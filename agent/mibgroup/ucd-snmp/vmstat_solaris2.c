@@ -271,7 +271,7 @@ init_vmstat_solaris2(void)
 
 /*
  * Data collection function take_snapshot starts here 
- * Get data from kernel and save into the snapshot strutcs 
+ * Get data from kernel and save into the snapshot structs 
  * Argument is the snapshot struct to save to. Global anyway, but looks nicer 
  */
 static int

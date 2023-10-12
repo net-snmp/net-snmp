@@ -275,7 +275,7 @@ start_new_cached_connection(netsnmp_transport *t,
     */
     /* Implementation notes:
        + This Information is passed in via the transport and default
-         paremeters
+         parameters
     */
     /* see if we have base configuration to copy in to this new one */
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {

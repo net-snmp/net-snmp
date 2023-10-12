@@ -124,7 +124,7 @@ shutdown_table_etherStatsTable(void)
 }
 
 /**
- * extra context initialization (eg default values)
+ * extra context initialization (e.g. default values)
  *
  * @param rowreq_ctx    : row request context
  * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
@@ -142,7 +142,7 @@ etherStatsTable_rowreq_ctx_init(etherStatsTable_rowreq_ctx * rowreq_ctx,
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:210:o: |-> Perform extra etherStatsTable rowreq initialization. (eg DEFVALS)
+     * TODO:210:o: |-> Perform extra etherStatsTable rowreq initialization. (e.g. DEFVALS)
      */
 
     return MFD_SUCCESS;

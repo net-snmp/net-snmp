@@ -21,7 +21,7 @@
  * for string length.  This covers a nasty loophole.
  *
  * The other functions are there to prevent NULL pointers from
- * causing nast effects.
+ * causing nasty effects.
  *
  * More Recently:
  *  Brandon Long <blong@fiction.net> 9/15/96 for mutt 0.43
@@ -35,7 +35,7 @@
  *    probably requires libm on most operating systems.  Don't yet
  *    support the exponent (e,E) and sigfig (g,G).  Also, fmtint()
  *    was pretty badly broken, it just wasn't being exercised in ways
- *    which showed it, so that's been fixed.  Also, formated the code
+ *    which showed it, so that's been fixed.  Also, formatted the code
  *    to mutt conventions, and removed dead code left over from the
  *    original.  Also, there is now a builtin-test, just compile with:
  *           gcc -DTEST_SNPRINTF -o snprintf snprintf.c -lm
@@ -469,7 +469,7 @@ fmtint(char *buffer, size_t * currlen, size_t maxlen,
         spadlen = 0;
     }
     if (flags & DP_F_MINUS)
-        spadlen = -spadlen;     /* Left Justifty */
+        spadlen = -spadlen;     /* Left Justify */
 
 #ifdef DEBUG_SNPRINTF
     dprint(1,
@@ -649,7 +649,7 @@ fmtfp(char *buffer, size_t * currlen, size_t maxlen,
     if (padlen < 0)
         padlen = 0;
     if (flags & DP_F_MINUS)
-        padlen = -padlen;       /* Left Justifty */
+        padlen = -padlen;       /* Left Justify */
 
     if ((flags & DP_F_ZERO) && (padlen > 0)) {
         if (signvalue) {

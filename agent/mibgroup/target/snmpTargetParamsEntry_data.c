@@ -283,7 +283,7 @@ shutdown_snmpTargetParamsEntry_data(void)
 }
 
 /*
- * store_snmpTargetParamsEntry handles the presistent storage proccess 
+ * store_snmpTargetParamsEntry handles the persistent storage process 
  * for this MIB table. It writes out all the non-volatile rows 
  * to permanent storage on a shutdown  
  */

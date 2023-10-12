@@ -253,7 +253,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
     }
 
     /*
-     * get the interface names of the devices present in the system, in case of failure retval suggests the reson for failure
+     * get the interface names of the devices present in the system, in case of failure retval suggests the reason for failure
      * and list_head contains null
      */
 
@@ -268,7 +268,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
     }
     
     /*
-     * Walk over the list of interface names present in the system and retreive the statistics 
+     * Walk over the list of interface names present in the system and retrieve the statistics 
      */
 
     for (p = list_head; p; p = p->ifn_next) {

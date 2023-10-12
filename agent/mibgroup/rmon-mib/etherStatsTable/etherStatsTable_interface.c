@@ -1314,7 +1314,7 @@ _etherStatsTable_check_column(etherStatsTable_rowreq_ctx * rowreq_ctx,
                                                 sizeof(rowreq_ctx->data.
                                                        etherStatsDataSource));
         if (SNMPERR_SUCCESS != rc) {
-            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsDataSource", "varbind validation failed (eg bad type or size)\n"));
+            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsDataSource", "varbind validation failed (e.g. bad type or size)\n"));
         } else {
             rc = etherStatsDataSource_check_value(rowreq_ctx,
                                                   (oid *) var->val.string,
@@ -1462,7 +1462,7 @@ _etherStatsTable_check_column(etherStatsTable_rowreq_ctx * rowreq_ctx,
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {
-            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsOwner", "varbind validation failed (eg bad type or size)\n"));
+            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsOwner", "varbind validation failed (e.g. bad type or size)\n"));
         } else {
             rc = etherStatsOwner_check_value(rowreq_ctx,
                                              (char *) var->val.string,
@@ -1496,7 +1496,7 @@ _etherStatsTable_check_column(etherStatsTable_rowreq_ctx * rowreq_ctx,
             rc = SNMP_ERR_WRONGVALUE;
         }
         if (SNMPERR_SUCCESS != rc) {
-            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsStatus", "varbind validation failed (eg bad type or size)\n"));
+            DEBUGMSGTL(("etherStatsTable:_etherStatsTable_check_column:etherStatsStatus", "varbind validation failed (e.g. bad type or size)\n"));
         } else {
             rc = etherStatsStatus_check_value(rowreq_ctx,
                                               *((u_long *) var->val.

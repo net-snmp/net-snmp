@@ -76,7 +76,7 @@ static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
     ((idx >= viewPtr->viewMaskLen) ? mask : (viewPtr->viewMask[idx] & mask))
 
 /**
- * Initilizes the VACM code.
+ * Initializes the VACM code.
  * Specifically:
  *  - adds a set of enums mapping view numbers to human readable names
  */

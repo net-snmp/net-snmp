@@ -477,7 +477,7 @@ var_hrswinst(struct variable * vp,
                 if (strstr(catg, "system") != NULL) {
                     long_return = 2;    /*  operatingSystem  */
                 } else if (strstr(catg, "application") != NULL) {
-                    long_return = 4;    /*  applcation  */
+                    long_return = 4;    /*  application  */
                 } else {
                     long_return = 1;    /*  unknown  */
                 }
@@ -490,7 +490,7 @@ var_hrswinst(struct variable * vp,
                 if ( strstr(rpm_groups, "System Environment") != NULL )
                     long_return = 2;	/* operatingSystem */
                 else
-                    long_return = 4;	/* applcation */
+                    long_return = 4;	/* application */
             } else {
                 long_return = 1;    /* unknown */
             }

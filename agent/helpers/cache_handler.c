@@ -57,12 +57,12 @@ void            release_cached_resources(unsigned int regNo,
  *  always return true, and thus the cache will be reloaded for every
  *  request.
  *
- *  To minimze resource use by the agent, a periodic callback checks for
+ *  To minimize resource use by the agent, a periodic callback checks for
  *  expired caches, and will call the free_cache function for any expired
  *  cache.
  *
  *  The load_cache routine should return a negative number if the cache
- *  was not successfully loaded. 0 or any positive number indicates successs.
+ *  was not successfully loaded. 0 or any positive number indicates success.
  *
  *
  *  Several flags can be set to affect the operations on the cache.
@@ -770,7 +770,7 @@ _cache_load( netsnmp_cache *cache )
  * xxx - method to prevent cache from expiring while a request
  *     is being processed (e.g. delegated request). proposal:
  *     set a flag, which would be cleared when request finished
- *     (which could be acomplished by a dummy data list item in
+ *     (which could be accomplished by a dummy data list item in
  *     agent req info & custom free function).
  */
 void

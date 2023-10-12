@@ -782,7 +782,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
     /** ###################################################### COMMIT #####
      *
      *   COMMIT is the final success state, when all changes are finalized.
-     * There is not recovery state should something faile here.
+     * There is not recovery state should something fail here.
      *
      *   This the final phase for this path in the state machine.
      */

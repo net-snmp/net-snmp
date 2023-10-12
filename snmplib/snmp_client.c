@@ -1205,7 +1205,7 @@ snmp_errstring(int errstat)
         "(noSuchName) There is no such variable name in this MIB.",
         "(badValue) The value given has the wrong type or length.",
         "(readOnly) The two parties used do not have access to use the specified SNMP PDU.",
-        "(genError) A general failure occured",
+        "(genError) A general failure occurred",
         "noAccess",
         "wrongType (The set datatype does not match the data type the agent expects)",
         "wrongLength (The set value has an illegal length from what the agent expects)",

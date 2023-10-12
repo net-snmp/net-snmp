@@ -1020,6 +1020,6 @@ int main(int argc, char **argv)
 
     if (strcmp(progname, "snmpps") == 0) return snmpps(argc, argv);
     if (strcmp(progname, "snmptop") == 0) return snmptop(argc, argv);
-    fprintf(stderr, "%s: unknown prognam name\n", progname);
+    fprintf(stderr, "%s: unknown program name\n", progname);
     exit(1);
 }

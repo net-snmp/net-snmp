@@ -179,7 +179,7 @@ main(int argc, char **argv)
         init_master_agent();    /* open the port to listen on (defaults to udp:161) */
 
     /*
-     * In case we recevie a request to stop (kill -TERM or kill -INT) 
+     * In case we receive a request to stop (kill -TERM or kill -INT) 
      */
     keep_running = 1;
     signal(SIGTERM, stop_server);

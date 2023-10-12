@@ -133,7 +133,7 @@ oid             example_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 254 };
      *  to do any initializations that might be required.
      *
      * In theory it is optional and can be omitted if no
-     *  initialization is needed.  In practise, every module
+     *  initialization is needed.  In practice, every module
      *  will need to register itself (or the objects being
      *  implemented will not appear in the MIB tree), and this
      *  registration is typically done here.
@@ -409,7 +409,7 @@ var_example(struct variable *vp,
         /*
          *  This will only be triggered if there's a problem with
          *   the coding of the module.  SNMP requests that reference
-         *   a non-existant OID will be directed elsewhere.
+         *   a non-existent OID will be directed elsewhere.
          *  If this branch is reached, log an error, so that
          *   the problem can be investigated.
          */
@@ -466,7 +466,7 @@ write_exampleint(int action,
 
     case RESERVE2:
         /*
-         *  This is conventially where any necesary
+         *  This is conventionally where any necessary
          *   resources are allocated (e.g. calls to malloc)
          *  Here, we are using static variables
          *   so don't need to worry about this.
@@ -603,7 +603,7 @@ write_exampletrap(int action,
  * 
  * The SNMPv2-Trap PDU contains at least a pair of object names and
  * values: - sysUpTime.0 whose value is the time in hundredths of a
- * second since the netwok management portion of system was last
+ * second since the network management portion of system was last
  * reinitialized.  - snmpTrapOID.0 which is part of the trap group SNMPv2
  * MIB whose value is the object-id of the specific trap you have defined
  * in your own MIB.  Other variables can be added to characterize the

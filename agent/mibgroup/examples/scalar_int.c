@@ -60,7 +60,7 @@ init_scalar_int(void)
      * the output of this debugging statement. 
      */
     DEBUGMSGTL(("example_scalar_int",
-                "Initalizing example scalar int.  Default value = %ld\n",
+                "Initializing example scalar int.  Default value = %ld\n",
                 example1));
 
     /*
@@ -80,5 +80,5 @@ init_scalar_int(void)
                                   &example1, NULL);
 
     DEBUGMSGTL(("example_scalar_int",
-                "Done initalizing example scalar int\n"));
+                "Done initializing example scalar int\n"));
 }

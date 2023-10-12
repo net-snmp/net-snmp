@@ -304,7 +304,7 @@ static long     stats[sizeof(struct statisticsV8_12_QUAR) / sizeof(long) + 1];  
 static time_t   lastreadstats;  /* time stats file has been read */
 static long     applindex = 1;  /* ApplIndex value for OIDs */
 static long     stat_cache_time = 5;    /* time (in seconds) to wait before reading stats file again */
-static long     dir_cache_time = 10;    /* time (in seconds) to wait before scanning queue directoy again */
+static long     dir_cache_time = 10;    /* time (in seconds) to wait before scanning queue directory again */
 
  /**/
 /** static void print_error(int priority, BOOL config, BOOL config_only, char *function, char *format, ...)
@@ -828,7 +828,7 @@ read_sendmailcf(BOOL config)
                 if (*filename++ != '=') {
                     print_error(LOG_WARNING, config, FALSE,
                                 "mibII/mta_sendmail.c:read_sendmailcf",
-                                "line %d in config file \"%s\" ist missing an '='",
+                                "line %d in config file \"%s\" is missing an '='",
                                 linenr, sendmailcf_fn);
                     break;
                 }
@@ -851,7 +851,7 @@ read_sendmailcf(BOOL config)
                     strlcpy(sendmailst_fn, filename, sizeof(sendmailst_fn));
                     found_sendmailst = TRUE;
                     DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf",
-                                "found statatistics file \"%s\"\n",
+                                "found statistics file \"%s\"\n",
                                 sendmailst_fn));
                 } else if (strncasecmp(line + 2, "QueueDirectory", 14) ==
                            0) {
@@ -875,7 +875,7 @@ read_sendmailcf(BOOL config)
                 strlcpy(sendmailst_fn, line + 2, sizeof(sendmailst_fn));
                 found_sendmailst = TRUE;
                 DEBUGMSGTL(("mibII/mta_sendmail.c:read_sendmailcf",
-                            "found statatistics file \"%s\"\n",
+                            "found statistics file \"%s\"\n",
                             sendmailst_fn));
                 break;
 
@@ -990,7 +990,7 @@ read_sendmailcf(BOOL config)
  *    Called by the agent for each configuration line that belongs to this module.
  *    The possible tokens are:
  *
- *    sendmail_config  - filename of the sendmail configutarion file
+ *    sendmail_config  - filename of the sendmail configuration file
  *    sendmail_stats   - filename of the sendmail statistics file
  *    sendmail_queue   - name of the sendmail mailqueue directory
  *    sendmail_index   - the ApplIndex to use for the table

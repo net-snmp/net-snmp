@@ -65,7 +65,7 @@
        - \#define NETSNMP_DS_LIB_MIB_REPLACE         7 replace objects from latest module 
        - \#define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM  8 print only numeric enum values
        - \#define NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS  9 print only numeric enum values 
-       - \#define NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS 10 dont print oid indexes specially 
+       - \#define NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS 10 don't print oid indexes specially 
        - \#define NETSNMP_DS_LIB_ALARM_DONT_USE_SIG  11 don't use the alarm() signal 
        - \#define NETSNMP_DS_LIB_PRINT_FULL_OID      12 print fully qualified oids 
        - \#define NETSNMP_DS_LIB_QUICK_PRINT         13 print very brief output for parsing
@@ -87,7 +87,7 @@
        - \#define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 don't print UNITS suffix
        - \#define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 don't apply DISPLAY-HINTs
        - \#define NETSNMP_DS_LIB_16BIT_IDS           31 restrict requestIDs, etc to 16-bit values
-       - \#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32 don't save/load any persistant state
+       - \#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32 don't save/load any persistent state
        - \#define NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT   33 print a leading 0 on hex values <= 'f'
 
 

@@ -186,7 +186,7 @@ netsnmp_file_open(netsnmp_file * filei)
         return filei->fd;
 
     /*
-     * try to open the file, loging an error if we failed
+     * try to open the file, logging an error if we failed
      */
     if (0 == filei->mode)
         filei->fd = open(filei->name, filei->fs_flags);

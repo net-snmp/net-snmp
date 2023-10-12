@@ -276,7 +276,7 @@ etherStatsTable_container_load(netsnmp_container * container)
         etherStatsIndex = (long) etherstats_interface_ioctl_ifindex_get(-1, p->name);
 
         /* 
-         *  get the etherstats contents populated, if the device is not an ethernet device
+         *  get the etherstats contents populated, if the device is not an Ethernet device
          *  the operation will not be supported and an error message will be logged
          */
         

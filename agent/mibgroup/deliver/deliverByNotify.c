@@ -387,7 +387,7 @@ deliver_execute(unsigned int clientreg, void *clientarg) {
                 walker = walker->next_variable;
 
                 /* if the current size PLUS the next one (which is now
-                   in 'walker') is greater than the limet then we stop here */
+                   in 'walker') is greater than the limit then we stop here */
                 if (obj->max_packet_size > 0 &&
                     estimated_pkt_size +
                     ESTIMATE_VAR_SIZE(walker) >=

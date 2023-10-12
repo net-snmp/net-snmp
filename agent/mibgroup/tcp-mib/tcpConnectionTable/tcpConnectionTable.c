@@ -962,7 +962,7 @@ The state of this TCP connection.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note

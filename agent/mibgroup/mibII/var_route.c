@@ -1537,7 +1537,7 @@ write_rte(int action,
             break;
         case IPROUTEAGE:
             /*
-             * Irrespective of suppied value, this will be set with 0.
+             * Irrespective of supplied value, this will be set with 0.
              * * As row will be updated and this field gives the number of
              * * seconds since this route was last updated
              */
@@ -1582,7 +1582,7 @@ write_rte(int action,
     case COMMIT:
         /*
          * When this case entered 'route_row' will have user supplied values
-         * for asked entries.  Thats why it is enough if we call
+         * for asked entries.  That's why it is enough if we call
          * SetIpForwardEntry/CreateIpForwardEntry only once SetIpForwardENtry
          * is not done in ACTION phase, as that will reset ipRouteAge on
          * success and if any varbind fails, then we can't UNDO the change for

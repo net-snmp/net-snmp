@@ -305,7 +305,7 @@ my_test_table_handler(netsnmp_mib_handler *handler,
                  */
                 if (table_info->colnum == RESULT_COLUMN &&
                     /*
-                     * and within the max boundries? 
+                     * and within the max boundaries? 
                      */
                     *(table_info->indexes->val.integer) <= MAX_COLONE &&
                     *(table_info->indexes->next_variable->val.integer)

@@ -312,7 +312,7 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     */
     /* Implementation notes:
        + path validation is taken care of during the openssl verify
-         routines, our part of which is hanlded in verify_callback
+         routines, our part of which is handled in verify_callback
          above.
        + fingerprint verification happens below.
     */
@@ -803,7 +803,7 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
                              struct snmp_session *sess) {
     /* the default security model here should be TSM; most other
        things won't work with TLS because we'll throw out the packet
-       if it doesn't have a proper tmStateRef (and onyl TSM generates
+       if it doesn't have a proper tmStateRef (and only TSM generates
        this at the moment */
     if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
         if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {

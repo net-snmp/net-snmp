@@ -261,7 +261,7 @@ debug_enable_token_logs (const char *token) {
 }
 
 /*
- * Diable logs on a given token
+ * Disable logs on a given token
  */
 int
 debug_disable_token_logs (const char *token) {

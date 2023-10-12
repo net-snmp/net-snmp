@@ -220,7 +220,7 @@ usage(void)
     fprintf(stderr, "\t\t\t  b:       brief field names\n");
     fprintf(stderr, "\t\t\t  B:       do not use GETBULK requests\n");
     fprintf(stderr, "\t\t\t  c<NUM>:  print table in columns of <NUM> chars width\n");
-    fprintf(stderr, "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
+    fprintf(stderr, "\t\t\t  f<STR>:  print table delimited with <STR>\n");
     fprintf(stderr, "\t\t\t  h:       print only the column headers\n");
     fprintf(stderr, "\t\t\t  H:       print no column headers\n");
     fprintf(stderr, "\t\t\t  i:       print index values\n");

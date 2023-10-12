@@ -191,7 +191,7 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
 }
 
 /** returns the next node associated with a given OID. INCOMPLETE.
-    This is equivelent to a GETNEXT operation.
+    This is equivalent to a GETNEXT operation.
  * @internal
  * @param root the top of the stash tree
  * @param lookup the oid to look up a node for.
@@ -286,7 +286,7 @@ netsnmp_feature_child_of(oid_stash_get_data, oid_stash_all);
 #ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_GET_DATA
 /** returns a data pointer associated with a given OID.
 
-    This is equivelent to netsnmp_oid_stash_get_node, but returns only
+    This is equivalent to netsnmp_oid_stash_get_node, but returns only
     the data not the entire node.
 
  * @param root the top of the stash
@@ -334,11 +334,11 @@ netsnmp_oid_stash_store_all(int majorID, int minorID,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_STORE_ALL */
 
-/** stores data in a starsh tree to peristent storage.
+/** stores data in a stash tree to persistent storage.
 
     This function can be called to save all data in a stash tree to
     Net-SNMP's percent storage.  Make sure you register a parsing
-    function with the read_config system to re-incorperate your saved
+    function with the read_config system to re-incorporate your saved
     data into future trees.
 
     @param root the top of the stash to store.

@@ -5,7 +5,7 @@ $SNMP::auto_init_mib = 0;
 $sess = new SNMP::Session(); 
 
 sub poller {  
-   # VarList is undefined if TIMEOUT occured
+   # VarList is undefined if TIMEOUT occurred
    if (!defined($_[1])) { die "request timed out[$_[0]->{ErrorStr}]\n"; }
    if ($i++>100000) { die "completed 500 polls\n"; }
    #print $_[1][0]->tag, " = ", $_[1][0]->val, "\n";

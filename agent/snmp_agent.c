@@ -1280,7 +1280,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
 				  NETSNMP_DS_AGENT_FLAGS);
     s->isAuthoritative = SNMP_SESS_AUTHORITATIVE;
 
-    /* Optional supplimental transport configuration information and
+    /* Optional supplemental transport configuration information and
        final call to actually open the transport */
     if (netsnmp_sess_config_transport(s->transport_configuration, t)
         != SNMPERR_SUCCESS) {
@@ -2152,7 +2152,7 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
 
     if (a == NULL && asp != NULL) {
         /*
-         * We coulnd't find it on the list, so free it anyway.  
+         * We couldn't find it on the list, so free it anyway.  
          */
         free_agent_snmp_session(asp);
     }
@@ -2461,7 +2461,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
              */
             if (asp->treecache_num >= asp->treecache_len) {
                 /*
-                 * exapand cache array 
+                 * expand cache array 
                  */
                 /*
                  * WWW: non-linear expansion needed (with cap) 
@@ -2655,7 +2655,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             DEBUGMSGTL(("snmp_agent:bulk", "maxresponse %d\n", maxresponses));
 
             /* reduce maxresponses by dividing the sessions max size by a
-             * (very) rough aproximation of the size of an average
+             * (very) rough approximation of the size of an average
              * varbind. 15 seems to be a reasonable balance between getting
              * enough varbinds to fill the packet vs retrieving varbinds
              * that will be discarded to make the response fit the packet size.
@@ -2714,7 +2714,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                 n--;
             } else {
                 /*
-                 * repeate request varbinds on GETBULK.  These will
+                 * repeat request varbinds on GETBULK.  These will
                  * have to be properly rearranged later though as
                  * responses are supposed to actually be interlaced
                  * with each other.  This is done with the asp->bulkcache. 
@@ -2913,7 +2913,7 @@ netsnmp_delete_subtree_cache(netsnmp_agent_session *asp)
  * asp requests array. This is of particular importance for
  * cases where the linked lists are unreliable. One known instance
  * of this scenario occurs when the row_merge helper is used, which
- * may temporarily disrupts linked lists during its (and its childrens)
+ * may temporarily disrupts linked lists during its (and its children's)
  * handling of requests.
  */
 int
@@ -3021,7 +3021,7 @@ handle_var_requests(netsnmp_agent_session *asp)
         /*
          * find any errors marked in the requests.  For later parts of
          * SET processing, only check for new errors specific to that
-         * set processing directive (which must superceed the previous
+         * set processing directive (which must supersede the previous
          * errors).
          */
         switch (asp->mode) {
@@ -3211,7 +3211,7 @@ netsnmp_check_transaction_id(int transaction_id)
 /*
  * check_delayed_request(asp)
  *
- * Called to rexamine a set of requests and continue processing them
+ * Called to reexamine a set of requests and continue processing them
  * once all the previous (delayed) requests have been handled one way
  * or another.
  */
@@ -3413,7 +3413,7 @@ check_getnext_results(netsnmp_agent_session *asp)
 }
 
 /** repeatedly calls getnext handlers looking for an answer till all
-   requests are satisified.  It's expected that one pass has been made
+   requests are satisfied.  It's expected that one pass has been made
    before entering this function */
 int
 handle_getnext_loop(netsnmp_agent_session *asp)
@@ -3470,7 +3470,7 @@ handle_getnext_loop(netsnmp_agent_session *asp)
             /*
              * make a very rough guesstimate of the encoded varbind size by
              * adding the name and val lengths. If these rough sizes add up
-             * to more than the msgMaxSize, stop gathing new varbinds.
+             * to more than the msgMaxSize, stop gathering new varbinds.
              *
              * [Increasing the accuracy of this estimate would allow us to
              * do better at filling packets and collecting fewer varbinds that

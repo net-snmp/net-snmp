@@ -86,7 +86,7 @@ typedef struct table_container_data_s {
  *  Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
  *  @ingroup table
  *
- *  The table_array handler is used (automatically) in conjuntion
+ *  The table_array handler is used (automatically) in conjunction
  *  with the @link table table@endlink handler. It is primarily
  *  intended to be used with the mib2c configuration file
  *  mib2c.array-user.conf.
@@ -121,7 +121,7 @@ typedef struct table_container_data_s {
  *
  *  SET processing modifies the row in-place. The duplicate_row
  *  callback will be called to save a copy of the original row.
- *  In the event of a failure before the commite phase, the
+ *  In the event of a failure before the commit phase, the
  *  row_copy callback will be called to restore the original row
  *  from the copy.
  *

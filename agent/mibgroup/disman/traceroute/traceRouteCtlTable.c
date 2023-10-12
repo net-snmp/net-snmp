@@ -1587,7 +1587,7 @@ write_traceRouteCtlTargetAddressType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1603,7 +1603,7 @@ write_traceRouteCtlTargetAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlTargetAddressType;
         StorageTmp->traceRouteCtlTargetAddressType = *((long *) var_val);
@@ -1673,7 +1673,7 @@ write_traceRouteCtlTargetAddress(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1689,7 +1689,7 @@ write_traceRouteCtlTargetAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlTargetAddress;
         tmplen = StorageTmp->traceRouteCtlTargetAddressLen;
@@ -1769,7 +1769,7 @@ write_traceRouteCtlByPassRouteTable(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1785,7 +1785,7 @@ write_traceRouteCtlByPassRouteTable(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlByPassRouteTable;
         StorageTmp->traceRouteCtlByPassRouteTable = *((long *) var_val);
@@ -1851,7 +1851,7 @@ write_traceRouteCtlDataSize(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1867,7 +1867,7 @@ write_traceRouteCtlDataSize(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlDataSize;
         if ((*((long *) var_val)) >= 0 && (*((long *) var_val)) <= 65507)
@@ -1938,7 +1938,7 @@ write_traceRouteCtlTimeOut(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1954,7 +1954,7 @@ write_traceRouteCtlTimeOut(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlTimeOut;
 
@@ -2028,7 +2028,7 @@ write_traceRouteCtlProbesPerHop(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2044,7 +2044,7 @@ write_traceRouteCtlProbesPerHop(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlProbesPerHop;
 
@@ -2112,7 +2112,7 @@ write_traceRouteCtlPort(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2128,7 +2128,7 @@ write_traceRouteCtlPort(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlPort;
         StorageTmp->traceRouteCtlPort = *((long *) var_val);
@@ -2196,7 +2196,7 @@ write_traceRouteCtlMaxTtl(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2212,7 +2212,7 @@ write_traceRouteCtlMaxTtl(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlMaxTtl;
         if ((*((long *) var_val)) >= 1 && (*((long *) var_val)) <= 255)
@@ -2281,7 +2281,7 @@ write_traceRouteCtlDSField(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2297,7 +2297,7 @@ write_traceRouteCtlDSField(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlDSField;
         StorageTmp->traceRouteCtlDSField = *((long *) var_val);
@@ -2363,7 +2363,7 @@ write_traceRouteCtlSourceAddressType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2379,7 +2379,7 @@ write_traceRouteCtlSourceAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlSourceAddressType;
         StorageTmp->traceRouteCtlSourceAddressType = *((long *) var_val);
@@ -2447,7 +2447,7 @@ write_traceRouteCtlSourceAddress(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2463,7 +2463,7 @@ write_traceRouteCtlSourceAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlSourceAddress;
         tmplen = StorageTmp->traceRouteCtlSourceAddressLen;
@@ -2543,7 +2543,7 @@ write_traceRouteCtlIfIndex(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2559,7 +2559,7 @@ write_traceRouteCtlIfIndex(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlIfIndex;
         StorageTmp->traceRouteCtlIfIndex = *((long *) var_val);
@@ -2628,7 +2628,7 @@ write_traceRouteCtlMiscOptions(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2644,7 +2644,7 @@ write_traceRouteCtlMiscOptions(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlMiscOptions;
         tmplen = StorageTmp->traceRouteCtlMiscOptionsLen;
@@ -2721,7 +2721,7 @@ write_traceRouteCtlMaxFailures(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2737,7 +2737,7 @@ write_traceRouteCtlMaxFailures(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlMaxFailures;
         if ((*((long *) var_val)) >= 0 && (*((long *) var_val)) <= 15)
@@ -2810,7 +2810,7 @@ write_traceRouteCtlDontFragment(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2826,7 +2826,7 @@ write_traceRouteCtlDontFragment(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlDontFragment;
         StorageTmp->traceRouteCtlDontFragment = *((long *) var_val);
@@ -2894,7 +2894,7 @@ write_traceRouteCtlInitialTtl(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2910,7 +2910,7 @@ write_traceRouteCtlInitialTtl(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlInitialTtl;
         if ((*((long *) var_val)) >= 0 && (*((long *) var_val)) <= 255)
@@ -2979,7 +2979,7 @@ write_traceRouteCtlFrequency(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2995,7 +2995,7 @@ write_traceRouteCtlFrequency(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlFrequency;
         StorageTmp->traceRouteCtlFrequency = *((long *) var_val);
@@ -3073,7 +3073,7 @@ write_traceRouteCtlStorageType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3089,7 +3089,7 @@ write_traceRouteCtlStorageType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlStorageType;
         StorageTmp->traceRouteCtlStorageType = *((long *) var_val);
@@ -3155,7 +3155,7 @@ write_traceRouteCtlAdminStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3171,7 +3171,7 @@ write_traceRouteCtlAdminStatus(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlAdminStatus;
         StorageTmp->traceRouteCtlAdminStatus = *((long *) var_val);
@@ -3277,7 +3277,7 @@ write_traceRouteCtlDescr(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3293,7 +3293,7 @@ write_traceRouteCtlDescr(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlDescr;
         tmplen = StorageTmp->traceRouteCtlDescrLen;
@@ -3374,7 +3374,7 @@ write_traceRouteCtlMaxRows(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3390,7 +3390,7 @@ write_traceRouteCtlMaxRows(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlMaxRows;
         StorageTmp->traceRouteCtlMaxRows = *((long *) var_val);
@@ -3457,7 +3457,7 @@ write_traceRouteCtlTrapGeneration(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3473,7 +3473,7 @@ write_traceRouteCtlTrapGeneration(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlTrapGeneration;
         tmplen = StorageTmp->traceRouteCtlTrapGenerationLen;
@@ -3553,7 +3553,7 @@ write_traceRouteCtlCreateHopsEntries(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3569,7 +3569,7 @@ write_traceRouteCtlCreateHopsEntries(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlCreateHopsEntries;
         StorageTmp->traceRouteCtlCreateHopsEntries = *((long *) var_val);
@@ -3636,7 +3636,7 @@ write_traceRouteCtlType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3652,7 +3652,7 @@ write_traceRouteCtlType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->traceRouteCtlType;
         tmplen = StorageTmp->traceRouteCtlTypeLen;
@@ -3803,7 +3803,7 @@ write_traceRouteCtlRowStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         if (StorageTmp == NULL) {
 
@@ -3894,7 +3894,7 @@ write_traceRouteCtlRowStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 

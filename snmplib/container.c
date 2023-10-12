@@ -84,7 +84,7 @@ netsnmp_container_init_list(void)
         return;
 
     /*
-     * create a binary arry container to hold container
+     * create a binary array container to hold container
      * factories
      */
     containers = netsnmp_container_get_binary_array();

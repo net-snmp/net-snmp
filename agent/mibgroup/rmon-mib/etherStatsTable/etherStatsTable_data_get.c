@@ -122,7 +122,7 @@ etherStatsTable_indexes_set(etherStatsTable_rowreq_ctx * rowreq_ctx,
  * Description:
 This object identifies the source of the data that
         this etherStats entry is configured to analyze.  This
-        source can be any ethernet interface on this device.
+        source can be any Ethernet interface on this device.
         In order to identify a particular interface, this object
         shall identify the instance of the ifIndex object,
         defined in RFC 2233 [17], for the desired interface.
@@ -136,7 +136,7 @@ This object identifies the source of the data that
         An agent may or may not be able to tell if fundamental
         changes to the media of the interface have occurred and
         necessitate an invalidation of this entry.  For example, a
-        hot-pluggable ethernet card could be pulled out and replaced
+        hot-pluggable Ethernet card could be pulled out and replaced
         by a token-ring card.  In such a case, if the agent has such
         knowledge of the change, it is recommended that it
         invalidate this entry.
@@ -301,7 +301,7 @@ The total number of octets of data (including
         FCS octets).
 
         This object can be used as a reasonable estimate of
-        10-Megabit ethernet utilization.  If greater precision is
+        10-Megabit Ethernet utilization.  If greater precision is
         desired, the etherStatsPkts and etherStatsOctets objects
         should be sampled before and after a common interval.  The
         differences in the sampled values are Pkts and Octets,
@@ -314,7 +314,7 @@ The total number of octets of data (including
                                  Interval * 10,000
 
         The result of this equation is the value Utilization which
-        is the percent utilization of the ethernet segment on a
+        is the percent utilization of the Ethernet segment on a
         scale of 0 to 100 percent.
  *
  * Attributes:

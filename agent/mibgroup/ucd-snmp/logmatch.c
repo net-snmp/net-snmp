@@ -272,7 +272,7 @@ updateLogmatch(int iindex)
                 /*
                  * ------------------------------------ 
                  * when we are here that means we       
-                 * could't set the file position maybe  
+                 * couldn't set the file position maybe  
                  * the file was rotated; let's reset    
                  * the filepointer, but not the counter 
                  * ------------------------------------ 

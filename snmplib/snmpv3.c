@@ -459,7 +459,7 @@ snmpv3_parse_args(char *optarg, netsnmp_session * session, char **Apsz,
  * XXX	What if a node has multiple interfaces?
  * XXX	What if multiple engines all choose the same address?
  *      (answer:  You're screwed, because you might need a kul database
- *       which is dependant on the current engineID.  Enumeration and other
+ *       which is dependent on the current engineID.  Enumeration and other
  *       tricks won't work). 
  */
 int

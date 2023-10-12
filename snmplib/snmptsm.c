@@ -283,7 +283,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                 strlen(prefix)+1 >= parms->secNameLen ||
                 strncmp(parms->secName, prefix, strlen(prefix)) != 0 ||
                 parms->secName[strlen(prefix)] != ':') {
-                /* Note: since we're assiging the prefixes above the
+                /* Note: since we're assigning the prefixes above the
                    prefix lengths always meet the 1-4 criteria */
                 snmp_increment_statistic(STAT_TSM_SNMPTSMINVALIDPREFIXES);
                 SNMP_FREE(tmStateRef);

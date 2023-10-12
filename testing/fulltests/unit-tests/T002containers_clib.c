@@ -23,7 +23,7 @@ OK(CONTAINER_SIZE(container) == 3,
 CONTAINER_REMOVE(container, "bar");
 
 OK(CONTAINER_FIND(container, "bar") == NULL,
-   "should no longer be able to find the (reoved) 'bar' string");
+   "should no longer be able to find the (removed) 'bar' string");
 
 OK(CONTAINER_SIZE(container) == 2,
    "container has the proper size for the elements after a removal");

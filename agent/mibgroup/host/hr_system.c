@@ -593,7 +593,7 @@ ns_set_time(int action,
             int minutes_from_utc= 0;
 
             if (var_val_len == 11) {
-                /* timezone inforamation was present */
+                /* timezone information was present */
                 hours_from_utc=(int)var_val[9];
                 minutes_from_utc=(int)var_val[10];
             }

@@ -261,7 +261,7 @@ term_handler(int sig)
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
-     * on signal. Thats why following function is called, which closes the 
+     * on signal. That's why following function is called, which closes the 
      * socket descriptors and causes the select() to return
      */
     snmp_close(main_session);
@@ -1343,7 +1343,7 @@ out:
 /*
  * Read the configuration files. Implemented as a signal handler so that
  * receipt of SIGHUP will cause configuration to be re-read when the
- * trap daemon is running detatched from the console.
+ * trap daemon is running detached from the console.
  *
  */
 void

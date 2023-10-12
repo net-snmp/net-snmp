@@ -21,7 +21,7 @@
  *  The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
     Functionally, it is a specialized version of the more
-    generic table helper but easies the burden of GETNEXT processing by
+    generic table helper but eases the burden of GETNEXT processing by
     manually looping through all the data indexes retrieved through
     function calls which should be supplied by the module that wishes
     help.  The module the table_iterator helps should, afterwards,
@@ -43,7 +43,7 @@
 	this request, the job of the loop context is done.  The
         most simple example would be a pointer to an integer which
         simply counts rows from 1 to X.  More commonly, it might be a
-        pointer to a linked list node, or someother internal or
+        pointer to a linked list node, or some other internal or
         external reference to a data set (file seek value, array
         pointer, ...).  If allocated during iteration, either the
         free_loop_context_at_end (preferably) or the free_loop_context

@@ -156,7 +156,7 @@ struct objgroup {
 #define SYNTAX_MASK     0x80
 /*
  * types of tokens
- * Tokens wiht the SYNTAX_MASK bit set are syntax tokens 
+ * Tokens with the SYNTAX_MASK bit set are syntax tokens 
  */
 #define CONTINUE    -1
 #define ENDOFFILE   0
@@ -1961,7 +1961,7 @@ parse_objectid(FILE * fp, char *name)
 
     /*
      * Handle numeric-only object identifiers,
-     *  by labelling the first sub-identifier
+     *  by labeling the first sub-identifier
      */
     op = loid;
     if (!op->label) {

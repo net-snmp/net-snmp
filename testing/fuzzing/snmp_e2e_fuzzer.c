@@ -112,7 +112,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     create_user_from_session(ss);
 
     /*
-     * Use snamp_add() to specify transport explicitly
+     * Use snmp_add() to specify transport explicitly
      */
     snmp_add(ss, transport, NULL, NULL);
 

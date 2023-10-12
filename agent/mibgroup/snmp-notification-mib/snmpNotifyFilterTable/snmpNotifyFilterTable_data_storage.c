@@ -111,7 +111,7 @@ snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
     DEBUGMSGTL(("verbose:snmpNotifyFilter:storage:create", "called\n"));
 
     /*
-     * check that neither Name or Subtree are larger that maximun sizes
+     * check that neither Name or Subtree are larger that maximum sizes
      * and that their combined length doesn't exceed the table max index len.
      * (+ 1 is for name length)
      */

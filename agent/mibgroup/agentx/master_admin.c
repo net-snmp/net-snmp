@@ -96,7 +96,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->sessUser = NULL;
 
     /*
-     * This next bit utilises unused SNMPv3 fields
+     * This next bit utilizes unused SNMPv3 fields
      *   to store the subagent OID and description.
      * This really ought to use AgentX-specific fields,
      *   but it hardly seems worth it for a one-off use.
@@ -133,19 +133,19 @@ close_agentx_session(netsnmp_session * session, int sessid)
     if (sessid == -1) {
         /*
          * The following is necessary to avoid locking up the agent when
-         * a sugagent dies during a set request. We must clean up the
+         * a subagent dies during a set request. We must clean up the
          * requests, so that the delegated request will be completed and
          * further requests can be processed
          */
 	while (netsnmp_remove_delegated_requests_for_session(session)) {
-		DEBUGMSGTL(("agentx/master", "Continue removing delegated reqests\n"));
+		DEBUGMSGTL(("agentx/master", "Continue removing delegated requests\n"));
 	}
 
         if (session->subsession != NULL) {
             netsnmp_session *subsession = session->subsession;
             for(; subsession; subsession = subsession->next) {
                 while (netsnmp_remove_delegated_requests_for_session(subsession)) {
-			DEBUGMSGTL(("agentx/master", "Continue removing delegated subsession reqests\n"));
+			DEBUGMSGTL(("agentx/master", "Continue removing delegated subsession requests\n"));
 		}
             }
         }

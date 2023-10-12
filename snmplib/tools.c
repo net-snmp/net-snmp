@@ -7,7 +7,7 @@
  * distributed with the Net-SNMP package.
  */
 
-#define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
+#define NETSNMP_TOOLS_C 1 /* don't re-define malloc wrappers here */
 
 #ifdef HAVE_CRTDBG_H
 /*
@@ -237,7 +237,7 @@ free_zero(void *buf, size_t size)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
 /**
- * Returns pointer to allocaed & set buffer on success, size contains
+ * Returns pointer to allocated & set buffer on success, size contains
  * number of random bytes filled.  buf is NULL and *size set to KMT
  * error value upon failure.
  *
@@ -295,7 +295,7 @@ void *netsnmp_memdup(const void *from, size_t size)
  * NOTE: the returned size DOES NOT include the extra byte for the NULL
  *       termination, just the raw data (i.e. from_size).
  *
- * This is mainly to protect agains code that uses str* functions on
+ * This is mainly to protect against code that uses str* functions on
  * a fixed buffer that may not have a terminating NULL.
  *
  * @param[in] from Pointer to copy memory from.
@@ -329,7 +329,7 @@ void *netsnmp_memdup_nt(const void *from, size_t from_size, size_t *to_size)
  * find the cause of undefined value errors if --track-origins=yes is not
  * sufficient. Does nothing when not running under Valgrind.
  *
- * Note: this requires a fairly recent valgrind.
+ * Note: this requires a fairly recent Valgrind.
  */
 void
 netsnmp_check_definedness(const void *packet, size_t length)
@@ -547,7 +547,7 @@ snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
  *
  * @param buf     address of a pointer (pointer to pointer) for the output buffer.
  *                If allow_realloc is set, the buffer may be grown via snmp_realloc
- *                to accomodate the data.
+ *                to accommodate the data.
  *
  * @param buf_len pointer to a size_t containing the initial size of buf.
  *
@@ -597,7 +597,7 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
             return 0;
         }
         /*
-         * if we dont' have enough space, realloc.
+         * if we don't have enough space, realloc.
          * (snmp_realloc will adjust buf_len to new size)
          */
         if ((*offset >= *buf_len) &&

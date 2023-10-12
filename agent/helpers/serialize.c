@@ -24,7 +24,7 @@
  *  This is useful for handlers that don't want to iterate through the
  *  request lists themselves.  Generally, this is probably less
  *  efficient so use with caution.  The serialize handler might be
- *  useable to dynamically fix handlers with broken looping code,
+ *  usable to dynamically fix handlers with broken looping code,
  *  however.
  *  @{
  */

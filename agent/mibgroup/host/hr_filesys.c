@@ -822,7 +822,7 @@ Check_HR_FileSys_NFS (void)
 	!strcmp( HRFS_entry->HRFS_type, "cifs") ||
 	    /*
 	     * MVFS is Rational ClearCase's view file system
-	     * it is similiar to NFS file systems in that it is mounted
+	     * it is similar to NFS file systems in that it is mounted
 	     * locally or remotely from the ClearCase server
 	     */
 	!strcmp( HRFS_entry->HRFS_type, "mvfs")))
@@ -874,7 +874,7 @@ when_dumped(const char *filesys, int level, size_t *length)
     char           *cp1, *cp2, *cp3;
 
     /*
-     * Look for the relevent entries in /etc/dumpdates
+     * Look for the relevant entries in /etc/dumpdates
      *
      * This is complicated by the fact that disks are
      *   mounted using block devices, but dumps are

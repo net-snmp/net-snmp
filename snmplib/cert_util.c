@@ -2357,7 +2357,7 @@ _reduce_subset(netsnmp_void_array *matching, const char *filename)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient soloution, but this is just happening at
+         * the most efficient solution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2425,7 +2425,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient soloution, but this is just happening at
+         * the most efficient solution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2446,7 +2446,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
 
 /*
  * reduce subset by eliminating any certificates that are not the
- * first certficate in a file. This allows us to ignore certificate
+ * first certificate in a file. This allows us to ignore certificate
  * chains when testing for specific certificates, and to match keys
  * to the first certificate only.
  */
@@ -2478,7 +2478,7 @@ _cert_reduce_subset_first(netsnmp_void_array *matching)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient soloution, but this is just happening at
+         * the most efficient solution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2536,7 +2536,7 @@ _cert_reduce_subset_what(netsnmp_void_array *matching, int what)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient soloution, but this is just happening at
+         * the most efficient solution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2933,7 +2933,7 @@ _purge_config_entries(void)
     
     /*
      * duplicate cert_maps and then iterate over the copy. That way we can
-     * add/remove to cert_maps without distrubing the iterator.
+     * add/remove to cert_maps without disturbing the iterator.
 xx
      */
     tmp_maps = CONTAINER_DUP(cert_maps, NULL, 0);
@@ -3049,7 +3049,7 @@ netsnmp_certToTSN_parse_common(char **line)
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     if ((buf[0] != '-') || (buf[1] != '-')) {
-        netsnmp_config_error("unexpected fromat: %s\n", *line);
+        netsnmp_config_error("unexpected format: %s\n", *line);
         goto end;
     }
     if (strcmp(&buf[2], "sn") == 0) {
@@ -3139,7 +3139,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
     
     /*
      * duplicate cert_maps and then iterate over the copy. That way we can
-     * add/remove to cert_maps without distrubing the iterator.
+     * add/remove to cert_maps without disturbing the iterator.
      */
     new_maps = CONTAINER_DUP(cert_maps, NULL, 0);
     if (NULL == new_maps) {
