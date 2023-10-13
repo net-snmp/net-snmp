@@ -7,8 +7,6 @@
  * distributed with the Net-SNMP package.
  */
 
-#define NETSNMP_TOOLS_C 1 /* don't re-define malloc wrappers here */
-
 #ifdef HAVE_CRTDBG_H
 /*
  * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
