@@ -133,10 +133,15 @@ create_lookupTable_data(void)
     struct lookupTable_data *StorageNew = NULL;
     StorageNew = SNMP_MALLOC_STRUCT(lookupTable_data);
     if (StorageNew == NULL) {
-        snmp_log(LOG_ERR, "Out in memory in nslookup-mib/create_lookupTable_date\n");
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/create_lookupTable_data\n");
         exit(1);
     }
     StorageNew->lookupCtlTargetAddress = strdup("");
+    if (StorageNew->lookupCtlTargetAddress == NULL) {
+        free(StorageNew);
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/create_lookupTable_data\n");
+        exit(1);
+    }
     StorageNew->lookupCtlTargetAddressLen = 0;
     StorageNew->lookupCtlOperStatus = 2L;
     StorageNew->lookupCtlTime = 0;
@@ -495,6 +500,13 @@ add_result(struct lookupTable_data *item, int index,
 
     temp->lookupResultsAddressType = iatype;
     temp->lookupResultsAddress = malloc(data_len + 1);
+    if (temp->lookupResultsAddress == NULL) {
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
+        free(temp->lookupCtlOperationName);
+        free(temp->lookupCtlOwnerIndex);
+        free(temp);
+        return NULL;
+    }
     memcpy(temp->lookupResultsAddress, data, data_len);
     temp->lookupResultsAddress[data_len] = '\0';
     temp->lookupResultsAddressLen = data_len;
