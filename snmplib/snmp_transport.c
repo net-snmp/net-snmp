@@ -458,9 +458,7 @@ netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
         char *str = netsnmp_transport_peer_string(t,
                                                   opaque ? *opaque : NULL,
                                                   olength ? *olength : 0);
-        if (debugLength)
-            DEBUGMSGT_NC(("transport:recv","%d bytes from %s\n",
-                          length, str));
+        DEBUGMSGT_NC(("transport:recv","%d bytes from %s\n", length, str));
         SNMP_FREE(str);
     }
 
