@@ -4276,9 +4276,14 @@ usm_store_users(int majorID, int minorID, void *serverarg, void *clientarg)
     return SNMPERR_SUCCESS;
 }
 
-/*
- * usm_parse_user(): reads in a line containing a saved user profile
+/**
+ * usm_read_user(): reads in a line containing a saved user profile
  * and returns a pointer to a newly created struct usmUser. 
+ *
+ * @param[in]     line Line of text containing a saved user profile
+ *
+ * @return A pointer to the newly-created struct usmUser if
+ *   parsing succeeded; NULL if an error occurred.
  */
 static struct usmUser *
 usm_read_user(const char *line)
@@ -4292,41 +4297,81 @@ usm_read_user(const char *line)
 
     user->userStatus = atoi(line);
     line = skip_token_const(line);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing userStorageType\n"));
+        usm_free_user(user);
+        return NULL;
+    }
+
     user->userStorageType = atoi(line);
     line = skip_token_const(line);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing engineID\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string_const(line, &user->engineID,
                                                &user->engineIDLen);
 
-    /*
-     * set the lcd entry for this engineID to the minimum boots/time
-     * values so that its a known engineid and won't return a report pdu.
-     * This is mostly important when receiving v3 traps so that the usm
-     * will at least continue processing them. 
-     */
-    set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
-
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing name\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, (u_char **) & user->name,
                                          &len);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing security name\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, (u_char **) & user->secName,
                                          &len);
     SNMP_FREE(user->cloneFrom);
     user->cloneFromLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing clone from\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->cloneFrom,
                                         &user->cloneFromLen);
 
     SNMP_FREE(user->authProtocol);
     user->authProtocolLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing authentication protocol\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->authProtocol,
                                         &user->authProtocolLen);
+
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing authentication key\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string_const(line, &user->authKey,
                                                &user->authKeyLen);
     SNMP_FREE(user->privProtocol);
     user->privProtocolLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing privacy protocol\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->privProtocol,
                                         &user->privProtocolLen);
+
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing privacy key\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
 
@@ -4339,8 +4384,24 @@ usm_read_user(const char *line)
         user->privKeyLen = proper_length;
     }
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing public string\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, &user->userPublicString,
                                          &user->userPublicStringLen);
+
+    /*
+     * set the lcd entry for this engineID to the minimum boots/time
+     * values so that its a known engineid and won't return a report pdu.
+     * This is mostly important when receiving v3 traps so that the usm
+     * will at least continue processing them.
+     * Note: We do this at the end so that it only runs if the parsing
+     * was successful
+     */
+    set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
+
     return user;
 }
 
