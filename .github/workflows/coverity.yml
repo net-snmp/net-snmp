@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
 jobs:
   coverity:
+    if: github.repository == 'net-snmp/net-snmp'
     runs-on: ubuntu-latest
     steps:
     - name: Check github variables
