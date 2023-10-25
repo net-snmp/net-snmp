@@ -360,6 +360,8 @@ _setup_containers(void)
 {
     netsnmp_container *additional_keys;
 
+    int rc;
+
     _certs = _get_cert_container("netsnmp certificates");
     if (NULL == _certs)
         return;
