@@ -5161,10 +5161,7 @@ static int
 deinit_usm_post_config(int majorid, int minorid, void *serverarg,
 		       void *clientarg)
 {
-    if (usm_free_user(noNameUser) != NULL) {
-	DEBUGMSGTL(("deinit_usm_post_config", "could not free initial user\n"));
-	return SNMPERR_GENERR;
-    }
+    usm_free_user(noNameUser);
     noNameUser = NULL;
 
     DEBUGMSGTL(("deinit_usm_post_config", "initial user removed\n"));
