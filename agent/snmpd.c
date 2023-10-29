@@ -944,7 +944,7 @@ main(int argc, char *argv[])
          * Some error opening one of the specified agent transports.  
          */
         snmp_log(LOG_ERR, "Server Exiting with code 1\n");
-        goto out;
+        goto shutdown;
     }
 
     /*
@@ -965,7 +965,7 @@ main(int argc, char *argv[])
          */
         if(ret != 0) {
             snmp_log(LOG_ERR, "Server Exiting with code 1\n");
-            goto out;
+            goto shutdown;
         }
     }
 
@@ -982,13 +982,13 @@ main(int argc, char *argv[])
             snmp_log_perror(opts.pid_file);
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                goto out;
+                goto shutdown;
             }
         } else {
             if ((PID = fdopen(fd, "w")) == NULL) {
                 close(fd);
                 snmp_log_perror(opts.pid_file);
-                goto out;
+                goto shutdown;
             } else {
                 fprintf(PID, "%d\n", (int) getpid());
                 fclose(PID);
@@ -1027,7 +1027,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setgid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                goto out;
+                goto shutdown;
             }
         }
     }
@@ -1049,7 +1049,7 @@ main(int argc, char *argv[])
                 snmp_log_perror("initgroups failed");
                 if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                             NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                    goto out;
+                    goto shutdown;
                 }
             }
         }
@@ -1060,7 +1060,7 @@ main(int argc, char *argv[])
             snmp_log_perror("setuid failed");
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                goto out;
+                goto shutdown;
             }
         }
     }
@@ -1114,6 +1114,8 @@ main(int argc, char *argv[])
         receive();
     DEBUGMSGTL(("snmpd/main", "sending shutdown trap\n"));
     SnmpTrapNodeDown();
+
+shutdown:
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown(app_name);
     shutdown_master_agent();
