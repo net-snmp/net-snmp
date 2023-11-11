@@ -235,11 +235,13 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         }
 
     case 'n':
+        free(session->contextName);
         session->contextName = strdup(optarg);
         session->contextNameLen = strlen(optarg);
         break;
 
     case 'u':
+        free(session->securityName);
         session->securityName = strdup(optarg);
         session->securityNameLen = strlen(optarg);
         break;
