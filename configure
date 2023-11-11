@@ -32186,6 +32186,12 @@ then :
   printf "%s\n" "#define HAVE_GETLOGIN 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "getnetgrent" "ac_cv_func_getnetgrent"
+if test "x$ac_cv_func_getnetgrent" = xyes
+then :
+  printf "%s\n" "#define HAVE_GETNETGRENT 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "if_nametoindex" "ac_cv_func_if_nametoindex"
 if test "x$ac_cv_func_if_nametoindex" = xyes
 then :

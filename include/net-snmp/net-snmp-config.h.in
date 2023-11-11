@@ -279,6 +279,9 @@
 /* Define to 1 if you have the `getmntinfo' function. */
 #undef HAVE_GETMNTINFO
 
+/* Define to 1 if you have the `getnetgrent' function. */
+#undef HAVE_GETNETGRENT
+
 /* Define to 1 if you have the `getopt' function. */
 #undef HAVE_GETOPT
 
