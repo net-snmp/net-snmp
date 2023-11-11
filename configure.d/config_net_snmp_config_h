@@ -511,6 +511,15 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #  define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
 #endif
 
+#if defined(__has_attribute)
+#  if __has_attribute(__nonnull__)
+#    define NETSNMP_NONNULL(...) __attribute__((__nonnull__(__VA_ARGS__)))
+#  endif
+#endif
+#if !defined NETSNMP_NONNULL
+#  define NETSNMP_NONNULL(...) /* nonnull */
+#endif
+
 /* ********* NETSNMP_MARK_BEGIN_LEGACY_DEFINITIONS *********/
 /* 
  * existing definitions prior to Net-SNMP 5.4
