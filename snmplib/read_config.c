@@ -2113,7 +2113,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
  * read_config_save_objid(): saves an objid as a numerical string 
  */
 char           *
-read_config_save_objid(char *saveto, oid * objid, size_t len)
+read_config_save_objid(char *saveto, const oid *objid, size_t len)
 {
     int             i;
 
@@ -2126,10 +2126,9 @@ read_config_save_objid(char *saveto, oid * objid, size_t len)
     /*
      * in case len=0, this makes it easier to read it back in 
      */
-    for (i = 0; i < (int) len; i++) {
-        sprintf(saveto, ".%" NETSNMP_PRIo "d", objid[i]);
-        saveto += strlen(saveto);
-    }
+    for (i = 0; i < len; i++)
+        saveto += sprintf(saveto, ".%" NETSNMP_PRIo "d", objid[i]);
+
     return saveto;
 }
 
