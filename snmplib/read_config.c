@@ -939,6 +939,11 @@ read_config(const char *filename,
 		            netsnmp_config_error("Blank line following %s token.", token);
                         continue;
                     }
+                    if (strlen(cptr) + 1 >= SNMP_MAXPATH) {
+                        netsnmp_config_error("File name '%s' is too long",
+                                             cptr);
+                        continue;
+                    }
                     if ( cptr[0] == '/' ) {
                         strlcpy(fname, cptr, SNMP_MAXPATH);
                     } else {
