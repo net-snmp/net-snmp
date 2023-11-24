@@ -12,6 +12,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/openssl_config.h>
 
 #include <net-snmp/net-snmp-includes.h>
 
@@ -21,7 +22,6 @@
 #if defined(NETSNMP_USE_OPENSSL)
 
 #include <string.h>
-#include <net-snmp/library/openssl_config.h>
 #include <openssl/dh.h>
 
 #ifndef HAVE_DH_GET0_PQG
@@ -711,7 +711,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     /*
      * get fingerprint and save it
      */
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, -1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, NS_HASH_SHA1);
     if (NULL == fingerprint)
         return NULL;
 
@@ -749,7 +749,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         sk_num_res = sk_num((const void *)ochain);
         for(i = 0; i < sk_num_res; ++i) {
             ocert_tmp = (X509*)sk_value((const void *)ochain,i);
-            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, -1);
+            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
             cert_map = netsnmp_cert_map_alloc(NULL, ocert);
