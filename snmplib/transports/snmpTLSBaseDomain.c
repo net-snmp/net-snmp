@@ -88,7 +88,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 
     X509_NAME_oneline(X509_get_subject_name(thecert), subject, sizeof(subject));
     X509_NAME_oneline(X509_get_issuer_name(thecert), issuer, sizeof(issuer));
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, -1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, NS_HASH_SHA1);
     DEBUGMSGTL(("tls_x509:verify", " subject: %s\n", subject));
     DEBUGMSGTL(("tls_x509:verify", "  issuer: %s\n", issuer));
     DEBUGMSGTL(("tls_x509:verify", "      fp: %s\n", fingerprint ?
@@ -168,7 +168,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
     char            *fingerprint;
 
     fingerprint =
-        netsnmp_openssl_cert_get_fingerprint(remote_cert, -1);
+        netsnmp_openssl_cert_get_fingerprint(remote_cert, NS_HASH_SHA1);
 
     if (!fingerprint) {
         /* no peer cert */
@@ -185,7 +185,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 
         if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, NS_HASH_SHA1);
     }
 
     if (!tlsdata->their_fingerprint && try_default) {
@@ -197,7 +197,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 
         if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, NS_HASH_SHA1);
     }
     
     if (tlsdata->their_fingerprint) {
