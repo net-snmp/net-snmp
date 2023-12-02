@@ -22,6 +22,7 @@
 #include <net-snmp/library/container_null.h>
 #include "factory.h"
 
+#include <malloc.h>
 #include <stdint.h>
 
 netsnmp_feature_child_of(container_all, libnetsnmp);
