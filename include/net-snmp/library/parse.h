@@ -54,6 +54,7 @@ SOFTWARE.
         struct enum_list *next;
         int             value;
         char           *label;
+        int             lineno;
     };
 
     /*
