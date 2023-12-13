@@ -2803,6 +2803,7 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
                if (!session.transport_configuration) {
                    fprintf(stderr, "failed to initialize the transport configuration container\n");
                    RETVAL = NULL;
+                   netsnmp_cleanup_session(&session);
                    return;
                }
 
