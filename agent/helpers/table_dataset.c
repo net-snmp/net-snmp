@@ -1173,7 +1173,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     int             rc;
 
     data_set_tables *tables;
-    netsnmp_variable_list *vb;  /* containing only types */
+    netsnmp_variable_list *vb, *vars;  /* containing only types */
     netsnmp_table_row *row;
     netsnmp_table_data_set_storage *dr;
 
@@ -1202,7 +1202,8 @@ netsnmp_config_parse_add_row(const char *token, char *line)
                     vb->type));
         buf_size = sizeof(buf);
         line = read_config_read_memory(vb->type, line, buf, &buf_size);
-        netsnmp_table_row_add_index(row, vb->type, buf, buf_size);
+        vars = netsnmp_table_row_add_index(row, vb->type, buf, buf_size);
+        free(vars);
     }
 
     /*
