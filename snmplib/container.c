@@ -510,7 +510,9 @@ void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
         x = x->prev;
     }
     x->clear(x, f, c);
+#ifdef HAVE_MALLOC_TRIM
     malloc_trim(0);
+#endif
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_FREE_ALL
