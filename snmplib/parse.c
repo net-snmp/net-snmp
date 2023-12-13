@@ -140,6 +140,7 @@ struct tc {                     /* textual conventions */
     struct enum_list *enums;
     struct range_list *ranges;
     char           *description;
+    int             lineno;
 } *tclist;
 int tc_alloc;
 
@@ -1830,15 +1831,11 @@ do_linkup(struct module *mp, struct node *np)
             nbuckets[i] = NULL;
             while (onp) {
                 snmp_log(LOG_WARNING,
-                         "Unlinked OID in %s: %s ::= { %s %ld }\n",
+                         "Cannot resolve OID in %s: %s ::= { %s %ld } at line %d in %s\n",
                          (mp->name ? mp->name : "<no module>"),
                          (onp->label ? onp->label : "<no label>"),
                          (onp->parent ? onp->parent : "<no parent>"),
-                         onp->subid);
-		 snmp_log(LOG_WARNING,
-			  "Undefined identifier: %s near line %d of %s\n",
-			  (onp->parent ? onp->parent : "<no parent>"),
-			  onp->lineno, onp->filename);
+                         onp->subid, onp->lineno, onp->filename);
                 np = onp;
                 onp = onp->next;
             }
@@ -2200,10 +2197,31 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
                 goto err;
             }
             (*epp)->value = strtol(token, NULL, 10);
+            (*epp)->lineno = mibLine;
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
                 goto err;
+            }
+            else {
+                struct enum_list *op = ep;
+                while (op != *epp) {
+                    if (strcmp((*epp)->label, op->label) == 0) {
+                        snmp_log(LOG_ERR,
+                            "Duplicate enum label '%s' at line %d in %s. First at line %d\n",
+                            (*epp)->label, mibLine, File, op->lineno);
+                        erroneousMibs++;
+                        break;
+                    }
+                    else if ((*epp)->value == op->value) {
+                        snmp_log(LOG_ERR,
+                            "Duplicate enum value '%d' at line %d in %s. First at line %d\n",
+                            (*epp)->value, mibLine, File, op->lineno);
+                        erroneousMibs++;
+                        break;
+                    }
+                    op = op->next;
+                }
             }
             epp = &(*epp)->next;
         }
@@ -2431,14 +2449,25 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         /*
          * textual convention 
          */
+        tcp = NULL;
         for (i = 0; i < tc_alloc; i++) {
-            if (tclist[i].type == 0)
-                break;
+            if (tclist[i].type == 0) {
+                if (tcp == NULL) tcp = &tclist[i];
+            }
+            else
+                if (strcmp(name, tclist[i].descriptor) == 0 &&
+                        tclist[i].modid == current_module) {
+                    snmp_log(LOG_ERR, 
+                        "Duplicate TEXTUAL-CONVENTION '%s' at line %d in %s. First at line %d\n",
+                        name, mibLine, File, tclist[i].lineno);
+		    erroneousMibs++;
+		}
         }
 
-        if (i == tc_alloc) {
+        if (tcp == NULL) {
             tclist = realloc(tclist, (tc_alloc + TC_INCR)*sizeof(struct tc));
             memset(tclist+tc_alloc, 0, TC_INCR*sizeof(struct tc));
+            tcp = tclist + tc_alloc;
             tc_alloc += TC_INCR;
         }
         if (!(type & SYNTAX_MASK)) {
@@ -2446,11 +2475,11 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                         token, type);
             goto err;
         }
-        tcp = &tclist[i];
         tcp->modid = current_module;
         tcp->descriptor = strdup(name);
         tcp->hint = hint;
         tcp->description = descr;
+        tcp->lineno = mibLine;
         tcp->type = type;
         *ntype = get_token(fp, ntoken, MAXTOKEN);
         if (*ntype == LEFTPAREN) {
@@ -4024,12 +4053,11 @@ adopt_orphans(void)
             while (onp) {
                 char            modbuf[256];
                 snmp_log(LOG_WARNING,
-                         "Cannot adopt OID in %s: %s ::= { %s %ld }\n",
+                         "Cannot resolve OID in %s: %s ::= { %s %ld } at line %d in %s\n",
                          module_name(onp->modid, modbuf),
                          (onp->label ? onp->label : "<no label>"),
                          (onp->parent ? onp->parent : "<no parent>"),
-                         onp->subid);
-
+                         onp->subid, onp->lineno, onp->filename);
                 np = onp;
                 onp = onp->next;
             }
@@ -4620,6 +4648,7 @@ parse(FILE * fp)
             goto free_mib;
         }
         if (nnp) {
+            struct node *op;
             if (np)
                 np->next = nnp;
             else
@@ -4628,6 +4657,16 @@ parse(FILE * fp)
                 np = np->next;
             if (np->type == TYPE_OTHER)
                 np->type = type;
+            op = root;
+            while (op != nnp) {
+                if (strcmp(nnp->label, op->label) == 0 && nnp->subid != op->subid) {
+                    snmp_log(LOG_ERR, 
+                        "Duplicate Object '%s' at line %d in %s. First at line %d\n",
+                        op->label, mibLine, File, op->lineno);
+		    erroneousMibs++;
+		}
+                op = op->next;
+            }
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
