@@ -23,6 +23,9 @@
 #endif
 
 #include <sys/types.h>
+#ifdef __ANDROID__
+#include <sys/select.h>
+#endif
 
 #if defined(WIN32) && !defined(cygwin)
 typedef HANDLE netsnmp_pid_t;
