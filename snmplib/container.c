@@ -22,7 +22,9 @@
 #include <net-snmp/library/container_null.h>
 #include "factory.h"
 
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <stdint.h>
 
 netsnmp_feature_child_of(container_all, libnetsnmp);
