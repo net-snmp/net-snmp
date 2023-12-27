@@ -484,7 +484,7 @@ static void set_ipv6_v6only_sockopt(int sd)
     /* Try to restrict PF_INET6 socket to IPv6 communications only. */
     int optval = 1;
 
-    if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, &optval,
+    if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&optval,
                    sizeof(optval)) != 0) {
         DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY: %s\n",
                     strerror(errno)));
