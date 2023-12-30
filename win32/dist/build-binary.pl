@@ -50,7 +50,7 @@ my $openssldir = $ENV{OPENSSLDIR} ? $ENV{OPENSSLDIR} :
                  $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
                  "C:\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
-my $openssllibdir = $openssldir . "\\lib\\VC";
+my $openssllibdir = $openssldir . "\\lib\\VC\\x64";
 
 my $version = "unknown";
 my $version_for_perl = "unknown";
@@ -370,8 +370,17 @@ sub build {
   print "\n";
   print "12. Install development files       $install_devel\n";
 
+  my $opensslsubdir .= $linktype eq "dynamic" ? "\\MD" : "\\MT";
+  if ($debug eq "enabled") {
+      $opensslsubdir .= "d";
+  }
+
   my $configOpts =
       ($openssl eq "enabled" ? "--with-ssl" : "" )
+      . " " .
+      ($openssl eq "enabled" ? "--with-sslincdir=$opensslincdir" : "" )
+      . " " .
+      ($openssl eq "enabled" ? "--with-ssllibdir=$openssllibdir$opensslsubdir" : "" )
       . " " .
       ($sdk eq "enabled" ? "--with-sdk" : "" )
       . " " .
@@ -385,9 +394,6 @@ sub build {
   
   # Set to not search for non-existent ".dep" files
   $ENV{NO_EXTERNAL_DEPS}="1";
-
-  $ENV{INCLUDE} .= ";$opensslincdir";
-  $ENV{LIB}     .= ";$openssllibdir";
 
   # Set PATH environment variable so Perl make tests can locate the DLL
   $ENV{PATH} = File::Spec->catdir($top_dir, "bin", $debug eq "enabled" ? "debug" : "release") . ";$ENV{PATH}";
