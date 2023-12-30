@@ -1790,9 +1790,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       } else {
           newpdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
-          for(vars = (response ? response->variables : NULL),
-                  varlist_ind = 0,
-                  oldvars = (pdu ? pdu->variables : NULL);
+          for(vars = response->variables, varlist_ind = 0,
+		oldvars = (pdu ? pdu->variables : NULL);
               vars && (varlist_ind < varlist_len);
               vars = vars->next_variable, varlist_ind++,
                   oldvars = (oldvars ? oldvars->next_variable : NULL)) {
