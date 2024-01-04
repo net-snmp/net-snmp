@@ -356,11 +356,9 @@ case "$(uname)" in
 	esac
 	;;
     *)
-	# Do not enable Python support for Cirrus CI because on Cirrus linking
-	# with Python fails as follows (this is probably a bug in Net-SNMP):
-	# /usr/bin/ld: /tmp/cirrus-ci-build/snmplib/.libs/libnetsnmp.a(snmp_client.o): relocation R_X86_64_32S against `a local symbol' can not be used when making a shared object; recompile with -fPIC
+	# To do: fix the build of the Python modules when using WolfSSL.
 	if python3 -c 'import setuptools' 1>/dev/null 2>&1 &&
-	       [ -z "$CIRRUS_CI" ]; then
+	       [ "$MODE" != "wolfssl" ]; then
 	    options+=(--with-python-modules)
 	fi
     esac
