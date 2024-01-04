@@ -189,6 +189,9 @@
 /* Define to 1 if you have the `ERR_get_error_all' function. */
 #undef HAVE_ERR_GET_ERROR_ALL
 
+/* Define to 1 if you have the `ERR_get_error_func' function. */
+#undef HAVE_ERR_GET_ERROR_FUNC
+
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
@@ -867,9 +870,6 @@
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
-
-/* Define to 1 if you have the <security/cryptoki.h> header file. */
-#undef HAVE_SECURITY_CRYPTOKI_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT

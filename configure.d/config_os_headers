@@ -114,7 +114,6 @@ openssl/ssl.h					\
 openssl/x509.h					\
 openssl/x509_vfy.h				\
 openssl/x509v3.h				\
-security/cryptoki.h				\
 ])
 
 # RPM subdirectory path                   (Agent)

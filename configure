@@ -18669,12 +18669,6 @@ then :
   printf "%s\n" "#define HAVE_OPENSSL_X509V3_H 1" >>confdefs.h
 
 fi
-ac_fn_c_check_header_compile "$LINENO" "security/cryptoki.h" "ac_cv_header_security_cryptoki_h" "$ac_includes_default"
-if test "x$ac_cv_header_security_cryptoki_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_SECURITY_CRYPTOKI_H 1" >>confdefs.h
-
-fi
 
 
 # RPM subdirectory path                   (Agent)
@@ -28748,6 +28742,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 
 
 
+
 	for symbol in				\
 	    AES_cfb128_encrypt			\
 	    ASN1_STRING_get0_data		\
@@ -28757,6 +28752,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 	    DTLS_method				\
 	    DTLSv1_method			\
 	    ERR_get_error_all			\
+	    ERR_get_error_func			\
 	    EVP_MD_CTX_create			\
 	    EVP_MD_CTX_destroy			\
 	    EVP_MD_CTX_free			\

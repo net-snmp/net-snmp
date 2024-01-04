@@ -61,12 +61,19 @@ netsnmp_feature_require(cert_util);
 int openssl_local_index;
 
 #ifndef HAVE_ERR_GET_ERROR_ALL
-/* A backport of the OpenSSL 1.1.1e ERR_get_error_all() function. */
+/*
+ * A backport of the OpenSSL 3.0 ERR_get_error_all() function. See also
+ * OpenSSL commit b13342e933c5 ("Modernise the ERR functionality further (new
+ * functions and deprecations)").
+ */
 static unsigned long ERR_get_error_all(const char **file, int *line,
                                        const char **func,
                                        const char **data, int *flags)
 {
     *func = "(?)";
+#ifdef HAVE_ERR_GET_ERROR_FUNC
+    ERR_get_error_func(func);
+#endif
     return ERR_get_error_line_data(file, line, data, flags);
 }
 #endif

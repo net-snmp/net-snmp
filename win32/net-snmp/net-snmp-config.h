@@ -634,9 +634,6 @@
 /* Define to 1 if you have the <search.h> header file. */
 #define HAVE_SEARCH_H 1
 
-/* Define to 1 if you have the <security/cryptoki.h> header file. */
-/* #undef HAVE_SECURITY_CRYPTOKI_H */
-
 /* Define to 1 if you have the `select' function. */
 /* #undef HAVE_SELECT */
 
@@ -1440,6 +1437,9 @@
 #if defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
 #define HAVE_AES 1
 #endif
+
+/* Define to 1 if you have the `ERR_get_error_all' function. */
+#define HAVE_ERR_GET_ERROR_ALL 1
 
 #else /* ! NETSNMP_USE_OPENSSL */
 

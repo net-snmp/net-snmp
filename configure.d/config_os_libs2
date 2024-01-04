@@ -386,6 +386,8 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 	    [Define to 1 if you have the `DTLSv1_method' function.])
 	AH_TEMPLATE([HAVE_ERR_GET_ERROR_ALL],
 	    [Define to 1 if you have the `ERR_get_error_all' function.])
+	AH_TEMPLATE([HAVE_ERR_GET_ERROR_FUNC],
+	    [Define to 1 if you have the `ERR_get_error_func' function.])
 	AH_TEMPLATE([HAVE_EVP_MD_CTX_CREATE],
 	    [Define to 1 if you have the `EVP_MD_CTX_create' function.])
 	AH_TEMPLATE([HAVE_EVP_MD_CTX_DESTROY],
@@ -433,6 +435,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 	    DTLS_method				\
 	    DTLSv1_method			\
 	    ERR_get_error_all			\
+	    ERR_get_error_func			\
 	    EVP_MD_CTX_create			\
 	    EVP_MD_CTX_destroy			\
 	    EVP_MD_CTX_free			\
