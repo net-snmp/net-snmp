@@ -320,7 +320,9 @@ else
 	if [ -e "${ssl_include_path}/dh.h" ]; then
 	    mibs+=(snmp-usm-dh-objects-mib)
 	fi
-	if [ -e "${ssl_include_path}/ssl.h" ]; then
+	if [ -e "${ssl_include_path}/ssl.h" ] &&
+               [ ${ssl_include_path%/wolfssl/openssl} = ${ssl_include_path} ]
+	then
 	    mibs+=(tlstm-mib)
 	fi
 	mibs+=(tsm-mib)
