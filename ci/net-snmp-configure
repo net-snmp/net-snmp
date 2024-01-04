@@ -58,15 +58,6 @@ scriptdir=$(cd "$(dirname "$0")" && pwd)
 branch_name="$1"
 shift
 
-is_5_7_or_above="false"
-is_5_8_or_above="false"
-if [ "${branch_name#master}" != "${branch_name}" ]; then
-  is_5_8_or_above="true"
-  is_5_7_or_above="true"
-elif [ "${branch_name#V5-7-}" != "${branch_name}" ]; then
-  is_5_7_or_above="true"
-fi
-
 libatmver="$(rpm_version linux-atm-devel;
 	     dpkg_version libatm1-dev)"
 echo "libatmver=$libatmver"
@@ -155,7 +146,7 @@ case "$(uname)" in
           mini*|read-only)
               ;;
           *)
-              $is_5_7_or_above && mibs+=(deliver/deliverByNotify)
+              mibs+=(deliver/deliverByNotify)
               mibs+=(disman/event)
               mibs+=(disman/expression)
               mibs+=(disman/mteEventNotificationTable)
@@ -215,7 +206,7 @@ case "$(uname)" in
 	  transports+=(IPX)
       fi
       transports+=(STD)
-      $is_5_8_or_above && transports+=(UDPshared)
+      transports+=(UDPshared)
       options+=("--with-default-snmp-version=2")
       options+=("--with-systemd")
       # Disabled modules because troublesome: Rmon ipfwchains/ipfwchains ucd-snmp/lmSensors
@@ -335,7 +326,7 @@ else
 	mibs+=(tsm-mib)
     fi
 fi
-if [ "$with_openssl" != "internal" ] && $is_5_8_or_above &&
+if [ "$with_openssl" != "internal" ] &&
        [ -e "${ssl_include_path}/aes.h" ] &&
        [ -e "${ssl_include_path}/evp.h" ] &&
        grep -qw EVP_aes_256_cfb "${ssl_include_path}/evp.h"; then
