@@ -734,6 +734,9 @@
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #undef HAVE_OPENSSL_DH_H
 
+/* Define to 1 if you have the <openssl/err.h> header file. */
+#undef HAVE_OPENSSL_ERR_H
+
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #undef HAVE_OPENSSL_EVP_H
 
@@ -745,6 +748,9 @@
 
 /* Define to 1 if you have the `OPENSSL_sk_value' function. */
 #undef HAVE_OPENSSL_SK_VALUE
+
+/* Define to 1 if you have the <openssl/ssl.h> header file. */
+#undef HAVE_OPENSSL_SSL_H
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
@@ -844,9 +850,6 @@
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
-
-/* Define to 1 if you have the <security/cryptoki.h> header file. */
-#undef HAVE_SECURITY_CRYPTOKI_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT

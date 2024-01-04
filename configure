@@ -19589,25 +19589,22 @@ then :
   printf "%s\n" "#define HAVE_OPENSSL_AES_H 1" >>confdefs.h
 
 fi
-     #  (Core)
 ac_fn_c_check_header_compile "$LINENO" "openssl/dh.h" "ac_cv_header_openssl_dh_h" "$ac_includes_default"
 if test "x$ac_cv_header_openssl_dh_h" = xyes
 then :
   printf "%s\n" "#define HAVE_OPENSSL_DH_H 1" >>confdefs.h
 
 fi
-     #  (Apps)
-#  Not-Used:
 ac_fn_c_check_header_compile "$LINENO" "openssl/des.h" "ac_cv_header_openssl_des_h" "$ac_includes_default"
 if test "x$ac_cv_header_openssl_des_h" = xyes
 then :
   printf "%s\n" "#define HAVE_OPENSSL_DES_H 1" >>confdefs.h
 
 fi
-ac_fn_c_check_header_compile "$LINENO" "openssl/hmac.h" "ac_cv_header_openssl_hmac_h" "$ac_includes_default"
-if test "x$ac_cv_header_openssl_hmac_h" = xyes
+ac_fn_c_check_header_compile "$LINENO" "openssl/err.h" "ac_cv_header_openssl_err_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_err_h" = xyes
 then :
-  printf "%s\n" "#define HAVE_OPENSSL_HMAC_H 1" >>confdefs.h
+  printf "%s\n" "#define HAVE_OPENSSL_ERR_H 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_compile "$LINENO" "openssl/evp.h" "ac_cv_header_openssl_evp_h" "$ac_includes_default"
@@ -19616,10 +19613,16 @@ then :
   printf "%s\n" "#define HAVE_OPENSSL_EVP_H 1" >>confdefs.h
 
 fi
-ac_fn_c_check_header_compile "$LINENO" "security/cryptoki.h" "ac_cv_header_security_cryptoki_h" "$ac_includes_default"
-if test "x$ac_cv_header_security_cryptoki_h" = xyes
+ac_fn_c_check_header_compile "$LINENO" "openssl/hmac.h" "ac_cv_header_openssl_hmac_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_hmac_h" = xyes
 then :
-  printf "%s\n" "#define HAVE_SECURITY_CRYPTOKI_H 1" >>confdefs.h
+  printf "%s\n" "#define HAVE_OPENSSL_HMAC_H 1" >>confdefs.h
+
+fi
+ac_fn_c_check_header_compile "$LINENO" "openssl/ssl.h" "ac_cv_header_openssl_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_ssl_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_OPENSSL_SSL_H 1" >>confdefs.h
 
 fi
 

@@ -648,9 +648,6 @@
 /* Define to 1 if you have the <search.h> header file. */
 #define HAVE_SEARCH_H 1
 
-/* Define to 1 if you have the <security/cryptoki.h> header file. */
-/* #undef HAVE_SECURITY_CRYPTOKI_H */
-
 /* Define to 1 if you have the `select' function. */
 /* #undef HAVE_SELECT */
 

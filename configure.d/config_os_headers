@@ -101,11 +101,8 @@ AC_CHECK_HEADERS([search.h   sgtty.h    xti.h      ] dnl
 # Valgrind
 AC_CHECK_HEADERS([valgrind/valgrind.h valgrind/memcheck.h])
 # OpenSSL
-AC_CHECK_HEADERS([openssl/aes.h ])     #  (Core)
-AC_CHECK_HEADERS([openssl/dh.h  ])     #  (Apps)
-#  Not-Used:
-AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h ] dnl
-                 [openssl/evp.h  security/cryptoki.h])
+AC_CHECK_HEADERS([openssl/aes.h openssl/dh.h openssl/des.h openssl/err.h]dnl
+                 [openssl/evp.h openssl/hmac.h openssl/ssl.h])
 
 # RPM subdirectory path                   (Agent)
 if test "x$with_rpm" != "xno"; then
