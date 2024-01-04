@@ -1478,6 +1478,9 @@
 #define HAVE_AES 1
 #endif
 
+/* Define to 1 if you have the `ERR_get_error_all' function. */
+#define HAVE_ERR_GET_ERROR_ALL 1
+
 #else /* ! NETSNMP_USE_OPENSSL */
 
 /* define if you are using the MD5 code ...*/
