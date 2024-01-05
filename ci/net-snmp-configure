@@ -291,7 +291,7 @@ case "$MODE" in
     wolfssl)
 	with_openssl=wolfssl
 	wolfssl_dir=$(dirname "${scriptdir}")/wolfssl-inst
-	options+=(--with-wolfssl=${wolfssl_dir})
+	options+=(--with-wolfssl="${wolfssl_dir}")
 	ssl_include_path=${wolfssl_dir}/include/wolfssl/openssl
 	;;
     *)
@@ -321,7 +321,7 @@ else
 	    mibs+=(snmp-usm-dh-objects-mib)
 	fi
 	if [ -e "${ssl_include_path}/ssl.h" ] &&
-               [ ${ssl_include_path%/wolfssl/openssl} = ${ssl_include_path} ]
+               [ "${ssl_include_path%/wolfssl/openssl}" = "${ssl_include_path}" ]
 	then
 	    mibs+=(tlstm-mib)
 	fi

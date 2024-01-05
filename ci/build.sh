@@ -46,7 +46,7 @@ case "$MODE" in
 	    nproc=1
 	fi;;
 esac
-make -s -j${nproc}                       || exit $?
+make -s -j"${nproc}" || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
         exit 0;;
