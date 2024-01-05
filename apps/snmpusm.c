@@ -91,26 +91,23 @@ static const char *successNotes[CMD_NUM] = {
 #define                   USM_OID_LEN    12
 #define                DH_USM_OID_LEN    11
 
-static oid
-
-authKeyOid[MAX_OID_LEN] = { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 },
-ownAuthKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7},
-privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9},
-ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10},
-usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4},
-usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3},
-usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11},
-usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
+static oid authKeyOid[MAX_OID_LEN] = { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 };
+static oid ownAuthKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7};
+static oid privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9};
+static oid ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10};
+static oid usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4};
+static oid usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3};
+static oid usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11};
+static oid usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13};
 /* diffie helman change key objects */
-usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
-usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 },
+static oid usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 };
+static oid usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 };
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
-usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
-usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 },
+static oid usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 };
+static oid usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 };
+static oid usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 };
+static size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
-usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 }
-;
-size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
 
 static
 oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
