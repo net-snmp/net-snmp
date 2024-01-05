@@ -58,58 +58,65 @@ scriptdir=$(cd "$(dirname "$0")" && pwd)
 branch_name="$1"
 shift
 
-libatmver="$(rpm_version linux-atm-devel;
-	     dpkg_version libatm1-dev)"
-echo "libatmver=$libatmver"
+case "$MODE" in
+    Android)
+	;;
+    *)
+	libatmver="$(rpm_version linux-atm-devel;
+		     dpkg_version libatm1-dev)"
+	echo "libatmver=$libatmver"
 
-libmysqlver="$(rpm_version libmariadb-devel;
+	libmysqlver="$(rpm_version libmariadb-devel;
 	      for p in libmariadbclient-dev libmariadb-client-lgpl-dev; do
 	        dpkg_version "$p";
               done;
               pacman_version mingw-w64-x86_64-libmariadbclient)"
-echo "libmysqlver=$libmysqlver"
+	echo "libmysqlver=$libmysqlver"
 
-libsensorsver="$(rpm_version libsensors4-devel;
+	libsensorsver="$(rpm_version libsensors4-devel;
 		 dpkg_version libsensors4-dev)"
-echo "libsensorsver=$libsensorsver"
+	echo "libsensorsver=$libsensorsver"
 
-if echo "$*" | grep -q wolfssl; then
-    have_ssl=true
-elif ! echo "$*" | grep -Eq 'with-openssl=(no|internal)|without-openssl'; then
-    have_ssl=true
-fi
-echo "have_ssl=$have_ssl"
+	if echo "$*" | grep -q wolfssl; then
+	    have_ssl=true
+	elif ! echo "$*" | grep -Eq 'with-openssl=(no|internal)|without-openssl'; then
+	    have_ssl=true
+	fi
+	echo "have_ssl=$have_ssl"
 
-case "$(uname)" in
-    FreeBSD*)
-	libssh2ver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
-    Linux*)
-	libssh2ver="$(for p in openssh-devel libssh2-devel libssh-devel; do
-                rpm_version "$p";
-              done |
-              head -n1;
-              for p in libopenssh2 libssh2-1-dev libssh-dev; do
-                dpkg_version "$p";
-              done;
-              pacman_version mingw-w64-x86_64-libssh2)"
+	case "$(uname)" in
+	    FreeBSD*)
+		libssh2ver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
+	    Linux*)
+		libssh2ver="$(for p in openssh-devel libssh2-devel libssh-devel
+			do
+			    rpm_version "$p";
+			done |
+			head -n1;
+			for p in libopenssh2 libssh2-1-dev libssh-dev; do
+			    dpkg_version "$p";
+			done;
+			pacman_version mingw-w64-x86_64-libssh2)"
+		;;
+	esac
+	echo "libssh2ver=$libssh2ver"
+
+	case "$(uname)" in
+	    FreeBSD*)
+		perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
+	    Linux*)
+		perldevver="$(rpm_version perl;
+			      dpkg_version libperl-dev;
+			      pacman_version mingw-w64-x86_64-perl)"
+		;;
+	esac
+	echo "perldevver=$perldevver"
+	# Set the perlcc variable.
+	eval "perl$(perl -V:cc)"
+	perlcc=$(compiler_type "$perlcc")
+	echo "perlcc=$perlcc"
 	;;
 esac
-echo "libssh2ver=$libssh2ver"
-
-case "$(uname)" in
-    FreeBSD*)
-	perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
-    Linux*)
-	perldevver="$(rpm_version perl;
-		      dpkg_version libperl-dev;
-		      pacman_version mingw-w64-x86_64-perl)"
-	;;
-esac
-echo "perldevver=$perldevver"
-# Set the perlcc variable.
-eval "perl$(perl -V:cc)"
-perlcc=$(compiler_type "$perlcc")
-echo "perlcc=$perlcc"
 
 options=()
 options+=(--enable-developer)
@@ -126,6 +133,16 @@ mibs=()
 mibs+=(agent/extend)
 case "$MODE" in
     read-only)
+	;;
+    Android)
+	options+=(
+	    --disable-embedded-perl
+	    --host=aarch64-linux-android33
+	    --with-openssl=internal
+	    --with-out-mib-modules="if-mib default_modules"
+	    --without-perl-modules
+	    --without-python-modules
+	)
         ;;
     *)
         mibs+=(examples/data_set)
@@ -139,7 +156,9 @@ case "$MODE" in
         ;;
 esac
 
-case "$(uname)" in
+case "$(uname):${MODE}" in
+  *:Android*)
+      ;;
   Linux*)
       options+=(--enable-new-features)
       case "$MODE" in
@@ -338,7 +357,9 @@ security_modules=(usm tsm)
 if [ -e /usr/include/krb5.h ]; then
     security_modules+=(ksm)
 fi
-case "$(uname)" in
+case "$(uname):${MODE}" in
+    *:Android*)
+	;;
     MSYS*|MINGW*)
 	# Do not enable Python support on MinGW32 nor for the MSYS build
 	# environment because the Python interpreter has been built on these
@@ -372,7 +393,7 @@ case "$MODE" in
         options+=(--enable-minimalist);;
     read-only)
         options+=(--enable-read-only);;
-    regular|wolfssl|"")
+    regular|wolfssl|Android|"")
         ;;
     *)
         echo "Error: unknown build type $MODE"

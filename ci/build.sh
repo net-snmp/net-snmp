@@ -29,6 +29,13 @@ case "$(uname -a)" in
 	export PATH="/mingw64/bin:$PATH"
 	;;
 esac
+case "$MODE" in
+    Android)
+	NDK=$PWD/android-ndk-r26b/toolchains/llvm/prebuilt/linux-x86_64/bin
+	export PATH="${NDK}:${PATH}"
+	export CC=aarch64-linux-android34-clang
+	;;
+esac
 echo "compiler path: $(type -p "${CC:-gcc}")"
 "${scriptdir}"/net-snmp-configure V5-9-patches || exit $?
 case "$MODE" in
