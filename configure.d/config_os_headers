@@ -271,6 +271,7 @@ AC_CHECK_HEADERS([sys/socket.h]dnl
                  [net/if.h]dnl
                  [netinet/in.h]dnl
                  [netdb.h]dnl
+                 [netgroup.h]dnl
                  [net/if_arp.h]dnl
                  [net/if_mib.h]dnl
                  [net/if_var.h]dnl

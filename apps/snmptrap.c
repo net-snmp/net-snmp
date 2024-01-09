@@ -323,7 +323,7 @@ main(int argc, char *argv[])
         trap = argv[arg];
         if (*trap == 0) {
             sysuptime = get_uptime();
-            sprintf(csysuptime, "%ld", sysuptime);
+            snprintf(csysuptime, sizeof csysuptime, "%ld", sysuptime);
             trap = csysuptime;
         }
         snmp_add_var(pdu, objid_sysuptime,

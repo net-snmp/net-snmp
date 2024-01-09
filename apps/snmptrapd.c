@@ -370,11 +370,12 @@ parse_trapd_address(const char *token, char *cptr)
     if (default_port == ddefault_port) {
         default_port = strdup(buf);
     } else {
-        p = malloc(strlen(buf) + 1 + strlen(default_port) + 1);
+        size_t len = strlen(buf) + 1 + strlen(default_port) + 1;
+        p = malloc(len);
         if (p) {
-            strcpy(p, buf);
-            strcat(p, ",");
-            strcat(p, default_port );
+            strlcpy(p, buf, len);
+            strlcat(p, ",", len);
+            strlcat(p, default_port, len);
         }
         free(default_port);
         default_port = p;
@@ -756,7 +757,7 @@ main(int argc, char *argv[])
                 } else {
                     /* Old style: implicitly "print=format" */
                     trap1_fmt_str_remember = malloc(strlen(optarg) + 7);
-                    sprintf( trap1_fmt_str_remember, "print %s", optarg );
+                    snprintf( trap1_fmt_str_remember, strlen(optarg) + 7, "print %s", optarg );
                 }
             } else {
                 usage();
@@ -958,12 +959,13 @@ main(int argc, char *argv[])
         for (i = optind; i < argc; i++) {
             char *astring;
             if (listen_ports != NULL) {
-                astring = malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
+                size_t len = strlen(listen_ports) + 2 + strlen(argv[i]);
+                astring = malloc(len);
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     goto out;
                 }
-                sprintf(astring, "%s,%s", listen_ports, argv[i]);
+                snprintf(astring, len, "%s,%s", listen_ports, argv[i]);
                 free(listen_ports);
                 listen_ports = astring;
             } else {

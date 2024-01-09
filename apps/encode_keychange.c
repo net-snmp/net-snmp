@@ -131,8 +131,9 @@ main(int argc, char **argv)
         fprintf(stderr, "%s: out of memory!", local_progname);
         exit(-1);
     }
-    sprintf(local_passphrase_filename, "%s/%s", PASSPHRASE_DIR,
-            PASSPHRASE_FILE);
+    snprintf(local_passphrase_filename, sizeof(PASSPHRASE_DIR) +
+                                        sizeof(PASSPHRASE_FILE) + 4,
+             "%s/%s", PASSPHRASE_DIR, PASSPHRASE_FILE);
 
 
 

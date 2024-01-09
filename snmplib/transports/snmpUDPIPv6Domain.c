@@ -169,8 +169,10 @@ int netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
     struct msghdr m = { NULL };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
     int           rc;
+#ifdef HAVE_SO_BINDTODEVICE
     char          iface[IFNAMSIZ];
     socklen_t     ifacelen = IFNAMSIZ;
+#endif
 
     iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
     iov.iov_len  = len;
