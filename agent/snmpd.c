@@ -816,15 +816,17 @@ main(int argc, char *argv[])
          */
         DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
         for (i = optind; i < argc; i++) {
-            char *c, *astring;
+            char *c;
             if ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					   NETSNMP_DS_AGENT_PORTS))) {
-                astring = (char*)malloc(strlen(c) + 2 + strlen(argv[i]));
+                char *astring;
+                size_t alen = strlen(c) + 2 + strlen(argv[i]);
+                astring = (char*)malloc(alen);
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     goto out;
                 }
-                sprintf(astring, "%s,%s", c, argv[i]);
+                snprintf(astring, alen, "%s,%s", c, argv[i]);
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
 				      NETSNMP_DS_AGENT_PORTS, astring);
                 SNMP_FREE(astring);
@@ -874,12 +876,13 @@ main(int argc, char *argv[])
             fprintf(stderr, "malloc failure processing argvrestart\n");
             goto out;
         }
-        strcpy(argvrestartname, argv[0]);
+        strlcpy(argvrestartname, argv[0], strlen(argv[0])+1);
 
         for (cptr = argvrestart, i = 0; i < argc; i++) {
-            strcpy(cptr, argv[i]);
+            strlcpy(cptr, argv[i], ret);
             *(argvptr++) = cptr;
             cptr += strlen(argv[i]) + 1;
+            ret -= strlen(argv[i]) + 1;
         }
     }
 #endif /* USING_UTIL_FUNCS_RESTART_MODULE */
