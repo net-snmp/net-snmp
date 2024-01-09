@@ -382,24 +382,26 @@ print_table(void)
 
     for (field = 0; field < fields; field++) {
         if (column_width != 0)
-            sprintf(string_buf, "%%%s%d.%ds", left_justify_flag,
-                    column_width + 1, column_width );
+            snprintf(string_buf, sizeof string_buf, "%%%s%d.%ds",
+                     left_justify_flag, column_width + 1, column_width );
         else if (field_separator == NULL)
-            sprintf(string_buf, "%%%s%ds", left_justify_flag,
-                    column[field].width + 1);
+            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
+                     left_justify_flag, column[field].width + 1);
         else if (field == 0 && !show_index)
-            sprintf(string_buf, "%%s");
+            snprintf(string_buf, sizeof string_buf, "%%s");
         else
-            sprintf(string_buf, "%s%%s", field_separator);
+            snprintf(string_buf, sizeof string_buf, "%s%%s",
+                     field_separator);
         column[field].fmt = strdup(string_buf);
     }
     if (show_index) {
         if (column_width)
-            sprintf(string_buf, "\nindex: %%s\n");
+            snprintf(string_buf, sizeof string_buf, "\nindex: %%s\n");
         else if (field_separator == NULL)
-            sprintf(string_buf, "%%%s%ds", left_justify_flag, index_width);
+            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
+                     left_justify_flag, index_width);
         else
-            sprintf(string_buf, "%%s");
+            snprintf(string_buf, sizeof string_buf, "%%s");
         index_fmt = strdup(string_buf);
     }
 

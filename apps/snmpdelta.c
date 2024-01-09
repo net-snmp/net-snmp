@@ -67,6 +67,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
+#define MAX_DESCRIPTOR 64
 #define MAX_ARGS 256
 #define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
@@ -80,7 +81,7 @@ struct varInfo {
     oid            *info_oid;
     int             type;
     size_t          oidlen;
-    char            descriptor[64];
+    char            descriptor[MAX_DESCRIPTOR];
     u_int           value;
     struct counter64 c64value;
     float           max;
@@ -261,7 +262,7 @@ sprint_descriptor(char *buffer, struct varInfo *vip)
     cp++;
     if (cp < buf)
         cp = buf;
-    strcpy(buffer, cp);
+    strlcpy(buffer, cp, MAX_DESCRIPTOR);
 
     if (buf != NULL) {
         free(buf);
@@ -518,11 +519,13 @@ main(int argc, char *argv[])
                     if (((period % 60)
                          && (!peaks || ((period * peaks) % 60)))
                         || keepSeconds)
-                        sprintf(timestring, " [%02d:%02d:%02d %d/%d]",
+                        snprintf(timestring, sizeof timestring,
+                                " [%02d:%02d:%02d %d/%d]",
                                 tm.tm_hour, tm.tm_min, tm.tm_sec,
                                 tm.tm_mon + 1, tm.tm_mday);
                     else
-                        sprintf(timestring, " [%02d:%02d %d/%d]",
+                        snprintf(timestring, sizeof timestring,
+                                " [%02d:%02d %d/%d]",
                                 tm.tm_hour, tm.tm_min,
                                 tm.tm_mon + 1, tm.tm_mday);
                 }
@@ -577,12 +580,12 @@ main(int argc, char *argv[])
 
                     if (tableForm) {
                         if (count == begin) {
-                            sprintf(outstr, "%s", timestring + 1);
+                            snprintf(outstr, sizeof outstr, "%s", timestring + 1);
                         } else {
                             outstr[0] = '\0';
                         }
                     } else {
-                        sprintf(outstr, "%s %s", timestring,
+                        snprintf(outstr, sizeof outstr, "%s %s", timestring,
                                 vip->descriptor);
                     }
 
@@ -595,24 +598,25 @@ main(int argc, char *argv[])
                             printvalue =
                                 ((float) value * 100) / delta_time;
                             if (tableForm)
-                                sprintf(valueStr, "\t%.2f", printvalue);
+                                snprintf(valueStr, sizeof valueStr, "\t%.2f", printvalue);
                             else
-                                sprintf(valueStr, " /sec: %.2f",
+                                snprintf(valueStr, sizeof valueStr, " /sec: %.2f",
                                         printvalue);
                         }
                     } else {
                         printvalue = (float) value;
-                        sprintf(valueStr, " /%d sec: ", period);
+                        snprintf(valueStr, sizeof valueStr, " /%d sec: ", period);
                         if (vip->type == ASN_COUNTER64)
                             printU64(valueStr + strlen(valueStr),
                                      &c64value);
                         else
-                            sprintf(valueStr + strlen(valueStr), "%u",
-                                    value);
+                            snprintf(valueStr + strlen(valueStr),
+                                     sizeof(valueStr) - strlen(valueStr), 
+                                     "%u", value);
                     }
 
                     if (!peaks) {
-                        strcat(outstr, valueStr);
+                        strlcat(outstr, valueStr, sizeof outstr);
                     } else {
                         print = 0;
                         if (vip->peak_count == -1) {
@@ -624,13 +628,13 @@ main(int argc, char *argv[])
                                 vip->peak = printvalue;
                             if (++vip->peak_count == peaks) {
                                 if (deltat)
-                                    sprintf(peakStr,
+                                    snprintf(peakStr, sizeof peakStr, 
                                             " /sec: %.2f	(%d sec Peak: %.2f)",
                                             vip->peak_average /
                                             vip->peak_count, period,
                                             vip->peak);
                                 else
-                                    sprintf(peakStr,
+                                    snprintf(peakStr, sizeof peakStr, 
                                             " /%d sec: %.0f	(%d sec Peak: %.0f)",
                                             period,
                                             vip->peak_average /
@@ -640,7 +644,7 @@ main(int argc, char *argv[])
                                 vip->peak = 0;
                                 vip->peak_count = 0;
                                 print = 1;
-                                strcat(outstr, peakStr);
+                                strlcat(outstr, peakStr, sizeof outstr);
                             }
                         }
                     }
@@ -650,15 +654,15 @@ main(int argc, char *argv[])
                             vip->max = printvalue;
                         }
                         if (deltat)
-                            sprintf(maxStr, "	(Max: %.2f)", vip->max);
+                            snprintf(maxStr, sizeof maxStr, "	(Max: %.2f)", vip->max);
                         else
-                            sprintf(maxStr, "	(Max: %.0f)", vip->max);
-                        strcat(outstr, maxStr);
+                            snprintf(maxStr, sizeof maxStr, "	(Max: %.0f)", vip->max);
+                        strlcat(outstr, maxStr, sizeof outstr);
                     }
 
                     if (print) {
                         if (fileout) {
-                            sprintf(filename, "%s-%s", gateway,
+                            snprintf(filename, sizeof filename, "%s-%s", gateway,
                                     vip->descriptor);
                             print_log(filename, outstr + 1);
                         } else {
