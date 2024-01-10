@@ -4738,8 +4738,12 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
     /* If no authentication protocol was specified, or it was explicitly
      * set to use the default, use the default auth protocol
      */
-    if ((!cp || (strncmp(cp, "default", 7) == 0)) && (NULL != def_auth_prot)) {
+    if (buf[0] == '\0' || strcmp(buf, "default") == 0) {
         SNMP_FREE(newuser->authProtocol);
+        if (!def_auth_prot) {
+            *errorMsg = "def_auth_prot == NULL";
+            goto fail;
+        }
         newuser->authProtocol = snmp_duplicate_objid(def_auth_prot,
                                                      def_auth_prot_len);
         if (newuser->authProtocol == NULL) {
