@@ -1203,11 +1203,9 @@ snmpd_reconfig(void)
     /* Stop and restart logging.  This allows logfiles to be rotated etc. */
     netsnmp_logging_restart();
     snmp_log(LOG_INFO, "NET-SNMP version %s restarted\n",
-             netsnmp_get_version());         
-    shutdown_master_agent();
+             netsnmp_get_version());
     read_premib_configs();
     update_config();
-    init_master_agent();
     send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
 #ifdef HAVE_SIGPROCMASK
     ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
