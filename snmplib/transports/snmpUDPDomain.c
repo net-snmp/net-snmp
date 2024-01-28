@@ -85,10 +85,6 @@ static netsnmp_tdomain udpDomain;
  */
 typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
 
-int
-netsnmp_sockaddr_in2(struct sockaddr_in *addr,
-                     const char *inpeername, const char *default_target);
-
 /*
  * Return a string representing the address in data, or else the "far end"
  * address if data is NULL.  

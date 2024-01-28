@@ -42,7 +42,7 @@
 
 #define config_warning(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define NETSNMP_REQUIRE_SEMICOLON extern void netsnmp_unused_function(void)
+#define NETSNMP_REQUIRE_SEMICOLON struct netsnmp_unused_struct
 
 #define config_belongs_in(x) NETSNMP_REQUIRE_SEMICOLON
 

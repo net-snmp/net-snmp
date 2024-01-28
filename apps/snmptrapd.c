@@ -98,6 +98,7 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/agent/netsnmp_close_fds.h>
+#include <net-snmp/agent/mib_modules.h>
 #include "../snmplib/snmp_syslog.h"
 #include "../agent_global_vars.h"
 #include "../agent/mibgroup/snmpv3/snmpEngine.h"

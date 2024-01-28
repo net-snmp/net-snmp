@@ -55,9 +55,6 @@ typedef struct container_type_s {
    netsnmp_container_compare  *compare;
 } container_type;
 
-netsnmp_factory *
-netsnmp_container_get_factory(const char *type);
-
 /*------------------------------------------------------------------
  */
 static void 

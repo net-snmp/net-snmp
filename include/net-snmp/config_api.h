@@ -35,7 +35,6 @@ extern          "C" {
     void            unregister_config_handler(const char *filePrefix, const char *token);
 
     				/* Defined in mib.c, rather than read_config.c */
-    void            register_mib_handlers(void);
     void            unregister_all_config_handlers(void);
 
     /* Application Handlers */
