@@ -234,16 +234,10 @@ SOFTWARE.
     void            snmp_mib_toggle_options_usage(const char *lead,
                                                   FILE * outf);
     NETSNMP_IMPORT
-    void            print_mib(FILE *);
-    NETSNMP_IMPORT
     void            print_mib_tree(FILE *, struct tree *, int);
     int             get_mib_parse_error_count(void);
     NETSNMP_IMPORT
     int             snmp_get_token(FILE * fp, char *token, int maxtlen);
-    NETSNMP_IMPORT
-    struct tree    *find_best_tree_node(const char *name,
-                                        struct tree *tree_top,
-                                        u_int * match);
 
 #ifdef __cplusplus
 }

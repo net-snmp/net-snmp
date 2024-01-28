@@ -55,14 +55,6 @@ const oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
 static netsnmp_tdomain tcpDomain;
 
 /*
- * Not static since it is needed here as well as in snmpUDPDomain, but not
- * public either
- */
-int
-netsnmp_sockaddr_in2(struct sockaddr_in *addr,
-                     const char *inpeername, const char *default_target);
-
-/*
  * Return a string representing the address in data, or else the "far end"
  * address if data is NULL.  
  */

@@ -119,17 +119,6 @@ static int  logh_enabled = 0;
 static char syslogname[64] = DEFAULT_LOG_ID;
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
-netsnmp_log_handler *
-netsnmp_register_stdio_loghandler(int is_stdout, int priority, int priority_max,
-                                  const char *tok);
-#endif
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_FILE
-netsnmp_log_handler *
-netsnmp_register_filelog_handler(const char* logfilename, int priority,
-                                 int priority_max, int dont_zero_log);
-#endif
-
 void
 netsnmp_disable_this_loghandler(netsnmp_log_handler *logh)
 {

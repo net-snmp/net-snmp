@@ -43,15 +43,6 @@ extern          "C" {
     void            add_module_replacement(const char *, const char *,
                                            const char *, int);
 
-         /* from ucd-compat.h */
-    NETSNMP_IMPORT
-    void            snmp_set_mib_warnings(int);
-    NETSNMP_IMPORT
-    void            snmp_set_mib_errors(int);
-    NETSNMP_IMPORT
-    void            snmp_set_save_descriptions(int);
-
-
      /* Searching the MIB Tree */
     NETSNMP_IMPORT
     int             read_objid(const char *, oid *, size_t *);
