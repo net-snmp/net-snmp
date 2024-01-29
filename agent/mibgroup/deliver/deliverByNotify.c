@@ -16,13 +16,13 @@ netsnmp_feature_require(container_fifo);
 /* if v is !NULL, then estimate it's likely size */
 #define ESTIMATE_VAR_SIZE(v) (v?(v->name_length + v->val_len + 8):0)
 
-void parse_deliver_config(const char *, char *);
-void parse_deliver_maxsize_config(const char *, char *);
-void parse_data_notification_oid_config(const char *, char *);
-void parse_periodic_time_oid_config(const char *, char *);
-void parse_message_number_oid_config(const char *, char *);
-void parse_max_message_number_oid_config(const char *, char *);
-void free_deliver_config(void);
+static void parse_deliver_config(const char *, char *);
+static void parse_deliver_maxsize_config(const char *, char *);
+static void parse_data_notification_oid_config(const char *, char *);
+static void parse_periodic_time_oid_config(const char *, char *);
+static void parse_message_number_oid_config(const char *, char *);
+static void parse_max_message_number_oid_config(const char *, char *);
+static void free_deliver_config(void);
 
 static void _schedule_next_execute_time(void);
 

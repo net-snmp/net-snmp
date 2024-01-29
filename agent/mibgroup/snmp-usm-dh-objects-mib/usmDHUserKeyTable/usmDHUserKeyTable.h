@@ -168,36 +168,6 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
      *********************************************************************
      * function prototypes
      */
-    int            
-        usmDHUserKeyTable_pre_request(usmDHUserKeyTable_registration *
-                                      user_context);
-    int            
-        usmDHUserKeyTable_post_request(usmDHUserKeyTable_registration *
-                                       user_context, int rc);
-
-    int            
-        usmDHUserKeyTable_rowreq_ctx_init(usmDHUserKeyTable_rowreq_ctx *
-                                          rowreq_ctx, void *user_init_ctx);
-    void           
-        usmDHUserKeyTable_rowreq_ctx_cleanup(usmDHUserKeyTable_rowreq_ctx *
-                                             rowreq_ctx);
-
-    usmDHUserKeyTable_data *usmDHUserKeyTable_allocate_data(void);
-    void            usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *
-                                                   data);
-
-    int            
-        usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
-                                             rowreq_ctx);
-    int             usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx *
-                                             rowreq_ctx);
-    int            
-        usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx
-                                              * rowreq_ctx);
-
-    usmDHUserKeyTable_rowreq_ctx
-        *usmDHUserKeyTable_row_find_by_mib_index
-        (usmDHUserKeyTable_mib_index * mib_idx);
 
     extern const oid      usmDHUserKeyTable_oid[];
     extern const int      usmDHUserKeyTable_oid_size;

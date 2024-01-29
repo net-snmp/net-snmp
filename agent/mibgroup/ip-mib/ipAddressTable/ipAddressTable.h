@@ -171,31 +171,6 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
      *********************************************************************
      * function prototypes
      */
-    int             ipAddressTable_pre_request(ipAddressTable_registration
-                                               * user_context);
-    int             ipAddressTable_post_request(ipAddressTable_registration
-                                                * user_context, int rc);
-
-    int
-        ipAddressTable_rowreq_ctx_init(ipAddressTable_rowreq_ctx *
-                                       rowreq_ctx, void *user_init_ctx);
-    void
-        ipAddressTable_rowreq_ctx_cleanup(ipAddressTable_rowreq_ctx *
-                                          rowreq_ctx);
-
-    ipAddressTable_data *ipAddressTable_allocate_data(void);
-    void            ipAddressTable_release_data(ipAddressTable_data *
-                                                data);
-
-    int
-        ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx *
-                                          rowreq_ctx);
-    int             ipAddressTable_commit(ipAddressTable_rowreq_ctx *
-                                          rowreq_ctx);
-
-        ipAddressTable_rowreq_ctx
-        * ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index *
-                                               mib_idx);
 
     extern const oid      ipAddressTable_oid[];
     extern const int      ipAddressTable_oid_size;
