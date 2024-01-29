@@ -93,27 +93,18 @@ dot3stats_interface_name_list_get (struct ifname *list_head, int *retval)
  * @retval -1 invalid pointer
  */
 
-int
-dot3stats_interface_name_list_free (struct ifname *list_head)
+void
+dot3stats_interface_name_list_free(struct ifname *list_head)
 {
-    struct ifname *nameptr1 = NULL, *nameptr2 = NULL;
+    struct ifname *nameptr1, *nameptr2;
 
     DEBUGMSGTL(("access:dot3StatsTable:interface_name_list_free",
                 "called\n"));
 
-    if (!list_head) {
-        snmp_log (LOG_ERR, "access:dot3StatsTable:interface_name_list_free: invalid pointer list_head");
-        DEBUGMSGTL(("access:dot3StatsTable:interface_name_list_free",
-                    "invalid pointer list_head\n"));
-        return -1;
-    }
-
     for (nameptr1 = list_head; nameptr1; nameptr1 = nameptr2) {
             nameptr2 = nameptr1->ifn_next;
-            free (nameptr1);
+            free(nameptr1);
     }
-
-    return 0;
 }
 
 /*
