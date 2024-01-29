@@ -1845,8 +1845,6 @@ main(int argc, char** argv)
 
 #endif /* CERT_MAIN */
 
-static netsnmp_cert *_cert_find_fp(const char *fingerprint);
-
 void
 netsnmp_fp_lowercase_and_strip_colon(char *fp)
 {

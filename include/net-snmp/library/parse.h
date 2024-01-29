@@ -240,10 +240,6 @@ SOFTWARE.
     int             get_mib_parse_error_count(void);
     NETSNMP_IMPORT
     int             snmp_get_token(FILE * fp, char *token, int maxtlen);
-    NETSNMP_IMPORT
-    struct tree    *find_best_tree_node(const char *name,
-                                        struct tree *tree_top,
-                                        u_int * match);
 
 #ifdef __cplusplus
 }

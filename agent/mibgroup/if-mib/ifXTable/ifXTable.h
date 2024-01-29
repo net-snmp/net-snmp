@@ -75,23 +75,6 @@ config_require(if-mib/ifXTable/ifXTable_data_access);
      *********************************************************************
      * function prototypes
      */
-    int             ifXTable_pre_request(ifXTable_registration *
-                                         user_context);
-    int             ifXTable_post_request(ifXTable_registration *
-                                          user_context, int rc);
-
-    int             ifXTable_rowreq_ctx_init(ifXTable_rowreq_ctx *
-                                             rowreq_ctx,
-                                             void *user_init_ctx);
-    void            ifXTable_rowreq_ctx_cleanup(ifXTable_rowreq_ctx *
-                                                rowreq_ctx);
-
-    int             ifXTable_check_dependencies(ifXTable_rowreq_ctx *
-                                                rowreq_ctx);
-    int             ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx);
-
-    ifXTable_rowreq_ctx *ifXTable_row_find_by_mib_index(ifXTable_mib_index
-                                                        * mib_idx);
 
     extern const oid      ifXTable_oid[];
     extern const int      ifXTable_oid_size;
