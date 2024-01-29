@@ -530,6 +530,12 @@ struct netsnmp_transport_s;
      */
 
     NETSNMP_IMPORT
+    void            snmp_set_do_debugging(int);
+    NETSNMP_IMPORT
+    int             snmp_get_do_debugging(void);
+
+
+    NETSNMP_IMPORT
     void            netsnmp_sess_log_error(int priority,
                                            const char *prog_string,
                                            netsnmp_session * ss);

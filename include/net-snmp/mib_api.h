@@ -53,9 +53,6 @@ extern          "C" {
 
      /* Output */
     NETSNMP_IMPORT
-    void            print_mib(FILE * fp);
-
-    NETSNMP_IMPORT
     void            print_objid(const oid * objid, size_t objidlen);
     NETSNMP_IMPORT
     void           fprint_objid(FILE * fp,

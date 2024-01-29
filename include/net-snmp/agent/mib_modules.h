@@ -13,6 +13,8 @@ struct module_init_list {
     struct module_init_list *next;
 };
 
+void            add_to_init_list(char *module_list);
+int             should_init(const char *module_name);
 void            init_mib_modules(void);
 
 #ifdef __cplusplus

@@ -234,6 +234,8 @@ SOFTWARE.
     void            snmp_mib_toggle_options_usage(const char *lead,
                                                   FILE * outf);
     NETSNMP_IMPORT
+    void            print_mib(FILE *);
+    NETSNMP_IMPORT
     void            print_mib_tree(FILE *, struct tree *, int);
     int             get_mib_parse_error_count(void);
     NETSNMP_IMPORT
