@@ -235,6 +235,8 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
 
     DEBUGMSGTL(("internal:${context}:_${context}_initialize_interface","called\n"));
 
+    /* Start with clean info, allows re-initializing */
+    memset(tbl_info, 0, sizeof(*tbl_info));
 
     /*************************************************
      *
