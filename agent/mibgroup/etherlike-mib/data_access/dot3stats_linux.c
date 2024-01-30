@@ -93,27 +93,18 @@ dot3stats_interface_name_list_get (struct ifname *list_head, int *retval)
  * @retval -1 invalid pointer
  */
 
-int
-dot3stats_interface_name_list_free (struct ifname *list_head)
+void
+dot3stats_interface_name_list_free(struct ifname *list_head)
 {
-    struct ifname *nameptr1 = NULL, *nameptr2 = NULL;
+    struct ifname *nameptr1, *nameptr2;
 
     DEBUGMSGTL(("access:dot3StatsTable:interface_name_list_free",
                 "called\n"));
 
-    if (!list_head) {
-        snmp_log (LOG_ERR, "access:dot3StatsTable:interface_name_list_free: invalid pointer list_head");
-        DEBUGMSGTL(("access:dot3StatsTable:interface_name_list_free",
-                    "invalid pointer list_head\n"));
-        return -1;
-    }
-
     for (nameptr1 = list_head; nameptr1; nameptr1 = nameptr2) {
             nameptr2 = nameptr1->ifn_next;
-            free (nameptr1);
+            free(nameptr1);
     }
-
-    return 0;
 }
 
 /*
@@ -546,60 +537,60 @@ interface_dot3stats_get_errorcounters (dot3StatsTable_rowreq_ctx *rowreq_ctx, co
 
     if ((dev = fopen(NETDEV_FILE, "r")) != NULL)
     {
-        char line[256], *lp, *next;
-        size_t namelen = strlen(name);
-        unsigned int value;
-        unsigned int column;
+        char line[256];
 
         while (fgets(line, sizeof(line), dev) != NULL)
         {
-            /*    br0:68395635 1038214    0    0    0     0          0    939411 25626606   90708    0    0    0     0       0          0 */
-            lp = line;
-            while (*lp == ' ' || *lp == '\t')
-                lp++;
-            if (strncmp(lp, name, namelen) != 0 || lp[namelen] != ':')
+            unsigned long long rx_errs = 0, rx_fifo = 0, rx_frame = 0,
+                tx_drop = 0, tx_fifo = 0, tx_colls = 0, tx_carrier = 0;
+            char ifname[64];
+            int cnt;
+            /*
+             * From /proc/net/dev:
+             * Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+             */
+            cnt = sscanf(line,
+                         "%64s %*u %*u %llu %*u %llu %llu %*u %*u %*u %*u %*u %llu %llu %llu %llu %*u",
+                         ifname, /*3*/&rx_errs, /*5*/&rx_fifo, /*6*/&rx_frame,
+                         /*12*/&tx_drop, /*13*/&tx_fifo, /*14*/&tx_colls,
+                         /*15*/&tx_carrier);
+            if (cnt < 1 || strcmp(name, ifname) != 0)
                 continue;
-            lp += namelen + 1;         /* Skip name and colon */
-
-            column = 1;
-            while (1)
-            {
-                value = strtoul(lp, &next, 10);
-                if (next == lp)
-                    break;             /* no more data */
-                switch (column)
-                {
-                case 3: 
-                    data->dot3StatsFCSErrors = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSFCSERRORS_FLAG;
-                    break;
-                case 12:
-                    data->dot3StatsDeferredTransmissions = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSDEFERREDTRANSMISSIONS_FLAG;
-                    break;
-                case 13:
-                    data->dot3StatsInternalMacTransmitErrors = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSINTERNALMACTRANSMITERRORS_FLAG;
-                    break;
-                case 15:
-                    data->dot3StatsCarrierSenseErrors = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSCARRIERSENSEERRORS_FLAG;
-                    break;
-                case 6:
-                    data->dot3StatsFrameTooLongs = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSFRAMETOOLONGS_FLAG;
-                    break;
-                case 5:
-                    data->dot3StatsInternalMacReceiveErrors = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSINTERNALMACRECEIVEERRORS_FLAG;
-                    break;
-                case 14:
-                    data->dot3StatsSingleCollisionFrames = value;
-                    rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSSINGLECOLLISIONFRAMES_FLAG;
-                    break;
-                }
-                column++;
-                lp = next;
+            if (cnt >= 2) {
+                data->dot3StatsFCSErrors = rx_errs;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSFCSERRORS_FLAG;
+            }
+            if (cnt >= 3) {
+                data->dot3StatsInternalMacReceiveErrors = rx_fifo;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSINTERNALMACRECEIVEERRORS_FLAG;
+            }
+            if (cnt >= 4) {
+                data->dot3StatsFrameTooLongs = rx_frame;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSFRAMETOOLONGS_FLAG;
+            }
+            if (cnt >= 5) {
+                data->dot3StatsDeferredTransmissions = tx_drop;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSDEFERREDTRANSMISSIONS_FLAG;
+            }
+            if (cnt >= 6) {
+                data->dot3StatsInternalMacTransmitErrors = tx_fifo;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSINTERNALMACTRANSMITERRORS_FLAG;
+            }
+            if (cnt >= 7) {
+                data->dot3StatsSingleCollisionFrames = tx_colls;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSSINGLECOLLISIONFRAMES_FLAG;
+            }
+            if (cnt >= 8) {
+                data->dot3StatsCarrierSenseErrors = tx_carrier;
+                rowreq_ctx->column_exists_flags |=
+                    COLUMN_DOT3STATSCARRIERSENSEERRORS_FLAG;
             }
             break;
         }

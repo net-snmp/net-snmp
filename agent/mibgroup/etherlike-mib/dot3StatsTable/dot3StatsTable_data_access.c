@@ -354,11 +354,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
      * free the interface names list 
      */
 
-    if ( (dot3stats_interface_name_list_free(list_head)) < 0) {
-        snmp_log(LOG_ERR, "access:dot3StatsTable, error freeing the interface name list \n");
-        DEBUGMSGTL(("access:dot3StatsTable", "error freeing the interface name list\n"));
-        return MFD_ERROR;
-    }
+    dot3stats_interface_name_list_free(list_head);
 #endif
 
     DEBUGMSGT(("verbose:dot3StatsTable:dot3StatsTable_container_load",
