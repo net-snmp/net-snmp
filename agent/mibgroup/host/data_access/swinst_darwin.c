@@ -112,7 +112,6 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags )
 {
     netsnmp_iterator   *it;
     const char         *dir;
-    int                 rc;
 
     DEBUGMSGTL(("swinst:arch:darwin", "load\n"));
 
@@ -125,7 +124,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags )
     
     it = CONTAINER_ITERATOR(dirs);
     for (dir = ITERATOR_FIRST(it); dir; dir = ITERATOR_NEXT(it)) {
-        rc = _add_applications_in_dir(container, dir);
+        _add_applications_in_dir(container, dir);
     }
     ITERATOR_RELEASE(it);
     DEBUGMSGTL(("swinst:arch:darwin", "loaded %d apps\n",_index));

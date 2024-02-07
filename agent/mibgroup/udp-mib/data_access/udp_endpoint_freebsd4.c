@@ -170,7 +170,7 @@ _load(netsnmp_container *container, u_int load_flags)
         }
 
         /** oddly enough, these appear to already be in network order */
-#if __FreeBSD_version >= 1200026
+#if defined(__FreeBSD_version) && __FreeBSD_version -0 >= 1200026
         entry->loc_port = htons(pcb.inp_lport);
         entry->rmt_port = htons(pcb.inp_fport);
         
