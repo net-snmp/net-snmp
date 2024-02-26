@@ -274,6 +274,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
 
             auth_proto = sc_get_auth_oid(auth_type,
                                          &session->securityAuthProtoLen);
+            free(session->securityAuthProto);
             session->securityAuthProto = snmp_duplicate_objid(auth_proto,
                                              session->securityAuthProtoLen);
          } else {
@@ -296,6 +297,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             return (-1);
         }
         priv_proto = sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
+        free(session->securityPrivProto);
         session->securityPrivProto = snmp_duplicate_objid(priv_proto,
                                          session->securityPrivProtoLen);
         break;
