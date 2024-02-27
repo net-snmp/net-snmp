@@ -5025,6 +5025,9 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     }
 #endif
 
+    // Free noNameUser before it is assigned
+    usm_free_user(noNameUser);
+
 #ifndef NETSNMP_DISABLE_MD5
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
                                          OID_LENGTH(usmHMACMD5AuthProtocol),
