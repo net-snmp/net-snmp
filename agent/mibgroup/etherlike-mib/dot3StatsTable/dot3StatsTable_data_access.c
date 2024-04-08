@@ -227,7 +227,9 @@ dot3StatsTable_container_load(netsnmp_container * container)
      * in which case a new data context will be allocated)
      */
 
+#if defined(linux)
     dot3StatsTable_container_load_impl(container);
+#endif
 
     DEBUGMSGT(("verbose:dot3StatsTable:dot3StatsTable_container_load",
                "inserted %" NETSNMP_PRIz "d records\n", count));
