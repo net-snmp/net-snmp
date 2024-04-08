@@ -614,7 +614,7 @@ write_snmpNotifyRowStatus(int action,
             StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
             StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
             StorageNew->snmpNotifyTagLen = 0;
-            StorageNew->snmpNotifyTag = (char *) calloc(sizeof(char), 1);
+            StorageNew->snmpNotifyTag = (char *) calloc(1, sizeof(char));
             if (StorageNew->snmpNotifyTag == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
