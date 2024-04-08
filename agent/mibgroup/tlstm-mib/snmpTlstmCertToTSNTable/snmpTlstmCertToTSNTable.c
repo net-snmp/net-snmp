@@ -39,7 +39,7 @@ netsnmp_feature_require(table_tdata_insert_row);
 typedef struct certToTSN_undo_s {
     char            fate;
     char            copied;
-    char            is_consistent;
+    signed char     is_consistent;
     netsnmp_request_info *req[SNMPTLSTMCERTTOTSN_TABLE_MAX_COL+1];
 
     /*

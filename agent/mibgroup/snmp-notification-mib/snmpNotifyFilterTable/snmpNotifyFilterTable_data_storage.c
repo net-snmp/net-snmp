@@ -258,7 +258,7 @@ snmpNotifyFilter_vacm_view_subtree(const char *profile)
     /*
      * allocate temporary storage
      */
-    tmp = calloc(sizeof(struct vacm_viewEntry), s->size + 1);
+    tmp = calloc(s->size + 1, sizeof(struct vacm_viewEntry));
     if (NULL == tmp) {
         free(s->array);
         free(s);

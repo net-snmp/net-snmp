@@ -45,7 +45,7 @@ netsnmp_feature_require(table_tdata_insert_row);
  typedef struct snmpTlstmParamsTable_undo_s {
     char  fate;
     char  copied;
-    char  is_consistent;
+    signed char  is_consistent;
     netsnmp_request_info *req[SNMPTLSTMPARAMSTABLE_MAX_COLUMN + 1];
     /* undo Column space */
     char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE];

@@ -40,12 +40,12 @@ netsnmp_feature_require(table_tdata_insert_row);
 typedef struct tlstmAddrTable_undo_s {
     char            fate;
     char            copied;
-    char            is_consistent;
+    signed char     is_consistent;
     netsnmp_request_info *req[TLSTMADDRTABLE_MAX_COLUMN + 1];
     /*
      * undo Column space 
      */
-    char       tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    char            tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
     size_t          tlstmAddrServerFingerprint_len;
     char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
     size_t          tlstmAddrServerIdentity_len;

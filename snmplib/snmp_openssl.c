@@ -18,6 +18,23 @@
 
 #include <net-snmp/net-snmp-features.h>
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
+
+#include <ctype.h>
+
+#include <openssl/evp.h>
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <openssl/err.h>
+#include <openssl/objects.h>
+
+#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/cert_util.h>
+#include <net-snmp/library/snmp_openssl.h>
+
+#endif /* NETSNMP_USE_OPENSSL & ... */
+
 /** OpenSSL compat functions for apps */
 #if defined(NETSNMP_USE_OPENSSL)
 
@@ -90,19 +107,6 @@ netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused);
 netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused);
 netsnmp_feature_child_of(openssl_err_log, netsnmp_unused);
 netsnmp_feature_child_of(cert_dump_names, netsnmp_unused);
-
-#include <ctype.h>
-
-#include <openssl/evp.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include <openssl/objects.h>
-
-#include <net-snmp/library/snmp_debug.h>
-#include <net-snmp/library/cert_util.h>
-#include <net-snmp/library/snmp_openssl.h>
 
 static u_char have_started_already = 0;
 

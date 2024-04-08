@@ -372,7 +372,7 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
             }
         }
         if ( extension->numlines > 1 ) {
-            extension->lines = calloc(sizeof(char *), extension->numlines);
+            extension->lines = calloc(extension->numlines, sizeof(char *));
             if (extension->lines)
                 memcpy(extension->lines, line_buf,
                        sizeof(char *) * extension->numlines);
