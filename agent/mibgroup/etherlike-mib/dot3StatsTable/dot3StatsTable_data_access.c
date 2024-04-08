@@ -216,7 +216,6 @@ int
 dot3StatsTable_container_load(netsnmp_container * container)
 {
     size_t          count = 0;
-    int             fd;
     
     DEBUGMSGTL(("verbose:dot3StatsTable:dot3StatsTable_container_load",
                 "called\n"));
