@@ -31517,7 +31517,14 @@ if test x$ac_cv_func_setnetgrent = xyes; then
 printf %s "checking return type of setnetgrent()... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <netdb.h>
+
+#ifdef HAVE_NETDB_H
+    #include <netdb.h>
+#endif
+#ifdef HAVE_NETGROUP_H
+    #include <netgroup.h>
+#endif
+
 int
 main (void)
 {

@@ -40,7 +40,14 @@ AC_CHECK_FUNCS([asprintf        closedir        endnetgrent      ] dnl
 if test x$ac_cv_func_setnetgrent = xyes; then
 AC_MSG_CHECKING([return type of setnetgrent()])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-        [[#include <netdb.h>]],[[return setnetgrent("")]]
+        [[
+#ifdef HAVE_NETDB_H
+    #include <netdb.h>
+#endif
+#ifdef HAVE_NETGROUP_H
+    #include <netgroup.h>
+#endif
+]],[[return setnetgrent("")]]
     )], [AC_MSG_RESULT([int])
 	 AC_DEFINE([SETNETGRENT_RETURNS_INT], [1],
             [Define if the setnetgrent() return type is 'int'])],
