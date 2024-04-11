@@ -372,8 +372,7 @@ netsnmp_udp_com2SecEntry_check_return_code(int rc)
     }
 }
 
-#if defined(HAVE_ENDNETGRENT) && defined(HAVE_GETNETGRENT) &&   \
-    defined(SETNETGRENT_RETURNS_INT)
+#if defined(HAVE_ENDNETGRENT) && defined(HAVE_GETNETGRENT)
 int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
                        const char *secName, const char *contextName, int negate)
 {
@@ -387,23 +386,27 @@ int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
         return 0;
 
     /* Interpret as netgroup */
-    if (setnetgrent(netgroup)) {
-        while (getnetgrent(&host, &user, &domain)) {
-            /* Parse source address and network mask for each netgroup host. */
-            if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
-                /* Create a new com2Sec entry. */
-                rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
-                                                     &network, &mask, negate);
-                netsnmp_udp_com2SecEntry_check_return_code(rc);
-            } else {
-                config_perror("netgroup host address parsing issue");
-                break;
-            }
-        }
-        endnetgrent();
-    } else {
+#ifdef SETNETGRENT_RETURNS_INT
+    if (!setnetgrent(netgroup)) {
         config_perror("netgroup could not be found");
+        return 1;
     }
+#else
+    setnetgrent(netgroup);
+#endif
+    while (getnetgrent(&host, &user, &domain)) {
+        /* Parse source address and network mask for each netgroup host. */
+        if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
+            /* Create a new com2Sec entry. */
+            rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+        					 &network, &mask, negate);
+            netsnmp_udp_com2SecEntry_check_return_code(rc);
+        } else {
+            config_perror("netgroup host address parsing issue");
+            break;
+        }
+    }
+    endnetgrent();
     return 1;
 }
 #else
