@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "30 Jun 2010" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "10 Mar 2023" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpd.conf - configuration file for the Net-SNMP SNMP agent
 .SH DESCRIPTION
@@ -418,7 +418,8 @@ map an SNMPv1 or SNMPv2c community string to a security name - either from
 a particular range of source addresses, or globally (\fI"default"\fR).
 A restricted source can either be a specific hostname (or address), or
 a subnet - represented as IP/MASK (e.g. 10.10.10.0/255.255.255.0), or
-IP/BITS (e.g. 10.10.10.0/24), or the IPv6 equivalents.
+IP/BITS (e.g. 10.10.10.0/24), or the IPv6 equivalents, or
+a netgroup - represented as @netgroup.
 A restriction preceded by an exclamation mark (!) denies access from
 that address or subnet, e.g., !10.10.10.0/24 denies requests from
 sources in that subnet.  Deny restrictions must be before
