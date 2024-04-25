@@ -5,7 +5,7 @@ scriptdir="$(cd "$(dirname "$0")" && pwd)"
 install_android_ndk() {
     echo "Installing Android NDK..."
     wget --quiet https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
-    unzip -q android-ndk-r26b-linux.zip
+    unzip -oq android-ndk-r26b-linux.zip
 }
 
 case "$(uname)" in
@@ -16,6 +16,7 @@ case "$(uname)" in
 		packages="
 		    make
 		    setpriv
+		    util-linux
 		"
 		;;
 	    *)
@@ -38,6 +39,7 @@ case "$(uname)" in
 		    pkg-config
 		    python3-dev
 		    setpriv
+		    util-linux
 		"
 		;;
 	esac
