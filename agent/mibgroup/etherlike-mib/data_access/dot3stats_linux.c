@@ -6,6 +6,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
+#ifndef HAVE_LIBNL3
+#error libnl-3 not found
+#endif
 #include <netlink/cache.h>
 #include <netlink/netlink.h>
 #include <netlink/route/addr.h>
