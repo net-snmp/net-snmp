@@ -28752,12 +28752,9 @@ fi
 
 # The test below verifies whether the libnl-3 package been installed.
 # This test works as follows:
-# - If pkg-config was not installed at the time autogen.sh was run,
-#   the definition of the PKG_CHECK_EXISTS() macro will not be found by
-#   autogen.sh. Augogen.sh will generate a configure script that prints
-#   a warning about pkg-config and proceeds as if libnl-3 has not been
-#   installed.
-# - If pkg-config was installed at the time autogen.sh was run,
+# - If pkg-config is not installed at the time autoreconf is run,
+#   autoreconf will fail.
+# - If pkg-config is installed at the time autoreconf is run,
 #   the generated configure script will try to detect the presence of
 #   the libnl-3 library by looking up compile and linker flags in the
 #   file called libnl-3.pc.
