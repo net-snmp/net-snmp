@@ -288,6 +288,7 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
     t->f_send     = netsnmp_tcpbase_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = netsnmp_tcp_accept;
+    t->f_setup_session = netsnmp_tcpbase_session_init;
     t->f_fmtaddr  = netsnmp_tcp_fmtaddr;
     t->f_get_taddr = netsnmp_ipv4_get_taddr;
 
