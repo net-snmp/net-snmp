@@ -24,6 +24,7 @@ case "$(uname)" in
 		    libatm1-dev
 		    libkrb5-dev
 		    libmariadb-client-lgpl-dev
+		    libmariadb-dev
 		    libmariadbclient-dev
 		    libmysqlclient-dev
 		    libncurses-dev
