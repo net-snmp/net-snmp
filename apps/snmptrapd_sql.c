@@ -201,7 +201,7 @@ typedef struct sql_buf_t {
  * static bind structures, plus 2 static buffers to bind to.
  */
 static MYSQL_BIND _tbind[TBIND_MAX], _vbind[VBIND_MAX];
-static char       _no_v3;
+static typeof(*((MYSQL_BIND*)NULL)->is_null) _no_v3;
 
 static void _sql_process_queue(u_int dontcare, void *meeither);
 
