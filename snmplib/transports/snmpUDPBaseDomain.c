@@ -530,42 +530,6 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
     return rc;
 }
 
-int netsnmp_udpbase_session_init(struct netsnmp_transport_s * transport,
-                                 struct snmp_session *sess)
-{
-    if (!sess) {
-        DEBUGMSGTL(("netsnmp_udpbase", "session pointer is NULL\n"));
-        return SNMPERR_SUCCESS;
-    }
-
-    union {
-        struct sockaddr     sa;
-        struct sockaddr_in  sin;
-        struct sockaddr_in6 sin6;
-    } ss;
-    socklen_t len = sizeof(ss);
-    if (getsockname(transport->sock, (struct sockaddr *)&ss, &len) == -1) {
-        DEBUGMSGTL(("netsnmp_udpbase", "getsockname error %s\n", strerror(errno)));
-        return SNMPERR_SUCCESS;
-    }
-    switch (ss.sa.sa_family) {
-        case AF_INET:
-            sess->local_port = ntohs(ss.sin.sin_port);
-            break;
-        case AF_INET6:
-            sess->local_port = ntohs(ss.sin6.sin6_port);
-            break;
-        default:
-            DEBUGMSGTL(("netsnmp_udpbase", "unsupported address family %d\n",
-                        ss.sa.sa_family));
-            return SNMPERR_SUCCESS;
-    }
-
-    DEBUGMSGTL(("netsnmp_udpbase", "local port number %d\n", sess->local_port));
-
-    return SNMPERR_SUCCESS;
-}
-
 void
 netsnmp_udp_base_ctor(void)
 {

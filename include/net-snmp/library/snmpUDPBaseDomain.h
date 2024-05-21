@@ -23,9 +23,6 @@ extern          "C" {
                              void **opaque, int *olength);
     int netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
                              void **opaque, int *olength);
-    int netsnmp_udpbase_session_init(struct netsnmp_transport_s *,
-                                     struct snmp_session *sess);
-
 
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
     int netsnmp_udpbase_recvfrom(int s, void *buf, int len,
