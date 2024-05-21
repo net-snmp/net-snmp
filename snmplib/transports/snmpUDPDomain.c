@@ -141,6 +141,7 @@ netsnmp_udp_transport_base(netsnmp_transport *t)
     t->f_send     = netsnmp_udpbase_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
+    t->f_setup_session = netsnmp_udpbase_session_init;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
     t->f_get_taddr = netsnmp_ipv4_get_taddr;
 

@@ -469,6 +469,7 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     t->f_send     = netsnmp_udp6_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
+    t->f_setup_session = netsnmp_udpbase_session_init;
     t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
     t->f_get_taddr = netsnmp_ipv6_get_taddr;
 
