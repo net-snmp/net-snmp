@@ -6,9 +6,19 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
-#ifndef HAVE_LIBNL3
-#error libnl-3 not found
+
+#if !(defined(HAVE_LIBNL3) && defined(HAVE_NETLINK_ROUTE_LINK_H))
+ #ifndef HAVE_LIBNL3
+  #error libnl3-devel (RedHat derivatives) / libnl-3-dev (Debian derivatives) required
+ #endif
+ #ifndef HAVE_NETLINK_ROUTE_LINK_H
+  #error libnl-route-3-dev required (Debian derivatives)
+ #endif
+ #if !defined(HAVE_LIBNL3) && !defined(HAVE_NETLINK_ROUTE_LINK_H) && defined(__linux__)
+  #error pkg-config/pkgconfig is required to detect libnl-3
+ #endif
 #endif
+
 #include <netlink/cache.h>
 #include <netlink/netlink.h>
 #include <netlink/route/addr.h>
