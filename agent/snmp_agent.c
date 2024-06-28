@@ -2249,7 +2249,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         if (access_ret == VACM_NOSUCHCONTEXT) {
             /*
              * rfc3413 section 3.2, step 5 says that we increment the
-             * counter but don't return a response of any kind 
+             * counter and indicates that a report should be sent.
              */
 
             /*
@@ -2257,6 +2257,24 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
              * there is no reason to that I currently know of 
              */
             snmp_increment_statistic(STAT_SNMPUNKNOWNCONTEXTS);
+
+            /*
+             * Code snippet is taken from usm_handle_report()
+             */
+            netsnmp_pdu *report_pdu;
+            int flags = pdu->flags;
+
+            pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
+            report_pdu = snmp_clone_pdu(pdu);
+            pdu->flags = report_pdu->flags = flags;
+            snmpv3_make_report(report_pdu, SNMPERR_BAD_CONTEXT);
+            if (0 == snmp_send(asp->session, report_pdu))
+            {
+                snmp_free_pdu(report_pdu);
+                /*
+                    * TODO: indicate error
+                    */
+            }
 
             /*
              * drop the request 
