@@ -194,8 +194,9 @@ updateLogmatch(int iindex)
                          * ------------------------------------ 
                          */
 
-                        if (!fseek
-                            (logmatchTable[iindex].logfile, pos, SEEK_SET)) {
+                        if ((long)pos >= 0 &&
+                            !fseek(logmatchTable[iindex].logfile, pos,
+                                   SEEK_SET)) {
 
 
                             /*
