@@ -211,6 +211,8 @@ wait_for_peak_start(int period, int peak)
     tm.tm_min = 0;
     tm.tm_hour++;
     SecondsAtNextHour = mktime(&tm);
+    if (SecondsAtNextHour == (time_t)-1)
+        return -1;
 
     /*
      * Now figure out the amount of time to sleep 
@@ -330,6 +332,8 @@ wait_for_period(int period)
         tm.tm_min = 0;
         tm.tm_hour++;
         nexthour = mktime(&tm);
+        if (nexthour == (time_t)-1)
+            return;
 
         target = (nexthour - tv->tv_sec) % period;
         if (target == 0)
