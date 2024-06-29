@@ -990,6 +990,9 @@ asn_predict_int_length(int type, long number, size_t len)
 static int
 asn_predict_length(int type, u_char * ptr, size_t u_char_len)
 {
+    /* Check for integer overflow. */
+    if (1 + 3 + u_char_len < 1 + 3)
+        return -1;
 
     if (type & ASN_SEQUENCE)
         return 1 + 3 + u_char_len;
@@ -999,6 +1002,10 @@ asn_predict_length(int type, u_char * ptr, size_t u_char_len)
         memcpy(&value, ptr, u_char_len);
         u_char_len = asn_predict_int_length(type, value, u_char_len);
     }
+
+    /* Check for integer overflow. */
+    if (1 + 3 + u_char_len < 1 + 3)
+        return -1;
 
     if (u_char_len < 0x80)
         return 1 + 1 + u_char_len;
