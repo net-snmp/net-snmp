@@ -638,7 +638,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     }
 
     *len = end - start + 1;
-    if (*len <= 0)
+    if (*len <= 0 || *len > SIZE_MAX / sizeof(void*))
         return NULL;
 
     subset = (void **)malloc((*len) * sizeof(void*));
