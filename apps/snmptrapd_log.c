@@ -386,7 +386,8 @@ realloc_output_temp_bfr(u_char ** buf, size_t * buf_len, size_t * out_len,
                     return 0;
                 }
             }
-            if (options->leading_zeroes || zeroes_to_write-- > 0) {
+            if (options->leading_zeroes ||
+                (zeroes_to_write && zeroes_to_write-- > 0)) {
                 *(*buf + *out_len) = '0';
             } else {
                 *(*buf + *out_len) = ' ';
