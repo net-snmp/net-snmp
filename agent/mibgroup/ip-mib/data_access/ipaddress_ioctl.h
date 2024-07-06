@@ -3,6 +3,8 @@ extern          "C" {
 #endif
 
 struct netsnmp_ipaddress_s;
+struct nl_cache;
+struct rtnl_addr;
 
 /*
  * struct for netlink extras
@@ -15,6 +17,8 @@ struct address_flag_info {
  
 #define IS_APIPA(a)  (((in_addr_t)(a << 16)) == 0xFEA90000)
 
+struct rtnl_addr *addr_of_type(int if_index, struct nl_cache *addr_cache,
+                               unsigned int af);
 int
 _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                                                   int idx_offset);

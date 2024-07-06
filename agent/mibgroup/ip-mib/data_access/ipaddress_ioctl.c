@@ -19,6 +19,13 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 
+#ifndef HAVE_LIBNL3
+#error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
+#endif
+#include <netlink/cache.h>
+#include <netlink/netlink.h>
+#include <netlink/route/addr.h>
+
 #include "ipaddress_ioctl.h"
 
 netsnmp_feature_child_of(ipadress_ioctl_entry_copy, ipaddress_common);
@@ -128,60 +135,64 @@ netsnmp_ioctl_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_IOCTL_ENTRY_COPY */
 
-/**
- * load ipv4 address via ioctl
- */
-int
-_netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
-                                                  int idx_offset)
+struct rtnl_addr *addr_of_type(int if_index, struct nl_cache *addr_cache,
+                               unsigned int af)
 {
-    int             i, sd, rc = 0, interfaces = 0;
-    struct ifconf   ifc;
-    struct ifreq   *ifrp;
-    struct sockaddr save_addr;
-    struct sockaddr_in * si;
-    struct address_flag_info addr_info;
-    in_addr_t       ipval;
-    _ioctl_extras           *extras;
+    struct nl_object *addr_obj;
 
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        snmp_log_perror("_netsnmp_ioctl_ipaddress_container_load_v4: could not create socket");
-        return -1;
+    for (addr_obj = nl_cache_get_first(addr_cache); addr_obj;
+         addr_obj = nl_cache_get_next(addr_obj)) {
+        struct rtnl_addr *rtnl_addr = (struct rtnl_addr *)addr_obj;
+        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+
+        if (rtnl_addr_get_ifindex(rtnl_addr) == if_index
+            && nl_addr_get_family(local_addr) == af) {
+            return rtnl_addr;
+        }
     }
+    return NULL;
+}
 
-    interfaces =
-        netsnmp_access_ipaddress_ioctl_get_interface_count(sd, &ifc);
-    if(interfaces < 0) {
-        close(sd);
-        return -2;
-    }
-    netsnmp_assert(NULL != ifc.ifc_buf);
-    DEBUGMSGTL(("access:ipaddress:container", "processing %d interfaces\n", interfaces));
+static int load_v4_interfaces(struct nl_sock *nl_sock,
+                              netsnmp_container *container, int idx_offset)
+{
+    struct nl_cache *link_cache, *addr_cache;
+    struct nl_object *link_obj;
+    int             rc;
 
-    ifrp = ifc.ifc_req;
-    for(i=0; i < interfaces; ++i, ++ifrp) {
-        netsnmp_ipaddress_entry *entry, *bcastentry = NULL;
+    rc = rtnl_link_alloc_cache(nl_sock, AF_UNSPEC, &link_cache);
+    if (rc)
+        return rc;
+
+    rc = rtnl_addr_alloc_cache(nl_sock, &addr_cache);
+    if (rc)
+        goto put_link_cache;
+
+    for (link_obj = nl_cache_get_first(link_cache); link_obj;
+         link_obj = nl_cache_get_next(link_obj)) {
+        struct rtnl_link *rtnl_link = (void *)link_obj;
+        int if_index = rtnl_link_get_ifindex(rtnl_link);
+        const char *if_name = rtnl_link_get_name(rtnl_link);
+        struct rtnl_addr *rtnl_addr;
+        netsnmp_ipaddress_entry *entry;
+        _ioctl_extras *extras;
 
         DEBUGMSGTL(("access:ipaddress:container",
-                    " interface %d, %s\n", i, ifrp->ifr_name));
+                    " interface %d, %s\n", idx_offset, if_name));
 
-        if (AF_INET != ifrp->ifr_addr.sa_family) {
-            DEBUGMSGTL(("access:ipaddress:container",
-                        " skipping %s; non AF_INET family %d\n",
-                        ifrp->ifr_name, ifrp->ifr_addr.sa_family));
-            continue;
-        }
-
-        if (!netsnmp_access_interface_include(ifrp->ifr_name))
+        rtnl_addr = addr_of_type(if_index, addr_cache, AF_INET);
+        if (!rtnl_addr)
             continue;
 
-	if (netsnmp_access_interface_max_reached(ifrp->ifr_name))
+        if (!netsnmp_access_interface_include(if_name))
+            continue;
+
+	if (netsnmp_access_interface_max_reached(if_name))
             /* we may need to stop tracking ifaces if a max was set */
             continue;
-        /*
-         */
+
         entry = netsnmp_access_ipaddress_entry_create();
-        if(NULL == entry) {
+        if (!entry) {
             rc = -3;
             break;
         }
@@ -191,114 +202,43 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          * save if name
          */
         extras = netsnmp_ioctl_ipaddress_extras_get(entry);
-        memcpy(extras->name, ifrp->ifr_name, sizeof(extras->name));
+        /*
+         * The obsolete IP aliasing approach uses network interface names
+         * where the interface name and the alias ID are separated by a colon.
+         * See also https://docs.kernel.org/networking/alias.html and
+         * https://en.wikipedia.org/wiki/IP_aliasing.
+         */
+        if (strchr(if_name, ':'))
+            entry->flags |= NETSNMP_ACCESS_IPADDRESS_ISALIAS;
+        strlcpy((char *)extras->name, if_name,
+                sizeof(extras->name));
 
         /*
-         * each time we make an ioctl, we need to specify the address, but
-         * it will be overwritten in the call. so we save address here.
+         * get IP address
          */
-        save_addr = ifrp->ifr_addr;
+        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+        void *addr = nl_addr_get_binary_addr(local_addr);
+        int addr_len = nl_addr_get_len(local_addr);
+        entry->ia_address_len = addr_len;
+        in_addr_t ipval;
+        netsnmp_assert(sizeof(ipval) == addr_len);
+        memcpy(&ipval, addr, addr_len);
+        memcpy(entry->ia_address, addr, addr_len);
 
         /*
-         * set indexes
+         * save ifindex
          */
-        si = (struct sockaddr_in *) &ifrp->ifr_addr;
-        entry->ia_address_len = sizeof(si->sin_addr.s_addr);
-        ipval = si->sin_addr.s_addr;
-        memcpy(entry->ia_address, &si->sin_addr.s_addr,
-               entry->ia_address_len);
-
-        /*
-         * get ifindex
-         */
-        {
-            /*
-             * I think that Linux and Solaris both use ':' in the
-             * interface name for aliases. When a new arch is added
-             * that uses some other indicator, a new function, maybe
-             * netsnmp_access_ipaddress_entry_name_alias_check(), will
-             * need to be written.
-             */
-            char *ptr = strchr(ifrp->ifr_name, ':');
-            if (NULL != ptr) {
-                entry->flags |= NETSNMP_ACCESS_IPADDRESS_ISALIAS;
-                *ptr = 0;
-            }
-        }
-        entry->if_index =
-            netsnmp_access_interface_ioctl_ifindex_get(sd, ifrp->ifr_name);
-        if (0 == entry->if_index) {
+        entry->if_index = if_index;
+        if (entry->if_index == 0) {
             snmp_log(LOG_ERR,"no ifindex found for interface\n");
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
 
-        /* restore the interface name if we modified it due to unaliasing
-         * above
-         */
-        if (entry->flags & NETSNMP_ACCESS_IPADDRESS_ISALIAS) {
-            memcpy(ifrp->ifr_name, extras->name, sizeof(extras->name));
-        }
-
         /*
-         * get broadcast
+         * get flags (IFF_*)
          */
-        memset(&addr_info, 0, sizeof(struct address_flag_info));
-#if defined (NETSNMP_ENABLE_IPV6) && defined(HAVE_LINUX_RTNETLINK_H)
-        addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET);
-        if(addr_info.bcastflg) {
-           bcastentry = netsnmp_access_ipaddress_entry_create();
-           if(NULL == bcastentry) {
-              netsnmp_access_ipaddress_entry_free(entry);
-              rc = -3;
-              break;
-           }
-           bcastentry->if_index = entry->if_index;
-           bcastentry->ns_ia_index = ++idx_offset;
-           bcastentry->ia_address_len = sizeof(addr_info.addr);
-           memcpy(bcastentry->ia_address, &addr_info.addr,
-                  bcastentry->ia_address_len);
-        }
-#endif
-
-        /*
-         * get netmask
-         */
-        ifrp->ifr_addr = save_addr;
-        if (ioctl(sd, SIOCGIFNETMASK, ifrp) < 0) {
-            snmp_log(LOG_ERR,
-                     "error getting netmask for interface %d\n", i);
-            netsnmp_access_ipaddress_entry_free(bcastentry);
-            netsnmp_access_ipaddress_entry_free(entry);
-            continue;
-        }
-        netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
-        si = (struct sockaddr_in *) &ifrp->ifr_addr;
-        entry->ia_prefix_len =
-            netsnmp_ipaddress_ipv4_prefix_len(si->sin_addr.s_addr);
-        if(bcastentry)
-           bcastentry->ia_prefix_len = entry->ia_prefix_len;
-
-
-        /*
-         * get flags
-         */
-        ifrp->ifr_addr = save_addr;
-        if (ioctl(sd, SIOCGIFFLAGS, ifrp) < 0) {
-            snmp_log(LOG_ERR,
-                     "error getting if_flags for interface %d\n", i);
-            netsnmp_access_ipaddress_entry_free(bcastentry);
-            netsnmp_access_ipaddress_entry_free(entry);
-            continue;
-        }
-        extras->flags = ifrp->ifr_flags;
-
-        if(bcastentry)
-           bcastentry->ia_type = IPADDRESSTYPE_BROADCAST;
-        if(addr_info.anycastflg)
-           entry->ia_type = IPADDRESSTYPE_ANYCAST;
-        else
-           entry->ia_type = IPADDRESSTYPE_UNICAST;
+        extras->flags = rtnl_link_get_flags(rtnl_link);
 
         /** entry->ia_prefix_oid ? */
 
@@ -308,29 +248,33 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          *   always preferred(1).
          */
         entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
-        if(bcastentry)
-           bcastentry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
+
+        /*
+         * get netmask
+         */
+        entry->ia_prefix_len = nl_addr_get_prefixlen(local_addr);
+
+        /* anycast */
+        if (rtnl_addr_get_anycast(rtnl_addr))
+           entry->ia_type = IPADDRESSTYPE_ANYCAST;
+        else
+           entry->ia_type = IPADDRESSTYPE_UNICAST;
 
         /*
          * can we figure out if an address is from DHCP?
          * use manual until then...
          */
-        if(IS_APIPA(ipval)) {
+        if (IS_APIPA(ipval)) {
            entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
-           if(bcastentry)
-              bcastentry->ia_origin = IPADDRESSORIGINTC_RANDOM;
-        }
-        else {
+        } else {
            entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
-           if(bcastentry)
-              bcastentry->ia_origin = IPADDRESSORIGINTC_MANUAL;
         }
 
         DEBUGIF("access:ipaddress:container") {
             DEBUGMSGT_NC(("access:ipaddress:container",
                           " if %d: addr len %d, index 0x%" NETSNMP_PRIo "x\n",
-                          i, entry->ia_address_len, entry->if_index));
-            if (4 == entry->ia_address_len)
+                          if_index, entry->ia_address_len, entry->if_index));
+            if (entry->ia_address_len == 4)
                 DEBUGMSGT_NC(("access:ipaddress:container",
                               " address %d.%d.%d.%d\n",
                               entry->ia_address[0], entry->ia_address[1],
@@ -341,40 +285,85 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 
         }
 
-        /*
-         * add entry to container
-         */
-        if(bcastentry){
-            if (CONTAINER_INSERT(container, bcastentry) < 0) {
-                DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert broadcast entry into container failed.\n"));
-                netsnmp_access_ipaddress_entry_free(bcastentry);
-                netsnmp_access_ipaddress_entry_free(entry);
-                continue;
-            }
-            bcastentry = NULL;
-        }
-
         if (CONTAINER_INSERT(container, entry) < 0) {
             DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
             NETSNMP_LOGONCE((LOG_ERR, "Duplicate IPv4 address detected, some interfaces may not be visible in IP-MIB\n"));
             netsnmp_access_ipaddress_entry_free(entry);
             continue;
         }
+
+        /*
+         * get broadcast
+         */
+        struct nl_addr *bc_addr = rtnl_addr_get_broadcast(rtnl_addr);
+        if (!bc_addr)
+            continue;
+
+        netsnmp_ipaddress_entry *bcastentry =
+            netsnmp_access_ipaddress_entry_create();
+        if (!bcastentry) {
+            rc = -3;
+            break;
+        }
+        bcastentry->if_index = entry->if_index;
+        bcastentry->ns_ia_index = ++idx_offset;
+        bcastentry->ia_address_len = nl_addr_get_len(bc_addr);
+        memcpy(bcastentry->ia_address, nl_addr_get_binary_addr(bc_addr),
+               nl_addr_get_len(bc_addr));
+        bcastentry->ia_prefix_len = entry->ia_prefix_len;
+        bcastentry->ia_type = IPADDRESSTYPE_BROADCAST;
+        bcastentry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
+        if (IS_APIPA(ipval)) {
+            bcastentry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+        } else {
+            bcastentry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+        }
+
+        /*
+         * add entry to container
+         */
+        if (CONTAINER_INSERT(container, bcastentry) < 0) {
+            DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert broadcast entry into container failed.\n"));
+            netsnmp_access_ipaddress_entry_free(bcastentry);
+            continue;
+        }
     }
 
-    /*
-     * clean up
-     */
-    free(ifc.ifc_buf);
-    close(sd);
+    nl_cache_put(addr_cache);
+
+put_link_cache:
+    nl_cache_put(link_cache);
+
+    return rc < 0 ? rc : idx_offset;
+}
+
+/**
+ * load IPv4 addresses via libnl
+ */
+int
+_netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
+                                           int idx_offset)
+{
+    struct nl_sock *nl_sock;
+    int             rc;
+
+    nl_sock = nl_socket_alloc();
+    if (!nl_sock)
+        return -1;
+
+    rc = nl_connect(nl_sock, NETLINK_ROUTE);
+    if (rc < 0)
+        goto free_socket;
+
+    rc = load_v4_interfaces(nl_sock, container, idx_offset);
+
+free_socket:
+    nl_socket_free(nl_sock);
 
     /*
      * return number of interfaces seen
      */
-    if(rc < 0)
-        return rc;
-
-    return idx_offset;
+    return rc;
 }
 
 /**
