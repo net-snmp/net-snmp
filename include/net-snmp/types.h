@@ -299,7 +299,7 @@ struct snmp_session {
     long            version;
     /** Number of retries before timeout. */
     int             retries;
-    /** Message timeout in uS before first retry and between retries */
+    /** Message timeout in μs before first retry and between retries */
     long            timeout;        
     u_long          flags;
     struct snmp_session *subsession;
