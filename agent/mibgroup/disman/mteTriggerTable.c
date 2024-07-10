@@ -3136,7 +3136,7 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
                                       item->mteTriggerContextNameLen);
     pdu->contextNameLen = item->mteTriggerContextNameLen;
     pdu->securityName = netsnmp_memdup(item->pdu_securityName,
-                                       item->pdu_securityNameLen);
+                                       item->pdu_securityNameLen + 1);
     pdu->securityNameLen = item->pdu_securityNameLen;
     DEBUGMSGTL(("mteTriggerTable",
                 "accessing locally with secName \"%s\" community \"%s\"\n",
