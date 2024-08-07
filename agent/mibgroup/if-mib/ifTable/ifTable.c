@@ -591,6 +591,17 @@ ifSpeed_get(ifTable_rowreq_ctx * rowreq_ctx, u_long * ifSpeed_val_ptr)
     return MFD_SUCCESS;
 }                               /* ifSpeed_get */
 
+static int is_zero(const char *p, unsigned int len)
+{
+    unsigned int i;
+
+    for (i = 0; i < len; i++)
+        if (p[i])
+            return FALSE;
+
+    return TRUE;
+}
+
 /*---------------------------------------------------------------------
  * IF-MIB::ifEntry.ifPhysAddress
  * ifPhysAddress is subid 6 of ifEntry.
@@ -659,12 +670,8 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    if ((rowreq_ctx->data.ifPhysAddress[0] == 0) &&
-        (rowreq_ctx->data.ifPhysAddress[1] == 0) &&
-        (rowreq_ctx->data.ifPhysAddress[2] == 0) &&
-        (rowreq_ctx->data.ifPhysAddress[3] == 0) &&
-        (rowreq_ctx->data.ifPhysAddress[4] == 0) &&
-        (rowreq_ctx->data.ifPhysAddress[5] == 0)) {
+    if (is_zero(rowreq_ctx->data.ifPhysAddress,
+                rowreq_ctx->data.ifPhysAddress_len)) {
         /*
          * all 0s = empty string
          */

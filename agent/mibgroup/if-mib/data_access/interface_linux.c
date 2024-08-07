@@ -663,15 +663,12 @@ static void netsnmp_retrieve_one_link_info(struct rtnl_link *rtnl_link, int fd,
                                            int load_stats)
 {
     struct nl_addr *nl_addr = rtnl_link_get_addr(rtnl_link);
+    void *paddr = nl_addr ? nl_addr_get_binary_addr(nl_addr) : NULL;
+    int paddr_len = nl_addr ? nl_addr_get_len(nl_addr) : 0;
 
-    if (nl_addr) {
-        void *paddr = nl_addr_get_binary_addr(nl_addr);
-        int paddr_len = nl_addr_get_len(nl_addr);
-
-        free(entry->paddr);
-        entry->paddr = netsnmp_memdup(paddr, paddr_len);
-        entry->paddr_len = paddr_len;
-    }
+    free(entry->paddr);
+    entry->paddr = netsnmp_memdup(paddr, paddr_len);
+    entry->paddr_len = paddr_len;
     entry->type = netsnmp_convert_arphrd_type(
                               rtnl_link_get_arptype(rtnl_link));
     if (entry->type == 0)
