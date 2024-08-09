@@ -1,4 +1,4 @@
-.TH net-snmp-create-v3-user 1 "17 Sep 2008" VVERSIONINFO "Net-SNMP"
+.TH net-snmp-create-v3-user 1 "09 Aug 2024" VVERSIONINFO "Net-SNMP"
 .SH NAME
 net-snmp-create-v3-user \- create a SNMPv3 user in net-snmp configuration file
 .SH SYNOPSIS
