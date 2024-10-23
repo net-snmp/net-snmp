@@ -187,7 +187,7 @@ int
 wait_for_peak_start(int period, int peak)
 {
     struct timeval  m_time, *tv = &m_time;
-    struct tm       tm;
+    struct tm       tm, *local_time;
     time_t          SecondsAtNextHour;
     int             target = 0;
     int             seconds;
@@ -202,7 +202,11 @@ wait_for_peak_start(int period, int peak)
     /*
      * Create a tm struct from it 
      */
-    memcpy(&tm, localtime((time_t *) & tv->tv_sec), sizeof(tm));
+    local_time = localtime(&tv->tv_sec);
+    if (local_time)
+        memcpy(&tm, local_time, sizeof(tm));
+    else
+        memset(&tm, 0, sizeof(tm));
 
     /*
      * Calculate the next hour 
@@ -317,7 +321,7 @@ wait_for_period(int period)
     Sleep(period * 1000);
 #else                   /* WIN32 */
     struct timeval  m_time, *tv = &m_time;
-    struct tm       tm;
+    struct tm       tm, *local_time;
     int             count;
     static int      target = 0;
     time_t          nexthour;
@@ -327,7 +331,11 @@ wait_for_period(int period)
     if (target) {
         target += period;
     } else {
-        memcpy(&tm, localtime((time_t *) & tv->tv_sec), sizeof(tm));
+        local_time = localtime(&tv->tv_sec);
+        if (local_time)
+            memcpy(&tm, local_time, sizeof(tm));
+        else
+            memset(&tm, 0, sizeof(tm));
         tm.tm_sec = 0;
         tm.tm_min = 0;
         tm.tm_hour++;
@@ -394,7 +402,7 @@ main(int argc, char *argv[])
     int             sum;        /* what the heck is this for, its never used? */
     char            filename[128] = { 0 };
     struct timeval  tv;
-    struct tm       tm;
+    struct tm       tm, *local_time;
     char            timestring[64] = { 0 }, valueStr[64] = {
     0}, maxStr[64] = {
     0};
@@ -517,9 +525,12 @@ main(int argc, char *argv[])
         if (status == STAT_SUCCESS) {
             if (response->errstat == SNMP_ERR_NOERROR) {
                 if (timestamp) {
-                    gettimeofday(&tv, (struct timezone *) 0);
-                    memcpy(&tm, localtime((time_t *) & tv.tv_sec),
-                           sizeof(tm));
+                    gettimeofday(&tv, NULL);
+                    local_time = localtime(&tv.tv_sec);
+                    if (local_time)
+                        memcpy(&tm, local_time, sizeof(tm));
+                    else
+                        memset(&tm, 0, sizeof(tm));
                     if (((period % 60)
                          && (!peaks || ((period * peaks) % 60)))
                         || keepSeconds)
