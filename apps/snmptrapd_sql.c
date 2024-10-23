@@ -757,14 +757,16 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     /** time */
     (void) time(&now);
     cur_time = localtime(&now);
-    sqlb->time.year = cur_time->tm_year + 1900;
-    sqlb->time.month = cur_time->tm_mon + 1;
-    sqlb->time.day = cur_time->tm_mday;
-    sqlb->time.hour = cur_time->tm_hour;
-    sqlb->time.minute = cur_time->tm_min;
-    sqlb->time.second = cur_time->tm_sec;
-    sqlb->time.second_part = 0;
-    sqlb->time.neg = 0;
+    if (cur_time) {
+        sqlb->time.year = cur_time->tm_year + 1900;
+        sqlb->time.month = cur_time->tm_mon + 1;
+        sqlb->time.day = cur_time->tm_mday;
+        sqlb->time.hour = cur_time->tm_hour;
+        sqlb->time.minute = cur_time->tm_min;
+        sqlb->time.second = cur_time->tm_sec;
+        sqlb->time.second_part = 0;
+        sqlb->time.neg = 0;
+    }
 
     /** host name */
     buf_host_len_t = 0;
