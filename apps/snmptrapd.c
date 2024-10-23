@@ -1260,12 +1260,18 @@ main(int argc, char *argv[])
     if (snmp_get_do_logging()) {
         struct tm      *tm;
         time_t          timer;
+
         time(&timer);
         tm = localtime(&timer);
-        snmp_log(LOG_INFO,
+        if (tm) {
+            snmp_log(LOG_INFO,
                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Stopped.\n",
                  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
                  tm->tm_min, tm->tm_sec, netsnmp_get_version());
+        } else {
+            snmp_log(LOG_INFO, "NET-SNMP version %s Stopped.\n",
+                     netsnmp_get_version());
+        }
     }
     snmp_log(LOG_INFO, "Stopping snmptrapd\n");
     
