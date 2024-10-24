@@ -188,7 +188,7 @@ wait_for_peak_start(int period, int peak)
 {
     struct timeval  m_time, *tv = &m_time;
     struct tm       tm, *local_time;
-    time_t          SecondsAtNextHour;
+    time_t          SecondsAtNextHour, tv_sec;
     int             target = 0;
     int             seconds;
 
@@ -202,7 +202,8 @@ wait_for_peak_start(int period, int peak)
     /*
      * Create a tm struct from it 
      */
-    local_time = localtime(&tv->tv_sec);
+    tv_sec = tv->tv_sec;
+    local_time = localtime(&tv_sec);
     if (local_time)
         memcpy(&tm, local_time, sizeof(tm));
     else
@@ -329,7 +330,8 @@ wait_for_period(int period)
     if (target) {
         target += period;
     } else {
-        local_time = localtime(&tv->tv_sec);
+        time_t tv_sec = tv->tv_sec;
+        local_time = localtime(&tv_sec);
         if (local_time)
             memcpy(&tm, local_time, sizeof(tm));
         else
@@ -521,8 +523,11 @@ main(int argc, char *argv[])
         if (status == STAT_SUCCESS) {
             if (response->errstat == SNMP_ERR_NOERROR) {
                 if (timestamp) {
+                    time_t tv_sec;
+
                     gettimeofday(&tv, NULL);
-                    local_time = localtime(&tv.tv_sec);
+                    tv_sec = tv.tv_sec;
+                    local_time = localtime(&tv_sec);
                     if (local_time)
                         memcpy(&tm, local_time, sizeof(tm));
                     else
