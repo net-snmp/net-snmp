@@ -580,8 +580,13 @@ setup_engineID(u_char ** eidp, const char *text)
     /*
      * Allocate memory and store enterprise ID.
      */
-    if ((bufp = calloc(1, len)) == NULL) {
-        snmp_log_perror("setup_engineID malloc");
+    if (len == 0) {
+        snmp_log(LOG_ERR, "%s(): len == 0\n", __func__);
+        return -1;
+    }
+    bufp = calloc(1, len);
+    if (bufp == NULL) {
+        snmp_log_perror("setup_engineID() calloc()");
         return -1;
     }
     if (localEngineIDType == ENGINEID_TYPE_NETSNMP_RND)
