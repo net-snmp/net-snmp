@@ -362,6 +362,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
         t->local_length = strlen(addr->sun_path);
         t->local = strdup(addr->sun_path);
         if (t->local == NULL) {
+            netsnmp_unix_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
