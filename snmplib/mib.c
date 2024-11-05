@@ -5171,6 +5171,8 @@ get_module_node(const char *fname,
      * Isolate the first component of the name ... 
      */
     name = strdup(fname);
+    if (name == NULL)
+        return -1;
     cp = strchr(name, '.');
     if (cp != NULL) {
         *cp = '\0';
