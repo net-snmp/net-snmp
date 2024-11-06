@@ -1104,7 +1104,7 @@ in_cksum(unsigned short *addr, int len)
      */
     sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
     sum += (sum >> 16);         /* add carry */
-    answer = ~sum;              /* truncate to 16 bits */
+    answer = (u_short)~sum;     /* truncate to 16 bits */
     return (answer);
 }
 
