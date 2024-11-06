@@ -990,7 +990,7 @@ static int
 asn_predict_length(int type, u_char * ptr, size_t u_char_len)
 {
     /* Check for integer overflow. */
-    if (1 + 3 + u_char_len < 1 + 3)
+    if (u_char_len > SIZE_MAX - (1 + 3))
         return -1;
 
     if (type & ASN_SEQUENCE)
