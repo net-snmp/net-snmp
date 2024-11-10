@@ -45,6 +45,8 @@ SOFTWARE.
 #define MAXLABEL        NETSNMP_MAXLABEL
 #endif
 
+    struct tc *tclist;
+
     struct variable_list;
 
     /*
