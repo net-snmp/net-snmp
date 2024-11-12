@@ -956,6 +956,7 @@ netsnmp_add_loghandler( netsnmp_log_handler *logh )
             logh2->prev->next = logh;
         else
             logh_head = logh;
+        logh->prev = logh2->prev;
         logh->next  = logh2;
         logh2->prev = logh;
     } else if (logh_head ) {
@@ -965,6 +966,7 @@ netsnmp_add_loghandler( netsnmp_log_handler *logh )
         for (logh2 = logh_head; logh2->next; logh2 = logh2->next)
             ;
         logh2->next = logh;
+        logh->prev = logh2;
     } else {
         logh_head = logh;
     }
