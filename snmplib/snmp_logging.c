@@ -111,9 +111,9 @@ netsnmp_feature_want(logging_outputs);
  * logh_head:  A list of all log handlers, in increasing order of priority
  * logh_priorities:  'Indexes' into this list, by priority
  */
-netsnmp_log_handler *logh_head = NULL;
-netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
-static int  logh_enabled = 0;
+static netsnmp_log_handler *logh_head;
+static netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
+static int logh_enabled;
 
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 static char syslogname[64] = DEFAULT_LOG_ID;
