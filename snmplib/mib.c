@@ -2725,21 +2725,19 @@ netsnmp_init_mib(void)
         env_var = strdup(env_var);
     }
     if (env_var && ((*env_var == '+') || (*env_var == '-'))) {
-        entry =
-            (char *) malloc(strlen(NETSNMP_DEFAULT_MIBS) + strlen(env_var) + 2);
-        if (!entry) {
-            DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
-            SNMP_FREE(env_var);
-            return;
-        } else {
-            if (*env_var == '+')
-                sprintf(entry, "%s%c%s", NETSNMP_DEFAULT_MIBS, ENV_SEPARATOR_CHAR,
-                        env_var+1);
-            else
-                sprintf(entry, "%s%c%s", env_var+1, ENV_SEPARATOR_CHAR,
-                        NETSNMP_DEFAULT_MIBS );
-        }
+        int res;
+
+        if (*env_var == '+')
+            res = asprintf(&entry, "%s%c%s", NETSNMP_DEFAULT_MIBS,
+                           ENV_SEPARATOR_CHAR, env_var + 1);
+        else
+            res = asprintf(&entry, "%s%c%s", env_var + 1, ENV_SEPARATOR_CHAR,
+                           NETSNMP_DEFAULT_MIBS);
         SNMP_FREE(env_var);
+        if (res < 0) {
+            DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
+            return;
+        }
         env_var = entry;
     }
 
