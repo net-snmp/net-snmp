@@ -3934,6 +3934,57 @@ read_import_replacements(const char *old_module_name,
     return read_module_replacements(old_module_name);
 }
 
+static int
+read_from_file(struct module *mp, const char *name)
+{
+    const char     *oldFile = File;
+    int             oldLine = mibLine;
+    int             oldModule = current_module;
+    FILE           *fp;
+    struct node    *np;
+    int             res;
+
+    if (mp->no_imports != -1) {
+        DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n",
+                    name));
+        return MODULE_ALREADY_LOADED;
+    }
+    if ((fp = fopen(mp->file, "r")) == NULL) {
+        int rval;
+        if (errno == ENOTDIR || errno == ENOENT)
+            rval = MODULE_NOT_FOUND;
+        else
+            rval = MODULE_LOAD_FAILED;
+        snmp_log_perror(mp->file);
+        return rval;
+    }
+#ifdef HAVE_FLOCKFILE
+    flockfile(fp);
+#endif
+    mp->no_imports = 0; /* Note that we've read the file */
+    File = mp->file;
+    mibLine = 1;
+    current_module = mp->modid;
+    /*
+     * Parse the file
+     */
+    np = parse(fp);
+#ifdef HAVE_FUNLOCKFILE
+    funlockfile(fp);
+#endif
+    fclose(fp);
+    File = oldFile;
+    mibLine = oldLine;
+    current_module = oldModule;
+    res = !np && gMibError == MODULE_SYNTAX_ERROR ?
+        MODULE_SYNTAX_ERROR : MODULE_LOADED_OK;
+    while (np) {
+        struct node *nnp = np->next;
+        free_node(np);
+        np = nnp;
+    }
+    return res;
+}
 
 /*
  *  Read in the named module
@@ -3944,59 +3995,12 @@ static int
 read_module_internal(const char *name)
 {
     struct module  *mp;
-    FILE           *fp;
-    struct node    *np;
-    int             res;
 
     netsnmp_init_mib_internals();
 
     for (mp = module_head; mp; mp = mp->next)
-        if (!label_compare(mp->name, name)) {
-            const char     *oldFile = File;
-            int             oldLine = mibLine;
-            int             oldModule = current_module;
-
-            if (mp->no_imports != -1) {
-                DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n",
-                            name));
-                return MODULE_ALREADY_LOADED;
-            }
-            if ((fp = fopen(mp->file, "r")) == NULL) {
-                int rval;
-                if (errno == ENOTDIR || errno == ENOENT)
-                    rval = MODULE_NOT_FOUND;
-                else
-                    rval = MODULE_LOAD_FAILED;
-                snmp_log_perror(mp->file);
-                return rval;
-            }
-#ifdef HAVE_FLOCKFILE
-            flockfile(fp);
-#endif
-            mp->no_imports = 0; /* Note that we've read the file */
-            File = mp->file;
-            mibLine = 1;
-            current_module = mp->modid;
-            /*
-             * Parse the file
-             */
-            np = parse(fp);
-#ifdef HAVE_FUNLOCKFILE
-            funlockfile(fp);
-#endif
-            fclose(fp);
-            File = oldFile;
-            mibLine = oldLine;
-            current_module = oldModule;
-            res = !np && gMibError == MODULE_SYNTAX_ERROR ?
-                MODULE_SYNTAX_ERROR : MODULE_LOADED_OK;
-            while (np) {
-                struct node *nnp = np->next;
-                free_node(np);
-                np = nnp;
-            }
-            return res;
-        }
+        if (!label_compare(mp->name, name))
+            return read_from_file(mp, name);
 
     return MODULE_NOT_FOUND;
 }
