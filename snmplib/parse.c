@@ -160,9 +160,9 @@ struct tc {                     /* textual conventions */
 } *tclist;
 int tc_alloc;
 
-int             mibLine = 0;
-const char     *File = "(none)";
-static int      anonymous = 0;
+static int      mibLine;
+static const char *File = "(none)";
+static int      anonymous;
 
 struct objgroup {
     char           *name;
