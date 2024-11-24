@@ -2190,8 +2190,7 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
             /*
              * this is an enumerated label 
              */
-            *epp =
-                (struct enum_list *) calloc(1, sizeof(struct enum_list));
+            *epp = calloc(1, sizeof(struct enum_list));
             if (*epp == NULL)
                 return (NULL);
             /*
@@ -2214,8 +2213,7 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
                 goto err;
-            }
-            else {
+            } else {
                 struct enum_list *op = ep;
                 while (op != *epp) {
                     if (strcmp((*epp)->label, op->label) == 0) {
@@ -2464,16 +2462,15 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
         tcp = NULL;
         for (i = 0; i < tc_alloc; i++) {
             if (tclist[i].type == 0) {
-                if (tcp == NULL) tcp = &tclist[i];
+                if (tcp == NULL)
+                    tcp = &tclist[i];
+            } else if (strcmp(name, tclist[i].descriptor) == 0 &&
+                       tclist[i].modid == current_module) {
+                snmp_log(LOG_ERR,
+                         "Duplicate TEXTUAL-CONVENTION '%s' at line %d in %s. First at line %d\n",
+                         name, mibLine, File, tclist[i].lineno);
+                erroneousMibs++;
             }
-            else
-                if (strcmp(name, tclist[i].descriptor) == 0 &&
-                        tclist[i].modid == current_module) {
-                    snmp_log(LOG_ERR, 
-                        "Duplicate TEXTUAL-CONVENTION '%s' at line %d in %s. First at line %d\n",
-                        name, mibLine, File, tclist[i].lineno);
-		    erroneousMibs++;
-		}
         }
 
         if (tcp == NULL) {
