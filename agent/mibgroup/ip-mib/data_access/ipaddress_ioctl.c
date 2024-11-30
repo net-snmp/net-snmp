@@ -652,7 +652,7 @@ _netsnmp_ioctl_ipaddress_delete_v6(netsnmp_ipaddress_entry * entry)
 int
 netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc)
 {
-    int lastlen = 0, i;
+    int lastlen = 0, i, i_max;
     struct ifconf ifc_tmp;
 
     if (NULL == ifc) {
@@ -666,7 +666,8 @@ netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc)
      * Volume I'', p.435.  
      */
 
-    for (i = 8;; i *= 2) {
+    i_max = INT_MAX / sizeof(struct ifreq);
+    for (i = 8; i <= i_max; i *= 2) {
         ifc->ifc_buf = calloc(i, sizeof(struct ifreq));
         if (NULL == ifc->ifc_buf) {
             snmp_log(LOG_ERR, "could not allocate memory for %d interfaces\n",
