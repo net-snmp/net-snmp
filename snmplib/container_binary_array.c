@@ -631,7 +631,11 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
      * find matching items
      */
     start = end = binary_search_for_start((netsnmp_index *)key, c);
-    if (start < 0 || start == INT_MAX)
+    /*
+     * Although start == end, Coverity doesn't seem to realize this. Hence
+     * check both 'start' and 'end'.
+     */
+    if (start < 0 || end < 0 || start == INT_MAX || end == INT_MAX)
         return NULL;
 
     for (i = start + 1; i < t->count; ++i) {
