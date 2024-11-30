@@ -2665,7 +2665,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
              * enough varbinds to fill the packet vs retrieving varbinds
              * that will be discarded to make the response fit the packet size.
              */
-            if (avgvarbind == 0)
+            if (avgvarbind <= 0)
                 avgvarbind = 15;
 
             if (maxresponses > (asp->pdu->msgMaxSize / avgvarbind)) {
