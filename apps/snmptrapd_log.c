@@ -462,6 +462,8 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         return 0;
     }
 
+    memset(&time_val, 0, sizeof(time_val));
+
     /*
      * Get the time field to output.  
      */
