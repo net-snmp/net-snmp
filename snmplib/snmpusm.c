@@ -5009,11 +5009,13 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                      void *clientarg)
 {
     size_t          salt_integer_len = sizeof(salt_integer);
+    uint64_t        current_time;
 
     if (sc_random((u_char *) & salt_integer, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
-        salt_integer = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer = current_time;
     }
 
 #ifdef HAVE_AES
@@ -5021,13 +5023,15 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
-        salt_integer64_1 = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer64_1 = current_time;
     }
     salt_integer_len = sizeof (salt_integer64_1);
     if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
-        salt_integer64_2 = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer64_2 = current_time;
     }
 #endif
 
