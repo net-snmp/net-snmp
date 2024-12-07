@@ -3146,22 +3146,24 @@ eat_syntax(FILE * fp, char *token, int maxtoken)
 static int
 compliance_lookup(const char *name, int modid)
 {
-    if (modid == -1) {
-        struct objgroup *op =
-            (struct objgroup *) malloc(sizeof(struct objgroup));
-        if (!op)
-            return 0;
-        op->next = objgroups;
-        op->name = strdup(name);
-        if (!op->name) {
-            free(op);
-            return 0;
-        }
-        op->line = mibLine;
-        objgroups = op;
-        return 1;
-    } else
+    struct objgroup *op;
+
+    if (modid != -1)
         return find_tree_node(name, modid) != NULL;
+
+    op = malloc(sizeof(struct objgroup));
+    if (!op)
+        return 0;
+
+    op->next = objgroups;
+    op->name = strdup(name);
+    if (!op->name) {
+        free(op);
+        return 0;
+    }
+    op->line = mibLine;
+    objgroups = op;
+    return 1;
 }
 
 static struct node *
