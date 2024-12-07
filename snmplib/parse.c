@@ -4386,6 +4386,7 @@ static void free_objgroup(struct objgroup *o)
     while (o) {
         struct objgroup *next = o->next;
 
+        free(o->name);
         free(o);
         o = next;
     }
