@@ -358,6 +358,9 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
         if (out_len > 0 && out_buf[out_len - 1] == '\n')
             out_buf[--out_len] = '\0';	/* Strip trailing newline */
         extension->output   = strdup( out_buf );
+	if (extension->output == NULL) {
+	    return -1;
+	}
         extension->out_len  = out_len;
         /*
          * Now we need to pick the output apart into separate lines.
