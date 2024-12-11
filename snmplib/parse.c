@@ -3030,11 +3030,9 @@ parse_trapDefinition(FILE * fp, char *name)
     }
 
     np->next->parent = np->parent;
-    np->parent = (char *) malloc(strlen(np->parent) + 2);
-    if (np->parent == NULL)
+    np->parent = NULL;
+    if (asprintf(&np->parent, "%s#", np->next->parent) < 0)
         goto free_next_node;
-    strcpy(np->parent, np->next->parent);
-    strcat(np->parent, "#");
     np->next->label = strdup(np->parent);
     return np;
 
