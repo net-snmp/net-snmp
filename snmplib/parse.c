@@ -2901,8 +2901,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad DESCRIPTION", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
@@ -2913,8 +2912,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             np->reference = strdup(quoted_string_buffer);
             break;
@@ -2922,8 +2920,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             np->varbinds = getVarbinds(fp, &np->varbinds);
             if (!np->varbinds) {
                 print_error("Bad OBJECTS list", token, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         default:
@@ -2935,6 +2932,10 @@ parse_notificationDefinition(FILE * fp, char *name)
         type = get_token(fp, token, MAXTOKEN);
     }
     return merge_parse_objectid(np, fp, name);
+
+free_node:
+    free_node(np);
+    return NULL;
 }
 
 /*
@@ -2959,8 +2960,7 @@ parse_trapDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad DESCRIPTION", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
@@ -2972,8 +2972,7 @@ parse_trapDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             np->reference = strdup(quoted_string_buffer);
             break;
@@ -2983,8 +2982,7 @@ parse_trapDefinition(FILE * fp, char *name)
                 type = get_token(fp, token, MAXTOKEN);
                 if (type != LABEL) {
                     print_error("Bad Trap Format", token, type);
-                    free_node(np);
-                    return NULL;
+                    goto free_node;
                 }
                 np->parent = strdup(token);
                 /*
@@ -2994,16 +2992,14 @@ parse_trapDefinition(FILE * fp, char *name)
             } else if (type == LABEL) {
                 np->parent = strdup(token);
             } else {
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         case VARIABLES:
             np->varbinds = getVarbinds(fp, &np->varbinds);
             if (!np->varbinds) {
                 print_error("Bad VARIABLES list", token, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         default:
@@ -3020,35 +3016,34 @@ parse_trapDefinition(FILE * fp, char *name)
 
     if (type != NUMBER) {
         print_error("Expected a Number", token, type);
-        free_node(np);
-        return NULL;
+        goto free_node;
     }
     np->subid = strtoul(token, NULL, 10);
     np->next = alloc_node(current_module);
-    if (np->next == NULL) {
-        free_node(np);
-        return (NULL);
-    }
+    if (np->next == NULL)
+        goto free_node;
 
     /* Catch the syntax error */
     if (np->parent == NULL) {
-        free_node(np->next);
-        free_node(np);
         gMibError = MODULE_SYNTAX_ERROR;
-        return (NULL);
+        goto free_next_node;
     }
 
     np->next->parent = np->parent;
     np->parent = (char *) malloc(strlen(np->parent) + 2);
-    if (np->parent == NULL) {
-        free_node(np->next);
-        free_node(np);
-        return (NULL);
-    }
+    if (np->parent == NULL)
+        goto free_next_node;
     strcpy(np->parent, np->next->parent);
     strcat(np->parent, "#");
     np->next->label = strdup(np->parent);
     return np;
+
+free_next_node:
+    free_node(np->next);
+
+free_node:
+    free_node(np);
+    return NULL;
 }
 
 
