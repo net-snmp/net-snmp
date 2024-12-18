@@ -1159,11 +1159,11 @@ const char     *
 get_configuration_directory(void)
 {
     char            defaultPath[SPRINT_MAX_LEN];
-    char           *homepath;
+    const char     *homepath;
 
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_CONFIGURATION_DIR)) {
-        homepath = netsnmp_getenv("HOME");
+        homepath = netsnmp_gethomedir();
         snprintf(defaultPath, sizeof(defaultPath), "%s%c%s%c%s%s%s%s",
                 SNMPCONFPATH, ENV_SEPARATOR_CHAR,
                 SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,

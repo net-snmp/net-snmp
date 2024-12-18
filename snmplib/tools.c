@@ -1415,3 +1415,12 @@ netsnmp_string_time_to_secs(const char *time_string) {
     return secs;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */
+
+const char *netsnmp_gethomedir() {
+    const char *homepath = netsnmp_getenv("HOME");
+#ifdef _WIN32
+    if (!homepath)
+        homepath = netsnmp_getenv("USERPROFILE");
+#endif
+    return homepath;
+}
