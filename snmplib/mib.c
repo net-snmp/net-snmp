@@ -2622,17 +2622,13 @@ netsnmp_get_mib_directory(void)
 void
 netsnmp_fixup_mib_directory(void)
 {
-    char *homepath = netsnmp_getenv("HOME");
+    const char *homepath = netsnmp_gethomedir();
     char *mibpath = netsnmp_get_mib_directory();
     char *oldmibpath = NULL;
     char *ptr_home;
     char *new_mibpath;
 
     DEBUGTRACE;
-#ifdef _WIN32
-    if (!homepath)
-      homepath = netsnmp_getenv("USERPROFILE");
-#endif
     if (homepath && mibpath) {
         DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
         while ((ptr_home = strstr(mibpath, "$HOME"))) {
