@@ -896,8 +896,11 @@ init_snmp(const char *type)
 
     /*
      * set our current locale properly to initialize isprint() type functions 
+     *
+     * Do not use setlocale on qnx, it is buggy 
+     * https://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/s/setlocale.html
      */
-#ifdef HAVE_SETLOCALE
+#if defined(HAVE_SETLOCALE) && !defined(__QNX__)
     setlocale(LC_CTYPE, "");
 #endif
 

@@ -37,7 +37,7 @@
 #endif
 
 #ifdef HAVE_PRIORITYNAMES
-#include <sys/syslog.h>
+#include <syslog.h>
 #endif
 
 #include <net-snmp/types.h>
