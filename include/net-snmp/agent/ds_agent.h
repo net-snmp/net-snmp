@@ -41,6 +41,7 @@
 #define NETSNMP_DS_AGENT_DISKIO_NO_LOOP 19      /* 1 = don't report /dev/loop* entries in diskIOTable */
 #define NETSNMP_DS_AGENT_DISKIO_NO_RAM  20      /* 1 = don't report /dev/ram*  entries in diskIOTable */
 #define NETSNMP_DS_AGENT_DISKIO_NO_MD   21      /* 1 = don't report /dev/md*   entries in diskIOTable */
+#define NETSNMP_DS_AGENT_DISKIO_NO_NBD  22      /* 1 = don't report /dev/nbd*  entries in diskIOTable */
 
 /* WARNING: The trap receiver also uses DS flags and must not conflict with these!
  * If you define additional boolean entries, check in "apps/snmptrapd_ds.h" first */
