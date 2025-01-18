@@ -780,6 +780,9 @@ e.g. "loop0"
 .IP "diskio_exclude_ram yes"
 Excludes all Linux ramdisk block devices, whose names start with "ram",
 e.g. "ram0"
+.IP "diskio_exclude_md yes"
+Excludes all Linux RAID block devices, whose names start with "md",
+e.g. "md0"
 .PP
 On Linux systems, it is also possible to report only explicitly whitelisted
 devices. It may take a significant amount of time to process diskIOTable data
