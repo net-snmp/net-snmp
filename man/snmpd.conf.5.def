@@ -778,8 +778,8 @@ e.g. "fd0"
 Excludes all Linux loopback block devices, whose names start with "loop",
 e.g. "loop0"
 .IP "diskio_exclude_ram yes"
-Excludes all LInux ramdisk block devices, whose names start with "ram", e.g.
-"ram0"
+Excludes all Linux ramdisk block devices, whose names start with "ram",
+e.g. "ram0"
 .PP
 On Linux systems, it is also possible to report only explicitly whitelisted
 devices. It may take a significant amount of time to process diskIOTable data
