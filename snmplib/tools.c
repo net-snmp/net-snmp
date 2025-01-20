@@ -1416,7 +1416,7 @@ netsnmp_string_time_to_secs(const char *time_string) {
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */
 
-const char *netsnmp_gethomedir() {
+const char *netsnmp_gethomedir(void) {
     const char *homepath = netsnmp_getenv("HOME");
 #ifdef _WIN32
     if (!homepath)
