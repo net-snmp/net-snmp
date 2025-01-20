@@ -23,7 +23,7 @@
 #endif
 
 #include <sys/types.h>
-#if defined(__ANDROID__)  || defined(HAVE_SYS_SELECT_H)
+#if defined(HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
 
