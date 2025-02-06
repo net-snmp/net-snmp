@@ -285,7 +285,7 @@ ip_handler(netsnmp_mib_handler          *handler,
 {
     netsnmp_request_info  *request;
     netsnmp_variable_list *requestvb;
-    long     ret_value;
+    long     ret_value = 0;
     oid      subid;
     int      type = ASN_COUNTER;
 

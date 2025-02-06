@@ -211,6 +211,7 @@ snmpNotifyFilter_storage_add(const u_char *profileName, size_t profileName_len,
     if (NULL == data)
         return NULL;
 
+    data->snmpNotifyFilterMask_len = filterMask_len;
     memcpy(data->snmpNotifyFilterMask, filterMask, filterMask_len);
 
     data->snmpNotifyFilterType = filterType;

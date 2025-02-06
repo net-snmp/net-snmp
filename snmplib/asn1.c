@@ -2338,7 +2338,7 @@ asn_parse_signed_int64(u_char * data,
         high = 0xFFFFFF;
     }
 
-    while (asn_length--) {
+    for ( ; asn_length; asn_length--) {
         high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000U) >> 24);
         low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }

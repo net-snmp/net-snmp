@@ -386,7 +386,8 @@ realloc_output_temp_bfr(u_char ** buf, size_t * buf_len, size_t * out_len,
                     return 0;
                 }
             }
-            if (options->leading_zeroes || zeroes_to_write-- > 0) {
+            if (options->leading_zeroes ||
+                (zeroes_to_write && zeroes_to_write-- > 0)) {
                 *(*buf + *out_len) = '0';
             } else {
                 *(*buf + *out_len) = ' ';
@@ -460,6 +461,8 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     if ((safe_bfr = (char *) calloc(30, 1)) == NULL) {
         return 0;
     }
+
+    memset(&time_val, 0, sizeof(time_val));
 
     /*
      * Get the time field to output.  

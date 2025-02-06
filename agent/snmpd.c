@@ -561,7 +561,10 @@ main(int argc, char *argv[])
                     struct group  *info;
 
                     info = getgrnam(optarg);
-                    gid = info ? info->gr_gid : -1;
+                    if (info)
+                        gid = info->gr_gid;
+                    else
+                        gid = -1;
                     endgrent();
                 }
 #endif
@@ -739,7 +742,10 @@ main(int argc, char *argv[])
                     struct passwd  *info;
 
                     info = getpwnam(optarg);
-                    uid = info ? info->pw_uid : -1;
+                    if (info)
+                        uid = info->pw_uid;
+                    else
+                        uid = -1;
                     endpwent();
                 }
 #endif

@@ -257,7 +257,8 @@ _bit_next_day(const u_char *day_pattern, const u_char *weekday_pattern,
         tm_val.tm_mday = next_day+1;
         tm_val.tm_mon  = month;
         tm_val.tm_year = year;
-        mktime( &tm_val );
+        if (mktime(&tm_val) == (time_t)-1)
+            return -1;
     } while ( !_bit_set( weekday_pattern, tm_val.tm_wday ));
     return next_day+1; /* Convert back to 1-based list */
 }

@@ -160,9 +160,9 @@ struct tc {                     /* textual conventions */
 } *tclist;
 int tc_alloc;
 
-int             mibLine = 0;
-const char     *File = "(none)";
-static int      anonymous = 0;
+static int      mibLine;
+static const char *File = "(none)";
+static int      anonymous;
 
 struct objgroup {
     char           *name;
@@ -2913,8 +2913,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad DESCRIPTION", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
@@ -2925,8 +2924,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             np->reference = strdup(quoted_string_buffer);
             break;
@@ -2934,8 +2932,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             np->varbinds = getVarbinds(fp, &np->varbinds);
             if (!np->varbinds) {
                 print_error("Bad OBJECTS list", token, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         default:
@@ -2947,6 +2944,10 @@ parse_notificationDefinition(FILE * fp, char *name)
         type = get_token(fp, token, MAXTOKEN);
     }
     return merge_parse_objectid(np, fp, name);
+
+free_node:
+    free_node(np);
+    return NULL;
 }
 
 /*
@@ -2971,8 +2972,7 @@ parse_trapDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad DESCRIPTION", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
@@ -2984,8 +2984,7 @@ parse_trapDefinition(FILE * fp, char *name)
             type = get_token(fp, quoted_string_buffer, MAXQUOTESTR);
             if (type != QUOTESTRING) {
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             np->reference = strdup(quoted_string_buffer);
             break;
@@ -2995,8 +2994,7 @@ parse_trapDefinition(FILE * fp, char *name)
                 type = get_token(fp, token, MAXTOKEN);
                 if (type != LABEL) {
                     print_error("Bad Trap Format", token, type);
-                    free_node(np);
-                    return NULL;
+                    goto free_node;
                 }
                 np->parent = strdup(token);
                 /*
@@ -3006,16 +3004,14 @@ parse_trapDefinition(FILE * fp, char *name)
             } else if (type == LABEL) {
                 np->parent = strdup(token);
             } else {
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         case VARIABLES:
             np->varbinds = getVarbinds(fp, &np->varbinds);
             if (!np->varbinds) {
                 print_error("Bad VARIABLES list", token, type);
-                free_node(np);
-                return NULL;
+                goto free_node;
             }
             break;
         default:
@@ -3032,35 +3028,32 @@ parse_trapDefinition(FILE * fp, char *name)
 
     if (type != NUMBER) {
         print_error("Expected a Number", token, type);
-        free_node(np);
-        return NULL;
+        goto free_node;
     }
     np->subid = strtoul(token, NULL, 10);
     np->next = alloc_node(current_module);
-    if (np->next == NULL) {
-        free_node(np);
-        return (NULL);
-    }
+    if (np->next == NULL)
+        goto free_node;
 
     /* Catch the syntax error */
     if (np->parent == NULL) {
-        free_node(np->next);
-        free_node(np);
         gMibError = MODULE_SYNTAX_ERROR;
-        return (NULL);
+        goto free_next_node;
     }
 
     np->next->parent = np->parent;
-    np->parent = (char *) malloc(strlen(np->parent) + 2);
-    if (np->parent == NULL) {
-        free_node(np->next);
-        free_node(np);
-        return (NULL);
-    }
-    strcpy(np->parent, np->next->parent);
-    strcat(np->parent, "#");
+    np->parent = NULL;
+    if (asprintf(&np->parent, "%s#", np->next->parent) < 0)
+        goto free_next_node;
     np->next->label = strdup(np->parent);
     return np;
+
+free_next_node:
+    free_node(np->next);
+
+free_node:
+    free_node(np);
+    return NULL;
 }
 
 
@@ -3146,22 +3139,24 @@ eat_syntax(FILE * fp, char *token, int maxtoken)
 static int
 compliance_lookup(const char *name, int modid)
 {
-    if (modid == -1) {
-        struct objgroup *op =
-            (struct objgroup *) malloc(sizeof(struct objgroup));
-        if (!op)
-            return 0;
-        op->next = objgroups;
-        op->name = strdup(name);
-        if (!op->name) {
-            free(op);
-            return 0;
-        }
-        op->line = mibLine;
-        objgroups = op;
-        return 1;
-    } else
+    struct objgroup *op;
+
+    if (modid != -1)
         return find_tree_node(name, modid) != NULL;
+
+    op = malloc(sizeof(struct objgroup));
+    if (!op)
+        return 0;
+
+    op->next = objgroups;
+    op->name = strdup(name);
+    if (!op->name) {
+        free(op);
+        return 0;
+    }
+    op->line = mibLine;
+    objgroups = op;
+    return 1;
 }
 
 static struct node *
@@ -3934,6 +3929,57 @@ read_import_replacements(const char *old_module_name,
     return read_module_replacements(old_module_name);
 }
 
+static int
+read_from_file(struct module *mp, const char *name)
+{
+    const char     *oldFile = File;
+    int             oldLine = mibLine;
+    int             oldModule = current_module;
+    FILE           *fp;
+    struct node    *np;
+    int             res;
+
+    if (mp->no_imports != -1) {
+        DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n",
+                    name));
+        return MODULE_ALREADY_LOADED;
+    }
+    if ((fp = fopen(mp->file, "r")) == NULL) {
+        int rval;
+        if (errno == ENOTDIR || errno == ENOENT)
+            rval = MODULE_NOT_FOUND;
+        else
+            rval = MODULE_LOAD_FAILED;
+        snmp_log_perror(mp->file);
+        return rval;
+    }
+#ifdef HAVE_FLOCKFILE
+    flockfile(fp);
+#endif
+    mp->no_imports = 0; /* Note that we've read the file */
+    File = mp->file;
+    mibLine = 1;
+    current_module = mp->modid;
+    /*
+     * Parse the file
+     */
+    np = parse(fp);
+#ifdef HAVE_FUNLOCKFILE
+    funlockfile(fp);
+#endif
+    fclose(fp);
+    File = oldFile;
+    mibLine = oldLine;
+    current_module = oldModule;
+    res = !np && gMibError == MODULE_SYNTAX_ERROR ?
+        MODULE_SYNTAX_ERROR : MODULE_LOADED_OK;
+    while (np) {
+        struct node *nnp = np->next;
+        free_node(np);
+        np = nnp;
+    }
+    return res;
+}
 
 /*
  *  Read in the named module
@@ -3944,59 +3990,12 @@ static int
 read_module_internal(const char *name)
 {
     struct module  *mp;
-    FILE           *fp;
-    struct node    *np;
-    int             res;
 
     netsnmp_init_mib_internals();
 
     for (mp = module_head; mp; mp = mp->next)
-        if (!label_compare(mp->name, name)) {
-            const char     *oldFile = File;
-            int             oldLine = mibLine;
-            int             oldModule = current_module;
-
-            if (mp->no_imports != -1) {
-                DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n",
-                            name));
-                return MODULE_ALREADY_LOADED;
-            }
-            if ((fp = fopen(mp->file, "r")) == NULL) {
-                int rval;
-                if (errno == ENOTDIR || errno == ENOENT)
-                    rval = MODULE_NOT_FOUND;
-                else
-                    rval = MODULE_LOAD_FAILED;
-                snmp_log_perror(mp->file);
-                return rval;
-            }
-#ifdef HAVE_FLOCKFILE
-            flockfile(fp);
-#endif
-            mp->no_imports = 0; /* Note that we've read the file */
-            File = mp->file;
-            mibLine = 1;
-            current_module = mp->modid;
-            /*
-             * Parse the file
-             */
-            np = parse(fp);
-#ifdef HAVE_FUNLOCKFILE
-            funlockfile(fp);
-#endif
-            fclose(fp);
-            File = oldFile;
-            mibLine = oldLine;
-            current_module = oldModule;
-            res = !np && gMibError == MODULE_SYNTAX_ERROR ?
-                MODULE_SYNTAX_ERROR : MODULE_LOADED_OK;
-            while (np) {
-                struct node *nnp = np->next;
-                free_node(np);
-                np = nnp;
-            }
-            return res;
-        }
+        if (!label_compare(mp->name, name))
+            return read_from_file(mp, name);
 
     return MODULE_NOT_FOUND;
 }
@@ -4004,7 +4003,7 @@ read_module_internal(const char *name)
 void
 adopt_orphans(void)
 {
-    struct node    *np, *onp;
+    struct node    *np = NULL, *onp;
     struct tree    *tp;
     int             i, adopted = 1;
 
@@ -4380,6 +4379,7 @@ static void free_objgroup(struct objgroup *o)
     while (o) {
         struct objgroup *next = o->next;
 
+        free(o->name);
         free(o);
         o = next;
     }

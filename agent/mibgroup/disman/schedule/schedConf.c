@@ -231,7 +231,7 @@ parse_sched_timed( const char *token, char *line )
      */
     while (line && isspace((unsigned char)(*line)))
         line++;
-    if ( *line == '=' ) {
+    if (line && *line == '=') {
         line++;
         while (line && isspace((unsigned char)(*line))) {
             line++;
