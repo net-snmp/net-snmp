@@ -353,7 +353,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Finally, handle ".... -Lx value ...." syntax
      *   (*without* surrounding quotes)
      */
-    if ((!*optarg) && (NULL != argv)) {
+    if (!*optarg && argv && optind < argc) {
         /*
          * We've run off the end of the argument
          *  so move on to the next.
