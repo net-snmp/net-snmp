@@ -596,7 +596,7 @@ snmp_config_when(char *line, int when)
     char           *cptr, buf[STRINGMAX];
     struct config_line *lptr = NULL;
     struct config_files *ctmp = config_files;
-    char           *st;
+    char           *st, *start_from, *end;
 
     if (line == NULL) {
         config_perror("snmp_config() called with a null string.");
@@ -640,7 +640,11 @@ snmp_config_when(char *line, int when)
     /*
      * use the original string instead since strtok_r messed up the original 
      */
-    line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
+    end = line + strlen(line);
+    start_from = line + (cptr - buf) + strlen(cptr) + 1;
+    if (start_from > end)
+        start_from = end;
+    line = skip_white(start_from);
 
     return (run_config_handler(lptr, cptr, line, when));
 }
