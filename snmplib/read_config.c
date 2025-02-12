@@ -531,7 +531,7 @@ read_config_find_handler(struct config_line *line_handlers,
 /*
  * searches a config_line linked list for a match 
  */
-int
+static int
 run_config_handler(struct config_line *lptr,
                    const char *token, char *cptr, int when)
 {
@@ -590,7 +590,7 @@ run_config_handler(struct config_line *lptr,
  */
 #define SNMP_CONFIG_DELIMETERS " \t="
 
-int
+static int
 snmp_config_when(char *line, int when)
 {
     char           *cptr, buf[STRINGMAX];
