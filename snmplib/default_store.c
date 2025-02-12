@@ -355,6 +355,8 @@ netsnmp_ds_parse_boolean(char *line)
     char           *st;
 
     value = strtok_r(line, " \t\n", &st);
+    if (!value)
+        goto invalid;
     if (strcasecmp(value, "yes") == 0 || 
 	strcasecmp(value, "true") == 0) {
         return 1;
@@ -363,12 +365,14 @@ netsnmp_ds_parse_boolean(char *line)
         return 0;
     } else {
         itmp = strtol(value, &endptr, 10);
-        if (*endptr != 0 || itmp < 0 || itmp > 1) {
-            config_perror("Should be yes|no|true|false|0|1");
-            return -1;
-	}
+        if (*endptr != 0 || itmp < 0 || itmp > 1)
+            goto invalid;
         return itmp;
     }
+
+invalid:
+    config_perror("Should be yes|no|true|false|0|1");
+    return -1;
 }
 
 void
