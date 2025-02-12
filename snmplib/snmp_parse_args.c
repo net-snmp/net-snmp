@@ -330,6 +330,7 @@ netsnmp_parse_args(int argc,
             break;
 
         case 's':
+            free(session->localname);
             session->localname = strdup(optarg);
             break;
 
