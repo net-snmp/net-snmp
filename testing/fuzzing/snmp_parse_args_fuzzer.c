@@ -37,7 +37,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
     af_gb_init();
 
-    int argc = (af_get_short(&data, &size) & 0xff) + 1;
+    int argc = (af_get_short(&data, &size) % 99) + 1;
     char **argv = malloc(argc * sizeof(*argv));
     for (int i = 0; i < argc; i++) {
         argv[i] = af_gb_get_null_terminated(&data, &size);
