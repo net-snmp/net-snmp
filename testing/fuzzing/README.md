@@ -52,6 +52,6 @@ should be placed in the [project.yaml](https://github.com/google/oss-fuzz/blob/m
 file. You can put it on the `auto_ccs` list, but only net-snmp maintainers
 will be allowed to do so. The email must be linked to a Google account. 
 
-When your email is in the `projec.yaml` file listed above, then you can
+When your email is in the `project.yaml` file listed above, then you can
 access project details, e.g. bugs and coverage information on 
 https://oss-fuzz.com
