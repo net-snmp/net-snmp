@@ -291,6 +291,7 @@ int
 netsnmp_transport_filter_add(const char *addrtxt)
 {
     char *tmp;
+    int res;
 
     /*
      * create the container, if needed
@@ -305,7 +306,10 @@ netsnmp_transport_filter_add(const char *addrtxt)
         snmp_log(LOG_ERR,"netsnmp_transport_filter_add strdup failed\n");
         return(-1);
     }
-    return CONTAINER_INSERT(filtered, tmp);
+    res = CONTAINER_INSERT(filtered, tmp);
+    if (res)
+        free(tmp);
+    return res;
 }
 
 int
