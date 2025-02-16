@@ -478,6 +478,7 @@ netsnmp_parse_args(int argc,
 #endif                          /* SNMPV3_CMD_OPTIONS */
 
         case '?':
+        case ':':
             ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
             goto out;
 
