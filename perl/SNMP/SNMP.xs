@@ -423,13 +423,11 @@ int type;
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-__snprint_value (buf, buf_len, var, tp, type, flag)
-char * buf;
-size_t buf_len;
-netsnmp_variable_list * var;
-struct tree * tp;
-int type;
-int flag;
+#if defined(__has_attribute) && __has_attribute(nonnull)
+__attribute__((nonnull(1)))
+#endif
+__snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
+                struct tree *tp, int type, int flag)
 {
    int len = 0;
    u_char* ip;
