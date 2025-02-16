@@ -150,7 +150,7 @@ se_read_conf(const char *word, const char *cptr)
                 break;
             }
             cp2 = e_enum;
-            while (*(cp2++) != ':')
+            while (*cp2 && *(cp2++) != ':')
                 ;
             se_add_pair_to_slist(e_name, strdup(cp2), value);
             if (!cp)
