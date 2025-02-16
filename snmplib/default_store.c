@@ -406,13 +406,17 @@ netsnmp_ds_handle_config(const char *token, char *line)
 
         case ASN_INTEGER:
             value = strtok_r(line, " \t\n", &st);
-            itmp = strtol(value, &endptr, 10);
-            if (*endptr != 0) {
-                config_perror("Bad integer value");
-	    } else {
-                netsnmp_ds_set_int(drsp->storeid, drsp->which, itmp);
-	    }
-            DEBUGMSGTL(("netsnmp_ds_handle_config", "int: %d\n", itmp));
+            if (!value) {
+                config_perror("Missing value");
+            } else {
+                itmp = strtol(value, &endptr, 10);
+                if (*endptr != 0) {
+                    config_perror("Bad integer value");
+                } else {
+                    netsnmp_ds_set_int(drsp->storeid, drsp->which, itmp);
+                }
+                DEBUGMSGTL(("netsnmp_ds_handle_config", "int: %d\n", itmp));
+            }
             break;
 
         case ASN_OCTET_STR:
