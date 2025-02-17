@@ -117,6 +117,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
                 init_agent_snmp_session(&sess, pdu);
             handle_snmp_packet(1, &sess, 0, pdu, vals);
             snmp_free_pdu(pdu);
+            free_agent_snmp_session(vals);
+
         }
 
         shutdown_master_agent();
