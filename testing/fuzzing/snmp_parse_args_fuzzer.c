@@ -45,6 +45,11 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
             goto free_argv;
     }
 
+#if 0
+    snmp_set_do_debugging(1);
+    debug_register_tokens("snmp_parse_args");
+#endif
+
     netsnmp_session *ss = SNMP_MALLOC_TYPEDEF(netsnmp_session);
 
     snmp_parse_args(argc, argv, ss, "", NULL);
