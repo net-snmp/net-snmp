@@ -1480,6 +1480,9 @@ read_config_files(int when) {
             ret = SNMPERR_SUCCESS;
     }
 
+    if ( netsnmp_tdomain_host_configs_of_type(when) == SNMPERR_SUCCESS )
+        ret = SNMPERR_SUCCESS;
+
     if (config_errors) {
         snmp_log(LOG_ERR, "net-snmp: %d error(s) in config file(s)\n",
                  config_errors);

@@ -624,6 +624,71 @@ netsnmp_is_fqdn(const char *thename)
 }
 
 /*
+ * Calls read_config_files_of_type(), and replacing the "smtp" config
+ * file type with "hosts/<host>". <when> == NORMAL_CONFIG ensures further
+ * calls are no-op (prevent snmp_sess_open() overriding cmdline)
+ */
+static int
+netsnmp_tdomain_host_config_of_type(int when, const char *host)
+{
+    char buf[SNMP_MAXPATH];
+    struct config_files file_names;
+    static int have_added_handler = 0;
+    static int final_pass = 0;
+    int ret = SNMPERR_GENERR;
+
+    /* don't set final_pass if no host */
+    if ((host == NULL) || final_pass)
+        return ret;
+
+    /* read_config_files( NORMAL_CONFIG, <host> != NULL ),
+       no-op further calls in snmp_sess_open() to protect cmdline overrides */
+    if ( when == NORMAL_CONFIG )
+        final_pass = 1;
+
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES) ||
+        !netsnmp_is_fqdn(host)) {
+        return ret;
+    }
+
+    /* register a "transport" specifier (only in host files) */
+    if (!have_added_handler) {
+        have_added_handler = 1;
+        netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "transport",
+                                   NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_HOSTNAME);
+    }
+
+    /* read in the hosts/STRING.conf files */
+    snprintf(buf, sizeof(buf)-1, "hosts/%s", host);
+    buf[ sizeof(buf)-1 ] = 0;
+    file_names.fileHeader = buf;
+    file_names.start = read_config_get_handlers("snmp");
+    file_names.next = NULL;
+    DEBUGMSGTL(("tdomain", "checking for host specific config %s (%d)\n",
+                buf, when));
+    ret = read_config_files_of_type(when, &file_names);
+
+    /* read_config_files( PREMIB_CONFIG ), ensure non-host "snmp" files
+       reject "transport" */
+    if ( when == PREMIB_CONFIG ) {
+        have_added_handler = 0;
+        unregister_config_handler("snmp", "transport");
+    }
+
+    return ret;
+}
+
+int
+netsnmp_tdomain_host_configs_of_type(int when)
+{
+    const char *host = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                             NETSNMP_DS_LIB_HOSTNAME);
+    return netsnmp_tdomain_host_config_of_type(when, host);
+}
+
+/*
  * Locate the appropriate transport domain and call the create function for
  * it.
  */
@@ -659,22 +724,10 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                 NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES) &&
         netsnmp_is_fqdn(str)) {
-        static int have_added_handler = 0;
         char *newhost;
-        struct config_line *config_handlers;
-        struct config_files file_names;
         char *prev_hostname;
 
-        /* register a "transport" specifier */
-        if (!have_added_handler) {
-            have_added_handler = 1;
-            netsnmp_ds_register_config(ASN_OCTET_STR,
-                                       "snmp", "transport",
-                                       NETSNMP_DS_LIBRARY_ID,
-                                       NETSNMP_DS_LIB_HOSTNAME);
-        }
-
-        /* we save on specific setting that we don't allow to change
+        /* we save one specific setting that we don't allow to change
            from one transport creation to the next; ie, we don't want
            the "transport" specifier to be a default.  It should be a
            single invocation use only */
@@ -683,15 +736,9 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
         if (prev_hostname)
             prev_hostname = strdup(prev_hostname);
 
-        /* read in the hosts/STRING.conf files */
-        config_handlers = read_config_get_handlers("snmp");
-        snprintf(buf, sizeof(buf)-1, "hosts/%s", str);
-        file_names.fileHeader = buf;
-        file_names.start = config_handlers;
-        file_names.next = NULL;
-        DEBUGMSGTL(("tdomain", "checking for host specific config %s\n",
-                    buf));
-        read_config_files_of_type(EITHER_CONFIG, &file_names);
+        /* only parses host config if read_config_files() didn't
+           have <host> set */
+        (void)netsnmp_tdomain_host_config_of_type(EITHER_CONFIG, str);
 
         if (NULL !=
             (newhost = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
