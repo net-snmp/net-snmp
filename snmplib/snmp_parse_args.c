@@ -231,7 +231,14 @@ netsnmp_parse_args(int argc,
         DEBUGMSGTL(("snmp_parse_args", " arg %d = %s\n", arg, argv[arg]));
     }
 
+#ifdef __linux__
+    /*
+     * glibc only resets the internal getopt() state if optind is set to zero.
+     */
+    optind = 0;
+#else
     optind = 1;
+#endif
     while (optind < argc && (arg = getopt(argc, argv, Opts)) != EOF) {
         DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %c (optarg %s) (sp %d)\n",
                     optind, arg, optarg, sp));
