@@ -174,7 +174,7 @@ do_cp()
 save_diff()
 {
     echo "Creating patch for your custom code"
-    cnt=`ls ./"$UPDATE_CURR/"*"$UPDATE_OID"* 2>/dev/null | grep -E "(file|onf|m2d|txt|\.c|\.h)$" | wc -l`
+    cnt=`ls "$UPDATE_CURR/"*"$UPDATE_OID"* 2>/dev/null | grep -E "(file|onf|m2d|txt|\.c|\.h)$" | wc -l`
     if [ "$cnt" -eq 0 ]; then
         echo "   no custom code!"
         FIRST_RUN=1
