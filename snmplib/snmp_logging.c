@@ -403,8 +403,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         priority = decode_priority( &optarg, &pri_max );
         if (priority == -1) return -1;
         while (*optarg == ' ') optarg++;
-        if (!*optarg && !argv) return -1;
-        else if (!*optarg) optarg = argv[++optind];
+        if (!*optarg && !argv)
+            return -1;
+        else if (!*optarg)
+            optarg = optind + 1 < argc ? argv[++optind] : NULL;
         NETSNMP_FALLTHROUGH;
     case 'f':
         if (inc_optind)
