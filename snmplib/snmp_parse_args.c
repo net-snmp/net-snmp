@@ -634,7 +634,7 @@ netsnmp_parse_args(int argc,
     /*
      * get the hostname 
      */
-    if (optind == argc) {
+    if (optind >= argc) {
         fprintf(stderr, "No hostname specified.\n");
         ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
         goto out;
