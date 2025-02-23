@@ -506,6 +506,21 @@ netsnmp_parse_args(int argc,
     }
 
     /*
+     * get the hostname 
+     */
+    if (optind == argc) {
+        fprintf(stderr, "No hostname specified.\n");
+        ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
+        goto out;
+    }
+    session->peername = strdup(argv[optind++]); /* hostname */
+
+    /* used to load hosts/<peername>.conf files */
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                          NETSNMP_DS_LIB_HOSTNAME,
+                          session->peername);
+
+    /*
      * read in MIB database and initialize the snmp library, read the config file
      */
     init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
@@ -630,16 +645,6 @@ netsnmp_parse_args(int argc,
         Xpsz = NULL;
     }
 #endif /* NETSNMP_SECMOD_USM */
-
-    /*
-     * get the hostname 
-     */
-    if (optind == argc) {
-        fprintf(stderr, "No hostname specified.\n");
-        ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-        goto out;
-    }
-    session->peername = strdup(argv[optind++]); /* hostname */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     /*

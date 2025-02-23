@@ -346,6 +346,9 @@ netsnmp_transport *netsnmp_tdomain_transport_oid(const oid * dom,
 						 int local);
 
 NETSNMP_IMPORT
+int netsnmp_tdomain_host_configs_of_type(int when);
+
+NETSNMP_IMPORT
 netsnmp_transport *netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec);
 
 NETSNMP_IMPORT
