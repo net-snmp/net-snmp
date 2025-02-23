@@ -2436,7 +2436,7 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
             break;
         case 's':
             if (!*(++cp)) {
-                cp = argv[optind++];
+                cp = optind < argc ? argv[optind++] : NULL;
                 if (!cp)
                     return "?";
             }
@@ -2447,7 +2447,7 @@ snmp_in_options(char *optarg, int argc, char *const *argv)
 
         case 'S':
             if (!*(++cp)) {
-                cp = argv[optind++];
+                cp = optind < argc ? argv[optind++] : NULL;
                 if (!cp)
                     return "?";
             }
