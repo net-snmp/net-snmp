@@ -287,7 +287,7 @@ se_find_label(unsigned int major, unsigned int minor, int value)
 int
 se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
 {
-    struct snmp_enum_list *lastnode = NULL, *tmp;
+    struct snmp_enum_list *lastnode = NULL, *new_node, *tmp;
 
     if (!list)
         return SE_DNE;
@@ -302,20 +302,19 @@ se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
         tmp = tmp->next;
     }
 
-    if (lastnode) {
-        lastnode->next = SNMP_MALLOC_STRUCT(snmp_enum_list);
-        lastnode = lastnode->next;
-    } else {
-        (*list) = SNMP_MALLOC_STRUCT(snmp_enum_list);
-        lastnode = (*list);
-    }
-    if (!lastnode) {
+    new_node = SNMP_MALLOC_STRUCT(snmp_enum_list);
+    if (!new_node) {
         free(label);
         return (SE_NOMEM);
     }
-    lastnode->label = label;
-    lastnode->value = value;
-    lastnode->next = NULL;
+
+    if (lastnode)
+        lastnode->next = new_node;
+    else
+        *list = new_node;
+    new_node->label = label;
+    new_node->value = value;
+    new_node->next = NULL;
     return (SE_OK);
 }
 
