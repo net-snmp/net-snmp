@@ -42,8 +42,8 @@ struct snmp_enum_list_str {
 };
 
 static struct snmp_enum_list ***snmp_enum_lists;
-unsigned int    current_maj_num;
-unsigned int    current_min_num;
+static unsigned int current_maj_num;
+static unsigned int current_min_num;
 static struct snmp_enum_list_str *sliststorage;
 
 static void
