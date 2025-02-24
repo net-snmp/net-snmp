@@ -182,7 +182,7 @@ se_store_list(unsigned int major, unsigned int minor, const char *type)
 static struct snmp_enum_list **
 se_find_list_ptr(unsigned int major, unsigned int minor)
 {
-    if (major > current_maj_num || minor > current_min_num)
+    if (major >= current_maj_num || minor >= current_min_num)
         return NULL;
     netsnmp_assert(NULL != snmp_enum_lists);
 
