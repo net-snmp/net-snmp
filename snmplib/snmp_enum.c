@@ -76,28 +76,6 @@ init_snmp_enum(const char *type)
     return SE_OK;
 }
 
-int
-se_store_in_list(struct snmp_enum_list *new_list,
-              unsigned int major, unsigned int minor)
-{
-    int             ret = SE_OK;
-
-    if (major > current_maj_num || minor > current_min_num) {
-        /*
-         * XXX: realloc 
-         */
-        return SE_NOMEM;
-    }
-    netsnmp_assert(NULL != snmp_enum_lists);
-
-    if (snmp_enum_lists[major][minor] != NULL)
-        ret = SE_ALREADY_THERE;
-
-    snmp_enum_lists[major][minor] = new_list;
-
-    return ret;
-}
-
 void
 se_read_conf(const char *word, const char *cptr)
 {
@@ -201,14 +179,22 @@ se_store_list(unsigned int major, unsigned int minor, const char *type)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_LIST */
 
-struct snmp_enum_list *
-se_find_list(unsigned int major, unsigned int minor)
+static struct snmp_enum_list **
+se_find_list_ptr(unsigned int major, unsigned int minor)
 {
     if (major > current_maj_num || minor > current_min_num)
         return NULL;
     netsnmp_assert(NULL != snmp_enum_lists);
 
-    return snmp_enum_lists[major][minor];
+    return &snmp_enum_lists[major][minor];
+}
+
+struct snmp_enum_list *
+se_find_list(unsigned int major, unsigned int minor)
+{
+    struct snmp_enum_list **p = se_find_list_ptr(major, minor);
+
+    return p ? *p : NULL;
 }
 
 int
@@ -321,12 +307,7 @@ se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
 int
 se_add_pair(unsigned int major, unsigned int minor, char *label, int value)
 {
-    struct snmp_enum_list *list = se_find_list(major, minor);
-    int             created = (list) ? 1 : 0;
-    int             ret = se_add_pair_to_list(&list, label, value);
-    if (!created)
-        se_store_in_list(list, major, minor);
-    return ret;
+    return se_add_pair_to_list(se_find_list_ptr(major, minor), label, value);
 }
 
 /*
