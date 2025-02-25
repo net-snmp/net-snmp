@@ -41,7 +41,7 @@ struct snmp_enum_list_str {
     struct snmp_enum_list_str *next;
 };
 
-static struct snmp_enum_list ***snmp_enum_lists;
+static struct snmp_enum_list **snmp_enum_lists;
 static unsigned int current_maj_num;
 static unsigned int current_min_num;
 static struct snmp_enum_list_str *sliststorage;
@@ -52,24 +52,14 @@ free_enum_list(struct snmp_enum_list *list);
 int
 init_snmp_enum(const char *type)
 {
-    int             i;
-
     if (NULL != snmp_enum_lists)
         return SE_OK;
 
-    snmp_enum_lists = (struct snmp_enum_list ***)
-        calloc(1, sizeof(struct snmp_enum_list **) * SE_MAX_IDS);
+    snmp_enum_lists = calloc(SE_MAX_IDS * SE_MAX_SUBIDS,
+                             sizeof(*snmp_enum_lists));
     if (!snmp_enum_lists)
         return SE_NOMEM;
     current_maj_num = SE_MAX_IDS;
-
-    for (i = 0; i < SE_MAX_IDS; i++) {
-        if (!snmp_enum_lists[i])
-            snmp_enum_lists[i] = (struct snmp_enum_list **)
-                calloc(1, sizeof(struct snmp_enum_list *) * SE_MAX_SUBIDS);
-        if (!snmp_enum_lists[i])
-            return SE_NOMEM;
-    }
     current_min_num = SE_MAX_SUBIDS;
 
     register_const_config_handler(type, "enum", se_read_conf, NULL, NULL);
@@ -186,7 +176,7 @@ se_find_list_ptr(unsigned int major, unsigned int minor)
         return NULL;
     netsnmp_assert(NULL != snmp_enum_lists);
 
-    return &snmp_enum_lists[major][minor];
+    return &snmp_enum_lists[major * current_min_num + minor];
 }
 
 struct snmp_enum_list *
@@ -404,7 +394,6 @@ void
 clear_snmp_enum(void)
 {
     struct snmp_enum_list_str *sptr = sliststorage, *next = NULL;
-    int i, j;
 
     while (sptr != NULL) {
 	next = sptr->next;
@@ -415,18 +404,7 @@ clear_snmp_enum(void)
     }
     sliststorage = NULL;
 
-    if (snmp_enum_lists) {
-        for (i = 0; i < SE_MAX_IDS; i++) {
-            if (snmp_enum_lists[i]) {
-                for (j = 0; j < SE_MAX_SUBIDS; j++) {
-                    if (snmp_enum_lists[i][j])
-                        free_enum_list(snmp_enum_lists[i][j]);
-                }
-                SNMP_FREE(snmp_enum_lists[i]);
-            }
-        }
-        SNMP_FREE(snmp_enum_lists);
-    }
+    SNMP_FREE(snmp_enum_lists);
 }
 
 void
