@@ -3910,15 +3910,8 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
      */
     SNMP_FREE(to->authKey);
 
-    if (from->authKeyLen > 0 &&
-        (to->authKey = (u_char *) malloc(from->authKeyLen))
-        != NULL) {
-        to->authKeyLen = from->authKeyLen;
-        memcpy(to->authKey, from->authKey, to->authKeyLen);
-    } else {
-        to->authKey = NULL;
-        to->authKeyLen = 0;
-    }
+    to->authKey = netsnmp_memdup(from->authKey, from->authKeyLen);
+    to->authKeyLen = to->authKey ? from->authKeyLen : 0;
 
     /*
      * copy the authKeyKu
