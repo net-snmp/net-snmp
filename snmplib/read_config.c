@@ -2081,6 +2081,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
         /*
          * copy validated data 
          */
+        *len = ilen;
         cptr = *str;
         for (i = 0; i < ilen; i++) {
             if (1 == sscanf(readfrom, "%2x", &tmp))
@@ -2097,7 +2098,6 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
          * Terminate the output buffer.
          */
         *cptr++ = '\0';
-        *len = ilen;
         readfrom = skip_white_const(readfrom);
     } else {
         /*
