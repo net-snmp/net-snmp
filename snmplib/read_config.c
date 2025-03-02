@@ -622,7 +622,10 @@ snmp_config_when(char *line, int when)
             return SNMPERR_GENERR;
         }
         cptr = strtok_r(NULL, SNMP_CONFIG_DELIMETERS, &st);
-        netsnmp_assert(cptr);
+        if (!cptr) {
+            netsnmp_config_error("Invalid configuration line %s", line);
+            return SNMPERR_GENERR;
+        }
         lptr = read_config_find_handler(lptr, cptr);
     } else {
         /*
