@@ -403,6 +403,7 @@ void
 clear_snmp_enum(void)
 {
     struct snmp_enum_list_str *sptr = sliststorage, *next = NULL;
+    unsigned int major, minor;
 
     while (sptr != NULL) {
 	next = sptr->next;
@@ -413,6 +414,17 @@ clear_snmp_enum(void)
     }
     sliststorage = NULL;
 
+    for (major = 0; major < current_maj_num; major++) {
+        for (minor = 0; minor < current_min_num; minor++) {
+            struct snmp_enum_list **list_ptr = se_find_list_ptr(major, minor);
+
+            if (!list_ptr || !*list_ptr)
+                continue;
+            free_enum_list(*list_ptr);
+        }
+    }
+    current_maj_num = 0;
+    current_min_num = 0;
     SNMP_FREE(snmp_enum_lists);
 }
 
