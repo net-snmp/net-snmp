@@ -260,13 +260,19 @@ se_find_label(unsigned int major, unsigned int minor, int value)
     return se_find_label_in_list(se_find_list(major, minor), value);
 }
 
+/*
+ * Ownership of 'label' is transferred from the caller to this function.
+ * 'label' is freed if list insertion fails.
+ */
 int
 se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
 {
     struct snmp_enum_list *lastnode = NULL, *new_node, *tmp;
 
-    if (!list)
+    if (!list) {
+        free(label);
         return SE_DNE;
+    }
 
     tmp = *list;
     while (tmp) {
@@ -350,6 +356,10 @@ se_find_free_value_in_slist(const char *listname)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SE_FIND_FREE_VALUE_IN_SLIST */
 
+/*
+ * Ownership of 'label' is transferred from the caller to this function.
+ * 'label' is freed if list insertion fails.
+ */
 int
 se_add_pair_to_slist(const char *listname, char *label, int value)
 {
