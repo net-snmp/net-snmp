@@ -363,28 +363,27 @@ se_find_free_value_in_slist(const char *listname)
 int
 se_add_pair_to_slist(const char *listname, char *label, int value)
 {
-    struct snmp_enum_list *list = se_find_slist(listname);
-    int             created = (list) ? 1 : 0;
-    int             ret = se_add_pair_to_list(&list, label, value);
+    struct snmp_enum_list **list_p = se_find_slist_ptr(listname);
 
-    if (!created) {
+    if (!list_p) {
         struct snmp_enum_list_str *sptr =
             SNMP_MALLOC_STRUCT(snmp_enum_list_str);
         if (!sptr) {
-            free_enum_list(list);
+            free(label);
             return SE_NOMEM;
         }
         sptr->next = sliststorage;
         sptr->name = strdup(listname);
         if (!sptr->name) {
             free(sptr);
-            free_enum_list(list);
+            free(label);
             return SE_NOMEM;
         }
-        sptr->list = list;
+        list_p = &sptr->list;
         sliststorage = sptr;
     }
-    return ret;
+
+    return se_add_pair_to_list(list_p, label, value);
 }
 
 static void
