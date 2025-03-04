@@ -2114,17 +2114,9 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
         snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
         asp->pdu = NULL;
-        netsnmp_remove_and_free_agent_snmp_session(asp);
+        free_agent_snmp_session(asp);
     }
     return 1;
-}
-
-void
-netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
-{
-    DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", asp));
-
-    free_agent_snmp_session(asp);
 }
 
 /** handles an incoming SNMP packet into the agent */
@@ -2202,7 +2194,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
             /*
              * drop the request 
              */
-            netsnmp_remove_and_free_agent_snmp_session(asp);
+            free_agent_snmp_session(asp);
             return 0;
         } else {
             /*
@@ -2228,14 +2220,14 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
                 if (!snmp_send(asp->session, asp->pdu))
                     snmp_free_pdu(asp->pdu);
                 asp->pdu = NULL;
-                netsnmp_remove_and_free_agent_snmp_session(asp);
+                free_agent_snmp_session(asp);
                 return 1;
             } else {
 #endif /* support for community based SNMP */
                 /*
                  * drop the request 
                  */
-                netsnmp_remove_and_free_agent_snmp_session(asp);
+                free_agent_snmp_session(asp);
                 return 0;
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
             }
