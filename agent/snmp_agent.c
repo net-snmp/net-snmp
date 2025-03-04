@@ -363,7 +363,6 @@ typedef struct _agent_nsap {
 } agent_nsap;
 
 static agent_nsap *agent_nsap_list = NULL;
-static netsnmp_agent_session *agent_session_list = NULL;
 netsnmp_agent_session *netsnmp_processing_set = NULL;
 netsnmp_agent_session *agent_delegated_list = NULL;
 netsnmp_agent_session *netsnmp_agent_queued_list = NULL;
@@ -2129,9 +2128,6 @@ dump_sess_list(void)
     netsnmp_agent_session *a;
 
     DEBUGMSGTL(("snmp_agent", "DUMP agent_sess_list -> "));
-    for (a = agent_session_list; a != NULL; a = a->next) {
-        DEBUGMSG(("snmp_agent", "%8p[session %8p] -> ", a, a->session));
-    }
     DEBUGMSG(("snmp_agent", "[NIL]\n"));
 }
 #endif /* NETSNMP_FEATURE_REMOVE_DUMP_SESS_LIST */
@@ -2139,28 +2135,9 @@ dump_sess_list(void)
 void
 netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
 {
-    netsnmp_agent_session *a, **prevNext = &agent_session_list;
-
     DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", asp));
 
-    for (a = agent_session_list; a != NULL; a = *prevNext) {
-        if (a == asp) {
-            *prevNext = a->next;
-            a->next = NULL;
-            free_agent_snmp_session(a);
-            asp = NULL;
-            break;
-        } else {
-            prevNext = &(a->next);
-        }
-    }
-
-    if (a == NULL && asp != NULL) {
-        /*
-         * We couldn't find it on the list, so free it anyway.  
-         */
-        free_agent_snmp_session(asp);
-    }
+    free_agent_snmp_session(asp);
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_FREE_AGENT_SNMP_SESSION_BY_SESSION
@@ -2169,20 +2146,7 @@ netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
                                            void (*free_request)
                                            (netsnmp_request_list *))
 {
-    netsnmp_agent_session *a, *next, **prevNext = &agent_session_list;
-
     DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", sess));
-
-    for (a = agent_session_list; a != NULL; a = next) {
-        if (a->session == sess) {
-            *prevNext = a->next;
-            next = a->next;
-            free_agent_snmp_session(a);
-        } else {
-            prevNext = &(a->next);
-            next = a->next;
-        }
-    }
 }
 #endif /* NETSNMP_FEATURE_REMOVE_FREE_AGENT_SNMP_SESSION_BY_SESSION */
 
