@@ -115,7 +115,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
             netsnmp_session sess = { };
             netsnmp_agent_session *vals =
                 init_agent_snmp_session(&sess, pdu);
-            handle_snmp_packet(1, &sess, 0, pdu, vals);
+            handle_snmp_packet(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, &sess, 0,
+                               pdu, vals);
             snmp_free_pdu(pdu);
             free_agent_snmp_session(vals);
 
