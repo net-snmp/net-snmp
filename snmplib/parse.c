@@ -2926,6 +2926,7 @@ parse_notificationDefinition(FILE * fp, char *name)
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
                 goto free_node;
             }
+            free(np->reference);
             np->reference = strdup(quoted_string_buffer);
             break;
         case OBJECTS:
