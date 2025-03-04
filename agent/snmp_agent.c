@@ -123,8 +123,6 @@ netsnmp_feature_child_of(request_set_error_idx, snmp_agent);
 netsnmp_feature_child_of(set_agent_uptime, snmp_agent);
 netsnmp_feature_child_of(agent_check_and_process, snmp_agent);
 
-netsnmp_feature_child_of(dump_sess_list, agent_debugging_utilities);
-
 netsnmp_feature_child_of(agent_remove_list_data, netsnmp_unused);
 netsnmp_feature_child_of(set_all_requests_error, netsnmp_unused);
 netsnmp_feature_child_of(addrcache_age, netsnmp_unused);
@@ -2120,17 +2118,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     }
     return 1;
 }
-
-#ifndef NETSNMP_FEATURE_REMOVE_DUMP_SESS_LIST
-void
-dump_sess_list(void)
-{
-    netsnmp_agent_session *a;
-
-    DEBUGMSGTL(("snmp_agent", "DUMP agent_sess_list -> "));
-    DEBUGMSG(("snmp_agent", "[NIL]\n"));
-}
-#endif /* NETSNMP_FEATURE_REMOVE_DUMP_SESS_LIST */
 
 void
 netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)

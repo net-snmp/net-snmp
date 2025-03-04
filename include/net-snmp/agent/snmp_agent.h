@@ -247,7 +247,6 @@ extern          "C" {
                                                     *));
 #endif
     int             getNextSessID(void);
-    void            dump_sess_list(void);
     int             init_master_agent(void);
     void            shutdown_master_agent(void);
     int             agent_check_and_process(int block);
