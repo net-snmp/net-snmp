@@ -239,13 +239,6 @@ extern          "C" {
     void           
         netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session
                                                    *asp);
-#ifdef SNMP_NEED_REQUEST_LIST
-    void           
-        netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
-                                                   void (*free_request)
-                                                   (netsnmp_request_list
-                                                    *));
-#endif
     int             getNextSessID(void);
     int             init_master_agent(void);
     void            shutdown_master_agent(void);

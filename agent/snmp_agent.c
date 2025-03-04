@@ -2127,16 +2127,6 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
     free_agent_snmp_session(asp);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_FREE_AGENT_SNMP_SESSION_BY_SESSION
-void
-netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
-                                           void (*free_request)
-                                           (netsnmp_request_list *))
-{
-    DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", sess));
-}
-#endif /* NETSNMP_FEATURE_REMOVE_FREE_AGENT_SNMP_SESSION_BY_SESSION */
-
 /** handles an incoming SNMP packet into the agent */
 int
 handle_snmp_packet(int op, netsnmp_session * session, int reqid,
