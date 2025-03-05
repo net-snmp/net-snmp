@@ -1905,6 +1905,8 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     }
 
     if (asp->pdu) {
+        const int command = asp->pdu->command;
+
         /*
          * If we've got an error status, then this needs to be
          *  passed back up to the higher levels....
@@ -2027,7 +2029,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         if (status == SNMP_ERR_NOERROR)
             snmp_increment_statistic_by(
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-                (asp->pdu->command == SNMP_MSG_SET ?
+                (command == SNMP_MSG_SET ?
                  STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS),
 #else
                 STAT_SNMPINTOTALREQVARS,
