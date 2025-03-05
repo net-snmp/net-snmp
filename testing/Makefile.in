@@ -25,6 +25,7 @@ help:
 	@echo "  make testall     -- Run all available tests"
 	@echo "  make testfailed  -- Run only the tests that failed last time."
 	@echo "  make testsimple  -- Run tests directly with simple_run"
+	@echo "  make fuzz-tests  -- Run fuzzing related tests"
 	@echo ""
 	@echo "Set additional test parameters with TESTOPTS=args"
 	@echo ""
