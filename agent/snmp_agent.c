@@ -1604,6 +1604,9 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
 
     DEBUGMSGTL(("snmp_agent","agent_session %8p released\n", asp));
 
+    snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMP_CALLBACK_FREE_SESSION,
+                        asp);
+
     netsnmp_remove_from_delegated(asp);
     
     DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p freed\n",
