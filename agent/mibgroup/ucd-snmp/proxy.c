@@ -579,7 +579,10 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         }
         netsnmp_free_delegated_cache(cache);
         return 0;
-
+    case NETSNMP_CALLBACK_OP_RESEND:
+	DEBUGMSGTL(("proxy", "resend on session %8p req=0x%x\n",
+                    sess, (unsigned)reqid));
+        return 0;
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
         vars = pdu->variables;
 
