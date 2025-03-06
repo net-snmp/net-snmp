@@ -1543,7 +1543,7 @@ _mfd_ifXTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully commited this row, set the dirty flag. Use the
+         * if we successfully committed this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1882,7 +1882,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
      *
      * 1) allocate space for each column. Comment out columns you don't
      * intend to save. You may also need to add room for any non-
-     * column data you want to store. Remeber, data will be stored in
+     * column data you want to store. Remember, data will be stored in
      * ASCII form, so you need to allow for that. Here are some
      * general guidelines:
      *

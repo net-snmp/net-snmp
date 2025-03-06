@@ -283,7 +283,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
                     "transport disconnect indication\n"));
 
         /*
-         * deal with existing session. This happend if agentx sends
+         * deal with existing session. This happened if agentx sends
          * a message to the master, but the master goes away before
          * a response is sent. agentx will spin in snmp_synch_response_cb,
          * waiting for a response. At the very least, the waiting
@@ -504,8 +504,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      */
 
     internal_pdu = snmp_clone_pdu(pdu);
-    if (!internal_pdu)
+    if (!internal_pdu) {
+        free(smagic);
         return 1;
+    }
     free(internal_pdu->contextName);
     internal_pdu->contextName = (char *) internal_pdu->community;
     internal_pdu->contextNameLen = internal_pdu->community_len;
@@ -1081,7 +1083,7 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
              *    (which is no longer valid).
              * 
              * Given that the main session is not responsive anyway.
-             * it shoudn't matter if we lose some outstanding requests.
+             * it shouldn't matter if we lose some outstanding requests.
              */
             if (agentx_callback_sess != NULL ) {
                 snmp_close(agentx_callback_sess);

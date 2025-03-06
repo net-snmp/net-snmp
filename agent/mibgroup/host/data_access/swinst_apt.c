@@ -33,7 +33,7 @@
 
 config_require(date_n_time);
 
-char pkg_directory[SNMP_MAXBUF];
+static char pkg_directory[SNMP_MAXBUF];
 static char apt_fmt[SNMP_MAXBUF];
 static char file[SNMP_MAXBUF];
 
@@ -114,7 +114,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
                 memcpy(entry->swDate, date_buf, entry->swDate_len);
             }
         }
-        /* FIXME, or fallback to whatever nonsesnse was here before, or leave it uninitialied?
+        /* FIXME, or fallback to whatever nonsense was here before, or leave it uninitialized?
              else {
         entry->swDate_len = 8;
 	memcpy(entry->swDate, "\0\0\1\1\0\0\0\0", 8);

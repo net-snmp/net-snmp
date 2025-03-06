@@ -36,8 +36,6 @@ if test "x$with_rpm" != "xno"; then
   # rpm-4.0.x needs rpmio.
   NETSNMP_SEARCH_LIBS(rpmGetPath, rpmio,,, $LMIBLIBS, _rpmlibs)
   
-  # rpm-4.0.3 librpmdb actually contains what we need.
-  NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
   # now check for rpm using the appropriate libraries.
   NETSNMP_SEARCH_LIBS(rpmReadConfigFiles, rpm, [
     AC_DEFINE(HAVE_LIBRPM, 1,
@@ -97,6 +95,32 @@ LIBS="$netsnmp_save_LIBS"
 #
 #   regex in process table
 #
+if test "x$with_pcre2" != "xno"; then
+  AC_CHECK_HEADER([pcre2.h], [
+      AC_DEFINE([HAVE_PCRE2_H], [1], [Define to 1 if you have <pcre2.h>.])
+      pcre2_h=yes
+    ],
+    [pcre2_h=no], [#define PCRE2_CODE_UNIT_WIDTH 8]
+  )
+fi
+if test "x$pcre2header_h" = "xno" -o "x$pcre2_h" = "xno" ; then
+  if test "x$with_pcre2" = "xyes" ; then
+    AC_MSG_ERROR([Could not find the pcre2 header file needed and was specifically asked to use pcre2 support])
+  else
+    with_pcre2=no
+  fi
+fi
+
+if test "x$with_pcre2" != "xno"; then
+  NETSNMP_SEARCH_LIBS([pcre2_match_8], [pcre2-8], [
+    LMIBLIBS="$LMIBLIBS -lpcre2-8"
+    ],,, LAGENTLIBS)
+  AC_SUBST(LAGENTLIBS)
+  AC_SUBST(LMIBLIBS)
+fi
+
+if test "x$with_pcre2" != "xyes"; then
+
 if test "x$with_pcre" != "xno"; then
   AC_CHECK_HEADER([pcre.h], [
       AC_DEFINE([HAVE_PCRE_H], [1], [Define to 1 if you have <pcre.h>.])
@@ -122,4 +146,5 @@ if test "x$with_pcre" != "xno"; then
     ],,, LAGENTLIBS)
   AC_SUBST(LAGENTLIBS)
   AC_SUBST(LMIBLIBS)
+fi
 fi

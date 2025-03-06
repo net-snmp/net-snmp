@@ -38,9 +38,13 @@ if [ "x$TESTCONF_SH_EVALED" != "xyes" ]; then
 #
 # set cpu limit to 1h.
 #
-[ "x$SNMP_LIMIT_CPU" = "x" ] && SNMP_LIMIT_CPU=3600
-# ulimit will fail if existing limit is lower -- ignore because it's ok
-ulimit -S -t $SNMP_LIMIT_CPU 2>/dev/null
+# defaults: 1h CPU, 500MB VMEM
+#
+if [ "x$SNMP_NO_RUNTIME_LIMITS" = "x" ]; then
+    [ "x$SNMP_LIMIT_CPU" = "x" ] && SNMP_LIMIT_CPU=3600
+    # ulimit will fail if existing limit is lower -- ignore because it's ok
+    ulimit -S -t $SNMP_LIMIT_CPU 2>/dev/null
+fi
 
 #
 # Set up an NL suppressing echo command

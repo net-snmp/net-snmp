@@ -738,6 +738,7 @@ snmpps(int argc, char *argv[])
 
     free_perf(procs, count);
     snmp_close(ss);
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
@@ -885,7 +886,10 @@ int snmptop(int argc, char **argv)
 
         clock = time(NULL);
         ptm = localtime(&clock);
-        strftime(timestr, sizeof(timestr), "%H:%M:%S", ptm);
+        if (ptm)
+            strftime(timestr, sizeof(timestr), "%H:%M:%S", ptm);
+        else
+            snprintf(timestr, sizeof(timestr), "(unknown)");
 
         clear();
         move(0, 0);
@@ -996,8 +1000,8 @@ int snmptop(int argc, char **argv)
     endwin();
 
     free_perf(oproc, ocount);
-
     snmp_close(ss);
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
@@ -1019,6 +1023,6 @@ int main(int argc, char **argv)
 
     if (strcmp(progname, "snmpps") == 0) return snmpps(argc, argv);
     if (strcmp(progname, "snmptop") == 0) return snmptop(argc, argv);
-    fprintf(stderr, "%s: unknown prognam name\n", progname);
+    fprintf(stderr, "%s: unknown program name\n", progname);
     exit(1);
 }

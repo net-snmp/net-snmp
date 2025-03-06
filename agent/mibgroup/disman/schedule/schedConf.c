@@ -231,7 +231,7 @@ parse_sched_timed( const char *token, char *line )
      */
     while (line && isspace((unsigned char)(*line)))
         line++;
-    if ( *line == '=' ) {
+    if (line && *line == '=') {
         line++;
         while (line && isspace((unsigned char)(*line))) {
             line++;
@@ -263,7 +263,7 @@ parse_sched_timed( const char *token, char *line )
     }
     entry = (struct schedTable_entry *)row->data;
 
-    entry->schedWeekDay = dayVal;
+    entry->schedWeekDay[0] = dayVal;
     memcpy(entry->schedMonth,  monVal,  2);
     memcpy(entry->schedDay,    dateVal, 4+4);
     memcpy(entry->schedHour,   hourVal, 3);
@@ -333,7 +333,7 @@ parse_schedTable( const char *token, char *line )
         /* Unpick the various timed bits */
     len  = 22; vp = time_bits;
     line = read_config_read_data(ASN_OCTET_STR, line, &vp,  &len);
-    entry->schedWeekDay  = time_bits[0];
+    entry->schedWeekDay[0] = time_bits[0];
     entry->schedMonth[0] = time_bits[1];
     entry->schedMonth[1] = time_bits[2];
     entry->schedHour[0]  = time_bits[11];
@@ -407,7 +407,7 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
         cptr = read_config_store_data(ASN_UNSIGNED,  cptr, &tint, NULL );
 
         /* Combine all the timed bits into a single field */
-        time_bits[0]  = entry->schedWeekDay;
+        time_bits[0]  = entry->schedWeekDay[0];
         time_bits[1]  = entry->schedMonth[0];
         time_bits[2]  = entry->schedMonth[1];
         time_bits[11] = entry->schedHour[0];

@@ -56,7 +56,7 @@ Availability:
    chance of being up to date and compatible with the Net-SNMP version
    with which it is bundled.)
 
-   A seperately bundled package of the SNMP module can be obtained from CPAN.
+   A separately bundled package of the SNMP module can be obtained from CPAN.
 
    (Note: In previous releases this module was compatible with the CMU
    SNMP library. Starting with Perl5/SNMP-1.7 this module will *only*

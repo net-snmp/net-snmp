@@ -98,6 +98,7 @@ SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/agent/netsnmp_close_fds.h>
+#include <net-snmp/agent/mib_modules.h>
 #include "../snmplib/snmp_syslog.h"
 #include "../agent_global_vars.h"
 #include "../agent/mibgroup/snmpv3/snmpEngine.h"
@@ -261,7 +262,7 @@ term_handler(int sig)
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
-     * on signal. Thats why following function is called, which closes the 
+     * on signal. That's why following function is called, which closes the 
      * socket descriptors and causes the select() to return
      */
     snmp_close(main_session);
@@ -370,11 +371,12 @@ parse_trapd_address(const char *token, char *cptr)
     if (default_port == ddefault_port) {
         default_port = strdup(buf);
     } else {
-        p = malloc(strlen(buf) + 1 + strlen(default_port) + 1);
+        size_t len = strlen(buf) + 1 + strlen(default_port) + 1;
+        p = malloc(len);
         if (p) {
-            strcpy(p, buf);
-            strcat(p, ",");
-            strcat(p, default_port );
+            strlcpy(p, buf, len);
+            strlcat(p, ",", len);
+            strlcat(p, default_port, len);
         }
         free(default_port);
         default_port = p;
@@ -434,7 +436,7 @@ parse_config_agentuser(const char *token, char *cptr)
         if (info)
             netsnmp_set_agent_user_id(info->pw_uid);
         else
-            config_perror("User not found in passwd database");
+            config_perror("User not found in password database");
         endpwent();
 #endif
     }
@@ -756,7 +758,7 @@ main(int argc, char *argv[])
                 } else {
                     /* Old style: implicitly "print=format" */
                     trap1_fmt_str_remember = malloc(strlen(optarg) + 7);
-                    sprintf( trap1_fmt_str_remember, "print %s", optarg );
+                    snprintf( trap1_fmt_str_remember, strlen(optarg) + 7, "print %s", optarg );
                 }
             } else {
                 usage();
@@ -776,7 +778,10 @@ main(int argc, char *argv[])
                     struct group  *info;
 
                     info = getgrnam(optarg);
-                    gid = info ? info->gr_gid : -1;
+                    if (info)
+                        gid = info->gr_gid;
+                    else
+                        gid = -1;
                     endgrent();
                 }
 #endif
@@ -906,7 +911,10 @@ main(int argc, char *argv[])
                     struct passwd  *info;
 
                     info = getpwnam(optarg);
-                    uid = info ? info->pw_uid : -1;
+                    if (info)
+                        uid = info->pw_uid;
+                    else
+                        uid = -1;
                     endpwent();
                 }
 #endif
@@ -958,12 +966,13 @@ main(int argc, char *argv[])
         for (i = optind; i < argc; i++) {
             char *astring;
             if (listen_ports != NULL) {
-                astring = malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
+                size_t len = strlen(listen_ports) + 2 + strlen(argv[i]);
+                astring = malloc(len);
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     goto out;
                 }
-                sprintf(astring, "%s,%s", listen_ports, argv[i]);
+                snprintf(astring, len, "%s,%s", listen_ports, argv[i]);
                 free(listen_ports);
                 listen_ports = astring;
             } else {
@@ -1312,12 +1321,18 @@ main(int argc, char *argv[])
     if (snmp_get_do_logging()) {
         struct tm      *tm;
         time_t          timer;
+
         time(&timer);
         tm = localtime(&timer);
-        snmp_log(LOG_INFO,
+        if (tm) {
+            snmp_log(LOG_INFO,
                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d NET-SNMP version %s Stopped.\n",
                  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
                  tm->tm_min, tm->tm_sec, netsnmp_get_version());
+        } else {
+            snmp_log(LOG_INFO, "NET-SNMP version %s Stopped.\n",
+                     netsnmp_get_version());
+        }
     }
     snmp_log(LOG_INFO, "Stopping snmptrapd\n");
     
@@ -1343,7 +1358,7 @@ out:
 /*
  * Read the configuration files. Implemented as a signal handler so that
  * receipt of SIGHUP will cause configuration to be re-read when the
- * trap daemon is running detatched from the console.
+ * trap daemon is running detached from the console.
  *
  */
 void

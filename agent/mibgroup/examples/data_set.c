@@ -4,7 +4,7 @@
  *  helper routines take care of handling all aspects of SNMP requests
  *  as they come in (yay!).
  *
- *  The exmaple we are instrumenting is an otherwise-useless table
+ *  The example we are instrumenting is an otherwise-useless table
  *  containing the names of IETF working group chairs.  Obviously,
  *  this data isn't all that useful from a network management point of
  *  view but this example only demonstrates how to use and store data.
@@ -101,7 +101,7 @@ init_data_set(void)
      * * the output of this debugging statement. 
      */
     DEBUGMSGTL(("example_data_set",
-                "Initalizing example dataset table\n"));
+                "Initializing example dataset table\n"));
 
     /*
      * It's going to be the "working group chairs" table, since I'm

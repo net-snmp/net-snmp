@@ -81,7 +81,7 @@ parse_mteOTable(const char *token, char *line)
         /*
          * The previous Event-MIB implementation saved
          *   these fields as separate (integer) values
-         * Accept this (for backwards compatability)
+         * Accept this (for backwards compatibility)
          */
         line = read_config_read_data(ASN_UNSIGNED, line, &tmpint, &len);
         if (tmpint == TV_TRUE)

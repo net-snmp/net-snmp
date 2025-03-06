@@ -140,7 +140,6 @@ AC_CONFIG_FILES([net-snmp-create-v3-user:net-snmp-create-v3-user.in],
 AC_CONFIG_FILES([netsnmp.pc:netsnmp.pc.in netsnmp-agent.pc:netsnmp-agent.pc.in])
 AC_CONFIG_FILES([dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in])
 AC_CONFIG_FILES([local/snmpconf])
-AC_CONFIG_FILES([perl/MakefileSubs.pm])
 
 AC_CONFIG_COMMANDS([default], echo timestamp > stamp-h)
 

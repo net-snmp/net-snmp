@@ -75,7 +75,7 @@ extern          "C" {
      * Returns the request id of the generated packet if applicable, otherwise 1.
      * (There is a special case: if the request id is 0, 1 will be returned).
      * On any error, 0 is returned.
-     * The pdu is freed by snmp_send() unless a failure occured.
+     * The pdu is freed by snmp_send() unless a failure occurred.
      */
     NETSNMP_IMPORT
     int             snmp_send(netsnmp_session *, netsnmp_pdu *);
@@ -94,7 +94,7 @@ extern          "C" {
      * then send the pdu.
      * Returns the request id of the generated packet if applicable, otherwise 1.
      * On any error, 0 is returned.
-     * The pdu is freed by snmp_send() unless a failure occured.
+     * The pdu is freed by snmp_send() unless a failure occurred.
      */
     NETSNMP_IMPORT
     int             snmp_async_send(netsnmp_session *, netsnmp_pdu *,

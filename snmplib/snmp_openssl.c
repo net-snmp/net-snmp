@@ -12,10 +12,28 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/openssl_config.h>
 
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/net-snmp-features.h>
+
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
+
+#include <ctype.h>
+
+#include <openssl/evp.h>
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <openssl/err.h>
+#include <openssl/objects.h>
+
+#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/cert_util.h>
+#include <net-snmp/library/snmp_openssl.h>
+
+#endif /* NETSNMP_USE_OPENSSL & ... */
 
 /** OpenSSL compat functions for apps */
 #if defined(NETSNMP_USE_OPENSSL)
@@ -80,7 +98,7 @@ DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
 #endif
 #endif /* defined(NETSNMP_USE_OPENSSL) */
 
-/** TLS/DTLS certificatte support */
+/** TLS/DTLS certificate support */
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
 netsnmp_feature_require(container_free_all);
@@ -90,23 +108,10 @@ netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused);
 netsnmp_feature_child_of(openssl_err_log, netsnmp_unused);
 netsnmp_feature_child_of(cert_dump_names, netsnmp_unused);
 
-#include <ctype.h>
-
-#include <openssl/evp.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include <openssl/objects.h>
-
-#include <net-snmp/library/snmp_debug.h>
-#include <net-snmp/library/cert_util.h>
-#include <net-snmp/library/snmp_openssl.h>
-
 static u_char have_started_already = 0;
 
 /*
- * This code merely does openssl initialization so that multilpe
+ * This code merely does openssl initialization so that multiple
  * modules are safe to call netsnmp_init_openssl() for bootstrapping
  * without worrying about other callers that may have already done so.
  */
@@ -213,7 +218,7 @@ netsnmp_openssl_cert_get_subjectName(X509 *ocert, char **buf, int *len)
 /** netsnmp_openssl_cert_get_commonName: get commonName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
- * be responsbile for releasing.
+ * be responsible for releasing.
  */
 char *
 netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
@@ -468,7 +473,7 @@ _extract_oname(const GENERAL_NAME *oname)
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
- * be responsbile for releasing.
+ * be responsible for releasing.
  */
 char *
 netsnmp_openssl_cert_get_subjectAltNames(X509 *ocert, char **buf, int *len)
@@ -710,7 +715,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     /*
      * get fingerprint and save it
      */
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, -1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, NS_HASH_SHA1);
     if (NULL == fingerprint)
         return NULL;
 
@@ -748,7 +753,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         sk_num_res = sk_X509_num(ochain);
         for(i = 0; i < sk_num_res; ++i) {
             ocert_tmp = sk_X509_value(ochain, i);
-            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, -1);
+            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
             cert_map = netsnmp_cert_map_alloc(NULL, ocert);

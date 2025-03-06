@@ -14,6 +14,7 @@
 #include "systemstats_private.h"
 
 #include <sys/types.h>
+#include <unistd.h>
 #include <dirent.h>
 #include <ctype.h>
 
@@ -69,7 +70,7 @@ struct	ip6stat {
 	u_quad_t ip6s_localout;		/* total ip packets generated here */
 	u_quad_t ip6s_odropped;		/* lost packets due to nobufs, etc. */
 	u_quad_t ip6s_reassembled;	/* total packets reassembled ok */
-	u_quad_t ip6s_fragmented;	/* datagrams sucessfully fragmented */
+	u_quad_t ip6s_fragmented;	/* datagrams successfully fragmented */
 	u_quad_t ip6s_ofragments;	/* output fragments created */
 	u_quad_t ip6s_cantfrag;		/* don't fragment flag was set, etc. */
 	u_quad_t ip6s_badoptions;	/* error in option processing */
@@ -693,7 +694,6 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     FILE           *devin;
     char           line[1024];
     char           *start = line;
-    int            rc;
     char           *scan_str;
     uintmax_t       scan_val;
     netsnmp_systemstats_entry *entry = NULL;
@@ -711,7 +711,6 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     /*
      * Read each per interface statistics proc file
      */
-    rc = 0;
     while ((dev_snmp6_entry = readdir(dev_snmp6_dir)) != NULL) {
         if (dev_snmp6_entry->d_name[0] == '.')
             continue;

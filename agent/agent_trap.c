@@ -251,7 +251,7 @@ netsnmp_add_notification_session(netsnmp_session *ss, int pdutype,
 /*
  * xxx needs update to support embedded NUL.
  * xxx should probably also be using and unregister callback, similar to
- *     how registaration is done.
+ *     how registration is done.
  */
 void
 netsnmp_unregister_notification(const char *name, u_char len)
@@ -367,7 +367,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     session.callback = handle_disconnect_packet;
     session.version = version;
     if (com) {
-        session.community = (u_char *) NETSNMP_REMOVE_CONST(char *, com);
+        session.community = (u_char *)strdup(com);
         session.community_len = strlen(com);
     }
 
@@ -382,7 +382,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
     memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
 
     /*
-     * use specified soure or client addr, if available. If no, and
+     * use specified source or client addr, if available. If no, and
      * if the sink is localhost, bind to localhost, to reduce open ports.
      */
     if (NULL != src)
@@ -396,7 +396,7 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
             client_addr = "localhost";
         tspec.source = client_addr;
     }
-    session.localname = NETSNMP_REMOVE_CONST(char *,tspec.source);
+    session.localname = tspec.source ? strdup(tspec.source) : NULL;
 
     tspec.application = "snmptrap";
     if (NULL == sinkport)
@@ -413,9 +413,12 @@ netsnmp_create_v1v2_notification_session(const char *sink, const char* sinkport,
         /** diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmpd: netsnmp_create_notification_session",
                          &session);
+        netsnmp_cleanup_session(&session);
         /* transport freed by snmp_add */
         return NULL;
     }
+
+    netsnmp_cleanup_session(&session);
 
     rc = netsnmp_add_closable_notification_session(sesp,
                                                    !(t->flags & NETSNMP_TRANSPORT_FLAG_STREAM),
@@ -1330,7 +1333,7 @@ void send_trap_vars_with_context(int trap, int specific,
  *
  * This function eventually calls send_enterprise_trap_vars.  If the
  * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
- * and enterprise_length paramater is set to the pre defined NETSNMP_SYSTEM_MIB 
+ * and enterprise_length parameter is set to the pre defined NETSNMP_SYSTEM_MIB 
  * oid and length respectively.  If the trap type is set to 
  * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
  * parameters are set to the pre-defined NETSNMP_NOTIFICATION_MIB oid and length 
@@ -1360,7 +1363,7 @@ send_easy_trap(int trap, int specific)
  *
  * This function eventually calls send_enterprise_trap_vars.  If the
  * trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise 
- * and enterprise_length paramater is set to the pre defined NETSNMP_SYSTEM_MIB 
+ * and enterprise_length parameter is set to the pre defined NETSNMP_SYSTEM_MIB 
  * oid and length respectively.  If the trap type is set to 
  * SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length 
  * parameters are set to the pre-defined NETSNMP_NOTIFICATION_MIB oid and length 
@@ -1611,13 +1614,13 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
 
     session.version = SNMP_VERSION_3;
 
-    session.peername = NETSNMP_REMOVE_CONST(char*,dest);
+    session.peername = strdup(dest);
 
-    session.securityName = NETSNMP_REMOVE_CONST(char*,user);
+    session.securityName = strdup(user);
     session.securityNameLen = strlen(user);
 
-    if (NULL != context) {
-        session.contextName = NETSNMP_REMOVE_CONST(char*,context);
+    if (context) {
+        session.contextName = strdup(context);
         session.contextNameLen = strlen(context);
     }
 
@@ -1701,15 +1704,12 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                                   notif_profile) != 1) {
         DEBUGMSGTL(("trap:v3user_notif_sess", "add notification failed\n"));
         snmp_close(ss);
-        ss = NULL;
-        goto bail;
+        return NULL;
     }
 
   bail:
     /** free any allocated mem in session */
-    SNMP_FREE(session.securityAuthProto);
-    SNMP_FREE(session.securityPrivProto);
-    SNMP_FREE(session.contextEngineID);
+    netsnmp_cleanup_session(&session);
 
     return ss;
 }

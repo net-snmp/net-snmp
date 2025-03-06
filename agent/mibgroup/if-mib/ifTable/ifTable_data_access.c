@@ -603,7 +603,7 @@ ifTable_container_shutdown(netsnmp_container *container_ptr)
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
  *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or peforming calculations to derive the data),
+ *  some other existing data, or performing calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  ifTable_row_prep() for populating data.
@@ -640,7 +640,7 @@ ifTable_container_load(netsnmp_container *container)
 
     /*
      * we just got a fresh copy of interface data. compare it to
-     * what we've already got, and make any adjustements...
+     * what we've already got, and make any adjustments...
      */
     CONTAINER_FOR_EACH(container, __check_interface_entry_for_updates, &cdc);
 

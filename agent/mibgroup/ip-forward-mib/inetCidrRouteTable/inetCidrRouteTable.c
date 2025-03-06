@@ -119,7 +119,7 @@ initialize_table_inetCidrRouteTable(void)
 	(inetCidrRouteTable_user_context_p, flags);
 
     /*
-     * regester scalar for route number
+     * register scalar for route number
      */
     {
         oid             reg_oid[] =
@@ -162,7 +162,7 @@ shutdown_table_inetCidrRouteTable(void)
 }
 
 /**
- * extra context initialization (eg default values)
+ * extra context initialization (e.g. default values)
  *
  * @param rowreq_ctx    : row request context
  * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
@@ -179,7 +179,7 @@ inetCidrRouteTable_rowreq_ctx_init(inetCidrRouteTable_rowreq_ctx *
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:210:o: |-> Perform extra inetCidrRouteTable rowreq initialization. (eg DEFVALS)
+     * TODO:210:o: |-> Perform extra inetCidrRouteTable rowreq initialization. (e.g. DEFVALS)
      */
     rowreq_ctx->data->rt_nexthop_type = 0;
 
@@ -1499,7 +1499,7 @@ inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully commited this row, set the dirty flag.
+     * if we successfully committed this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -1538,7 +1538,7 @@ inetCidrRouteTable_undo_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
      * check the column's flag in rowreq_ctx->column_set_flags to see
      * if it was set during commit, then undo it.
      *
-     * eg: if (rowreq_ctx->column_set_flags & COLUMN__FLAG) {}
+     * e.g.: if (rowreq_ctx->column_set_flags & COLUMN__FLAG) {}
      */
     if (rowreq_ctx->column_set_flags & COLUMN_INETCIDRROUTESTATUS_FLAG) {
         /*
@@ -1565,7 +1565,7 @@ inetCidrRouteTable_undo_commit(inetCidrRouteTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully un-commited this row, clear the dirty flag.
+     * if we successfully un-committed this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -1619,7 +1619,7 @@ The ifIndex value which identifies the local interface
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1736,7 +1736,7 @@ The type of route.  Note that local(3) refers to a
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1843,7 +1843,7 @@ The Autonomous System Number of the Next Hop.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1948,7 +1948,7 @@ The primary routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2052,7 +2052,7 @@ An alternate routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transistion from one value to another
  * is legal).
  *      
  *@note

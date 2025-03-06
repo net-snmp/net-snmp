@@ -524,7 +524,7 @@ write_expObjectID(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -540,7 +540,7 @@ write_expObjectID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectID;
         tmplen = StorageTmp->expObjectIDLen;
@@ -615,7 +615,7 @@ write_expObjectIDWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -631,7 +631,7 @@ write_expObjectIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectIDWildcard;
         StorageTmp->expObjectIDWildcard = *((long *) var_val);
@@ -697,7 +697,7 @@ write_expObjectSampleType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -713,7 +713,7 @@ write_expObjectSampleType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectSampleType;
         StorageTmp->expObjectSampleType = *((long *) var_val);
@@ -782,7 +782,7 @@ write_expObjectDeltaDiscontinuityID(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -798,7 +798,7 @@ write_expObjectDeltaDiscontinuityID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectDeltaDiscontinuityID;
         tmplen = StorageTmp->expObjectDeltaDiscontinuityIDLen;
@@ -878,7 +878,7 @@ write_expObjectDiscontinuityIDWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -894,7 +894,7 @@ write_expObjectDiscontinuityIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectDiscontinuityIDWildcard;
         StorageTmp->expObjectDiscontinuityIDWildcard = *((long *) var_val);
@@ -962,7 +962,7 @@ write_expObjectDiscontinuityIDType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -978,7 +978,7 @@ write_expObjectDiscontinuityIDType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectDiscontinuityIDType;
         StorageTmp->expObjectDiscontinuityIDType = *((long *) var_val);
@@ -1046,7 +1046,7 @@ write_expObjectConditional(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1062,7 +1062,7 @@ write_expObjectConditional(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectConditional;
         tmplen = StorageTmp->expObjectConditionalLen;
@@ -1141,7 +1141,7 @@ write_expObjectConditionalWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -1157,7 +1157,7 @@ write_expObjectConditionalWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expObjectConditionalWildcard;
         StorageTmp->expObjectConditionalWildcard = *((long *) var_val);
@@ -1289,7 +1289,7 @@ write_expObjectEntryStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         if (StorageTmp == NULL) {
             /*
@@ -1362,7 +1362,7 @@ write_expObjectEntryStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 

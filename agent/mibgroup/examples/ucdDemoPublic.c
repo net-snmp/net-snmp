@@ -107,7 +107,7 @@ var_ucdDemoPublic(struct variable *vp,
     static char     string[MYMAX + 1], *cp;
     int             i;
 
-    *write_method = NULL;       /* assume it isnt writable for the time being */
+    *write_method = NULL;       /* assume it isn't writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 
     if (header_generic(vp, name, length, exact, var_len, write_method))
@@ -188,6 +188,7 @@ write_ucdDemoResetKeys(int action,
                                           demopass);
                 }
             }
+            free(engineID);
             /*
              * reset the keys 
              */

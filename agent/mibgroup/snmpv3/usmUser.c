@@ -279,7 +279,7 @@ var_usmUser(struct variable * vp,
     if (!vp || !name || !length || !var_len)
         return NULL;
 
-    /* assume it isnt writable for the time being */
+    /* assume it isn't writable for the time being */
     *write_method = (WriteMethod*)0;    
 
     /* assume an integer and change later if not */
@@ -767,7 +767,7 @@ write_usmUserAuthProtocol(int action,
  *
  * Note: This function handles both the usmUserAuthKeyChange and
  *       usmUserOwnAuthKeyChange objects.  We are not passed the name
- *       of the user requseting the keychange, so we leave this to the
+ *       of the user requesting the keychange, so we leave this to the
  *       calling module to verify when and if we should be called.  To
  *       change this would require a change in the mib module API to
  *       pass in the securityName requesting the change.

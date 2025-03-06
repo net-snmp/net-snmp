@@ -314,7 +314,7 @@ optProc(int argc, char *const *argv, int opt)
         break;                  /* End of '-Cx' switch */
 
         /*
-         *  Backward compatability for the main display modes
+         *  Backward compatibility for the main display modes
          *    (where this doesn't clash with standard SNMP flags)
          */
     case 'i':

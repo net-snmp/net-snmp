@@ -33,6 +33,9 @@ netsnmp_feature_require(interface_ioctl_flags_set);
 #ifdef HAVE_PCI_LOOKUP_NAME
 #include <pci/pci.h>
 #include <setjmp.h>
+#ifndef PCI_NONRET
+#define PCI_NONRET
+#endif
 static struct pci_access *pci_access;
 
 /* Avoid letting libpci call exit(1) when no PCI bus is available. */
@@ -147,7 +150,7 @@ static void init_libpci(void)
      * When snmpd is run inside an OpenVZ container or on a Raspberry Pi system
      * /proc/bus/pci is not available.
      */
-    if (stat("/proc/bus/pci", &stbuf) == 0)
+    if (stat("/proc/bus/pci", &stbuf) < 0)
         return;
 
     pci_access = pci_alloc();
@@ -553,7 +556,7 @@ static void netsnmp_derive_interface_id(netsnmp_interface_entry *entry)
 
 static void netsnmp_retrieve_link_speed(int fd, netsnmp_interface_entry *entry)
 {
-    unsigned long long defaultspeed = NOMINAL_LINK_SPEED;
+    unsigned long long defaultspeed = NOMINAL_LINK_SPEED, speed;
 
     if (!(entry->os_flags & IFF_RUNNING)) {
         /*
@@ -562,9 +565,12 @@ static void netsnmp_retrieve_link_speed(int fd, netsnmp_interface_entry *entry)
          */
         defaultspeed = 0;
     }
-    entry->speed = netsnmp_linux_interface_get_if_speed(fd, entry->name,
-                                                        defaultspeed);
-    entry->speed_high = entry->speed / 1000000LL;
+    speed = netsnmp_linux_interface_get_if_speed(fd, entry->name,
+                                                 defaultspeed);
+    entry->speed_high = speed / 1000000LL;
+    entry->speed = speed;
+    if (speed > 0xffffffff)
+        entry->speed = 0xffffffff; /* 4294967295; */
 }
 
 /**
@@ -657,20 +663,19 @@ static void netsnmp_retrieve_one_link_info(struct rtnl_link *rtnl_link, int fd,
                                            int load_stats)
 {
     struct nl_addr *nl_addr = rtnl_link_get_addr(rtnl_link);
-    void *paddr = nl_addr_get_binary_addr(nl_addr);
-    int paddr_len = nl_addr_get_len(nl_addr);
-    unsigned int link_flags;
+    void *paddr = nl_addr ? nl_addr_get_binary_addr(nl_addr) : NULL;
+    int paddr_len = nl_addr ? nl_addr_get_len(nl_addr) : 0;
 
     free(entry->paddr);
     entry->paddr = netsnmp_memdup(paddr, paddr_len);
     entry->paddr_len = paddr_len;
-    entry->type = netsnmp_convert_arphrd_type(
-                              rtnl_link_get_arptype(rtnl_link));
+    entry->type = netsnmp_convert_arphrd_type(rtnl_link_get_arptype(rtnl_link),
+                                              rtnl_link_get_type(rtnl_link));
     if (entry->type == 0)
         netsnmp_guess_interface_type(entry);
     netsnmp_derive_interface_id(entry);
     /* IFF_* flags */
-    link_flags = rtnl_link_get_flags(rtnl_link);
+    const unsigned int link_flags = rtnl_link_get_flags(rtnl_link);
     netsnmp_process_link_flags(entry, link_flags);
     /* MTU */
     entry->mtu = rtnl_link_get_mtu(rtnl_link);
@@ -1179,7 +1184,7 @@ void netsnmp_prefix_process(int fd, void *data)
                 DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
                 free(new);
             }
-            if(iret == 2) /*Only when enrty already exists and we are only updating*/
+            if(iret == 2) /*Only when entry already exists and we are only updating*/
                 free(new);
         }
         have_addr = have_prefix = 0;

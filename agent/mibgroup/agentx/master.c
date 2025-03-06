@@ -216,7 +216,6 @@ agentx_got_response(int operation,
     int             i, ret;
     netsnmp_request_info *requests, *request;
     netsnmp_variable_list *var;
-    netsnmp_session *ax_session;
 
     cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
@@ -261,8 +260,6 @@ agentx_got_response(int operation,
             } else {
                 DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
             }
-            ax_session = (netsnmp_session *) cache->localinfo;
-            netsnmp_free_agent_snmp_session_by_session(ax_session, NULL);
             netsnmp_free_delegated_cache(cache);
             return 0;
         }

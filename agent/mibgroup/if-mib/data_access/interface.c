@@ -16,7 +16,11 @@
 #include "if-mib/ifTable/ifTable.h"
 #include "if-mib/data_access/interface.h"
 #include "interface_private.h"
-#if defined(HAVE_PCRE_H)
+
+#if defined(HAVE_PCRE2_H)
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+#elif defined(HAVE_PCRE_H)
 #include <pcre.h>
 #elif defined(HAVE_REGEX_H)
 #include <sys/types.h>
@@ -47,8 +51,7 @@ static int ifmib_max_num_ifaces = 0;
  */
 static int _access_interface_entry_compare_name(const void *lhs,
                                                 const void *rhs);
-static void _access_interface_entry_release(netsnmp_interface_entry * entry,
-                                            void *unused);
+static void _access_interface_entry_release(void *entry, void *unused);
 static void _access_interface_entry_save_name(const char *name, oid index);
 static void _parse_interface_config(const char *token, char *cptr);
 static void _parse_ifmib_max_num_ifaces(const char *token, char *cptr);
@@ -203,9 +206,7 @@ netsnmp_access_interface_container_free(netsnmp_container *container, u_int free
         /*
          * free all items.
          */
-        CONTAINER_CLEAR(container,
-                        (netsnmp_container_obj_func*)_access_interface_entry_release,
-                        NULL);
+        CONTAINER_CLEAR(container, _access_interface_entry_release, NULL);
     }
 
     CONTAINER_FREE(container);
@@ -477,7 +478,7 @@ _access_interface_entry_compare_name(const void *lhs, const void *rhs)
 /**
  */
 static void
-_access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
+_access_interface_entry_release(void *entry, void *context)
 {
     netsnmp_access_interface_entry_free(entry);
 }
@@ -825,7 +826,9 @@ int netsnmp_access_interface_max_reached(const char *name)
 int netsnmp_access_interface_include(const char *name)
 {
     netsnmp_include_if_list *if_ptr;
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE2_H)
+    pcre2_match_data *ndx_match;
+#elif defined(HAVE_PCRE_H)
     int                      found_ndx[3];
 #endif
 
@@ -839,9 +842,18 @@ int netsnmp_access_interface_include(const char *name)
          */
         return TRUE;
 
+#if defined(HAVE_PCRE2_H)
+    ndx_match = pcre2_match_data_create(3, NULL);
+#endif
 
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+        if (pcre2_match(if_ptr->regex_ptr, (const unsigned char *)name,
+                        strlen(name), 0, 0, ndx_match, NULL) >= 0)  {
+                pcre2_match_data_free(ndx_match);
+                return TRUE;
+        }
+#elif defined(HAVE_PCRE_H)
         if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
                       found_ndx, 3) >= 0)
             return TRUE;
@@ -854,6 +866,9 @@ int netsnmp_access_interface_include(const char *name)
 #endif
     }
 
+#if defined(HAVE_PCRE2_H)
+    pcre2_match_data_free(ndx_match);
+#endif
     return FALSE;
 }
 
@@ -965,7 +980,15 @@ _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
     char                    *name, *st;
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+    /*
+     * We can only get the message upon calling pcre2_error_message.
+     * so an additional variable is required.
+     */
+    int                     pcre2_err_code;
+    char                    pcre2_error[128];
+    size_t                  pcre2_error_offset;
+#elif defined(HAVE_PCRE_H)
     const char              *pcre_error;
     int                     pcre_error_offset;
 #elif defined(HAVE_REGEX_H)
@@ -997,7 +1020,19 @@ _parse_include_if_config(const char *token, char *cptr)
             config_perror("Out of memory");
             goto err;
         }
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+        if_new->regex_ptr = pcre2_compile((const unsigned char *)if_new->name,
+                                          PCRE2_ZERO_TERMINATED, 0,
+                                          &pcre2_err_code, &pcre2_error_offset,
+                                          NULL);
+        if (!if_new->regex_ptr) {
+            pcre2_get_error_message(pcre2_err_code,
+                                    (unsigned char *)pcre2_error,
+                                    sizeof(pcre2_error));
+            config_perror(pcre2_error);
+            goto err;
+        }
+#elif defined(HAVE_PCRE_H)
         if_new->regex_ptr = pcre_compile(if_new->name, 0,  &pcre_error,
                                          &pcre_error_offset, NULL);
         if (!if_new->regex_ptr) {
@@ -1033,7 +1068,7 @@ _parse_include_if_config(const char *token, char *cptr)
 
 err:
     if (if_new) {
-#if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
+#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
         free(if_new->regex_ptr);
 #endif
         free(if_new->name);
@@ -1048,7 +1083,7 @@ _free_include_if_config(void)
 
     while (if_ptr) {
         if_next = if_ptr->next;
-#if defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
         free(if_ptr->regex_ptr);
 #elif defined(HAVE_REGEX_H)
         regfree(if_ptr->regex_ptr);

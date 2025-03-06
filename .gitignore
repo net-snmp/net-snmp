@@ -124,8 +124,8 @@ snmplib/transports/snmp_transport_inits.h
 stamp-h
 TAGS
 testing/failed_tests
+testing/fuzzing/*_fuzzer
 testing/testing/
-testing/fuzzing/
 win32/*/debug
 win32/*/release
 win32/bin

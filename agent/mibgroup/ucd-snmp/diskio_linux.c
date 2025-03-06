@@ -94,6 +94,10 @@ diskio_free_config(void)
                            NETSNMP_DS_AGENT_DISKIO_NO_LOOP, 0);
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_DISKIO_NO_RAM, 0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_DISKIO_NO_MD, 0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+                           NETSNMP_DS_AGENT_DISKIO_NO_NBD, 0);
 
     if (la_head.length) {
         /*
@@ -150,7 +154,7 @@ add_device(char *path, int addNewDisks)
             maxdisks = 50;
             disks = malloc(maxdisks * sizeof(struct diskiopart));
             if (!disks) {
-                config_perror("malloc failed for new disko allocation.");
+                config_perror("malloc failed for new diskio allocation.");
                 netsnmp_config_error("\tignoring:  %s", path);
                 return;
             }
@@ -162,7 +166,7 @@ add_device(char *path, int addNewDisks)
             if (!newdisks) {
                 free(disks);
                 disks = NULL;
-                config_perror("malloc failed for new disko allocation.");
+                config_perror("malloc failed for new diskio allocation.");
                 netsnmp_config_error("\tignoring:  %s", path);
                 return;
             }
@@ -253,6 +257,12 @@ void init_diskio_linux(void)
     netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_ram",
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_md",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_MD);
+    netsnmp_ds_register_config(ASN_BOOLEAN, app, "diskio_exclude_nbd",
+                               NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_NBD);
 
     snmpd_register_config_handler("diskio", diskio_parse_config_disks,
         diskio_free_config, "path | device");
@@ -326,6 +336,14 @@ is_excluded(const char *name)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DISKIO_NO_RAM)
         && !(strncmp(name, "ram", 3)))
+        return 1;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_MD)
+        && !(strncmp(name, "md", 2)))
+        return 1;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_DISKIO_NO_NBD)
+        && !(strncmp(name, "nbd", 2)))
         return 1;
     return 0;
 }

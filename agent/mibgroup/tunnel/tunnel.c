@@ -324,7 +324,7 @@ setTunnelParm(char *ifname, struct ip_tunnel_parm *parm)
 
 
 /*
- * update a struct tunnel. its index and ifname elements have to be set.
+ * update a struct tunnel. Its index and ifname elements have to be set.
  */
 static struct tunnel *
 updateTunnel(struct tunnel *tunnel)
@@ -358,7 +358,7 @@ updateTunnel(struct tunnel *tunnel)
          * NOTE: this ioctl does not guarantee 6 bytes of a physaddr.
          * In particular, a 'sit0' interface only appears to get back
          * 4 bytes of sa_data. We don't use sa_data here, or we'd
-         * need to memset it to 0 before the ioct.
+         * need to memset it to 0 before the ioctl.
          */
         strlcpy(ifrq.ifr_name, tunnel->ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) == 0)

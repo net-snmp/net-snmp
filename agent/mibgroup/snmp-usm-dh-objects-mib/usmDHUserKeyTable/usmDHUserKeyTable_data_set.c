@@ -9,6 +9,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -361,7 +362,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
 
     /*
-     * if we successfully commited this row, set the dirty flag.
+     * if we successfully committed this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -406,7 +407,7 @@ usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-commited this row, clear the dirty flag.
+     * if we successfully un-committed this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -517,7 +518,7 @@ The object used to change any given user's Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -718,7 +719,7 @@ The object used to change the agents own Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -902,7 +903,7 @@ The object used to change any given user's Privacy Key using
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1104,7 +1105,7 @@ The object used to change the agent's own Privacy Key using a
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note

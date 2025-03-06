@@ -201,7 +201,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
      */
     /* For this implementation we use the t->data memory pointer as
        the sessionID.  As it's a pointer to session specific data tied
-       with the transport object we know it'll never be realloated
+       with the transport object we know it'll never be reallocated
        (ie, duplicated) until release by this transport object and is
        safe to use as a unique session identifier. */
 
@@ -623,7 +623,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     */
     /* Implementation notes:
        - we expect fingerprints to be stored in the transport config
-       - we do not currently support mulitple principals and only offer one
+       - we do not currently support multiple principals and only offer one
     */
     if ((rc = netsnmp_tlsbase_verify_client_cert(ssl, tlsdata))
         != SNMPERR_SUCCESS) {

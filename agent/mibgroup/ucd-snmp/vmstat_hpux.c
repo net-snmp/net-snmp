@@ -262,7 +262,7 @@ init_vmstat_hpux(void)
 
 /*
  * Data collection function take_snapshot starts here 
- * Get data from kernel and save into the snapshot strutcs 
+ * Get data from kernel and save into the snapshot structs 
  * Argument is the snapshot struct to save to. Global anyway, but looks nicer 
  */
 static int
@@ -467,7 +467,7 @@ update_stats(unsigned int registrationNumber, void *clientarg)
         /*
          * swapin and swapout are in pages, MIB wants kB/s,so we just need to get kB and seconds 
          * For the others we need to get value per second 
-         * Retreive static information to obtain memory page_size 
+         * Retrieve static information to obtain memory page_size 
          */
         if (pstat_getstatic(&pst, sizeof(pst), (size_t) 1, 0) == -1) {
             snmp_log(LOG_ERR, "vmstat_hpux: pstat_getstatic failed!\n");

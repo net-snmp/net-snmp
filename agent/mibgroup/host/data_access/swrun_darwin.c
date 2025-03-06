@@ -217,7 +217,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 
 /* ---------------------------------------------------------------------
  * The following code was snagged from Darwin code, and the original
- * file had the following licences:
+ * file had the following licenses:
  */
 
 /*
@@ -250,7 +250,7 @@ _set_command_name_jaguar(netsnmp_swrun_entry *entry)
     char       *arg_end, *exec_path;
     int        *ip;
     int         len;
-    char       *command_beg, *command, *command_end;
+    char       *command_beg, *command;
     char        arg_buf[MAX_KERN_ARGMAX]; /* max to avoid kernel bug */
 
     DEBUGMSGTL(("swrun:load:arch:_cn"," pid %d\n", entry->hrSWRunIndex));
@@ -314,7 +314,7 @@ _set_command_name_jaguar(netsnmp_swrun_entry *entry)
     DEBUGMSGTL(("swrun:load:arch:_cn"," command_beg '%s'\n", command_beg));
     
     /* Get the basename of command. */
-    command = command_end = command_beg + strlen(command_beg) + 1;
+    command = command_beg + strlen(command_beg) + 1;
     for (command--; command >= command_beg; command--) {
         if (*command == '/')
             break;
@@ -344,7 +344,7 @@ _set_command_name(netsnmp_swrun_entry *entry)
     size_t      procargssize, mib_size = sizeof(mib)/sizeof(mib[0]);
     char       *cp;
     int         len, nargs;
-    char       *command_beg, *command, *command_end, *exec_path, *argN;
+    char       *command_beg, *command, *exec_path, *argN;
     char        arg_buf[MAX_KERN_ARGMAX]; /* max to avoid kernel bug */
 
     /*
@@ -420,7 +420,7 @@ _set_command_name(netsnmp_swrun_entry *entry)
         DEBUGMSGTL(("swrun:load:arch:_cn"," unexpected end of buffer\n"));
         return -1;
     }
-    command_end = command = cp;
+    command = cp;
     --nargs;
 
     /*

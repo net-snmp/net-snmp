@@ -21,7 +21,7 @@ There are four sections:
 
   Combining the binaries and HTMLHelp files
 
-  Bulding a NullSoft installer package
+  Building a NullSoft installer package
 
 
 Compiling binaries
@@ -308,7 +308,7 @@ Combining the binaries and HTMLHelp files
     copy c:\temp\Net-SNMP\html\Net-SNMP.chm c:\usr\docs\
 
 
-Bulding a NullSoft installer package
+Building a NullSoft installer package
 ====================================
 
 Requirements

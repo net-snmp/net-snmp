@@ -98,7 +98,7 @@ var_snmpEngine(struct variable *vp,
     static long     long_ret;
     static unsigned char engineID[SNMP_MAXBUF];
 
-    *write_method = (WriteMethod*)0;    /* assume it isnt writable for the time being */
+    *write_method = (WriteMethod*)0;    /* assume it isn't writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 
     if (header_generic(vp, name, length, exact, var_len, write_method))

@@ -1,7 +1,7 @@
 /*
  *  Interface MIB architecture support
  *
- *  Based on patch 1362403, submited by Rojer
+ *  Based on patch 1362403, submitted by Rojer
  *
  * $Id$
  */
@@ -465,7 +465,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     struct sockaddr_dl *adl;
     int amask;
     char *if_name;
-    int flags;
 #ifdef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
     struct timespec startspec;
 
@@ -509,7 +508,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         ifp = (struct if_msghdr *) cp;
         if_name = NULL;
-        flags = 0;
         adl = NULL;
 
         if (ifp->ifm_type != RTM_IFINFO)

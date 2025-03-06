@@ -11,13 +11,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [regular, disable-set, mini, read-only, wolfssl]
+        mode: [regular, disable-set, mini, read-only, wolfssl, Android]
 
     env:
       MODE: ${{ matrix.mode }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@main
 
     - name: install required packages
       run: sudo bash -c "MODE=$MODE ci/install.sh"

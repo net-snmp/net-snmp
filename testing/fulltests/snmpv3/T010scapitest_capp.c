@@ -154,7 +154,7 @@ int
 main(int argc, char **argv)
 {
     int             rval = SNMPERR_SUCCESS;
-    char            ch;
+    int             ch;
 
     local_progname = argv[0];
 
@@ -379,7 +379,7 @@ test_dokeyedhash(void)
         goto test_dokeyedhash_again;
     }
 
-    } /* whilte(1) */
+    } /* while(1) */
 
     return failcount;
 

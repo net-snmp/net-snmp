@@ -65,7 +65,7 @@
        - \#define NETSNMP_DS_LIB_MIB_REPLACE         7 replace objects from latest module 
        - \#define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM  8 print only numeric enum values
        - \#define NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS  9 print only numeric enum values 
-       - \#define NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS 10 dont print oid indexes specially 
+       - \#define NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS 10 don't print oid indexes specially 
        - \#define NETSNMP_DS_LIB_ALARM_DONT_USE_SIG  11 don't use the alarm() signal 
        - \#define NETSNMP_DS_LIB_PRINT_FULL_OID      12 print fully qualified oids 
        - \#define NETSNMP_DS_LIB_QUICK_PRINT         13 print very brief output for parsing
@@ -87,7 +87,7 @@
        - \#define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 don't print UNITS suffix
        - \#define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 don't apply DISPLAY-HINTs
        - \#define NETSNMP_DS_LIB_16BIT_IDS           31 restrict requestIDs, etc to 16-bit values
-       - \#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32 don't save/load any persistant state
+       - \#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32 don't save/load any persistent state
        - \#define NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT   33 print a leading 0 on hex values <= 'f'
 
 
@@ -355,6 +355,8 @@ netsnmp_ds_parse_boolean(char *line)
     char           *st;
 
     value = strtok_r(line, " \t\n", &st);
+    if (!value)
+        goto invalid;
     if (strcasecmp(value, "yes") == 0 || 
 	strcasecmp(value, "true") == 0) {
         return 1;
@@ -363,12 +365,14 @@ netsnmp_ds_parse_boolean(char *line)
         return 0;
     } else {
         itmp = strtol(value, &endptr, 10);
-        if (*endptr != 0 || itmp < 0 || itmp > 1) {
-            config_perror("Should be yes|no|true|false|0|1");
-            return -1;
-	}
+        if (*endptr != 0 || itmp < 0 || itmp > 1)
+            goto invalid;
         return itmp;
     }
+
+invalid:
+    config_perror("Should be yes|no|true|false|0|1");
+    return -1;
 }
 
 void
@@ -402,13 +406,17 @@ netsnmp_ds_handle_config(const char *token, char *line)
 
         case ASN_INTEGER:
             value = strtok_r(line, " \t\n", &st);
-            itmp = strtol(value, &endptr, 10);
-            if (*endptr != 0) {
-                config_perror("Bad integer value");
-	    } else {
-                netsnmp_ds_set_int(drsp->storeid, drsp->which, itmp);
-	    }
-            DEBUGMSGTL(("netsnmp_ds_handle_config", "int: %d\n", itmp));
+            if (!value) {
+                config_perror("Missing value");
+            } else {
+                itmp = strtol(value, &endptr, 10);
+                if (*endptr != 0) {
+                    config_perror("Bad integer value");
+                } else {
+                    netsnmp_ds_set_int(drsp->storeid, drsp->which, itmp);
+                }
+                DEBUGMSGTL(("netsnmp_ds_handle_config", "int: %d\n", itmp));
+            }
             break;
 
         case ASN_OCTET_STR:

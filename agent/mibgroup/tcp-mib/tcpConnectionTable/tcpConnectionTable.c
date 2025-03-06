@@ -843,7 +843,7 @@ tcpConnectionTable_commit(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully commited this row, set the dirty flag.
+     * if we successfully committed this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -893,7 +893,7 @@ tcpConnectionTable_undo_commit(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-commited this row, clear the dirty flag.
+     * if we successfully un-committed this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -962,7 +962,7 @@ The state of this TCP connection.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (ie, the transition from one value to another
  * is legal).
  *      
  *@note

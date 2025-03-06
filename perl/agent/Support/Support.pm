@@ -187,7 +187,7 @@ sub my_snmp_handler {
     print STDERR "processing a request of type " . 
 	$request_info->getMode() . "\n" if ($debugging) ;
     #
-    # Process each varbind in teh list of requests
+    # Process each varbind in the list of requests
     #
     for($request = $requests; $request; $request = $request->next()) {
       my $oid = $request->getOID();

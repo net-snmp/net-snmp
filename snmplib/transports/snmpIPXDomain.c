@@ -238,7 +238,7 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
         }
 
         /*
-         * This session is inteneded as a server, so we must bind on to the
+         * This session is intended as a server, so we must bind on to the
          * given address (which may include a particular network and/or node
          * address, but definitely includes a port number).
          */

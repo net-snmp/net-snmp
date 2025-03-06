@@ -1,0 +1,43 @@
+# Creates and uploads a Coverity build on a schedule
+
+name: Coverity Scan
+
+on:
+  schedule:
+    # Run daily
+    - cron: '0 0 * * *'
+  # Support manual execution
+  workflow_dispatch:
+jobs:
+  coverity:
+    if: github.repository == 'net-snmp/net-snmp'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check github variables
+      run: |
+          [ -n "${{ secrets.COVERITY_SCAN_EMAIL }}" ] && \
+          [ -n "${{ secrets.COVERITY_SCAN_TOKEN }}" ]
+    - uses: actions/checkout@main
+    - name: Download the Coverity Build Tool
+      run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=${{ secrets.COVERITY_SCAN_TOKEN }}&project=net-snmp" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+    - name: Install Net-SNMP build dependencies
+      run: sudo bash -c "MODE=regular ci/install.sh"
+    - name: Configure Net-SNMP
+      run: ci/net-snmp-configure master CFLAGS=-fPIE
+    - name: Build Net-SNMP with cov-build
+      run: |
+          export PATH=$(pwd)/cov-analysis-linux64/bin:$PATH
+          cov-build --dir cov-int make -s -j"$(nproc)"
+    - name: Upload the result
+      run: |
+          tar -cf - cov-int | xz -9 >net-snmp-cov.txz
+          ls -l net-snmp-cov.txz
+          curl \
+            --form project=net-snmp \
+            --form token=${{ secrets.COVERITY_SCAN_TOKEN }} \
+            --form email=${{ secrets.COVERITY_SCAN_EMAIL }} \
+            --form file=@net-snmp-cov.txz \
+            https://scan.coverity.com/builds?project=net-snmp

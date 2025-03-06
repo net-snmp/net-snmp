@@ -98,8 +98,7 @@ snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 
     if (reaped->sess && reaped->close_sess)
         snmp_close(reaped->sess);
-    else
-        SNMP_FREE(reaped->tAddress);
+    SNMP_FREE(reaped->tAddress);
     SNMP_FREE(reaped->nameData);
     SNMP_FREE(reaped->tagListData);
     SNMP_FREE(reaped->paramsData);
@@ -265,7 +264,7 @@ init_snmpTargetAddrEntry_data(void)
 
     snmpd_register_config_handler("targetAddr",
                                   snmpd_parse_config_targetAddr,
-                                  (void (*)(void))0, NULL);
+                                  NULL, NULL);
 
     /*
      * we need to be called back later 

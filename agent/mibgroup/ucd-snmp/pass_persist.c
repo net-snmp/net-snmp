@@ -111,7 +111,7 @@ pass_persist_group(struct extensible *persistpassthrus)
     * group
     */
    for (ptmp = persistpassthrus; ptmp != NULL; ptmp = ptmp->next) {
-      /* skip already groupped items */
+      /* skip already grouped items */
       if (ptmp->passpersist_inst != NULL) {
          continue;
       }

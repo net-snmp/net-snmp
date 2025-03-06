@@ -45,7 +45,7 @@ static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
  *  original mib module api (which derived from the original CMU SNMP
  *  code) the underlying mib modules were passed very little
  *  information (only the truly most basic information about a
- *  request).  This worked well at the time but in todays world of
+ *  request).  This worked well at the time but in today's world of
  *  subagents, device instrumentation, low resource consumption, etc,
  *  it just isn't flexible enough.  "handlers" are here to fix all that.
  *
@@ -73,12 +73,12 @@ static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
  *  @link instance instance@endlink, @link table table@endlink, @link
  *  table_iterator table_iterator@endlink, @link table_data
  *  table_data@endlink, or @link table_dataset table_dataset@endlink
- *  helpers to make their life easier.  These "helpers" interpert
+ *  helpers to make their life easier.  These "helpers" interpret
  *  important aspects of the request and pass them on to you.
  *
  *  For instance, the @link table table@endlink helper is designed to
  *  hand you a list of extracted index values from an incoming
- *  request.  THe @link table_iterator table_iterator@endlink helper
+ *  request.  The @link table_iterator table_iterator@endlink helper
  *  is built on top of the table helper, and is designed to help you
  *  iterate through data stored elsewhere (like in a kernel) that is
  *  not in OID lexographical order (ie, don't write your own index/oid
@@ -133,7 +133,7 @@ netsnmp_create_handler(const char *name,
  *  access function, registration location OID and list of modes that
  *  the handler supports. If modes == 0, then modes will automatically
  *  be set to the default value of only HANDLER_CAN_DEFAULT, which is
- *  by default read-only GET and GETNEXT requests. A hander which supports
+ *  by default read-only GET and GETNEXT requests. A handler which supports
  *  sets but not row creation should set us a mode of HANDLER_CAN_SET_ONLY.
  *  @note This ends up calling netsnmp_create_handler(name, handler_access_method)
  *  @param name is the handler name and is copied then assigned to
@@ -199,7 +199,7 @@ netsnmp_handler_registration_create(const char *name,
 /** Creates a handler registration structure with a new MIB handler.
  *  This function first @link netsnmp_create_handler() creates @endlink
  *  a MIB handler, then @link netsnmp_handler_registration_create()
- *  makes registation structure @endlink for it.
+ *  makes registration structure @endlink for it.
  *
  *  @param name is the handler name for netsnmp_create_handler()
  *
@@ -239,7 +239,7 @@ netsnmp_create_handler_registration(const char *name,
 }
 
 /** Registers a MIB handler inside the registration structure.
- *  Checks given registation handler for sanity, then
+ *  Checks given registration handler for sanity, then
  *  @link netsnmp_register_mib() performs registration @endlink
  *  in the MIB tree, as defined by the netsnmp_handler_registration
  *  pointer. On success, SNMP_CALLBACK_APPLICATION is called.
@@ -349,7 +349,7 @@ netsnmp_unregister_handler(netsnmp_handler_registration *reginfo)
 }
 
 /** Registers a MIB handler inside the registration structure.
- *  Checks given registation handler for sanity, then
+ *  Checks given registration handler for sanity, then
  *  @link netsnmp_register_mib() performs registration @endlink
  *  in the MIB tree, as defined by the netsnmp_handler_registration
  *  pointer. Never calls SNMP_CALLBACK_APPLICATION.
@@ -724,7 +724,7 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
  *  @param handler is the MIB Handler to be duplicated
  *
  *  @return Returns a pointer to the complete copy,
- *         or NULL if any problem occured.
+ *         or NULL if any problem occurred.
  *
  * @see _clone_handler()
  */
@@ -797,7 +797,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
  *  @param reginfo is the handler registration object to be duplicated
  *
  *  @return Returns a pointer to the complete copy,
- *         or NULL if any problem occured.
+ *         or NULL if any problem occurred.
  *
  * @see netsnmp_handler_dup()
  */

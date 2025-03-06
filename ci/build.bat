@@ -1,7 +1,11 @@
 echo "Build type %BUILD%"
 @echo on
 @rem dir /b /s "C:\Program Files (x86)" | findstr /i /e "\vcvars64.bat"
-set "VCVARSPATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+@rem dir /b /s "C:\Program Files" | findstr /i /e "\vcvars64.bat"
+set p=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
+if exist "%p%" set "VCVARSPATH=%p%"
+set p=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary/Build
+if exist "%p%" set "VCVARSPATH=%p%"
 goto %BUILD%
 echo "Error: unknown build type %BUILD%"
 goto eof
@@ -12,7 +16,7 @@ call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
 set PATH=c:\perl-msvc\bin;%PATH%
 cd win32
-perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
+perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc\x64\MD
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -29,7 +33,7 @@ call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
 set PATH=c:\perl-msvc\bin;%PATH%
 cd win32
-perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc
+perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc\x64\MT
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%

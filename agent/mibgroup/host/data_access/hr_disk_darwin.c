@@ -34,12 +34,11 @@ static const int media_types = sizeof(media_type_map)/sizeof(media_type_map[0]);
 static int
 _get_type_value(const char *str_type)
 {
-    int           i, len;
+    int           i;
 
     if (NULL == str_type)
         return HRDISKSTORAGEMEDIA_UNKNOWN;
 
-    len = strlen(str_type);
     for (i = 0; i < media_types; ++i) {
         if (0 == strcmp(media_type_map[i].type, str_type))
             return media_type_map[i].value;
@@ -56,12 +55,11 @@ static int proto_maps = sizeof(proto_map)/sizeof(proto_map[0]);
 
 static int _get_type_from_protocol(const char *prot)
 {
-    int           i, len;
+    int           i;
 
     if (NULL == prot)
         return TV_FALSE;
 
-    len = strlen(prot);
     for (i = 0; i < proto_maps; ++i) {
         if (0 == strcmp(proto_map[i].type, prot))
             return proto_map[i].value;

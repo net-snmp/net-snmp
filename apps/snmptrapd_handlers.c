@@ -455,7 +455,7 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
      * Now try to find the appropriate place in the trap-specific
      * list for this particular trap OID.  If there's a matching OID
      * already, then find it.  Otherwise find the one that follows.
-     * If we run out of entried, the new one should be tacked onto the end.
+     * If we run out of entries, the new one should be tacked onto the end.
      */
     for (traph2 = netsnmp_specific_traphandlers;
          traph2; traph2 = traph2->nextt) {
@@ -837,7 +837,7 @@ int   command_handler( netsnmp_pdu           *pdu,
          *  If there's a format string registered for this trap, then use it.
          *  Otherwise use the standard execution format setting.
          */
-        if (handler && handler->format && *handler->format) {
+        if (handler->format && *handler->format) {
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
             realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
@@ -986,7 +986,7 @@ static int add_forwarder_info(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
         DEBUGMSGTL(("snmptrapd",
                     "  last_snmpTrapAddress_index=%d, adding index=%d\n",
                     last_snmpTrapAddress_index, last_snmpTrapAddress_index+1));
-        /* Change the last index of this OID to the next avaiable number. */
+        /* Change the last index of this OID to the next available number. */
         forwarder_oid[forwarder_oid_len - 1] = last_snmpTrapAddress_index + 1;
 
         /*
@@ -1028,7 +1028,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
         return NETSNMPTRAPD_HANDLER_FAIL;
 
     /* XXX: wjh we should be caching sessions here and not always
-       reopening a session.  It's very ineffecient, especially with v3
+       reopening a session.  It's very inefficient, especially with v3
        INFORMS which may require engineID probing */
 
     pdu2 = snmp_clone_pdu(pdu);

@@ -50,7 +50,8 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     char *hint, *value;
-    int value_start, new_val_len;
+    size_t value_start;
+    int new_val_len;
     unsigned char *new_val;
 
     hint = strndup((const char *)data, size);

@@ -254,6 +254,10 @@ _unregister_extend(extend_registration_block *eptr)
     }
 
     netsnmp_table_data_delete_table(eptr->dinfo);
+    netsnmp_unregister_handler( eptr->reg[0] );
+    netsnmp_unregister_handler( eptr->reg[1] );
+    netsnmp_unregister_handler( eptr->reg[2] );
+    netsnmp_unregister_handler( eptr->reg[3] );
     free(eptr->root_oid);
     free(eptr);
 }
@@ -266,11 +270,14 @@ extend_clear_callback(int majorID, int minorID,
 
     for ( eptr=ereg_head; eptr; eptr=enext ) {
         enext=eptr->next;
+        netsnmp_table_data_delete_table(eptr->dinfo);
         netsnmp_unregister_handler( eptr->reg[0] );
         netsnmp_unregister_handler( eptr->reg[1] );
         netsnmp_unregister_handler( eptr->reg[2] );
         netsnmp_unregister_handler( eptr->reg[3] );
-        SNMP_FREE(eptr);
+        if (eptr->root_oid)
+            free(eptr->root_oid);
+        free(eptr);
     }
     ereg_head = NULL;
     return 0;
@@ -351,6 +358,9 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
         if (out_len > 0 && out_buf[out_len - 1] == '\n')
             out_buf[--out_len] = '\0';	/* Strip trailing newline */
         extension->output   = strdup( out_buf );
+	if (extension->output == NULL) {
+	    return -1;
+	}
         extension->out_len  = out_len;
         /*
          * Now we need to pick the output apart into separate lines.
@@ -365,7 +375,7 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
             }
         }
         if ( extension->numlines > 1 ) {
-            extension->lines = calloc(sizeof(char *), extension->numlines);
+            extension->lines = calloc(extension->numlines, sizeof(char *));
             if (extension->lines)
                 memcpy(extension->lines, line_buf,
                        sizeof(char *) * extension->numlines);
@@ -597,7 +607,7 @@ extend_parse_config(const char *token, char *cptr)
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
     /*
-     *  Compatability with the UCD extTable
+     *  Compatibility with the UCD extTable
      */
     if (!strcmp( token, "execFix"  )) {
         int  i;

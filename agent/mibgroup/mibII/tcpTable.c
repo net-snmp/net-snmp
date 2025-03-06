@@ -621,28 +621,9 @@ static const int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
 #ifdef HAVE_NETLINK_NETLINK_H
 
-#if !defined(HAVE_LIBNL3)
-/* libnl3 API implemented on top of the libnl1 API */
-
-#define nl_sock nl_handle
-
-static const char *nl_geterror_compat(int e)
-{
-    return nl_geterror();
-}
-
-#define nl_geterror(e) nl_geterror_compat(e)
-
-static struct nl_handle *nl_socket_alloc(void)
-{
-    return nl_handle_alloc();
-}
-
-static void nl_socket_free(struct nl_handle *ns)
-{
-    nl_handle_destroy(ns);
-}
-#endif /* HAVE_LIBNL3 */
+#ifndef HAVE_LIBNL3
+#error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
+#endif
 
 static int
 tcpTable_load_netlink(void)

@@ -120,7 +120,7 @@ SERVICE_TABLE_ENTRY ServiceTableEntry[] = {
 static HANDLE   hServiceThread = NULL;  /* Thread Handle */
 
 /*
- * Holds calling partys Function Entry point, that should start
+ * Holds calling party's Function Entry point, that should start
  * when entering service mode
  */
 static int      (*ServiceEntryPoint)(int Argc, char *Argv[]);

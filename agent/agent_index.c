@@ -3,7 +3,7 @@
  *
  * Maintain a registry of index allocations
  *      (Primarily required for AgentX support,
- *       but it could be more widely useable).
+ *       but it could be more widely usable).
  */
 
 

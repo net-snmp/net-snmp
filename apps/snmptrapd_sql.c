@@ -201,7 +201,7 @@ typedef struct sql_buf_t {
  * static bind structures, plus 2 static buffers to bind to.
  */
 static MYSQL_BIND _tbind[TBIND_MAX], _vbind[VBIND_MAX];
-static char       _no_v3;
+static typeof(*((MYSQL_BIND*)NULL)->is_null) _no_v3;
 
 static void _sql_process_queue(u_int dontcare, void *meeither);
 
@@ -345,7 +345,7 @@ netsnmp_mysql_bind(const char *text, size_t text_size, MYSQL_STMT **stmt,
                    MYSQL_BIND *bind)
 {
     if ((NULL == text) || (NULL == stmt) || (NULL == bind)) {
-        snmp_log(LOG_ERR,"invalid paramaters to netsnmp_mysql_bind()\n");
+        snmp_log(LOG_ERR,"invalid parameters to netsnmp_mysql_bind()\n");
         return -1;
     }
 
@@ -602,8 +602,9 @@ netsnmp_mysql_init(void)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_log(sql_buf *sqlb, void* dontcare)
+_sql_log(void *p, void *dontcare)
 {
+    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
 
@@ -662,8 +663,10 @@ _sql_log(sql_buf *sqlb, void* dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_vb_buf_free(sql_vb_buf *sqlvb, void* dontcare)
+_sql_vb_buf_free(void *p, void *dontcare)
 {
+    sql_vb_buf *sqlvb = p;
+
     if (NULL == sqlvb)
         return;
 
@@ -679,15 +682,16 @@ _sql_vb_buf_free(sql_vb_buf *sqlvb, void* dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_buf_free(sql_buf *sqlb, void* dontcare)
+_sql_buf_free(void *p, void* dontcare)
 {
+    sql_buf *sqlb = p;
+
     if (NULL == sqlb)
         return;
 
     /** do varbinds first */
     if (sqlb->varbinds) {
-        CONTAINER_CLEAR(sqlb->varbinds,
-                        (netsnmp_container_obj_func*)_sql_vb_buf_free, NULL);
+        CONTAINER_CLEAR(sqlb->varbinds, _sql_vb_buf_free, NULL);
         CONTAINER_FREE(sqlb->varbinds);
     }
 
@@ -753,14 +757,16 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     /** time */
     (void) time(&now);
     cur_time = localtime(&now);
-    sqlb->time.year = cur_time->tm_year + 1900;
-    sqlb->time.month = cur_time->tm_mon + 1;
-    sqlb->time.day = cur_time->tm_mday;
-    sqlb->time.hour = cur_time->tm_hour;
-    sqlb->time.minute = cur_time->tm_min;
-    sqlb->time.second = cur_time->tm_sec;
-    sqlb->time.second_part = 0;
-    sqlb->time.neg = 0;
+    if (cur_time) {
+        sqlb->time.year = cur_time->tm_year + 1900;
+        sqlb->time.month = cur_time->tm_mon + 1;
+        sqlb->time.day = cur_time->tm_mday;
+        sqlb->time.hour = cur_time->tm_hour;
+        sqlb->time.minute = cur_time->tm_min;
+        sqlb->time.second = cur_time->tm_sec;
+        sqlb->time.second_part = 0;
+        sqlb->time.neg = 0;
+    }
 
     /** host name */
     buf_host_len_t = 0;
@@ -983,8 +989,9 @@ mysql_handler(netsnmp_pdu           *pdu,
  * save a buffered trap to sql database
  */
 static void
-_sql_save(sql_buf *sqlb, void *dontcare)
+_sql_save(void *p, void *dontcare)
 {
+    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
     u_long                trap_id;
@@ -1132,22 +1139,18 @@ _sql_process_queue(u_int dontcare, void *meeither)
 
     int sql_has_connected = _sql.connected;
 
-    CONTAINER_FOR_EACH(_sql.queue, (netsnmp_container_obj_func*)_sql_save,
-                       NULL);
+    CONTAINER_FOR_EACH(_sql.queue, _sql_save, NULL);
 
     if (_sql.connected) {
         rc = mysql_commit(_sql.conn);
         if (rc) { /* nuts... now what? */
             netsnmp_sql_error("commit failed");
-            CONTAINER_FOR_EACH(_sql.queue,
-                               (netsnmp_container_obj_func*)_sql_log,
-                               NULL);
+            CONTAINER_FOR_EACH(_sql.queue, _sql_log, NULL);
         }
     }
 
     if (!sql_has_connected || _sql.connected) {
-        CONTAINER_CLEAR(_sql.queue, (netsnmp_container_obj_func*)_sql_buf_free,
-                        NULL);
+        CONTAINER_CLEAR(_sql.queue, _sql_buf_free, NULL);
     }
 }
 

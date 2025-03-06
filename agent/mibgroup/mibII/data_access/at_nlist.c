@@ -85,7 +85,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
         if (at_ptr == (auto_nlist_value(ARPTAB_SYMBOL) +
                        arptab_current * sizeof(struct arphd))) {
             /*
-             * Usused
+             * Unused
              */
             arptab_current++;
             at_ptr = at[arptab_current].at_next;

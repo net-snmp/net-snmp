@@ -29,13 +29,30 @@ AC_CHECK_FUNCS([asprintf        closedir        endnetgrent      ] dnl
                [fgetc_unlocked                                   ] dnl
                [flockfile       funlockfile     getipnodebyname  ] dnl
                [gettimeofday    getlogin        getnetgrent      ] dnl
-               [if_nametoindex  mkstemp                          ] dnl
+               [if_nametoindex  malloc_trim     mkstemp          ] dnl
                [opendir         readdir         regcomp          ] dnl
                [setenv          setitimer       setlocale        ] dnl
                [setnetgrent                                      ] dnl
                [setsid          snprintf        strcasestr       ] dnl
                [strdup          strerror        strncasecmp      ] dnl
                [sysconf         times           vsnprintf        ] )
+
+if test x$ac_cv_func_setnetgrent = xyes; then
+AC_MSG_CHECKING([return type of setnetgrent()])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[
+#ifdef HAVE_NETDB_H
+    #include <netdb.h>
+#endif
+#ifdef HAVE_NETGROUP_H
+    #include <netgroup.h>
+#endif
+]],[[return setnetgrent("")]]
+    )], [AC_MSG_RESULT([int])
+	 AC_DEFINE([SETNETGRENT_RETURNS_INT], [1],
+            [Define if the setnetgrent() return type is 'int'])],
+    [AC_MSG_RESULT([void])])
+fi
 
 AC_MSG_CHECKING([for _NSGetArgv()])
 AC_LINK_IFELSE(

@@ -443,7 +443,7 @@ header_complex_maybe_add_data_by_oid(struct header_complex_index **thedata,
          * XXX: check for == and error (overlapping table entries) 
          * 8/2005 rks Ok, I added duplicate entry check, but only log
          *            warning and continue, because it seems that nobody
-         *            that calls this fucntion does error checking!.
+         *            that calls this function does error checking!.
          */
         rc = snmp_oid_compare(hciptrn->name, hciptrn->namelen,
                               newoid, newoid_len);

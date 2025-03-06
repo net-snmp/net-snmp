@@ -1534,7 +1534,7 @@ ipCidrRouteTable_commit(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully commited this row, set the dirty flag.
+     * if we successfully committed this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -1585,7 +1585,7 @@ ipCidrRouteTable_undo_commit(ipCidrRouteTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-commited this row, clear the dirty flag.
+     * if we successfully un-committed this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -1639,7 +1639,7 @@ The ifIndex value which identifies  the local interface
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1818,7 +1818,7 @@ The type of route.  Note that local(3) refers to a
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -1999,7 +1999,7 @@ A reference to MIB definitions specific to the
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2176,7 +2176,7 @@ The Autonomous System Number of the Next Hop.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2346,7 +2346,7 @@ The primary routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2517,7 +2517,7 @@ An alternate routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2694,7 +2694,7 @@ An alternate routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -2871,7 +2871,7 @@ An alternate routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -3050,7 +3050,7 @@ An alternate routing metric for this route.  The
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note
@@ -3224,7 +3224,7 @@ The row status variable, used according to row
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transistion from one value to another
+ * new value is legal (i.e., the transition from one value to another
  * is legal).
  *      
  *@note

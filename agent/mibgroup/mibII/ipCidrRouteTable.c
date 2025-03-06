@@ -197,7 +197,7 @@ ipCidrRouteTable_get_first_data_point(void **my_loop_context,
         return NULL;
     }
 
-    /* We use the positinonal count as our loop context */
+    /* We use the positional count as our loop context */
     *position = 0;
     *my_loop_context = position;
 

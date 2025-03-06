@@ -12,7 +12,7 @@ config_require(util_funcs);
      extern WriteMethod fixProcError;
      int sh_count_myprocs(struct myproc *);
      int             sh_count_procs(char *);
-#ifdef HAVE_PCRE_H
+#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
      int sh_count_procs_by_regex(char *, netsnmp_regex_ptr);
 #endif
 

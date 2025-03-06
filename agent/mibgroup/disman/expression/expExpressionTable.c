@@ -540,7 +540,7 @@ write_expExpression(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -556,7 +556,7 @@ write_expExpression(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expExpression;
         tmplen = StorageTmp->expExpressionLen;
@@ -633,7 +633,7 @@ write_expExpressionValueType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -649,7 +649,7 @@ write_expExpressionValueType(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expExpressionValueType;
         StorageTmp->expExpressionValueType = *((long *) var_val);
@@ -717,7 +717,7 @@ write_expExpressionComment(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -733,7 +733,7 @@ write_expExpressionComment(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expExpressionComment;
         tmplen = StorageTmp->expExpressionCommentLen;
@@ -807,7 +807,7 @@ write_expExpressionDeltaInterval(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -823,7 +823,7 @@ write_expExpressionDeltaInterval(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->expExpressionDeltaInterval;
         StorageTmp->expExpressionDeltaInterval = *((long *) var_val);
@@ -954,7 +954,7 @@ write_expExpressionEntryStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         if (StorageTmp == NULL) {
             /*
@@ -1024,7 +1024,7 @@ write_expExpressionEntryStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 
@@ -1157,9 +1157,8 @@ write_expExpressionEntryStatus(int action,
                 }
                 if (pdu->securityName) {
                     StorageTmp->pdu_securityName =
-                        calloc(1, pdu->securityNameLen + 1);
-                    memcpy(StorageTmp->pdu_securityName, pdu->securityName,
-                           pdu->securityNameLen);
+                        netsnmp_memdup(pdu->securityName,
+                                       pdu->securityNameLen + 1);
                     StorageTmp->pdu_securityNameLen = pdu->securityNameLen;
                 } else {
                     StorageTmp->pdu_securityName = NULL;

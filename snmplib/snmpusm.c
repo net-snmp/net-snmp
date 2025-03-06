@@ -34,6 +34,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -62,6 +65,7 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/utilities.h>
 
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
@@ -303,7 +307,6 @@ usm_clone(netsnmp_pdu *pdu, netsnmp_pdu *new_pdu)
         return ret;
 
     if (pdu->command == SNMP_MSG_TRAP2) {
-        netsnmp_assert(pdu->securityModel == SNMP_DEFAULT_SECMODEL);
         ret = usm_clone_usmStateReference(ref, new_ref);
     } else {
         netsnmp_assert(ref == *new_ref);
@@ -501,8 +504,10 @@ usm_get_user_from_list(const u_char *engineID, size_t engineIDLen,
     /*
      * return "" user used to facilitate engineID discovery
      */
-    if (use_default && !strcmp(name, ""))
+    if (use_default && !strcmp(name, "")) {
+        DEBUGMSGTL(("usm", "return noNameUser\n"));
         return noNameUser;
+    }
     return NULL;
 }
 
@@ -707,7 +712,7 @@ usm_remove_usmUser_from_list(struct usmUser *user, struct usmUser **ppuserList)
  * NOTE: if there was only one user in the list, list head will be NULL.
  *       So NULL can also mean success. Use the newer usm_remove_usmUser() for
  *       more specific return codes. This function is kept for backwards
- *       compatability with this ambiguous behaviour.
+ *       compatibility with this ambiguous behaviour.
  */
 static struct usmUser *
 usm_remove_user_from_list(struct usmUser *user,
@@ -846,7 +851,7 @@ int usm_set_priv_key(struct usmUser *user, const char *fname,
         new_key = dummy.privKey;
         new_key_len = dummy.privKeyLen;
         /*
-         * make sure no reallocation happened; buf2 must be large enoungh
+         * make sure no reallocation happened; buf2 must be large enough
          */
         netsnmp_assert(dummy.privKey == buf2);
     }
@@ -987,6 +992,9 @@ asn_predict_int_length(int type, long number, size_t len)
 static int
 asn_predict_length(int type, u_char * ptr, size_t u_char_len)
 {
+    /* Check for integer overflow. */
+    if (u_char_len > SIZE_MAX - (1 + 3))
+        return -1;
 
     if (type & ASN_SEQUENCE)
         return 1 + 3 + u_char_len;
@@ -996,6 +1004,10 @@ asn_predict_length(int type, u_char * ptr, size_t u_char_len)
         memcpy(&value, ptr, u_char_len);
         u_char_len = asn_predict_int_length(type, value, u_char_len);
     }
+
+    /* Check for integer overflow. */
+    if (u_char_len > SIZE_MAX - (1 + 3))
+        return -1;
 
     if (u_char_len < 0x80)
         return 1 + 1 + u_char_len;
@@ -1432,6 +1444,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
                       * secStateRef, pointer to cached info provided only for
                       * * Response, otherwise NULL.
                       */
+                     struct usmUser *sessUser,  /* IN - pointer to current session user. */
                      u_char * secParams,        /* OUT */
                      /*
                       * BER encoded securityParameters pointer to offset within
@@ -1475,7 +1488,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
      * 
      * None of these are to be free'd - they are either pointing to
      * what's in the secStateRef or to something either in the
-     * actual prarmeter list or the user list.
+     * actual parameter list or the user list.
      */
 
     const char     *theName = NULL;
@@ -1533,7 +1546,11 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
          * we do allow an unknown user name for
          * unauthenticated requests. 
          */
-        user = usm_get_user2(secEngineID, secEngineIDLen, secName, secNameLen);
+        if (sessUser)
+            user = sessUser;
+        else
+            user = usm_get_user2(secEngineID, secEngineIDLen, secName, secNameLen);
+
         if (user == NULL && secLevel != SNMP_SEC_LEVEL_NOAUTH) {
             DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
             return SNMPERR_USM_UNKNOWNSECURITYNAME;
@@ -1905,6 +1922,7 @@ usm_secmod_generate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                 parms->secLevel,
                                 parms->scopedPdu, parms->scopedPduLen,
                                 parms->secStateRef,
+                                parms->session->sessUser,
                                 parms->secParams, parms->secParamsLen,
                                 parms->wholeMsg, parms->wholeMsgLen);
 }
@@ -1938,6 +1956,8 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                        * secStateRef, pointer to cached info provided only for
                        * * Response, otherwise NULL.
                        */
+                     struct usmUser *sessUser,  /* IN - pointer to current session user. */
+
                       u_char ** wholeMsg,       /*  IN/OUT  */
                       /*
                        * Points at the pointer to the packet buffer, which might get extended
@@ -2029,7 +2049,11 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
          * we do allow an unknown user name for
          * unauthenticated requests. 
          */
-        user = usm_get_user2(secEngineID, secEngineIDLen, secName, secNameLen);
+        if (sessUser)
+            user = sessUser;
+        else
+            user = usm_get_user2(secEngineID, secEngineIDLen, secName, secNameLen);
+
         if (user == NULL && secLevel != SNMP_SEC_LEVEL_NOAUTH) {
             DEBUGMSGTL(("usm", "Unknown User\n"));
             return SNMPERR_USM_UNKNOWNSECURITYNAME;
@@ -2415,6 +2439,7 @@ usm_secmod_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                  parms->secLevel,
                                  parms->scopedPdu, parms->scopedPduLen,
                                  parms->secStateRef,
+                                 parms->session->sessUser,
                                  parms->wholeMsg, parms->wholeMsgLen,
                                  parms->wholeMsgOffset);
 }
@@ -2521,7 +2546,7 @@ usm_parse_security_parameters(u_char * secParams,
 
     /*
      * Retrieve the engine boots, notice switch in the way next_ptr and
-     * remaining_bytes are used (to accomodate the asn code).
+     * remaining_bytes are used (to accommodate the asn code).
      */
     DEBUGDUMPHEADER("recv", "msgAuthoritativeEngineBoots");
     if ((next_ptr = asn_parse_int(next_ptr, &remaining_bytes, &type_value,
@@ -3068,12 +3093,16 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      * Locate the User record.
      * If the user/engine ID is unknown, report this as an error.
      */
-    if ((user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
+    if (sess && sess->sessUser)
+        user = sess->sessUser;
+    else
+        user = usm_get_user_from_list(secEngineID, *secEngineIDLen,
                                        secName, *secNameLen, userList,
                                        (((sess && sess->isAuthoritative ==
                                           SNMP_SESS_AUTHORITATIVE) ||
-                                         (!sess)) ? 0 : 1)))
-        == NULL) {
+                                         (!sess)) ? 0 : 1));
+
+    if (user == NULL) {
         DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
         snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES);
         error = SNMPERR_USM_UNKNOWNSECURITYNAME;
@@ -3567,7 +3596,7 @@ err:
  * 
  * creates a user in the usm table from the information in a session.
  * If the user already exists, it is updated with the current
- * information from the session
+ * information from the session, also update boot/time set
  * 
  * Parameters:
  * session -- IN: pointer to the session to use when creating the user.
@@ -3582,6 +3611,20 @@ usm_create_user_from_session(netsnmp_session * session)
     struct usmUser *user;
     int             user_just_created = 0;
     char *cp;
+
+    /*
+     * If boot/time supplied set it for this engineID. Do it from hook when
+     * creating user in case probe was sent by other means for example
+     * asynchronously.
+     */
+    if (!(session->flags & SNMP_FLAGS_TIME_CREATED) &&
+        (session->engineBoots || session->engineTime)) {
+        set_enginetime(session->securityEngineID,
+                       session->securityEngineIDLen,
+                       session->engineBoots, session->engineTime,
+                       TRUE);
+        session->flags |= SNMP_FLAGS_TIME_CREATED;
+    }
 
     /*
      * - don't create-another/copy-into user for this session by default
@@ -3601,12 +3644,17 @@ usm_create_user_from_session(netsnmp_session * session)
      * now that we have the engineID, create an entry in the USM list
      * for this user using the information in the session 
      */
-    user = usm_get_user_from_list(session->securityEngineID,
-                                  session->securityEngineIDLen,
-                                  session->securityName,
-                                  session->securityNameLen,
-                                  usm_get_userList(), 0);
-    if (NULL != user) {
+    if ((session->flags & SNMP_FLAGS_SESSION_USER) == 0)
+        user = usm_get_user_from_list(session->securityEngineID,
+                                      session->securityEngineIDLen,
+                                      session->securityName,
+                                      session->securityNameLen,
+                                      usm_get_userList(), 0);
+    else
+        user = NULL;
+
+
+    if (user) {
         DEBUGMSGTL(("usm", "user exists x=%p\n", user));
     } else {
         if (usm_build_user(&user, session) != SNMPERR_SUCCESS)
@@ -3745,9 +3793,17 @@ usm_create_user_from_session(netsnmp_session * session)
          */
         user->userStatus = RS_ACTIVE;
         user->userStorageType = ST_READONLY;
-        usm_add_user(user);
+
+        if (session->flags & SNMP_FLAGS_SESSION_USER) {
+            if (session->sessUser)
+                usm_free_user(session->sessUser);
+            session->sessUser = user;
+        } else {
+            usm_add_user(user);
+        }
     }
-    DEBUGMSGTL(("9:usm", "user created\n"));
+    DEBUGMSGTL(("9:usm", "user created and stored in %s\n", session->flags &
+                SNMP_FLAGS_SESSION_USER ? "session" : "local store"));
 
     return SNMPERR_SUCCESS;
 
@@ -3764,7 +3820,7 @@ usm_create_user_from_session_hook(struct session_list *slp,
 }
 
 static int
-usm_build_probe_pdu(netsnmp_pdu **pdu)
+usm_build_probe_pdu(netsnmp_pdu **pdu, struct usmUser **sessUser)
 {
     struct usmUser *user;
 
@@ -3773,19 +3829,17 @@ usm_build_probe_pdu(netsnmp_pdu **pdu)
      */
     if (!pdu)
         return -1;
-    *pdu = snmp_pdu_create(SNMP_MSG_GET);
+    *pdu = snmpv3_probe_usm_pdu_create();
     if (!(*pdu))
         return -1;
-    (*pdu)->version = SNMP_VERSION_3;
-    (*pdu)->securityName = strdup("");
-    (*pdu)->securityNameLen = strlen((*pdu)->securityName);
-    (*pdu)->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-    (*pdu)->securityModel = SNMP_SEC_MODEL_USM;
 
     /*
      * create the empty user 
      */
-    user = usm_get_user2(NULL, 0, (*pdu)->securityName,
+    if (sessUser && *sessUser)
+        user = *sessUser;
+    else
+        user = usm_get_user2(NULL, 0, (*pdu)->securityName,
                          (*pdu)->securityNameLen);
     if (user == NULL) {
         user = calloc(1, sizeof(struct usmUser));
@@ -3802,7 +3856,10 @@ usm_build_probe_pdu(netsnmp_pdu **pdu)
         user->privProtocolLen = OID_LENGTH(usmNoPrivProtocol);
         user->privProtocol =
             snmp_duplicate_objid(usmNoPrivProtocol, user->privProtocolLen);
-        usm_add_user(user);
+        if (sessUser)
+            *sessUser = user;
+        else
+            usm_add_user(user);
     }
     return 0;
 }
@@ -3811,9 +3868,11 @@ static int usm_discover_engineid(struct session_list *slp,
                                  netsnmp_session *session)
 {
     netsnmp_pdu    *pdu = NULL, *response = NULL;
+    struct usmUser **user;
     int status, i;
 
-    if (usm_build_probe_pdu(&pdu) != 0) {
+    user = session->flags & SNMP_FLAGS_SESSION_USER ? &session->sessUser : NULL;
+    if (usm_build_probe_pdu(&pdu, user) != 0) {
         DEBUGMSGTL(("snmp_api", "unable to create probe PDU\n"));
         return SNMP_ERR_GENERR;
     }
@@ -3873,6 +3932,7 @@ static int usm_discover_engineid(struct session_list *slp,
                        session->securityEngineIDLen,
                        session->engineBoots, session->engineTime,
                        TRUE);
+        session->flags |= SNMP_FLAGS_TIME_CREATED;
     }
     return SNMPERR_SUCCESS;
 }
@@ -3966,15 +4026,8 @@ usm_cloneFrom_user(struct usmUser *from, struct usmUser *to)
      */
     SNMP_FREE(to->authKey);
 
-    if (from->authKeyLen > 0 &&
-        (to->authKey = (u_char *) malloc(from->authKeyLen))
-        != NULL) {
-        to->authKeyLen = from->authKeyLen;
-        memcpy(to->authKey, from->authKey, to->authKeyLen);
-    } else {
-        to->authKey = NULL;
-        to->authKeyLen = 0;
-    }
+    to->authKey = netsnmp_memdup(from->authKey, from->authKeyLen);
+    to->authKeyLen = to->authKey ? from->authKeyLen : 0;
 
     /*
      * copy the authKeyKu
@@ -4225,9 +4278,14 @@ usm_store_users(int majorID, int minorID, void *serverarg, void *clientarg)
     return SNMPERR_SUCCESS;
 }
 
-/*
- * usm_parse_user(): reads in a line containing a saved user profile
+/**
+ * usm_read_user(): reads in a line containing a saved user profile
  * and returns a pointer to a newly created struct usmUser. 
+ *
+ * @param[in]     line Line of text containing a saved user profile
+ *
+ * @return A pointer to the newly-created struct usmUser if
+ *   parsing succeeded; NULL if an error occurred.
  */
 static struct usmUser *
 usm_read_user(const char *line)
@@ -4241,41 +4299,81 @@ usm_read_user(const char *line)
 
     user->userStatus = atoi(line);
     line = skip_token_const(line);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing userStorageType\n"));
+        usm_free_user(user);
+        return NULL;
+    }
+
     user->userStorageType = atoi(line);
     line = skip_token_const(line);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing engineID\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string_const(line, &user->engineID,
                                                &user->engineIDLen);
 
-    /*
-     * set the lcd entry for this engineID to the minimum boots/time
-     * values so that its a known engineid and won't return a report pdu.
-     * This is mostly important when receiving v3 traps so that the usm
-     * will at least continue processing them. 
-     */
-    set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
-
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing name\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, (u_char **) & user->name,
                                          &len);
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing security name\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, (u_char **) & user->secName,
                                          &len);
     SNMP_FREE(user->cloneFrom);
     user->cloneFromLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing clone from\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->cloneFrom,
                                         &user->cloneFromLen);
 
     SNMP_FREE(user->authProtocol);
     user->authProtocolLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing authentication protocol\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->authProtocol,
                                         &user->authProtocolLen);
+
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing authentication key\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string_const(line, &user->authKey,
                                                &user->authKeyLen);
     SNMP_FREE(user->privProtocol);
     user->privProtocolLen = 0;
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing privacy protocol\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_objid_const(line, &user->privProtocol,
                                         &user->privProtocolLen);
+
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing privacy key\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
 
@@ -4288,8 +4386,24 @@ usm_read_user(const char *line)
         user->privKeyLen = proper_length;
     }
 
+    if (line == NULL) {
+        DEBUGMSGTL(("usm", "Configuration line missing public string\n"));
+        usm_free_user(user);
+        return NULL;
+    }
     line = read_config_read_octet_string(line, &user->userPublicString,
                                          &user->userPublicStringLen);
+
+    /*
+     * set the lcd entry for this engineID to the minimum boots/time
+     * values so that its a known engineid and won't return a report pdu.
+     * This is mostly important when receiving v3 traps so that the usm
+     * will at least continue processing them.
+     * Note: We do this at the end so that it only runs if the parsing
+     * was successful
+     */
+    set_enginetime(user->engineID, user->engineIDLen, 1, 0, 0);
+
     return user;
 }
 
@@ -4507,7 +4621,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
  * create a usm user from a string.
  *
  * The format for the string is described in the createUser
- * secion of the snmpd.conf man page.
+ * section of the snmpd.conf man page.
  *
  * On success, a pointer to the created usmUser struct is returned.
  * On error, a NULL pointer is returned. In this case, if a pointer to a
@@ -4623,8 +4737,15 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
      */
     newuser->authProtocol[0] = 0;
     cp = copy_nword(cp, buf, sizeof(buf));
-    if ((strncmp(cp, "default", 7) == 0) && (NULL != def_auth_prot)) {
+    /* If no authentication protocol was specified, or it was explicitly
+     * set to use the default, use the default auth protocol
+     */
+    if (buf[0] == '\0' || strcmp(buf, "default") == 0) {
         SNMP_FREE(newuser->authProtocol);
+        if (!def_auth_prot) {
+            *errorMsg = "def_auth_prot == NULL";
+            goto fail;
+        }
         newuser->authProtocol = snmp_duplicate_objid(def_auth_prot,
                                                      def_auth_prot_len);
         if (newuser->authProtocol == NULL) {
@@ -5000,11 +5121,13 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
                      void *clientarg)
 {
     size_t          salt_integer_len = sizeof(salt_integer);
+    uint64_t        current_time;
 
     if (sc_random((u_char *) & salt_integer, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
-        salt_integer = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer = current_time;
     }
 
 #ifdef HAVE_AES
@@ -5012,15 +5135,20 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
     if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
-        salt_integer64_1 = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer64_1 = current_time;
     }
     salt_integer_len = sizeof (salt_integer64_1);
     if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
         SNMPERR_SUCCESS) {
         DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
-        salt_integer64_2 = (u_int) time(NULL);
+        current_time = time(NULL);
+        salt_integer64_2 = current_time;
     }
 #endif
+
+    // Free noNameUser before it is assigned
+    usm_free_user(noNameUser);
 
 #ifndef NETSNMP_DISABLE_MD5
     noNameUser = usm_create_initial_user("", usmHMACMD5AuthProtocol,
@@ -5046,10 +5174,7 @@ static int
 deinit_usm_post_config(int majorid, int minorid, void *serverarg,
 		       void *clientarg)
 {
-    if (usm_free_user(noNameUser) != NULL) {
-	DEBUGMSGTL(("deinit_usm_post_config", "could not free initial user\n"));
-	return SNMPERR_GENERR;
-    }
+    usm_free_user(noNameUser);
     noNameUser = NULL;
 
     DEBUGMSGTL(("deinit_usm_post_config", "initial user removed\n"));
@@ -5065,7 +5190,7 @@ init_usm(void)
     DEBUGMSGTL(("init_usm", "unit_usm: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u\n",
                 usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
 
-    sc_init();                  /* initalize scapi code */
+    sc_init();                  /* initialize scapi code */
 
     /*
      * register ourselves as a security service

@@ -185,6 +185,8 @@ main(int argc, char *argv[])
                 }
             }
         }
+	if (copy)
+	    snmp_free_pdu(copy);
         copy = snmp_clone_pdu(pdu);
         if (command == SNMP_MSG_TRAP2) {
             /*
@@ -297,7 +299,7 @@ input_variable(netsnmp_variable_list * vp)
     printf("Variable: ");
     fflush(stdout);
     if (!fgets(buf, sizeof(buf), stdin)) {
-        printf("Quitting,  Goobye\n");
+        printf("Quitting,  Goodbye\n");
         SOCK_CLEANUP;
         exit(0);
     }

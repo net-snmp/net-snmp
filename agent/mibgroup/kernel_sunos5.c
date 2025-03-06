@@ -645,7 +645,7 @@ getKstatString(const char *statname, const char *varname,
 }
 
 /*
- * get MIB-II statistics. It maintaines a simple cache which buffers the last
+ * get MIB-II statistics. It maintains a simple cache which buffers the last
  * read block of MIB statistics (which may contain the whole table). It calls
  * *comp to compare every entry with an entry pointed by arg. *comp should
  * return 0 if comparison is successful.  Req_type may be GET_FIRST, GET_EXACT,

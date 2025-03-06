@@ -111,9 +111,14 @@ netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
              !netsnmp_parse_ep_str(&ep_str, default_target))
             snmp_log(LOG_ERR, "Invalid default target %s\n",
                      default_target);
-    if (inpeername && *inpeername != '\0' &&
-        !netsnmp_parse_ep_str(&ep_str, inpeername))
-        return 0;
+    if (inpeername && *inpeername != '\0') {
+	if (ep_str.addr) {
+	    free(ep_str.addr);  /* free default target */
+	    ep_str.addr = NULL;
+	}
+	if (!netsnmp_parse_ep_str(&ep_str, inpeername))
+            return 0;
+    }
 
     if (ep_str.port[0])
         addr->sin_port = htons(atoi(ep_str.port));

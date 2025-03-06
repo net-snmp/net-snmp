@@ -32,27 +32,17 @@ netsnmp_feature_require(ipaddress_ioctl_entry_copy);
 
 #include <linux/types.h>
 #include <asm/types.h>
-#if defined(HAVE_LINUX_RTNETLINK_H)
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
-#ifdef RTMGRP_IPV6_PREFIX
+#ifndef HAVE_LIBNL3
+#error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
+#endif
+#include <netlink/cache.h>
+#include <netlink/netlink.h>
+#include <netlink/route/addr.h>
 #define SUPPORT_PREFIX_FLAGS 1
-#endif /* RTMGRP_IPV6_PREFIX */
-#endif /* HAVE_LINUX_RTNETLINK_H */
 
 #include "ipaddress.h"
 #include "ipaddress_ioctl.h"
 #include "ipaddress_private.h"
-
-int _load_v6(netsnmp_container *container, int idx_offset);
-
-#ifdef HAVE_LINUX_RTNETLINK_H
-int
-netsnmp_access_ipaddress_extra_prefix_info(int index,
-                                           u_long *preferedlt,
-                                           ulong *validlt,
-                                           char *addr);
-#endif
 
 /*
  * initialize arch specific storage
@@ -158,6 +148,189 @@ netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry)
     }
 }
 
+#if defined (NETSNMP_ENABLE_IPV6)
+static int load_v6_interfaces(struct nl_sock *nl_sock,
+                              netsnmp_container *container, int idx_offset)
+{
+    struct nl_cache *link_cache, *addr_cache;
+    struct nl_object *link_obj;
+    int             rc;
+
+    rc = rtnl_link_alloc_cache(nl_sock, AF_UNSPEC, &link_cache);
+    if (rc)
+        return rc;
+
+    rc = rtnl_addr_alloc_cache(nl_sock, &addr_cache);
+    if (rc)
+        goto put_link_cache;
+
+    for (link_obj = nl_cache_get_first(link_cache); link_obj;
+         link_obj = nl_cache_get_next(link_obj)) {
+        struct rtnl_link *rtnl_link = (void *)link_obj;
+        int if_index = rtnl_link_get_ifindex(rtnl_link);
+        const char *if_name = rtnl_link_get_name(rtnl_link);
+        struct rtnl_addr *rtnl_addr;
+        netsnmp_ipaddress_entry *entry;
+        _ioctl_extras *extras;
+
+        DEBUGMSGTL(("access:ipaddress:container",
+                    " interface %d, %s\n", idx_offset, if_name));
+
+        rtnl_addr = addr_of_type(if_index, addr_cache, AF_INET6);
+        if (!rtnl_addr)
+            continue;
+
+        if (!netsnmp_access_interface_include(if_name))
+            continue;
+
+	if (netsnmp_access_interface_max_reached(if_name))
+            /* we may need to stop tracking ifaces if a max was set */
+            continue;
+
+        entry = netsnmp_access_ipaddress_entry_create();
+        if (!entry) {
+            rc = -3;
+            break;
+        }
+        entry->ns_ia_index = ++idx_offset;
+
+        /*
+         * save if name
+         */
+        extras = netsnmp_ioctl_ipaddress_extras_get(entry);
+        strlcpy((char *)extras->name, rtnl_link_get_ifalias(rtnl_link) ? :
+                if_name, sizeof(extras->name));
+
+        /*
+         * save ifindex
+         */
+        entry->if_index = if_index;
+        if (entry->if_index == 0) {
+            snmp_log(LOG_ERR,"no ifindex found for interface\n");
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
+        }
+
+        /*
+         * get flags (IFF_*)
+         */
+        extras->flags = rtnl_link_get_flags(rtnl_link);
+
+        entry->ia_onlink_flag = 1;  /*Set by default as true*/
+        entry->ia_autonomous_flag = 2; /*Set by default as false*/
+
+        /*
+         * get IP address
+         */
+        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+        void *addr = nl_addr_get_binary_addr(local_addr);
+        int addr_len = nl_addr_get_len(local_addr);
+        netsnmp_assert(addr_len <= sizeof(entry->ia_address));
+        memcpy(entry->ia_address, addr, addr_len);
+        entry->ia_address_len = addr_len;
+
+        /*
+         * get netmask
+         */
+        entry->ia_prefix_len = nl_addr_get_prefixlen(local_addr);
+
+        /*
+         * address flags
+         */
+        const unsigned int flags = rtnl_addr_get_flags(rtnl_addr);
+        if ((flags & IFA_F_PERMANENT) || (!flags))
+            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
+#ifdef IFA_F_TEMPORARY
+        else if (flags & IFA_F_TEMPORARY)
+            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
+#endif
+        else if (flags & IFA_F_DEPRECATED)
+            entry->ia_status = IPADDRESSSTATUSTC_DEPRECATED;
+        else if (flags & IFA_F_TENTATIVE)
+            entry->ia_status = IPADDRESSSTATUSTC_TENTATIVE;
+        else {
+            entry->ia_status = IPADDRESSSTATUSTC_UNKNOWN;
+            DEBUGMSGTL(("access:ipaddress:ipv6",
+                        "unknown flags 0x%x\n", flags));
+        }
+
+        /* a_cacheinfo.aci_prefered */
+        entry->ia_prefered_lifetime =
+            rtnl_addr_get_preferred_lifetime(rtnl_addr);
+        /* a_cacheinfo.aci_valid */
+        entry->ia_valid_lifetime = rtnl_addr_get_valid_lifetime(rtnl_addr);
+
+        /* anycast */
+        if (rtnl_addr_get_anycast(rtnl_addr))
+            entry->ia_type = IPADDRESSTYPE_ANYCAST;
+        else
+            entry->ia_type = IPADDRESSTYPE_UNICAST;
+
+        /*
+         * can we figure out if an address is from DHCP?
+         * use manual until then...
+         *
+         *#define IPADDRESSORIGINTC_OTHER  1
+         *#define IPADDRESSORIGINTC_MANUAL  2
+         *#define IPADDRESSORIGINTC_DHCP  4
+         *#define IPADDRESSORIGINTC_LINKLAYER  5
+         *#define IPADDRESSORIGINTC_RANDOM  6
+         *
+         * are 'local' address assigned by link layer??
+         */
+        if (!flags)
+            entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+#ifdef IFA_F_TEMPORARY
+        else if (flags & IFA_F_TEMPORARY)
+            entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
+#endif
+        else if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address))
+            entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
+        else
+            entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
+
+        if (entry->ia_origin == IPADDRESSORIGINTC_LINKLAYER)
+            entry->ia_storagetype = STORAGETYPE_PERMANENT;
+
+        if (CONTAINER_INSERT(container, entry) < 0) {
+            DEBUGMSGTL(("access:ipaddress:container", "error with ipaddress_entry: insert into container failed.\n"));
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
+        }
+    }
+    nl_cache_put(addr_cache);
+
+put_link_cache:
+    nl_cache_put(link_cache);
+
+    return rc < 0 ? rc : idx_offset;
+}
+
+static int _load_v6(netsnmp_container *container, int idx_offset)
+{
+    struct nl_sock *nl_sock;
+    int             rc;
+
+    nl_sock = nl_socket_alloc();
+    if (!nl_sock)
+        return -1;
+
+    rc = nl_connect(nl_sock, NETLINK_ROUTE);
+    if (rc < 0)
+        goto free_socket;
+
+    rc = load_v6_interfaces(nl_sock, container, idx_offset);
+
+free_socket:
+    nl_socket_free(nl_sock);
+
+    /*
+     * return number of interfaces seen
+     */
+    return rc;
+}
+#endif /* defined(NETSNMP_ENABLE_IPV6) */
+
 /**
  *
  * @retval  0 no errors
@@ -206,418 +379,3 @@ netsnmp_arch_ipaddress_container_load(netsnmp_container *container,
 
     return rc;
 }
-
-#if defined (NETSNMP_ENABLE_IPV6)
-/**
- */
-int
-_load_v6(netsnmp_container *container, int idx_offset)
-{
-#ifndef HAVE_LINUX_RTNETLINK_H
-    DEBUGMSGTL(("access:ipaddress:container",
-                "cannot get ip address information"
-                "as netlink socket is not available\n"));
-    return -1;
-#else /* HAVE_LINUX_RTNETLINK_H */
-    FILE           *in;
-    char            line[80], addr[40];
-    char            if_name[IFNAMSIZ+1];/* +1 for '\0' because of the ugly sscanf below */ 
-    u_char          *buf;
-    int             if_index, pfx_len, scope, flags, rc = 0;
-    size_t          in_len, out_len;
-    netsnmp_ipaddress_entry *entry;
-    _ioctl_extras           *extras;
-    struct address_flag_info addr_info;
-    
-    netsnmp_assert(NULL != container);
-
-#define PROCFILE "/proc/net/if_inet6"
-    if (!(in = fopen(PROCFILE, "r"))) {
-        /*
-         * If opening /proc/net/if_inet6 fails, only complain if that file
-         * does not exist. If it exists but if it is not readable, do not
-         * log an error message because this probably is the result of IPv6
-         * support having been disabled intentionally.
-         */
-        struct stat st;
-
-        if (stat(PROCFILE, &st) == 0) {
-            NETSNMP_LOGONCE((LOG_ERR,
-                             "ipaddress_linux: could not open " PROCFILE));
-        }
-        return -2;
-    }
-
-    /*
-     * address index prefix_len scope status if_name
-     */
-    while (fgets(line, sizeof(line), in)) {
-        /*
-         * fe800000000000000200e8fffe5b5c93 05 40 20 80 eth0
-         *             A                    D  P  S  F  I
-         * A: address
-         * D: device number
-         * P: prefix len
-         * S: scope (see include/net/ipv6.h, net/ipv6/addrconf.c)
-         * F: flags (see include/linux/rtnetlink.h, net/ipv6/addrconf.c)
-         * I: interface
-         */
-        rc = sscanf(line, "%39s %08x %08x %04x %02x %" SNMP_MACRO_VAL_TO_STR(IFNAMSIZ) "s\n",
-                    addr, &if_index, &pfx_len, &scope, &flags, if_name);
-        if( 6 != rc ) {
-            snmp_log(LOG_ERR, PROCFILE " data format error (%d!=6), line ==|%s|\n",
-                     rc, line);
-            continue;
-        }
-        DEBUGMSGTL(("access:ipaddress:container",
-                    "addr %s, index %d, pfx %d, scope %d, flags 0x%X, name %s\n",
-                    addr, if_index, pfx_len, scope, flags, if_name));
-
-        if (!netsnmp_access_interface_include(if_name))
-            continue;
-
-	if (netsnmp_access_interface_max_reached(if_name))
-            /* we may need to stop tracking ifaces if a max was set */
-            continue;
-        /*
-         */
-        entry = netsnmp_access_ipaddress_entry_create();
-        if(NULL == entry) {
-            rc = -3;
-            break;
-        }
-
-        in_len = entry->ia_address_len = sizeof(entry->ia_address);
-        netsnmp_assert(16 == in_len);
-        out_len = 0;
-        entry->flags = flags;
-        buf = entry->ia_address;
-        if(1 != netsnmp_hex_to_binary(&buf, &in_len,
-                                      &out_len, 0, addr, ":")) {
-            snmp_log(LOG_ERR,"error parsing '%s', skipping\n", addr);
-            netsnmp_access_ipaddress_entry_free(entry);
-            continue;
-        }
-        netsnmp_assert(16 == out_len);
-        entry->ia_address_len = out_len;
-
-        entry->ns_ia_index = ++idx_offset;
-
-        /*
-         * save if name
-         */
-        extras = netsnmp_ioctl_ipaddress_extras_get(entry);
-        memcpy(extras->name, if_name, sizeof(extras->name));
-        extras->flags = flags;
-
-        /*
-         * yyy-rks: optimization: create a socket outside the loop and use
-         * netsnmp_access_interface_ioctl_ifindex_get() here, since
-         * netsnmp_access_interface_index_find will open/close a socket
-         * every time it is called.
-         */
-        entry->if_index = netsnmp_access_interface_index_find(if_name);
-        memset(&addr_info, 0, sizeof(struct address_flag_info));
-        addr_info = netsnmp_access_other_info_get(entry->if_index, AF_INET6);
-
-        /*
-          #define IPADDRESSSTATUSTC_PREFERRED  1
-          #define IPADDRESSSTATUSTC_DEPRECATED  2
-          #define IPADDRESSSTATUSTC_INVALID  3
-          #define IPADDRESSSTATUSTC_INACCESSIBLE  4
-          #define IPADDRESSSTATUSTC_UNKNOWN  5
-          #define IPADDRESSSTATUSTC_TENTATIVE  6
-          #define IPADDRESSSTATUSTC_DUPLICATE  7
-        */
-        if((flags & IFA_F_PERMANENT) || (!flags))
-            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
-#ifdef IFA_F_TEMPORARY
-        else if(flags & IFA_F_TEMPORARY)
-            entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
-#endif
-        else if(flags & IFA_F_DEPRECATED)
-            entry->ia_status = IPADDRESSSTATUSTC_DEPRECATED;
-        else if(flags & IFA_F_TENTATIVE)
-            entry->ia_status = IPADDRESSSTATUSTC_TENTATIVE;
-        else {
-            entry->ia_status = IPADDRESSSTATUSTC_UNKNOWN;
-            DEBUGMSGTL(("access:ipaddress:ipv6",
-                        "unknown flags 0x%x\n", flags));
-        }
-
-        /*
-         * if it's not multi, it must be uni.
-         *  (an ipv6 address is never broadcast)
-         */
-        if(addr_info.anycastflg)
-            entry->ia_type = IPADDRESSTYPE_ANYCAST;
-        else
-            entry->ia_type = IPADDRESSTYPE_UNICAST;
-
-
-        entry->ia_prefix_len = pfx_len;
-
-        /*
-         * can we figure out if an address is from DHCP?
-         * use manual until then...
-         *
-         *#define IPADDRESSORIGINTC_OTHER  1
-         *#define IPADDRESSORIGINTC_MANUAL  2
-         *#define IPADDRESSORIGINTC_DHCP  4
-         *#define IPADDRESSORIGINTC_LINKLAYER  5
-         *#define IPADDRESSORIGINTC_RANDOM  6
-         *
-         * are 'local' address assigned by link layer??
-         */
-         if (!flags)
-             entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
-#ifdef IFA_F_TEMPORARY
-         else if (flags & IFA_F_TEMPORARY)
-             entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
-#endif
-         else if (IN6_IS_ADDR_LINKLOCAL(entry->ia_address))
-             entry->ia_origin = IPADDRESSORIGINTC_LINKLAYER;
-         else
-             entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
-
-         if(entry->ia_origin == IPADDRESSORIGINTC_LINKLAYER)
-            entry->ia_storagetype = STORAGETYPE_PERMANENT;
-
-        /* xxx-rks: what can we do with scope? */
-#ifdef HAVE_LINUX_RTNETLINK_H
-        if(netsnmp_access_ipaddress_extra_prefix_info(entry->if_index, &entry->ia_prefered_lifetime
-                                                      ,&entry->ia_valid_lifetime, addr) < 0){
-           DEBUGMSGTL(("access:ipaddress:container", "unable to fetch extra prefix info\n"));
-        }
-#else
-        entry->ia_prefered_lifetime = 0;
-        entry->ia_valid_lifetime = 0;
-#endif
-#ifdef SUPPORT_PREFIX_FLAGS
-        {
-        prefix_cbx      prefix_val;
-        memset(&prefix_val, 0, sizeof(prefix_cbx));
-        if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val) < 0) {
-           DEBUGMSGTL(("access:ipaddress:container", "unable to find info\n"));
-           entry->ia_onlink_flag = 1;  /*Set by default as true*/
-           entry->ia_autonomous_flag = 2; /*Set by default as false*/
-
-        } else {
-           entry->ia_onlink_flag = prefix_val.ipAddressPrefixOnLinkFlag; 
-           entry->ia_autonomous_flag = prefix_val.ipAddressPrefixAutonomousFlag;
-        }
-        }
-#else
-        entry->ia_onlink_flag = 1;  /*Set by default as true*/
-        entry->ia_autonomous_flag = 2; /*Set by default as false*/
-#endif
-
-        /*
-         * add entry to container
-         */
-        if (CONTAINER_INSERT(container, entry) < 0) {
-            DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
-            netsnmp_access_ipaddress_entry_free(entry);
-            continue;
-        }
-    }
-
-    fclose(in);
-
-    if(rc<0)
-        return rc;
-
-    return idx_offset;
-#endif /* HAVE_LINUX_RTNETLINK_H */
-}
-
-#ifdef HAVE_LINUX_RTNETLINK_H
-struct address_flag_info
-netsnmp_access_other_info_get(int index, int family)
-{
-   struct {
-           struct nlmsghdr n;
-           struct ifaddrmsg r;
-           char   buf[1024];
-   } req;
-   struct address_flag_info addr;
-   struct rtattr    *rta;
-   int    status;
-   char   buf[16384];
-   struct nlmsghdr  *nlmp;
-   struct ifaddrmsg *rtmp;
-   struct rtattr    *rtatp;
-   int    rtattrlen;
-   int    sd;
-
-   memset(&addr, 0, sizeof(struct address_flag_info));
-   sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-   if(sd < 0) {
-      snmp_log_perror("ipaddress_linux: could not open netlink socket");
-      return addr;
-   }
-
-   memset(&req, 0, sizeof(req));
-   req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
-   req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
-   req.n.nlmsg_type = RTM_GETADDR;
-   req.r.ifa_family = family;
-   rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.n.nlmsg_len));
-   if(family == AF_INET)
-      rta->rta_len = RTA_LENGTH(4);
-   else
-      rta->rta_len = RTA_LENGTH(16);
-
-    status = send(sd, &req, req.n.nlmsg_len, 0);
-    if (status < 0) {
-        snmp_log_perror("ipadress_linux: could not send netlink request");
-        goto out;
-    }
-
-    status = recv(sd, buf, sizeof(buf), 0);
-    if (status < 0) {
-        snmp_log_perror("ipadress_linux: could not receive netlink request");
-        goto out;
-    }
-
-    if(status == 0) {
-       snmp_log (LOG_ERR, "ipadress_linux: nothing to read\n");
-       goto out;
-    }
-
-    for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);) {
-        int len = nlmp->nlmsg_len;
-        int req_len = len - sizeof(*nlmp);
-
-        if (req_len < 0 || len > status) {
-            snmp_log (LOG_ERR, "invalid netlink message\n");
-            goto out;
-        }
-
-        if (!NLMSG_OK(nlmp, status)) {
-            snmp_log (LOG_ERR, "invalid NLMSG message\n");
-            goto out;
-        }
-        rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
-        rtatp = (struct rtattr *)IFA_RTA(rtmp);
-        rtattrlen = IFA_PAYLOAD(nlmp);
-        if(index == rtmp->ifa_index){
-           for (; RTA_OK(rtatp, rtattrlen); rtatp = RTA_NEXT(rtatp, rtattrlen)) {
-                if(rtatp->rta_type == IFA_BROADCAST){
-                   addr.addr = ((struct in_addr *)RTA_DATA(rtatp))->s_addr;
-                   addr.bcastflg = 1;
-                }
-                if(rtatp->rta_type == IFA_ANYCAST){
-                   addr.addr = ((struct in_addr *)RTA_DATA(rtatp))->s_addr;
-                   addr.anycastflg = 1;
-                }
-           }
-        }
-        status -= NLMSG_ALIGN(len);
-        nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
-    }
-out:
-    close(sd);
-    return addr;
-}
-
-int
-netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
-                                           ulong *validlt, char *addr)
-{
-
-    struct {
-            struct nlmsghdr nlhdr;
-            struct ifaddrmsg ifaceinfo;
-            char   buf[1024];
-    } req;
-
-    struct rtattr        *rta;
-    int                  status;
-    char                 buf[16384];
-    char                 tmpaddr[40];
-    struct nlmsghdr      *nlmp;
-    struct ifaddrmsg     *rtmp;
-    struct rtattr        *rtatp;
-    struct ifa_cacheinfo *cache_info;
-    struct in6_addr      *in6p;
-    int                  rtattrlen;
-    int                  sd;
-    int                  reqaddr = 0;
-    int                  ret = -1;
-
-    sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-    if(sd < 0) {
-       snmp_log(LOG_ERR, "could not open netlink socket\n");
-       return -1;
-    }
-    memset(&req, 0, sizeof(req));
-    req.nlhdr.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
-    req.nlhdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
-    req.nlhdr.nlmsg_type = RTM_GETADDR;
-    req.ifaceinfo.ifa_family = AF_INET6;
-    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.nlhdr.nlmsg_len));
-    rta->rta_len = RTA_LENGTH(16); /*For ipv6*/
-
-    status = send (sd, &req, req.nlhdr.nlmsg_len, 0);
-    if (status < 0) {
-        snmp_log(LOG_ERR, "could not send netlink request\n");
-        goto out;
-    }
-    status = recv (sd, buf, sizeof(buf), 0);
-    if (status < 0) {
-        snmp_log (LOG_ERR, "could not recieve netlink request\n");
-        goto out;
-    }
-    if (status == 0) {
-       snmp_log (LOG_ERR, "nothing to read\n");
-       goto out;
-    }
-    for (nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp); ){
-
-        int len = nlmp->nlmsg_len;
-        int req_len = len - sizeof(*nlmp);
-
-        if (req_len < 0 || len > status) {
-            snmp_log (LOG_ERR, "invalid netlink message\n");
-            goto out;
-        }
-
-        if (!NLMSG_OK (nlmp, status)) {
-            snmp_log (LOG_ERR, "invalid NLMSG message\n");
-            goto out;
-        }
-        rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
-        rtatp = (struct rtattr *)IFA_RTA(rtmp);
-        rtattrlen = IFA_PAYLOAD(nlmp);
-        if(index == rtmp->ifa_index) {
-           for (; RTA_OK(rtatp, rtattrlen); rtatp = RTA_NEXT(rtatp, rtattrlen)) {
-                if(rtatp->rta_type == IFA_ADDRESS) {
-                   in6p = (struct in6_addr *)RTA_DATA(rtatp);
-                   sprintf(tmpaddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
-                   if(!strcmp(tmpaddr ,addr))
-                       reqaddr = 1;
-                }
-                if(rtatp->rta_type == IFA_CACHEINFO) {
-                   cache_info = (struct ifa_cacheinfo *)RTA_DATA(rtatp);
-                   if(reqaddr) {
-                      reqaddr = 0;
-                      *validlt = cache_info->ifa_valid;
-                      *preferedlt = cache_info->ifa_prefered;
-                   }
-
-                }
-
-           }
-        }
-        status -= NLMSG_ALIGN(len);
-        nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
-    }
-    ret = 0;
-
-out:
-    close(sd);
-    return ret;
-}
-#endif /* HAVE_LINUX_RTNETLINK_H */
-#endif /* defined(NETSNMP_ENABLE_IPV6) */

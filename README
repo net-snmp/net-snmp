@@ -66,6 +66,8 @@ AVAILABILITY
     - http://www.net-snmp.org/
   Project Wiki:
     - http://www.net-snmp.org/wiki/
+  GitHub Project:
+    - https://github.com/net-snmp/net-snmp/
   Sourceforge Project page:
     - http://sourceforge.net/projects/net-snmp
 
@@ -101,7 +103,7 @@ HELPING OUT
   your help, but please read the PORTING file first.  Also, subscribe
   to the net-snmp-coders list described below and mention what you're
   going to work on to make sure no one else is already doing so!
-  You'll also need to keep up to date with the latest code snap shot,
+  You'll also need to keep up to date with the latest code snapshot,
   which can be obtained from CVS using the information found at
   http://www.net-snmp.org/cvs/.
 
@@ -153,7 +155,7 @@ MAILING LISTS
     managers, MIB modules, etc).
 
     Please do *NOT* send messages to both -users and -coders lists.
-    This is completely unnecessary, and simply serves to further
+    This is completely unnecessary and simply serves to further
     overload (and annoy) the core development team.   If in doubt,
     just use the -users list.
 
@@ -220,20 +222,19 @@ SUBMITTING BUG REPORTS
   using, as well as detailed information about exactly what is wrong.
 
   To submit a bug report, please use the web interface at
-  http://www.net-snmp.org/bugs/.  It is a full-fledged
+  https://github.com/net-snmp/net-snmp/issues.  It is a full-fledged
   bug-tracking system that will allow you to search for already
   existing bug reports as well as track the status of your report as
   it is processed by the core developers.
 
   If you intend to submit a patch as well, please read the PORTING
-  file before you do so and then submit it to
-  http://www.net-snmp.org/patches/.
+  file before you do so and then submit it as a GitHub pull request.
 
 CLOSING
 
   We love patches.  Send some to us!  But before you do, please see
   the 'PORTING' file for information on helping us out with the
-  process of integrating your patches (regardless of whether its a new
+  process of integrating your patches (regardless of whether it is a new
   feature implementation or a new port).
 
   Also, We're interested if anyone actually uses/likes/hates/whatever

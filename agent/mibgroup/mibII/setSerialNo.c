@@ -52,7 +52,7 @@ init_setSerialNo(void)
      */
     setserialno = netsnmp_random();
     DEBUGMSGTL(("snmpSetSerialNo",
-                "Initalizing SnmpSetSerialNo to %d\n", setserialno));
+                "Initializing SnmpSetSerialNo to %d\n", setserialno));
     snmpd_register_config_handler("setserialno", setserial_parse_config,
                                   NULL, "integer");
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
@@ -70,6 +70,6 @@ init_setSerialNo(void)
         netsnmp_create_handler_registration("snmpSetSerialNo", NULL,
                                    set_serial_oid, OID_LENGTH(set_serial_oid),
                                    mode), &setserialno);
-    DEBUGMSGTL(("scalar_int", "Done initalizing example scalar int\n"));
+    DEBUGMSGTL(("scalar_int", "Done initializing example scalar int\n"));
 }
 

@@ -938,6 +938,8 @@ with_dnssec
 enable_dnssec
 with_rpm
 enable_rpm
+with_pcre2_8
+enable_pcre2_8
 with_pcre
 enable_pcre
 with_install_prefix
@@ -1864,6 +1866,8 @@ Compiler Options:
   --without-rpm                   Don't include support for the RPM package
                                   management system when building the host MIB
                                   module.
+  --without-pcre2                  Don't include pcre2 process searching
+                                  support in the agent.
   --without-pcre                  Don't include pcre process searching
                                   support in the agent.
   --with-install-prefix=PATH      Just for installing, prefix all
@@ -13971,6 +13975,21 @@ fi
 
 
 
+# Check whether --with-pcre2-8 was given.
+if test ${with_pcre2_8+y}
+then :
+  withval=$with_pcre2_8; with_pcre2="$withval"
+else $as_nop
+  with_pcre2="maybe"
+fi
+
+   # Check whether --enable-pcre2-8 was given.
+if test ${enable_pcre2_8+y}
+then :
+  enableval=$enable_pcre2_8; as_fn_error $? "Invalid option. Use --with-pcre2-8/--without-pcre2-8 instead" "$LINENO" 5
+fi
+
+
 
 # Check whether --with-pcre was given.
 if test ${with_pcre+y}
@@ -17104,8 +17123,7 @@ printf "%s\n" "$as_me: Checking for developer compiler flags" >&6;}
     for opt in -Wall -Wextra -Wstrict-prototypes -Wwrite-strings -Wcast-qual \
         -Wimplicit-fallthrough -Wlogical-op -Wundef                          \
         -Wno-format-truncation -Wno-missing-field-initializers               \
-        -Wno-sign-compare -Wno-unused-parameter                              \
-        -Wno-deprecated-declarations -Wextra-semi
+        -Wno-sign-compare -Wno-unused-parameter -Wcast-function-type
     do
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 printf %s "checking whether the compiler supports $opt... " >&6; }
@@ -18199,6 +18217,12 @@ then :
 fi
 
 
+ac_fn_c_check_header_compile "$LINENO" "sys/callout.h" "ac_cv_header_sys_callout_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_callout_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_CALLOUT_H 1" >>confdefs.h
+
+fi
 ac_fn_c_check_header_compile "$LINENO" "sys/diskio.h" "ac_cv_header_sys_diskio_h" "$ac_includes_default"
 if test "x$ac_cv_header_sys_diskio_h" = xyes
 then :
@@ -18257,6 +18281,12 @@ ac_fn_c_check_header_compile "$LINENO" "sys/mnttab.h" "ac_cv_header_sys_mnttab_h
 if test "x$ac_cv_header_sys_mnttab_h" = xyes
 then :
   printf "%s\n" "#define HAVE_SYS_MNTTAB_H 1" >>confdefs.h
+
+fi
+ac_fn_c_check_header_compile "$LINENO" "sys/osd.h" "ac_cv_header_sys_osd_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_osd_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_OSD_H 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_compile "$LINENO" "sys/pool.h" "ac_cv_header_sys_pool_h" "$ac_includes_default"
@@ -18637,12 +18667,6 @@ ac_fn_c_check_header_compile "$LINENO" "openssl/x509v3.h" "ac_cv_header_openssl_
 if test "x$ac_cv_header_openssl_x509v3_h" = xyes
 then :
   printf "%s\n" "#define HAVE_OPENSSL_X509V3_H 1" >>confdefs.h
-
-fi
-ac_fn_c_check_header_compile "$LINENO" "security/cryptoki.h" "ac_cv_header_security_cryptoki_h" "$ac_includes_default"
-if test "x$ac_cv_header_security_cryptoki_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_SECURITY_CRYPTOKI_H 1" >>confdefs.h
 
 fi
 
@@ -19773,6 +19797,71 @@ ac_fn_c_check_header_compile "$LINENO" "netdb.h" "ac_cv_header_netdb_h" "
 if test "x$ac_cv_header_netdb_h" = xyes
 then :
   printf "%s\n" "#define HAVE_NETDB_H 1" >>confdefs.h
+
+fi
+ac_fn_c_check_header_compile "$LINENO" "netgroup.h" "ac_cv_header_netgroup_h" "
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIMEOUT_H
+#include <sys/timeout.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip_icmp.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#ifdef HAVE_NETINET_IP_ICMP_H
+#include <netinet/ip_icmp.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+#ifdef HAVE_NETINET_TCP_TIMER_H
+#include <netinet/tcp_timer.h>
+#endif
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
+#ifdef HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
+#endif
+
+"
+if test "x$ac_cv_header_netgroup_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_NETGROUP_H 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_compile "$LINENO" "net/if_arp.h" "ac_cv_header_net_if_arp_h" "
@@ -24228,79 +24317,6 @@ printf "%s\n" "$netsnmp_cv_func_rpmGetPath__rpmlibs" >&6; }
  fi
 
 
-  # rpm-4.0.3 librpmdb actually contains what we need.
-
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing rpmdbOpen" >&5
-printf %s "checking for library containing rpmdbOpen... " >&6; }
-if test ${netsnmp_cv_func_rpmdbOpen__rpmlibs+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-char rpmdbOpen ();
-int
-main (void)
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  netsnmp_result="none required"
-else $as_nop
-  for netsnmp_cur_lib in rpmdb ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-char rpmdbOpen ();
-int
-main (void)
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_rpmdbOpen__rpmlibs="${netsnmp_result}"
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
-printf "%s\n" "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
   # now check for rpm using the appropriate libraries.
 
  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing rpmReadConfigFiles" >&5
@@ -25359,6 +25375,112 @@ LIBS="$netsnmp_save_LIBS"
 #
 #   regex in process table
 #
+if test "x$with_pcre2" != "xno"; then
+  ac_fn_c_check_header_compile "$LINENO" "pcre2.h" "ac_cv_header_pcre2_h" "#define PCRE2_CODE_UNIT_WIDTH 8
+
+"
+if test "x$ac_cv_header_pcre2_h" = xyes
+then :
+
+
+printf "%s\n" "#define HAVE_PCRE2_H 1" >>confdefs.h
+
+      pcre2_h=yes
+
+else $as_nop
+  pcre2_h=no
+fi
+
+fi
+if test "x$pcre2header_h" = "xno" -o "x$pcre2_h" = "xno" ; then
+  if test "x$with_pcre2" = "xyes" ; then
+    as_fn_error $? "Could not find the pcre2 header file needed and was specifically asked to use pcre2 support" "$LINENO" 5
+  else
+    with_pcre2=no
+  fi
+fi
+
+if test "x$with_pcre2" != "xno"; then
+
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing pcre2_match_8" >&5
+printf %s "checking for library containing pcre2_match_8... " >&6; }
+if test ${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LAGENTLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char pcre2_match_8 ();
+int
+main (void)
+{
+return pcre2_match_8 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  netsnmp_result="none required"
+else $as_nop
+  for netsnmp_cur_lib in pcre2-8 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char pcre2_match_8 ();
+int
+main (void)
+{
+return pcre2_match_8 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_pcre2_match_8_LAGENTLIBS="${netsnmp_result}"
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pcre2_match_8_LAGENTLIBS" >&5
+printf "%s\n" "$netsnmp_cv_func_pcre2_match_8_LAGENTLIBS" >&6; }
+ if test "${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS}" != "none required" ; then
+       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+    LMIBLIBS="$LMIBLIBS -lpcre2-8"
+
+
+ fi
+
+
+
+fi
+
+if test "x$with_pcre2" != "xyes"; then
+
 if test "x$with_pcre" != "xno"; then
   ac_fn_c_check_header_compile "$LINENO" "pcre.h" "ac_cv_header_pcre_h" "$ac_includes_default"
 if test "x$ac_cv_header_pcre_h" = xyes
@@ -25463,6 +25585,7 @@ printf "%s\n" "$netsnmp_cv_func_pcre_exec_LAGENTLIBS" >&6; }
 
 
 
+fi
 fi
 
 # -*- autoconf -*-
@@ -27582,12 +27705,9 @@ fi
 
 # The test below verifies whether the libnl-3 package been installed.
 # This test works as follows:
-# - If pkg-config was not installed at the time autogen.sh was run,
-#   the definition of the PKG_CHECK_EXISTS() macro will not be found by
-#   autogen.sh. Augogen.sh will generate a configure script that prints
-#   a warning about pkg-config and proceeds as if libnl-3 has not been
-#   installed.
-# - If pkg-config was installed at the time autogen.sh was run,
+# - If pkg-config is not installed at the time autoreconf is run,
+#   autoreconf will fail.
+# - If pkg-config is installed at the time autoreconf is run,
 #   the generated configure script will try to detect the presence of
 #   the libnl-3 library by looking up compile and linker flags in the
 #   file called libnl-3.pc.
@@ -28684,6 +28804,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 
 
 
+
 	for symbol in				\
 	    AES_cfb128_encrypt			\
 	    ASN1_STRING_get0_data		\
@@ -28693,6 +28814,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 	    DTLS_method				\
 	    DTLSv1_method			\
 	    ERR_get_error_all			\
+	    ERR_get_error_func			\
 	    EVP_MD_CTX_create			\
 	    EVP_MD_CTX_destroy			\
 	    EVP_MD_CTX_free			\
@@ -30807,7 +30929,7 @@ CFLAGS="$CFLAGS -Werror"
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for the type of fd_set::fds_bits" >&5
 printf %s "checking for the type of fd_set::fds_bits... " >&6; }
-for type in __fd_mask __int32_t unknown; do
+for type in __fd_mask __int32_t long 'unsigned long' unknown; do
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -31276,6 +31398,12 @@ then :
   printf "%s\n" "#define HAVE_IF_NAMETOINDEX 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "malloc_trim" "ac_cv_func_malloc_trim"
+if test "x$ac_cv_func_malloc_trim" = xyes
+then :
+  printf "%s\n" "#define HAVE_MALLOC_TRIM 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "mkstemp" "ac_cv_func_mkstemp"
 if test "x$ac_cv_func_mkstemp" = xyes
 then :
@@ -31379,6 +31507,42 @@ then :
 
 fi
 
+
+if test x$ac_cv_func_setnetgrent = xyes; then
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking return type of setnetgrent()" >&5
+printf %s "checking return type of setnetgrent()... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef HAVE_NETDB_H
+    #include <netdb.h>
+#endif
+#ifdef HAVE_NETGROUP_H
+    #include <netgroup.h>
+#endif
+
+int
+main (void)
+{
+return setnetgrent("")
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: int" >&5
+printf "%s\n" "int" >&6; }
+
+printf "%s\n" "#define SETNETGRENT_RETURNS_INT 1" >>confdefs.h
+
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: void" >&5
+printf "%s\n" "void" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _NSGetArgv()" >&5
 printf %s "checking for _NSGetArgv()... " >&6; }
@@ -33810,7 +33974,7 @@ else $as_nop
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -33842,7 +34006,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -33892,7 +34056,7 @@ else $as_nop
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -33924,7 +34088,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 int
 main (void)
 {
-struct ifnet test; test.if_mtu = 0;
+struct ifnet test; test.if_mtu = 0; return sizeof(struct in_ifaddr);
   ;
   return 0;
 }
@@ -35602,7 +35766,7 @@ else $as_nop
 #include <stddef.h>
 #include <stdlib.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
   int                 mib[2];
   size_t              len;
@@ -35612,11 +35776,7 @@ int main(void)
   mib[1] = KERN_BOOTTIME;
 
   len = sizeof(boottime);
-  sysctl(mib, 2, &boottime, &len, NULL, NULL);
-  if (boottime.tv_sec != 0)
-    exit(0);
-  else
-    exit(1);
+  return 1 - (sysctl(mib, 2, &boottime, &len, NULL, 0) == 0 && boottime.tv_sec);
 }
 
 _ACEOF
@@ -35936,6 +36096,48 @@ printf "%s\n" "$ac_cv_have_ip_pktinfo" >&6; }
 if test x$ac_cv_have_ip_pktinfo = xyes; then
 
 printf "%s\n" "#define HAVE_IP_PKTINFO 1" >>confdefs.h
+
+fi
+
+#   Check whether IPV6_RECVPKTINFO is usable.
+#
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for IPV6_RECVPKTINFO " >&5
+printf %s "checking for IPV6_RECVPKTINFO ... " >&6; }
+if test ${ac_cv_have_ipv6_recvpktinfo+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <netinet/in.h>
+
+int
+main (void)
+{
+
+return IPV6_RECVPKTINFO
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_have_ipv6_recvpktinfo=yes
+else $as_nop
+  ac_cv_have_ipv6_recvpktinfo=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_have_ipv6_recvpktinfo" >&5
+printf "%s\n" "$ac_cv_have_ipv6_recvpktinfo" >&6; }
+if test x$ac_cv_have_ipv6_recvpktinfo = xyes; then
+
+printf "%s\n" "#define HAVE_IPV6_RECVPKTINFO 1" >>confdefs.h
 
 fi
 

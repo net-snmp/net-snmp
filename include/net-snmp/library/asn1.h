@@ -54,7 +54,7 @@ SOFTWARE.
 #define MAX_NAME_LEN	    MAX_OID_LEN /* obsolete. use MAX_OID_LEN */
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__)
 /*
  * If x is an array, x and &(x)[0] have different types. If x is a pointer,
  * x and &(x)[0] have the same type. Trigger a build error if x is a pointer

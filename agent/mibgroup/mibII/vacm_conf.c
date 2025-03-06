@@ -935,7 +935,7 @@ vacm_create_simple(const char *token, char *confline,
         } else {
             /*
              * If no context field is given, then we default to matching
-             *   all contexts (for compatability with previous releases).
+             *   all contexts (for compatibility with previous releases).
              * But if a field context is specified (not ending with '*')
              *   then this should be taken as an exact match.
              * Specifying a context field of "" will match the default
@@ -1134,11 +1134,11 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
         /*
          *  The trap daemon implements VACM-style access control for incoming
          *    notifications, but offers a way of turning this off (for backwards
-         *    compatability).  Check for this explicitly, and warn if necessary.
+         *    compatibility).  Check for this explicitly, and warn if necessary.
          *
          *  NB:  The NETSNMP_DS_APP_NO_AUTHORIZATION definition is a duplicate
          *       of an identical setting in "apps/snmptrapd_ds.h".
-         *       These two need to be kept in synch.
+         *       These two need to be kept in sync.
          */
 #ifndef NETSNMP_DS_APP_NO_AUTHORIZATION
 #define NETSNMP_DS_APP_NO_AUTHORIZATION 17
@@ -1191,7 +1191,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  * VACM_NOVIEW(4)	   Missing view
  * VACM_NOTINVIEW(5)	   Not in view
  * VACM_NOSUCHCONTEXT(6)   No Such Context
- * VACM_SUBTREE_UNKNOWN(7) When testing an entire subtree, UNKNOWN (ie, the entire
+ * VACM_SUBTREE_UNKNOWN(7) When testing an entire subtree, UNKNOWN (i.e., the entire
  *                         subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:
@@ -1245,7 +1245,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
  * VACM_NOVIEW(4)	   Missing view
  * VACM_NOTINVIEW(5)	   Not in view
  * VACM_NOSUCHCONTEXT(6)   No Such Context
- * VACM_SUBTREE_UNKNOWN(7) When testing an entire subtree, UNKNOWN (ie, the entire
+ * VACM_SUBTREE_UNKNOWN(7) When testing an entire subtree, UNKNOWN (i.e., the entire
  *                         subtree has both allowed and disallowed portions)
  *
  * Debug output listed as follows:

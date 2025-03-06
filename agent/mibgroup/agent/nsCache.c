@@ -26,7 +26,7 @@ extern netsnmp_cache *netsnmp_cache_get_head(void);
 #define nsCache 1, 3, 6, 1, 4, 1, 8072, 1, 5
 
 /*
- * OIDs for the cacheging control scalar objects
+ * OIDs for the caching control scalar objects
  *
  * Note that these we're registering the full object rather
  *  than the (sole) valid instance in each case, in order

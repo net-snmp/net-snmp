@@ -35,7 +35,7 @@ get_disk(int disknr)
     }
 
     /*
-     * could be optimiced by checking if cache_disknr<=disknr
+     * could be optimized by checking if cache_disknr<=disknr
      * if so, just reread the data - not going through the whole chain
      * from kc->kc_chain 
      */

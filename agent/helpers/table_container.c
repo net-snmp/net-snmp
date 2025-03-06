@@ -78,7 +78,7 @@ typedef struct container_table_data_s {
  *  Helps you implement a table when data can be found via a netsnmp_container.
  *  @ingroup table
  *
- *  The table_container handler is used (automatically) in conjuntion
+ *  The table_container handler is used (automatically) in conjunction
  *  with the @link table table@endlink handler.
  *
  *  This handler will use the index information provided by
@@ -116,7 +116,7 @@ typedef struct container_table_data_s {
  *
  *  The container must, at a minimum, implement find and find_next. If a NULL
  *  key is passed to the container, it must return the first item, if any.
- *  All containers provided by net-snmp fulfil this requirement.
+ *  All containers provided by net-snmp fulfill this requirement.
  *
  *  This handler will only register to process 'data lookup' modes. In
  *  traditional net-snmp modes, that is any GET-like mode (GET, GET-NEXT,
@@ -140,11 +140,11 @@ typedef struct container_table_data_s {
  *    pass it to the next appropriate handler.
  *
  *  SET
- *    If the hander did not register with the HANDLER_CAN_NOT_CREATE flag
+ *    If the handler did not register with the HANDLER_CAN_NOT_CREATE flag
  *    set in the registration modes, it is assumed that this is a row
  *    creation request and a NULL row is added to the request's data list.
- *    The sub-handler is responsbile for dealing with any row creation
- *    contraints and inserting any newly created rows into the container
+ *    The sub-handler is responsible for dealing with any row creation
+ *    constraints and inserting any newly created rows into the container
  *    and the request's data list.
  *
  *  If a row is found, it will be inserted into
@@ -278,16 +278,20 @@ netsnmp_tcontainer_replace_row( container_table_data *table,
  *
  * ================================== */
 
-static container_table_data *
-netsnmp_container_table_data_clone(container_table_data *tad)
+static void *
+netsnmp_container_table_data_clone(void *p)
 {
+    container_table_data *tad = p;
+
     ++tad->refcnt;
     return tad;
 }
 
 static void
-netsnmp_container_table_data_free(container_table_data *tad)
+netsnmp_container_table_data_free(void *p)
 {
+    container_table_data *tad = p;
+
     if (--tad->refcnt == 0)
 	free(tad);
 }
@@ -333,8 +337,8 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
         container->ncompare = netsnmp_ncompare_netsnmp_index;
     
     handler->myvoid = (void*)tad;
-    handler->data_clone = (void *(*)(void *))netsnmp_container_table_data_clone;
-    handler->data_free = (void (*)(void *))netsnmp_container_table_data_free;
+    handler->data_clone = netsnmp_container_table_data_clone;
+    handler->data_free = netsnmp_container_table_data_free;
     handler->flags |= MIB_HANDLER_AUTO_NEXT;
     
     return handler;
@@ -767,7 +771,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
      */
     if ((oldmode == MODE_GETNEXT) && (handler->next)) {
         /*
-         * tell agent handlder not to auto call next handler
+         * tell agent handler not to auto call next handler
          */
         handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
 

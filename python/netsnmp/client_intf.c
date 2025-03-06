@@ -365,7 +365,7 @@ __scan_num_objid(const char *buf, oid *objid, size_t *len)
 }
 
 /* does a destructive dissection of <label1>...<labeln>.<iid> returning
-   <labeln> and <iid> in seperate strings (note: will destructively
+   <labeln> and <iid> in separate strings (note: will destructively
    alter input string, 'name') */
 static int
 __get_label_iid(char *name, const char **last_label, const char **iid, int flag)
@@ -438,7 +438,7 @@ __get_label_iid(char *name, const char **last_label, const char **iid, int flag)
                         (flag & FAIL_ON_NULL_IID)))
       return FAILURE;
 
-   if (flag & NON_LEAF_NAME) { /* dont know where to start instance id */
+   if (flag & NON_LEAF_NAME) { /* don't know where to start instance id */
      /* put the whole thing in label */
      icp = &(name[len]);
      flag |= USE_LONG_NAMES;
@@ -899,7 +899,7 @@ py_netsnmp_attr_long(PyObject *obj, const char *attr_name)
 }
 
 /*
- * Retrieve attribute @attr_name of @obj and return it as a void ponter.
+ * Retrieve attribute @attr_name of @obj and return it as a void pointer.
  * Returns NULL on error.
  */
 static void *
@@ -970,14 +970,14 @@ py_netsnmp_attr_set_string(PyObject *obj, const char *attr_name,
  *
  * Copy the error info which may have been returned from __send_sync_pdu(...)
  * into the python object. This will allow the python code to determine if
- * an error occured during an snmp operation.
+ * an error occurred during an snmp operation.
  *
  * Currently there are 3 attributes we care about
  *
  * ErrorNum - Copy of the value of netsnmp_session.s_errno. This is the system
  * errno that was generated during our last call into the net-snmp library.
  *
- * ErrorInd - Copy of the value of netsmp_session.s_snmp_errno. These error
+ * ErrorInd - Copy of the value of netsnmp_session.s_snmp_errno. These error
  * numbers are separate from the system errno's and describe SNMP errors.
  *
  * ErrorStr - A string describing the ErrorInd that was returned during our last
@@ -1266,7 +1266,6 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
       }
 
       session.transport_configuration->compare =
-          (netsnmp_container_compare*)
           netsnmp_transport_config_compare;
   }
 
@@ -1791,9 +1790,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       } else {
           newpdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
-          for(vars = (response ? response->variables : NULL),
-                  varlist_ind = 0,
-                  oldvars = (pdu ? pdu->variables : NULL);
+          for(vars = response->variables, varlist_ind = 0,
+		oldvars = (pdu ? pdu->variables : NULL);
               vars && (varlist_ind < varlist_len);
               vars = vars->next_variable, varlist_ind++,
                   oldvars = (oldvars ? oldvars->next_variable : NULL)) {
@@ -1818,7 +1816,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   /* The agent responded with an illegal response
                      as the returning OID was lexogragically less
                      then or equal to the requested OID...
-                     We need to give up here because an infite
+                     We need to give up here because an infinite
                      loop will result otherwise.
 
                      XXX: this really should be an option to
@@ -2069,7 +2067,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
 	  } else {
 	    PyObject *none = Py_BuildValue(""); /* new ref */
-	    /* not sure why making vabind failed - should not happen*/
+	    /* not sure why making varbind failed - should not happen*/
 	    PyList_Append(varbinds, none); /* increments ref */
 	    /* Return None for this variable. */
 	    PyTuple_SetItem(val_tuple, varbind_ind, none); /* steals ref */

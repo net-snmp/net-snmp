@@ -423,13 +423,11 @@ int type;
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-__snprint_value (buf, buf_len, var, tp, type, flag)
-char * buf;
-size_t buf_len;
-netsnmp_variable_list * var;
-struct tree * tp;
-int type;
-int flag;
+#if defined(__has_attribute) && __has_attribute(nonnull)
+__attribute__((nonnull(1)))
+#endif
+__snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
+                struct tree *tp, int type, int flag)
 {
    int len = 0;
    u_char* ip;
@@ -681,7 +679,7 @@ char * str;
 }
 
 /* does a destructive disection of <label1>...<labeln>.<iid> returning
-   <labeln> and <iid> in seperate strings (note: will destructively
+   <labeln> and <iid> in separate strings (note: will destructively
    alter input string, 'name') */
 static int
 __get_label_iid (name, last_label, iid, flag)
@@ -2623,14 +2621,14 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                 goto end;
 	   }
 
-	   session.peername = peer;
+	   session.peername = netsnmp_strdup(peer);
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
            session.contextNameLen = strlen(context);
-           session.contextName = context;
+           session.contextName = netsnmp_strdup(context);
            session.securityNameLen = strlen(sec_name);
-           session.securityName = sec_name;
+           session.securityName = netsnmp_strdup(sec_name);
            session.securityLevel = sec_level;
            session.securityModel = USM_SEC_MODEL_NUMBER;
            session.securityEngineIDLen =
@@ -2751,12 +2749,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
         end:
            RETVAL = ss;
-	   netsnmp_free(session.securityPrivLocalKey);
-	   netsnmp_free(session.securityPrivProto);
-	   netsnmp_free(session.securityAuthLocalKey);
-	   netsnmp_free(session.securityAuthProto);
-	   netsnmp_free(session.contextEngineID);
-	   netsnmp_free(session.securityEngineID);
+           netsnmp_cleanup_session(&session);
 	}
         OUTPUT:
         RETVAL
@@ -2787,13 +2780,13 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
 
            session.version = version;
 
-	   session.peername = peer;
+	   session.peername = netsnmp_strdup(peer);
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.contextNameLen = strlen(context);
-           session.contextName = context;
+           session.contextName = netsnmp_strdup(context);
            session.securityNameLen = strlen(sec_name);
-           session.securityName = sec_name;
+           session.securityName = netsnmp_strdup(sec_name);
            session.securityLevel = sec_level;
            session.securityModel = NETSNMP_TSM_SECURITY_MODEL;
            session.contextEngineIDLen =
@@ -2808,11 +2801,11 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
                if (!session.transport_configuration) {
                    fprintf(stderr, "failed to initialize the transport configuration container\n");
                    RETVAL = NULL;
+                   netsnmp_cleanup_session(&session);
                    return;
                }
 
                session.transport_configuration->compare =
-                   (netsnmp_container_compare*)
                    netsnmp_transport_config_compare;
            }
 
@@ -2844,12 +2837,7 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
            }
 
            RETVAL = ss;
-	   netsnmp_free(session.securityPrivLocalKey);
-	   netsnmp_free(session.securityPrivProto);
-	   netsnmp_free(session.securityAuthLocalKey);
-	   netsnmp_free(session.securityAuthProto);
-	   netsnmp_free(session.contextEngineID);
-	   netsnmp_free(session.securityEngineID);
+           netsnmp_cleanup_session(&session);
 	}
         OUTPUT:
         RETVAL

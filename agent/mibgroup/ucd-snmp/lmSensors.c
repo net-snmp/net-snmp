@@ -227,7 +227,7 @@ init_lmSensors(void)
 
 /*
  * shutdown_lmSensors():
- * A shutdown/cleanup routine.  This is called when the agent shutsdown.
+ * A shutdown/cleanup routine.  This is called when the agent shuts down.
  */
 void
 shutdown_lmSensors(void)
@@ -654,7 +654,7 @@ process_i2c(picl_nodehdl_t childh,
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
-/* walks its way recusively through the tree of sensors */
+/* walks its way recursively through the tree of sensors */
 
 static int
 process_sensors(int level, picl_nodehdl_t nodeh)
@@ -764,7 +764,7 @@ _sensor_load(time_t t)
     picl_nodehdl_t  rooth;
 #else
     int typ;
-    int temp=0; /* do not reset this later, more than one typ has temperatures*/
+    int temp=0; /* do not reset this later, more than one type has temperatures*/
     int other=0;
     const char *fantypes[]={"CPU","PWR","AFB"};
     kstat_ctl_t *kc;

@@ -42,7 +42,7 @@
 
 #define config_warning(x) NETSNMP_REQUIRE_SEMICOLON
 
-#define NETSNMP_REQUIRE_SEMICOLON extern void netsnmp_unused_function(void)
+#define NETSNMP_REQUIRE_SEMICOLON struct netsnmp_unused_struct
 
 #define config_belongs_in(x) NETSNMP_REQUIRE_SEMICOLON
 
@@ -188,6 +188,9 @@
 
 /* Define to 1 if you have the `ERR_get_error_all' function. */
 #undef HAVE_ERR_GET_ERROR_ALL
+
+/* Define to 1 if you have the `ERR_get_error_func' function. */
+#undef HAVE_ERR_GET_ERROR_FUNC
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
@@ -381,6 +384,9 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
+/* Set if IPV6_RECVPKTINFO is usable */
+#undef HAVE_IPV6_RECVPKTINFO
+
 /* Set if IP_PKTINFO is usable */
 #undef HAVE_IP_PKTINFO
 
@@ -538,6 +544,9 @@
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
+/* Define to 1 if you have the `malloc_trim' function. */
+#undef HAVE_MALLOC_TRIM
+
 /* Define to 1 if the system has the type `mib2_ipIfStatsEntry_t'. */
 #undef HAVE_MIB2_IPIFSTATSENTRY_T
 
@@ -582,6 +591,9 @@
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
+
+/* Define to 1 if you have the <netgroup.h> header file. */
+#undef HAVE_NETGROUP_H
 
 /* Define to 1 if you have the <netinet6/in6_pcb.h> header file. */
 #undef HAVE_NETINET6_IN6_PCB_H
@@ -772,6 +784,9 @@
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
 
+/* Define to 1 if you have <pcre2.h>. */
+#undef HAVE_PCRE2_H
+
 /* Define to 1 if you have <pcre.h>. */
 #undef HAVE_PCRE_H
 
@@ -858,9 +873,6 @@
 
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
-
-/* Define to 1 if you have the <security/cryptoki.h> header file. */
-#undef HAVE_SECURITY_CRYPTOKI_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
@@ -1244,6 +1256,9 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
+/* Define to 1 if you have the <sys/callout.h> header file. */
+#undef HAVE_SYS_CALLOUT_H
+
 /* Define to 1 if you have the <sys/cdefs.h> header file. */
 #undef HAVE_SYS_CDEFS_H
 
@@ -1297,6 +1312,9 @@
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
 #undef HAVE_SYS_MOUNT_H
+
+/* Define to 1 if you have the <sys/osd.h> header file. */
+#undef HAVE_SYS_OSD_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
@@ -1792,6 +1810,9 @@
 /* Qualifier for second argument of the appverify_cookie_cb() callback
    function */
 #undef SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
+
+/* Define if the setnetgrent() return type is 'int' */
+#undef SETNETGRENT_RETURNS_INT
 
 /* The size of `sockaddr_un.sun_path', as computed by sizeof. */
 #undef SIZEOF_SOCKADDR_UN_SUN_PATH
@@ -2378,6 +2399,15 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #  define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
 #endif
 
+#if defined(__has_attribute)
+#  if __has_attribute(__nonnull__)
+#    define NETSNMP_NONNULL(...) __attribute__((__nonnull__(__VA_ARGS__)))
+#  endif
+#endif
+#if !defined NETSNMP_NONNULL
+#  define NETSNMP_NONNULL(...) /* nonnull */
+#endif
+
 /* ********* NETSNMP_MARK_BEGIN_LEGACY_DEFINITIONS *********/
 /* 
  * existing definitions prior to Net-SNMP 5.4
@@ -2532,6 +2562,7 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define HPUX11ID      NETSNMP_HPUX11ID
 #define AIXID         NETSNMP_AIXID
 #define MACOSXID      NETSNMP_MACOSXID
+#define DRAGONFLYID   NETSNMP_DRAGONFLYID
 #define UNKNOWNID     NETSNMP_UNKNOWNID
 
 #define ENTERPRISE_OID            NETSNMP_ENTERPRISE_OID

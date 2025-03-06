@@ -1101,7 +1101,7 @@ _ifTable_check_column(ifTable_rowreq_ctx * rowreq_ctx,
          * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h 
          */
     case COLUMN_IFADMINSTATUS:
-        /** special case: we are using exernal storage w/smaller data size
+        /** special case: we are using external storage w/smaller data size
          ** for storage, so we can't use sizeof on data context. So we
          ** just check that it's the expected size. The enum tests below
          ** will ensure that there is no data overflow. */
@@ -1626,7 +1626,7 @@ _mfd_ifTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully commited this row, set the dirty flag. Use the
+         * if we successfully committed this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1635,7 +1635,7 @@ _mfd_ifTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully commited this row, set the dirty flag. Use the
+         * if we successfully committed this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */

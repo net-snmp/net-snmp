@@ -234,6 +234,21 @@ create_pingCtlTable_data(void)
 
     StorageNew->storageType = ST_NONVOLATILE;
     StorageNew->pingProbeHistoryMaxIndex = 0;
+
+    if (StorageNew->pingCtlTargetAddress == NULL ||
+        StorageNew->pingCtlTrapGeneration == NULL ||
+        StorageNew->pingCtlType == NULL ||
+        StorageNew->pingCtlDescr == NULL ||
+        StorageNew->pingCtlSourceAddress == NULL) {
+        free(StorageNew->pingCtlTargetAddress);
+        free(StorageNew->pingCtlTrapGeneration);
+        free(StorageNew->pingCtlType);
+        free(StorageNew->pingCtlDescr);
+        free(StorageNew->pingCtlSourceAddress);
+        free(StorageNew);
+        return NULL;
+    }
+
     return StorageNew;
 }
 
@@ -418,6 +433,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlOwnerIndexLen);
     if (StorageTmp->pingCtlOwnerIndex == NULL) {
         config_perror("invalid specification for pingCtlOwnerIndex");
+        free(StorageTmp);
         return;
     }
 
@@ -427,6 +443,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTestNameLen);
     if (StorageTmp->pingCtlTestName == NULL) {
         config_perror("invalid specification for pingCtlTestName");
+        free(StorageTmp);
         return;
     }
 
@@ -441,6 +458,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTargetAddressLen);
     if (StorageTmp->pingCtlTargetAddress == NULL) {
         config_perror("invalid specification for pingCtlTargetAddress");
+        free(StorageTmp);
         return;
     }
 
@@ -466,6 +484,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDataFillLen);
     if (StorageTmp->pingCtlDataFill == NULL) {
         config_perror("invalid specification for pingCtlDataFill");
+        free(StorageTmp);
         return;
     }
 
@@ -487,6 +506,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTrapGenerationLen);
     if (StorageTmp->pingCtlTrapGeneration == NULL) {
         config_perror("invalid specification for pingCtlTrapGeneration");
+        free(StorageTmp);
         return;
     }
 
@@ -506,6 +526,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTypeLen);
     if (StorageTmp->pingCtlType == NULL) {
         config_perror("invalid specification for pingCtlType");
+        free(StorageTmp);
         return;
     }
 
@@ -515,6 +536,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDescrLen);
     if (StorageTmp->pingCtlDescr == NULL) {
         config_perror("invalid specification for pingCtlTrapDescr");
+        free(StorageTmp);
         return;
     }
 
@@ -1081,7 +1103,7 @@ in_cksum(unsigned short *addr, int len)
      */
     sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
     sum += (sum >> 16);         /* add carry */
-    answer = ~sum;              /* truncate to 16 bits */
+    answer = (u_short)~sum;     /* truncate to 16 bits */
     return (answer);
 }
 
@@ -2297,7 +2319,7 @@ write_pingCtlTargetAddressType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2313,7 +2335,7 @@ write_pingCtlTargetAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTargetAddressType;
         StorageTmp->pingCtlTargetAddressType = *((long *) var_val);
@@ -2382,7 +2404,7 @@ write_pingCtlTargetAddress(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2398,7 +2420,7 @@ write_pingCtlTargetAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTargetAddress;
         tmplen = StorageTmp->pingCtlTargetAddressLen;
@@ -2482,7 +2504,7 @@ write_pingCtlDataSize(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2498,7 +2520,7 @@ write_pingCtlDataSize(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDataSize;
         if ((*((long *) var_val)) >= 0 && (*((long *) var_val)) <= 65507)
@@ -2573,7 +2595,7 @@ write_pingCtlTimeOut(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2589,7 +2611,7 @@ write_pingCtlTimeOut(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTimeOut;
         if ((*((long *) var_val)) >= 1 && (*((long *) var_val)) <= 60)
@@ -2665,7 +2687,7 @@ write_pingCtlProbeCount(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2681,7 +2703,7 @@ write_pingCtlProbeCount(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlProbeCount;
 
@@ -2753,7 +2775,7 @@ write_pingCtlAdminStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2769,7 +2791,7 @@ write_pingCtlAdminStatus(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlAdminStatus;
         StorageTmp->pingCtlAdminStatus = *((long *) var_val);
@@ -2858,7 +2880,7 @@ write_pingCtlDataFill(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2874,7 +2896,7 @@ write_pingCtlDataFill(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDataFill;
         tmplen = StorageTmp->pingCtlDataFillLen;
@@ -2955,7 +2977,7 @@ write_pingCtlFrequency(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -2971,7 +2993,7 @@ write_pingCtlFrequency(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlFrequency;
         StorageTmp->pingCtlFrequency = *((long *) var_val);
@@ -3041,7 +3063,7 @@ write_pingCtlMaxRows(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3057,7 +3079,7 @@ write_pingCtlMaxRows(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlMaxRows;
         StorageTmp->pingCtlMaxRows = *((long *) var_val);
@@ -3129,7 +3151,7 @@ write_pingCtlStorageType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3145,7 +3167,7 @@ write_pingCtlStorageType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlStorageType;
         StorageTmp->pingCtlStorageType = *((long *) var_val);
@@ -3215,7 +3237,7 @@ write_pingCtlTrapGeneration(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3231,7 +3253,7 @@ write_pingCtlTrapGeneration(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapGeneration;
         tmplen = StorageTmp->pingCtlTrapGenerationLen;
@@ -3315,7 +3337,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3331,7 +3353,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapProbeFailureFilter;
 
@@ -3408,7 +3430,7 @@ write_pingCtlTrapTestFailureFilter(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3424,7 +3446,7 @@ write_pingCtlTrapTestFailureFilter(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapTestFailureFilter;
 
@@ -3498,7 +3520,7 @@ write_pingCtlType(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3514,7 +3536,7 @@ write_pingCtlType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlType;
         tmplen = StorageTmp->pingCtlTypeLen;
@@ -3595,7 +3617,7 @@ write_pingCtlDescr(int action,
 
     case RESERVE2:
         /*
-         * memory reseveration, final preparation... 
+         * memory reservation, final preparation... 
          */
         break;
 
@@ -3611,7 +3633,7 @@ write_pingCtlDescr(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDescr;
         tmplen = StorageTmp->pingCtlDescrLen;
@@ -3710,7 +3732,7 @@ write_pingCtlSourceAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlSourceAddressType;
         StorageTmp->pingCtlSourceAddressType = *((long *) var_val);
@@ -3796,7 +3818,7 @@ write_pingCtlSourceAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlSourceAddress;
         tmplen = StorageTmp->pingCtlSourceAddressLen;
@@ -3895,7 +3917,7 @@ write_pingCtlIfIndex(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlIfIndex;
         StorageTmp->pingCtlIfIndex = *((long *) var_val);
@@ -3984,7 +4006,7 @@ write_pingCtlByPassRouteTable(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlByPassRouteTable;
         StorageTmp->pingCtlByPassRouteTable = *((long *) var_val);
@@ -4073,7 +4095,7 @@ write_pingCtlDSField(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDSField;
         StorageTmp->pingCtlDSField = *((long *) var_val);
@@ -4308,7 +4330,7 @@ write_pingCtlRowStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 
@@ -4693,7 +4715,7 @@ pinger(int icmp_sock, int preload, int cmsglen, char *cmsgbuf,
 }
 
 /*
- * Set socket buffers, "alloc" is an esimate of memory taken by single packet. 
+ * Set socket buffers, "alloc" is an estimate of memory taken by single packet. 
  */
 
 void

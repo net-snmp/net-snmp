@@ -491,9 +491,9 @@ SOFTWARE.
     NETSNMP_IMPORT
     void            snmp_out_toggle_options_usage(const char *, FILE *);
     NETSNMP_IMPORT
-    char           *snmp_in_toggle_options(char *);
+    const char     *snmp_in_toggle_options(char *);
     NETSNMP_IMPORT
-    char           *snmp_in_options(char *, int, char * const *);
+    const char     *snmp_in_options(char *, int, char * const *);
     NETSNMP_IMPORT
     void            snmp_in_toggle_options_usage(const char *, FILE *);
     NETSNMP_IMPORT
@@ -514,6 +514,7 @@ SOFTWARE.
 #define NETSNMP_OID_OUTPUT_NUMERIC 4
 #define NETSNMP_OID_OUTPUT_UCD     5
 #define NETSNMP_OID_OUTPUT_NONE    6
+#define NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC 7
 #ifdef __cplusplus
 }
 #endif

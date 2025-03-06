@@ -27,9 +27,11 @@
   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
+#include <assert.h>
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/mib_modules.h>
 #include <unistd.h>
 #include "ada_fuzz_header.h"
 
@@ -50,6 +52,23 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
     return 0;
 }
 
+static int free_session_impl(int majorID, int minorID,
+                             netsnmp_agent_session *freed_session,
+                             netsnmp_agent_session **this_session)
+{
+    if (*this_session == freed_session) {
+        fprintf(stderr, "%s(%#lx)\n", __func__, (uintptr_t)freed_session);
+        *this_session = NULL;
+    }
+    return 0;
+}
+
+static int free_session(int majorID, int minorID, void *serverarg,
+                        void *clientarg)
+{
+    return free_session_impl(majorID, minorID, serverarg, clientarg);
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
@@ -57,7 +76,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     /*
      * Extract the fuzz data. We do this early to avoid overhead
-     * from intiailising the agent and then having to exit due to
+     * from initializing the agent and then having to exit due to
      * limited fuzz data. 
      */
     char           *mib_file_data =
@@ -114,8 +133,25 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
             netsnmp_session sess = { };
             netsnmp_agent_session *vals =
                 init_agent_snmp_session(&sess, pdu);
-            handle_snmp_packet(1, &sess, 0, pdu, vals);
+
+            snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                                   SNMP_CALLBACK_FREE_SESSION,
+                                   free_session, &vals);
+
+            handle_snmp_packet(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, &sess, 0,
+                               pdu, vals);
             snmp_free_pdu(pdu);
+            /*
+             * handle_snmp_packet() may free the session 'vals'. If
+             * handle_snmp_packet() freed 'vals', 'vals' will be NULL.
+             * free_agent_snmp_session() ignores NULL pointers.
+             */
+            free_agent_snmp_session(vals);
+            int count;
+            count = snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                                             SNMP_CALLBACK_FREE_SESSION,
+                                             free_session, &vals, TRUE);
+            assert(count == 1);
         }
 
         shutdown_master_agent();

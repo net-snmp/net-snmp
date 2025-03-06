@@ -81,7 +81,7 @@ netsnmp_feature_child_of(usm_keytools, usm_support);
  * Parameters:
  *	*hashtype	MIB OID for the transform type for hashing.
  *	 hashtype_len	Length of OID value.
- *	*P		Pre-allocated bytes of passpharase.
+ *	*P		Pre-allocated bytes of passphrase.
  *	 pplen		Length of passphrase.
  *	*Ku		Buffer to contain Ku.
  *	*kulen		Length of Ku buffer.
@@ -539,7 +539,7 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
         needKeyLen -= copyLen;
         *origKulLen += copyLen;
 
-        /** not part of the draft, but stop if we already have enought bits */
+        /** not part of the draft, but stop if we already have enough bits */
         if (needKeyLen <= 0)
             break;
     }
@@ -636,7 +636,7 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
  *       neededKeyLen   The neede key length
  *      *hashoid        MIB OID for the hash transform type.
  *       hashoid_len    Length of the MIB OID hash transform type.
- *       privType       Privay algorithm type
+ *       privType       Privacy algorithm type
  *       engineID       engineID
  *       engineIDLen    Length of engineID
  *     **kulBuf         Pointer to a buffer pointer
@@ -800,7 +800,7 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
  *		*kcstring_len will be returned as exactly twice that same
  *		length though the input buffer may be larger.
  *
- * XXX FIX:     Does not handle varibable length keys.
+ * XXX FIX:     Does not handle variable length keys.
  * XXX FIX:     Does not handle keys larger than the hash algorithm used.
  *
 KeyChange ::=     TEXTUAL-CONVENTION

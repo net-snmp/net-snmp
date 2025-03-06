@@ -45,7 +45,7 @@ netsnmp_feature_require(table_tdata_insert_row);
  typedef struct snmpTlstmParamsTable_undo_s {
     char  fate;
     char  copied;
-    char  is_consistent;
+    signed char  is_consistent;
     netsnmp_request_info *req[SNMPTLSTMPARAMSTABLE_MAX_COLUMN + 1];
     /* undo Column space */
     char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE];
@@ -79,6 +79,8 @@ static Netsnmp_Node_Handler snmpTlstmParamsTable_handler;
 static NetsnmpCacheLoad snmpTlstmParamsTable_load;
 static NetsnmpCacheFree snmpTlstmParamsTable_free;
 
+static int _tlstmParamsTable_save(int majorID, int minorID,
+                                  void *serverarg, void *clientarg);
 static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info *reqinfo,
@@ -87,6 +89,11 @@ static void _tlstmParams_init_persistence(void);
 static void _params_add(snmpTlstmParamsTable_entry *entry);
 static void _params_remove(snmpTlstmParamsTable_entry *entry);
 static void _params_tweak_storage(snmpTlstmParamsTable_entry *entry);
+
+static netsnmp_handler_registration *params_table_reg;
+static netsnmp_handler_registration *params_count_reg;
+static netsnmp_handler_registration *last_changed_reg;
+static netsnmp_table_registration_info *params_table;
 
 static uint32_t                _last_changed = 0;
 static netsnmp_tdata          *_table_data = NULL;
@@ -100,105 +107,143 @@ init_snmpTlstmParamsTable(void)
 {
     oid reg_oid[] = {SNMP_TLS_TM_BASE,2,2,1,6};
     const size_t reg_oid_len   = OID_LENGTH(reg_oid);
-    netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
     netsnmp_cache                   *cache;
-    netsnmp_watcher_info            *watcher;
+    netsnmp_watcher_info            *last_changed_watcher;
     int                              rc;
 
     DEBUGMSGTL(("tlstmParamsTable:init", "initializing table snmpTlstmParamsTable\n"));
 
-    reg = netsnmp_create_handler_registration
+    params_table_reg = netsnmp_create_handler_registration
         ("snmpTlstmParamsTable", snmpTlstmParamsTable_handler, reg_oid,
          reg_oid_len, HANDLER_CAN_RWRITE);
-
-    _table_data = netsnmp_tdata_create_table( "snmpTlstmParamsTable", 0 );
-    if (NULL == _table_data) {
-        snmp_log(LOG_ERR,"error creating tdata table for snmpTlstmParamsTable\n");
+    if (!params_table_reg) {
+        snmp_log(LOG_ERR, "snmpTlstmParamsTable registration failed");
         return;
     }
+    _table_data = netsnmp_tdata_create_table( "snmpTlstmParamsTable", 0 );
+    if (!_table_data) {
+        snmp_log(LOG_ERR,"error creating tdata table for snmpTlstmParamsTable\n");
+        goto unregister_params_table;
+    }
     cache = netsnmp_cache_create(SNMPTLSTMPARAMSTABLE_TIMEOUT,
-                                  snmpTlstmParamsTable_load,
+                                 snmpTlstmParamsTable_load,
                                  snmpTlstmParamsTable_free,
-                                  reg_oid, reg_oid_len);
+                                 reg_oid, reg_oid_len);
     if (NULL == cache) {
         snmp_log(LOG_ERR,"error creating cache for snmpTlstmParamsTable\n");
-        netsnmp_tdata_delete_table(_table_data);
-        _table_data = NULL;
-        return;
+        goto delete_table_data;
     }
     cache->magic = (void *)_table_data;
     cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
-    table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
-    if (NULL == table_info) {
+    params_table = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
+    if (!params_table) {
         snmp_log(LOG_ERR,"error creating table info for snmpTlstmParamsTable\n");
-        netsnmp_tdata_delete_table(_table_data);
-        _table_data = NULL;
-        netsnmp_cache_free(cache);
-        return;
+        goto free_cache;
     }
     /*
      * populate index types
      */
-    netsnmp_table_helper_add_indexes(table_info,
+    netsnmp_table_helper_add_indexes(params_table,
                                      /* index: snmpTargetParamsName */
                                      ASN_PRIV_IMPLIED_OCTET_STR,  0);
 
-    table_info->min_column = SNMPTLSTMPARAMSTABLE_MIN_COLUMN;
-    table_info->max_column = SNMPTLSTMPARAMSTABLE_MAX_COLUMN;
+    params_table->min_column = SNMPTLSTMPARAMSTABLE_MIN_COLUMN;
+    params_table->max_column = SNMPTLSTMPARAMSTABLE_MAX_COLUMN;
     
-    rc = netsnmp_tdata_register(reg, _table_data, table_info);
+    rc = netsnmp_tdata_register(params_table_reg, _table_data,
+                                params_table);
     if (rc) {
         snmp_log(LOG_ERR, "%s: netsnmp_tdata_register() returned %d\n",
                  __func__, rc);
-        return;
+        goto free_params_table;
     }
-    netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
-                                      "table_container");
+    netsnmp_inject_handler_before(params_table_reg,
+                                  netsnmp_cache_handler_get(cache),
+                                  "table_container");
 
     /*
      * register scalars
      */
     reg_oid[10] = 4;
-    reg = netsnmp_create_handler_registration("snmpTlstmParamsCount",
-                                              _count_handler, reg_oid,
-                                              OID_LENGTH(reg_oid),
-                                              HANDLER_CAN_RONLY);
-    if (NULL == reg)
+    params_count_reg =
+        netsnmp_create_handler_registration("snmpTlstmParamsCount",
+                                            _count_handler, reg_oid,
+                                            OID_LENGTH(reg_oid),
+                                            HANDLER_CAN_RONLY);
+    if (!params_count_reg) {
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmParamsCount\n");
-    else {
-        const int rc = netsnmp_register_scalar(reg);
+        goto free_params_table;
+    }
+    {
+        const int rc = netsnmp_register_scalar(params_count_reg);
         if (rc) {
             snmp_log(LOG_ERR, "%s: netsnmp_register_scalar() returned %d\n",
                      __func__, rc);
-            return;
+            goto unreg_params_count;
         }
-        if (cache)
-            netsnmp_inject_handler_before(reg,
-                                          netsnmp_cache_handler_get(cache),
-                                          "snmpTlstmParamsCount");
+        netsnmp_inject_handler_before(params_count_reg,
+                                      netsnmp_cache_handler_get(cache),
+                                      "snmpTlstmParamsCount");
     }
     
     reg_oid[10] = 5;
-    reg = netsnmp_create_handler_registration(
+    last_changed_reg = netsnmp_create_handler_registration(
         "snmpTlstmParamsTableLastChanged", NULL, reg_oid,
         OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
-    watcher = netsnmp_create_watcher_info((void*)&_last_changed,
+    if (!last_changed_reg) {
+        snmp_log(LOG_ERR,
+                 "could not create handler for snmpTlstmParamsTableLastChanged\n");
+        goto unreg_params_count;
+    }
+    last_changed_watcher = netsnmp_create_watcher_info((void*)&_last_changed,
                                           sizeof(_last_changed),
                                           ASN_TIMETICKS,
                                           WATCHER_FIXED_SIZE);
-    if ((NULL == reg) || (NULL == watcher))
+    if (!last_changed_watcher) {
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmParamsTableLastChanged\n");
-    else
-        netsnmp_register_watched_scalar2(reg, watcher);
+        goto unreg_last_changed;
+    }
+
+    netsnmp_register_watched_scalar2(last_changed_reg, last_changed_watcher);
 
     /*
      * Initialise the contents of the table here
      */
     _tlstmParams_init_persistence();
+    return;
+
+unreg_last_changed:
+    netsnmp_tdata_unregister(last_changed_reg);
+
+unreg_params_count:
+    netsnmp_tdata_unregister(params_count_reg);
+
+free_params_table:
+    netsnmp_table_registration_info_free(params_table);
+
+free_cache:
+    netsnmp_cache_free(cache);
+
+delete_table_data:
+    netsnmp_tdata_delete_table(_table_data);
+    _table_data = NULL;
+
+unregister_params_table:
+    netsnmp_tdata_unregister(params_table_reg);
+}
+
+void
+shutdown_snmpTlstmParamsTable(void)
+{
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             _tlstmParamsTable_save, _table_data->container, 1);
+    netsnmp_tdata_unregister(last_changed_reg);
+    netsnmp_tdata_unregister(params_count_reg);
+    netsnmp_tdata_unregister(params_table_reg);
+    netsnmp_table_registration_info_free(params_table);
 }
 
 /** **************************************************************************
@@ -534,7 +579,6 @@ snmpTlstmParamsTable_handler(
     netsnmp_request_info       *request = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata              *table_data;
-    netsnmp_tdata_row          *table_row;
     snmpTlstmParamsTable_entry          *table_entry;
     int                         ret = SNMP_ERR_NOERROR;
     
@@ -658,6 +702,8 @@ snmpTlstmParamsTable_handler(
      */
     case MODE_SET_RESERVE2:
         for (request=requests; request; request=request->next) {
+            netsnmp_tdata_row *table_row = NULL;
+
             table_entry = (snmpTlstmParamsTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_data = netsnmp_tdata_extract_table(request);
@@ -740,7 +786,8 @@ snmpTlstmParamsTable_handler(
          * remove any newly created rows
          */
         for (request=requests; request; request=request->next) {
-            table_row   =     netsnmp_tdata_extract_row(  request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
+
             table_data  =  netsnmp_tdata_extract_table(request);
             table_entry = (snmpTlstmParamsTable_entry *)
                               netsnmp_tdata_extract_entry(request);
@@ -886,7 +933,6 @@ snmpTlstmParamsTable_handler(
         for (request=requests; request; request=request->next) {
             table_entry = (snmpTlstmParamsTable_entry *)
                               netsnmp_tdata_extract_entry(request);
-            table_row   =     netsnmp_tdata_extract_row(  request);
             table_data  =     netsnmp_tdata_extract_table(request);
             table_info  =     netsnmp_extract_table_info( request);
 
@@ -918,7 +964,8 @@ snmpTlstmParamsTable_handler(
          * or remove any newly created rows
          */
         for (request=requests; request; request=request->next) {
-            table_row   =     netsnmp_tdata_extract_row(  request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
+
             table_entry = (snmpTlstmParamsTable_entry *)
                               netsnmp_tdata_extract_entry(request);
             
@@ -938,13 +985,14 @@ snmpTlstmParamsTable_handler(
     /** ###################################################### COMMIT #####
      *
      *   COMMIT is the final success state, when all changes are finalized.
-     * There is not recovery state should something faile here.
+     * There is not recovery state should something fail here.
      *
      *   This the final phase for this path in the state machine.
      */
     case MODE_SET_COMMIT:
         for (request=requests; request; request=request->next) {
-            table_row   =     netsnmp_tdata_extract_row(  request);
+            netsnmp_tdata_row *table_row = netsnmp_tdata_extract_row(request);
+
             table_data  =     netsnmp_tdata_extract_table(request);
             table_info  =     netsnmp_extract_table_info(    request);
             table_entry = (snmpTlstmParamsTable_entry *)
@@ -1004,7 +1052,6 @@ snmpTlstmParamsTable_handler(
                     /** disassociate row with requests */
                     netsnmp_remove_tdata_row( request, table_row );
                     snmpTlstmParamsTable_removeEntry(table_data, table_row );
-                    table_row = NULL;
                     table_entry = NULL;
                 }
                 /** release undo data */
@@ -1071,8 +1118,6 @@ _count_handler(netsnmp_mib_handler *handler,
  *
  ***********************************************************************/
 
-static int _tlstmParamsTable_save(int majorID, int minorID,
-                                  void *serverarg, void *clientarg);
 static int _save_params(snmpTlstmParams *params, void *app_type);
 static int _save_entry(snmpTlstmParamsTable_entry *entry, void *type);
 static void _tlstmParamsTable_row_restore_mib(const char *token, char *buf);

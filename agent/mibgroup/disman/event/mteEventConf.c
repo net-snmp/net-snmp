@@ -40,7 +40,7 @@ init_mteEventConf(void)
      * ... and for persistent storage of dynamic event table entries.
      *
      * (The previous implementation didn't store these entries,
-     *  so we don't need to worry about backwards compatability)
+     *  so we don't need to worry about backwards compatibility)
      */
     snmpd_register_config_handler("_mteETable",
                                    parse_mteETable, NULL, NULL);
@@ -207,7 +207,7 @@ parse_notificationEvent( const char *token, char *line )
                 config_perror("-m option must come first");
                 return;
             case 'i':   /* exact instance */
-            case 'w':   /* "not-wild" (backward compatability) */
+            case 'w':   /* "not-wild" (backward compatibility) */
                 wild = 0;
                 break;
             case 'o':   /* wildcarded object  */

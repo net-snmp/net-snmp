@@ -85,7 +85,7 @@ netsnmp_feature_require(date_n_time);
 #define UTMP_FILE _PATH_UTMP
 #endif
 
-#if defined(UTMP_FILE) && !HAVE_UTMPX_H
+#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
 void            setutent(void);
 void            endutent(void);
 struct utmp    *getutent(void);
@@ -593,7 +593,7 @@ ns_set_time(int action,
             int minutes_from_utc= 0;
 
             if (var_val_len == 11) {
-                /* timezone inforamation was present */
+                /* timezone information was present */
                 hours_from_utc=(int)var_val[9];
                 minutes_from_utc=(int)var_val[10];
             }
@@ -722,7 +722,7 @@ count_users(void)
     return total;
 }
 
-#if defined(UTMP_FILE) && !HAVE_UTMPX_H
+#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
 
 static FILE    *utmp_file;
 static struct utmp utmp_rec;

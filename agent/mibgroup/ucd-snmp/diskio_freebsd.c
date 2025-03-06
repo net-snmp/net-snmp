@@ -33,7 +33,7 @@ struct dev_la {
 static struct dev_la *devloads;
 static int ndevs;
 
-#if ! HAVE_DEVSTAT_GETDEVS
+#ifndef HAVE_DEVSTAT_GETDEVS
 double devla_timeval_diff(struct timeval *t1, struct timeval *t2)
 {
     double dt1 = (double) t1->tv_sec + (double) t1->tv_usec * 0.000001;

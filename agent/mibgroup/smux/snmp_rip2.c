@@ -139,7 +139,7 @@ var_rip2(struct variable *vp,
     *write_method = NULL;
 
     /*
-     * Donot allow access to the peer stuff as it crashes gated.
+     * Do not allow access to the peer stuff as it crashes gated.
      * However A GetNext on the last 23.3.1.9 variable will force gated into
      * the peer stuff and cause it to crash.
      * The only way to fix this is to either solve the Gated problem, or 
@@ -194,7 +194,7 @@ var_rip2(struct variable *vp,
         return NULL;
 
     /*
-     * Any resullt returned should be within the rip2 tree.
+     * Any result returned should be within the rip2 tree.
      * rip_mib - static u_int rip_mib[] = {1, 3, 6, 1, 2, 1, 23};
      */
     if (memcmp(rip_mib, name, sizeof(rip_mib)) != 0) {

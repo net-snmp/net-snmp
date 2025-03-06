@@ -186,7 +186,7 @@ netsnmp_file_open(netsnmp_file * filei)
         return filei->fd;
 
     /*
-     * try to open the file, loging an error if we failed
+     * try to open the file, logging an error if we failed
      */
     if (0 == filei->mode)
         filei->fd = open(filei->name, filei->fs_flags);
@@ -244,14 +244,16 @@ netsnmp_file_close(netsnmp_file * filei)
 #endif /* NETSNMP_FEATURE_REMOVE_FILE_CLOSE */
 
 void
-netsnmp_file_container_free(netsnmp_file *file, void *context)
+netsnmp_file_container_free(void *file, void *context)
 {
     netsnmp_file_release(file);
 }
 
 int
-netsnmp_file_compare_name(netsnmp_file *lhs, netsnmp_file *rhs)
+netsnmp_file_compare_name(const void *p, const void *q)
 {
+    const netsnmp_file *lhs = p, *rhs = q;
+
     netsnmp_assert((NULL != lhs) && (NULL != rhs));
     netsnmp_assert((NULL != lhs->name) && (NULL != rhs->name));
 

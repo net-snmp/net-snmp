@@ -235,6 +235,8 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
 
     DEBUGMSGTL(("internal:${context}:_${context}_initialize_interface","called\n"));
 
+    /* Start with clean info, allows re-initializing */
+    memset(tbl_info, 0, sizeof(*tbl_info));
 
     /*************************************************
      *
@@ -1429,7 +1431,7 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully commited this row, set the dirty flag. Use the
+         * if we successfully committed this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */

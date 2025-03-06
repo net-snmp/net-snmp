@@ -180,6 +180,8 @@ typedef struct request_list {
 
 #define SNMP_DETAIL_SIZE        512
 
+#define SNMP_FLAGS_TIME_CREATED    0x2000
+#define SNMP_FLAGS_SESSION_USER    0x1000
 #define SNMP_FLAGS_UDP_BROADCAST   0x800
 #define SNMP_FLAGS_RESP_CALLBACK   0x400      /* Additional callback on response */
 #define SNMP_FLAGS_USER_CREATED    0x200      /* USM user has been created */
@@ -476,6 +478,7 @@ typedef struct request_list {
     NETSNMP_IMPORT
     int snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                                              netsnmp_session *session);
+    netsnmp_pdu *snmpv3_probe_usm_pdu_create(void);
 
     /*
      * New re-allocating reverse encoding functions.  
@@ -520,17 +523,6 @@ struct netsnmp_transport_s;
                                                   netsnmp_pdu *, u_char **,
                                                   size_t *, size_t *),
                                   int (*fcheck) (u_char *, size_t));
-
-    /*
-     * provided for backwards compatability.  Don't use these functions.
-     * See snmp_debug.h and snmp_debug.c instead.
-     */
-
-    NETSNMP_IMPORT
-    void            snmp_set_do_debugging(int);
-    NETSNMP_IMPORT
-    int             snmp_get_do_debugging(void);
-
 
     NETSNMP_IMPORT
     void            netsnmp_sess_log_error(int priority,

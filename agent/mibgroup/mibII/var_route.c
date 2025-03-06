@@ -111,10 +111,14 @@ var_ipRouteEntry(struct variable *vp,
      * 1.3.6.1.2.1.4.21.1.1.A.B.C.D,  where A.B.C.D is IP address.
      * IPADDR starts at offset 10.
      */
-    struct rt_msghdr *rtp, *saveRtp = 0;
+    struct rt_msghdr *rtp;
     register int    Save_Valid, result;
+#if 0
+    struct rt_msghdr *saveRtp = 0;
     static int      saveNameLen = 0, saveExact = 0;
-    static oid      saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
+    static oid      saveName[MAX_OID_LEN];
+#endif
+    static oid      Current[MAX_OID_LEN];
     u_char         *cp;
     u_char         *ap;
     oid            *op;
@@ -209,6 +213,7 @@ var_ipRouteEntry(struct variable *vp,
         }
         if (ap >= all_routes_end || rtp->rtm_type == 0)
             return 0;
+#if 0
         /*
          *  Save in the 'cache'
          */
@@ -218,6 +223,7 @@ var_ipRouteEntry(struct variable *vp,
         saveNameLen = *length;
         saveExact = exact;
         saveRtp = rtp;
+#endif
         /*
          *  Return the name
          */
@@ -1531,7 +1537,7 @@ write_rte(int action,
             break;
         case IPROUTEAGE:
             /*
-             * Irrespective of suppied value, this will be set with 0.
+             * Irrespective of supplied value, this will be set with 0.
              * * As row will be updated and this field gives the number of
              * * seconds since this route was last updated
              */
@@ -1576,7 +1582,7 @@ write_rte(int action,
     case COMMIT:
         /*
          * When this case entered 'route_row' will have user supplied values
-         * for asked entries.  Thats why it is enough if we call
+         * for asked entries.  That's why it is enough if we call
          * SetIpForwardEntry/CreateIpForwardEntry only once SetIpForwardENtry
          * is not done in ACTION phase, as that will reset ipRouteAge on
          * success and if any varbind fails, then we can't UNDO the change for
@@ -2027,8 +2033,11 @@ var_ipRouteEntry(struct variable * vp,
     oid            *op;
     struct snmprt  *rt;
     static struct snmprt *savert;
+#if 0
     static int      saveNameLen, saveExact;
-    static oid      saveName[14], Current[14];
+    static oid      saveName[14];
+#endif
+    static oid      Current[14];
     static in_addr_t addr_ret;
     
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
@@ -2086,6 +2095,7 @@ var_ipRouteEntry(struct variable * vp,
         if (rt == NULL)
             return NULL;
 
+#if 0
         /*
          *  Save in the 'cache'
          */
@@ -2094,6 +2104,7 @@ var_ipRouteEntry(struct variable * vp,
         saveNameLen = *length;
         saveExact = exact;
         savert = rt;
+#endif
 
         /*
          *  Return the name

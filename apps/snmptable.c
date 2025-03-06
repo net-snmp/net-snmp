@@ -220,7 +220,7 @@ usage(void)
     fprintf(stderr, "\t\t\t  b:       brief field names\n");
     fprintf(stderr, "\t\t\t  B:       do not use GETBULK requests\n");
     fprintf(stderr, "\t\t\t  c<NUM>:  print table in columns of <NUM> chars width\n");
-    fprintf(stderr, "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
+    fprintf(stderr, "\t\t\t  f<STR>:  print table delimited with <STR>\n");
     fprintf(stderr, "\t\t\t  h:       print only the column headers\n");
     fprintf(stderr, "\t\t\t  H:       print no column headers\n");
     fprintf(stderr, "\t\t\t  i:       print index values\n");
@@ -382,24 +382,26 @@ print_table(void)
 
     for (field = 0; field < fields; field++) {
         if (column_width != 0)
-            sprintf(string_buf, "%%%s%d.%ds", left_justify_flag,
-                    column_width + 1, column_width );
+            snprintf(string_buf, sizeof string_buf, "%%%s%d.%ds",
+                     left_justify_flag, column_width + 1, column_width );
         else if (field_separator == NULL)
-            sprintf(string_buf, "%%%s%ds", left_justify_flag,
-                    column[field].width + 1);
+            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
+                     left_justify_flag, column[field].width + 1);
         else if (field == 0 && !show_index)
-            sprintf(string_buf, "%%s");
+            snprintf(string_buf, sizeof string_buf, "%%s");
         else
-            sprintf(string_buf, "%s%%s", field_separator);
+            snprintf(string_buf, sizeof string_buf, "%s%%s",
+                     field_separator);
         column[field].fmt = strdup(string_buf);
     }
     if (show_index) {
         if (column_width)
-            sprintf(string_buf, "\nindex: %%s\n");
+            snprintf(string_buf, sizeof string_buf, "\nindex: %%s\n");
         else if (field_separator == NULL)
-            sprintf(string_buf, "%%%s%ds", left_justify_flag, index_width);
+            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
+                     left_justify_flag, index_width);
         else
-            sprintf(string_buf, "%%s");
+            snprintf(string_buf, sizeof string_buf, "%%s");
         index_fmt = strdup(string_buf);
     }
 
@@ -734,6 +736,7 @@ get_table_entries(netsnmp_session * ss)
                                     break;
                                 case NETSNMP_OID_OUTPUT_FULL:
                                 case NETSNMP_OID_OUTPUT_NUMERIC:
+				case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                                 case NETSNMP_OID_OUTPUT_UCD:
                                     name_p = buf + strlen(table_name)+1;
                                     name_p = strchr(name_p, '.')+1;
@@ -764,7 +767,6 @@ get_table_entries(netsnmp_session * ss)
                     if (dp[col]) {
                         fprintf(stderr, "OID not increasing: %s\n", buf);
                         running = 0;
-                        vars = NULL;
                         end_of_table = 1;
                         exitval = 2;
                         break;
@@ -927,6 +929,7 @@ getbulk_table_entries(netsnmp_session * ss)
                             break;
                         case NETSNMP_OID_OUTPUT_FULL:
                         case NETSNMP_OID_OUTPUT_NUMERIC:
+			case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                         case NETSNMP_OID_OUTPUT_UCD:
                             name_p = buf + strlen(table_name)+1;
                             name_p = strchr(name_p, '.')+1;

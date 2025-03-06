@@ -151,7 +151,7 @@ netsnmp_get_pid_from_inode_init(void)
             strlcpy(path_name + filelen, pidinfo->d_name,
                     sizeof(path_name) - filelen);
 
-            /* The file discriptor is a symbolic link to a socket or a file.*/
+            /* The file descriptor is a symbolic link to a socket or a file.*/
             /* Thus read the symbolic link.*/
             memset(socket_lnk, '\0', NAME_MAX + 1);
             readlen = readlink(path_name, socket_lnk, NAME_MAX);

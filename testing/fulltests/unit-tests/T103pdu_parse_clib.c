@@ -1,5 +1,5 @@
 /* HEADER Parsing of PDUs */
-netsnmp_pdu pdu;
+netsnmp_pdu *pdu;
 int rc;
 u_char data[] = { 
     0xA2, 0x1D, 0x02, 0x04, 0x4E, 0x39,
@@ -10,13 +10,17 @@ u_char data[] = {
 };
 size_t data_length=sizeof(data);
 
-rc = snmp_pdu_parse(&pdu, data, &data_length);
+pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+rc = snmp_pdu_parse(pdu, data, &data_length);
+snmp_free_pdu(pdu);
 
 OKF((rc == 0), ("Parsing of a generic PDU failed"));
 
 #ifdef NETSNMP_NO_WRITE_SUPPORT
 data[0] = 0xA3; /* changes it to a SET pdu */
-rc = snmp_pdu_parse(&pdu, data, &data_length);
+pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+rc = snmp_pdu_parse(pdu, data, &data_length);
+snmp_free_pdu(pdu);
 
 OKF((rc != 0), ("Parsing of a generic SET PDU succeeded"));
 #endif /* NETSNMP_NO_WRITE_SUPPORT */

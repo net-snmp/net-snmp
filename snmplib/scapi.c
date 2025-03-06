@@ -65,6 +65,7 @@ netsnmp_feature_child_of(usm_scapi, usm_support);
 #ifdef NETSNMP_USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
+#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_secmod.h>
@@ -1647,7 +1648,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
  */
 
 /*
- * MD5_hmac(data, len, MD5): do a checksum on an arbirtrary amount
+ * MD5_hmac(data, len, MD5): do a checksum on an arbitrary amount
  * of data, and prepended with a secret in the standard fashion 
  */
 static int
@@ -1701,7 +1702,7 @@ MD5_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
     if (((uintptr_t) data) % sizeof(long) != 0) {
         /*
          * this relies on the ability to use integer math and thus we
-         * must rely on data that aligns on 32-bit-word-boundries 
+         * must rely on data that aligns on 32-bit-word-boundaries 
          */
         newdata = netsnmp_memdup(data, len);
         cp = newdata;
@@ -1801,7 +1802,7 @@ SHA1_hmac(const u_char * data, size_t len, u_char * mac, size_t maclen,
     if (((uintptr_t) data) % sizeof(long) != 0) {
         /*
          * this relies on the ability to use integer math and thus we
-         * must rely on data that aligns on 32-bit-word-boundries 
+         * must rely on data that aligns on 32-bit-word-boundaries 
          */
         newdata = netsnmp_memdup(data, len);
         cp = newdata;

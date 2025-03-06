@@ -116,7 +116,7 @@ static lookup_cache_context *thecontextcache = NULL;
  *
  * @param newsize set to the maximum size of a cache for a given
  * context.  Set to 0 to completely disable caching, or to -1 to set
- * to the default cache size (8), or to a number of your chosing.  The
+ * to the default cache size (8), or to a number of your choosing.  The
  */
 void
 netsnmp_set_lookup_cache_size(int newsize) {
@@ -161,6 +161,10 @@ get_context_lookup_cache(const char *context) {
                 return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
+            if (!ptr->context) {
+                free(ptr);
+                return NULL;
+            }
             thecontextcache = ptr;
         } else {
             return NULL;
@@ -359,6 +363,11 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     ptr->next = context_subtrees;
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
+    if (!ptr->context_name) {
+        free(ptr);
+        return NULL;
+    }
+
     context_subtrees = ptr;
 
     return ptr->first_subtree;
@@ -728,7 +737,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
         new_sub->variables = current->variables;
     }
 
-    /* Propogate this split down through any children */
+    /* Propagate this split down through any children */
     if (current->children) {
         new_sub->children = netsnmp_subtree_split(current->children, 
 						  name, name_len);
@@ -1659,7 +1668,7 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
  * The parameters priority, range_subid, range_ubound and context
  * should match those used to register the module originally.
  *
- * @param name  the specific OID to unregister if it conatins the associated
+ * @param name  the specific OID to unregister if it contains the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1729,7 +1738,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
         myptr = child;              /* remember this for later */
 
         /*
-        *  Now handle any occurances in the following subtrees,
+        *  Now handle any occurrences in the following subtrees,
         *      as a result of splitting this range.  Due to the
         *      nature of the way such splits work, the first
         *      subtree 'slice' that doesn't refer to the given
@@ -1871,7 +1880,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
  * The parameters priority, range_subid, and range_ubound should
  * match those used to register the module originally.
  *
- * @param name  the specific OID to unregister if it conatins the associated
+ * @param name  the specific OID to unregister if it contains the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1907,7 +1916,7 @@ unregister_mib_range(oid * name, size_t len, int priority,
  * Unregisters a module registered against a given OID at the specified priority.
  * The priority parameter should match that used to register the module originally.
  *
- * @param name  the specific OID to unregister if it conatins the associated
+ * @param name  the specific OID to unregister if it contains the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1933,7 +1942,7 @@ unregister_mib_priority(oid * name, size_t len, int priority)
 /**
  * Unregisters a module registered against a given OID at the default priority.
  *
- * @param name  the specific OID to unregister if it conatins the associated
+ * @param name  the specific OID to unregister if it contains the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -2208,7 +2217,7 @@ setup_tree(void)
 
     /* 
      * we need to have the oid's in the heap, that we can *free* it for every case, 
-     * thats the purpose of the duplicate_objid's
+     * that's the purpose of the duplicate_objid's
      */
     netsnmp_register_null(snmp_duplicate_objid(ccitt, 1), 1);
     netsnmp_register_null(snmp_duplicate_objid(iso, 1), 1);

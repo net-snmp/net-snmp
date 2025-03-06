@@ -809,7 +809,7 @@ checkmib(struct variable *vp, oid * name, size_t * length,
          int exact, size_t * var_len, WriteMethod ** write_method, int max)
 {
     /*
-     * checkmib used to be header_simple_table, with reveresed boolean
+     * checkmib used to be header_simple_table, with reversed boolean
      * return output.  header_simple_table() was created to match
      * header_generic(). 
      */
@@ -1246,16 +1246,14 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
 #ifdef ETHTOOL_GLINKSETTINGS
     {
         /*
-         * For Linux kernel v6.0 __ETHTOOL_LINK_MODE_MASK_NBITS == 93 or
-         * 3 32-bit words. Increase the 'nwords' constant if necessary.
+         * For Linux kernel v6.3 __ETHTOOL_LINK_MODE_MASK_NBITS == 101 or
+         * 4 32-bit words. Increase the 'nwords' constant if necessary.
          */
-        enum { mask_nwords = 4 };
-        struct {
-            union {
-                struct ethtool_link_settings elinkset;
-                uint8_t data[sizeof(struct ethtool_link_settings) +
-                             mask_nwords * 3 * 4];
-            };
+        enum { mask_nwords = 8 };
+        union {
+            struct ethtool_link_settings elinkset;
+            uint8_t _data[sizeof(struct ethtool_link_settings) +
+                          mask_nwords * 3 * 4];
         } data;
 
         memset(&data, 0, sizeof(data));

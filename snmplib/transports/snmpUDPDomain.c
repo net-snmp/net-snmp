@@ -50,6 +50,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_NETGROUP_H
+#include <netgroup.h>
+#endif
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
@@ -82,10 +85,6 @@ static netsnmp_tdomain udpDomain;
  * and perl/agent/agent.xs 
  */
 typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
-
-int
-netsnmp_sockaddr_in2(struct sockaddr_in *addr,
-                     const char *inpeername, const char *default_target);
 
 /*
  * Return a string representing the address in data, or else the "far end"
@@ -195,6 +194,7 @@ netsnmp_udp_transport_base(netsnmp_transport *t)
     t->f_send     = netsnmp_udpbase_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
+    t->f_setup_session = netsnmp_ipbase_session_init;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
     t->f_get_taddr = netsnmp_ipv4_get_taddr;
 
@@ -373,7 +373,7 @@ netsnmp_udp_com2SecEntry_check_return_code(int rc)
     }
 }
 
-#if HAVE_ENDNETGRENT && HAVE_GETNETGRENT && HAVE_SETNETGRENT
+#if defined(HAVE_ENDNETGRENT) && defined(HAVE_GETNETGRENT)
 int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
                        const char *secName, const char *contextName, int negate)
 {
@@ -387,23 +387,27 @@ int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
         return 0;
 
     /* Interpret as netgroup */
-    if (setnetgrent(netgroup)) {
-        while (getnetgrent(&host, &user, &domain)) {
-            /* Parse source address and network mask for each netgroup host. */
-            if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
-                /* Create a new com2Sec entry. */
-                rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
-                                                     &network, &mask, negate);
-                netsnmp_udp_com2SecEntry_check_return_code(rc);
-            } else {
-                config_perror("netgroup host address parsing issue");
-                break;
-            }
-        }
-        endnetgrent();
-    } else {
+#ifdef SETNETGRENT_RETURNS_INT
+    if (!setnetgrent(netgroup)) {
         config_perror("netgroup could not be found");
+        return 1;
     }
+#else
+    setnetgrent(netgroup);
+#endif
+    while (getnetgrent(&host, &user, &domain)) {
+        /* Parse source address and network mask for each netgroup host. */
+        if (netsnmp_udp_resolve_source(host, &network, &mask) == 0) {
+            /* Create a new com2Sec entry. */
+            rc = netsnmp_udp_com2SecEntry_create(NULL, community, secName, contextName,
+        					 &network, &mask, negate);
+            netsnmp_udp_com2SecEntry_check_return_code(rc);
+        } else {
+            config_perror("netgroup host address parsing issue");
+            break;
+        }
+    }
+    endnetgrent();
     return 1;
 }
 #else
