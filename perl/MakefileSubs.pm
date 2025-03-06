@@ -118,6 +118,9 @@ sub AddCommonParams {
 	# not supported by older versions of gcc.
 	$cflags =~ s/-Wimplicit-fallthrough=*[0-9]*//g;
 	$cflags =~ s/-Wcast-function-type//g;
+	# Remove -Wmaybe-uninitialized because there are multiple unused
+	# variables in the .xs files.
+	$cflags =~ s/-Wmaybe-uninitialized//g;
 	append($Params->{'CCFLAGS'}, $cflags);
 	append($Params->{'CCFLAGS'}, $Config{'ccflags'});
 	# Suppress known Perl header shortcomings.
