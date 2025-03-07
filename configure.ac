@@ -15,7 +15,7 @@
 #
 # Process this file with autoconf to produce a configure script.
 #
-AC_INIT([Net-SNMP], [5.10], [net-snmp-coders@lists.sourceforge.net])
+AC_INIT([Net-SNMP], [5.10.pre1], [net-snmp-coders@lists.sourceforge.net])
 AC_PREREQ([2.71])
 AC_CONFIG_SRCDIR([agent/snmpd.c])
 AC_REVISION([$Revision$])
