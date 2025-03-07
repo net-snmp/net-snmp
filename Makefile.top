@@ -82,7 +82,7 @@ LINKCC	        = @LINKCC@
 # changes for past releases if absolutely necessary.
 #
 # Most recent change: 45 for the PR#586 - snmpv3 for multithread.
-LIBCURRENT  = 45
+LIBCURRENT  = 50
 LIBAGE      = 0
 LIBREVISION = 0
 
