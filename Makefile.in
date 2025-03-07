@@ -79,13 +79,6 @@ FTOTHERTARGS=@PERLFEATURES@ @PYTHONFEATURES@
 #
 all:    sedscript EXAMPLE.conf  @FEATURETARGS@ standardall net-snmp-config-x net-snmp-create-v3-user @PERLTARGS@ @PYTHONTARGS@
 
-fuzz-test: all
-	if grep mibgroup/agentx/protocol.o agent/Makefile > /dev/null 2>&1 &&	\
-	   ! grep NETSNMP_FEATURE_REMOVE_MIB_SNPRINT		\
-	   include/net-snmp/library/features.h >/dev/null 2>&1; then\
-		cd testing && make fuzz-tests;			\
-	fi
-
 start-flag:
 	@touch build-in-progress-flag
 
