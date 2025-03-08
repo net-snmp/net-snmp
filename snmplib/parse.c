@@ -2244,10 +2244,7 @@ parse_enumlist(FILE * fp, struct enum_list **retp)
     return ep;
 
 err:
-    if (*epp)
-        free((*epp)->label);
-    free(*epp);
-    *epp = NULL;
+    free_enums(&ep);
     return NULL;
 }
 
