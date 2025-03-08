@@ -54,8 +54,11 @@ case "$MODE" in
 	fi;;
 esac
 make -s -j"${nproc}" || exit $?
-make -C testing -s fuzz-test || exit $?
 case "$MODE" in
     disable-set|mini*|read-only)
-        exit 0;;
+	exit 0
+	;;
+    *)
+	make -C testing -s fuzz-tests || exit $?
+	;;
 esac
