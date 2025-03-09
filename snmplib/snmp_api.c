@@ -1977,6 +1977,7 @@ static void netsnmp_free_one_tr_cfg(void *data, void *context)
 
     free(c->key);
     free(c->value);
+    free(c);
 }
 
 static void netsnmp_free_transport_config(netsnmp_container *tc)
@@ -1984,7 +1985,7 @@ static void netsnmp_free_transport_config(netsnmp_container *tc)
     if (!tc)
         return;
 
-    CONTAINER_FOR_EACH(tc, netsnmp_free_one_tr_cfg, NULL);
+    CONTAINER_CLEAR(tc, netsnmp_free_one_tr_cfg, NULL);
     CONTAINER_FREE(tc);
 }
 
