@@ -5,7 +5,6 @@ scriptdir="$(dirname "$0")"
 killall snmpd snmptrapd >/dev/null 2>&1
 
 export SNMP_VERBOSE=1 &&
-export NOAUTODEPS=1 &&
 export SNMP_SAVE_TMPDIR=1 &&
 make -s &&
 (

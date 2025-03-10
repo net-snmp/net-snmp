@@ -302,16 +302,6 @@ configclean: makefileclean
 touchit:
 	touch configure include/net-snmp/net-snmp-config.h.in
 	touch config.status
-	touch stamp-h stamp-h.in
-
-Makefile: Makefile.in config.status Makefile.rules Makefile.top
-	@if test "x$(NOAUTODEPS)" = "x"; then \
-	    echo "running config.status because the following file(s) changed:"; \
-	    echo "  $?"; \
-	    ./config.status; \
-	else \
-	    echo "WARNING: not running config.status"; \
-	fi
 
 configure_ac = configure.ac \
 	configure.d/config_modules_agent \
@@ -333,35 +323,6 @@ configure_ac = configure.ac \
 	configure.d/config_project_perl_python \
 	configure.d/config_project_types \
 	configure.d/config_project_with_enable
-
-$(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
-$(srcdir)/stamp-h.in: $(configure_ac)
-	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOHEADER)" != "x:"; then \
-	    cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER); \
-	    echo timestamp > ${srcdir}/stamp-h.in; \
-	else \
-	    echo "WARNING: not running autoheader"; \
-	fi
-
-include/net-snmp/net-snmp-config.h: stamp-h
-stamp-h: include/net-snmp/net-snmp-config.h.in config.status
-	@if test "x$(NOAUTODEPS)" = "x"; then \
-	    echo "running config.status because the following file(s) changed:"; \
-	    echo "  $?"; \
-	    ./config.status; \
-	    echo timestamp > stamp-h; \
-	else \
-	    echo "WARNING: not running config.status"; \
-	fi
-
-$(srcdir)/configure: $(configure_ac) aclocal.m4
-	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOCONF)" != "x:"; then \
-	    cd ${srcdir} && $(AUTOCONF); \
-	    echo "Please run configure now."; \
-	    sh -c exit 2; \
-	else \
-	    echo "WARNING: not running autoconf"; \
-	fi
 
 gendir=dist/generation-scripts
 generation-scripts: generation-scripts-dirs $(gendir)/gen-transport-headers $(gendir)/gen-security-headers
@@ -386,14 +347,6 @@ $(gendir)/gen-security-headers: $(gendir)/gen-security-headers.in $(gendir)/gen-
 	rm -f $@
 	autoconf -o $@ $<
 	chmod a+x $@
-
-config.status: configure
-	@if test "x$(NOAUTODEPS)" = "x"; then \
-	    echo "running config.status because $? changed"; \
-	    ./config.status --recheck; \
-	else \
-	    echo "WARNING: not running config.status --recheck"; \
-	fi
 
 #
 # Emacs TAGS file

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 scriptdir="$(dirname "$0")"
-export NOAUTODEPS=1
 export SNMP_VERBOSE=1
 case "$(uname -a)" in
     MSYS*|MINGW*)

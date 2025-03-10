@@ -358,9 +358,9 @@ nsb_make()
    nsb_info "Making $target... (log is $nsb_make_OUTPUT)"
    #
    if [ "x$target" = "xall" ]; then
-      $NSB_MAKE NOAUTODEPS=y touchit 2>&1 | tee $nsb_make_OUTPUT
+      $NSB_MAKE touchit 2>&1 | tee $nsb_make_OUTPUT
    fi
-   $NSB_MAKE $NSB_MAKE_EXTRA NOAUTODEPS=y start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   $NSB_MAKE $NSB_MAKE_EXTRA start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
    nsb_info "Checking for errors..."
@@ -447,7 +447,7 @@ nsb_build()
           #rm -fR nsb_* $dest_dir > /dev/null 2>&1
         fi
         if [ -f Makefile ]; then
-            nsb_make NOAUTODEPS=y distclean
+            nsb_make distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
                 nsb_abort "Error during make distclean (rc=$nsb_build_rc)"
