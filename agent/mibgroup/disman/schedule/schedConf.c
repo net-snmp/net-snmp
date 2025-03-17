@@ -161,13 +161,20 @@ _sched_convert_bits( char *cron_spec, char *bit_buf,
     memset( bit_buf, 0, bit_buf_len );
 
     while (1) {
-        sscanf( cp, "%d", &val);
+        if ( sscanf( cp, "%d", &val) != 1 ) {
+            config_perror("Bad number format");
+            return;
+        }
         /* Handle negative day specification */
         if ( val < 0 ) {
             val = max_val - val; 
         }
         if ( startAt1 )
             val--;
+        if ( val < 0  || val >= max_val ) {
+            config_perror("Bad time spec");
+            return;
+        }
         major = val/8;
         minor = val%8;
         bit_buf[ major ] |= b[minor];
