@@ -2709,7 +2709,8 @@ parse_objecttype(FILE * fp, char *name)
             /*
              * Mark's defVal section 
              */
-            type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+            type = get_token(fp, quoted_string_buffer,
+                             sizeof(quoted_string_buffer));
             if (type != LEFTBRACKET) {
                 print_error("Bad DEFAULTVALUE", quoted_string_buffer,
                             type);
@@ -2723,7 +2724,8 @@ parse_objecttype(FILE * fp, char *name)
 
                 defbuf[0] = 0;
                 while (1) {
-                    type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+                    type = get_token(fp, quoted_string_buffer,
+                                     sizeof(quoted_string_buffer));
                     if ((type == RIGHTBRACKET && --level == 0)
                         || type == ENDOFFILE)
                         break;
@@ -3181,7 +3183,8 @@ parse_compliance(FILE * fp, char *name)
         np->description = strdup(quoted_string_buffer);
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
-        type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+        type = get_token(fp, quoted_string_buffer,
+                         sizeof(quoted_string_buffer));
         if (type != QUOTESTRING) {
             print_error("Bad REFERENCE", quoted_string_buffer, type);
             goto skip;
@@ -3324,7 +3327,7 @@ parse_capabilities(FILE * fp, char *name)
         print_error("Expected DESCRIPTION", token, type);
         goto skip;
     }
-    type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+    type = get_token(fp, quoted_string_buffer, sizeof(quoted_string_buffer));
     if (type != QUOTESTRING) {
         print_error("Bad DESCRIPTION", quoted_string_buffer, type);
         goto skip;
@@ -3335,7 +3338,8 @@ parse_capabilities(FILE * fp, char *name)
     }
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
-        type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+        type = get_token(fp, quoted_string_buffer,
+                         sizeof(quoted_string_buffer));
         if (type != QUOTESTRING) {
             print_error("Bad REFERENCE", quoted_string_buffer, type);
             goto skip;
@@ -3457,7 +3461,8 @@ parse_capabilities(FILE * fp, char *name)
                 print_error("Expected DESCRIPTION", token, type);
                 goto skip;
             }
-            type = get_token(fp, quoted_string_buffer, MAXTOKEN);
+            type = get_token(fp, quoted_string_buffer,
+                             sizeof(quoted_string_buffer));
             if (type != QUOTESTRING) {
                 print_error("Bad DESCRIPTION", quoted_string_buffer, type);
                 goto skip;
