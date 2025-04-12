@@ -1926,7 +1926,7 @@ snmp_free_session(netsnmp_session * s)
          */
         netsnmp_callback_clear_client_arg(s, 0, 0);
 
-        free((char *) s);
+        SNMP_FREE(s);
     }
 }
 
@@ -2012,7 +2012,7 @@ snmp_sess_close(void *sessp)
     }
 
     snmp_free_session(sesp);
-    free((char *) slp);
+    SNMP_FREE(slp);
     return 1;
 }
 
@@ -6064,8 +6064,10 @@ _sess_read_dgram_packet(void *sessp, netsnmp_large_fd_set * fdset,
                                               SNMP_MAX_RCV_MSG_SIZE,
                                               &rcvp->opaque, &rcvp->olength);
     if (rcvp->packet_len == -1) {
-        sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
-        sp->s_errno = errno;
+        if (!sp) {
+            sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
+            sp->s_errno = errno;
+        }
         snmp_set_detail(strerror(errno));
         SNMP_FREE(rcvp->packet);
         SNMP_FREE(rcvp->opaque);
@@ -6425,7 +6427,7 @@ snmp_sess_read2(void *sessp, netsnmp_large_fd_set * fdset)
     rc = _sess_read(sessp, fdset);
     psl = (struct session_list *) sessp;
     pss = psl->session;
-    if (rc && pss->s_snmp_errno) {
+    if (rc && (pss && pss->s_snmp_errno)) {
         SET_SNMP_ERROR(pss->s_snmp_errno);
     }
     return rc;
@@ -7145,7 +7147,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
     min_size = SNMP_MIN(len1, len2);
     for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
-            return i;    /* 'í' is the first differing subidentifier
+            return i;    /* 'ï¿½' is the first differing subidentifier
                             So the common prefix is 0..(i-1), of length i */
     }
     return min_size;	/* The shorter OID is a prefix of the longer, and
