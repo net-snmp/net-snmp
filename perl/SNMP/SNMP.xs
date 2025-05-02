@@ -1178,6 +1178,10 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
   SV **err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
   SV **err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
 
+  /* These are purely informative; only act on the final callback. */
+  if (op == NETSNMP_CALLBACK_OP_RESEND)
+    return 1;
+
   ENTER;
   SAVETMPS;
 
