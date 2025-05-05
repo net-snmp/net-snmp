@@ -5848,77 +5848,77 @@ _sess_process_packet_handle_pdu(struct session_list *slp, netsnmp_session * sp,
        * should be per session ! 
        */
 
-      if (callback == NULL
-	  || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
-		      pdu->reqid, pdu, magic) == 1) {
-	if (pdu->command == SNMP_MSG_REPORT) {
-	  if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
-	      snmpv3_get_report_type(pdu) ==
-	      SNMPERR_NOT_IN_TIME_WINDOW) {
-	    /*
-	     * trigger immediate retry on recoverable Reports 
-	     * * (notInTimeWindow), incr_retries == TRUE to prevent
-	     * * inifinite resend                      
-	     */
-	    if (rp->retries <= sp->retries) {
-	      snmp_resend_request(slp, orp, rp, TRUE);
-	      break;
-	    } else {
-	      /* We're done with retries, so no longer waiting for a response */
-	      if (callback) {
-	        callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
-	                 pdu->reqid, pdu, magic);
-	      }
-	    }
-	  } else {
-	    if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
-	      break;
-	    } else { /* We're done with retries */
-	      if (callback) {
-	        callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
-	                 pdu->reqid, pdu, magic);
-	      }
-	    }
-	  }
+      if (pdu->command == SNMP_MSG_REPORT) {
+        if (sp->s_snmp_errno == SNMPERR_NOT_IN_TIME_WINDOW ||
+            snmpv3_get_report_type(pdu) ==
+            SNMPERR_NOT_IN_TIME_WINDOW) {
+          /*
+           * trigger immediate retry on recoverable Reports 
+           * * (notInTimeWindow), incr_retries == TRUE to prevent
+           * * inifinite resend                      
+           */
+          if (rp->retries <= sp->retries) {
+            snmp_resend_request(slp, orp, rp, TRUE);
+            break;
+          } else {
+            /* We're done with retries, so no longer waiting for a response */
+            if (callback) {
+              callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
+                       pdu->reqid, pdu, magic);
+            }
+          }
+        } else {
+          if (SNMPV3_IGNORE_UNAUTH_REPORTS) {
+            break;
+          } else { /* We're done with retries */
+            if (callback) {
+              callback(NETSNMP_CALLBACK_OP_SEC_ERROR, sp,
+                       pdu->reqid, pdu, magic);
+            }
+          }
+        }
 
-	  /*
-	   * Handle engineID discovery.  
-	   */
-	  if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
-	    sp->securityEngineID =
-	      (u_char *) malloc(pdu->securityEngineIDLen);
-	    if (sp->securityEngineID == NULL) {
-	      /*
-	       * TODO FIX: recover after message callback *?
+        /*
+         * Handle engineID discovery.  
+         */
+        if (!sp->securityEngineIDLen && pdu->securityEngineIDLen) {
+          sp->securityEngineID =
+            (u_char *) malloc(pdu->securityEngineIDLen);
+          if (sp->securityEngineID == NULL) {
+              /*
+               * TODO FIX: recover after message callback *?
                */
-                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
-                snmp_free_pdu(pdu);
-                return -1;
-	    }
-	    memcpy(sp->securityEngineID, pdu->securityEngineID,
-		   pdu->securityEngineIDLen);
-	    sp->securityEngineIDLen = pdu->securityEngineIDLen;
-	    if (!sp->contextEngineIDLen) {
-	      sp->contextEngineID =
-		(u_char *) malloc(pdu->
-				  securityEngineIDLen);
-	      if (sp->contextEngineID == NULL) {
-		/*
-		 * TODO FIX: recover after message callback *?
-		 */
-                snmp_log(LOG_ERR, "malloc failed handling pdu\n");
-                snmp_free_pdu(pdu);
-                return -1;
-	      }
-	      memcpy(sp->contextEngineID,
-		     pdu->securityEngineID,
-		     pdu->securityEngineIDLen);
-	      sp->contextEngineIDLen =
-		pdu->securityEngineIDLen;
-	    }
-	  }
-	}
+              snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+              snmp_free_pdu(pdu);
+              return -1;
+          }
+          memcpy(sp->securityEngineID, pdu->securityEngineID,
+            pdu->securityEngineIDLen);
+          sp->securityEngineIDLen = pdu->securityEngineIDLen;
+          if (!sp->contextEngineIDLen) {
+            sp->contextEngineID =
+               (u_char *) malloc(pdu->
+                                 securityEngineIDLen);
+            if (sp->contextEngineID == NULL) {
+              /*
+               * TODO FIX: recover after message callback *?
+               */
+              snmp_log(LOG_ERR, "malloc failed handling pdu\n");
+              snmp_free_pdu(pdu);
+              return -1;
+            }
+            memcpy(sp->contextEngineID,
+              pdu->securityEngineID,
+              pdu->securityEngineIDLen);
+            sp->contextEngineIDLen =
+              pdu->securityEngineIDLen;
+          }
+        }
+      }
 
+      if (callback == NULL
+         || callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE, sp,
+                     pdu->reqid, pdu, magic) == 1) {
 	/*
 	 * Successful, so delete request.  
 	 */
