@@ -329,7 +329,7 @@ UPDATE_DATE=`date "+%F_%I.%M"`
 if [ -z "$UPDATE_OID_NAME" ]; then
     UPDATE_OID_NAME=$(echo "$UPDATE_OID" | awk -F'::' '{print $2}')
 fi
-echo "Starting regneration of $UPDATE_OID filename $UPDATE_OID_NAME using $UPDATE_CONF at $UPDATE_DATE"
+echo "Starting regeneration of $UPDATE_OID filename $UPDATE_OID_NAME using $UPDATE_CONF at $UPDATE_DATE"
 
 if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
     echo "It appears that the last run of mib2c-update was not able to merge"
