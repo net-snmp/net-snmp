@@ -987,14 +987,17 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     return;
                 }
 #ifdef HAVE_GETADDRINFO
-                int             gai_error;
+                {
+                    int             gai_error;
 
-                hints.ai_family = AF_INET6;
-                hints.ai_socktype = SOCK_DGRAM;
-                gai_error = netsnmp_getaddrinfo(sourcep, NULL, &hints, &res);
-                if (gai_error != 0) {
-                    config_perror(gai_strerror(gai_error));
-                    return;
+                    hints.ai_family = AF_INET6;
+                    hints.ai_socktype = SOCK_DGRAM;
+                    gai_error = netsnmp_getaddrinfo(sourcep, NULL, &hints,
+                                                    &res);
+                    if (gai_error != 0) {
+                        config_perror(gai_strerror(gai_error));
+                        return;
+                    }
                 }
 #else
                 config_perror("getaddrinfo() not available");

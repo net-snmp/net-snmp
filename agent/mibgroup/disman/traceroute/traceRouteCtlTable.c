@@ -4415,6 +4415,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 item->traceRouteCtlMaxTtl, packlen));
     (void) fflush(stderr);
 
+    {
     struct traceRouteResultsTable_data *StorageResults = NULL;
     netsnmp_variable_list *vars_results = NULL;
 
@@ -4452,13 +4453,12 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
         if (item->traceRouteCtlCreateHopsEntries == 1) {
             if (ttl == item->traceRouteCtlInitialTtl) {
                 int             k = 0;
-                count = traceRouteHopsTable_count(item);
-
-
                 struct header_complex_index *hciptr2, *nhciptr2;
                 netsnmp_variable_list *vars = NULL;
                 oid             newoid[MAX_OID_LEN];
                 size_t          newoid_len;
+
+                count = traceRouteHopsTable_count(item);
 
                 snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlOwnerIndex, item->traceRouteCtlOwnerIndexLen); /* traceRouteCtlOwnerIndex */
                 snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlTestName, item->traceRouteCtlTestNameLen);     /* traceRouteCtlTestName */
@@ -4521,13 +4521,14 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
             temp->traceRouteCtlTestNameLen =
                 item->traceRouteCtlTestNameLen;
 
+            {
             /* add lock to protect */
             pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
             pthread_mutex_lock(&counter_mutex);
             temp->traceRouteHopsHopIndex = ++index;
             pthread_mutex_unlock(&counter_mutex);
             /* endsadsadsad */
-
+            }
 
             temp->traceRouteHopsIpTgtAddressType = 0;
             temp->traceRouteHopsIpTgtAddress = strdup("");
@@ -4560,6 +4561,8 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                                 "registered an entry error\n"));
 
         }
+        
+        {
         unsigned long maxRtt = 0;
         unsigned long minRtt = 0;
         unsigned long averageRtt = 0;
@@ -4736,6 +4739,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 temp_his->traceRouteCtlTestNameLen =
                     item->traceRouteCtlTestNameLen;
 
+                {
                 /* add lock to protect */
                 pthread_mutex_t counter_mutex =
                     PTHREAD_MUTEX_INITIALIZER;
@@ -4747,6 +4751,8 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                     ++(item->traceRouteProbeHistoryMaxIndex);
                 pthread_mutex_unlock(&counter_mutex);
                 /* endsadsadsad */
+                }
+
                 temp_his->traceRouteProbeHistoryHopIndex = ttl;
                 temp_his->traceRouteProbeHistoryProbeIndex = probe + 1;
 
@@ -4855,6 +4861,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
 
             (void) fflush(stdout);
         }
+        }
         putchar('\n');
 
 
@@ -4938,6 +4945,7 @@ out:
         close(sndsock);
     free(outip);
     free(hostname);
+    }
 }
 
 static void
@@ -5118,7 +5126,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
             item->traceRouteCtlMaxTtl, datalen);
     (void) fflush(stderr);
 
-
+    {
     struct traceRouteResultsTable_data *StorageResults = NULL;
     netsnmp_variable_list *vars_results = NULL;
 
@@ -5153,14 +5161,14 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
         StorageResults->traceRouteResultsCurHopCount = ttl;
         if (item->traceRouteCtlCreateHopsEntries == 1) {
             if (ttl == item->traceRouteCtlInitialTtl) {
-
                 int             k = 0;
-                count = traceRouteHopsTable_count(item);
                 struct traceRouteHopsTable_data *StorageTmp;
                 struct header_complex_index *hciptr2, *nhciptr2;
                 netsnmp_variable_list *vars = NULL;
                 oid             newoid[MAX_OID_LEN];
                 size_t          newoid_len;
+
+                count = traceRouteHopsTable_count(item);
 
                 snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlOwnerIndex, item->traceRouteCtlOwnerIndexLen); /* traceRouteCtlOwnerIndex */
                 snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) item->traceRouteCtlTestName, item->traceRouteCtlTestNameLen);     /* traceRouteCtlTestName */
@@ -5226,13 +5234,14 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
             temp->traceRouteCtlTestNameLen =
                 item->traceRouteCtlTestNameLen;
 
+            {
             /* add lock to protect */
             pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
             pthread_mutex_lock(&counter_mutex);
             temp->traceRouteHopsHopIndex = ++index;
             pthread_mutex_unlock(&counter_mutex);
             /* endsadsadsad */
-
+            }
 
             temp->traceRouteHopsIpTgtAddressType = 0;
             temp->traceRouteHopsIpTgtAddress = strdup("");
@@ -5266,6 +5275,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
 
         }
 
+        {
         unsigned long maxRtt = 0;
         unsigned long minRtt = 0;
         unsigned long averageRtt = 0;
@@ -5387,6 +5397,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 temp_his->traceRouteCtlTestNameLen =
                     item->traceRouteCtlTestNameLen;
 
+                {
                 /* add lock to protect */
                 pthread_mutex_t counter_mutex =
                     PTHREAD_MUTEX_INITIALIZER;
@@ -5398,6 +5409,8 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                     ++(item->traceRouteProbeHistoryMaxIndex);
                 pthread_mutex_unlock(&counter_mutex);
                 /* endsadsadsad */
+                }
+
                 temp_his->traceRouteProbeHistoryHopIndex = ttl;
                 temp_his->traceRouteProbeHistoryProbeIndex = probe + 1;
 
@@ -5512,6 +5525,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
 
             (void) fflush(stdout);
         }
+        }
         putchar('\n');
 
 
@@ -5570,6 +5584,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
             }
         }
 
+    }
     }
 
     if (flag == 1) {
