@@ -208,6 +208,7 @@ create_pingCtlTable_data(void)
     StorageNew->pingCtlAdminStatus = 2;
     StorageNew->pingCtlDataFill = strdup("00");
     if (StorageNew->pingCtlDataFill == NULL) {
+        free(StorageNew->pingCtlTargetAddress);
         free(StorageNew);
         return NULL;
     }
