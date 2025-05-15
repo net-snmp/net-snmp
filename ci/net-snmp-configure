@@ -19,9 +19,8 @@ rpm_version() {
 }
 
 dpkg_version() {
-    if type -p dpkg-query >/dev/null 2>&1; then
+    type -p dpkg-query >/dev/null 2>&1 &&
 	dpkg-query --show -f '${Version}\n' "$1" 2>/dev/null | grep -v '^$'
-    fi
 }
 
 pacman_version() {
@@ -67,14 +66,15 @@ case "$MODE" in
 	echo "libatmver=$libatmver"
 
 	libmysqlver="$(rpm_version libmariadb-devel;
-	      for p in libmariadbclient-dev libmariadb-client-lgpl-dev; do
-	        dpkg_version "$p";
+	      for p in libmariadb-dev libmariadb-dev-compat \
+		       libmariadbclient-dev libmariadb-client-lgpl-dev; do
+	        dpkg_version "$p" && break;
               done;
               pacman_version mingw-w64-x86_64-libmariadbclient)"
 	echo "libmysqlver=$libmysqlver"
 
 	libsensorsver="$(rpm_version libsensors4-devel;
-		 dpkg_version libsensors4-dev)"
+		 dpkg_version libsensors-dev libsensors4-dev)"
 	echo "libsensorsver=$libsensorsver"
 
 	if echo "$*" | grep -q wolfssl; then
