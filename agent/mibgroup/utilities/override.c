@@ -254,6 +254,7 @@ netsnmp_parse_override(const char *token, char *line)
     if (!the_reg->rootoid || !the_reg->handler || !the_reg->handlerName) {
         if (the_reg->handler)
             SNMP_FREE(the_reg->handler->handler_name);
+        SNMP_FREE(the_reg->rootoid);
         SNMP_FREE(the_reg->handler);
         SNMP_FREE(the_reg->handlerName);
         SNMP_FREE(the_reg);
