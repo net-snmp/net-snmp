@@ -17886,6 +17886,44 @@ CFLAGS=$lt_save_CFLAGS
 #   Build environment:
 ##
 
+for opt in -Werror=declaration-after-statement
+do
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
+printf %s "checking whether the compiler supports $opt... " >&6; }
+    if test x$opt != x-Wstrict-prototypes; then
+      CFLAGS="-Werror $opt $CFLAGS"
+    else
+      CFLAGS="$opt $CFLAGS"
+    fi
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+      DEVFLAGS="$DEVFLAGS $opt"
+
+else $as_nop
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+    CFLAGS="$netsnmp_save_CFLAGS"
+done
+
 #   developer build
 #       (enabled by default when building from SVN checkout)
 #
