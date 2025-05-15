@@ -58,6 +58,8 @@ case "$MODE" in
 	exit 0
 	;;
     *)
-	make -C testing -s fuzz-tests || exit $?
+	if [ -e testing/fuzzing ]; then
+	    make -C testing -s fuzz-tests || exit $?
+	fi
 	;;
 esac
