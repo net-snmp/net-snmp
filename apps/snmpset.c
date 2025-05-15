@@ -131,7 +131,8 @@ main(int argc, char *argv[])
 
     SOCK_STARTUP;
 
-    putenv(strdup("POSIXLY_CORRECT=1"));
+    const char *posix_env = strdup("POSIXLY_CORRECT=1");
+    putenv(posix_env);
 
     /*
      * get the common command line arguments 
@@ -283,6 +284,7 @@ close_session:
     snmp_close(ss);
 
 out:
+    free(posix_env);
     netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
