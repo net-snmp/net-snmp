@@ -128,10 +128,11 @@ main(int argc, char *argv[])
     int             status;
     int             failures = 0;
     int             exitval = 1;
+    char           *posix_env;
 
     SOCK_STARTUP;
 
-    const char *posix_env = strdup("POSIXLY_CORRECT=1");
+    posix_env = strdup("POSIXLY_CORRECT=1");
     putenv(posix_env);
 
     /*

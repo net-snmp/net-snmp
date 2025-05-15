@@ -258,11 +258,13 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 
     case NO_FINGERPRINT_AVAILABLE:
         if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
+            char *lower_hostname;
+
             their_hostname_len = strlen(tlsdata->their_hostname);
             their_hostname = tlsdata->their_hostname;
             
             /* RFC 6353: convert their_hostname to lowercase */
-            char *lower_hostname = calloc(their_hostname_len + 1, sizeof(char));
+            lower_hostname = calloc(their_hostname_len + 1, sizeof(char));
             if (NULL == lower_hostname) {
                 LOGANDDIE("Failed to allocate memory to convert hostname to lowercase");
             }

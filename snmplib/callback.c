@@ -260,12 +260,11 @@ int
 netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                           void *arg, int priority)
 {
+    struct snmp_gen_callback *newscp = NULL, *scp = NULL;
+
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
-
-    struct snmp_gen_callback *newscp = NULL, *scp = NULL;
-    struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
 
     if (_callback_need_init)
         init_callbacks();
@@ -276,6 +275,8 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
         _callback_unlock(major,minor);
         return SNMPERR_GENERR;
     } else {
+        struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
+
         newscp->priority = priority;
         newscp->sc_client_arg = arg;
         newscp->sc_callback = new_callback;

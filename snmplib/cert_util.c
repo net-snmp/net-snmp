@@ -250,10 +250,11 @@ netsnmp_certs_init(void)
 void
 netsnmp_certs_shutdown(void)
 {
-    DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
     netsnmp_container ***c, **containers[] = {
         &_tlstmParams, &_tlstmAddr, &_maps, &_certs, &_keys, NULL
     };
+
+    DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
 
     for (c = containers; *c; c++) {
         if (!**c)

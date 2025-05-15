@@ -171,7 +171,9 @@ static int load_v6_interfaces(struct nl_sock *nl_sock,
         const char *if_name = rtnl_link_get_name(rtnl_link);
         struct rtnl_addr *rtnl_addr;
         netsnmp_ipaddress_entry *entry;
+        struct nl_addr *local_addr;
         _ioctl_extras *extras;
+        unsigned int flags;
 
         DEBUGMSGTL(("access:ipaddress:container",
                     " interface %d, %s\n", idx_offset, if_name));
@@ -222,12 +224,14 @@ static int load_v6_interfaces(struct nl_sock *nl_sock,
         /*
          * get IP address
          */
-        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+        local_addr = rtnl_addr_get_local(rtnl_addr);
+        {
         void *addr = nl_addr_get_binary_addr(local_addr);
         int addr_len = nl_addr_get_len(local_addr);
         netsnmp_assert(addr_len <= sizeof(entry->ia_address));
         memcpy(entry->ia_address, addr, addr_len);
         entry->ia_address_len = addr_len;
+        }
 
         /*
          * get netmask
@@ -237,7 +241,7 @@ static int load_v6_interfaces(struct nl_sock *nl_sock,
         /*
          * address flags
          */
-        const unsigned int flags = rtnl_addr_get_flags(rtnl_addr);
+        flags = rtnl_addr_get_flags(rtnl_addr);
         if ((flags & IFA_F_PERMANENT) || (!flags))
             entry->ia_status = IPADDRESSSTATUSTC_PREFERRED; /* ?? */
 #ifdef IFA_F_TEMPORARY

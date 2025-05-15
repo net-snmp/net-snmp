@@ -89,6 +89,23 @@ AC_SUBST([PERL_SYSTEM_INVOKES_POSIX_SHELL])
 #   Build environment:
 ##
 
+for opt in -Werror=declaration-after-statement
+do
+    AC_MSG_CHECKING([whether the compiler supports $opt])
+    if test x$opt != x-Wstrict-prototypes; then
+      CFLAGS="-Werror $opt $CFLAGS"
+    else
+      CFLAGS="$opt $CFLAGS"
+    fi
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [
+      AC_MSG_RESULT([yes])
+      DEVFLAGS="$DEVFLAGS $opt"
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+    CFLAGS="$netsnmp_save_CFLAGS"
+done
+
 #   developer build 
 #       (enabled by default when building from SVN checkout)
 #

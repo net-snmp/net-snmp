@@ -665,6 +665,7 @@ static void netsnmp_retrieve_one_link_info(struct rtnl_link *rtnl_link, int fd,
     struct nl_addr *nl_addr = rtnl_link_get_addr(rtnl_link);
     void *paddr = nl_addr ? nl_addr_get_binary_addr(nl_addr) : NULL;
     int paddr_len = nl_addr ? nl_addr_get_len(nl_addr) : 0;
+    unsigned int link_flags;
 
     free(entry->paddr);
     entry->paddr = netsnmp_memdup(paddr, paddr_len);
@@ -675,7 +676,7 @@ static void netsnmp_retrieve_one_link_info(struct rtnl_link *rtnl_link, int fd,
         netsnmp_guess_interface_type(entry);
     netsnmp_derive_interface_id(entry);
     /* IFF_* flags */
-    const unsigned int link_flags = rtnl_link_get_flags(rtnl_link);
+    link_flags = rtnl_link_get_flags(rtnl_link);
     netsnmp_process_link_flags(entry, link_flags);
     /* MTU */
     entry->mtu = rtnl_link_get_mtu(rtnl_link);

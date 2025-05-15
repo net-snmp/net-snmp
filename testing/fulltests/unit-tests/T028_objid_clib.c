@@ -81,10 +81,11 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
                             &datalength, &type, objid, &objid_len);
         OKF(end != NULL, ("[%d] asn_parse_objid()", i));
         if (end != NULL) {
+            uint32_t exp_len;
             OKF(datalength == 0, ("[%d] datalength %zu", i, datalength));
             OKF(type == ASN_OBJECT_ID, ("[%d] type %u", i, type));
-            const uint32_t exp_len = t->objid_length >= 2 ?
-                t->objid_length : 2;
+
+            exp_len = t->objid_length >= 2 ? t->objid_length : 2;
             OKF(exp_len == objid_len, ("[%d] objid len %d <> %zd", i, exp_len,
                                        objid_len));
             if (exp_len == objid_len) {

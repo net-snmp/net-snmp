@@ -173,9 +173,13 @@ static int load_v4_interfaces(struct nl_sock *nl_sock,
         struct rtnl_link *rtnl_link = (void *)link_obj;
         int if_index = rtnl_link_get_ifindex(rtnl_link);
         const char *if_name = rtnl_link_get_name(rtnl_link);
-        struct rtnl_addr *rtnl_addr;
+        netsnmp_ipaddress_entry *bcastentry;
         netsnmp_ipaddress_entry *entry;
+        struct rtnl_addr *rtnl_addr;
+        struct nl_addr *local_addr;
+        struct nl_addr *bc_addr;
         _ioctl_extras *extras;
+        in_addr_t ipval;
 
         DEBUGMSGTL(("access:ipaddress:container",
                     " interface %d, %s\n", idx_offset, if_name));
@@ -216,14 +220,16 @@ static int load_v4_interfaces(struct nl_sock *nl_sock,
         /*
          * get IP address
          */
-        struct nl_addr *local_addr = rtnl_addr_get_local(rtnl_addr);
+        local_addr = rtnl_addr_get_local(rtnl_addr);
+        {
         void *addr = nl_addr_get_binary_addr(local_addr);
         int addr_len = nl_addr_get_len(local_addr);
+
         entry->ia_address_len = addr_len;
-        in_addr_t ipval;
         netsnmp_assert(sizeof(ipval) == addr_len);
         memcpy(&ipval, addr, addr_len);
         memcpy(entry->ia_address, addr, addr_len);
+        }
 
         /*
          * save ifindex
@@ -295,11 +301,11 @@ static int load_v4_interfaces(struct nl_sock *nl_sock,
         /*
          * get broadcast
          */
-        struct nl_addr *bc_addr = rtnl_addr_get_broadcast(rtnl_addr);
+        bc_addr = rtnl_addr_get_broadcast(rtnl_addr);
         if (!bc_addr)
             continue;
 
-        netsnmp_ipaddress_entry *bcastentry =
+        bcastentry =
             netsnmp_access_ipaddress_entry_create();
         if (!bcastentry) {
             rc = -3;

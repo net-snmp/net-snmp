@@ -1,12 +1,12 @@
 /* HEADER PDU building */
 
-SOCK_STARTUP;
-
 netsnmp_pdu *pdu;
 u_char *packet;
 size_t packet_len, offset = 0;
 netsnmp_session session, *ss;
 int rc;
+
+SOCK_STARTUP;
 
 init_snmp("testing");
 snmp_sess_init(&session);
