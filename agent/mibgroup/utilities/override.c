@@ -240,6 +240,8 @@ netsnmp_parse_override(const char *token, char *line)
     the_reg = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     if (!the_reg) {
         config_perror("memory allocation failure");
+        if (thedata->type != ASN_NULL)
+            free(thedata->value);
         free(thedata);
         return;
     }
@@ -259,6 +261,8 @@ netsnmp_parse_override(const char *token, char *line)
         SNMP_FREE(the_reg->handlerName);
         SNMP_FREE(the_reg);
         config_perror("memory allocation failure");
+        if (thedata->type != ASN_NULL)
+            free(thedata->value);
         free(thedata);
         return;
     }
