@@ -731,8 +731,9 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
                     sshdomain_sock_group = -1;
                 DEBUGMSGTL(("ssh", "Setting socket user/group to %d/%d\n",
                             sshdomain_sock_user, sshdomain_sock_group));
-                chown(unaddr->sun_path,
-                      sshdomain_sock_user, sshdomain_sock_group);
+                if (chown(unaddr->sun_path,
+                          sshdomain_sock_user, sshdomain_sock_group) < 0)
+                    snmp_log_perror("SSH socket chown");
             }
         }
 
@@ -839,7 +840,11 @@ netsnmp_ssh_transport(const struct sockaddr_in *addr, int local)
 
         /* open the SSH session and channel */
         addr_pair->session = libssh2_session_init();
+#ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
+        if (libssh2_session_handshake(addr_pair->session, t->sock)) {
+#else
         if (libssh2_session_startup(addr_pair->session, t->sock)) {
+#endif
           shutdown:
             snmp_log(LOG_ERR, "Failed to establish an SSH session\n");
             netsnmp_ssh_close(t);
