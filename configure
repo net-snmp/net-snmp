@@ -28953,9 +28953,75 @@ printf "%s\n" "#define HAVE_LIBSSL 1" >>confdefs.h
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libssh2_session_startup in -lssh2" >&5
-printf %s "checking for libssh2_session_startup in -lssh2... " >&6; }
-if test ${ac_cv_lib_ssh2_libssh2_session_startup+y}
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing libssh2_session_handshake" >&5
+printf %s "checking for library containing libssh2_session_handshake... " >&6; }
+if test ${ac_cv_search_libssh2_session_handshake+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char libssh2_session_handshake ();
+int
+main (void)
+{
+return libssh2_session_handshake ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' ssh2
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_search_libssh2_session_handshake=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext
+  if test ${ac_cv_search_libssh2_session_handshake+y}
+then :
+  break
+fi
+done
+if test ${ac_cv_search_libssh2_session_handshake+y}
+then :
+
+else $as_nop
+  ac_cv_search_libssh2_session_handshake=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_libssh2_session_handshake" >&5
+printf "%s\n" "$ac_cv_search_libssh2_session_handshake" >&6; }
+ac_res=$ac_cv_search_libssh2_session_handshake
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+	    ac_fn_c_check_func "$LINENO" "libssh2_session_handshake" "ac_cv_func_libssh2_session_handshake"
+if test "x$ac_cv_func_libssh2_session_handshake" = xyes
+then :
+  printf "%s\n" "#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1" >>confdefs.h
+
+fi
+
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libssh2_session_init_ex in -lssh2" >&5
+printf %s "checking for libssh2_session_init_ex in -lssh2... " >&6; }
+if test ${ac_cv_lib_ssh2_libssh2_session_init_ex+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
@@ -28967,28 +29033,28 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char libssh2_session_startup ();
+char libssh2_session_init_ex ();
 int
 main (void)
 {
-return libssh2_session_startup ();
+return libssh2_session_init_ex ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssh2_libssh2_session_startup=yes
+  ac_cv_lib_ssh2_libssh2_session_init_ex=yes
 else $as_nop
-  ac_cv_lib_ssh2_libssh2_session_startup=no
+  ac_cv_lib_ssh2_libssh2_session_init_ex=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssh2_libssh2_session_startup" >&5
-printf "%s\n" "$ac_cv_lib_ssh2_libssh2_session_startup" >&6; }
-if test "x$ac_cv_lib_ssh2_libssh2_session_startup" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssh2_libssh2_session_init_ex" >&5
+printf "%s\n" "$ac_cv_lib_ssh2_libssh2_session_init_ex" >&6; }
+if test "x$ac_cv_lib_ssh2_libssh2_session_init_ex" = xyes
 then :
 
 printf "%s\n" "#define HAVE_LIBSSH2 1" >>confdefs.h

@@ -532,7 +532,9 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
             TLSPROG=yes
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
-	    AC_CHECK_LIB(ssh2, libssh2_session_startup,
+	    AC_SEARCH_LIBS(libssh2_session_handshake, [ssh2])
+	    AC_CHECK_FUNCS(libssh2_session_handshake)
+	    AC_CHECK_LIB(ssh2, libssh2_session_init_ex,
                 AC_DEFINE(HAVE_LIBSSH2, 1,
                     [Define to 1 if you have the `ssh2' library (-lssh2).])
                 LIBCRYPTO=" -lssh2 $LIBCRYPTO",
