@@ -241,6 +241,7 @@ create_pingCtlTable_data(void)
         StorageNew->pingCtlDescr == NULL ||
         StorageNew->pingCtlSourceAddress == NULL) {
         free(StorageNew->pingCtlTargetAddress);
+        free(StorageNew->pingCtlDataFill);
         free(StorageNew->pingCtlTrapGeneration);
         free(StorageNew->pingCtlType);
         free(StorageNew->pingCtlDescr);
