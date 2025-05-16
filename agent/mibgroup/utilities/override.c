@@ -233,7 +233,6 @@ netsnmp_parse_override(const char *token, char *line)
 
     if (!thedata->value && thedata->type != ASN_NULL) {
         config_perror("memory allocation failure");
-        free(thedata->value);
         free(thedata);
         return;
     }
