@@ -55,7 +55,7 @@ case "$MODE" in
 esac
 make -s -j"${nproc}" || exit $?
 case "$MODE" in
-    disable-set|mini*|read-only)
+    disable-ipv6|disable-set|mini*|read-only)
 	exit 0
 	;;
     *)

@@ -120,7 +120,6 @@ esac
 
 options=()
 options+=(--enable-developer)
-options+=(--enable-ipv6)
 options+=("--prefix=/usr/local/net-snmp-${branch_name}")
 options+=("--with-cflags=$CFLAGS")
 options+=(--with-defaults)
@@ -131,6 +130,14 @@ transports=()
 #  sed -n 's/\.h$//p')
 mibs=()
 mibs+=(agent/extend)
+case "$MODE" in
+    disable-ipv6)
+	options+=(--disable-ipv6)
+        ;;
+    *)
+	options+=(--enable-ipv6)
+	;;
+esac
 case "$MODE" in
     read-only)
 	;;
@@ -385,6 +392,8 @@ case "$(uname):${MODE}" in
     esac
 
 case "$MODE" in
+    disable-ipv6)
+	;;
     disable-set)
         options+=(--disable-set-support);;
     mini)
