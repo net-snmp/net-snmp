@@ -21,7 +21,8 @@ esac
 if [ -z "${LIB_FUZZING_ENGINE+x}" ]; then
     CC=clang
     CXX=clang++
-    CFLAGS="-g3 -Wall -Werror -fsanitize=fuzzer-no-link -fsanitize=address"
+    CFLAGS="-g3 -Wall -Werror -Wno-declaration-after-statement"
+    CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link -fsanitize=address"
     CXXFLAGS="${CFLAGS}"
     WORK=${scriptdir}
     OUT=$WORK

@@ -9,9 +9,9 @@ for fuzzname in testing/fuzzing/*_fuzzer.c; do
     fuzzname=${fuzzname%_fuzzer.c}
     fuzzname=${fuzzname#testing/fuzzing/}
     echo "Compiling testing/fuzzing/${fuzzname}_fuzzer.c"
-    $CC $CFLAGS -c -Iinclude -Iagent/mibgroup/agentx \
+    $CC	$(${scriptdir}/../../net-snmp-config --base-cflags) \
+	$CFLAGS -c -Iinclude -Iagent/mibgroup/agentx \
 	-Wno-unused-command-line-argument \
-	$(${scriptdir}/../../net-snmp-config --base-cflags) \
 	testing/fuzzing/${fuzzname}_fuzzer.c -o $WORK/${fuzzname}_fuzzer.o
     $CXX $CXXFLAGS $WORK/${fuzzname}_fuzzer.o \
 	-Wno-unused-command-line-argument \
