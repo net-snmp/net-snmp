@@ -17112,6 +17112,7 @@ for opt in -Werror=declaration-after-statement
 do
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
 printf %s "checking whether the compiler supports $opt... " >&6; }
+    netsnmp_save_CFLAGS="$CFLAGS"
     if test x$opt != x-Wstrict-prototypes; then
       CFLAGS="-Werror $opt $CFLAGS"
     else
@@ -17133,17 +17134,17 @@ then :
 
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 printf "%s\n" "yes" >&6; }
-      DEVFLAGS="$DEVFLAGS $opt"
+      CFLAGS="$opt $netsnmp_save_CFLAGS"
 
 else $as_nop
 
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
+      CFLAGS="$netsnmp_save_CFLAGS"
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-    CFLAGS="$netsnmp_save_CFLAGS"
 done
 
 #   developer build
