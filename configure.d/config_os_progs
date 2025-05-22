@@ -113,6 +113,7 @@ AC_SUBST(LIBTOOL_DEPS)
 for opt in -Werror=declaration-after-statement
 do
     AC_MSG_CHECKING([whether the compiler supports $opt])
+    netsnmp_save_CFLAGS="$CFLAGS"
     if test x$opt != x-Wstrict-prototypes; then
       CFLAGS="-Werror $opt $CFLAGS"
     else
@@ -120,11 +121,11 @@ do
     fi
     AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [
       AC_MSG_RESULT([yes])
-      DEVFLAGS="$DEVFLAGS $opt"
+      CFLAGS="$opt $netsnmp_save_CFLAGS"
     ], [
       AC_MSG_RESULT([no])
+      CFLAGS="$netsnmp_save_CFLAGS"
     ])
-    CFLAGS="$netsnmp_save_CFLAGS"
 done
 
 #   developer build 
