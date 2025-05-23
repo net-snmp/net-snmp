@@ -17,7 +17,9 @@
 	config_require(host/hr_device);
 	config_require(host/hr_other);
 	config_require(host/hr_proc);
+#if !defined(__linux__) || defined(HAVE_NETLINK_ROUTE_ADDR_H)
 	config_require(host/hr_network);
+#endif
 	config_require(host/hr_print);
 	config_require(host/hr_disk);
 	config_require(host/hr_partition);
