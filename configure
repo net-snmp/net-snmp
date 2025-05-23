@@ -27534,7 +27534,7 @@ done
 
 if test $module_debug -eq 1; then
    echo -e "\nFinal module list: $module_list_code"
-   exit
+   exit 1
 fi
 if test "x$with_mib_cfg_checks" = "xyes"; then
 
