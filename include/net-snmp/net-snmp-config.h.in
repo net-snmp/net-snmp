@@ -689,11 +689,23 @@
 /* Define to 1 if you have the <netipx/ipx.h> header file. */
 #undef HAVE_NETIPX_IPX_H
 
+/* Define to 1 if you have the <netlink/cache.h> header file. */
+#undef HAVE_NETLINK_CACHE_H
+
+/* Define to 1 if you have the <netlink/msg.h> header file. */
+#undef HAVE_NETLINK_MSG_H
+
 /* Define to 1 if you have the <netlink/netlink.h> header file. */
 #undef HAVE_NETLINK_NETLINK_H
 
+/* Define to 1 if you have the <netlink/route/addr.h> header file. */
+#undef HAVE_NETLINK_ROUTE_ADDR_H
+
 /* Define to 1 if you have the <netlink/route/link.h> header file. */
 #undef HAVE_NETLINK_ROUTE_LINK_H
+
+/* Define to 1 if you have the <netlink/socket.h> header file. */
+#undef HAVE_NETLINK_SOCKET_H
 
 /* Define to 1 if you have the <net/if_arp.h> header file. */
 #undef HAVE_NET_IF_ARP_H
