@@ -36,7 +36,8 @@ case "$MODE" in
 	;;
 esac
 echo "compiler path: $(type -p "${CC:-gcc}")"
-"${scriptdir}"/net-snmp-configure master || exit $?
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+"${scriptdir}"/net-snmp-configure "${branch_name}" || exit $?
 case "$MODE" in
     mini*)
 	# Net-SNMP uses static dependencies, the Makefile.depend files have
@@ -54,10 +55,7 @@ case "$MODE" in
 esac
 make -s -j"${nproc}" || exit $?
 case "$MODE" in
-    disable-ipv6|disable-set|mini*|read-only)
-	exit 0
-	;;
-    *)
+    regular)
 	if [ -e testing/fuzzing ]; then
 	    make -C testing -s fuzz-tests || exit $?
 	fi

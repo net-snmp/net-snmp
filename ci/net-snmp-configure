@@ -169,7 +169,7 @@ case "$(uname):${MODE}" in
   Linux*)
       options+=(--enable-new-features)
       case "$MODE" in
-          mini*|read-only)
+          mini*|read-only|without-nl)
               ;;
           *)
               mibs+=(deliver/deliverByNotify)
@@ -402,6 +402,8 @@ case "$MODE" in
         options+=(--enable-minimalist);;
     read-only)
         options+=(--enable-read-only);;
+    without-nl)
+	options+=(--without-nl);;
     regular|wolfssl|Android|"")
         ;;
     *)
