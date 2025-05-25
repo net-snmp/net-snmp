@@ -56,10 +56,7 @@ case "$MODE" in
 esac
 make -s -j"${nproc}" || exit $?
 case "$MODE" in
-    disable-ipv6|disable-set|mini*|read-only)
-	exit 0
-	;;
-    *)
+    regular)
 	if [ -e testing/fuzzing ]; then
 	    make -C testing -s fuzz-tests || exit $?
 	fi
