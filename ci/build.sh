@@ -37,7 +37,13 @@ case "$MODE" in
 esac
 echo "compiler path: $(type -p "${CC:-gcc}")"
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-"${scriptdir}"/net-snmp-configure "${branch_name}" || exit $?
+if ! "${scriptdir}"/net-snmp-configure "${branch_name}"; then
+    echo "========================================"
+    echo "Configure failed. Dumping config.log:"
+    echo "========================================"
+    cat config.log
+    exit 1
+fi
 case "$MODE" in
     mini*)
 	# Net-SNMP uses static dependencies, the Makefile.depend files have
