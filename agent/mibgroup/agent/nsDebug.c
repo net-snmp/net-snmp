@@ -333,7 +333,9 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 {
     long status;
     netsnmp_request_info       *request    =NULL;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_table_request_info *table_info    =NULL;
+#endif
     netsnmp_token_descr        *debug_entry=NULL;
 
     switch (reqinfo->mode) {

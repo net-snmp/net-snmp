@@ -312,9 +312,9 @@ snmpTagValid(const char *tag, const size_t tagLen)
     return 1;
 }
 
-static struct snmpNotifyTable_data *StorageNew;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT 
+static struct snmpNotifyTable_data *StorageNew;
 
 static const int snmpNotifyTable_offset =
     sizeof(snmpNotifyTable_variables_oid) / sizeof(oid) + 3 - 1;

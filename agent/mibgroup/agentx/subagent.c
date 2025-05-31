@@ -88,7 +88,9 @@ struct agent_netsnmp_set_info {
     struct agent_netsnmp_set_info *next;
 };
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static struct agent_netsnmp_set_info *Sets = NULL;
+#endif
 
 netsnmp_session *agentx_callback_sess = NULL;
 
@@ -241,7 +243,6 @@ free_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
         prev = ptr;
     }
 }
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 static void
 send_agentx_error(netsnmp_session *session, netsnmp_pdu *pdu, int errstat, int errindex)
@@ -262,12 +263,15 @@ send_agentx_error(netsnmp_session *session, netsnmp_pdu *pdu, int errstat, int e
         snmp_free_pdu(pdu);
     }
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 int
 handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
                      netsnmp_pdu *pdu, void *magic)
 {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     struct agent_netsnmp_set_info *asi = NULL;
+#endif
     snmp_callback   mycallback;
     netsnmp_pdu    *internal_pdu = NULL;
     void           *retmagic = NULL;

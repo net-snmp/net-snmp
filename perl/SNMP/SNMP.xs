@@ -3021,7 +3021,6 @@ snmp_read_module(module)
         OUTPUT:
         RETVAL
 
-
 void
 snmp_set(sess_ref, varlist_ref, perl_callback)
         SV *	sess_ref
@@ -3029,6 +3028,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
         SV *	perl_callback
 	PPCODE:
 	{
+#ifndef NETSNMP_NO_WRITE_SUPPORT
            AV *varlist;
            SV **varbind_ref;
            SV **varbind_val_f;
@@ -3053,7 +3053,6 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            int use_enums;
            struct enum_list *ep;
            int best_guess;	   
-#ifndef NETSNMP_NO_WRITE_SUPPORT
 
            New (0, oid_arr, MAX_OID_LEN, oid);
 
@@ -3175,11 +3174,11 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
               /* BUG!!! need to return an error value */
               XPUSHs(&sv_undef); /* no mem or bad args */
            }
+done:
+           Safefree(oid_arr);
 #else  /* NETSNMP_NO_WRITE_SUPPORT */
            warn("error: Net-SNMP was compiled using --enable-read-only, set() can not be used.");
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
-done:
-           Safefree(oid_arr);
         }
 
 void

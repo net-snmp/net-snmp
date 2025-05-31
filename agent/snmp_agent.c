@@ -3722,6 +3722,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
 check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
 {
@@ -3741,6 +3742,7 @@ check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 int
 handle_pdu(netsnmp_agent_session *asp)
