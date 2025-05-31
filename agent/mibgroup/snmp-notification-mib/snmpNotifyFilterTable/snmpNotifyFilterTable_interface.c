@@ -172,6 +172,7 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_post_request;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_get_values;
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_objects;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_set_values;
@@ -181,6 +182,7 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_dependencies;
+#endif
 
 NETSNMP_STATIC_INLINE int
                 _snmpNotifyFilterTable_undo_column(snmpNotifyFilterTable_rowreq_ctx *
