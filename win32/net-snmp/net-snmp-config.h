@@ -1184,7 +1184,7 @@
 
 #if defined(_M_PPC) || defined(_M_MPPC)
 # define NETSNMP_BIGENDIAN 1
-#elif defined(_M_IX86) || defined(_M_X64)
+#elif defined(_M_IX86) || defined(_M_X64) || defined(_M_ARM64)
 # define NETSNMP_BIGENDIAN 0
 #else
 #  error Unknown byte order
