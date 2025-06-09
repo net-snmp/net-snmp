@@ -1785,9 +1785,13 @@ unregister_mib_context(oid * name, size_t len, int priority,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
+    /*
+     * netsnmp_subtree_free() may free the 'context' pointer. Hence, call
+     * invalidate_lookup_cache() before calling netsnmp_subtree_free().
+     */
+    invalidate_lookup_cache(context);
     netsnmp_subtree_free(myptr);
     netsnmp_set_lookup_cache_size(old_lookup_cache_val);
-    invalidate_lookup_cache(context);
     return MIB_UNREGISTERED_OK;
 }
 
