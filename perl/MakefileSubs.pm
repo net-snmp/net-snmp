@@ -123,6 +123,8 @@ sub AddCommonParams {
 	$cflags =~ s/-Wmaybe-uninitialized//g;
 	append($Params->{'CCFLAGS'}, $cflags);
 	append($Params->{'CCFLAGS'}, $Config{'ccflags'});
+	# Suppress warnings about old-style function definitions.
+	append($Params->{'CCFLAGS'}, '-Wno-old-style-definition');
 	# Suppress known Perl header shortcomings.
 	$Params->{'CCFLAGS'} =~ s/ -W(cast-qual|write-strings)//g;
 	append($Params->{'CCFLAGS'}, '-Wformat');
