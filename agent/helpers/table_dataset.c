@@ -18,38 +18,38 @@
 
 #include <net-snmp/agent/table_dataset.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-netsnmp_feature_child_of(table_dataset_all, mib_helpers);
-netsnmp_feature_child_of(table_dataset, table_dataset_all);
-netsnmp_feature_child_of(table_dataset_remove_row, table_dataset_all);
-netsnmp_feature_child_of(table_data_set_column, table_dataset_all);
-netsnmp_feature_child_of(table_dataset_get_newrow, table_dataset_all);
-netsnmp_feature_child_of(table_set_add_indexes, table_dataset_all);
-netsnmp_feature_child_of(delete_table_data_set, table_dataset_all);
-netsnmp_feature_child_of(table_set_multi_add_default_row, table_dataset_all);
-netsnmp_feature_child_of(table_dataset_unregister_auto_data_table, table_dataset_all);
+netsnmp_feature_child_of(table_dataset_all, mib_helpers)
+netsnmp_feature_child_of(table_dataset, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_remove_row, table_dataset_all)
+netsnmp_feature_child_of(table_data_set_column, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_get_newrow, table_dataset_all)
+netsnmp_feature_child_of(table_set_add_indexes, table_dataset_all)
+netsnmp_feature_child_of(delete_table_data_set, table_dataset_all)
+netsnmp_feature_child_of(table_set_multi_add_default_row, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_unregister_auto_data_table, table_dataset_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_DATASET
-netsnmp_feature_require(table_get_or_create_row_stash);
-netsnmp_feature_require(table_data_delete_table);
-netsnmp_feature_require(table_data);
-netsnmp_feature_require(oid_stash_get_data);
-netsnmp_feature_require(oid_stash_add_data);
+netsnmp_feature_require(table_get_or_create_row_stash)
+netsnmp_feature_require(table_data_delete_table)
+netsnmp_feature_require(table_data)
+netsnmp_feature_require(oid_stash_get_data)
+netsnmp_feature_require(oid_stash_add_data)
 #endif /* NETSNMP_FEATURE_REQUIRE_TABLE_DATASET */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(oid_stash);
+netsnmp_feature_require(oid_stash)
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
-netsnmp_feature_require(mib_to_asn_type);
+netsnmp_feature_require(mib_to_asn_type)
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 static netsnmp_data_list *auto_tables;
@@ -307,7 +307,7 @@ netsnmp_table_data_set_create_row_from_defaults
  * Arguments should be the table_set, column number, variable type and
  * finally a 1 if it is allowed to be writable, or a 0 if not.  If the
  * default_value field is not NULL, it will be used to populate new
- * values in that column fro newly created rows. It is copied into the
+ * valuse in that column fro newly created rows. It is copied into the
  * storage template (free your calling argument).
  *
  * returns SNMPERR_SUCCESS or SNMPERR_FAILURE
@@ -480,7 +480,6 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
         snmp_log(LOG_ERR, "could not create table data set handler\n");
         netsnmp_handler_free(handler);
         netsnmp_handler_registration_free(reginfo);
-        free(table_info);
         return MIB_REGISTRATION_FAILED;
     }
 
@@ -699,7 +698,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 
         case MODE_SET_RESERVE2:
             /*
-             * If the agent receives a SET request for an object in a non-existent
+             * If the agent receives a SET request for an object in a non-existant
              *  row, then the RESERVE1 pass will create the row automatically.
              *
              * But since the row doesn't exist at that point, the test for whether
@@ -864,6 +863,8 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 		    netsnmp_create_data_list(TABLE_DATA_ROW, newrow, NULL));
         	    	}
     		    }
+
+		    row = NULL;
                 }
                 if (newrowstash->deleted) {
                     netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
@@ -930,7 +931,7 @@ netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
   * NULL then the name used when the table was created will be used
   * instead.
   *
-  * @todo create a properly free'ing registration pointer for the
+  * @todo create a properly free'ing registeration pointer for the
   * datalist, and get the datalist freed at shutdown.
   */
 void
@@ -980,7 +981,7 @@ _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
         if (!snmp_parse_oid(index->ilabel, name, &name_length) ||
             (NULL ==
              (indexnode = get_tree(name, name_length, get_tree_head())))) {
-            config_pwarn("can't instantiate table since "
+            config_pwarn("can't instatiate table since "
                          "I don't know anything about one index");
             snmp_log(LOG_WARNING, "  index %s not found in tree\n",
                      index->ilabel);
@@ -1012,8 +1013,8 @@ _table_set_add_indexes(netsnmp_table_data_set *table_set, struct tree *tp)
         netsnmp_table_dataset_add_index(table_set, type);
 
         /*
-         * hack alert: for fixed length strings, save the
-         * length for use during oid parsing.
+         * hack alert: for fixed lenght strings, save the
+         * lenght for use during oid parsing.
          */
         if (fixed_len) {
             /*
@@ -1039,7 +1040,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
     char           *pos;
 
     /*
-     * instantiate a fake table based on MIB information 
+     * instatiate a fake table based on MIB information 
      */
     DEBUGMSGTL(("9:table_set_add_table", "processing '%s'\n", line));
     if (NULL != (pos = strchr(line,' '))) {
@@ -1062,18 +1063,18 @@ netsnmp_config_parse_table_set(const char *token, char *line)
      */
     if (!snmp_parse_oid(line, table_name, &table_name_length)) {
         config_pwarn
-            ("can't instantiate table since I can't parse the table name");
+            ("can't instatiate table since I can't parse the table name");
         return;
     }
     if(NULL == (tp = get_tree(table_name, table_name_length,
                               get_tree_head()))) {
-        config_pwarn("can't instantiate table since "
+        config_pwarn("can't instatiate table since "
                      "I can't find mib information about it");
         return;
     }
 
     if (NULL == (tp = tp->child_list) || NULL == tp->child_list) {
-        config_pwarn("can't instantiate table since it doesn't appear to be "
+        config_pwarn("can't instatiate table since it doesn't appear to be "
                      "a proper table (no children)");
         return;
     }
@@ -1095,7 +1096,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
             return;
         }
         if(NULL == (tp2 = get_tree(name, name_length, get_tree_head()))) {
-            config_pwarn("can't instantiate table since "
+            config_pwarn("can't instatiate table since "
                          "I can't find mib information about augment table");
             snmp_log(LOG_WARNING, "  table %s not found in tree\n",
                      tp->augments);
@@ -1127,11 +1128,11 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         switch (tp->access) {
         case MIB_ACCESS_CREATE:
             table_set->allow_creation = 1;
-            NETSNMP_FALLTHROUGH;
+            /* fallthrough */
         case MIB_ACCESS_READWRITE:
         case MIB_ACCESS_WRITEONLY:
             canwrite = 1;
-            NETSNMP_FALLTHROUGH;
+            /* fallthrough */
         case MIB_ACCESS_READONLY:
             DEBUGMSGTL(("table_set_add_table",
                         "adding column %ld of type %d\n", tp->subid, type));
@@ -1461,7 +1462,7 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
  *
  * ================================== */
 
-/** adds an index to the table.  Call this repeatedly for each index. */
+/** adds an index to the table.  Call this repeatly for each index. */
 void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 {

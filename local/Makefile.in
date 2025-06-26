@@ -36,7 +36,7 @@ MIB2CFILES=default-mfd-top.m2c details-enums.m2i details-node.m2i \
 	generic-ctx-set.m2i generic-data-allocate.m2i generic-data-context.m2i \
 	generic-get-char.m2i generic-get-decl-bot.m2i generic-get-decl.m2i \
 	generic-get-long.m2i generic-get-oid.m2i generic-get-U64.m2i \
-	generic-get-in_addr_t.m2i generic-header-bottom.m2i \
+	generic-header-bottom.m2i \
 	generic-header-top.m2i generic-source-includes.m2i \
 	generic-table-constants.m2c generic-table-enums.m2c \
 	generic-table-indexes-from-oid.m2i generic-table-indexes-set.m2i \
@@ -149,9 +149,9 @@ snmp-bridge-mib.made: $(srcdir)/snmp-bridge-mib
 	  touch snmp-bridge-mib.made; \
         fi
 
-checkbandwidth.made: $(srcdir)/checkbandwidth
+checkbandwidth.made: checkbandwidth
 	if test "x$(PERL)" != "x" ; then \
-	  $(PERL) -p -e 's%^#!.*/perl.*%#!$(PERL)%' $(srcdir)/checkbandwidth > checkbandwidth.made ; \
+	  $(PERL) -p -e 's%^#!.*/perl.*%#!$(PERL)%' checkbandwidth > checkbandwidth.made ; \
 	else \
 	  touch checkbandwidth.made ; \
 	fi

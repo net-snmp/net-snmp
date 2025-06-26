@@ -9,31 +9,30 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/types.h>
-#include "snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpUDPsharedDomain.h>
 
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #include <errno.h>
@@ -47,9 +46,9 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
-netsnmp_feature_require(transport_cache);
+netsnmp_feature_require(transport_cache)
 
-const oid netsnmpUDPsharedDomain[] = { 1,3,6,1,2,1,100,1,999 }; /** made up */
+oid    netsnmpUDPsharedDomain[] = { 1,3,6,1,2,1,100,1,999 }; /** made up */
 size_t netsnmpUDPsharedDomain_len = OID_LENGTH(netsnmpUDPsharedDomain);
 
 /* ***************************************************************************
@@ -181,10 +180,8 @@ _transport_common(netsnmp_transport *t)
     t->flags = NETSNMP_TRANSPORT_FLAG_SHARED;
     if (t->base_transport->domain == netsnmpUDPDomain)
         t->f_get_taddr = netsnmp_ipv4_get_taddr;
-#ifdef NETSNMP_ENABLE_IPV6
     else if (t->base_transport->domain == netsnmp_UDPIPv6Domain)
         t->f_get_taddr = netsnmp_ipv6_get_taddr;
-#endif
     else
         netsnmp_assert(0);
 
@@ -192,11 +189,11 @@ _transport_common(netsnmp_transport *t)
 }
 
 netsnmp_transport *
-netsnmp_udpshared_transport(const struct netsnmp_ep *ep, int local)
+netsnmp_udpshared_transport(const struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
-    t = netsnmp_udp_transport(ep, local);
+    t = netsnmp_udp_transport(addr, local);
     if (NULL == t)
         return NULL;
 
@@ -206,9 +203,9 @@ netsnmp_udpshared_transport(const struct netsnmp_ep *ep, int local)
 }
 
 netsnmp_transport *
-netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
+netsnmp_udpshared_transport_with_source(const struct sockaddr_in *addr,
                                         int flags,
-                                        const struct netsnmp_ep *src_addr)
+                                        const struct sockaddr_in *src_addr)
 {
     netsnmp_transport *t = NULL, *b = NULL;
     int                local = flags & NETSNMP_TSPEC_LOCAL;
@@ -216,18 +213,16 @@ netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
     DEBUGMSGTL(("udpshared:create", "from addr with source\n"));
 
     /** init common parts of parent transport */
-    t = netsnmp_udpipv4base_transport_init(ep, local);
+    t = netsnmp_udpipv4base_transport_init(addr, local);
     if (NULL == t)
         return NULL;
 
-    if (!_transport_common(t))
-        return NULL;
+    _transport_common(t);
 
     if (!local && src_addr) {
         /** check for existing base transport */
         b = netsnmp_transport_cache_get(PF_INET, SOCK_DGRAM, local,
-                                        (const void *)src_addr,
-                                        sizeof(*src_addr));
+                                        (const void *)src_addr);
         if (NULL != b && NULL != b->local) {
             /*
              * uh-oh. we've assumed sharedudp is just for clients, and we're
@@ -242,7 +237,7 @@ netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
 
     /** if no base transport found, create one */
     if (NULL == b) {
-        b = netsnmp_udp_transport_with_source(ep, local, src_addr);
+        b = netsnmp_udp_transport_with_source(addr, local, src_addr);
         if (NULL == b) {
             netsnmp_transport_free(t);
             return NULL;
@@ -262,8 +257,7 @@ netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
     /** cache base transport for future use */
     if (!local && src_addr && 1 == b->local_length) {
         netsnmp_transport_cache_save(PF_INET, SOCK_DGRAM, local,
-                                     (const void *)src_addr, sizeof(*src_addr),
-                                     b);
+                                     (const void *)src_addr, b);
     }
 
     return t;
@@ -277,11 +271,11 @@ netsnmp_udpshared_transport_with_source(const struct netsnmp_ep *ep,
  * the remote address to send things to.
  */
 netsnmp_transport *
-netsnmp_udpshared6_transport(const struct netsnmp_ep *ep, int local)
+netsnmp_udpshared6_transport(const struct sockaddr_in6 *addr, int local)
 {
     netsnmp_transport *t = NULL;
 
-    t = netsnmp_udp6_transport(ep, local);
+    t = netsnmp_udp6_transport(addr, local);
     if (NULL != t)
         t = _transport_common(t);
 
@@ -289,9 +283,9 @@ netsnmp_udpshared6_transport(const struct netsnmp_ep *ep, int local)
 }
 
 netsnmp_transport *
-netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
+netsnmp_udpshared6_transport_with_source(const struct sockaddr_in6 *addr6,
                                          int flags,
-                                         const struct netsnmp_ep *src_addr6)
+                                         const struct sockaddr_in6 *src_addr6)
 {
     netsnmp_transport *t = NULL, *b = NULL;
     int                local = flags & NETSNMP_TSPEC_LOCAL;
@@ -299,18 +293,16 @@ netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
     DEBUGMSGTL(("udpshared:create", "from addr6 with source\n"));
 
     /** init common parts of parent transport */
-    t = netsnmp_udp6_transport_init(ep, local);
+    t = netsnmp_udp6_transport_init(addr6, local);
     if (NULL == t)
         return NULL;
 
-    if (!_transport_common(t))
-        return NULL;
+    _transport_common(t);
 
     if (!local && src_addr6) {
         /** check for existing base transport */
         b = netsnmp_transport_cache_get(PF_INET6, SOCK_DGRAM, local,
-                                        (const void *)src_addr6,
-                                        sizeof(*src_addr6));
+                                        (const void *)src_addr6);
         if (NULL != b && NULL != b->local) {
             /*
              * uh-oh. we've assumed sharedudp is just for clients, and we're
@@ -325,7 +317,7 @@ netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
 
     /** if no base transport found, create one */
     if (NULL == b) {
-        b = netsnmp_udp6_transport_with_source(ep, local, src_addr6);
+        b = netsnmp_udp6_transport_with_source(addr6, local, src_addr6);
         if (NULL == b) {
             netsnmp_transport_free(t);
             return NULL;
@@ -344,8 +336,7 @@ netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
     /** cache base transport for future use */
     if (!local && src_addr6 && 1 == b->local_length) {
         netsnmp_transport_cache_save(PF_INET6, SOCK_DGRAM, local,
-                                     (const void *)src_addr6,
-                                     sizeof(*src_addr6), b);
+                                     (const void *)src_addr6, b);
     }
 
     return t;
@@ -355,16 +346,16 @@ netsnmp_udpshared6_transport_with_source(const struct netsnmp_ep *ep,
 netsnmp_transport *
 netsnmp_udpshared_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct netsnmp_ep ep;
+    struct sockaddr_in sin;
+    struct sockaddr_in6 sin6;
 
     DEBUGMSGTL(("udpshared:create", "from ostring\n"));
 
-    memset(&ep, 0, sizeof(ep));
-    if (netsnmp_ipv4_ostring_to_sockaddr(&ep.a.sin, o, o_len))
-        return netsnmp_udpshared_transport(&ep, local);
+    if (netsnmp_ipv4_ostring_to_sockaddr(&sin, o, o_len))
+        return netsnmp_udpshared_transport(&sin, local);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (netsnmp_ipv6_ostring_to_sockaddr(&ep.a.sin6, o, o_len))
-        return netsnmp_udpshared6_transport(&ep, local);
+    else if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_udpshared6_transport(&sin6, local);
 #endif
     return NULL;
 }
@@ -373,16 +364,19 @@ netsnmp_transport *
 netsnmp_udpshared_create_tstring(const char *str, int isserver,
                                  const char *default_target)
 {
-    struct netsnmp_ep ep;
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+    struct sockaddr_in6 addr6;
+#endif
+    struct sockaddr_in addr;
     netsnmp_transport *t;
 
     DEBUGMSGTL(("udpshared:create", "from tstring %s\n", str));
 
-    if (netsnmp_sockaddr_in3(&ep, str, default_target))
-        t = netsnmp_udpshared_transport(&ep, isserver);
+    if (netsnmp_sockaddr_in2(&addr, str, default_target))
+        t = netsnmp_udpshared_transport(&addr, isserver);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (netsnmp_sockaddr_in6_3(&ep, str, default_target))
-        t = netsnmp_udpshared6_transport(&ep, isserver);
+    else if (netsnmp_sockaddr_in6_2(&addr6, str, default_target))
+        t = netsnmp_udpshared6_transport(&addr6, isserver);
 #endif
     else
         return NULL;
@@ -391,58 +385,68 @@ netsnmp_udpshared_create_tstring(const char *str, int isserver,
 }
 
 static netsnmp_transport *
-_tspec_v4(const struct netsnmp_ep *ep, netsnmp_tdomain_spec *tspec)
+_tspec_v4(struct sockaddr_in *addr, netsnmp_tdomain_spec *tspec)
 {
     int local = tspec->flags & NETSNMP_TSPEC_LOCAL;
 
     if (NULL != tspec->source) {
-        struct netsnmp_ep src_addr;
-
+        struct sockaddr_in src_addr, *srcp = &src_addr;
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in3(&src_addr, tspec->source, NULL))
+        if (!netsnmp_sockaddr_in2(&src_addr, tspec->source, NULL))
             return NULL;
-        return netsnmp_udpshared_transport_with_source(ep, local, &src_addr);
+        return netsnmp_udpshared_transport_with_source(addr, local, srcp);
+    } else {
+        /** if no source and we do not want any default client address */
+        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
+            return netsnmp_udpshared_transport_with_source(addr, local, NULL);
     }
 
     /** no source and default client address ok */
-    return netsnmp_udpshared_transport(ep, local);
+    return netsnmp_udpshared_transport(addr, local);
 }
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 static netsnmp_transport *
-_tspec_v6(const struct netsnmp_ep *ep, netsnmp_tdomain_spec *tspec)
+_tspec_v6(struct sockaddr_in6 *addr, netsnmp_tdomain_spec *tspec)
 {
     int local = tspec->flags & NETSNMP_TSPEC_LOCAL;
 
     if (NULL != tspec->source) {
-        struct netsnmp_ep src_addr;
-
+        struct sockaddr_in6 src_addr, *srcp = &src_addr;
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in6_3(&src_addr, tspec->source, NULL))
+        if (!netsnmp_sockaddr_in6_2(&src_addr, tspec->source, NULL))
             return NULL;
-        return netsnmp_udpshared6_transport_with_source(ep, local, &src_addr);
+        return netsnmp_udpshared6_transport_with_source(addr, local, srcp);
+    } else {
+        /** if no source and we do not want any default client address */
+        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
+            return netsnmp_udpshared6_transport_with_source(addr, local, NULL);
     }
 
     /** no source and default client address ok */
-    return netsnmp_udpshared6_transport(ep, local);
+    return netsnmp_udpshared6_transport(addr, local);
 }
 #endif /* NETSNMP_TRANSPORT_UDPIPV6_DOMAIN */
 
 netsnmp_transport *
 netsnmp_udpshared_create_tspec(netsnmp_tdomain_spec *tspec)
 {
-    struct netsnmp_ep ep;
+#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+    struct sockaddr_in6 addr6;
+#endif
+    struct sockaddr_in addr;
 
     DEBUGMSGTL(("udpshared:create", "from tspec\n"));
 
     if (NULL == tspec)
         return NULL;
 
-    if (netsnmp_sockaddr_in3(&ep, tspec->target, tspec->default_target))
-        return _tspec_v4(&ep, tspec);
+    if (netsnmp_sockaddr_in2(&addr, tspec->target, tspec->default_target))
+        return _tspec_v4(&addr, tspec);
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    else if (netsnmp_sockaddr_in6_3(&ep, tspec->target, tspec->default_target))
-        return _tspec_v6(&ep, tspec);
+    else if (netsnmp_sockaddr_in6_2(&addr6, tspec->target,
+                                    tspec->default_target))
+        return _tspec_v6(&addr6, tspec);
 #endif
 
     return NULL;
@@ -461,13 +465,10 @@ netsnmp_udpshared_ctor(void)
     domain.name = netsnmpUDPsharedDomain;
     domain.name_length = netsnmpUDPsharedDomain_len;
 
-    domain.prefix = calloc(2, sizeof(char *));
-    if (!domain.prefix) {
-        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
-        return;
-    }
+    domain.prefix = (const char**)calloc(2, sizeof(char *));
     domain.prefix[0] = "udpshared";
 
+    domain.f_create_from_tstring     = NULL;
     domain.f_create_from_tstring_new = netsnmp_udpshared_create_tstring;
     domain.f_create_from_tspec       = netsnmp_udpshared_create_tspec;
     domain.f_create_from_ostring     = netsnmp_udpshared_create_ostring;

@@ -1,7 +1,8 @@
 /*
  *  udpEndpointTable MIB architecture support
+ *
+ * $Id$
  */
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -18,11 +19,10 @@
 #include "udp_endpoint_private.h"
 
 #include <fcntl.h>
-#include <stdint.h>
 
-netsnmp_feature_require(text_utils);
-netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs);
-netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint_all);
+netsnmp_feature_require(text_utils)
+netsnmp_feature_child_of(udp_endpoint_all, libnetsnmpmibs)
+netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint_all)
 
 static int _load4(netsnmp_container *container, u_int flags);
 #if defined (NETSNMP_ENABLE_IPV6)
@@ -238,7 +238,7 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     ep->pid = netsnmp_get_pid_from_inode(inode);
 
     ep->index = (uintptr_t)(lpi->user_context);
-    lpi->user_context = (void*)((uintptr_t)lpi->user_context + 1);
+    lpi->user_context = (void*)((char*)(lpi->user_context) + 1);
 
     ep->oid_index.oids = &ep->index;
     ep->oid_index.len = 1;

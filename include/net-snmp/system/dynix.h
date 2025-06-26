@@ -20,6 +20,9 @@
  */
 #define dynix dynix
 
+#undef TOTAL_MEMORY_SYMBOL
+#undef MBSTAT_SYMBOL
+
 /*
  * Not enough alcohool in bloodstream [fmc] 
  */
@@ -95,7 +98,7 @@
  * Might as well include this here, since a significant
  * number of files seem to need it.  DTS 
  */
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 

@@ -48,7 +48,9 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swrun.h>
 #include "swrun_private.h"
-#include "../../../kernel.h"
+
+extern kvm_t *kd;
+
 
 #if defined(freebsd5) && __FreeBSD_version >= 500014
     /*
@@ -63,7 +65,7 @@
 #define SWRUN_K_FLAG	ki_flag
 #define SWRUN_K_CLASS	ki_pri.pri_class
 
-#elif defined(HAVE_KVM_GETPROC2) || defined(openbsd5)
+#elif HAVE_KVM_GETPROC2 || defined(openbsd5)
     /*
      * newer NetBSD, OpenBSD kinfo_proc2 field names
      */
@@ -159,7 +161,7 @@
 void
 netsnmp_arch_swrun_init(void)
 {
-#if defined(NETSNMP_CAN_USE_SYSCTL) && defined(CTL_KERN) && defined(KERN_MAXPROC)
+#if NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     extern int _swrun_max;
     size_t max_size = sizeof(_swrun_max);
     int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
@@ -187,10 +189,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     proc_table = kvm_getprocs(kd, KERN_PROC_KTHREAD, 0, sizeof(struct kinfo_proc), &nprocs );
 #elif defined(HAVE_KVM_GETPROC2)
     proc_table = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &nprocs );
-#elif defined(KERN_PROC_PROC)
-    proc_table = kvm_getprocs(kd, KERN_PROC_PROC, 0, &nprocs);
 #else
-    proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nprocs);
+    proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nprocs );
 #endif
     for ( i=0 ; i<nprocs; i++ ) {
         if ( 0 == proc_table[i].SWRUN_K_STAT )
@@ -205,10 +205,6 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (NULL == entry)
             continue;   /* error already logged by function */
         rc = CONTAINER_INSERT(container, entry);
-        if (rc < 0) {
-            netsnmp_swrun_entry_free(entry);
-            continue;
-        }
 
         /*
          * There are two possible sources for the command being run:
@@ -221,7 +217,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          * We'll use SWRUN_K_COMM for hrSWRunName,
          *   and as an alternative for hrSWRunPath
          */
-#ifdef HAVE_KVM_GETPROC2
+#if HAVE_KVM_GETPROC2
         argv = kvm_getargv2( kd, &(proc_table[i]), 0);
 #else
         argv = kvm_getargv(  kd, &(proc_table[i]), BUFSIZ);
@@ -291,9 +287,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 	case LSSUSPENDED:
         case LSSTOP:  entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
-#ifdef LSDEAD
 	case LSDEAD:
-#endif
         case LSZOMB:  entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
 		      break;
         default:   

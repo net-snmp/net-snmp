@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -22,32 +22,36 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <ctype.h>
@@ -56,8 +60,6 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/library/snmp.h>
-#include <net-snmp/library/snmp-tc.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/system.h> /* strlcpy() */
 #include <net-snmp/library/tools.h>
@@ -76,7 +78,7 @@ static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
     ((idx >= viewPtr->viewMaskLen) ? mask : (viewPtr->viewMask[idx] & mask))
 
 /**
- * Initializes the VACM code.
+ * Initilizes the VACM code.
  * Specifically:
  *  - adds a set of enums mapping view numbers to human readable names
  */
@@ -715,10 +717,12 @@ netsnmp_view_create(struct vacm_viewEntry **head, const char *viewName,
     glen = (int) strlen(viewName);
     if (glen < 0 || glen > VACM_MAX_STRING || viewSubtreeLen > MAX_OID_LEN)
         return NULL;
-    vp = calloc(1, sizeof(struct vacm_viewEntry));
+    vp = (struct vacm_viewEntry *) calloc(1,
+                                          sizeof(struct vacm_viewEntry));
     if (vp == NULL)
         return NULL;
-    vp->reserved = calloc(1, sizeof(struct vacm_viewEntry));
+    vp->reserved =
+        (struct vacm_viewEntry *) calloc(1, sizeof(struct vacm_viewEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;
@@ -839,10 +843,13 @@ vacm_createGroupEntry(int securityModel, const char *securityName)
     glen = (int) strlen(securityName);
     if (glen < 0 || glen > VACM_MAX_STRING)
         return NULL;
-    gp = calloc(1, sizeof(struct vacm_groupEntry));
+    gp = (struct vacm_groupEntry *) calloc(1,
+                                           sizeof(struct vacm_groupEntry));
     if (gp == NULL)
         return NULL;
-    gp->reserved = calloc(1, sizeof(struct vacm_groupEntry));
+    gp->reserved =
+        (struct vacm_groupEntry *) calloc(1,
+                                          sizeof(struct vacm_groupEntry));
     if (gp->reserved == NULL) {
         free(gp);
         return NULL;
@@ -1021,10 +1028,15 @@ vacm_createAccessEntry(const char *groupName,
     clen = (int) strlen(contextPrefix);
     if (clen < 0 || clen > VACM_MAX_STRING)
         return NULL;
-    vp = calloc(1, sizeof(struct vacm_accessEntry));
+    vp = (struct vacm_accessEntry *) calloc(1,
+                                            sizeof(struct
+                                                   vacm_accessEntry));
     if (vp == NULL)
         return NULL;
-    vp->reserved = calloc(1, sizeof(struct vacm_accessEntry));
+    vp->reserved =
+        (struct vacm_accessEntry *) calloc(1,
+                                           sizeof(struct
+                                                  vacm_accessEntry));
     if (vp->reserved == NULL) {
         free(vp);
         return NULL;

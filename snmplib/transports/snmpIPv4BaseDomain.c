@@ -4,7 +4,6 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/types.h>
-#include "snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmp_assert.h>
 
@@ -12,29 +11,28 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/system.h>
@@ -45,101 +43,135 @@
 #define INADDR_NONE     -1
 #endif
 
-/**
- * Convert a "traditional" peername into a sockaddr_in structure which is
- * written to *addr.
- *
- * @return 1 if the conversion was successful, or 0 if it failed.
- */
 int
 netsnmp_sockaddr_in(struct sockaddr_in *addr,
                     const char *inpeername, int remote_port)
 {
     char buf[sizeof(int) * 3 + 2];
-
     sprintf(buf, ":%u", remote_port);
     return netsnmp_sockaddr_in2(addr, inpeername, remote_port ? buf : NULL);
 }
 
-/**
- * Convert a "traditional" peername into a sockaddr_in structure which is
- * written to *addr.
- *
- * @return 1 if the conversion was successful, or 0 if it failed.
- */
 int
 netsnmp_sockaddr_in2(struct sockaddr_in *addr,
                      const char *inpeername, const char *default_target)
 {
-    struct netsnmp_ep ep;
     int ret;
 
-    ret = netsnmp_sockaddr_in3(&ep, inpeername, default_target);
-    if (ret == 0)
+    if (addr == NULL) {
         return 0;
-    *addr = ep.a.sin;
-    return ret;
-}
-
-int
-netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
-                     const char *inpeername, const char *default_target)
-{
-    struct sockaddr_in *addr = &ep->a.sin;
-    struct netsnmp_ep_str ep_str;
-    int port, ret;
-
-    if (!ep)
-        return 0;
+    }
 
     DEBUGMSGTL(("netsnmp_sockaddr_in",
                 "addr %p, inpeername \"%s\", default_target \"%s\"\n",
-                ep, inpeername ? inpeername : "[NIL]",
+                addr, inpeername ? inpeername : "[NIL]",
                 default_target ? default_target : "[NIL]"));
 
-    memset(ep, 0, sizeof(*ep));
+    memset(addr, 0, sizeof(struct sockaddr_in));
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
     addr->sin_family = AF_INET;
     addr->sin_port = htons((u_short)SNMP_PORT);
 
-    memset(&ep_str, 0, sizeof(ep_str));
-    port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_DEFAULT_PORT);
-    if (port != 0)
-        snprintf(ep_str.port, sizeof(ep_str.port), "%d", port);
-    else if (default_target &&
-             !netsnmp_parse_ep_str(&ep_str, default_target))
-            snmp_log(LOG_ERR, "Invalid default target %s\n",
-                     default_target);
-    if (inpeername && *inpeername != '\0') {
-	if (ep_str.addr) {
-	    free(ep_str.addr);  /* free default target */
-	    ep_str.addr = NULL;
-	}
-	if (!netsnmp_parse_ep_str(&ep_str, inpeername))
-            return 0;
+    {
+	int port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+				      NETSNMP_DS_LIB_DEFAULT_PORT);
+
+	if (port != 0) {
+	    addr->sin_port = htons((u_short)port);
+	} else if (default_target != NULL)
+	    netsnmp_sockaddr_in2(addr, default_target, NULL);
     }
 
-    if (ep_str.port[0])
-        addr->sin_port = htons(atoi(ep_str.port));
-    if (ep_str.iface[0])
-        strlcpy(ep->iface, ep_str.iface, sizeof(ep->iface));
-    if (ep_str.addr && strcmp(ep_str.addr, "255.255.255.255") == 0) {
+    if (inpeername != NULL && *inpeername != '\0') {
+	const char     *host, *port;
+	char           *peername = NULL;
+        char           *cp;
         /*
-         * The explicit broadcast address hack
+         * Duplicate the peername because we might want to mank around with
+         * it.
          */
-        DEBUGMSGTL(("netsnmp_sockaddr_in", "Explicit UDP broadcast\n"));
-        addr->sin_addr.s_addr = INADDR_NONE;
-    } else if (ep_str.addr && strcmp(ep_str.addr, "") != 0) {
-        ret = netsnmp_gethostbyname_v4(ep_str.addr, &addr->sin_addr.s_addr);
-        if (ret < 0) {
-            DEBUGMSGTL(("netsnmp_sockaddr_in",
-                        "couldn't resolve hostname \"%s\"\n", ep_str.addr));
-            free(ep_str.addr);
+
+        peername = strdup(inpeername);
+        if (peername == NULL) {
             return 0;
         }
-        DEBUGMSGTL(("netsnmp_sockaddr_in",
-                    "hostname (resolved okay)\n"));
+
+        /*
+         * Try and extract an appended port number.
+         */
+        cp = strchr(peername, ':');
+        if (cp != NULL) {
+            *cp = '\0';
+            port = cp + 1;
+            host = peername;
+        } else {
+            host = NULL;
+            port = peername;
+        }
+
+        /*
+         * Try to convert the user port specifier
+         */
+        if (port && *port == '\0')
+            port = NULL;
+
+        if (port != NULL) {
+            long int l;
+            char* ep;
+
+            DEBUGMSGTL(("netsnmp_sockaddr_in", "check user service %s\n",
+                        port));
+
+            l = strtol(port, &ep, 10);
+            if (ep != port && *ep == '\0' && 0 <= l && l <= 0x0ffff)
+                addr->sin_port = htons((u_short)l);
+            else {
+                if (host == NULL) {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in",
+                                "servname not numeric, "
+				"check if it really is a destination)\n"));
+                    host = port;
+                    port = NULL;
+                } else {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in",
+                                "servname not numeric\n"));
+                    free(peername);
+                    return 0;
+                }
+            }
+        }
+
+        /*
+         * Try to convert the user host specifier
+         */
+        if (host && *host == '\0')
+            host = NULL;
+
+        if (host != NULL) {
+            DEBUGMSGTL(("netsnmp_sockaddr_in",
+                        "check destination %s\n", host));
+
+
+            if (strcmp(peername, "255.255.255.255") == 0 ) {
+                /*
+                 * The explicit broadcast address hack
+                 */
+                DEBUGMSGTL(("netsnmp_sockaddr_in", "Explicit UDP broadcast\n"));
+                addr->sin_addr.s_addr = INADDR_NONE;
+            } else {
+                ret =
+                    netsnmp_gethostbyname_v4(peername, &addr->sin_addr.s_addr);
+                if (ret < 0) {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in",
+                                "couldn't resolve hostname\n"));
+                    free(peername);
+                    return 0;
+                }
+                DEBUGMSGTL(("netsnmp_sockaddr_in",
+                            "hostname (resolved okay)\n"));
+            }
+        }
+	free(peername);
     }
 
     /*
@@ -148,7 +180,6 @@ netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
 
     DEBUGMSGTL(("netsnmp_sockaddr_in", "return { AF_INET, %s:%hu }\n",
                 inet_ntoa(addr->sin_addr), ntohs(addr->sin_port)));
-    free(ep_str.addr);
     return 1;
 }
 

@@ -7,25 +7,29 @@
 #include <signal.h>
 #include <errno.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
-#include <net-snmp/library/snmp.h>
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/tools.h>
 
-const oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };
+oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };
 static netsnmp_tdomain stdDomain;
 
 /*
@@ -237,7 +241,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
             close(outfd[1]);
 
             /* call exec */
-            NETSNMP_IGNORE_RESULT(system(instring));
+            system(instring);
             /* XXX: TODO: use exec form instead; needs args */
             /* execv(instring, NULL); */
             exit(0);
@@ -267,14 +271,11 @@ void
 netsnmp_std_ctor(void)
 {
     stdDomain.name = netsnmp_snmpSTDDomain;
-    stdDomain.name_length = OID_LENGTH(netsnmp_snmpSTDDomain);
-    stdDomain.prefix = calloc(2, sizeof(char *));
-    if (!stdDomain.prefix) {
-        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
-        return;
-    }
+    stdDomain.name_length = sizeof(netsnmp_snmpSTDDomain) / sizeof(oid);
+    stdDomain.prefix = (const char **)calloc(2, sizeof(char *));
     stdDomain.prefix[0] = "std";
 
+    stdDomain.f_create_from_tstring     = NULL;
     stdDomain.f_create_from_tstring_new = netsnmp_std_create_tstring;
     stdDomain.f_create_from_ostring     = netsnmp_std_create_ostring;
 

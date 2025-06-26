@@ -350,8 +350,8 @@ SOFTWARE.
     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
                                       size_t *, u_char **, size_t *);
     NETSNMP_IMPORT
-    u_char         *snmp_build_var_op(u_char *, const oid *, size_t *, u_char,
-                                      size_t, const void *, size_t *);
+    u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
+                                      size_t, u_char *, size_t *);
 
 
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING

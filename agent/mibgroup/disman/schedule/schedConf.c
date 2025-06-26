@@ -11,8 +11,8 @@
 #include "disman/schedule/schedCore.h"
 #include "disman/schedule/schedConf.h"
 
-netsnmp_feature_require(iquery);
-netsnmp_feature_require(string_time_to_secs);
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(string_time_to_secs)
 
 static int schedEntries;
 
@@ -161,20 +161,13 @@ _sched_convert_bits( char *cron_spec, char *bit_buf,
     memset( bit_buf, 0, bit_buf_len );
 
     while (1) {
-        if ( sscanf( cp, "%d", &val) != 1 ) {
-            config_perror("Bad number format");
-            return;
-        }
+        sscanf( cp, "%d", &val);
         /* Handle negative day specification */
         if ( val < 0 ) {
             val = max_val - val; 
         }
         if ( startAt1 )
             val--;
-        if ( val < 0  || val >= max_val ) {
-            config_perror("Bad time spec");
-            return;
-        }
         major = val/8;
         minor = val%8;
         bit_buf[ major ] |= b[minor];
@@ -238,7 +231,7 @@ parse_sched_timed( const char *token, char *line )
      */
     while (line && isspace((unsigned char)(*line)))
         line++;
-    if (line && *line == '=') {
+    if ( *line == '=' ) {
         line++;
         while (line && isspace((unsigned char)(*line))) {
             line++;
@@ -270,7 +263,7 @@ parse_sched_timed( const char *token, char *line )
     }
     entry = (struct schedTable_entry *)row->data;
 
-    entry->schedWeekDay[0] = dayVal;
+    entry->schedWeekDay = dayVal;
     memcpy(entry->schedMonth,  monVal,  2);
     memcpy(entry->schedDay,    dateVal, 4+4);
     memcpy(entry->schedHour,   hourVal, 3);
@@ -340,7 +333,7 @@ parse_schedTable( const char *token, char *line )
         /* Unpick the various timed bits */
     len  = 22; vp = time_bits;
     line = read_config_read_data(ASN_OCTET_STR, line, &vp,  &len);
-    entry->schedWeekDay[0] = time_bits[0];
+    entry->schedWeekDay  = time_bits[0];
     entry->schedMonth[0] = time_bits[1];
     entry->schedMonth[1] = time_bits[2];
     entry->schedHour[0]  = time_bits[11];
@@ -414,7 +407,7 @@ store_schedTable(int majorID, int minorID, void *serverarg, void *clientarg)
         cptr = read_config_store_data(ASN_UNSIGNED,  cptr, &tint, NULL );
 
         /* Combine all the timed bits into a single field */
-        time_bits[0]  = entry->schedWeekDay[0];
+        time_bits[0]  = entry->schedWeekDay;
         time_bits[1]  = entry->schedMonth[0];
         time_bits[2]  = entry->schedMonth[1];
         time_bits[11] = entry->schedHour[0];

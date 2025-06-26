@@ -1,24 +1,24 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_SYS_WAIT_H
+#if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
 #ifdef HAVE_LIMITS_H
@@ -37,8 +37,8 @@
 #include "extensible.h"
 #include "util_funcs.h"
 
-netsnmp_feature_require(get_exten_instance);
-netsnmp_feature_require(parse_miboid);
+netsnmp_feature_require(get_exten_instance)
+netsnmp_feature_require(parse_miboid)
 
 struct extensible *passthrus = NULL;
 int             numpassthrus = 0;
@@ -323,9 +323,9 @@ setPass(int action, u_char * var_val, u_char var_val_type,
 int
 pass_compare(const void *a, const void *b)
 {
-    const struct extensible *const *ap = a;
-    const struct extensible *const *bp = b;
-
+    const struct extensible *const *ap, *const *bp;
+    ap = (const struct extensible * const *) a;
+    bp = (const struct extensible * const *) b;
     return snmp_oid_compare((*ap)->miboid, (*ap)->miblen, (*bp)->miboid,
                             (*bp)->miblen);
 }

@@ -7,22 +7,26 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -238,7 +242,7 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
         }
 
         /*
-         * This session is intended as a server, so we must bind on to the
+         * This session is inteneded as a server, so we must bind on to the
          * given address (which may include a particular network and/or node
          * address, but definitely includes a port number).
          */
@@ -476,13 +480,10 @@ netsnmp_ipx_ctor(void)
 {
     ipxDomain.name = netsnmpIPXDomain;
     ipxDomain.name_length = netsnmpIPXDomain_len;
-    ipxDomain.prefix = calloc(2, sizeof(char *));
-    if (!ipxDomain.prefix) {
-        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
-        return;
-    }
+    ipxDomain.prefix = (const char**)calloc(2, sizeof(char *));
     ipxDomain.prefix[0] = "ipx";
 
+    ipxDomain.f_create_from_tstring     = NULL;
     ipxDomain.f_create_from_tstring_new = netsnmp_ipx_create_tstring;
     ipxDomain.f_create_from_ostring     = netsnmp_ipx_create_ostring;
 

@@ -11,7 +11,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -96,7 +96,7 @@ init_snmpTargetParamsEntry(void)
 
     snmpd_register_config_handler("targetParams",
                                   snmpd_parse_config_targetParams,
-                                  NULL, NULL);
+                                  (void (*)(void))0, NULL);
 
 }                               /*  init_snmpTargetParmsEntry  */
 

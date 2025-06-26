@@ -17,6 +17,12 @@ CPP_PROJ=/I.. /I..\..\include /I..\..\agent /I..\..\agent\mibgroup $(CFLAGS)
 
 ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
+"..\lib\$(OUTDIR)" :
+    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
+
+"$(INTDIR)" :
+    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
+
 {..\..\agent}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
 
@@ -36,18 +42,6 @@ ALL : "..\lib\$(OUTDIR)\$(PROGNAME).lib"
    $(CPP) $(CPP_PROJ) $<
 
 {..\..\agent\mibgroup\examples}.c{$(INTDIR)}.obj::
-   $(CPP) $(CPP_PROJ) $<
-
-{..\..\agent\mibgroup\if-mib}.c{$(INTDIR)}.obj::
-   $(CPP) $(CPP_PROJ) $<
-
-{..\..\agent\mibgroup\if-mib\ifTable}.c{$(INTDIR)}.obj::
-   $(CPP) $(CPP_PROJ) $<
-
-{..\..\agent\mibgroup\if-mib\ifXTable}.c{$(INTDIR)}.obj::
-   $(CPP) $(CPP_PROJ) $<
-
-{..\..\agent\mibgroup\if-mib\data_access}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
 
 {..\..\agent\mibgroup\mibII}.c{$(INTDIR)}.obj::
@@ -175,14 +169,7 @@ LIB32_OBJS3= \
 	"$(INTDIR)\at.obj" \
 	"$(INTDIR)\at_iphlpapi.obj" \
 	"$(INTDIR)\icmp.obj" \
-	"$(INTDIR)\ifTable.obj" \
-	"$(INTDIR)\ifTable_data_access.obj" \
-	"$(INTDIR)\ifTable_interface.obj" \
-	"$(INTDIR)\ifXTable.obj" \
-	"$(INTDIR)\ifXTable_data_access.obj" \
-	"$(INTDIR)\ifXTable_interface.obj" \
-	"$(INTDIR)\interface.obj" \
-	"$(INTDIR)\interface_iphlpapi.obj" \
+	"$(INTDIR)\interfaces.obj" \
 	"$(INTDIR)\ip.obj" \
 	"$(INTDIR)\ipAddr.obj" \
 	"$(INTDIR)\notification_log.obj" \
@@ -202,7 +189,7 @@ CLEAN :
 	-@for %f in ($(LIB32_OBJS3)) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
-"..\lib\$(OUTDIR)\$(PROGNAME).lib" : $(DEF_FILE) $(LIB32_OBJS)
+"..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
 
 
@@ -213,3 +200,190 @@ CLEAN :
 !MESSAGE Warning: cannot find "$(PROGNAME).dep"
 !ENDIF 
 !ENDIF 
+
+
+"$(INTDIR)\setSerialNo.obj": ..\..\agent\mibgroup\mibII\setSerialNo.c "$(INTDIR)"
+
+"$(INTDIR)\snmp_mib.obj": ..\..\agent\mibgroup\mibII\snmp_mib.c "$(INTDIR)"
+
+"$(INTDIR)\sysORTable.obj": ..\..\agent\mibgroup\mibII\sysORTable.c "$(INTDIR)"
+
+"$(INTDIR)\system_mib.obj": ..\..\agent\mibgroup\mibII\system_mib.c "$(INTDIR)"
+
+"$(INTDIR)\updates.obj": ..\..\agent\mibgroup\mibII\updates.c "$(INTDIR)"
+
+"$(INTDIR)\vacm_context.obj": ..\..\agent\mibgroup\mibII\vacm_context.c "$(INTDIR)"
+
+"$(INTDIR)\vacm_conf.obj": ..\..\agent\mibgroup\mibII\vacm_conf.c "$(INTDIR)"
+
+"$(INTDIR)\vacm_vars.obj": ..\..\agent\mibgroup\mibII\vacm_vars.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteEvent.obj": ..\..\agent\mibgroup\disman\event\mteEvent.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteEventConf.obj": ..\..\agent\mibgroup\disman\event\mteEventConf.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteEventNotificationTable.obj": ..\..\agent\mibgroup\disman\event\mteEventNotificationTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteEventSetTable.obj": ..\..\agent\mibgroup\disman\event\mteEventSetTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteEventTable.obj": ..\..\agent\mibgroup\disman\event\mteEventTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteObjects.obj": ..\..\agent\mibgroup\disman\event\mteObjects.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteObjectsConf.obj": ..\..\agent\mibgroup\disman\event\mteObjectsConf.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteObjectsTable.obj": ..\..\agent\mibgroup\disman\event\mteObjectsTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteScalars.obj": ..\..\agent\mibgroup\disman\event\mteScalars.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerBooleanTable.obj": ..\..\agent\mibgroup\disman\event\mteTriggerBooleanTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTrigger.obj": ..\..\agent\mibgroup\disman\event\mteTrigger.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerConf.obj": ..\..\agent\mibgroup\disman\event\mteTriggerConf.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerDeltaTable.obj": ..\..\agent\mibgroup\disman\event\mteTriggerDeltaTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerExistenceTable.obj": ..\..\agent\mibgroup\disman\event\mteTriggerExistenceTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerTable.obj": ..\..\agent\mibgroup\disman\event\mteTriggerTable.c "$(INTDIR)"
+
+"$(INTDIR)\event\mteTriggerThresholdTable.obj": ..\..\agent\mibgroup\disman\event\mteTriggerThresholdTable.c "$(INTDIR)"
+
+"$(INTDIR)\example.obj": ..\..\agent\mibgroup\examples\example.c "$(INTDIR)"
+
+"$(INTDIR)\ucdDemoPublic.obj": ..\..\agent\mibgroup\examples\ucdDemoPublic.c "$(INTDIR)"
+
+"$(INTDIR)\dlmod.obj": ..\..\agent\mibgroup\ucd-snmp\dlmod.c "$(INTDIR)"
+
+"$(INTDIR)\errormib.obj": ..\..\agent\mibgroup\ucd-snmp\errormib.c "$(INTDIR)"
+
+"$(INTDIR)\extensible.obj": ..\..\agent\mibgroup\ucd-snmp\extensible.c "$(INTDIR)"
+
+"$(INTDIR)\file.obj": ..\..\agent\mibgroup\ucd-snmp\file.c "$(INTDIR)"
+
+"$(INTDIR)\loadave.obj": ..\..\agent\mibgroup\ucd-snmp\loadave.c "$(INTDIR)"
+
+"$(INTDIR)\pass.obj": ..\..\agent\mibgroup\ucd-snmp\pass.c "$(INTDIR)"
+
+"$(INTDIR)\pass_common.obj": ..\..\agent\mibgroup\ucd-snmp\pass_common.c "$(INTDIR)"
+
+"$(INTDIR)\pass_persist.obj": ..\..\agent\mibgroup\ucd-snmp\pass_persist.c "$(INTDIR)"
+
+"$(INTDIR)\proc.obj": ..\..\agent\mibgroup\ucd-snmp\proc.c "$(INTDIR)"
+
+"$(INTDIR)\proxy.obj": ..\..\agent\mibgroup\ucd-snmp\proxy.c "$(INTDIR)"
+
+"$(INTDIR)\versioninfo.obj": ..\..\agent\mibgroup\ucd-snmp\versioninfo.c "$(INTDIR)"
+
+"$(INTDIR)\snmpv3.obj": ..\..\agent\mibgroup\snmpv3\snmpEngine.c "$(INTDIR)"
+
+"$(INTDIR)\snmpv3.obj": ..\..\agent\mibgroup\snmpv3\snmpMPDStats.c "$(INTDIR)"
+
+"$(INTDIR)\snmpv3.obj": ..\..\agent\mibgroup\snmpv3\usmConf.c "$(INTDIR)"
+
+"$(INTDIR)\snmpv3.obj": ..\..\agent\mibgroup\snmpv3\usmStats.c "$(INTDIR)"
+
+"$(INTDIR)\snmpv3.obj": ..\..\agent\mibgroup\snmpv3\usmUser.c "$(INTDIR)"
+
+"$(INTDIR)\notification.obj": ..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c "$(INTDIR)"
+
+"$(INTDIR)\notification.obj": ..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable_data.c "$(INTDIR)"
+
+"$(INTDIR)\notification-log-mib.obj": ..\..\agent\mibgroup\notification-log-mib\notification_log.c "$(INTDIR)"
+
+"$(INTDIR)\snmp-notification-mib.obj": ..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable.c "$(INTDIR)"
+
+"$(INTDIR)\snmp-notification-mib.obj": ..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_data_access.c "$(INTDIR)"
+
+"$(INTDIR)\snmp-notification-mib.obj": ..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_data_storage.c "$(INTDIR)"
+
+"$(INTDIR)\snmp-notification-mib.obj": ..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_interface.c "$(INTDIR)"
+
+"$(INTDIR)\notification.obj": ..\..\agent\mibgroup\notification\snmpNotifyTable.c "$(INTDIR)"
+
+"$(INTDIR)\notification.obj": ..\..\agent\mibgroup\notification\snmpNotifyTable_data.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\snmpTargetAddrEntry.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\snmpTargetAddrEntry_data.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\snmpTargetParamsEntry.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\snmpTargetParamsEntry_data.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\target.c "$(INTDIR)"
+
+"$(INTDIR)\target.obj": ..\..\agent\mibgroup\target\target_counters.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\agentx_config.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\client.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\master.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\master_admin.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\protocol.c "$(INTDIR)"
+
+"$(INTDIR)\agentx.obj": ..\..\agent\mibgroup\agentx\subagent.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\extend.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\nsCache.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\nsDebug.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\nsLogging.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\nsModuleTable.c "$(INTDIR)"
+
+"$(INTDIR)\agent.obj": ..\..\agent\mibgroup\agent\nsTransactionTable.c "$(INTDIR)"
+
+"$(INTDIR)\utilities.obj": ..\..\agent\mibgroup\utilities\execute.c "$(INTDIR)"
+
+"$(INTDIR)\utilities.obj": ..\..\agent\mibgroup\utilities\iquery.c "$(INTDIR)"
+
+"$(INTDIR)\utilities.obj": ..\..\agent\mibgroup\utilities\override.c "$(INTDIR)"
+
+"$(INTDIR)\util_funcs.obj": ..\..\agent\mibgroup\util_funcs\header_generic.c "$(INTDIR)"
+
+"$(INTDIR)\util_funcs.obj": ..\..\agent\mibgroup\util_funcs\header_simple_table.c "$(INTDIR)"
+
+"$(INTDIR)\header_complex.obj": ..\..\agent\mibgroup\header_complex.c "$(INTDIR)"
+
+"$(INTDIR)\mib_modules.obj": ..\..\agent\mib_modules.c "$(INTDIR)"
+
+"$(INTDIR)\util_funcs.obj": ..\..\agent\mibgroup\util_funcs.c "$(INTDIR)"
+
+"$(INTDIR)\Exit.obj": ..\..\agent\mibgroup\util_funcs\Exit.c "$(INTDIR)"
+
+"$(INTDIR)\restart.obj": ..\..\agent\mibgroup\util_funcs\restart.c "$(INTDIR)"
+
+"$(INTDIR)\smux.obj": ..\..\agent\mibgroup\smux\smux.c "$(INTDIR)"
+
+"$(INTDIR)\winExtDLL.obj": ..\..\agent\mibgroup\winExtDLL.c "$(INTDIR)"
+
+"$(INTDIR)\at.obj": ..\..\agent\mibgroup\mibII\at.c "$(INTDIR)"
+
+"$(INTDIR)\at_iphlpapi.obj": ..\..\agent\mibgroup\mibII\data_access\at_iphlpapi.c "$(INTDIR)"
+
+"$(INTDIR)\icmp.obj": ..\..\agent\mibgroup\mibII\icmp.c "$(INTDIR)"
+
+"$(INTDIR)\interfaces.obj": ..\..\agent\mibgroup\mibII\interfaces.c "$(INTDIR)"
+
+"$(INTDIR)\ip.obj": ..\..\agent\mibgroup\mibII\ip.c "$(INTDIR)"
+
+"$(INTDIR)\ipAddr.obj": ..\..\agent\mibgroup\mibII\ipAddr.c "$(INTDIR)"
+
+"$(INTDIR)\route_write.obj": ..\..\agent\mibgroup\mibII\route_write.c "$(INTDIR)"
+
+"$(INTDIR)\tcp.obj": ..\..\agent\mibgroup\mibII\tcp.c "$(INTDIR)"
+
+"$(INTDIR)\tcpTable.obj": ..\..\agent\mibgroup\mibII\tcpTable.c "$(INTDIR)"
+
+"$(INTDIR)\udp.obj": ..\..\agent\mibgroup\mibII\udp.c "$(INTDIR)"
+
+"$(INTDIR)\udpTable.obj": ..\..\agent\mibgroup\mibII\udpTable.c "$(INTDIR)"
+
+"$(INTDIR)\var_route.obj": ..\..\agent\mibgroup\mibII\var_route.c "$(INTDIR)"

@@ -1,14 +1,14 @@
 #ifndef _SNMPSSHDOMAIN_H
 #define _SNMPSSHDOMAIN_H
 
-config_require(IPv4Base);
-config_require(SocketBase);
+config_require(IPv4Base)
+config_require(SocketBase)
 
 #ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
 
 #include <net-snmp/library/snmp_transport.h>
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -19,16 +19,14 @@ extern          "C" {
 /*
  * The SNMP over SSH over IPv4 transport domain is identified by
  * transportDomainSshIpv4 as defined in RFC 3419.
- *
- * FIXME: above is wrong. Closest definition seems to be
- * transportDomainTcpIpv4 and transportDomainTcpIpv6
- *
- * Looks like oid is 1.3.6.1.6.1.7 snmpSSHDomain from rfc5592
  */
 
 #define TRANSPORT_DOMAIN_SSH_IP		1,3,6,1,2,1,100,1,100
 NETSNMP_IMPORT const oid netsnmp_snmpSSHDomain[];
 enum { netsnmp_snmpSSHDomain_len = 9 };
+
+netsnmp_transport *netsnmp_ssh_transport(const struct sockaddr_in *addr,
+                                         int local);
 
 /*
  * "Constructor" for transport domain object.

@@ -14,24 +14,27 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-config_require(UDPIPv4Base);
+config_require(UDPIPv4Base)
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
-netsnmp_transport *
-netsnmp_udp_transport(const struct netsnmp_ep *ep, int local);
+NETSNMP_IMPORT
+netsnmp_transport *netsnmp_udp_transport(const struct sockaddr_in *addr,
+                                         int local);
 
+NETSNMP_IMPORT
 netsnmp_transport *netsnmp_udp_create_tspec(netsnmp_tdomain_spec *tspec);
 
+NETSNMP_IMPORT
 netsnmp_transport *
-netsnmp_udp_transport_with_source(const struct netsnmp_ep *ep, int local,
-                                  const struct netsnmp_ep *src_addr);
+netsnmp_udp_transport_with_source(const struct sockaddr_in *addr, int local,
+                                  const struct sockaddr_in *src_addr);
 
 #define C2SE_ERR_SUCCESS             0
 #define C2SE_ERR_MISSING_ARG        -1
@@ -43,6 +46,7 @@ netsnmp_udp_transport_with_source(const struct netsnmp_ep *ep, int local,
 
 typedef struct com2SecEntry_s com2SecEntry;
 
+NETSNMP_IMPORT
 int         netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp,
                                             const char *community,
                                             const char *secName,
@@ -50,8 +54,10 @@ int         netsnmp_udp_com2SecEntry_create(com2SecEntry **entryp,
                                             struct in_addr *network,
                                             struct in_addr *mask,
                                             int negate);
+NETSNMP_IMPORT
 void        netsnmp_udp_com2Sec_free(com2SecEntry *e);
 
+NETSNMP_IMPORT
 int         netsnmp_udp_com2SecList_remove(com2SecEntry *e);
 
 /*

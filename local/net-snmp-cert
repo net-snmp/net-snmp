@@ -868,7 +868,7 @@ sub find_cfgdir {
     return NetSNMP::Cert::fq_rel_path($dir);
   } else {
     my @path = cfg_path();
-    # search first for writable tls dir
+    # search first for writeable tls dir
     # for root search top down, for user bottom up
     while (@path) {
       $dir = ($> ? pop(@path): shift(@path));
@@ -1003,7 +1003,7 @@ sub make_openssl_conf {
 rdir            = .
 dir		= $ENV::DIR
 RANDFILE	= $rdir/.rand
-MD		= sha512
+MD		= sha1
 KSIZE		= 2048
 CN		= net-snmp.org
 EMAIL		= admin@net-snmp.org

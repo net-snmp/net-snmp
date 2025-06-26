@@ -1,86 +1,20 @@
 image:
-  - Ubuntu
-  - Ubuntu1604
-  - Ubuntu2004
-  - Ubuntu2204
-  - macos-monterey
-  - Visual Studio 2022
+  - Visual Studio 2017
 
 environment:
   CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
   matrix:
     - BUILD: MSVCDYNAMIC64
     - BUILD: MSVCSTATIC64
-    - BUILD: INSTALLER
-    - BUILD: MSYS2
     - BUILD: MinGW64
+    - BUILD: Cygwin32
+    - BUILD: Cygwin64
 
 matrix:
-  exclude:
-    - image: Ubuntu
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu
-      BUILD: INSTALLER
-    - image: Ubuntu
-      BUILD: MinGW32
-    - image: Ubuntu
-      BUILD: MSYS2
-    - image: Ubuntu
-      BUILD: MinGW64
-    - image: Ubuntu1604
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu1604
-      BUILD: INSTALLER
-    - image: Ubuntu1604
-      BUILD: MinGW32
-    - image: Ubuntu1604
-      BUILD: MSYS2
-    - image: Ubuntu1604
-      BUILD: MinGW64
-    - image: Ubuntu2004
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu2004
-      BUILD: INSTALLER
-    - image: Ubuntu2004
-      BUILD: MinGW32
-    - image: Ubuntu2004
-      BUILD: MSYS2
-    - image: Ubuntu2004
-      BUILD: MinGW64
-    - image: Ubuntu2204
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu2204
-      BUILD: INSTALLER
-    - image: Ubuntu2204
-      BUILD: MinGW32
-    - image: Ubuntu2204
-      BUILD: MSYS2
-    - image: Ubuntu2204
-      BUILD: MinGW64
-    - image: macos-monterey
-      BUILD: MSVCSTATIC64
-    - image: macos-monterey
-      BUILD: INSTALLER
-    - image: macos-monterey
-      BUILD: MinGW32
-    - image: macos-monterey
-      BUILD: MSYS2
-    - image: macos-monterey
-      BUILD: MinGW64
-
-artifacts:
-  - path: installer
+  allow_failures:
+  - BUILD: MINGW64
 
 clone_depth: 5
 
-install:
-  - cmd: 'ci\openssl.bat'
-  - sh:  'sudo ci/install.sh'
-
 build_script:
-  - cmd: 'ci\build.bat'
-  - sh:  'ci/build.sh'
-
-test_script:
-  - cmd: 'ci\test.bat'
-  - sh:  'if [ $(uname) != Darwin ]; then ci/test.sh; fi'
+  - 'call "ci\build.bat"'

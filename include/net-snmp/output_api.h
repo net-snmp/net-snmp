@@ -14,14 +14,12 @@
 extern "C" {
 #endif
 
-    struct session_list;
-
     /* Error reporting */
     NETSNMP_IMPORT
     void    snmp_error(netsnmp_session *sess, int *clib_errorno,
                            int *snmp_errorno, char **errstring);
     NETSNMP_IMPORT
-    void    snmp_sess_error(struct session_list *slp, int *clib_errorno,
+    void    snmp_sess_error(      void *sess, int *clib_errorno,
                            int *snmp_errorno, char **errstring);
 
     NETSNMP_IMPORT
@@ -48,6 +46,8 @@ extern "C" {
     int  snmp_vlog(int priority, const char *format, va_list ap);
     NETSNMP_IMPORT
     int  snmp_get_do_logging(    void);
+    NETSNMP_IMPORT
+    void netsnmp_logging_restart(void);
     NETSNMP_IMPORT
     void snmp_disable_log(       void);
     NETSNMP_IMPORT
@@ -149,10 +149,6 @@ netsnmp_debug_no_dumpsetup(const char *token, const void *buf, size_t len)
     void            snmp_set_do_debugging(int);
     NETSNMP_IMPORT
     int             snmp_get_do_debugging(void);
-    NETSNMP_IMPORT
-    void            snmp_set_do_debugoutputall(int);
-    NETSNMP_IMPORT
-    int             snmp_get_do_debugoutputall(void);
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     NETSNMP_IMPORT
     void            netsnmp_set_debug_log_level(int val);

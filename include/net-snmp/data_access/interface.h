@@ -10,15 +10,6 @@
 extern          "C" {
 #endif
 
-#if defined(HAVE_PCRE2_H)
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
-#elif defined(HAVE_PCRE_H)
-#include <pcre.h>
-#elif defined(HAVE_REGEX_H)
-#include <regex.h>
-#endif
-
 /*
  * define flags to indicate the availability of certain data
  */
@@ -213,18 +204,6 @@ typedef struct _conf_if_list {
 
     typedef netsnmp_conf_if_list conf_if_list; /* backwards compat */
 
-typedef struct _include_if_list {
-#if defined(HAVE_PCRE2_H)
-    pcre2_code              *regex_ptr;
-#elif defined(HAVE_PCRE_H)
-    pcre                    *regex_ptr;
-#elif defined(HAVE_REGEX_H)
-    regex_t                 *regex_ptr;
-#endif
-    char                    *name;
-    struct _include_if_list *next;
-} netsnmp_include_if_list;
-
 /**---------------------------------------------------------------------*/
 /*
  * ACCESS function prototypes
@@ -303,9 +282,6 @@ void netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *);
 
 netsnmp_conf_if_list *
 netsnmp_access_interface_entry_overrides_get(const char * name);
-
-int netsnmp_access_interface_include(const char * name);
-int netsnmp_access_interface_max_reached(const char * name);
 
 /**---------------------------------------------------------------------*/
 

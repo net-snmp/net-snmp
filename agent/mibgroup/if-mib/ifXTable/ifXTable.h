@@ -25,9 +25,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/ifTable/ifTable);
-config_require(if-mib/ifXTable/ifXTable_interface);
-config_require(if-mib/ifXTable/ifXTable_data_access);
+config_require(if-mib/ifTable/ifTable)
+config_require(if-mib/ifXTable/ifXTable_interface)
+config_require(if-mib/ifXTable/ifXTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -67,6 +67,7 @@ config_require(if-mib/ifXTable/ifXTable_data_access);
     typedef ifTable_undo_data ifXTable_undo_data;
     typedef ifTable_mib_index ifXTable_mib_index;
     typedef ifTable_rowreq_ctx ifXTable_rowreq_ctx;
+    typedef ifTable_ref_rowreq_ctx ifXTable_ref_rowreq_ctx;
 
 #define ifXTable_data_list           ifTable_data_list
 #define ifXTable_reg                 ifTable_reg
@@ -222,6 +223,7 @@ config_require(if-mib/ifXTable/ifXTable_data_access);
     int             ifXTable_undo_cleanup(ifXTable_rowreq_ctx *
                                           rowreq_ctx);
     int             ifXTable_undo(ifXTable_rowreq_ctx * rowreq_ctx);
+    int             ifXTable_commit(ifXTable_rowreq_ctx * rowreq_ctx);
     int             ifXTable_undo_commit(ifXTable_rowreq_ctx * rowreq_ctx);
 
 
@@ -433,6 +435,9 @@ config_require(if-mib/ifXTable/ifXTable_data_access);
                                                    ifCounterDiscontinuityTime_val);
     int             ifCounterDiscontinuityTime_undo(ifXTable_rowreq_ctx *
                                                     rowreq_ctx);
+
+
+    int             ifXTable_check_dependencies(ifXTable_rowreq_ctx * ctx);
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*

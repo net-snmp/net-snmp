@@ -2,6 +2,13 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#ifndef HEADER_SSL_H
+#error "must include <openssl/ssl.h> before cert_util.h"
+#endif
+#ifndef HEADER_X509_H
+#error "must include <openssl/x509.h> before cert_util.h"
+#endif
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -15,7 +22,6 @@ extern "C" {
     void netsnmp_certs_init(void);
     NETSNMP_IMPORT
     void netsnmp_certs_agent_init(void);
-    NETSNMP_IMPORT
     void netsnmp_certs_shutdown(void);
     void netsnmp_certs_load(void);
     netsnmp_container *netsnmp_cert_get_trustlist(void);
@@ -50,7 +56,6 @@ extern "C" {
 
         u_char          hash_type;
         u_char          _pad[3]; /* for future use */
-        uint32_t        offset;
     } netsnmp_cert;
 
 /** types */
@@ -95,7 +100,6 @@ extern "C" {
 
     NETSNMP_IMPORT
     netsnmp_cert *netsnmp_cert_find(int what, int where, void *hint);
-    netsnmp_void_array *netsnmp_certs_find(int what, int where, void *hint);
 
     int netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var);
 

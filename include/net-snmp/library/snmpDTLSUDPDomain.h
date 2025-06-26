@@ -1,12 +1,12 @@
 #ifndef _SNMPDTLSUDPDOMAIN_H
 #define _SNMPDTLSUDPDOMAIN_H
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-config_require(UDP);
-config_require(TLSBase);
+config_require(UDP)
+config_require(TLSBase)
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
@@ -16,11 +16,11 @@ extern          "C" {
 #endif
 
 #define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,6,1,9
-NETSNMP_IMPORT const oid netsnmpDTLSUDPDomain[];
+NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[7];
 NETSNMP_IMPORT size_t netsnmpDTLSUDPDomain_len;
 
-netsnmp_transport *
-netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local);
+netsnmp_transport *netsnmp_dtlsudp_transport(const struct sockaddr_in *addr,
+                                             int local);
 
 
 /*

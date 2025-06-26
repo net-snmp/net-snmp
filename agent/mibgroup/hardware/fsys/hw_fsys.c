@@ -1,71 +1,26 @@
-#define __USE_MINGW_ANSI_STDIO 0
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "hardware/fsys/fsys.h"
+#include <net-snmp/agent/hardware/fsys.h>
 #include "hw_fsys.h"
 #include "hardware/fsys/hw_fsys_private.h"
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-#if defined(HAVE_PCRE_H)
-#include <pcre.h>
-#elif defined(HAVE_REGEX_H)
-#include <sys/types.h>
-#include <regex.h>
-#endif
 
-netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused);
+netsnmp_feature_child_of(hw_fsys_get_container, netsnmp_unused)
 
-static int netsnmp_fsys_load( netsnmp_cache *cache, void *data);
-static void netsnmp_fsys_free( netsnmp_cache *cache, void *data);
+static int  _fsys_load( void );
+static void _fsys_free( void );
 
 static int _fsysAutoUpdate = 0;   /* 0 means on-demand caching */
+static void _fsys_update_stats( unsigned int, void* );
 
-static netsnmp_cache     *_fsys_cache;
-static netsnmp_container *_fsys_container;
-static int         _fsys_idx;
-
-static void _parse_mount_config(const char *, char *);
-static void _free_mount_config(void);
-
-conf_mount_list *ignoremount_list;
-
-/*
- * Architecture-independent processing of loading filesystem statistics
- */
-static int
-_fsys_load(void)
-{
-    netsnmp_fsys_arch_load();
-    /* XXX - update cache timestamp */
-    return 0;
-}
-
-/*
- * Architecture-independent release of filesystem statistics
- */
-static void
-_fsys_free(void)
-{
-    netsnmp_fsys_info *sp;
-
-    for (sp = CONTAINER_FIRST(_fsys_container); sp;
-         sp = CONTAINER_NEXT(_fsys_container, sp)) {
-         sp->flags &= ~NETSNMP_FS_FLAG_ACTIVE;
-    }
-}
-
-/*
- * Wrapper routine for automatically updating fsys information
- */
-void
-_fsys_update_stats(unsigned int clientreg, void *data)
-{
-    _fsys_free();
-    _fsys_load();
-}
+netsnmp_cache     *_fsys_cache     = NULL;
+netsnmp_container *_fsys_container = NULL;
+static int         _fsys_idx       = 0;
+static netsnmp_fsys_info * _fsys_create_entry( void );
 
 void init_hw_fsys( void ) {
 
@@ -103,20 +58,34 @@ void init_hw_fsys( void ) {
         DEBUGMSGTL(("fsys", "Reloading Hardware FileSystems on-demand (%p)\n",
                                _fsys_cache));
     }
-
-    snmpd_register_config_handler("ignoremount", _parse_mount_config,
-                                  _free_mount_config, "name");
 }
 
 void shutdown_hw_fsys( void ) {
     _fsys_free();
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER
+/*
+ *  Return the main fsys container
+ */
+netsnmp_container *netsnmp_fsys_get_container( void ) { return _fsys_container; }
+#endif /* NETSNMP_FEATURE_REMOVE_HW_FSYS_GET_CONTAINER */
+
 /*
  *  Return the main fsys cache control structure (if defined)
  */
 netsnmp_cache *netsnmp_fsys_get_cache( void ) { return _fsys_cache; }
 
+
+/*
+ * Wrapper routine for automatically updating fsys information
+ */
+void
+_fsys_update_stats( unsigned int clientreg, void *data )
+{
+    _fsys_free();
+    _fsys_load();
+}
 
 /*
  * Wrapper routine for re-loading filesystem statistics on demand
@@ -138,33 +107,39 @@ netsnmp_fsys_free( netsnmp_cache *cache, void *data )
 }
 
 
-netsnmp_fsys_info *netsnmp_fsys_get_first(void) {
-    return CONTAINER_FIRST(_fsys_container);
+/*
+ * Architecture-independent processing of loading filesystem statistics
+ */
+static int
+_fsys_load( void )
+{
+    netsnmp_fsys_arch_load();
+    /* XXX - update cache timestamp */
+    return 0;
 }
 
-netsnmp_fsys_info *netsnmp_fsys_get_next(const netsnmp_fsys_info *this_ptr) {
-    return CONTAINER_NEXT(_fsys_container, this_ptr);
-}
-
-netsnmp_fsys_info *
-_fsys_create_entry(void)
+/*
+ * Architecture-independent release of filesystem statistics
+ */
+static void
+_fsys_free( void )
 {
     netsnmp_fsys_info *sp;
 
-    sp = SNMP_MALLOC_TYPEDEF(netsnmp_fsys_info);
-    if (!sp)
-        return NULL;
+    for (sp = CONTAINER_FIRST( _fsys_container );
+         sp;
+         sp = CONTAINER_NEXT(  _fsys_container, sp )) {
 
-    /*
-     * Set up the index value.
-     */
-    sp->idx.len  = 1;
-    sp->idx.oids = &sp->fsys_idx;
-    sp->idx.oids[0] = ++_fsys_idx;
+         sp->flags &= ~NETSNMP_FS_FLAG_ACTIVE;
+    }
+}
 
-    DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
-    CONTAINER_INSERT(_fsys_container, sp);
-    return sp;
+
+netsnmp_fsys_info *netsnmp_fsys_get_first( void ) {
+    return CONTAINER_FIRST( _fsys_container );
+}
+netsnmp_fsys_info *netsnmp_fsys_get_next( netsnmp_fsys_info *this_ptr ) {
+    return CONTAINER_NEXT( _fsys_container, this_ptr );
 }
 
 /*
@@ -250,6 +225,30 @@ netsnmp_fsys_by_device( char *device, int create_type )
 }
 
 
+netsnmp_fsys_info *
+_fsys_create_entry( void )
+{
+    netsnmp_fsys_info *sp;
+
+    sp = SNMP_MALLOC_TYPEDEF( netsnmp_fsys_info );
+    if ( sp ) {
+        /*
+         * Set up the index value.
+         *  
+         * All this trouble, just for a simple integer.
+         * Surely there must be a better way?
+         */
+        sp->idx.len  = 1;
+        sp->idx.oids = SNMP_MALLOC_TYPEDEF( oid );
+        sp->idx.oids[0] = ++_fsys_idx;
+    }
+
+    DEBUGMSGTL(("fsys:new", "Create filesystem entry (index = %d)\n", _fsys_idx));
+    CONTAINER_INSERT( _fsys_container, sp );
+    return sp;
+}
+
+
 /*
  *  Convert fsys size information to 1K units
  *    (attempting to avoid 32-bit overflow!)
@@ -275,8 +274,7 @@ _fsys_to_K( unsigned long long size, unsigned long long units )
 }
 
 unsigned long long
-netsnmp_fsys_size_ull(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_size_ull( netsnmp_fsys_info *f) {
     if ( !f ) {
         return 0;
     }
@@ -284,8 +282,7 @@ netsnmp_fsys_size_ull(const netsnmp_fsys_info *f)
 }
 
 unsigned long long
-netsnmp_fsys_used_ull(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_used_ull( netsnmp_fsys_info *f) {
     if ( !f ) {
         return 0;
     }
@@ -293,8 +290,7 @@ netsnmp_fsys_used_ull(const netsnmp_fsys_info *f)
 }
 
 unsigned long long
-netsnmp_fsys_avail_ull(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_avail_ull( netsnmp_fsys_info *f) {
     if ( !f ) {
         return 0;
     }
@@ -303,22 +299,19 @@ netsnmp_fsys_avail_ull(const netsnmp_fsys_info *f)
 
 
 int
-netsnmp_fsys_size(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_size( netsnmp_fsys_info *f) {
     unsigned long long v = netsnmp_fsys_size_ull(f);
     return (int)v;
 }
 
 int
-netsnmp_fsys_used(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_used( netsnmp_fsys_info *f) {
     unsigned long long v = netsnmp_fsys_used_ull(f);
     return (int)v;
 }
 
 int
-netsnmp_fsys_avail(const netsnmp_fsys_info *f)
-{
+netsnmp_fsys_avail( netsnmp_fsys_info *f) {
     unsigned long long v = netsnmp_fsys_avail_ull(f);
     return (int)v;
 }
@@ -353,107 +346,4 @@ netsnmp_fsys_calculate32(netsnmp_fsys_info *f)
                 " used %" PRIu64 " -> %lu\n",
 		(uint64_t)f->size, f->size_32, (uint64_t)f->units, f->units_32,
 		(uint64_t)f->avail, f->avail_32, (uint64_t)f->used, f->used_32));
-}
-
-static void
-_parse_mount_config(const char *token, char *cptr)
-{
-    conf_mount_list *m_new;
-    char            *name, *st = NULL;
-#if defined(HAVE_PCRE_H)
-    const char      *pcre_error;
-    int             pcre_error_offset;
-    int             is_regex = 0;
-#elif defined(HAVE_REGEX_H)
-    int             r = 0;
-    int             is_regex = 0;
-#endif
-
-    name = strtok_r(cptr, " \t", &st);
-    if (!name) {
-        config_perror("Invalid configuration string");
-        return;
-    }
-    if (strcmp(name, "-r") == 0) {
-#if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
-        is_regex = 1;
-        name = strtok_r(NULL, " \t", &st);
-        if (!name) {
-            config_perror("Invalid configuration string");
-            return;
-        }
-#else
-        config_perror("Missing regex support");
-        return;
-#endif
-    }
-    m_new = SNMP_MALLOC_TYPEDEF(conf_mount_list);
-    if (!m_new) {
-        config_perror("Out of memory");
-        goto err;
-    }
-    m_new->name = strdup(name);
-    if (!m_new->name) {
-        config_perror("Out of memory");
-        goto err;
-    }
-#if defined(HAVE_PCRE_H)
-    if (is_regex) {
-        m_new->regex_ptr = pcre_compile(m_new->name, 0, &pcre_error,
-                                        &pcre_error_offset, NULL);
-        if (!m_new->regex_ptr) {
-            config_perror(pcre_error);
-            goto err;
-        }
-    }
-#elif defined(HAVE_REGEX_H)
-    if (is_regex) {
-        m_new->regex_ptr = malloc(sizeof(regex_t));
-        if (!m_new->regex_ptr) {
-            config_perror("Out of memory");
-            goto err;
-        }
-        r = regcomp(m_new->regex_ptr, m_new->name, REG_NOSUB);
-        if (r) {
-            char buf[BUFSIZ];
-            size_t regerror_len = 0;
-
-            regerror_len = regerror(r, m_new->regex_ptr, buf, BUFSIZ);
-            if (regerror_len >= BUFSIZ)
-                buf[BUFSIZ - 1] = '\0';
-            else
-                buf[regerror_len] = '\0';
-            config_perror(buf);
-            goto err;
-        }
-    }
-#endif
-    m_new->next = ignoremount_list;
-    ignoremount_list = m_new;
-    return;
-
-err:
-    if (m_new) {
-#if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
-        free(m_new->regex_ptr);
-#endif
-        free(m_new->name);
-    }
-    free (m_new);
-}
-
-static void
-_free_mount_config(void)
-{
-    conf_mount_list *m_ptr = ignoremount_list, *m_next;
-    while (m_ptr) {
-        m_next = m_ptr->next;
-#if defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
-        free(m_ptr->regex_ptr);
-#endif
-        free(m_ptr->name);
-        free(m_ptr);
-        m_ptr = m_next;
-    }
-    ignoremount_list = NULL;
 }

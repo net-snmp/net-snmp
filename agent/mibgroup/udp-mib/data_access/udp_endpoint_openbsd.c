@@ -14,20 +14,20 @@
 
 #include "mibII/mibII_common.h"
 
-#ifdef HAVE_NETINET_UDP_H
+#if HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
-#ifdef HAVE_NETINET_UDP_VAR_H
+#if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #if defined(HAVE_KVM_GETFILE2) || !defined(openbsd5)
 #undef HAVE_KVM_GETFILES
 #endif
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #include <kvm.h>
 #include <sys/sysctl.h>
 #define _KERNEL /* for DTYPE_SOCKET */
@@ -192,8 +192,8 @@ static int
 _load(netsnmp_container *container, u_int load_flags)
 {
     struct inpcbtable table;
-    struct inpcb   *next, *prev;
-    struct inpcb   inpcb, previnpcb;
+    struct inpcb   *head, *next, *prev;
+    struct inpcb   inpcb;
     netsnmp_udp_endpoint_entry  *entry;
     int      rc = 0;
 
@@ -205,29 +205,22 @@ _load(netsnmp_container *container, u_int load_flags)
 	return -1;
     }
 
-    next = (struct inpcb *)&TAILQ_FIRST(&table.inpt_queue);
+    prev = (struct inpcb *)&CIRCLEQ_FIRST(&table.inpt_queue);
     prev = NULL;
+    head = next = CIRCLEQ_FIRST(&table.inpt_queue);
 
     while (next) {
 	NETSNMP_KLOOKUP(next, (char *)&inpcb, sizeof(inpcb));
-	if (prev != NULL) {
-		if (!NETSNMP_KLOOKUP(prev, (char *)&previnpcb,
-		    sizeof(previnpcb))) {
-			DEBUGMSGTL(("udp-mib/data_access/udpConn",
-			    "klookup previnpcb failed\n"));
-			break;
-		}
-		if (TAILQ_NEXT(&previnpcb, inp_queue) != next) {
-		    snmp_log(LOG_ERR,"udptable link error\n");
-		    break;
-		}
+	if (prev && CIRCLEQ_PREV(&inpcb, inp_queue) != prev) {
+	    snmp_log(LOG_ERR,"udbtable link error\n");
+	    break;
 	}
 	prev = next;
-	next = TAILQ_NEXT(&inpcb, inp_queue);
+	next = CIRCLEQ_NEXT(&inpcb, inp_queue);
 
 #if !defined(NETSNMP_ENABLE_IPV6)
         if (inpcb.inp_flags & INP_IPV6)
-            continue;
+            goto skip;
 #endif
         entry = netsnmp_access_udp_endpoint_entry_create();
         if (NULL == entry) {
@@ -257,6 +250,11 @@ _load(netsnmp_container *container, u_int load_flags)
          */
         entry->index = CONTAINER_SIZE(container) + 1;
         CONTAINER_INSERT(container, entry);
+#if !defined(NETSNMP_ENABLE_IPV6)
+    skip:
+#endif
+	if (next == head)
+	    break;
     }
 
     if (rc < 0)

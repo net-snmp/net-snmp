@@ -28,6 +28,12 @@ CLEAN :
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\lib\$(OUTDIR)\netsnmptrapd.lib"
 
+"..\lib\$(OUTDIR)" :
+    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
+
+"$(INTDIR)" :
+    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
+
 {..\..\apps}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
 
@@ -44,7 +50,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmptrapd_auth.obj" \
 	"$(INTDIR)\winservice.obj"
 
-"..\lib\$(OUTDIR)\netsnmptrapd.lib" : $(DEF_FILE) $(LIB32_OBJS)
+"..\lib\$(OUTDIR)\netsnmptrapd.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
 
 
@@ -55,3 +61,9 @@ LIB32_OBJS= \
 !MESSAGE Warning: cannot find "libnetsnmptrapd.dep"
 !ENDIF 
 !ENDIF 
+
+"$(INTDIR)\snmptrapd.obj": ..\..\apps\snmptrapd.c "$(INTDIR)"
+"$(INTDIR)\snmptrapd_auth.obj": ..\..\apps\snmptrapd_auth.c "$(INTDIR)"
+"$(INTDIR)\snmptrapd_handlers.obj": ..\..\apps\snmptrapd_handlers.c "$(INTDIR)"
+"$(INTDIR)\snmptrapd_log.obj": ..\..\apps\snmptrapd_log.c "$(INTDIR)"
+"$(INTDIR)\winservice.obj": ..\..\snmplib\winservice.c "$(INTDIR)"

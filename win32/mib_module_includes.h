@@ -70,7 +70,7 @@
 #include "mibgroup/ucd-snmp/versioninfo.h"
 #include "mibgroup/ucd-snmp/pass.h"
 #include "mibgroup/ucd-snmp/pass_persist.h"
-#include "mibgroup/ucd-snmp/disk_hw.h"
+#include "mibgroup/ucd-snmp/disk.h"
 #include "mibgroup/ucd-snmp/loadave.h"
 #include "mibgroup/ucd-snmp/extensible.h"
 #include "mibgroup/agent/extend.h"
@@ -79,7 +79,7 @@
 #include "mibgroup/ucd-snmp/proxy.h"
 #endif
 
-#ifdef HAVE_REGEX_H
+#if HAVE_REGEX_H
 #include "mibgroup/ucd-snmp/logmatch.h"
 #endif
 
@@ -105,7 +105,7 @@
 
 #ifdef USING_HOST_MODULE
 #include "mibgroup/host/hr_system.h"
-#include "mibgroup/host/hrh_storage.h"
+#include "mibgroup/host/hr_storage.h"
 #include "mibgroup/host/hr_device.h"
 #include "mibgroup/host/hr_other.h"
 #include "mibgroup/host/hr_proc.h"
@@ -113,9 +113,9 @@
 #include "mibgroup/host/hr_print.h"
 #include "mibgroup/host/hr_disk.h"
 #include "mibgroup/host/hr_partition.h"
-#include "mibgroup/host/hrh_filesys.h"
-#include "mibgroup/host/hrh_swrun.h"
-#include "mibgroup/host/hrh_swinst.h"
+#include "mibgroup/host/hr_filesys.h"
+#include "mibgroup/host/hr_swrun.h"
+#include "mibgroup/host/hr_swinst.h"
 #endif
 
 #ifdef USING_RMON_MODULE

@@ -20,7 +20,7 @@
 
 #include <net-snmp/agent/table_array.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -30,12 +30,12 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
 
-netsnmp_feature_child_of(table_array_all, mib_helpers);
+netsnmp_feature_child_of(table_array_all, mib_helpers)
 
-netsnmp_feature_child_of(table_array_register,table_array_all);
-netsnmp_feature_child_of(table_array_find_table_array_handler,table_array_all);
-netsnmp_feature_child_of(table_array_extract_array_context,table_array_all);
-netsnmp_feature_child_of(table_array_check_row_status,table_array_all);
+netsnmp_feature_child_of(table_array_register,table_array_all)
+netsnmp_feature_child_of(table_array_find_table_array_handler,table_array_all)
+netsnmp_feature_child_of(table_array_extract_array_context,table_array_all)
+netsnmp_feature_child_of(table_array_check_row_status,table_array_all)
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER
 
@@ -86,7 +86,7 @@ typedef struct table_container_data_s {
  *  Helps you implement a table when data can be stored locally. The data is stored in a sorted array, using a binary search for lookups.
  *  @ingroup table
  *
- *  The table_array handler is used (automatically) in conjunction
+ *  The table_array handler is used (automatically) in conjuntion
  *  with the @link table table@endlink handler. It is primarily
  *  intended to be used with the mib2c configuration file
  *  mib2c.array-user.conf.
@@ -121,7 +121,7 @@ typedef struct table_container_data_s {
  *
  *  SET processing modifies the row in-place. The duplicate_row
  *  callback will be called to save a copy of the original row.
- *  In the event of a failure before the commit phase, the
+ *  In the event of a failure before the commite phase, the
  *  row_copy callback will be called to restore the original row
  *  from the copy.
  *
@@ -647,10 +647,10 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 static void
-release_netsnmp_request_group(void *g, void *v)
+release_netsnmp_request_group(netsnmp_index *g, void *v)
 {
     netsnmp_request_group_item *tmp;
-    netsnmp_request_group *group = g;
+    netsnmp_request_group *group = (netsnmp_request_group *) g;
 
     if (!g)
         return;
@@ -666,17 +666,18 @@ release_netsnmp_request_group(void *g, void *v)
 static void
 release_netsnmp_request_groups(void *vp)
 {
-    netsnmp_container *c = vp;
-    CONTAINER_FOR_EACH(c, release_netsnmp_request_group, NULL);
+    netsnmp_container *c = (netsnmp_container*)vp;
+    CONTAINER_FOR_EACH(c, (netsnmp_container_obj_func*)
+                       release_netsnmp_request_group, NULL);
     CONTAINER_FREE(c);
 }
 
 static void
-process_set_group(void *o, void *c)
+process_set_group(netsnmp_index *o, void *c)
 {
     /* xxx-rks: should we continue processing after an error?? */
     set_context           *context = (set_context *) c;
-    netsnmp_request_group *ag = o;
+    netsnmp_request_group *ag = (netsnmp_request_group *) o;
     int                    rc = SNMP_ERR_NOERROR;
 
     switch (context->agtreq_info->mode) {
@@ -858,7 +859,9 @@ process_set_requests(netsnmp_agent_request_info *agtreq_info,
     context.agtreq_info = agtreq_info;
     context.tad = tad;
     context.status = SNMP_ERR_NOERROR;
-    CONTAINER_FOR_EACH(request_group, process_set_group, &context);
+    CONTAINER_FOR_EACH(request_group,
+                       (netsnmp_container_obj_func*)process_set_group,
+                       &context);
 
     return context.status;
 }

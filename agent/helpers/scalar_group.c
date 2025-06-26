@@ -17,7 +17,7 @@
 #include <net-snmp/agent/scalar_group.h>
 
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -26,10 +26,9 @@
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/serialize.h>
 
-static void *
-clone_scalar_group(void *p)
+static netsnmp_scalar_group*
+clone_scalar_group(netsnmp_scalar_group* src)
 {
-  netsnmp_scalar_group* src = p;
   netsnmp_scalar_group *t = SNMP_MALLOC_TYPEDEF(netsnmp_scalar_group);
   if(t != NULL) {
     t->lbound = src->lbound;
@@ -62,7 +61,7 @@ netsnmp_get_scalar_group_handler(oid first, oid last)
 	    sgroup->ubound = last;
             ret->myvoid = (void *)sgroup;
             ret->data_free = free;
-            ret->data_clone = clone_scalar_group;
+            ret->data_clone = (void *(*)(void *))clone_scalar_group;
 	}
     }
     return ret;

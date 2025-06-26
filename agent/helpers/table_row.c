@@ -17,7 +17,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -31,9 +31,9 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
 
-netsnmp_feature_child_of(table_row_all, mib_helpers);
+netsnmp_feature_child_of(table_row_all, mib_helpers)
 
-netsnmp_feature_child_of(table_row_extract, table_row_all);
+netsnmp_feature_child_of(table_row_extract, table_row_all)
 
 
 /*

@@ -20,17 +20,17 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -128,8 +128,6 @@
          kuku_cnt =
          0;
 #endif
-
-static unsigned char zero_octet_string[1];
 
 static int
 fetch_var_val(oid * name, size_t namelen, u_long * new_value)
@@ -647,7 +645,7 @@ var_alarmEntry(struct variable * vp, oid * name, size_t * length,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return zero_octet_string;
+            return (unsigned char *) "";
         }
 
     case IDalarmStatus:
@@ -663,7 +661,7 @@ var_alarmEntry(struct variable * vp, oid * name, size_t * length,
 }
 
 /*
- * Registration & Initialization section
+ * Registration & Initializatio section 
  */
 
 oid             oidalarmVariablesOid[] = { 1, 3, 6, 1, 2, 1, 16, 3 };

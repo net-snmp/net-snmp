@@ -25,9 +25,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(ip-forward-mib/data_access/route);
-config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_interface);
-config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access);
+config_require(ip-forward-mib/data_access/route)
+config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_interface)
+config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -188,6 +188,8 @@ config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access);
     void            ipCidrRouteTable_release_data(ipCidrRouteTable_data *
                                                   data);
 
+    int             ipCidrRouteTable_commit(ipCidrRouteTable_rowreq_ctx *
+                                            rowreq_ctx);
     ipCidrRouteTable_rowreq_ctx
         * ipCidrRouteTable_row_find_by_mib_index(ipCidrRouteTable_mib_index
                                                  * mib_idx);

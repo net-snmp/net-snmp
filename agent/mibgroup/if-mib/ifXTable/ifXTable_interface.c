@@ -50,14 +50,14 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(ifXTable_external_access, libnetsnmpmibs);
+netsnmp_feature_child_of(ifXTable_external_access, libnetsnmpmibs)
 
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(cache_find_by_oid);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(cache_find_by_oid)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(check_vb_type_and_max_size);
+netsnmp_feature_require(check_vb_type_and_max_size)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /**********************************************************************
@@ -921,7 +921,7 @@ _mfd_ifXTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1144,7 +1144,9 @@ _ifXTable_check_column(ifXTable_rowreq_ctx * rowreq_ctx,
         /*
          * check defined range(s). 
          */
-        if (rc == SNMPERR_SUCCESS && var->val_len > 64) {
+        if ((SNMPERR_SUCCESS == rc)
+            && ((var->val_len < 0) || (var->val_len > 64))
+            ) {
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {
@@ -1543,7 +1545,7 @@ _mfd_ifXTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1797,7 +1799,8 @@ static int      _ifXTable_container_save_rows(int majorID, int minorID,
                                               void *clientarg);
 static void     _ifXTable_container_row_restore(const char *token,
                                                 char *buf);
-static void     _ifXTable_container_row_save(void *data, void *type);
+static int      _ifXTable_container_row_save(ifXTable_rowreq_ctx *
+                                             rowreq_ctx, void *type);
 static char    *_ifXTable_container_col_restore(ifXTable_rowreq_ctx *
                                                 rowreq_ctx, u_int col,
                                                 char *buf);
@@ -1853,6 +1856,7 @@ _ifXTable_container_save_rows(int majorID, int minorID, void *serverarg,
      * save all rows
      */
     CONTAINER_FOR_EACH(*(netsnmp_container **)clientarg,
+                       (netsnmp_container_obj_func *)
                        _ifXTable_container_row_save, type);
 
     read_config_store((char *) type, sep);
@@ -1869,10 +1873,9 @@ _ifXTable_container_save_rows(int majorID, int minorID, void *serverarg,
 /************************************************************
  * _ifXTable_container_row_save
  */
-static void _ifXTable_container_row_save(void *data, void *type)
+static int
+_ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
 {
-    ifXTable_rowreq_ctx *rowreq_ctx = data;
-
     /*
      * Allocate space for a line with all data for a row. An
      * attempt is made to come up with a default maximum size, but
@@ -1882,7 +1885,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
      *
      * 1) allocate space for each column. Comment out columns you don't
      * intend to save. You may also need to add room for any non-
-     * column data you want to store. Remember, data will be stored in
+     * column data you want to store. Remeber, data will be stored in
      * ASCII form, so you need to allow for that. Here are some
      * general guidelines:
      *
@@ -1915,7 +1918,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
     int             i;
 
     if (ifXTable_container_should_save(rowreq_ctx) == 0) {
-        return;
+        return SNMP_ERR_NOERROR;
     }
 
     /*
@@ -1927,13 +1930,13 @@ static void _ifXTable_container_row_save(void *data, void *type)
     if (NULL == pos) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
     *pos++ = ' ';
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file (too long)\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
 
     /*
@@ -1953,7 +1956,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
         if (pos > max) {
             snmp_log(LOG_ERR, "error saving ifXTable row "
                      "to persistent file (too long)\n");
-            return;
+            return SNMP_ERR_GENERR;
         }
     }
 
@@ -1969,12 +1972,14 @@ static void _ifXTable_container_row_save(void *data, void *type)
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file (too long)\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
     read_config_store((char *) type, buf);
 
     DEBUGMSGTL(("internal:ifXTable:_ifXTable_container_row_save",
                 "saving line '%s'\n", buf));
+
+    return SNMP_ERR_NOERROR;
 }
 
 static void
@@ -2180,7 +2185,7 @@ ifXTable_row_find_by_mib_index(ifXTable_mib_index * mib_idx)
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

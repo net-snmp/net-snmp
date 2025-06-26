@@ -12,11 +12,11 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-netsnmp_feature_provide(baby_steps);
-netsnmp_feature_child_of(baby_steps, mib_helpers);
+netsnmp_feature_provide(baby_steps)
+netsnmp_feature_child_of(baby_steps, mib_helpers)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_BABY_STEPS
-netsnmp_feature_require(check_requests_error);
+netsnmp_feature_require(check_requests_error)
 #endif
 
 #ifndef NETSNMP_FEATURE_REMOVE_BABY_STEPS
@@ -68,20 +68,16 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
  *  @{
  */
 
-static void *
-netsnmp_baby_steps_modes_ref(void *p)
+static netsnmp_baby_steps_modes *
+netsnmp_baby_steps_modes_ref(netsnmp_baby_steps_modes *md)
 {
-    netsnmp_baby_steps_modes *md = p;
-
     md->refcnt++;
     return md;
 }
 
 static void
-netsnmp_baby_steps_modes_deref(void *p)
+netsnmp_baby_steps_modes_deref(netsnmp_baby_steps_modes *md)
 {
-    netsnmp_baby_steps_modes *md = p;
-
     if (--md->refcnt == 0)
 	free(md);
 }
@@ -108,8 +104,8 @@ netsnmp_baby_steps_handler_get(u_long modes)
     else {
 	md->refcnt = 1;
         mh->myvoid = md;
-	mh->data_clone = netsnmp_baby_steps_modes_ref;
-	mh->data_free = netsnmp_baby_steps_modes_deref;
+	mh->data_clone = (void *(*)(void *))netsnmp_baby_steps_modes_ref;
+	mh->data_free = (void (*)(void *))netsnmp_baby_steps_modes_deref;
         if (0 == modes)
             modes = BABY_STEP_ALL;
         md->registered = modes;
@@ -151,7 +147,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
          * merge helper as well (or if requests are serialized).
          */
         bs_modes->completed = 0;
-        NETSNMP_FALLTHROUGH;
+        /* FALL THROUGH */
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
     case MODE_SET_COMMIT:
@@ -359,7 +355,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
  *  handler as a run-time injectable handler for configuration file
  *  use.
  */
-netsnmp_feature_child_of(netsnmp_baby_steps_handler_init,netsnmp_unused);
+netsnmp_feature_child_of(netsnmp_baby_steps_handler_init,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_BABY_STEPS_HANDLER_INIT
 void
 netsnmp_baby_steps_handler_init(void)

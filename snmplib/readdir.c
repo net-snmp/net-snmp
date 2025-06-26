@@ -18,7 +18,7 @@
  * Readdir just returns the current string pointer and bumps the
  * * string pointer to the nDllExport entry.
  */
-struct dirent  *
+struct direct  *
 readdir(DIR * dirp)
 {
     int             len;

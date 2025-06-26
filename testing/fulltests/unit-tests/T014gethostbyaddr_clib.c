@@ -39,7 +39,7 @@ SOCK_STARTUP;
 
 {
     struct hostent *h;
-#if defined(cygwin) || defined(solaris2)
+#ifdef cygwin
     static const struct in6_addr v6loop = { { IN6ADDR_LOOPBACK_INIT } };
 #else
     static const struct in6_addr v6loop = IN6ADDR_LOOPBACK_INIT;
@@ -57,7 +57,7 @@ SOCK_STARTUP;
         if (bind(s, (struct sockaddr *) &sin6_addr, sizeof(sin6_addr)) >=
             0) {
             addr = NULL;
-            strncpy(buf, "(failed)", sizeof(buf));
+            strcpy(buf, "(failed)");
             h = netsnmp_gethostbyaddr(&v6loop, sizeof(v6loop), AF_INET6);
             if (h) {
                 memset(&hints, 0, sizeof(hints));
@@ -74,7 +74,7 @@ SOCK_STARTUP;
                         }
                     }
                     if (!ap)
-                        strncpy(buf, "no AF_INET6 address found", sizeof(buf));
+                        strcpy(buf, "no AF_INET6 address found");
                 } else {
                     snprintf(buf, sizeof(buf), "getaddrinfo() failed: %s",
                              strerror(errno));

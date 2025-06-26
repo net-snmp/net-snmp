@@ -27,8 +27,6 @@ AC_ARG_WITH(endianness,
                                   cross-compiling.],
     [if test $with_endianness != "big" -a $with_endianness != "little" ; then
        AC_MSG_ERROR([Endianness must be big or little, not "$with_endianness".]);
-     else
-       AC_MSG_WARN([--with-endianness is obsolete])
      fi
 ])
 
@@ -59,6 +57,14 @@ AC_SUBST(LIBTOOLFLAGS)
 #   System: Library settings
 ##
 
+NETSNMP_ARG_WITH(dmalloc,
+        AS_HELP_STRING([--with-dmalloc=PATH],
+                [Use dmalloc library (www.dmalloc.com)]))
+
+NETSNMP_ARG_WITH(efence,
+[  --with-efence                   Look for and use libefence (malloc).],
+      use_efence="$withval")
+
 tryrsaref=no
 NETSNMP_ARG_WITH(rsaref,
 [  --with-rsaref=PATH              Look for librsaref in PATH/lib.],
@@ -72,7 +78,7 @@ NETSNMP_ARG_WITH(rsaref,
     fi,
 )
 
-tryopenssl=yes
+tryopenssl=defaultyes
 askedopenssl=no
 aes_capable=no
 NETSNMP_ARG_WITH(openssl,
@@ -98,21 +104,10 @@ NETSNMP_ARG_WITH(openssl,
       askedopenssl=yes
     fi,
 )
-NETSNMP_ARG_WITH(wolfssl,
-[  --with-wolfssl=PATH             Look for wolfssl in PATH/lib.],
-    if test "x$withval" = xyes; then
-        tryopenssl=yes
-        askedopenssl=yes
-        CPPFLAGS="-I/usr/include/wolfssl -DWC_NO_HARDEN -DNO_OLD_TIMEVAL_NAME -DOPENSSL_EXTRA -DEXTERNAL_OPTS_OPENVPN $CPPFLAGS"
-    elif test -d "$withval" && test -d "$withval/include/wolfssl"; then
-        tryopenssl=yes
-        askedopenssl=yes
-        LDFLAGS="-L$withval/lib $LDFLAGS"
-        CPPFLAGS="-I$withval/include -I$withval/include/wolfssl -DWC_NO_HARDEN -DNO_OLD_TIMEVAL_NAME -DOPENSSL_EXTRA -DEXTERNAL_OPTS_OPENVPN $CPPFLAGS"
-    else
-        AC_MSG_ERROR([Cannot find wolfSSL in ${withval}.])
-    fi
-)
+if test "x$tryopenssl" = "xdefaultyes"; then
+      AC_ADD_SEARCH_PATH(/usr/local/ssl)
+      tryopenssl=yes
+fi
 if test "x$tryopenssl" = "xyes"; then
     AC_CHECK_HEADERS(
         [openssl/aes.h openssl/evp.h],
@@ -171,10 +166,6 @@ NETSNMP_ARG_WITH(rpm,
                                   management system when building the host MIB
                                   module.])
 
-NETSNMP_ARG_WITH(pcre2-8,
-[  --without-pcre2                  Don't include pcre2 process searching
-                                  support in the agent.],
-      with_pcre2="$withval", with_pcre2="maybe")
 
 NETSNMP_ARG_WITH(pcre,
 [  --without-pcre                  Don't include pcre process searching
@@ -1041,6 +1032,10 @@ NETSNMP_ARG_WITH(enterprise-sysoid,
   fi
   sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_MIB, $sys_oid)
+  sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
+  AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_DOT_MIB, $sys_dot_oid)
+  sysoid_len=`echo "$withval" | sed 's/[^\.]//g' | awk -F\. '{ print NF }'`
+  AC_DEFINE_UNQUOTED(NETSNMP_SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT(using enterprise sysOID $withval ....)
 ],[
   AC_MSG_RESULT(using default enterprise sysOID "NET-SNMP-MIB::netSnmpAgentOIDs...")

@@ -27,8 +27,6 @@ done
 #
 AC_MSG_CHECKING([for and configuring mib modules to use])
 
-AH_TOP([#define NETSNMP_REQUIRE_SEMICOLON struct netsnmp_unused_struct])
-
 # set up the CPP command
 MODULECPP="$CPP $PARTIALTARGETFLAGS $CPPFLAGS -DNETSNMP_FEATURE_CHECKING -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 if test "x$enable_mfd_rewrites" = "xyes"; then
@@ -43,101 +41,6 @@ new_with_out_mib_modules=`echo $with_out_mib_modules | $SED 's/,/ /g;'`
 
 # set up initial module list
 new_module_list="$new_with_mib_modules"
-
-case "x$PARTIALTARGETOS" in
-    Linux)
-	if "x$ac_cv_header_netlink_route_addr_h" != xyes; then
-new_with_out_mib_modules="$new_with_out_mib_modules
-etherlike-mib
-etherlike-mib/dot3StatsTable
-host/hr_network
-if-mib
-if-mib/data_access/interface
-if-mib/data_access/interface_ioctl
-if-mib/data_access/interface_private
-if-mib/data_access/interface_sysctl
-if-mib/ifTable
-if-mib/ifTable/ifTable
-if-mib/ifTable/ifTable_constants
-if-mib/ifTable/ifTable_data_access
-if-mib/ifTable/ifTable_defs
-if-mib/ifTable/ifTable_interface
-if-mib/ifXTable
-if-mib/ifXTable/ifXTable
-if-mib/ifXTable/ifXTable_constants
-if-mib/ifXTable/ifXTable_data_access
-if-mib/ifXTable/ifXTable_interface
-ip-forward-mib
-ip-mib
-ip-mib/data_access/arp
-ip-mib/data_access/defaultrouter
-ip-mib/data_access/defaultrouter_private
-ip-mib/data_access/ipaddress
-ip-mib/data_access/ipaddress_ioctl
-ip-mib/data_access/ipaddress_linux
-ip-mib/data_access/ipaddress_private
-ip-mib/data_access/ipv6scopezone
-ip-mib/data_access/ipv6scopezone_private
-ip-mib/data_access/scalars_common
-ip-mib/data_access/systemstats
-ip-mib/data_access/systemstats_private
-ip-mib/inetNetToMediaTable
-ip-mib/inetNetToMediaTable/inetNetToMediaTable
-ip-mib/inetNetToMediaTable/inetNetToMediaTable_constants
-ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access
-ip-mib/inetNetToMediaTable/inetNetToMediaTable_interface
-ip-mib/ipAddressPrefixTable
-ip-mib/ipAddressPrefixTable/ipAddressPrefixTable
-ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants
-ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access
-ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_interface
-ip-mib/ipAddressTable
-ip-mib/ipAddressTable/ipAddressTable
-ip-mib/ipAddressTable/ipAddressTable_constants
-ip-mib/ipAddressTable/ipAddressTable_data_access
-ip-mib/ipAddressTable/ipAddressTable_interface
-ip-mib/ipDefaultRouterTable
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_access
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_enums
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_interface
-ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_oids
-ip-mib/ipIfStatsTable
-ip-mib/ipIfStatsTable/ipIfStatsTable
-ip-mib/ipIfStatsTable/ipIfStatsTable_data_access
-ip-mib/ipIfStatsTable/ipIfStatsTable_data_get
-ip-mib/ipIfStatsTable/ipIfStatsTable_enums
-ip-mib/ipIfStatsTable/ipIfStatsTable_interface
-ip-mib/ipIfStatsTable/ipIfStatsTable_oids
-ip-mib/ipSystemStatsTable
-ip-mib/ipSystemStatsTable/ipSystemStatsTable
-ip-mib/ipSystemStatsTable/ipSystemStatsTable_constants
-ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access
-ip-mib/ipSystemStatsTable/ipSystemStatsTable_interface
-ip-mib/ip_scalars
-ip-mib/ipv4InterfaceTable
-ip-mib/ipv4InterfaceTable/ipv4InterfaceTable
-ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_constants
-ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access
-ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface
-ip-mib/ipv6InterfaceTable
-ip-mib/ipv6InterfaceTable/ipv6InterfaceTable
-ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_constants
-ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access
-ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_interface
-ip-mib/ipv6ScopeZoneIndexTable
-ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable
-ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_data_access
-ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_enums
-ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_interface
-ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_oids
-mibII
-tunnel/tunnel
-	"
-	fi
-	;;
-esac
 
 if test "x$enable_agent" != "xno" ; then
   # If the agent should be built then use default_modules
@@ -277,11 +180,11 @@ while test "x$new_module_list" != "x"; do
     #---------------------
     # build a pseudo include header that includes current config and
     # system symbols:
-    rm -f conftest.$ac_ext module_tmp_header.i
+    rm -f conftest.$ac_ext module_tmp_header.h
     AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #include "$srcdir/$mibdir/$i.h"]])])
-    $MODULECPP conftest.$ac_ext >module_tmp_header.i 2>/dev/null
+    mv conftest.$ac_ext module_tmp_header.h
 
     #---------------------
     # macro: config_belongs_in(ARG)
@@ -289,11 +192,11 @@ while test "x$new_module_list" != "x"; do
     #     - mib_module   => libnetsnmpmibs   (default)
     #     - agent_module => libnetsnmpagent
     #
-    AH_TOP([#define config_belongs_in(x) NETSNMP_REQUIRE_SEMICOLON])
+    AH_TOP([#define config_belongs_in(x)])
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
       changequote(, )
-      module_type=`cat module_tmp_header.i | \
+      module_type=`$MODULECPP module_tmp_header.h | \
                    $SED -n 's@.*config_belongs_in(\([^)]*\)).*@\1@p'`
       changequote([, ])
     fi
@@ -374,8 +277,8 @@ while test "x$new_module_list" != "x"; do
       	#
         # check if $i has any conflicts
         #
-        AH_TOP([#define config_exclude(x) NETSNMP_REQUIRE_SEMICOLON])
-        new_list_excl=`cat module_tmp_header.i | \
+        AH_TOP([#define config_exclude(x)])
+        new_list_excl=`$MODULECPP module_tmp_header.h | \
                        $SED -n 's/.*config_exclude(\(.*\)).*/\1/p'`
 	if test "x$new_list_excl" != "x"; then
           AC_MSG_MODULE_DBG("$i excludes $new_list_excl")
@@ -403,9 +306,9 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any architecture specific requirements
         #
-        AH_TOP([#define config_arch_require(x,y) NETSNMP_REQUIRE_SEMICOLON])
+        AH_TOP([#define config_arch_require(x,y)])
         changequote(, )
-        new_list_arch=`cat module_tmp_header.i | \
+        new_list_arch=`$MODULECPP module_tmp_header.h | \
                        $SED -n 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/p'`
         changequote([, ])
 	if test "x$new_list_arch" != "x"; then
@@ -425,8 +328,8 @@ while test "x$new_module_list" != "x"; do
       	# macro: config_version_require((base, version, version-modules, ...))
       	#  - lists alternative modules used from different versions.
         #
-        AH_TOP([#define config_version_require(x) NETSNMP_REQUIRE_SEMICOLON])
-        [new_list_alt3=`cat module_tmp_header.i | \
+        AH_TOP([#define config_version_require(x)])
+        [new_list_alt3=`$MODULECPP module_tmp_header.h | \
             $AWK '
                 BEGIN {
                     if("'"$enable_new_features"'" == "yes")
@@ -467,8 +370,8 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any other required modules
         #
-        AH_TOP([#define config_require(x) NETSNMP_REQUIRE_SEMICOLON])
-        new_list="$new_list `cat module_tmp_header.i | \
+        AH_TOP([#define config_require(x)])
+        new_list="$new_list `$MODULECPP module_tmp_header.h | \
                   $SED -n 's/.*config_require(\(.*\)).*/\1/p'`"
         AC_MSG_MODULE_DBG(" $i will test: $new_list")
 	if test "x$new_list" != "x"; then
@@ -504,8 +407,8 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any mibs to add
         #
-        AH_TOP([#define config_add_mib(x) NETSNMP_REQUIRE_SEMICOLON])
-        new_mibs=`cat module_tmp_header.i | \
+        AH_TOP([#define config_add_mib(x)])
+        new_mibs=`$MODULECPP module_tmp_header.h | \
                   $SED -n 's/.*config_add_mib(\(.*\)).*/\1/p'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
@@ -542,7 +445,7 @@ while test "x$new_module_list" != "x"; do
         #-------------------
         # check for unsupported config_load_mib
         #
-        if cat module_tmp_header.i | $GREP -q config_load_mib; then
+        if $MODULECPP module_tmp_header.h | $GREP -q config_load_mib; then
           AC_MSG_WARN([mib module error])
       	  AC_MSG_WARN([mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.])
         fi # grep config_load_mib
@@ -551,9 +454,9 @@ while test "x$new_module_list" != "x"; do
         # check for config_parse_dot_conf
         #  (generally not used any longer; old auto-load a .conf token)
         #
-        AH_TOP([#define config_parse_dot_conf(w,x,y,z) NETSNMP_REQUIRE_SEMICOLON])
+        AH_TOP([#define config_parse_dot_conf(w,x,y,z)])
         changequote(, )
-        cat module_tmp_header.i | \
+        $MODULECPP module_tmp_header.h | \
         $SED -n 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@p' >> $mibdir/mib_module_dot_conf.h
 	changequote([, ])
 
@@ -563,8 +466,8 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any errors, or warnings
         #
-        AH_TOP([#define config_error(x) NETSNMP_REQUIRE_SEMICOLON])
-        error=`cat module_tmp_header.i | \
+        AH_TOP([#define config_error(x)])
+        error=`$MODULECPP module_tmp_header.h | \
                $SED -n 's/.*config_error(\(.*\)).*/\1/p'`
 	if test "x$error" != "x"; then
           echo
@@ -576,8 +479,8 @@ while test "x$new_module_list" != "x"; do
       	# macro: config_warning(warning text)
       	#  - used to signal a configuration "warning" to be printed to the user
         #
-        AH_TOP([#define config_warning(x) NETSNMP_REQUIRE_SEMICOLON])
-        warning=`cat module_tmp_header.i | \
+        AH_TOP([#define config_warning(x)])
+        warning=`$MODULECPP module_tmp_header.h | \
                  $SED -n 's/.*config_warning(\(.*\)).*/\1/p'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
@@ -782,7 +685,7 @@ EOFOCFIN
 done
 
 # cleanup
-rm -f conftest.$ac_ext module_tmp_header.i
+rm -f conftest.$ac_ext module_tmp_header.h
 
 #-------------------
 # build module lists for Makefiles
@@ -833,7 +736,7 @@ changequote([, ])
 
 if test $module_debug -eq 1; then
    echo -e "\nFinal module list: $module_list_code"
-   exit 1
+   exit
 fi
 if test "x$with_mib_cfg_checks" = "xyes"; then
   AC_MSG_CACHE_ADD([Agent Module list: $module_list_code])
@@ -889,8 +792,8 @@ if test "x$NETSNMP_DEFAULT_MIBS" = "x"; then
 fi
 if test "x$ENV_SEPARATOR" != "x"; then
   :
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-  # mingw32 uses ';' as the default environment variable separator
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  # mingw32 and cygwin use ';' as the default environment variable separator
   ENV_SEPARATOR=";"
   NETSNMP_DEFAULT_MIBS=`echo "$NETSNMP_DEFAULT_MIBS" | $SED 's/:/;/g'`
   default_mibs=`echo "$default_mibs" | $SED 's/:/;/g'`
@@ -911,8 +814,8 @@ AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
 #
 
 if echo " $agent_module_list " | \
-   $FGREP ' agentx/agentx_config ' | \
-   $FGREP ' agentx/protocol ' > /dev/null ; then
+   fgrep ' agentx/agentx_config ' | \
+   fgrep ' agentx/protocol ' > /dev/null ; then
    NETSNMP_HAVE_AGENTX_LIBS_TRUE=''
    NETSNMP_HAVE_AGENTX_LIBS_FALSE='#'
 else

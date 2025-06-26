@@ -18,21 +18,17 @@ PARSEOBJS	=
 CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
-help:
+all:
 	@echo "Select one of the following targets to run:"
 	@echo ""
 	@echo "  make test        -- default test suites"
 	@echo "  make testall     -- Run all available tests"
 	@echo "  make testfailed  -- Run only the tests that failed last time."
 	@echo "  make testsimple  -- Run tests directly with simple_run"
-	@echo "  make fuzz-tests  -- Run fuzzing related tests"
 	@echo ""
 	@echo "Set additional test parameters with TESTOPTS=args"
 	@echo ""
 	@echo "Also see the RUNFULLTESTS script for details"
-
-fuzz-tests:
-	(cd fuzzing && ./build.sh)
 
 test:
 	@$(srcdir)/check_for_pskill
@@ -65,16 +61,16 @@ test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run
 
 etest:    etimetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} ${LDFLAGS} -o $@ etimetest.o $(PARSEOBJS) ${LIBS}
+	${CC} -o $@ etimetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 ktest:    keymanagetest.o $(PARSEOBJS) $(USELIBS)
-	${CC} ${LDFLAGS} -o $@ keymanagetest.o $(PARSEOBJS) ${LIBS}
+	${CC} -o $@ keymanagetest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 misctest:    misctest.o $(PARSEOBJS) $(USELIBS)
-	${CC} ${LDFLAGS} -o $@ misctest.o $(PARSEOBJS) ${LIBS}
+	${CC} -o $@ misctest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 stest:    scapitest.o $(PARSEOBJS) $(USELIBS)
-	${CC} ${LDFLAGS} -o $@ scapitest.o $(PARSEOBJS) ${LIBS}
+	${CC} -o $@ scapitest.o $(PARSEOBJS) ${LDFLAGS} ${LIBS} 
 
 clean: testclean
 	rm -f *.o core *.core $(TARG)

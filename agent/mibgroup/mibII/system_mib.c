@@ -8,7 +8,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -16,23 +16,23 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
 
-#ifdef HAVE_UTSNAME_H
+#if HAVE_UTSNAME_H
 #include <utsname.h>
 #else
-#ifdef HAVE_SYS_UTSNAME_H
+#if HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
 #endif
@@ -50,7 +50,7 @@
 #include "updates.h"
 #include "agent_global_vars.h"
 
-netsnmp_feature_require(watcher_read_only_int_scalar);
+netsnmp_feature_require(watcher_read_only_int_scalar)
 
         /*********************
 	 *
@@ -216,7 +216,7 @@ handle_sysServices(netsnmp_mib_handler *handler,
                    netsnmp_agent_request_info *reqinfo,
                    netsnmp_request_info *requests)
 {
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
     if (reqinfo->mode == MODE_GET && !sysServicesConfiged)
         netsnmp_request_set_error(requests, SNMP_NOSUCHINSTANCE);
 #endif
@@ -248,7 +248,7 @@ init_system_mib(void)
             utsName.machine);
     version_descr[ sizeof(version_descr)-1 ] = 0;
 #else
-#ifdef HAVE_EXECV
+#if HAVE_EXECV
     struct extensible extmp;
 
     /*

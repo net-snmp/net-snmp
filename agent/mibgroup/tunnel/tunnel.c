@@ -324,7 +324,7 @@ setTunnelParm(char *ifname, struct ip_tunnel_parm *parm)
 
 
 /*
- * update a struct tunnel. Its index and ifname elements have to be set.
+ * update a struct tunnel. its index and ifname elements have to be set.
  */
 static struct tunnel *
 updateTunnel(struct tunnel *tunnel)
@@ -358,7 +358,7 @@ updateTunnel(struct tunnel *tunnel)
          * NOTE: this ioctl does not guarantee 6 bytes of a physaddr.
          * In particular, a 'sit0' interface only appears to get back
          * 4 bytes of sa_data. We don't use sa_data here, or we'd
-         * need to memset it to 0 before the ioctl.
+         * need to memset it to 0 before the ioct.
          */
         strlcpy(ifrq.ifr_name, tunnel->ifname, sizeof(ifrq.ifr_name));
         if (ioctl(fd, SIOCGIFHWADDR, &ifrq) == 0)
@@ -612,13 +612,12 @@ writeLocalAddress(int action, unsigned char *var_val,
         if (var_val_len != 4) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	NETSNMP_FALLTHROUGH;
+	/* FALL THROUGH */
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
             return SNMP_ERR_NOSUCHNAME;
         }
-        NETSNMP_FALLTHROUGH;
     case FREE:
         break;
     case ACTION:
@@ -659,7 +658,7 @@ writeRemoteAddress(int action, unsigned char *var_val,
         if (var_val_len != 4) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	NETSNMP_FALLTHROUGH;
+	/* FALL THROUGH */
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
@@ -706,7 +705,7 @@ writeHopLimit(int action, unsigned char *var_val,
         if (var_val_len > sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	NETSNMP_FALLTHROUGH;
+	/* FALL THROUGH */
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {
@@ -753,7 +752,7 @@ writeTOS(int action, unsigned char *var_val,
         if (var_val_len > sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
-	NETSNMP_FALLTHROUGH;
+	/* FALL THROUGH */
     case RESERVE2:
         tunnel = getTunnelByIfIndex((int) name[name_len - 1]);
         if (!tunnel) {

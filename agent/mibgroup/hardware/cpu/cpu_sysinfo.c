@@ -45,13 +45,13 @@ void init_cpu_sysinfo( void )
 
     /* allocate sysinfo for all cpus + global stats */
 
-    sinfo_cpus = calloc(cpu_count, sinfo_ksize);
+    sinfo_cpus = (struct sysinfo *) calloc(cpu_count, sinfo_ksize);
     if (!sinfo_cpus) {
         snmp_log_perror("init_cpu_sysinfo: Couldn't allocate memory bytes for sinfo_cpus");
         exit(1);
     }
 
-    sinfo_gen = calloc(1, sinfo_ksize);
+    sinfo_gen = (struct sysinfo *) calloc(1, sinfo_ksize);
     if (!sinfo_gen) {
         snmp_log_perror("init_cpu_sysinfo: Couldn't allocate memory bytes for sinfo_gen");
         exit(1);

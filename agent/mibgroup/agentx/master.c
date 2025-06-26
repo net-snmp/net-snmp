@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -15,7 +15,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
-#ifdef HAVE_IO_H
+#if HAVE_IO_H
 #include <io.h>
 #endif
 
@@ -24,20 +24,20 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #include <errno.h>
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
@@ -51,9 +51,9 @@
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 
-netsnmp_feature_require(handler_mark_requests_as_delegated);
-netsnmp_feature_require(unix_socket_paths);
-netsnmp_feature_require(free_agent_snmp_session_by_session);
+netsnmp_feature_require(handler_mark_requests_as_delegated)
+netsnmp_feature_require(unix_socket_paths)
+netsnmp_feature_require(free_agent_snmp_session_by_session)
 
 void
 real_init_master(void)
@@ -178,17 +178,13 @@ real_init_master(void)
                         agentx_sock_user = -1;
                     if (agentx_sock_group == 0 )
                         agentx_sock_group = -1;
-                    NETSNMP_IGNORE_RESULT(chown(name, agentx_sock_user,
-                                                agentx_sock_group));
+                    chown(name, agentx_sock_user, agentx_sock_group);
                 }
             }
 #endif
             session =
                 snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
                               agentx_realloc_build, agentx_check_packet, NULL);
-            /* snmp_add_full() frees 't' upon failure. */
-            if (!session)
-                t = NULL;
         }
         if (session == NULL) {
             netsnmp_transport_free(t);
@@ -216,6 +212,7 @@ agentx_got_response(int operation,
     int             i, ret;
     netsnmp_request_info *requests, *request;
     netsnmp_variable_list *var;
+    netsnmp_session *ax_session;
 
     cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
@@ -224,13 +221,13 @@ agentx_got_response(int operation,
         /* response is too late, free the cache */
         if (magic)
             netsnmp_free_delegated_cache((netsnmp_delegated_cache*) magic);
-        return 1;
+        return 0;
     }
     requests = cache->requests;
 
     switch (operation) {
     case NETSNMP_CALLBACK_OP_TIMED_OUT:{
-            struct session_list *s = snmp_sess_pointer(session);
+            void           *s = snmp_sess_pointer(session);
             DEBUGMSGTL(("agentx/master", "timeout on session %8p req=0x%x\n",
                         session, (unsigned)reqid));
 
@@ -260,6 +257,8 @@ agentx_got_response(int operation,
             } else {
                 DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
             }
+            ax_session = (netsnmp_session *) cache->localinfo;
+            netsnmp_free_agent_snmp_session_by_session(ax_session, NULL);
             netsnmp_free_delegated_cache(cache);
             return 0;
         }
@@ -279,11 +278,6 @@ agentx_got_response(int operation,
         netsnmp_set_request_error(cache->reqinfo, requests,     /* XXXWWW: should be index=0 */
                                   SNMP_ERR_GENERR);
         netsnmp_free_delegated_cache(cache);
-        return 0;
-
-    case NETSNMP_CALLBACK_OP_RESEND:
-        DEBUGMSGTL(("agentx/master", "resend on session %8p req=0x%x\n",
-                    session, (unsigned)reqid));
         return 0;
 
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -614,6 +608,8 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
     if (result == 0) {
         snmp_free_pdu(pdu);
+        if (cb_data)
+            netsnmp_free_delegated_cache((netsnmp_delegated_cache*) cb_data);
     }
 
     return SNMP_ERR_NOERROR;

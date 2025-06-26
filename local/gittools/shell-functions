@@ -4,7 +4,7 @@
 
 nsbuildroot=${nsbuildroot:=$HOME/ns-build-root}
 nsecho=${nsecho:=}
-nsbranches=${nsbranches:="V5-9-patches master"}
+nsbranches=${nsbranches:="V5-4-patches V5-7-patches master"}
 
 # set nsverbose to ':' if you don't want verbose output of what's going on
 nsverbose=${nsverbose:="echo ::: Net-SNMP: "}
@@ -26,7 +26,7 @@ _ns_switchtobuilddir () {
 
 _ns_getbuilddir() {
     nssuffix=${1:-$nssuffix}
-    nsbranch=`git branch | grep -E '^\*' | sed 's/^..//'`
+    nsbranch=`git branch | egrep '^\*' | sed 's/^..//'`
     NSBUILDDIR="$nsbuildroot/$nsbranch"
     NSSRCDIR="$PWD"
 
@@ -334,7 +334,7 @@ nsrollup() {
             fi
 
 	    if [ -f dist/release ] ; then
-		if [ "`grep -E ^$branch dist/release`" = "$branch rc" ] ; then
+		if [ "`egrep ^$branch dist/release`" = "$branch rc" ] ; then
 		    $nsverbose Skipping: branch is in rc phase of release
 		    nsbranchesnotdone="$nsbranchesnotdone $branch"
 
@@ -411,7 +411,7 @@ nsrollup() {
 }
 
 nspull() {
-    nscurrentbranch=`git branch | grep -E '^\*' | sed 's/^..//'`
+    nscurrentbranch=`git branch | egrep '^\*' | sed 's/^..//'`
     _ns_checkclean
     if [ $NSCLEAN != 1 ]; then
 	return

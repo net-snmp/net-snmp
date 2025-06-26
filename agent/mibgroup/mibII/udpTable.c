@@ -9,7 +9,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -17,20 +17,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#ifdef HAVE_NETINET_UDP_H
+#if HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
-#ifdef HAVE_NETINET_UDP_VAR_H
+#if HAVE_NETINET_UDP_VAR_H
 #include <netinet/udp_var.h>
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #if defined(HAVE_KVM_GETFILE2) || !defined(openbsd5)
 #undef HAVE_KVM_GETFILES
 #endif
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #include <kvm.h>
 #include <sys/sysctl.h>
 #define _KERNEL
@@ -97,21 +97,13 @@ struct netsnmp_udpEntry_s {
 #if defined(freebsd4) || defined(darwin) || defined(osf5)
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
 struct netsnmp_inpcb_s {
-#if __FreeBSD_version >= 1200026
-    struct xinpcb   pcb;
-#else
     struct inpcb    pcb;
-#endif
     int             state;
     netsnmp_inpcb  *inp_next;
 };
 #define	UDPTABLE_ENTRY_TYPE	netsnmp_inpcb 
 #define	UDPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
 #define	UDPTABLE_LOCALPORT	pcb.inp_lport
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
-#define	UDPTABLE_ENTRY_TYPE	struct in4pcb 
-#define	UDPTABLE_LOCALADDRESS	in4p_ip.ip_src.s_addr
-#define	UDPTABLE_LOCALPORT	in4p_pcb.inp_lport
 #else
 #define	UDPTABLE_ENTRY_TYPE	struct inpcb 
 #define	UDPTABLE_LOCALADDRESS	inp_laddr.s_addr 
@@ -330,7 +322,7 @@ udpTable_next_entry( void **loop_context,
     int i = (intptr_t)*loop_context;
     long port;
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
     while (i < udp_size && (udp_head[i].so_protocol != IPPROTO_UDP
 	    || udp_head[i].so_family != AF_INET))
 	i++;
@@ -434,13 +426,7 @@ udpTable_next_entry( void **loop_context,
      * and update the loop context ready for the next one.
      */
     *data_context = (void*)entry;
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
-    *loop_context = (void*)TAILQ_NEXT(entry, in4p_pcb.inp_queue);
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-    *loop_context = (void*)TAILQ_NEXT(entry, inp_queue);
-#else
     *loop_context = (void*)entry->INP_NEXT_SYMBOL;
-#endif
     return index;
 }
 
@@ -450,13 +436,7 @@ udpTable_free(netsnmp_cache *cache, void *magic)
     UDPTABLE_ENTRY_TYPE	 *p;
     while (udp_head) {
         p = udp_head;
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
-        udp_head = TAILQ_NEXT(udp_head, in4p_pcb.inp_queue);
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-        udp_head = TAILQ_NEXT(udp_head, inp_queue);
-#else
         udp_head = udp_head->INP_NEXT_SYMBOL;
-#endif
         free(p);
     }
 
@@ -569,7 +549,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     return 0;
 }
 
-#elif defined(HAVE_KVM_GETFILES)
+#elif HAVE_KVM_GETFILES
 
 int
 udpTable_load(netsnmp_cache *cache, void *vmagic)
@@ -728,11 +708,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
-#if __FreeBSD_version >= 1200026
-        memcpy(&nnew->pcb, xig, sizeof(struct xinpcb));
-#else
         memcpy(&nnew->pcb, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
-#endif
 	nnew->inp_next = udp_head;
 	udp_head   = nnew;
 #if defined(dragonfly)
@@ -768,11 +744,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     /*
      *  Set up a linked list
      */
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-    entry  = TAILQ_FIRST(&table.inpt_queue);
-#else
     entry  = table.INP_FIRST_SYMBOL;
-#endif
     while (entry) {
    
         nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
@@ -788,11 +760,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 	nnew->INP_NEXT_SYMBOL = udp_head;
 	udp_head = nnew;
 
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-        if (entry == TAILQ_FIRST(&table.inpt_queue))
-#else
         if (entry == table.INP_FIRST_SYMBOL)
-#endif
             break;
     }
 
@@ -833,20 +801,11 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
             break;
         }
 
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-        entry    = TAILQ_NEXT(nnew, inp_queue);        /* Next kernel entry */
-       TAILQ_NEXT(nnew, inp_queue) = udp_head;
-#else
         entry    = nnew->INP_NEXT_SYMBOL;		/* Next kernel entry */
 	nnew->INP_NEXT_SYMBOL = udp_head;
-#endif
 	udp_head = nnew;
 
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-        if (entry == TAILQ_FIRST(&table.inpt_queue))
-#else
         if (entry == udp_inpcb.INP_NEXT_SYMBOL)
-#endif
             break;
     }
 

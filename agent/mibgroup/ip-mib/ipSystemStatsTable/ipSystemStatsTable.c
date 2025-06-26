@@ -332,7 +332,7 @@ ipSystemStatsTable_indexes_set(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != ipSystemStatsTable_index_to_oid(&rowreq_ctx->oid_idx,
                                              &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

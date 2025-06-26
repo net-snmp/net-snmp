@@ -3,7 +3,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/scalar.h>
 
-#include <stdint.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -82,7 +81,6 @@ init_nsDebug(void)
      */
     iinfo      = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
     if (!iinfo) {
-        free(table_info);
         return;
     }
     iinfo->get_first_data_point = get_first_debug_entry;
@@ -95,7 +93,7 @@ init_nsDebug(void)
      */
     netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
-            "nsDebugTable", handle_nsDebugTable,
+            "tzDebugTable", handle_nsDebugTable,
             nsDebugTokenTable_oid, OID_LENGTH(nsDebugTokenTable_oid),
             HANDLER_CAN_RWRITE),
         iinfo);
@@ -171,7 +169,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
     switch (reqinfo->mode) {
 
     case MODE_GET:
-	enabled = snmp_get_do_debugoutputall();
+	enabled = snmp_get_do_debugging();
 	if ( enabled==0 )
 	    enabled=2;		/* false */
 	for (request = requests; request; request=request->next) {
@@ -207,7 +205,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
         enabled = *requests->requestvb->val.integer;
 	if (enabled == 2 )	/* false */
 	    enabled = 0;
-	snmp_set_do_debugoutputall( enabled );
+	snmp_set_do_debugging( enabled );
         break;
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
@@ -274,6 +272,12 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/*
+ * var_tzIntTableFixed():
+ *   Handle the tzIntTable as a fixed table of NUMBER_TZ_ENTRIES rows,
+ *    with the timezone offset hardwired to be the same as the index.
+ */
+
 netsnmp_variable_list *
 get_first_debug_entry(void **loop_context, void **data_context,
                       netsnmp_variable_list *index,
@@ -282,7 +286,8 @@ get_first_debug_entry(void **loop_context, void **data_context,
     int i;
 
     for (i=0; i<debug_num_tokens; i++) {
-        if (dbg_tokens[i].token_name)
+        /* skip excluded til mib is updated */
+        if (dbg_tokens[i].token_name && (dbg_tokens[i].enabled != 2))
             break;
     }
     if ( i==debug_num_tokens )
@@ -303,7 +308,8 @@ get_next_debug_entry(void **loop_context, void **data_context,
     int i = (int)(intptr_t)*loop_context;
 
     for (i++; i<debug_num_tokens; i++) {
-        if (dbg_tokens[i].token_name)
+        /* skip excluded til mib is updated */
+        if (dbg_tokens[i].token_name && (dbg_tokens[i].enabled != 2))
             break;
     }
     if ( i==debug_num_tokens )
@@ -325,9 +331,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 {
     long status;
     netsnmp_request_info       *request    =NULL;
-#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_table_request_info *table_info    =NULL;
-#endif
     netsnmp_token_descr        *debug_entry=NULL;
 
     switch (reqinfo->mode) {
@@ -340,7 +344,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
                            netsnmp_extract_iterator_context(request);
             if (!debug_entry)
                 continue;
-	    status = debug_entry->enabled;
+	    status = (debug_entry->enabled ? RS_ACTIVE : RS_NOTINSERVICE);
 	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
                                      (u_char*)&status, sizeof(status));
 	}
@@ -414,10 +418,14 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
             switch (*request->requestvb->val.integer) {
             case RS_ACTIVE:
             case RS_NOTINSERVICE:
+                /*
+		 * Update the enabled field appropriately
+		 */
                 debug_entry = (netsnmp_token_descr*)
                                netsnmp_extract_iterator_context(request);
                 if (debug_entry)
-		    debug_entry->enabled = *request->requestvb->val.integer;
+                    debug_entry->enabled =
+                        (*request->requestvb->val.integer == RS_ACTIVE);
 		break;
 
             case RS_CREATEANDWAIT:

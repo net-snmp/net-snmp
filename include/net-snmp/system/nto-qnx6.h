@@ -20,6 +20,9 @@
  */
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_queue.cqe_next
+#undef INP_PREV_SYMBOL
+#define INP_PREV_SYMBOL inp_queue.cqe_prev
+#define HAVE_INPCBTABLE 1
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"

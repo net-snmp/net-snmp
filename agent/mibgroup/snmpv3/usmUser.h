@@ -18,8 +18,8 @@
  * we use header_generic from the util_funcs module
  */
 
-config_require(util_funcs/header_generic);
-config_add_mib(SNMP-USER-BASED-SM-MIB);
+config_require(util_funcs/header_generic)
+config_add_mib(SNMP-USER-BASED-SM-MIB)
 
     /*
      * Magic number definitions: 
@@ -46,7 +46,10 @@ config_add_mib(SNMP-USER-BASED-SM-MIB);
      void            shutdown_usmUser(void);
      int             store_usmUser(int majorID, int minorID,
                                    void *serverarg, void *clientarg);
-     int             usm_parse_oid(const oid * oidIndex, size_t oidLen,
+     oid            *usm_generate_OID(oid * prefix, size_t prefixLen,
+                                      struct usmUser *uptr,
+                                      size_t * length);
+     int             usm_parse_oid(oid * oidIndex, size_t oidLen,
                                    unsigned char **engineID,
                                    size_t * engineIDLen,
                                    unsigned char **name, size_t * nameLen);

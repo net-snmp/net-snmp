@@ -31,7 +31,7 @@
  * if --enable-minimalist has been turned on, we need to register
  * the support we need so the needed functions aren't removed at compile time
  */
-netsnmp_feature_require(long_instance);
+netsnmp_feature_require(long_instance)
 
 /*
  * Then, we declare the variables we want to be accessed 
@@ -60,7 +60,7 @@ init_scalar_int(void)
      * the output of this debugging statement. 
      */
     DEBUGMSGTL(("example_scalar_int",
-                "Initializing example scalar int.  Default value = %ld\n",
+                "Initalizing example scalar int.  Default value = %ld\n",
                 example1));
 
     /*
@@ -80,5 +80,5 @@ init_scalar_int(void)
                                   &example1, NULL);
 
     DEBUGMSGTL(("example_scalar_int",
-                "Done initializing example scalar int\n"));
+                "Done initalizing example scalar int\n"));
 }

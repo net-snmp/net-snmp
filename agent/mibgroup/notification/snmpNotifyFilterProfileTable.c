@@ -15,10 +15,10 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -37,7 +37,7 @@
 #include "snmpNotifyFilterProfileTable.h"
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(header_complex_find_entry);
+netsnmp_feature_require(header_complex_find_entry)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
@@ -50,10 +50,9 @@ netsnmp_feature_require(header_complex_find_entry);
 
 oid             snmpNotifyFilterProfileTable_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 13, 1, 2 };
-#ifndef NETSNMP_NO_WRITE_SUPPORT
 static const size_t table_offset =
-    OID_LENGTH(snmpNotifyFilterProfileTable_variables_oid) + 3 - 1;
-#endif
+    sizeof(snmpNotifyFilterProfileTable_variables_oid)/sizeof(oid) + 3 - 1;
+
 
 /*
  * variable2 snmpNotifyFilterProfileTable_variables:
@@ -200,9 +199,11 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     return NULL;
 }
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
+
 
 static struct snmpNotifyFilterProfileTable_data *StorageNew;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 int
 write_snmpNotifyFilterProfileName(int action,
@@ -246,7 +247,7 @@ write_snmpNotifyFilterProfileName(int action,
          */
         tmpvar = StorageTmp->snmpNotifyFilterProfileName;
         tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
-        StorageTmp->snmpNotifyFilterProfileName = calloc(1, var_val_len + 1);
+        StorageTmp->snmpNotifyFilterProfileName = (char*)calloc(1, var_val_len + 1);
         if (NULL == StorageTmp->snmpNotifyFilterProfileName)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;

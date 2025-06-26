@@ -31,7 +31,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -69,7 +69,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <winerror.h>
 #endif
 
-netsnmp_feature_child_of(get_routes, libnetsnmpmibs);
+netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -111,14 +111,10 @@ var_ipRouteEntry(struct variable *vp,
      * 1.3.6.1.2.1.4.21.1.1.A.B.C.D,  where A.B.C.D is IP address.
      * IPADDR starts at offset 10.
      */
-    struct rt_msghdr *rtp;
+    struct rt_msghdr *rtp, *saveRtp = 0;
     register int    Save_Valid, result;
-#if 0
-    struct rt_msghdr *saveRtp = 0;
     static int      saveNameLen = 0, saveExact = 0;
-    static oid      saveName[MAX_OID_LEN];
-#endif
-    static oid      Current[MAX_OID_LEN];
+    static oid      saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char         *cp;
     u_char         *ap;
     oid            *op;
@@ -213,7 +209,6 @@ var_ipRouteEntry(struct variable *vp,
         }
         if (ap >= all_routes_end || rtp->rtm_type == 0)
             return 0;
-#if 0
         /*
          *  Save in the 'cache'
          */
@@ -223,7 +218,6 @@ var_ipRouteEntry(struct variable *vp,
         saveNameLen = *length;
         saveExact = exact;
         saveRtp = rtp;
-#endif
         /*
          *  Return the name
          */
@@ -247,25 +241,25 @@ var_ipRouteEntry(struct variable *vp,
         long_return = (rtp->rtm_flags & RTF_UP) ? 1 : 0;
         return (u_char *) & long_return;
     case IPROUTEMETRIC2:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC3:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC4:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
@@ -291,7 +285,7 @@ var_ipRouteEntry(struct variable *vp,
             ? 2 : (rtp->rtm_flags & RTF_DYNAMIC) ? 4 : 1;
         return (u_char *) & long_return;
     case IPROUTEAGE:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -307,7 +301,7 @@ var_ipRouteEntry(struct variable *vp,
         }
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return NETSNMP_REMOVE_CONST(void *, nullOid);
+        return (u_char *) nullOid;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -408,13 +402,13 @@ init_var_route(void)
 
 #ifndef solaris2
 
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
 static union {
     struct sockaddr_in sin;
     u_short         data[128];
 } klgetsatmp;
 
-static struct sockaddr_in *
+struct sockaddr_in *
 klgetsa(struct sockaddr_in *dst)
 {
     if (!NETSNMP_KLOOKUP(dst, (char *) &klgetsatmp.sin, sizeof klgetsatmp.sin)) {
@@ -449,7 +443,7 @@ var_ipRouteEntry(struct variable * vp,
     u_char         *cp;
     oid            *op;
     static in_addr_t addr_ret;
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
     struct sockaddr_in *sa;
 #endif
 #if !defined(linux) && !defined(hpux11)
@@ -463,7 +457,7 @@ var_ipRouteEntry(struct variable * vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (rtsize <= 1)
@@ -511,7 +505,7 @@ var_ipRouteEntry(struct variable * vp,
         Route_Scan_Reload();
 #endif
         for (RtIndex = 0; RtIndex < rtsize; RtIndex++) {
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
             sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
             cp = (u_char *) & (sa->sin_addr.s_addr);
 #elif defined(hpux11)
@@ -554,7 +548,7 @@ var_ipRouteEntry(struct variable * vp,
     switch (vp->magic) {
     case IPROUTEDEST:
         *var_len = sizeof(addr_ret);
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
         return (u_char *) & (sa->sin_addr.s_addr);
 #elif defined(hpux11)
@@ -606,14 +600,14 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTEMETRIC5:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
         *var_len = sizeof(addr_ret);
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
         return (u_char *) & (sa->sin_addr.s_addr);
 #elif defined(hpux11)
@@ -656,12 +650,12 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
     case IPROUTEMASK:
         *var_len = sizeof(addr_ret);
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
         /*
          * XXX - Almost certainly not right
          * but I don't have a suitable system to test this on 
          */
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         addr_ret = 0;
@@ -699,7 +693,7 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & addr_ret;
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return NETSNMP_REMOVE_CONST(void *, nullOid);
+        return (u_char *) nullOid;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -828,10 +822,16 @@ var_ipRouteEntry(struct variable * vp,
         addr_ret = Lowentry.ipRouteDest;
         return (u_char *) & addr_ret;
     case IPROUTEIFINDEX:
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
         Lowentry.ipRouteIfIndex.o_bytes[Lowentry.ipRouteIfIndex.o_length] = '\0';
         long_return =
             netsnmp_access_interface_index_find(
                 Lowentry.ipRouteIfIndex.o_bytes);
+#else
+        long_return =
+           Interface_Index_By_Name(Lowentry.ipRouteIfIndex.o_bytes,
+                                   Lowentry.ipRouteIfIndex.o_length);
+#endif
         return (u_char *) & long_return;
     case IPROUTEMETRIC1:
         long_return = Lowentry.ipRouteMetric1;
@@ -877,38 +877,17 @@ var_ipRouteEntry(struct variable * vp,
 static int      qsort_compare(const void *, const void *);
 #endif
 
-static void append_rtentry(struct rtentry *rt)
-{
-    if (rtsize >= rtallocate) {
-        struct rtentry **tmp_rthead;
-
-        tmp_rthead = realloc(rthead, 2 * rtallocate * sizeof(struct rtentry *));
-        if (!tmp_rthead)
-            return;
-        rthead = tmp_rthead;
-        memset(&rthead[rtallocate], 0, rtallocate * sizeof(struct rtentry *));
-        rtallocate *= 2;
-    }
-    if (!rthead[rtsize]) {
-        rthead[rtsize] = malloc(sizeof(struct rtentry));
-        if (!rthead[rtsize])
-            return;
-    }
-    memcpy(rthead[rtsize], rt, sizeof(struct rtentry));
-    rtsize++;
-}
-
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT) || defined (hpux11)
 
 #if defined(RTENTRY_4_4) && !defined(hpux11)
-static void
+void
 load_rtentries(struct radix_node *pt)
 {
     struct radix_node node;
     RTENTRY         rt;
     struct ifnet    ifnet;
     char            name[16], temp[16];
-#if !defined(HAVE_STRUCT_IFNET_IF_XNAME)
+#if !HAVE_STRUCT_IFNET_IF_XNAME
     register char  *cp;
 #endif
 
@@ -941,7 +920,7 @@ load_rtentries(struct radix_node *pt)
                 DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
                 return;
             }
-#ifdef HAVE_STRUCT_IFNET_IF_XNAME
+#if HAVE_STRUCT_IFNET_IF_XNAME
 #if defined(netbsd1) || defined(openbsd2)
             strlcpy(name, ifnet.if_xname, sizeof(name));
 #else
@@ -975,12 +954,31 @@ load_rtentries(struct radix_node *pt)
                     break;
             }
         }
-#ifdef CHECK_RT_FLAGS
+#if CHECK_RT_FLAGS
         if (((rt.rt_flags & RTF_CLONING) != RTF_CLONING)
             && ((rt.rt_flags & RTF_LLINFO) != RTF_LLINFO)) {
 #endif
-            append_rtentry(&rt);
-#ifdef CHECK_RT_FLAGS
+            /*
+             * check for space and malloc 
+             */
+            if (rtsize >= rtallocate) {
+                rthead =
+                    (RTENTRY **) realloc((char *) rthead,
+                                         2 * rtallocate *
+                                         sizeof(RTENTRY *));
+                memset((char *) &rthead[rtallocate], (0),
+                       rtallocate * sizeof(RTENTRY *));
+
+                rtallocate *= 2;
+            }
+            if (!rthead[rtsize])
+                rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+            /*
+             *      Add this to the database
+             */
+            memcpy((char *) rthead[rtsize], (char *) &rt, sizeof(RTENTRY));
+            rtsize++;
+#if CHECK_RT_FLAGS
         }
 #endif
 
@@ -1064,11 +1062,12 @@ Route_Scan_Reload(void)
      * *  Makes sure we have SOME space allocated for new routing entries
      */
     if (!rthead) {
-        rthead = calloc(100, sizeof(RTENTRY *));
+        rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
         if (!rthead) {
             snmp_log(LOG_ERR, "route table malloc fail\n");
             return;
         }
+        memset((char *) rthead, (0), 100 * sizeof(RTENTRY *));
         rtallocate = 100;
     }
 
@@ -1143,7 +1142,27 @@ Route_Scan_Reload(void)
                             break;
                     }
                 }
-                append_rtentry(rt);
+                /*
+                 *      Allocate a block to hold it and add it to the database
+                 */
+                if (rtsize >= rtallocate) {
+                    rthead =
+                        (RTENTRY **) realloc((char *) rthead,
+                                             2 * rtallocate *
+                                             sizeof(RTENTRY *));
+                    memset((char *) &rthead[rtallocate], (0),
+                           rtallocate * sizeof(RTENTRY *));
+
+                    rtallocate *= 2;
+                }
+                if (!rthead[rtsize])
+                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+                /*
+                 *      Add this to the database
+                 */
+                memcpy((char *) rthead[rtsize], (char *) rt,
+                       sizeof(RTENTRY));
+                rtsize++;
             }
         }
         free(routehash);
@@ -1164,9 +1183,9 @@ Route_Scan_Reload(void)
 
 #else
 
-#ifdef HAVE_SYS_MBUF_H
-netsnmp_feature_require(string_append_int);
-netsnmp_feature_require(interface_legacy);
+#if HAVE_SYS_MBUF_H
+netsnmp_feature_require(string_append_int)
+netsnmp_feature_require(interface_legacy)
 static void
 Route_Scan_Reload(void)
 {
@@ -1254,7 +1273,27 @@ Route_Scan_Reload(void)
                             break;
                     }
                 }
-                append_rtentry(rt);
+                /*
+                 *  Allocate a block to hold it and add it to the database
+                 */
+                if (rtsize >= rtallocate) {
+                    rthead =
+                        (RTENTRY **) realloc((char *) rthead,
+                                             2 * rtallocate *
+                                             sizeof(RTENTRY *));
+                    memset((char *) &rthead[rtallocate], (0),
+                           rtallocate * sizeof(RTENTRY *));
+
+                    rtallocate *= 2;
+                }
+                if (!rthead[rtsize])
+                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
+                /*
+                 * *      Add this to the database
+                 */
+                memcpy((char *) rthead[rtsize], (char *) rt,
+                       sizeof(RTENTRY));
+                rtsize++;
             }
         }
         free(routehash);
@@ -1285,7 +1324,7 @@ Route_Scan_Reload(void)
      *  Makes sure we have SOME space allocated for new routing entries
      */
     if (!rthead) {
-        rthead = calloc(100, sizeof(struct rtentry *));
+        rthead = (struct rtentry **) calloc(100, sizeof(struct rtentry *));
         if (!rthead) {
             snmp_log(LOG_ERR, "route table malloc fail\n");
             return;
@@ -1337,7 +1376,26 @@ Route_Scan_Reload(void)
 
         rt->rt_unit = netsnmp_access_interface_index_find(name);
 
-        append_rtentry(rt);
+        /*
+         *  Allocate a block to hold it and add it to the database
+         */
+        if (rtsize >= rtallocate) {
+            rthead = (struct rtentry **) realloc((char *) rthead,
+                                                 2 * rtallocate *
+                                                 sizeof(struct rtentry *));
+            memset(&rthead[rtallocate], 0,
+                   rtallocate * sizeof(struct rtentry *));
+            rtallocate *= 2;
+        }
+        if (!rthead[rtsize])
+            rthead[rtsize] =
+                (struct rtentry *) malloc(sizeof(struct rtentry));
+        /*
+         *  Add this to the database
+         */
+        memcpy((char *) rthead[rtsize], (char *) rt,
+               sizeof(struct rtentry));
+        rtsize++;
     }
 
     fclose(in);
@@ -1377,7 +1435,7 @@ qsort_compare(const void *v1, const void *v2)
 {
     RTENTRY * const *r1 = (RTENTRY * const *) v1;
     RTENTRY * const *r2 = (RTENTRY * const *) v2;
-#ifdef NEED_KLGETSA
+#if NEED_KLGETSA
     register u_long dst1 =
         ntohl(klgetsa((const struct sockaddr_in *) (*r1)->rt_dst)->
               sin_addr.s_addr);
@@ -1420,241 +1478,6 @@ init_var_route(void)
 {
 }
 
-static int
-write_rte(int action,
-          u_char * var_val,
-          u_char var_val_type,
-          size_t var_val_len, u_char * statP, oid * name, size_t length)
-{
-    int             var, retval = NO_ERROR;
-    static PMIB_IPFORWARDROW oldroute_row = NULL;
-    static int      mask_flag = 0, nexthop_flag = 0;
-    static int      index_flag = 0, metric_flag = 0;
-    static int      dest_flag = 0;
-    uint32_t        status = NO_ERROR;
-    /*
-     * object identifier is of form:
-     * 1.3.6.1.2.1.4.21.1.X.A.B.C.D ,  where A.B.C.D is IP address.
-     * IPADDR starts at offset 10.
-     */
-
-    if (length != 14) {
-        snmp_log(LOG_ERR, "length error\n");
-        return SNMP_ERR_NOCREATION;
-    }
-    /*
-     * #define for ipRouteTable entries are 1 less than corresponding sub-id in MIB
-     * * i.e. IPROUTEDEST defined as 0, but ipRouteDest registered as 1
-     */
-    var = name[9] - 1;
-
-    switch (action) {
-    case RESERVE1:
-        switch (var) {
-        case IPROUTEMETRIC1:
-        case IPROUTEMETRIC2:
-        case IPROUTEMETRIC3:
-        case IPROUTEMETRIC4:
-        case IPROUTEMETRIC5:
-        case IPROUTETYPE:
-        case IPROUTEAGE:
-        case IPROUTEIFINDEX:
-            if (var_val_type != ASN_INTEGER) {
-                snmp_log(LOG_ERR, "not integer\n");
-                return SNMP_ERR_WRONGTYPE;
-            }
-            if (var_val_len > sizeof(int)) {
-                snmp_log(LOG_ERR, "bad length\n");
-                return SNMP_ERR_WRONGLENGTH;
-            }
-            if (var == IPROUTETYPE) {
-                if ((*((int *) var_val)) < 2 || (*((int *) var_val)) > 4) {
-                    snmp_log(LOG_ERR, "invalid ipRouteType\n");
-                    return SNMP_ERR_WRONGVALUE;
-                }
-            } else if ((var == IPROUTEIFINDEX) || (var == IPROUTEAGE)) {
-                if ((*((int *) var_val)) < 0) {
-                    snmp_log(LOG_ERR, "invalid ipRouteIfIndex\n");
-                    return SNMP_ERR_WRONGVALUE;
-                }
-            } else {
-                if ((*((int *) var_val)) < -1) {
-                    snmp_log(LOG_ERR, "not right1");
-                    return SNMP_ERR_WRONGVALUE;
-                }
-            }
-            break;
-        case IPROUTENEXTHOP:
-        case IPROUTEMASK:
-        case IPROUTEDEST:
-            if (var_val_type != ASN_IPADDRESS) {
-                snmp_log(LOG_ERR, "not right4");
-                return SNMP_ERR_WRONGTYPE;
-            }
-            if (var_val_len != 4) {
-                snmp_log(LOG_ERR, "incorrect ipAddress length");
-                return SNMP_ERR_WRONGLENGTH;
-            }
-            break;
-        default:
-            DEBUGMSGTL(("snmpd", "unknown sub-id %d in write_rte\n",
-                        var + 1));
-            retval = SNMP_ERR_NOTWRITABLE;
-        }
-        break;
-
-    case RESERVE2:
-        /*
-         * Save the old value, in case of UNDO
-         */
-        if (oldroute_row == NULL) {
-            oldroute_row =
-                (PMIB_IPFORWARDROW) malloc(sizeof(MIB_IPFORWARDROW));
-            *oldroute_row = *route_row;
-        }
-        break;
-
-    case ACTION:               /* Perform the SET action (if reversible) */
-        switch (var) {
-        case IPROUTEMETRIC1:
-            metric_flag = 1;
-            route_row->dwForwardMetric1 = *((int *) var_val);
-            break;
-        case IPROUTEMETRIC2:
-            route_row->dwForwardMetric2 = *((int *) var_val);
-            break;
-        case IPROUTEMETRIC3:
-            route_row->dwForwardMetric3 = *((int *) var_val);
-            break;
-        case IPROUTEMETRIC4:
-            route_row->dwForwardMetric4 = *((int *) var_val);
-            break;
-        case IPROUTEMETRIC5:
-            route_row->dwForwardMetric5 = *((int *) var_val);
-            break;
-        case IPROUTETYPE:
-            route_row->dwForwardType = *((int *) var_val);
-            break;
-        case IPROUTEAGE:
-            /*
-             * Irrespective of supplied value, this will be set with 0.
-             * * As row will be updated and this field gives the number of
-             * * seconds since this route was last updated
-             */
-            route_row->dwForwardAge = *((int *) var_val);
-            break;
-        case IPROUTEIFINDEX:
-            index_flag = 1;
-            route_row->dwForwardIfIndex = *((int *) var_val);
-            break;
-
-        case IPROUTENEXTHOP:
-            nexthop_flag = 1;
-            route_row->dwForwardNextHop = *((DWORD *) var_val);
-            break;
-        case IPROUTEMASK:
-            mask_flag = 1;
-            route_row->dwForwardMask = *((DWORD *) var_val);
-            break;
-        case IPROUTEDEST:
-            dest_flag = 1;
-            route_row->dwForwardDest = *((DWORD *) var_val);
-            break;
-        default:
-            DEBUGMSGTL(("snmpd", "unknown sub-id %d in write_rte\n",
-                        var + 1));
-            retval = SNMP_ERR_NOTWRITABLE;
-        }
-        return retval;
-    case UNDO:
-        /*
-         * Reverse the SET action and free resources
-         */
-        if (oldroute_row) {
-            *route_row = *oldroute_row;
-            free(oldroute_row);
-            oldroute_row = NULL;
-            free(route_row);
-            route_row = NULL;
-        }
-        break;
-
-    case COMMIT:
-        /*
-         * When this case entered 'route_row' will have user supplied values
-         * for asked entries.  That's why it is enough if we call
-         * SetIpForwardEntry/CreateIpForwardEntry only once SetIpForwardENtry
-         * is not done in ACTION phase, as that will reset ipRouteAge on
-         * success and if any varbind fails, then we can't UNDO the change for
-         * ipROuteAge.
-         */
-        if (route_row) {
-            if (!create_flag) {
-
-                if (SetIpForwardEntry(route_row) != NO_ERROR) {
-                    snmp_log(LOG_ERR,
-                             "Can't set route table's row with specified value\n");
-                    retval = SNMP_ERR_COMMITFAILED;
-                } else {
-                    /*
-                     * SET on IpRouteNextHop, IpRouteMask & ipRouteDest
-                     * creates new row.  If Set succeeds, then delete the old
-                     * row.  Don't know yet whether SET on ipRouteIfIndex
-                     * creates new row.  If it creates then index_flag should
-                     * be added to following if statement
-                     */
-
-                    if (dest_flag || nexthop_flag || mask_flag) {
-                        oldroute_row->dwForwardType = 2;
-                        if (SetIpForwardEntry(oldroute_row) != NO_ERROR) {
-                            snmp_log(LOG_ERR,
-                                     "Set on ipRouteTable created new row, but failed to delete the old row\n");
-                            retval = SNMP_ERR_GENERR;
-                        }
-                    }
-                }
-            }
-            /*
-             * Only if create_flag, mask, nexthop, ifIndex and metric are
-             * specified, create new entry.
-             */
-            if (create_flag) {
-                if (mask_flag && nexthop_flag && metric_flag && index_flag) {
-                    if ((status =
-                         CreateIpForwardEntry(route_row)) != NO_ERROR) {
-                        snmp_log(LOG_ERR,
-                                 "Inside COMMIT: CreateIpNetEntry failed, status %u\n",
-                                 status);
-                        retval = SNMP_ERR_COMMITFAILED;
-                    }
-                } else {
-                    /*
-                     * For new entry, mask, nexthop, ifIndex and metric must
-                     * be supplied.
-                     */
-                    snmp_log(LOG_ERR,
-                             "case COMMIT, can't create without index, mask, nextHop and metric\n");
-                    retval = SNMP_ERR_WRONGVALUE;
-                }
-            }
-        }
-        NETSNMP_FALLTHROUGH; /* Is this fall-through intentional or not? */
-
-    case FREE:
-        /*
-         * Free any resources allocated
-         */
-        free(oldroute_row);
-        oldroute_row = NULL;
-        free(route_row);
-        route_row = NULL;
-        mask_flag = nexthop_flag = metric_flag = index_flag = dest_flag =
-            0;
-        break;
-    }
-    return retval;
-}
-
 u_char         *
 var_ipRouteEntry(struct variable *vp,
                  oid * name,
@@ -1684,7 +1507,7 @@ var_ipRouteEntry(struct variable *vp,
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
      **/
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
     saveNameLen = 0;
 #endif
     if (route_row == NULL) {
@@ -1864,7 +1687,7 @@ var_ipRouteEntry(struct variable *vp,
         return (u_char *) & addr_ret;
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return NETSNMP_REMOVE_CONST(void *, nullOid);
+        return (u_char *) nullOid;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -2033,11 +1856,8 @@ var_ipRouteEntry(struct variable * vp,
     oid            *op;
     struct snmprt  *rt;
     static struct snmprt *savert;
-#if 0
     static int      saveNameLen, saveExact;
-    static oid      saveName[14];
-#endif
-    static oid      Current[14];
+    static oid      saveName[14], Current[14];
     static in_addr_t addr_ret;
     
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
@@ -2095,7 +1915,6 @@ var_ipRouteEntry(struct variable * vp,
         if (rt == NULL)
             return NULL;
 
-#if 0
         /*
          *  Save in the 'cache'
          */
@@ -2104,7 +1923,6 @@ var_ipRouteEntry(struct variable * vp,
         saveNameLen = *length;
         saveExact = exact;
         savert = rt;
-#endif
 
         /*
          *  Return the name
@@ -2168,7 +1986,7 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTEAGE:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -2181,7 +1999,7 @@ var_ipRouteEntry(struct variable * vp,
 
     case IPROUTEINFO:
         *var_len = nullOidLen;
-        return NETSNMP_REMOVE_CONST(void *, nullOid);
+        return (u_char *) nullOid;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -2235,7 +2053,7 @@ snmp_socket_length(int family)
     case AF_LINK:
 #ifdef _MAX_SA_LEN
         length = _MAX_SA_LEN;
-#elif defined(SOCK_MAXADDRLEN)
+#elif SOCK_MAXADDRLEN
         length = SOCK_MAXADDRLEN;
 #else
         length = sizeof(struct sockaddr_dl);

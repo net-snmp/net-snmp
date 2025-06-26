@@ -7,30 +7,30 @@
 
 #include <stdio.h>
 #include <errno.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -43,7 +43,7 @@
 #include "agentx/client.h"
 #include "agentx/subagent.h"
 
-netsnmp_feature_require(set_agent_uptime);
+netsnmp_feature_require(set_agent_uptime)
 
         /*
          * AgentX handling utility routines
@@ -105,7 +105,7 @@ int
 agentx_open_session(netsnmp_session * ss)
 {
     netsnmp_pdu    *pdu, *response;
-    int 	    timeout;
+    u_long 	    timeout;
 
     DEBUGMSGTL(("agentx/subagent", "opening session \n"));
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -118,10 +118,10 @@ agentx_open_session(netsnmp_session * ss)
     timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     if (timeout < 0) 
-        pdu->time = 0;
+    pdu->time = 0;
     else
-        /* for master TIMEOUT is usec, but Agentx Open specifies sec */
-        pdu->time = timeout / (1000L * 1000L);
+	/* for master TIMEOUT is usec, but Agentx Open specifies sec */
+    	pdu->time = timeout/ONE_SEC;
 
     snmp_add_var(pdu, version_sysoid, version_sysoid_len,
 		 's', "Net-SNMP AgentX sub-agent");

@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -19,7 +19,7 @@
  *    then remember to run 'perl/default_store/gen' to update the
  *    corresponding perl interface.
  */
-/**
+/*
  * @file default_store.h: storage space for defaults
  *
  * @addtogroup default_store
@@ -36,7 +36,7 @@ extern          "C" {
 #endif
 
 #define NETSNMP_DS_MAX_IDS 3
-#define NETSNMP_DS_MAX_SUBIDS 64        /* needs to be a multiple of 8 */
+#define NETSNMP_DS_MAX_SUBIDS 48        /* needs to be a multiple of 8 */
 
     /*
      * begin storage definitions 
@@ -104,9 +104,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DISABLE_V2c         44 /* disable SNMPv2c */
 #define NETSNMP_DS_LIB_DISABLE_V3          45 /* disable SNMPv3 */
 #define NETSNMP_DS_LIB_FILTER_SOURCE       46 /* filter pkt by source IP */
-#define NETSNMP_DS_LIB_ADD_FORWARDER_INFO  47 /* add info about forwarder to SNMP packets */
-#define NETSNMP_DS_LIB_SSH_AGENT           48 /* enable ssh agent forwarding */
-#define NETSNMP_DS_LIB_MAX_BOOL_ID         64 /* match NETSNMP_DS_MAX_SUBIDS */
+#define NETSNMP_DS_LIB_MAX_BOOL_ID         48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*
      * library integers 
@@ -131,7 +129,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_RETRIES             15
 #define NETSNMP_DS_LIB_MSG_SEND_MAX        16 /* global max response size */
 #define NETSNMP_DS_LIB_FILTER_TYPE         17 /* 0=NONE, 1=whitelist, -1=blacklist */
-#define NETSNMP_DS_LIB_MAX_INT_ID          64 /* match NETSNMP_DS_MAX_SUBIDS */
+#define NETSNMP_DS_LIB_MAX_INT_ID          48 /* match NETSNMP_DS_MAX_SUBIDS */
     
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
@@ -184,9 +182,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_SSH_PUBKEY        33
 #define NETSNMP_DS_LIB_SSH_PRIVKEY       34
 #define NETSNMP_DS_LIB_OUTPUT_PRECISION  35
-#define NETSNMP_DS_LIB_TLS_MIN_VERSION   36
-#define NETSNMP_DS_LIB_TLS_MAX_VERSION   37
-#define NETSNMP_DS_LIB_MAX_STR_ID        64 /* match NETSNMP_DS_MAX_SUBIDS */
+#define NETSNMP_DS_LIB_MAX_STR_ID        48 /* match NETSNMP_DS_MAX_SUBIDS */
 
     /*
      * end storage definitions 
@@ -197,25 +193,17 @@ extern          "C" {
      */
 #ifndef NETSNMP_FEATURE_REMOVE_RUNTIME_DISABLE_VERSION
 
-#if defined(NETSNMP_DISABLE_SNMPV1)
-#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver)                        \
-    ((pc_ver) == 0/*SNMP_VERSION_1*/)
-#else
-#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver)                        \
-    ((pc_ver) == SNMP_VERSION_1 &&                                      \
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) \
+    ((pc_ver == SNMP_VERSION_1) &&                                     \
      netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,                      \
                             NETSNMP_DS_LIB_DISABLE_V1))
-#endif
 
-#if defined(NETSNMP_DISABLE_SNMPV2C)
-#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver)                        \
-    ((pc_ver) == 1/*SNMP_VERSION_2c*/)
-#else
-#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver)                        \
-    ((pc_ver) == SNMP_VERSION_2c &&                                     \
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) \
+    ((pc_ver == SNMP_VERSION_2c) &&                                     \
      netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,                      \
                             NETSNMP_DS_LIB_DISABLE_V2c))
-#endif
 
 #define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(pc_ver, pc_target) do {    \
         if (NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) ||                \
@@ -224,6 +212,11 @@ extern          "C" {
             goto pc_target;                                            \
         }                                                              \
     } while(0)
+#else
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V1(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_SKIP_V2(pc_ver) (0)
+#define NETSNMP_RUNTIME_PROTOCOL_CHECK_V1V2(ver, gt) do { ; } while(0)
+#endif
 
 #define NETSNMP_RUNTIME_PROTOCOL_SKIP_V3(pc_ver) \
     ((pc_ver == SNMP_VERSION_3) &&                                   \

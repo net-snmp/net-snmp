@@ -25,41 +25,41 @@ SOFTWARE.
 **********************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <net-snmp/utilities.h>
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -164,7 +164,7 @@ main(int argc, char *argv[])
         goto out;
     }
 
-    namep = name = calloc(names, sizeof(*name));
+    namep = name = (struct nameStruct *) calloc(names, sizeof(*name));
     while (arg < argc) {
         namep->name_len = MAX_OID_LEN;
         if (snmp_parse_oid(argv[arg], namep->name, &namep->name_len) ==
@@ -249,7 +249,6 @@ main(int argc, char *argv[])
     snmp_close(ss);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }

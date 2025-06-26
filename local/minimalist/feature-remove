@@ -99,15 +99,15 @@ for i in `grep NETSNMP_FEATURE_PROVIDE_ $featureheaderin | sed 's/.*FEATURE_PROV
     #
     # check to see if something required a parent
     #
-    elif grep -E NETSNMP_FEATURE_${i}_CHILD_OF $featureheaderglobal > /dev/null ; then
-	parentnames=`grep -E NETSNMP_FEATURE_${i}_CHILD_OF $featureheaderglobal | sed 's/.*CHILD_OF_//;s/ .*//;'`
+    elif egrep NETSNMP_FEATURE_${i}_CHILD_OF $featureheaderglobal > /dev/null ; then
+	parentnames=`egrep NETSNMP_FEATURE_${i}_CHILD_OF $featureheaderglobal | sed 's/.*CHILD_OF_//;s/ .*//;'`
 
 	foundone=0
 	for parentname in $parentnames ; do
    	    # if the parent was desired, then we are too:
 	    
 	    if test $foundone = 0 ; then
-		if grep -E "NETSNMP_FEATURE_HAS_${parentname} " $featureheader > /dev/null ; then
+		if egrep "NETSNMP_FEATURE_HAS_${parentname} " $featureheader > /dev/null ; then
        		    echo "#define NETSNMP_FEATURE_HAS_$i 1" >> $featureheader
 		    haslist="${haslist}${i} "
 		    foundone=1

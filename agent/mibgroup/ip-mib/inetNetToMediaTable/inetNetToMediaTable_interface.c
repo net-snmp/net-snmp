@@ -47,18 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(inetNetToMediaTable_external_access, libnetsnmpmibs);
+netsnmp_feature_child_of(inetNetToMediaTable_external_access, libnetsnmpmibs)
 
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(table_container_row_insert);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 
-netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access);
-netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access);
-netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access);
-netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access);
+netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -1023,7 +1023,7 @@ _mfd_inetNetToMediaTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1101,8 +1101,10 @@ _inetNetToMediaTable_check_indexes(inetNetToMediaTable_rowreq_ctx *
     /*
      * check defined range(s). 
      */
-    if (rc == SNMPERR_SUCCESS &&
-        rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len > 255) {
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len < 0)
+            || (rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len > 255))
+        ) {
         rc = SNMP_ERR_WRONGLENGTH;
     }
     if (MFD_SUCCESS != rc)
@@ -1173,7 +1175,9 @@ _inetNetToMediaTable_check_column(inetNetToMediaTable_rowreq_ctx *
         /*
          * check defined range(s). 
          */
-        if (rc == SNMPERR_SUCCESS && var->val_len > 65535) {
+        if ((SNMPERR_SUCCESS == rc)
+            && ((var->val_len < 0) || (var->val_len > 65535))
+            ) {
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {
@@ -1646,7 +1650,7 @@ _mfd_inetNetToMediaTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1899,10 +1903,9 @@ _cache_free(netsnmp_cache * cache, void *magic)
  * @internal
  */
 static void
-_container_item_free(void *p, void *context)
+_container_item_free(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
+                     void *context)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = p;
-
     DEBUGMSGTL(("internal:inetNetToMediaTable:_container_item_free",
                 "called\n"));
 
@@ -1935,7 +1938,9 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container, _container_item_free, NULL);
+    CONTAINER_CLEAR(container,
+                    (netsnmp_container_obj_func *) _container_item_free,
+                    NULL);
 }                               /* _container_free */
 
 /**
@@ -2012,7 +2017,7 @@ inetNetToMediaTable_row_find_by_mib_index(inetNetToMediaTable_mib_index *
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

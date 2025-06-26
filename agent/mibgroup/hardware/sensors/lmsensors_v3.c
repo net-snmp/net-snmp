@@ -54,9 +54,6 @@ netsnmp_sensor_arch_load(netsnmp_cache *cache, void *vp) {
                 case SENSORS_SUBFEATURE_VID:
                     type = NETSNMP_SENSOR_TYPE_VOLTAGE_DC;
                     break;
-                case SENSORS_SUBFEATURE_HUMIDITY_INPUT:
-                    type = NETSNMP_SENSOR_TYPE_HUMIDITY;
-                    break;
                 default:
                     /* Skip everything other than these basic sensor features - ??? */
                     DEBUGMSGTL(("sensors:arch:detail", "  Skip type %x\n", data2->type));

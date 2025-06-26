@@ -1,7 +1,7 @@
 #ifndef SCHEDCORE_H
 #define SCHEDCORE_H
 
-config_require(utilities/iquery);
+config_require(utilities/iquery)
 
     /*
      * Values for schedType field
@@ -39,11 +39,11 @@ struct schedTable_entry {
      */
     char            schedDescr[SCHED_STR2_LEN+1];
     u_long          schedInterval;
-    u_char          schedWeekDay[1];
-    u_char          schedMonth[2];
-    u_char          schedDay[4+4];
-    u_char          schedHour[3];
-    u_char          schedMinute[8];
+    char            schedWeekDay;
+    char            schedMonth[2];
+    char            schedDay[4+4];
+    char            schedHour[3];
+    char            schedMinute[8];
     char            schedContextName[SCHED_STR1_LEN+1];
     oid             schedVariable[   MAX_OID_LEN   ];
     size_t          schedVariable_len;

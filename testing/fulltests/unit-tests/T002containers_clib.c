@@ -5,7 +5,7 @@ void *p;
 
 init_snmp("container-test");
 container = netsnmp_container_find("fifo");
-container->compare = netsnmp_str_compare;
+container->compare = (netsnmp_container_compare*) strcmp;
 
 CONTAINER_INSERT(container, "foo");
 CONTAINER_INSERT(container, "bar");
@@ -23,7 +23,7 @@ OK(CONTAINER_SIZE(container) == 3,
 CONTAINER_REMOVE(container, "bar");
 
 OK(CONTAINER_FIND(container, "bar") == NULL,
-   "should no longer be able to find the (removed) 'bar' string");
+   "should no longer be able to find the (reoved) 'bar' string");
 
 OK(CONTAINER_SIZE(container) == 2,
    "container has the proper size for the elements after a removal");

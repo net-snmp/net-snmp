@@ -12,28 +12,10 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/library/openssl_config.h>
 
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/net-snmp-features.h>
-
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
-
-#include <ctype.h>
-
-#include <openssl/evp.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include <openssl/objects.h>
-
-#include <net-snmp/library/snmp_debug.h>
-#include <net-snmp/library/cert_util.h>
-#include <net-snmp/library/snmp_openssl.h>
-
-#endif /* NETSNMP_USE_OPENSSL & ... */
 
 /** OpenSSL compat functions for apps */
 #if defined(NETSNMP_USE_OPENSSL)
@@ -98,20 +80,33 @@ DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
 #endif
 #endif /* defined(NETSNMP_USE_OPENSSL) */
 
-/** TLS/DTLS certificate support */
+/** TLS/DTLS certificatte support */
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
-netsnmp_feature_require(container_free_all);
+netsnmp_feature_require(container_free_all)
 
-netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused);
-netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused);
-netsnmp_feature_child_of(openssl_err_log, netsnmp_unused);
-netsnmp_feature_child_of(cert_dump_names, netsnmp_unused);
+netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
+netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
+netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
+netsnmp_feature_child_of(cert_dump_names, netsnmp_unused)
+
+#include <ctype.h>
+
+#include <openssl/evp.h>
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <openssl/err.h>
+#include <openssl/objects.h>
+
+#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/cert_util.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 static u_char have_started_already = 0;
 
 /*
- * This code merely does openssl initialization so that multiple
+ * This code merely does openssl initialization so that multilpe
  * modules are safe to call netsnmp_init_openssl() for bootstrapping
  * without worrying about other callers that may have already done so.
  */
@@ -131,12 +126,8 @@ void netsnmp_init_openssl(void) {
 #ifdef HAVE_SSL_LOAD_ERROR_STRINGS
     SSL_load_error_strings();
 #endif
-#ifdef HAVE_ERR_LOAD_BIO_STRINGS
     ERR_load_BIO_strings();
-#endif
-#ifdef HAVE_OPENSSL_ADD_ALL_ALGORITHMS
     OpenSSL_add_all_algorithms();
-#endif
 }
 
 /** netsnmp_openssl_cert_get_name: get subject name field from cert
@@ -218,7 +209,7 @@ netsnmp_openssl_cert_get_subjectName(X509 *ocert, char **buf, int *len)
 /** netsnmp_openssl_cert_get_commonName: get commonName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
- * be responsible for releasing.
+ * be responsbile for releasing.
  */
 char *
 netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
@@ -293,30 +284,31 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
     }
     if (X509V3_EXT_print(bio, oext, 0, 0) != 1) {
         snmp_log(LOG_ERR, "could not print extension!\n");
-        goto out;
+        BIO_vfree(bio);
+        return NULL;
     }
 
     space = BIO_get_mem_data(bio, &data);
     if (buf && *buf) {
-        if (*len < space + 1) {
-            snmp_log(LOG_ERR, "not enough buffer space to print extension\n");
-            goto out;
-        }
-        buf_ptr = *buf;
-    } else {
-        buf_ptr = calloc(1, space + 1);
+        if (*len < space) 
+            buf_ptr = NULL;
+        else
+            buf_ptr = *buf;
     }
+    else
+        buf_ptr = calloc(1,space + 1);
     
     if (!buf_ptr) {
-        snmp_log(LOG_ERR, "error in allocation for extension\n");
-        goto out;
+        snmp_log(LOG_ERR,
+                 "not enough space or error in allocation for extenstion\n");
+        BIO_vfree(bio);
+        return NULL;
     }
     memcpy(buf_ptr, data, space);
     buf_ptr[space] = 0;
     if (len)
         *len = space;
 
-out:
     BIO_vfree(bio);
 
     return buf_ptr;
@@ -473,7 +465,7 @@ _extract_oname(const GENERAL_NAME *oname)
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
- * be responsible for releasing.
+ * be responsbile for releasing.
  */
 char *
 netsnmp_openssl_cert_get_subjectAltNames(X509 *ocert, char **buf, int *len)
@@ -487,7 +479,7 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
 {
     X509_EXTENSION  *extension;
     const char      *extension_name;
-    char             buf[SNMP_MAXBUF], *buf_ptr = buf, *str, *lf;
+    char             buf[SNMP_MAXBUF_SMALL], *buf_ptr = buf, *str, *lf;
     int              i, num_extensions, buf_len, nid;
 
     if (NULL == ocert)
@@ -507,11 +499,6 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
         extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
         str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);
-        if (!str) {
-            DEBUGMSGT(("9:cert:dump", "    %2d: %s\n", i,
-                        extension_name));
-            continue;
-        }
         lf = strchr(str, '\n'); /* look for multiline strings */
         if (NULL != lf)
             *lf = '\0'; /* only log first line of multiline here */
@@ -530,54 +517,18 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
     }
 }
 
-static const struct {
-    uint16_t nid;
-    uint16_t ht;
-} _htmap[] = {
-    { 0, NS_HASH_NONE },
-#ifdef NID_md5WithRSAEncryption
-    { NID_md5WithRSAEncryption, NS_HASH_MD5 },
-#endif
-#ifdef NID_sha1WithRSAEncryption
-    { NID_sha1WithRSAEncryption, NS_HASH_SHA1 },
-#endif
-#ifdef NID_ecdsa_with_SHA1
-    { NID_ecdsa_with_SHA1, NS_HASH_SHA1 },
-#endif
-#ifdef NID_sha224WithRSAEncryption
-    { NID_sha224WithRSAEncryption, NS_HASH_SHA224 },
-#endif
-#ifdef NID_ecdsa_with_SHA224
-    { NID_ecdsa_with_SHA224, NS_HASH_SHA224 },
-#endif
-#ifdef NID_sha256WithRSAEncryption
-    { NID_sha256WithRSAEncryption, NS_HASH_SHA256 },
-#endif
-#ifdef NID_ecdsa_with_SHA256
-    { NID_ecdsa_with_SHA256, NS_HASH_SHA256 },
-#endif
-#ifdef NID_sha384WithRSAEncryption
-    { NID_sha384WithRSAEncryption, NS_HASH_SHA384 },
-#endif
-#ifdef NID_ecdsa_with_SHA384
-    { NID_ecdsa_with_SHA384, NS_HASH_SHA384 },
-#endif
-#ifdef NID_sha512WithRSAEncryption
-    { NID_sha512WithRSAEncryption, NS_HASH_SHA512 },
-#endif
-#ifdef NID_ecdsa_with_SHA512
-    { NID_ecdsa_with_SHA512, NS_HASH_SHA512 },
-#endif
-};
+static int _htmap[NS_HASH_MAX + 1] = {
+    0, NID_md5WithRSAEncryption, NID_sha1WithRSAEncryption,
+    NID_sha224WithRSAEncryption, NID_sha256WithRSAEncryption,
+    NID_sha384WithRSAEncryption, NID_sha512WithRSAEncryption };
 
 int
 _nid2ht(int nid)
 {
     int i;
-
-    for (i = 0; i < sizeof(_htmap) / sizeof(_htmap[0]); i++) {
-        if (_htmap[i].nid == nid)
-            return _htmap[i].ht;
+    for (i=1; i<= NS_HASH_MAX; ++i) {
+        if (nid == _htmap[i])
+            return i;
     }
     return 0;
 }
@@ -586,13 +537,9 @@ _nid2ht(int nid)
 int
 _ht2nid(int ht)
 {
-    int i;
-
-    for (i = 0; i < sizeof(_htmap) / sizeof(_htmap[0]); i++) {
-        if (_htmap[i].ht == ht)
-            return _htmap[i].nid;
-    }
-    return 0;
+    if ((ht < 0) || (ht > NS_HASH_MAX))
+        return 0;
+    return _htmap[ht];
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_HT2NID */
 
@@ -637,7 +584,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
         
         case NS_HASH_NONE:
             snmp_log(LOG_ERR, "hash type none not supported. using SHA1\n");
-            NETSNMP_FALLTHROUGH;
+            /* FALLTHROUGH */
 
         case NS_HASH_SHA1:
             digest = EVP_sha1();
@@ -698,12 +645,11 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     char                  *fingerprint;
     netsnmp_container     *chain_map;
     netsnmp_cert_map      *cert_map;
-    int                    i, sk_num_res;
+    int                    i;
 
     netsnmp_assert_or_return(ssl != NULL, NULL);
-
-    ocert = SSL_get_peer_certificate(ssl);
-    if (!ocert) {
+    
+    if (NULL == (ocert = SSL_get_peer_certificate(ssl))) {
         /** no peer cert */
         snmp_log(LOG_ERR, "SSL peer has no certificate\n");
         return NULL;
@@ -715,7 +661,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     /*
      * get fingerprint and save it
      */
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, NS_HASH_SHA1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, -1);
     if (NULL == fingerprint)
         return NULL;
 
@@ -741,8 +687,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
 
     /** check for a chain to a CA */
     ochain = SSL_get_peer_cert_chain(ssl);
-    sk_num_res = sk_X509_num(ochain);
-    if (!ochain || sk_num_res == 0) {
+    if ((NULL == ochain) || (0 == sk_num((const void *)ochain))) {
         DEBUGMSGT(("ssl:cert:chain", "peer has no cert chain\n"));
     }
     else {
@@ -750,10 +695,10 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          * loop over chain, adding fingerprint / cert for each
          */
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
-        sk_num_res = sk_X509_num(ochain);
-        for(i = 0; i < sk_num_res; ++i) {
-            ocert_tmp = sk_X509_value(ochain, i);
-            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
+        for(i = 0; i < sk_num((const void *)ochain); ++i) {
+            ocert_tmp = (X509*)sk_value((const void *)ochain,i);
+            fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp,
+                                                               NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
             cert_map = netsnmp_cert_map_alloc(NULL, ocert);
@@ -769,7 +714,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         /*
          * if we broke out of loop before finishing, clean up
          */
-        if (i < sk_num_res)
+        if (i < sk_num((const void *)ochain)) 
             CONTAINER_FREE_ALL(chain_map, NULL);
     } /* got peer chain */
 
@@ -874,7 +819,8 @@ _cert_get_san_type(X509 *ocert, int mapType)
 
     if (lower)
         for ( ; *lower; ++lower )
-            *lower = tolower(0xFF & *lower);
+            if (isascii(*lower))
+                *lower = tolower(0xFF & *lower);
     DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
                oname ? oname->type : -1, buf ? buf : "NULL"));
 
@@ -948,6 +894,19 @@ netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert)
     return (X509_check_issued(issuer, cert) == X509_V_OK);
 }
 
+
+#ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_ERR_LOG
+void
+netsnmp_openssl_err_log(const char *prefix)
+{
+    unsigned long err;
+    for (err = ERR_get_error(); err; err = ERR_get_error()) {
+        snmp_log(LOG_ERR,"%s: %ld\n", prefix ? prefix: "openssl error", err);
+        snmp_log(LOG_ERR, "library=%d, function=%d, reason=%d\n",
+                 ERR_GET_LIB(err), ERR_GET_FUNC(err), ERR_GET_REASON(err));
+    }
+}
+#endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_ERR_LOG */
 
 void
 netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)

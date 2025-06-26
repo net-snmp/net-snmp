@@ -13,8 +13,8 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h> /* PATH_MAX (Linux), MAXPATHLEN (BSD) */
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h> /* uintptr_t */
 #endif
 
 #ifdef __cplusplus
@@ -24,7 +24,7 @@ extern          "C" {
 
 
     /*
-     * General macros and constants.
+     * General acros and constants.
      */
 #ifdef WIN32
 #  define SNMP_MAXPATH MAX_PATH
@@ -59,7 +59,11 @@ extern          "C" {
 
 /** @def SNMP_FREE(s)
     Frees a pointer only if it is !NULL and sets its value to NULL */
-#define SNMP_FREE(s)    do { if (s) { free(s); s=NULL; } } while(0)
+#define SNMP_FREE(s)    do { if (s) { free((void *)s); s=NULL; } } while(0)
+
+/** @def SNMP_SWIPE_MEM(n, s)
+    Frees pointer n only if it is !NULL, sets n to s and sets s to NULL */
+#define SNMP_SWIPE_MEM(n,s) do { if (n) free((void *)n); n = s; s=NULL; } while(0)
 
     /*
      * XXX Not optimal everywhere. 
@@ -88,9 +92,9 @@ extern          "C" {
  */
 #if defined(__GNUC__)
 #define NETSNMP_REMOVE_CONST(t, e)                                      \
-    (__extension__ ({ const t tmp = (e); (t)(size_t)tmp; }))
+    (__extension__ ({ const t tmp = (e); (t)(uintptr_t)tmp; }))
 #else
-#define NETSNMP_REMOVE_CONST(t, e) ((t)(size_t)(e))
+#define NETSNMP_REMOVE_CONST(t, e) ((t)(uintptr_t)(e))
 #endif
 
 
@@ -128,8 +132,6 @@ extern          "C" {
 #define TRUE  1
 #endif
 
-#define NETSNMP_IGNORE_RESULT(e) do { if (e) { } } while (0)
-
     /*
      * QUIT the FUNction:
      *      e       Error code variable
@@ -153,14 +155,15 @@ extern          "C" {
  * @note res may be the same variable as one of the operands. In other
  *   words, &a == &res || &b == &res may hold.
  */
-#define NETSNMP_TIMERADD(a, b, res) do {             \
+#define NETSNMP_TIMERADD(a, b, res)                  \
+{                                                    \
     (res)->tv_sec  = (a)->tv_sec  + (b)->tv_sec;     \
     (res)->tv_usec = (a)->tv_usec + (b)->tv_usec;    \
     if ((res)->tv_usec >= 1000000L) {                \
         (res)->tv_usec -= 1000000L;                  \
         (res)->tv_sec++;                             \
     }                                                \
-} while (0)
+}
 
 /**
  * Compute res = a - b.
@@ -170,20 +173,20 @@ extern          "C" {
  * @note res may be the same variable as one of the operands. In other
  *   words, &a == &res || &b == &res may hold.
  */
-#define NETSNMP_TIMERSUB(a, b, res) do {                        \
+#define NETSNMP_TIMERSUB(a, b, res)                             \
+{                                                               \
     (res)->tv_sec  = (a)->tv_sec  - (b)->tv_sec - 1;            \
     (res)->tv_usec = (a)->tv_usec - (b)->tv_usec + 1000000L;    \
     if ((res)->tv_usec >= 1000000L) {                           \
         (res)->tv_usec -= 1000000L;                             \
         (res)->tv_sec++;                                        \
     }                                                           \
-} while (0)
+}
 
 #define ENGINETIME_MAX	2147483647      /* ((2^31)-1) */
 #define ENGINEBOOT_MAX	2147483647      /* ((2^31)-1) */
 
 
-    struct timeval;
 
 
     /*
@@ -232,18 +235,11 @@ extern          "C" {
                                            size_t * out_len,
                                            int allow_realloc,
                                            const char *decimal);
+#define snmp_cstrcat(b,l,o,a,s) snmp_strcat(b,l,o,a,(const u_char *)s)
     NETSNMP_IMPORT
     int             snmp_strcat(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 const u_char * s);
-    NETSNMP_STATIC_INLINE
-    int
-    snmp_cstrcat(u_char **buf, size_t *buf_len, size_t *out_len,
-                 int allow_realloc, const char *s)
-    {
-        return snmp_strcat(buf, buf_len, out_len, allow_realloc,
-                           (const u_char *)s);
-    }
     NETSNMP_IMPORT
     char           *netsnmp_strdup_and_null(const u_char * from,
                                             size_t from_len);
@@ -290,11 +286,8 @@ extern          "C" {
     NETSNMP_IMPORT
     int             netsnmp_string_time_to_secs(const char *time_string);
 
-    NETSNMP_IMPORT
-    const char      *netsnmp_gethomedir(void);
-
 #ifdef __cplusplus
 }
 #endif
 #endif                          /* _TOOLS_H */
-/** @} */
+/* @} */

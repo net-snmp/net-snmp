@@ -3,7 +3,7 @@
  * that may apply:
  */
 /*
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -194,9 +194,8 @@ updateLogmatch(int iindex)
                          * ------------------------------------ 
                          */
 
-                        if (pos < LONG_MAX &&
-                            !fseek(logmatchTable[iindex].logfile, pos,
-                                   SEEK_SET)) {
+                        if (!fseek
+                            (logmatchTable[iindex].logfile, pos, SEEK_SET)) {
 
 
                             /*
@@ -273,7 +272,7 @@ updateLogmatch(int iindex)
                 /*
                  * ------------------------------------ 
                  * when we are here that means we       
-                 * couldn't set the file position maybe  
+                 * could't set the file position maybe  
                  * the file was rotated; let's reset    
                  * the filepointer, but not the counter 
                  * ------------------------------------ 
@@ -341,10 +340,9 @@ updateLogmatch(int iindex)
 
 
 static void
-updateLogmatch_Scheduled(unsigned int registrationNumber, void *p)
+updateLogmatch_Scheduled(unsigned int registrationNumber,
+                         struct logmatchstat *logmatchtable)
 {
-    struct logmatchstat *logmatchtable = p;
-
     updateLogmatch(logmatchtable->thisIndex);
 }
 
@@ -453,7 +451,8 @@ logmatch_parse_config(const char *token, char *cptr)
         }
         else if (logmatchTable[logmatchCount].frequency > 0) {
             snmp_alarm_register(logmatchTable[logmatchCount].frequency,
-                                SA_REPEAT, updateLogmatch_Scheduled,
+                                SA_REPEAT,
+                                (SNMPAlarmCallback *) updateLogmatch_Scheduled,
                                 &logmatchTable[logmatchCount]);
         }
 

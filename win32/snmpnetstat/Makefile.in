@@ -19,7 +19,7 @@ CPP=cl.exe
 CPP_PROJ=/I.. -I..\..\include $(CFLAGS)
 
 
-ALL : ..\bin\$(OUTDIR)\$(PROGNAME).exe
+ALL : "..\bin\$(OUTDIR)\$(PROGNAME).exe" "$(INTDIR)"
 
 
 CLEAN :
@@ -36,6 +36,12 @@ CLEAN :
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest"
+
+"..\bin\$(OUTDIR)" :
+    if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
+
+"$(INTDIR)" :
+    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 {..\..\apps\$(PROGNAME)}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
@@ -54,9 +60,11 @@ LINK32_OBJS= \
 	"$(INTDIR)\ffs.obj" \
 	"$(INTDIR)\winstub.obj"
 
-"..\bin\$(OUTDIR)\$(PROGNAME).exe" : $(DEF_FILE) $(LINK32_OBJS)
+"..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
     $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
+ if exist "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" \
+	    mt.exe -manifest "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" -outputresource:"..\bin\$(OUTDIR)\$(PROGNAME).exe";1
 !ELSE	# Linktype check
 	-@echo .
 	-@echo Aborting build.  Applications can not be built using --linktype=dynamic
@@ -71,3 +79,14 @@ LINK32_OBJS= \
 !MESSAGE Warning: cannot find "$(PROGNAME).dep"
 !ENDIF 
 !ENDIF 
+
+
+"$(INTDIR)\ffs.obj": ..\..\apps\$(PROGNAME)\ffs.c "$(INTDIR)"
+"$(INTDIR)\if.obj": ..\..\apps\$(PROGNAME)\if.c "$(INTDIR)"
+"$(INTDIR)\inet.obj": ..\..\apps\$(PROGNAME)\inet.c "$(INTDIR)"
+"$(INTDIR)\inet6.obj": ..\..\apps\$(PROGNAME)\inet6.c "$(INTDIR)"
+"$(INTDIR)\inetx.obj": ..\..\apps\$(PROGNAME)\inetx.c "$(INTDIR)"
+"$(INTDIR)\main.obj": ..\..\apps\$(PROGNAME)\main.c "$(INTDIR)"
+"$(INTDIR)\route.obj": ..\..\apps\$(PROGNAME)\route.c "$(INTDIR)"
+"$(INTDIR)\routex.obj": ..\..\apps\$(PROGNAME)\routex.c "$(INTDIR)"
+"$(INTDIR)\winstub.obj": ..\..\apps\$(PROGNAME)\winstub.c "$(INTDIR)"

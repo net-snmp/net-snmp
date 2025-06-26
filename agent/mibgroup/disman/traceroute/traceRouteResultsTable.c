@@ -20,10 +20,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -42,7 +42,7 @@
 #include "traceRouteHopsTable.h"
 #include "header_complex.h"
 
-netsnmp_feature_require(table_dataset);
+netsnmp_feature_require(table_dataset)
 
 /*
  *traceRouteResultsTable_variables_oid:
@@ -238,6 +238,7 @@ store_traceRouteResultsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
+    size_t          tmpint;
     struct traceRouteResultsTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -269,22 +270,22 @@ store_traceRouteResultsTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteResultsOperStatus,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_GAUGE, cptr,
                                        &StorageTmp->
                                        traceRouteResultsCurHopCount,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_GAUGE, cptr,
                                        &StorageTmp->
                                        traceRouteResultsCurProbeCount,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        traceRouteResultsIpTgtAddrType,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -296,12 +297,12 @@ store_traceRouteResultsTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        traceRouteResultsTestAttempts,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        traceRouteResultsTestSuccesses,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->

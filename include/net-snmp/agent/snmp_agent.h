@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -13,7 +13,7 @@
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
-/**
+/*
  * @file snmp_agent.h
  *
  * @addtogroup agent
@@ -26,21 +26,19 @@
 #ifndef SNMP_AGENT_H
 #define SNMP_AGENT_H
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern          "C" {
 #endif
 
-#include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/data_list.h>
 
+#define SNMP_MAX_PDU_SIZE 64000 /* local constraint on PDU size sent by agent
+                                 * (see also SNMP_MAX_MSG_SIZE in snmp_api.h) */
+
 #define SNMP_AGENT_FLAGS_NONE                   0x0
 #define SNMP_AGENT_FLAGS_CANCEL_IN_PROGRESS     0x1
-
-    struct timeval;
 
     /*
      * If non-zero, causes the addresses of peers to be logged when receptions
@@ -236,7 +234,18 @@ extern          "C" {
     netsnmp_agent_session *init_agent_snmp_session(netsnmp_session *,
                                                    netsnmp_pdu *);
     void            free_agent_snmp_session(netsnmp_agent_session *);
+    void           
+        netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session
+                                                   *asp);
+#ifdef SNMP_NEED_REQUEST_LIST
+    void           
+        netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
+                                                   void (*free_request)
+                                                   (netsnmp_request_list
+                                                    *));
+#endif
     int             getNextSessID(void);
+    void            dump_sess_list(void);
     int             init_master_agent(void);
     void            shutdown_master_agent(void);
     int             agent_check_and_process(int block);

@@ -13,17 +13,17 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -33,6 +33,10 @@
 #endif
 #include <errno.h>
 
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 #ifdef NETSNMP_USE_KERBEROS_HEIMDAL
 #ifndef NETSNMP_USE_KERBEROS_MIT
@@ -62,12 +66,10 @@
 #define TICKET_CLIENT(x)	(x)->enc_part2->client
 #endif				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 
-#ifdef HAVE_ET_COM_ERR_H
+#if HAVE_ET_COM_ERR_H
 #include <et/com_err.h>
-#elif defined(HAVE_COM_ERR_H)
+#elif HAVE_COM_ERR_H
 #include <com_err.h>
-#else
-static const char *error_message(int ret) { return "(?)"; }
 #endif
 
 #include <net-snmp/output_api.h>
@@ -169,12 +171,12 @@ init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
 {
 
     if (kcontext == NULL) {
-	/* not reached, I'd imagine */
+	/* not reached, i'd imagine */
         return SNMPERR_KRB5;
     }
 
     if (service_name == NULL) {
-	/* always reached, I'd imagine */
+	/* always reached, i'd imagine */
 	char *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
 					NETSNMP_DS_LIB_KSM_SERVICE_NAME);
 	if (c != NULL) {
@@ -186,7 +188,7 @@ init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
     }
 
     if (keytab_setup == 0) {
-	/* always reached, I'd imagine */
+	/* always reached, i'd imagine */
 	char *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
 					NETSNMP_DS_LIB_KSM_KEYTAB);
 	if (c) {
@@ -481,10 +483,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 #else                           /* NETSNMP_USE_KERBEROS_MIT */
     krb5_encrypt_block eblock;
 #endif                          /* NETSNMP_USE_KERBEROS_MIT */
-#ifndef OLD_HEIMDAL
-    size_t          blocksize;
-#endif
-    size_t          encrypted_length;
+    size_t          blocksize, encrypted_length;
     unsigned char  *encrypted_data = NULL;
     long            zero = 0, tmp;
     int             i;
@@ -1247,10 +1246,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     size_t          length =
         parms->wholeMsgLen - (u_int) (parms->secParams - parms->wholeMsg);
     u_char         *current = parms->secParams, type;
-#ifndef OLD_HEIMDAL
-    size_t          blocksize;
-#endif
-    size_t          cksumlength;
+    size_t          cksumlength, blocksize;
     long            hint;
     char           *cname;
     struct ksm_secStateRef *ksm_state;
@@ -1457,7 +1453,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 #endif
 
         /*
-         * We need to initialize the authorization context, and set the
+         * We need to initalize the authorization context, and set the
          * replay cache in it (and initialize the replay cache if we
          * haven't already
          */
@@ -1770,7 +1766,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 	retcode = krb5_decrypt(kcontext, heim_crypto, KSM_KEY_USAGE_ENCRYPTION,
 			       current, length, &output);
 	if (retcode == 0) {
-		*parms->scopedPdu = (u_char *) output.data;
+		*parms->scopedPdu = (char *) output.data;
 		*parms->scopedPduLen = output.length;
 		krb5_data_zero(&output);
 	}

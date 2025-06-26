@@ -10,28 +10,32 @@
 #ifdef WIN32
 #include <net-snmp/library/winpipe.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_SYS_UN_H
+#if HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#ifdef HAVE_IO_H
+#if HAVE_IO_H
 #include <io.h>
 #endif
-#ifdef HAVE_FCNTL_H
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -472,7 +476,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
-        NETSNMP_FALLTHROUGH;
+        /* FALL THROUGH */
     default:
         if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
             pdu->errstat = 0;
@@ -497,23 +501,26 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
                 sp->s_snmp_errno = SNMPERR_BAD_COMMUNITY;
                 return -1;
             }
-            pdu->community = netsnmp_memdup(sp->community, sp->community_len);
+            pdu->community = malloc(sp->community_len);
             if (pdu->community == NULL) {
                 sp->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;
             }
+            memmove(pdu->community,
+                    sp->community, sp->community_len);
             pdu->community_len = sp->community_len;
         }
         break;
 #endif
     case SNMP_VERSION_3:
         if (pdu->securityNameLen == 0) {
-            pdu->securityName = netsnmp_memdup(sp->securityName,
-                                               sp->securityNameLen + 1);
+	  pdu->securityName = malloc(sp->securityNameLen);
             if (pdu->securityName == NULL) {
                 sp->s_snmp_errno = SNMPERR_MALLOC;
                 return -1;
             }
+            memmove(pdu->securityName,
+                     sp->securityName, sp->securityNameLen);
             pdu->securityNameLen = sp->securityNameLen;
         }
         if (pdu->securityModel == -1)

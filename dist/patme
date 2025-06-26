@@ -101,7 +101,7 @@ sub load_primaries {
        patch_info =>
        qw_primary('check','Checking code directory status:', '',
 		  [qw_paragraph('patch pieces:',
-				sub { capture("grep -E '^(---|\\+\\+\\+)' " . 
+				sub { capture("egrep '^(---|\\+\\+\\+)' " . 
 					      qwparam('patchfile'))},
 				width => 80,
 				height => 30),

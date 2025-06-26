@@ -26,10 +26,10 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -95,12 +95,12 @@ int             get_user_passphrases(void);
 int             snmp_ttyecho(const int fd, const int echo);
 char           *snmp_getpassphrase(const char *prompt, int fvisible);
 
-#if defined(HAVE__CPUTS) && defined(HAVE__GETCH)
-#include <conio.h>
-#include <io.h>
+#ifdef WIN32
 #define HAVE_GETPASS 1
-#define isatty _isatty
-static char    *getpass(const char *prompt);
+char           *getpass(const char *prompt);
+int             isatty(int);
+int             _cputs(const char *);
+int             _getch(void);
 #endif
 
 /*******************************************************************-o-******
@@ -131,9 +131,8 @@ main(int argc, char **argv)
         fprintf(stderr, "%s: out of memory!", local_progname);
         exit(-1);
     }
-    snprintf(local_passphrase_filename, sizeof(PASSPHRASE_DIR) +
-                                        sizeof(PASSPHRASE_FILE) + 4,
-             "%s/%s", PASSPHRASE_DIR, PASSPHRASE_FILE);
+    sprintf(local_passphrase_filename, "%s/%s", PASSPHRASE_DIR,
+            PASSPHRASE_FILE);
 
 
 
@@ -171,7 +170,7 @@ main(int argc, char **argv)
             break;
         case 'h':
             rval = 0;
-	    NETSNMP_FALLTHROUGH;
+	    /* fallthrough */
         default:
             usage_to_file(stdout);
             exit(rval);
@@ -375,7 +374,7 @@ usage_synopsis(FILE * ofp)
 void
 usage_to_file(FILE * ofp)
 {
-    const char *s;
+    char           *s;
 
     usage_synopsis(ofp);
 
@@ -388,7 +387,7 @@ usage_to_file(FILE * ofp)
     Ku=>Kul, and to hash the old Kul with the random bits.\n\
 \n\
     Passphrase will be taken from the first successful source as follows:\n",
-    (s = netsnmp_gethomedir()) ? s : "$HOME", local_passphrase_filename,
+    (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename,
    "-f will require reading from the stdin/terminal, ignoring a) and b).\n\
     -P will prevent prompts for passphrases to stdout from being printed.\n\
 \n\
@@ -461,8 +460,7 @@ get_user_passphrases(void)
 
     char           *obuf = NULL, *nbuf = NULL;
 
-    char            path[SNMP_MAXBUF], buf[SNMP_MAXBUF];
-    const char     *s = NULL;
+    char            path[SNMP_MAXBUF], buf[SNMP_MAXBUF], *s = NULL;
 
     struct stat     statbuf;
     FILE           *fp = NULL;
@@ -485,7 +483,7 @@ get_user_passphrases(void)
      * path for existence and access first.  Refuse to read
      * if the permissions are wrong.
      */
-    s = netsnmp_gethomedir();
+    s = getenv("HOME");
     snprintf(path, sizeof(path), "%s/%s", s, PASSPHRASE_DIR);
     path[ sizeof(path)-1 ] = 0;
 
@@ -539,9 +537,9 @@ get_user_passphrases(void)
 
     } else if (!oldpass) {
         len = strlen(buf);
-        if (len && buf[len - 1] == '\n')
+        if (buf[len - 1] == '\n')
             buf[--len] = '\0';
-        oldpass = calloc(1, len + 1);
+        oldpass = (char *) calloc(1, len + 1);
         if (oldpass)
             memcpy(oldpass, buf, len + 1);
     }
@@ -555,9 +553,9 @@ get_user_passphrases(void)
 
     } else if (!newpass) {
         len = strlen(buf);
-        if (len && buf[len - 1] == '\n')
+        if (buf[len - 1] == '\n')
             buf[--len] = '\0';
-        newpass = calloc(1, len + 1);
+        newpass = (char *) calloc(1, len + 1);
         if (newpass)
             memcpy(newpass, buf, len + 1);
     }
@@ -746,10 +744,10 @@ snmp_getpassphrase(const char *prompt, int bvisible)
      * Copy the input and zero out the read-in buffer.
      */
     len = strlen(buffer);
-    if (len && buffer[len - 1] == '\n')
+    if (buffer[len - 1] == '\n')
         buffer[--len] = '\0';
 
-    bufp = calloc(1, len + 1);
+    bufp = (char *) calloc(1, len + 1);
     if (bufp)
         memcpy(bufp, buffer, len + 1);
 
@@ -760,7 +758,8 @@ snmp_getpassphrase(const char *prompt, int bvisible)
 
 }                               /* end snmp_getpassphrase() */
 
-#if defined(HAVE__CPUTS) && defined(HAVE__GETCH)
+#ifdef WIN32
+
 int
 snmp_ttyecho(const int fd, const int echo)
 {
@@ -771,7 +770,7 @@ snmp_ttyecho(const int fd, const int echo)
  * stops at the first newline, carrier return, or backspace.
  * WARNING! _getch does NOT read <Ctrl-C>
  */
-static char    *
+char           *
 getpass(const char *prompt)
 {
     static char     pbuf[128];
@@ -789,4 +788,4 @@ getpass(const char *prompt)
 
     return pbuf;
 }
-#endif /* defined(HAVE__CPUTS) && defined(HAVE__GETCH) */
+#endif                          /* WIN32 */

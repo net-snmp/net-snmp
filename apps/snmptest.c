@@ -27,40 +27,40 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -151,10 +151,10 @@ main(int argc, char *argv[])
                  * free the last (unused) variable 
                  */
                 if (vp->name)
-                    free(vp->name);
+                    free((char *) vp->name);
                 if (vp->val.string)
-                    free(vp->val.string);
-                free(vp);
+                    free((char *) vp->val.string);
+                free((char *) vp);
 
                 if (command == SNMP_MSG_GETBULK) {
                     if (nonRepeaters == -1) {
@@ -185,8 +185,6 @@ main(int argc, char *argv[])
                 }
             }
         }
-	if (copy)
-	    snmp_free_pdu(copy);
         copy = snmp_clone_pdu(pdu);
         if (command == SNMP_MSG_TRAP2) {
             /*
@@ -284,7 +282,6 @@ main(int argc, char *argv[])
     /* NOTREACHED */
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exit_code;
 }
@@ -299,7 +296,7 @@ input_variable(netsnmp_variable_list * vp)
     printf("Variable: ");
     fflush(stdout);
     if (!fgets(buf, sizeof(buf), stdin)) {
-        printf("Quitting,  Goodbye\n");
+        printf("Quitting,  Goobye\n");
         SOCK_CLEANUP;
         exit(0);
     }
@@ -309,7 +306,7 @@ input_variable(netsnmp_variable_list * vp)
         vp->name_length = 0;
         return 0;
     }
-    if (val_len && buf[val_len - 1] == '\n')
+    if (buf[val_len - 1] == '\n')
         buf[--val_len] = 0;
     if (*buf == '$') {
         switch (toupper((unsigned char)(buf[1]))) {

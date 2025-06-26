@@ -166,10 +166,8 @@ tcpConnectionTable_container_shutdown(netsnmp_container *container_ptr)
  * add new entry
  */
 static void
-_add_connection(void *p, void *q)
+_add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
 {
-    netsnmp_tcpconn_entry *entry = p;
-    netsnmp_container *container = q;
     tcpConnectionTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("tcpConnectionTable:access", "creating new entry\n"));
@@ -229,8 +227,8 @@ _add_connection(void *p, void *q)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  tcpConnectionTable_row_prep() for populating data.
@@ -256,7 +254,8 @@ tcpConnectionTable_container_load(netsnmp_container *container)
     /*
      * got all the connections. pull out the active ones.
      */
-    CONTAINER_FOR_EACH(raw_data, _add_connection, container);
+    CONTAINER_FOR_EACH(raw_data, (netsnmp_container_obj_func *)
+                       _add_connection, container);
 
     /*
      * free the container. we've either claimed each entry, or released it,

@@ -7,3 +7,5 @@
 
 #undef PROC_SYMBOL
 #undef NPROC_SYMBOL
+
+#undef TOTAL_MEMORY_SYMBOL

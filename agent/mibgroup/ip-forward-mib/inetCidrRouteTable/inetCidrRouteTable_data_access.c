@@ -136,10 +136,9 @@ inetCidrRouteTable_container_init(netsnmp_container **container_ptr_ptr,
  * check entry for update
  */
 static void
-_snarf_route_entry(void *p, void *q)
+_snarf_route_entry(netsnmp_route_entry *route_entry,
+                   netsnmp_container *container)
 {
-    netsnmp_route_entry *route_entry = p;
-    netsnmp_container *container = q;
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
 
     netsnmp_assert(NULL != route_entry);
@@ -233,8 +232,8 @@ inetCidrRouteTable_container_shutdown(netsnmp_container *container_ptr)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  inetCidrRouteTable_row_prep() for populating data.
@@ -263,17 +262,18 @@ inetCidrRouteTable_container_load(netsnmp_container *container)
     route_container =
         netsnmp_access_route_container_load(NULL,
                                             NETSNMP_ACCESS_ROUTE_LOAD_NOFLAGS);
+    DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
+               "%d records\n", (int)CONTAINER_SIZE(route_container)));
 
     if (NULL == route_container)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
 
-    DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
-               "%d records\n", (int)CONTAINER_SIZE(route_container)));
-
     /*
      * we just got a fresh copy of route data. snarf data
      */
-    CONTAINER_FOR_EACH(route_container, _snarf_route_entry, container);
+    CONTAINER_FOR_EACH(route_container,
+                       (netsnmp_container_obj_func *) _snarf_route_entry,
+                       container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,

@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -26,7 +26,7 @@
  *  All debugging output is done via the standard debugging routines
  *  with a token name of "helper:debug", so use the -Dhelper:debug
  *  command line flag to see the output when running the snmpd
- *  daemon. It's not recommended you compile this into a handler chain
+ *  demon. It's not recommended you compile this into a handler chain
  *  during compile time, but instead use the "injectHandler" token in
  *  the snmpd.conf file (or similar) to add it to the chain later:
  *

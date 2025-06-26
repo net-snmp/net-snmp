@@ -8,10 +8,10 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -242,7 +242,7 @@ write_mteTriggerBooleanComparison(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -326,7 +326,7 @@ write_mteTriggerBooleanValue(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -410,7 +410,7 @@ write_mteTriggerBooleanStartup(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -496,7 +496,7 @@ write_mteTriggerBooleanObjectsOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -586,7 +586,7 @@ write_mteTriggerBooleanObjects(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -677,7 +677,7 @@ write_mteTriggerBooleanEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -767,7 +767,7 @@ write_mteTriggerBooleanEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerBooleanTable_variables_oid) + 3 -
+        (sizeof(mteTriggerBooleanTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 

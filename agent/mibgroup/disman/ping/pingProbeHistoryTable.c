@@ -16,10 +16,10 @@
 /*
  * This should always be included first before anything else 
  */
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -197,6 +197,7 @@ store_pingProbeHistoryTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
+    size_t          tmpint;
     struct pingProbeHistoryTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -224,19 +225,19 @@ store_pingProbeHistoryTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingProbeHistoryIndex,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       pingProbeHistoryResponse, NULL);
+                                       pingProbeHistoryResponse, &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingProbeHistoryStatus,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingProbeHistoryLastRC,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingProbeHistoryTime,

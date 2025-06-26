@@ -14,10 +14,10 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
-netsnmp_feature_child_of(data_list_all, libnetsnmp);
+netsnmp_feature_child_of(data_list_all, libnetsnmp)
 
-netsnmp_feature_child_of(data_list_add_data, data_list_all);
-netsnmp_feature_child_of(data_list_get_list_node, data_list_all);
+netsnmp_feature_child_of(data_list_add_data, data_list_all)
+netsnmp_feature_child_of(data_list_get_list_node, data_list_all)
 
 /** @defgroup data_list generic linked-list data handling with a string as a key.
  * @ingroup library
@@ -292,12 +292,12 @@ netsnmp_register_save_list(netsnmp_data_list **datalist,
 }
 
 
-/** intended to be registered as a callback operation.
+/** intended to be registerd as a callback operation.
  * It should be registered using:
  *
  * snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, netsnmp_save_all_data_callback, INFO_POINTER);
  *
- * where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing appropriate registration information
+ * where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information
  */
 int
 netsnmp_save_all_data_callback(int major, int minor,
@@ -343,13 +343,13 @@ netsnmp_save_all_data(netsnmp_data_list *head,
     return SNMP_ERR_NOERROR;
 }
 
-/** intended to be registered as a .conf parser
+/** intended to be registerd as a .conf parser
  * It should be registered using:
  *
  * register_app_config_handler("token", netsnmp_read_data_callback, XXX)
  *
  * where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object
- * containing appropriate registration information
+ * containing apporpriate registration information
  * @todo make netsnmp_read_data_callback deal with a free routine
  */
 void

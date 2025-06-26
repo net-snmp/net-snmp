@@ -16,7 +16,7 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_ALIAS_IP		1,3,6,1,2,1,100,1,5
-NETSNMP_IMPORT const oid netsnmp_snmpALIASDomain[];
+NETSNMP_IMPORT oid netsnmp_snmpALIASDomain[];
 
 /*
  * "Constructor" for transport domain object.  

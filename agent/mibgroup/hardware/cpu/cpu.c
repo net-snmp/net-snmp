@@ -5,12 +5,12 @@
 #include <net-snmp/agent/hardware/cpu.h>
 #include "cpu.h"
 
-netsnmp_feature_child_of(hardware_cpu, libnetsnmpmibs);
+netsnmp_feature_child_of(hardware_cpu, libnetsnmpmibs)
 
-netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu);
-netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu);
-netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu);
-netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu);
+netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu)
 
 static void _cpu_update_stats( unsigned int, void* );
 
@@ -194,7 +194,7 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
              * First time through, we need to create buffers
              * for the historical stats
              */
-            cpu->history = calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
+            cpu->history  = (struct netsnmp_cpu_history *)calloc( _cpuHistoryLen, sizeof(struct netsnmp_cpu_history));
         } else {
             /*
              * Otherwise, rotate these values - in descending order

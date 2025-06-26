@@ -13,47 +13,44 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <errno.h>
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <stdio.h>
 #include <sys/types.h>
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_TIMES_H
+#if HAVE_SYS_TIMES_H
 #include <sys/times.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <ctype.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #       include <stdlib.h>
 #endif
 
@@ -65,6 +62,10 @@
 #endif
 #ifdef HAVE_NET_IF_H
 #	include <net/if.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -203,7 +204,6 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
-	    free(session->securityEngineID);
             session->securityEngineID = ebuf;
             session->securityEngineIDLen = eout_len;
             break;
@@ -228,21 +228,18 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                 free(ebuf);
                 return (-1);
             }
-	    free(session->contextEngineID);
             session->contextEngineID = ebuf;
             session->contextEngineIDLen = eout_len;
             break;
         }
 
     case 'n':
-        free(session->contextName);
-        session->contextName = strdup(optarg);
+        session->contextName = optarg;
         session->contextNameLen = strlen(optarg);
         break;
 
     case 'u':
-        free(session->securityName);
-        session->securityName = strdup(optarg);
+        session->securityName = optarg;
         session->securityNameLen = strlen(optarg);
         break;
 
@@ -270,13 +267,8 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     case 'a': {
         int auth_type = usm_lookup_auth_type(optarg);
         if (auth_type > 0) {
-            const oid *auth_proto;
-
-            auth_proto = sc_get_auth_oid(auth_type,
-                                         &session->securityAuthProtoLen);
-            free(session->securityAuthProto);
-            session->securityAuthProto = snmp_duplicate_objid(auth_proto,
-                                             session->securityAuthProtoLen);
+            session->securityAuthProto =
+                sc_get_auth_oid(auth_type, &session->securityAuthProtoLen);
          } else {
             fprintf(stderr,
                     "Invalid authentication protocol specified after -3a flag: %s\n",
@@ -286,9 +278,7 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
     }
         break;
 
-    case 'x': {
-        const oid *priv_proto;
-
+    case 'x':
         priv_type = usm_lookup_priv_type(optarg);
         if (priv_type < 0) {
             fprintf(stderr,
@@ -296,17 +286,11 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
                     optarg);
             return (-1);
         }
-        priv_proto = sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
-        free(session->securityPrivProto);
-        session->securityPrivProto = snmp_duplicate_objid(priv_proto,
-                                         session->securityPrivProtoLen);
+        session->securityPrivProto =
+            sc_get_priv_oid(priv_type, &session->securityPrivProtoLen);
         break;
-    }
+
     case 'A':
-        if (*Apsz && zero_sensitive) {
-            memset(*Apsz, 0x0, strlen(*Apsz));
-        }
-        free(*Apsz);
         *Apsz = strdup(optarg);
         if (NULL == *Apsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -318,10 +302,6 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
         break;
 
     case 'X':
-        if (*Xpsz && zero_sensitive) {
-            memset(*Xpsz, 0x0, strlen(*Xpsz));
-        }
-        free(*Xpsz);
         *Xpsz = strdup(optarg);
         if (NULL == *Xpsz) {
             fprintf(stderr, "malloc failure processing -%c flag.\n",
@@ -369,7 +349,6 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
-        free(session->securityAuthLocalKey);
         session->securityAuthLocalKey = kbuf;
         session->securityAuthLocalKeyLen = kout_len;
         break;
@@ -389,7 +368,6 @@ snmpv3_parse_arg(int arg, char *optarg, netsnmp_session *session, char **Apsz,
             SNMP_FREE(kbuf);
             return (-1);
         }
-        free(session->securityPrivLocalKey);
         session->securityPrivLocalKey = kbuf;
         session->securityPrivLocalKeyLen = kout_len;
         break;
@@ -463,7 +441,7 @@ snmpv3_parse_args(char *optarg, netsnmp_session * session, char **Apsz,
  * XXX	What if a node has multiple interfaces?
  * XXX	What if multiple engines all choose the same address?
  *      (answer:  You're screwed, because you might need a kul database
- *       which is dependent on the current engineID.  Enumeration and other
+ *       which is dependant on the current engineID.  Enumeration and other
  *       tricks won't work). 
  */
 int
@@ -580,13 +558,8 @@ setup_engineID(u_char ** eidp, const char *text)
     /*
      * Allocate memory and store enterprise ID.
      */
-    if (len == 0) {
-        snmp_log(LOG_ERR, "%s(): len == 0\n", __func__);
-        return -1;
-    }
-    bufp = calloc(1, len);
-    if (bufp == NULL) {
-        snmp_log_perror("setup_engineID() calloc()");
+    if ((bufp = (u_char *) calloc(1, len)) == NULL) {
+        snmp_log_perror("setup_engineID malloc");
         return -1;
     }
     if (localEngineIDType == ENGINEID_TYPE_NETSNMP_RND)
@@ -883,23 +856,7 @@ version_conf(const char *word, char *cptr)
 void
 oldengineID_conf(const char *word, char *cptr)
 {
-    unsigned char *EngineID = NULL;
-    size_t         EngineIDLength = 0;
-
-    if (oldEngineID) {
-        free(oldEngineID);
-        oldEngineID = NULL;
-        oldEngineIDLength = 0;
-    }
-
-    read_config_read_octet_string(cptr, &EngineID, &EngineIDLength);
-    if (EngineIDLength < 4) {
-        config_perror("Invalid oldEngineID");
-        free(EngineID);
-        return;
-    }
-    oldEngineID = EngineID;
-    oldEngineIDLength = EngineIDLength;
+    read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }
 
 /*
@@ -967,7 +924,7 @@ exactEngineID_conf(const char *word, char *cptr)
 /*
  * merely call 
  */
-netsnmp_feature_child_of(get_enginetime_alarm, netsnmp_unused);
+netsnmp_feature_child_of(get_enginetime_alarm, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_GET_ENGINETIME_ALARM
 void
 get_enginetime_alarm(unsigned int regnum, void *clientargs)
@@ -1089,14 +1046,12 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
 
     size_t          engineIDLen;
     u_char         *c_engineID;
-    u_long          localEngineTime;
-    u_long          localEngineBoots;
 
     c_engineID = snmpv3_generate_engineID(&engineIDLen);
 
-    if (!c_engineID || engineIDLen == 0) {
+    if (engineIDLen == 0 || !c_engineID) {
         /*
-         * Something went wrong - help! 
+         * Somethine went wrong - help! 
          */
         SNMP_FREE(c_engineID);
         return SNMPERR_GENERR;
@@ -1115,11 +1070,9 @@ init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
     /*
      * for USM set our local engineTime in the LCD timing cache 
      */
-    localEngineTime = snmpv3_local_snmpEngineTime();
-    localEngineBoots = snmpv3_local_snmpEngineBoots();
     set_enginetime(c_engineID, engineIDLen,
-                   localEngineBoots,
-                   localEngineTime, TRUE);
+                   snmpv3_local_snmpEngineBoots(),
+                   snmpv3_local_snmpEngineTime(), TRUE);
 #endif /* NETSNMP_SECMOD_USM */
 
     SNMP_FREE(c_engineID);
@@ -1238,9 +1191,10 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
     *destlen = 0;
 
     if (srclen && src) {
-        *dest = netsnmp_memdup(src, srclen);
+        *dest = (u_char *) malloc(srclen);
         if (*dest == NULL)
             return 0;
+        memmove(*dest, src, srclen);
         *destlen = srclen;
     }
     return *destlen;

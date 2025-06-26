@@ -16,13 +16,112 @@
 #include <net-snmp/net-snmp-config.h>
 #include "host_res.h"
 #include "hr_disk.h"
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <fcntl.h>
-#include <limits.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#else
+# define dirent direct
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+
+#if HAVE_SYS_DKIO_H
+#include <sys/dkio.h>
+#endif
+#if HAVE_SYS_DISKIO_H           /* HP-UX only ? */
+#include <sys/diskio.h>
+#endif
+#if HAVE_LINUX_HDREG_H
+#include <linux/hdreg.h>
+#endif
+#if HAVE_SYS_DISKLABEL_H
+#define DKTYPENAMES
+#include <sys/disklabel.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#include <regex.h>
+#endif
+
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifdef darwin
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOBlockStorageDriver.h>
+#include <IOKit/storage/IOMedia.h>
+#include <IOKit/IOBSD.h>
+#include <DiskArbitration/DADisk.h>
+#endif
+
+#ifdef linux
+/*
+ * define BLKGETSIZE from <linux/fs.h>:
+ * Note: cannot include this file completely due to errors with redefinition
+ * of structures (at least with older linux versions) --jsf
+ */
+#define BLKGETSIZE _IO(0x12,96) /* return device size */
+#endif
+
 #include <net-snmp/agent/agent_read_config.h>
 #include <net-snmp/library/read_config.h>
+
+#define HRD_MONOTONICALLY_INCREASING
+
+/*************************************************************
+ * constants for enums for the MIB node
+ * hrDiskStorageAccess (INTEGER / ASN_INTEGER)
+ */
+#define HRDISKSTORAGEACCESS_READWRITE  1
+#define HRDISKSTORAGEACCESS_READONLY  2
+
+
+/*************************************************************
+ * constants for enums for the MIB node
+ * hrDiskStorageMedia (INTEGER / ASN_INTEGER)
+ */
+#define HRDISKSTORAGEMEDIA_OTHER  1
+#define HRDISKSTORAGEMEDIA_UNKNOWN  2
+#define HRDISKSTORAGEMEDIA_HARDDISK  3
+#define HRDISKSTORAGEMEDIA_FLOPPYDISK  4
+#define HRDISKSTORAGEMEDIA_OPTICALDISKROM  5
+#define HRDISKSTORAGEMEDIA_OPTICALDISKWORM  6
+#define HRDISKSTORAGEMEDIA_OPTICALDISKRW  7
+#define HRDISKSTORAGEMEDIA_RAMDISK  8
 
         /*********************
 	 *
@@ -31,19 +130,73 @@
 	 *
 	 *********************/
 
+#if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
+static void     Add_HR_Disk_entry(const char *, int, int, int, int,
+                                  const char *, int, int);
+#endif
+static void     Save_HR_Disk_General(void);
+static void     Save_HR_Disk_Specific(void);
+static int      Query_Disk(int, const char *);
+static int      Is_It_Writeable(void);
+static int      What_Type_Disk(void);
+static int      Is_It_Removeable(void);
 static const char *describe_disk(int);
 
 int             header_hrdisk(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
 
-int             HRD_type_index;
+static int      HRD_type_index;
 static int      HRD_index;
-char            HRD_savedModel[HRD_SAVED_MODEL_SIZE];
-long            HRD_savedCapacity = 1044;
+static char     HRD_savedModel[40];
+static long     HRD_savedCapacity = 1044;
+#if defined(DIOC_DESCRIBE) || defined(DKIOCINFO) || defined(HAVE_LINUX_HDREG_H)
+static int      HRD_savedFlags;
+#endif
 static time_t   HRD_history[HRDEV_TYPE_MASK + 1];
+
+#ifdef DIOC_DESCRIBE
+static disk_describe_type HRD_info;
+static capacity_type HRD_cap;
+
+static int      HRD_savedIntf_type;
+static int      HRD_savedDev_type;
+#endif
+
+#ifdef DKIOCINFO
+static struct dk_cinfo HRD_info;
+static struct dk_geom HRD_cap;
+
+static int      HRD_savedCtrl_type;
+#endif
+
+#ifdef HAVE_LINUX_HDREG_H
+static struct hd_driveid HRD_info;
+#endif
+
+#ifdef DIOCGDINFO
+static struct disklabel HRD_info;
+#endif
+
+#ifdef darwin
+static int64_t  HRD_cap;
+static int      HRD_access;
+static int      HRD_type;
+static int      HRD_removeble;
+static char     HRD_model[40];
+static int      HRD_saved_access;
+static int      HRD_saved_type;
+static int      HRD_saved_removeble;
+static int _get_type_from_protocol( const char *prot );
+static int _get_type_value( const char *str_type );
+#endif
 
 static void     parse_disk_config(const char *, char *);
 static void     free_disk_config(void);
+
+#ifdef linux
+static void     Add_LVM_Disks(void);
+static void     Remove_LVM_Disks(void);
+#endif
 
         /*********************
 	 *
@@ -77,9 +230,48 @@ init_hr_disk(void)
     init_device[HRDEV_DISK] = Init_HR_Disk;
     next_device[HRDEV_DISK] = Get_Next_HR_Disk;
     save_device[HRDEV_DISK] = Save_HR_Disk_General;
+#ifdef HRD_MONOTONICALLY_INCREASING
     dev_idx_inc[HRDEV_DISK] = 1;
+#endif
 
-    init_hr_disk_entries();
+#if defined(linux)
+    Add_HR_Disk_entry("/dev/hd%c%d", -1, -1, 'a', 'l', "/dev/hd%c", 1, 15);
+    Add_HR_Disk_entry("/dev/sd%c%d", -1, -1, 'a', 'p', "/dev/sd%c", 1, 15);
+    Add_HR_Disk_entry("/dev/md%d", -1, -1, 0, 3, "/dev/md%d", 0, 0);
+    Add_HR_Disk_entry("/dev/fd%d", -1, -1, 0, 1, "/dev/fd%d", 0, 0);
+
+    Add_LVM_Disks();
+
+#elif defined(hpux)
+#if defined(hpux10) || defined(hpux11)
+    Add_HR_Disk_entry("/dev/rdsk/c%dt%xd%d", 0, 1, 0, 15,
+                      "/dev/rdsk/c%dt%xd0", 0, 4);
+#else                           /* hpux9 */
+    Add_HR_Disk_entry("/dev/rdsk/c%dd%xs%d", 201, 201, 0, 15,
+                      "/dev/rdsk/c%dd%xs0", 0, 4);
+#endif
+#elif defined(solaris2)
+    Add_HR_Disk_entry("/dev/rdsk/c%dt%dd0s%d", 0, 7, 0, 15,
+                      "/dev/rdsk/c%dt%dd0s0", 0, 7);
+    Add_HR_Disk_entry("/dev/rdsk/c%dd%ds%d", 0, 7, 0, 15,
+                      "/dev/rdsk/c%dd%ds0", 0, 7);
+#elif defined(darwin)
+    Add_HR_Disk_entry("/dev/disk%ds%d", -1, -1, 0, 32, "/dev/disk%d", 1, 32);
+#elif defined(freebsd4) || defined(freebsd5)
+    Add_HR_Disk_entry("/dev/ad%ds%d%c", 0, 1, 1, 4, "/dev/ad%ds%d", 'a', 'h');
+    Add_HR_Disk_entry("/dev/da%ds%d%c", 0, 1, 1, 4, "/dev/da%ds%d", 'a', 'h');
+#elif defined(freebsd3)
+    Add_HR_Disk_entry("/dev/wd%ds%d%c", 0, 1, 1, 4, "/dev/wd%ds%d", 'a',
+                      'h');
+    Add_HR_Disk_entry("/dev/sd%ds%d%c", 0, 1, 1, 4, "/dev/sd%ds%d", 'a',
+                      'h');
+#elif defined(freebsd2)
+    Add_HR_Disk_entry("/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%d", 'a', 'h');
+    Add_HR_Disk_entry("/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%d", 'a', 'h');
+#elif defined(netbsd1)
+    Add_HR_Disk_entry("/dev/wd%d%c", -1, -1, 0, 3, "/dev/wd%dc", 'a', 'h');
+    Add_HR_Disk_entry("/dev/sd%d%c", -1, -1, 0, 3, "/dev/sd%dc", 'a', 'h');
+#endif
 
     device_descr[HRDEV_DISK] = describe_disk;
     HRD_savedModel[0] = '\0';
@@ -93,6 +285,14 @@ init_hr_disk(void)
 
     snmpd_register_config_handler("ignoredisk", parse_disk_config,
                                   free_disk_config, "name");
+}
+
+void
+shutdown_hr_disk(void)
+{
+#ifdef linux
+    Remove_LVM_Disks();
+#endif
 }
 
 #define ITEM_STRING	1
@@ -156,7 +356,7 @@ parse_disk_config(const char *token, char *cptr)
             di_curr->item_details = (void *) 0;
             name++;
         } else if (*name == '[') {
-            d_set = calloc(1, sizeof(details_set));
+            d_set = (details_set *) calloc(sizeof(details_set), 1);
             if (!d_set) {
                 config_perror("Out of memory");
                 SNMP_FREE(d_new);
@@ -252,10 +452,10 @@ free_disk_config(void)
             di_next = di_ptr->item_next;
             if (di_ptr->item_details)
                 free(di_ptr->item_details);
-            free(di_ptr);
+            free((void *) di_ptr);
             di_ptr = di_next;
         }
-        free(d_ptr);
+        free((void *) d_ptr);
         d_ptr = d_next;
     }
     conf_list = (conf_disk_list *) 0;
@@ -377,7 +577,9 @@ header_hrdisk(struct variable *vp,
             (LowIndex == -1 || disk_idx < LowIndex)) {
             LowIndex = disk_idx;
             Save_HR_Disk_Specific();
+#ifdef HRD_MONOTONICALLY_INCREASING
             break;
+#endif
         }
     }
 
@@ -466,7 +668,8 @@ typedef struct {
 static HRD_disk_t disk_devices[MAX_NUMBER_DISK_TYPES];
 static int      HR_number_disk_types = 0;
 
-void
+#if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
+static void
 Add_HR_Disk_entry(const char *devpart_string,
                   int first_ctl,
                   int last_ctl,
@@ -500,7 +703,7 @@ Add_HR_Disk_entry(const char *devpart_string,
             first_partn;
         disk_devices[HR_number_disk_types].disk_partition_last =
             last_partn;
-#ifdef DEBUG_TEST
+#if DEBUG_TEST
         DEBUGMSGTL(("host/hr_disk",
                     "Add_HR %02d '%s' first=%d last=%d\n",
                     HR_number_disk_types, devpart_string, lodev, hidev));
@@ -515,13 +718,14 @@ Add_HR_Disk_entry(const char *devpart_string,
                     "WARNING! Add_HR_Disk_entry '%s' incomplete, %d created\n",
                     devpart_string, nbr_created));
     }
-#ifdef DEBUG_TEST
+#if DEBUG_TEST
     else
         DEBUGMSGTL(("host/hr_disk",
                     "Add_HR_Disk_entry '%s' completed, %d created\n",
                     devpart_string, nbr_created));
 #endif
 }
+#endif
 
 void
 Init_HR_Disk(void)
@@ -686,6 +890,114 @@ Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
     return 0;
 }
 
+#ifdef darwin
+int
+Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
+{
+    DASessionRef        sess_ref;
+    DADiskRef           disk;
+    CFDictionaryRef     desc;
+    CFStringRef         str_ref;
+    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
+
+    DEBUGMSGTL(("host/hr_disk", "Disk Label type %s\n", devfull));
+
+    sess_ref = DASessionCreate( NULL );
+    if (NULL == sess_ref) {
+        strlcpy(string, devfull, str_len);
+        return -1;
+    }
+
+    disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
+    if (NULL == disk) {
+        CFRelease(sess_ref);
+        strlcpy(string, devfull, str_len);
+        return -1;
+    }
+
+    desc = DADiskCopyDescription( disk );
+    if (NULL == desc) {
+        snmp_log(LOG_ERR,
+                 "diskmgr: couldn't get disk description for %s, skipping\n",
+                 devfull);
+        CFRelease(disk);
+        CFRelease(sess_ref);
+        strlcpy(string, devfull, str_len);
+        return -1;
+    }
+
+    /** model */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaNameKey);
+    if (str_ref) {
+        strlcpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
+                str_len);
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " name %s\n", string));
+    }
+    else {
+        strlcpy(string, devfull, str_len);
+    }
+    
+    CFRelease(disk);
+    CFRelease(desc);
+    CFRelease(sess_ref);
+    
+    return 0;
+}
+#endif
+
+static void
+Save_HR_Disk_Specific(void)
+{
+#ifdef DIOC_DESCRIBE
+    HRD_savedIntf_type = HRD_info.intf_type;
+    HRD_savedDev_type = HRD_info.dev_type;
+    HRD_savedFlags = HRD_info.flags;
+    HRD_savedCapacity = HRD_cap.lba / 2;
+#endif
+#ifdef DKIOCINFO
+    HRD_savedCtrl_type = HRD_info.dki_ctype;
+    HRD_savedFlags = HRD_info.dki_flags;
+    HRD_savedCapacity = HRD_cap.dkg_ncyl * HRD_cap.dkg_nhead * HRD_cap.dkg_nsect / 2;   /* ??? */
+#endif
+#ifdef HAVE_LINUX_HDREG_H
+    HRD_savedCapacity = HRD_info.lba_capacity / 2;
+    HRD_savedFlags = HRD_info.config;
+#endif
+#ifdef DIOCGDINFO
+    HRD_savedCapacity = HRD_info.d_secperunit / 2;
+#endif
+#ifdef darwin
+    HRD_savedCapacity = HRD_cap / 1024;
+    HRD_saved_access = HRD_access;
+    HRD_saved_type = HRD_type;
+    HRD_saved_removeble = HRD_removeble;
+#endif
+
+}
+
+static void
+Save_HR_Disk_General(void)
+{
+#ifdef DIOC_DESCRIBE
+    strlcpy(HRD_savedModel, HRD_info.model_num, sizeof(HRD_savedModel));
+#endif
+#ifdef DKIOCINFO
+    strlcpy(HRD_savedModel, HRD_info.dki_dname, sizeof(HRD_savedModel));
+#endif
+#ifdef HAVE_LINUX_HDREG_H
+    strlcpy(HRD_savedModel, (const char *) HRD_info.model,
+            sizeof(HRD_savedModel));
+#endif
+#ifdef DIOCGDINFO
+    strlcpy(HRD_savedModel, dktypenames[HRD_info.d_type],
+            sizeof(HRD_savedModel));
+#endif
+#ifdef darwin
+    strlcpy(HRD_savedModel, HRD_model, sizeof(HRD_savedModel));
+#endif
+}
+
 static const char *
 describe_disk(int idx)
 {
@@ -694,3 +1006,423 @@ describe_disk(int idx)
     else
         return (HRD_savedModel);
 }
+
+
+static int
+Query_Disk(int fd, const char *devfull)
+{
+    int             result = -1;
+
+#ifdef DIOC_DESCRIBE
+    result = ioctl(fd, DIOC_DESCRIBE, &HRD_info);
+    if (result != -1)
+        result = ioctl(fd, DIOC_CAPACITY, &HRD_cap);
+#endif
+
+#ifdef DKIOCINFO
+    result = ioctl(fd, DKIOCINFO, &HRD_info);
+    if (result != -1)
+        result = ioctl(fd, DKIOCGGEOM, &HRD_cap);
+#endif
+
+#ifdef HAVE_LINUX_HDREG_H
+    if (HRD_type_index == 0)    /* IDE hard disk */
+        result = ioctl(fd, HDIO_GET_IDENTITY, &HRD_info);
+    else if (HRD_type_index != 3) {     /* SCSI hard disk, md and LVM devices */
+        long            h;
+        result = ioctl(fd, BLKGETSIZE, &h);
+        if (result != -1 && HRD_type_index == 2 && h == 0L)
+            result = -1;        /* ignore empty md devices */
+        if (result != -1) {
+            HRD_info.lba_capacity = h;
+            if (HRD_type_index == 1)
+                snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
+                         "SCSI disk (%s)", devfull);
+	    else if (HRD_type_index >= 4)
+		snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
+			 "LVM volume (%s)", devfull + strlen("/dev/mapper/"));
+            else
+                snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
+                        "RAID disk (%s)", devfull);
+            HRD_info.model[ sizeof(HRD_info.model)-1 ] = 0;
+            HRD_info.config = 0;
+        }
+    }
+#endif
+
+#ifdef DIOCGDINFO
+    result = ioctl(fd, DIOCGDINFO, &HRD_info);
+#endif
+
+#ifdef darwin
+    DASessionRef        sess_ref;
+    DADiskRef           disk;
+    CFDictionaryRef     desc;
+    CFStringRef         str_ref;
+    CFNumberRef         number_ref;
+    CFBooleanRef        bool_ref;
+    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
+
+    sess_ref = DASessionCreate( NULL );
+    if (NULL == sess_ref)
+        return -1;
+
+    disk = DADiskCreateFromBSDName( NULL, sess_ref, devfull );
+    if (NULL == disk) {
+        CFRelease(sess_ref);
+        return -1;
+    }
+
+    desc = DADiskCopyDescription( disk );
+    if (NULL == desc) {
+        CFRelease(disk);
+        CFRelease(sess_ref);
+        return -1;
+    }
+
+    number_ref = (CFNumberRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaSizeKey);
+    if (number_ref)
+        CFNumberGetValue(number_ref, kCFNumberSInt64Type, &HRD_cap);
+    else
+        HRD_cap = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " size %lld\n", HRD_cap));
+
+    /** writable?  */
+    bool_ref = (CFBooleanRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaWritableKey);
+    if (bool_ref) {
+        HRD_access = CFBooleanGetValue(bool_ref);
+    }
+    else
+        HRD_access = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " writable %d\n",
+                HRD_access));
+
+    /** removable?  */
+    bool_ref = (CFBooleanRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaRemovableKey);
+    if (bool_ref) {
+        HRD_removeble = CFBooleanGetValue(bool_ref);
+    }
+    else
+        HRD_removeble = 0;
+    DEBUGMSGTL(("verbose:diskmgr:darwin", " removable %d\n",
+                HRD_removeble));
+
+    /** get type */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionMediaTypeKey);
+    if (str_ref) {
+        HRD_type = _get_type_value(CFStringGetCStringPtr(str_ref,
+                                                         sys_encoding));
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
+                    CFStringGetCStringPtr(str_ref, sys_encoding),
+                    HRD_type));
+    }
+    else {
+        str_ref = (CFStringRef)
+            CFDictionaryGetValue(desc, kDADiskDescriptionDeviceProtocolKey);
+        if (str_ref) {
+            HRD_type = 
+                _get_type_from_protocol(CFStringGetCStringPtr(str_ref,
+                                                              sys_encoding));
+            DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
+                        CFStringGetCStringPtr(str_ref, sys_encoding),
+                        HRD_type));
+        }
+        else
+            HRD_type = HRDISKSTORAGEMEDIA_UNKNOWN;
+    }
+
+    /** model */
+    str_ref = (CFStringRef)
+        CFDictionaryGetValue(desc, kDADiskDescriptionDeviceModelKey);
+    if (str_ref) {
+        strlcpy(HRD_model, CFStringGetCStringPtr(str_ref, sys_encoding),
+                sizeof(HRD_model));
+        DEBUGMSGTL(("verbose:diskmgr:darwin", " model %s\n", HRD_model));
+    }
+    else
+        HRD_model[0] = 0;
+    CFRelease(disk);
+    CFRelease(desc);
+    CFRelease(sess_ref);
+    result = 0;
+#endif
+
+    return (result);
+}
+
+
+static int
+Is_It_Writeable(void)
+{
+#ifdef DIOC_DESCRIBE
+    if ((HRD_savedFlags & WRITE_PROTECT_FLAG) ||
+        (HRD_savedDev_type == CDROM_DEV_TYPE))
+        return (2);             /* read only */
+#endif
+
+#ifdef DKIOCINFO
+    if (HRD_savedCtrl_type == DKC_CDROM)
+        return (2);             /* read only */
+#endif
+
+#ifdef darwin
+    if (!HRD_access)
+        return (2);
+#endif
+
+    return (1);                 /* read-write */
+}
+
+static int
+What_Type_Disk(void)
+{
+#ifdef DIOC_DESCRIBE
+    switch (HRD_savedDev_type) {
+    case DISK_DEV_TYPE:
+        if (HRD_savedIntf_type == PC_FDC_INTF)
+            return (4);         /* Floppy Disk */
+        else
+            return (3);         /* Hard Disk */
+        break;
+    case CDROM_DEV_TYPE:
+        return (5);             /* Optical RO */
+        break;
+    case WORM_DEV_TYPE:
+        return (6);             /* Optical WORM */
+        break;
+    case MO_DEV_TYPE:
+        return (7);             /* Optical R/W */
+        break;
+    default:
+        return (2);             /* Unknown */
+        break;
+    }
+#endif
+
+#ifdef DKIOCINFO
+    switch (HRD_savedCtrl_type) {
+    case DKC_WDC2880:
+    case DKC_DSD5215:
+#ifdef DKC_XY450
+    case DKC_XY450:
+#endif
+    case DKC_ACB4000:
+    case DKC_MD21:
+#ifdef DKC_XD7053
+    case DKC_XD7053:
+#endif
+    case DKC_SCSI_CCS:
+#ifdef DKC_PANTHER
+    case DKC_PANTHER:
+#endif
+#ifdef DKC_CDC_9057
+    case DKC_CDC_9057:
+#endif
+#ifdef DKC_FJ_M1060
+    case DKC_FJ_M1060:
+#endif
+    case DKC_DIRECT:
+    case DKC_PCMCIA_ATA:
+        return (3);             /* Hard Disk */
+        break;
+    case DKC_NCRFLOPPY:
+    case DKC_SMSFLOPPY:
+    case DKC_INTEL82077:
+        return (4);             /* Floppy Disk */
+        break;
+    case DKC_CDROM:
+        return (5);             /* Optical RO */
+        break;
+    case DKC_PCMCIA_MEM:
+        return (8);             /* RAM disk */
+        break;
+    case DKC_MD:               /* "meta-disk" driver */
+        return (1);             /* Other */
+        break;
+    }
+#endif
+
+#ifdef darwin
+    return HRD_type;
+#endif
+
+    return (2);                 /* Unknown */
+}
+
+static int
+Is_It_Removeable(void)
+{
+#ifdef DIOC_DESCRIBE
+    if ((HRD_savedIntf_type == PC_FDC_INTF) ||
+        (HRD_savedDev_type == WORM_DEV_TYPE) ||
+        (HRD_savedDev_type == MO_DEV_TYPE) ||
+        (HRD_savedDev_type == CDROM_DEV_TYPE))
+        return (1);             /* true */
+#endif
+
+#ifdef DKIOCINFO
+    if ((HRD_savedCtrl_type == DKC_CDROM) ||
+        (HRD_savedCtrl_type == DKC_NCRFLOPPY) ||
+        (HRD_savedCtrl_type == DKC_SMSFLOPPY) ||
+        (HRD_savedCtrl_type == DKC_INTEL82077) ||
+        (HRD_savedCtrl_type == DKC_PCMCIA_MEM) ||
+        (HRD_savedCtrl_type == DKC_PCMCIA_ATA))
+        return (1);             /* true */
+#endif
+
+#ifdef HAVE_LINUX_HDREG_H
+    if (HRD_savedFlags & 0x80)
+        return (1);             /* true */
+#endif
+
+#ifdef darwin
+    if (HRD_removeble)
+        return (1);
+#endif
+
+    return (2);                 /* false */
+}
+
+#ifdef darwin
+typedef struct type_value_map_s {
+     const char *type;
+     uint32_t    value;
+} type_value_map;
+
+static type_value_map media_type_map[] = {
+    { "CD-ROM", HRDISKSTORAGEMEDIA_OPTICALDISKROM},
+    { "DVD-R", HRDISKSTORAGEMEDIA_OPTICALDISKWORM},
+    { "DVD+R", HRDISKSTORAGEMEDIA_OPTICALDISKWORM},
+};  
+static int media_types = sizeof(media_type_map)/sizeof(media_type_map[0]);
+
+static int
+_get_type_value( const char *str_type )
+{
+    int           i, len;
+    
+    if (NULL == str_type)
+        return HRDISKSTORAGEMEDIA_UNKNOWN;
+
+    len = strlen(str_type);
+    for(i=0; i < media_types; ++i) {
+        if (0 == strcmp(media_type_map[i].type, str_type))
+            return media_type_map[i].value;
+    }
+
+    return HRDISKSTORAGEMEDIA_UNKNOWN;
+}
+
+static type_value_map proto_map[] = {
+    { "ATA", HRDISKSTORAGEMEDIA_HARDDISK},
+    { "ATAPI", HRDISKSTORAGEMEDIA_OPTICALDISKROM}
+};
+static int proto_maps = sizeof(proto_map)/sizeof(proto_map[0]);
+
+static int _get_type_from_protocol( const char *prot )
+{   
+    int           i, len;
+
+    if (NULL == prot)
+        return TV_FALSE;
+
+    len = strlen(prot);
+    for(i=0; i < proto_maps; ++i) {
+        if (0 == strcmp(proto_map[i].type, prot))
+            return proto_map[i].value;
+    }
+
+    return HRDISKSTORAGEMEDIA_UNKNOWN;
+}
+#endif
+
+
+#ifdef linux
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+static char    *lvm_device_names[MAX_NUMBER_DISK_TYPES];
+static int      lvm_device_count;
+#endif
+
+static void
+Add_LVM_Disks(void)
+{
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    /*
+     * LVM devices are harder because their name can be almost anything (see 
+     * regexp below). Each logical volume is interpreted as its own device with
+     * one partition, even if two logical volumes share common volume group. 
+     */
+    regex_t         lvol;
+    int             res;
+    DIR            *dir;
+    struct dirent  *d;
+
+    res =
+        regcomp(&lvol, "[0-9a-zA-Z+_\\.-]+-[0-9a-zA-Z+_\\.-]+",
+                REG_EXTENDED | REG_NOSUB);
+    if (res != 0) {
+        char            error[200];
+        regerror(res, &lvol, error, sizeof(error)-1);
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_LVM_Disks: cannot compile regexp: %s", error));
+        return;
+    }
+
+    dir = opendir("/dev/mapper/");
+    if (dir == NULL) {
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_LVM_Disks: cannot open /dev/mapper"));
+        regfree(&lvol);
+        return;
+    }
+
+    while ((d = readdir(dir)) != NULL) {
+        res = regexec(&lvol, d->d_name, 0, NULL, 0);
+        if (res == 0) {
+            char *path = (char*)malloc(PATH_MAX + 1);
+            if (path == NULL) {
+                DEBUGMSGTL(("host/hr_disk",
+                            "Add_LVM_Disks: cannot allocate memory for device %s",
+                            d->d_name));
+                break;
+            }
+            snprintf(path, PATH_MAX-1, "/dev/mapper/%s", d->d_name);
+            Add_HR_Disk_entry(path, -1, -1, 0, 0, path, 0, 0);
+
+            /*
+             * store the device name so we can free it in Remove_LVM_Disks 
+             */
+            lvm_device_names[lvm_device_count] = path;
+            ++lvm_device_count;
+            if (lvm_device_count >= MAX_NUMBER_DISK_TYPES) {
+                DEBUGMSGTL(("host/hr_disk",
+                            "Add_LVM_Disks: maximum count of LVM devices reached"));
+                break;
+            }
+        }
+    }
+    closedir(dir);
+    regfree(&lvol);
+#endif
+}
+
+static void
+Remove_LVM_Disks(void)
+{
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    /*
+     * just free the device names allocated in add_lvm_disks 
+     */
+    int             i;
+    for (i = 0; i < lvm_device_count; i++) {
+        free(lvm_device_names[i]);
+        lvm_device_names[i] = NULL;
+    }
+    lvm_device_count = 0;
+#endif
+}
+#endif

@@ -23,35 +23,33 @@
 #undef PACKAGE_STRING
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
-#if !defined(HAVE_MYSQL_INIT)
 #ifdef HAVE_MY_GLOBAL_H
 #include <my_global.h>
 #endif
 #ifdef HAVE_MY_SYS_H
 #include <my_sys.h>
 #endif
-#endif
 #include <mysql.h>
 #include <errmsg.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
@@ -62,7 +60,7 @@
 #include "snmptrapd_log.h"
 #include "snmptrapd_sql.h"
 
-netsnmp_feature_require(container_fifo);
+netsnmp_feature_require(container_fifo)
 
 /*
  * define a structure to hold all the file globals
@@ -201,7 +199,7 @@ typedef struct sql_buf_t {
  * static bind structures, plus 2 static buffers to bind to.
  */
 static MYSQL_BIND _tbind[TBIND_MAX], _vbind[VBIND_MAX];
-static typeof(*((MYSQL_BIND*)NULL)->is_null) _no_v3;
+static my_bool    _no_v3;
 
 static void _sql_process_queue(u_int dontcare, void *meeither);
 
@@ -256,13 +254,6 @@ netsnmp_sql_disconnected(void)
     }
 }
 
-static int
-netsnmp_sql_server_disconnected(int err)
-{
-    // CR_SERVER_GONE_ERROR | CR_SERVER_LOST | ER_CLIENT_INTERACTION_TIMEOUT
-    return CR_SERVER_GONE_ERROR == err || CR_SERVER_LOST == err || 4031 == err;
-}
-
 /*
  * convenience function to log mysql errors
  */
@@ -270,20 +261,17 @@ static void
 netsnmp_sql_error(const char *message)
 {
     u_int err = mysql_errno(_sql.conn);
-
-    if (0 == _sql.connected || !netsnmp_sql_server_disconnected(err)) {
-        snmp_log(LOG_ERR, "%s\n", message);
-        if (_sql.conn != NULL) {
+    snmp_log(LOG_ERR, "%s\n", message);
+    if (_sql.conn != NULL) {
 #if MYSQL_VERSION_ID >= 40101
-            snmp_log(LOG_ERR, "Error %u (%s): %s\n",
-                     err, mysql_sqlstate(_sql.conn), mysql_error(_sql.conn));
+        snmp_log(LOG_ERR, "Error %u (%s): %s\n",
+                 err, mysql_sqlstate(_sql.conn), mysql_error(_sql.conn));
 #else
-            snmp(LOG_ERR, "Error %u: %s\n",
-                 mysql_errno(_sql.conn), mysql_error(_sql.conn));
+        snmp(LOG_ERR, "Error %u: %s\n",
+             mysql_errno(_sql.conn), mysql_error(_sql.conn));
 #endif
-        }
     }
-    if (netsnmp_sql_server_disconnected(err))
+    if (CR_SERVER_GONE_ERROR == err)
         netsnmp_sql_disconnected();
 }
 
@@ -295,15 +283,14 @@ netsnmp_sql_stmt_error (MYSQL_STMT *stmt, const char *message)
 {
     u_int err = mysql_errno(_sql.conn);
 
-    if (0 == _sql.connected || !netsnmp_sql_server_disconnected(err)) {
-        snmp_log(LOG_ERR, "%s\n", message);
-        if (stmt) {
-            snmp_log(LOG_ERR, "SQL Error %u (%s): %s\n",
-                     mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt),
-                     mysql_stmt_error(stmt));
-        }
+    snmp_log(LOG_ERR, "%s\n", message);
+    if (stmt) {
+        snmp_log(LOG_ERR, "SQL Error %u (%s): %s\n",
+                 mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt),
+                 mysql_stmt_error(stmt));
     }
-    if (netsnmp_sql_server_disconnected(err))
+    
+    if (CR_SERVER_GONE_ERROR == err)
         netsnmp_sql_disconnected();
 }
 
@@ -326,6 +313,15 @@ netsnmp_mysql_cleanup(void)
     CONTAINER_FREE(_sql.queue);
     _sql.queue = NULL;
 
+    if (_sql.trap_stmt) {
+        mysql_stmt_close(_sql.trap_stmt);
+        _sql.trap_stmt = NULL;
+    }
+    if (_sql.vb_stmt) {
+        mysql_stmt_close(_sql.vb_stmt);
+        _sql.vb_stmt = NULL;
+    }
+    
     /** disconnect from server */
     netsnmp_sql_disconnected();
 
@@ -345,7 +341,7 @@ netsnmp_mysql_bind(const char *text, size_t text_size, MYSQL_STMT **stmt,
                    MYSQL_BIND *bind)
 {
     if ((NULL == text) || (NULL == stmt) || (NULL == bind)) {
-        snmp_log(LOG_ERR,"invalid parameters to netsnmp_mysql_bind()\n");
+        snmp_log(LOG_ERR,"invalid paramaters to netsnmp_mysql_bind()\n");
         return -1;
     }
 
@@ -382,21 +378,6 @@ netsnmp_mysql_connect(void)
         return 0;
 
     DEBUGMSGTL(("sql:connection","connecting\n"));
-
-    if (_sql.conn) {
-        mysql_close(_sql.conn);
-        _sql.conn = NULL;
-    }
-
-    _sql.conn = mysql_init (NULL);
-    if (_sql.conn == NULL) {
-        netsnmp_sql_error("mysql_init() failed (out of memory?)");
-        goto err;
-    }
-
-#ifdef HAVE_MYSQL_OPTIONS
-    mysql_options(_sql.conn, MYSQL_READ_DEFAULT_GROUP, "snmptrapd");
-#endif
 
     /** connect to server */
     if (mysql_real_connect (_sql.conn, _sql.host_name, _sql.user_name,
@@ -440,6 +421,9 @@ netsnmp_mysql_connect(void)
 int
 netsnmp_mysql_init(void)
 {
+    int not_argc = 0, i;
+    char *not_args[] = { NULL };
+    char **not_argv = not_args;
     netsnmp_trapd_handler *traph;
 
     DEBUGMSGTL(("sql:init","called\n"));
@@ -466,22 +450,14 @@ netsnmp_mysql_init(void)
     my_init();
 #endif
 
-#if !defined(HAVE_MYSQL_OPTIONS)
-    {
-    int not_argc = 0, i;
-    char *not_args[] = { NULL };
-    char **not_argv = not_args;
-
     /** load .my.cnf values */
-#ifdef HAVE_MY_LOAD_DEFAULTS
+#if HAVE_MY_LOAD_DEFAULTS
     my_load_defaults ("my", _sql.groups, &not_argc, &not_argv, 0);
 #elif defined(HAVE_LOAD_DEFAULTS)
     load_defaults ("my", _sql.groups, &not_argc, &not_argv);
-#else
-#error Neither load_defaults() nor mysql_options() are available.
 #endif
 
-    for (i = 0; i < not_argc; ++i) {
+    for(i=0; i < not_argc; ++i) {
         if (NULL == not_argv[i])
             continue;
         if (strncmp(not_argv[i],"--password=",11) == 0)
@@ -499,8 +475,6 @@ netsnmp_mysql_init(void)
         else
             snmp_log(LOG_WARNING, "unknown argument[%d] %s\n", i, not_argv[i]);
     }
-    }
-#endif /* !defined(HAVE_MYSQL_OPTIONS) */
 
     /** init bind structures */
     memset(_tbind, 0x0, sizeof(_tbind));
@@ -574,6 +548,16 @@ netsnmp_mysql_init(void)
 #endif
     _vbind[VBIND_VAL].length = &_vbind[VBIND_VAL].buffer_length;
 
+    _sql.conn = mysql_init (NULL);
+    if (_sql.conn == NULL) {
+        netsnmp_sql_error("mysql_init() failed (out of memory?)");
+        return -1;
+    }
+
+#if MYSQL_VERSION_ID >= 100000
+    mysql_options(_sql.conn, MYSQL_READ_DEFAULT_GROUP, "snmptrapd");
+#endif
+
     /** try to connect; we'll try again later if we fail */
     (void) netsnmp_mysql_connect();
 
@@ -602,9 +586,8 @@ netsnmp_mysql_init(void)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_log(void *p, void *dontcare)
+_sql_log(sql_buf *sqlb, void* dontcare)
 {
-    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
 
@@ -663,10 +646,8 @@ _sql_log(void *p, void *dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_vb_buf_free(void *p, void *dontcare)
+_sql_vb_buf_free(sql_vb_buf *sqlvb, void* dontcare)
 {
-    sql_vb_buf *sqlvb = p;
-
     if (NULL == sqlvb)
         return;
 
@@ -682,16 +663,15 @@ _sql_vb_buf_free(void *p, void *dontcare)
  * to CONTAINER_FOR_EACH.
  */
 static void
-_sql_buf_free(void *p, void* dontcare)
+_sql_buf_free(sql_buf *sqlb, void* dontcare)
 {
-    sql_buf *sqlb = p;
-
     if (NULL == sqlb)
         return;
 
     /** do varbinds first */
     if (sqlb->varbinds) {
-        CONTAINER_CLEAR(sqlb->varbinds, _sql_vb_buf_free, NULL);
+        CONTAINER_CLEAR(sqlb->varbinds,
+                        (netsnmp_container_obj_func*)_sql_vb_buf_free, NULL);
         CONTAINER_FREE(sqlb->varbinds);
     }
 
@@ -757,16 +737,14 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     /** time */
     (void) time(&now);
     cur_time = localtime(&now);
-    if (cur_time) {
-        sqlb->time.year = cur_time->tm_year + 1900;
-        sqlb->time.month = cur_time->tm_mon + 1;
-        sqlb->time.day = cur_time->tm_mday;
-        sqlb->time.hour = cur_time->tm_hour;
-        sqlb->time.minute = cur_time->tm_min;
-        sqlb->time.second = cur_time->tm_sec;
-        sqlb->time.second_part = 0;
-        sqlb->time.neg = 0;
-    }
+    sqlb->time.year = cur_time->tm_year + 1900;
+    sqlb->time.month = cur_time->tm_mon + 1;
+    sqlb->time.day = cur_time->tm_mday;
+    sqlb->time.hour = cur_time->tm_hour;
+    sqlb->time.minute = cur_time->tm_min;
+    sqlb->time.second = cur_time->tm_sec;
+    sqlb->time.second_part = 0;
+    sqlb->time.neg = 0;
 
     /** host name */
     buf_host_len_t = 0;
@@ -989,9 +967,8 @@ mysql_handler(netsnmp_pdu           *pdu,
  * save a buffered trap to sql database
  */
 static void
-_sql_save(void *p, void *dontcare)
+_sql_save(sql_buf *sqlb, void *dontcare)
 {
-    sql_buf              *sqlb = p;
     netsnmp_iterator     *it;
     sql_vb_buf           *sqlvb;
     u_long                trap_id;
@@ -1119,7 +1096,7 @@ _sql_save(void *p, void *dontcare)
 static void
 _sql_process_queue(u_int dontcare, void *meeither)
 {
-    int        sql_has_connected, rc;
+    int        rc;
 
     /** bail if the queue is empty */
     if( 0 == CONTAINER_SIZE(_sql.queue))
@@ -1137,21 +1114,21 @@ _sql_process_queue(u_int dontcare, void *meeither)
         (void) netsnmp_mysql_connect();
     }
 
-    sql_has_connected = _sql.connected;
-
-    CONTAINER_FOR_EACH(_sql.queue, _sql_save, NULL);
+    CONTAINER_FOR_EACH(_sql.queue, (netsnmp_container_obj_func*)_sql_save,
+                       NULL);
 
     if (_sql.connected) {
         rc = mysql_commit(_sql.conn);
         if (rc) { /* nuts... now what? */
             netsnmp_sql_error("commit failed");
-            CONTAINER_FOR_EACH(_sql.queue, _sql_log, NULL);
+            CONTAINER_FOR_EACH(_sql.queue,
+                               (netsnmp_container_obj_func*)_sql_log,
+                               NULL);
         }
     }
 
-    if (!sql_has_connected || _sql.connected) {
-        CONTAINER_CLEAR(_sql.queue, _sql_buf_free, NULL);
-    }
+    CONTAINER_CLEAR(_sql.queue, (netsnmp_container_obj_func*)_sql_buf_free,
+                    NULL);
 }
 
 #else

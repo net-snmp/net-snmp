@@ -9,7 +9,6 @@
  * function declarations 
  */
 void            init_expObjectTable(void);
-void            shutdown_expObjectTable(void);
 Netsnmp_Node_Handler expObjectTable_handler;
 
 /*

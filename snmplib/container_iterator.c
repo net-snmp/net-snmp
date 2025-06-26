@@ -7,14 +7,14 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -29,7 +29,7 @@
 
 #include <net-snmp/library/container_iterator.h>
 
-netsnmp_feature_child_of(container_iterator, container_types);
+netsnmp_feature_child_of(container_iterator, container_types)
 
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_ITERATOR
 /**
@@ -42,7 +42,7 @@ netsnmp_feature_child_of(container_iterator, container_types);
  */
 typedef struct iterator_info_s {
    /*
-    * netsnmp_container  must be first
+    * netsnmp_conatiner  must be first
     */
    netsnmp_container c;
 
@@ -183,7 +183,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
              * than the key, but less than any previous match.
              *
              * if there is no key, this is a get-first, and we need to
-             * compare the best value against the tmp value to see if the
+             * compare the best value agains the tmp value to see if the
              * tmp value is lesser than the best match.
              */
             if(key) /* get next */
@@ -285,28 +285,23 @@ _iterator_get_next(iterator_info *ii, const void *key)
  * container
  *
  **********************************************************************/
-static int _iterator_free(netsnmp_container *c)
+static void
+_iterator_free(iterator_info *ii)
 {
-    iterator_info *ii = (iterator_info *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_free"));
     
     if(NULL == ii)
-        return 0;
+        return;
     
     if(ii->user_ctx)
         ii->free_user_ctx(ii->user_ctx,ii->user_ctx);
     
     free(ii);
-
-    return 0;
 }
 
 static void *
-_iterator_find(netsnmp_container *c, const void *data)
+_iterator_find(iterator_info *ii, const void *data)
 {
-    iterator_info *ii = (void *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_find"));
     
     if((NULL == ii) || (NULL == data))
@@ -316,10 +311,8 @@ _iterator_find(netsnmp_container *c, const void *data)
 }
 
 static void *
-_iterator_find_next(netsnmp_container *c, const void *data)
+_iterator_find_next(iterator_info *ii, const void *data)
 {
-    iterator_info *ii = (void *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_find_next"));
     
     if(NULL == ii)
@@ -329,10 +322,8 @@ _iterator_find_next(netsnmp_container *c, const void *data)
 }
 
 static int
-_iterator_insert(netsnmp_container *c, const void *data)
+_iterator_insert(iterator_info *ii, const void *data)
 {
-    iterator_info *ii = (void *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_insert"));
     
     if(NULL == ii)
@@ -345,10 +336,8 @@ _iterator_insert(netsnmp_container *c, const void *data)
 }
 
 static int
-_iterator_remove(netsnmp_container *c, const void *data)
+_iterator_remove(iterator_info *ii, const void *data)
 {
-    iterator_info *ii = (void *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_remove"));
     
     if(NULL == ii)
@@ -361,10 +350,8 @@ _iterator_remove(netsnmp_container *c, const void *data)
 }
 
 static int
-_iterator_release(netsnmp_container *c, const void *data)
+_iterator_release(iterator_info *ii, const void *data)
 {
-    iterator_info *ii = (void *)c;
-
     DEBUGMSGT(("container_iterator",">%s\n", "_iterator_release"));
     
     if(NULL == ii)
@@ -377,9 +364,8 @@ _iterator_release(netsnmp_container *c, const void *data)
 }
 
 static size_t
-_iterator_size(netsnmp_container *c)
+_iterator_size(iterator_info *ii)
 {
-    iterator_info *ii = (void *)c;
     size_t count = 0;
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
@@ -410,10 +396,9 @@ _iterator_size(netsnmp_container *c)
 }
 
 static void
-_iterator_for_each(netsnmp_container *c, netsnmp_container_obj_func *f,
+_iterator_for_each(iterator_info *ii, netsnmp_container_obj_func *f,
                    void *ctx)
 {
-    iterator_info *ii = (void *)c;
     netsnmp_ref_void loop_ctx = { NULL };
     netsnmp_ref_void tmp = { NULL };
 
@@ -478,18 +463,18 @@ netsnmp_container_iterator_get(void *iterator_user_ctx,
     /*
      * init container structure with iterator functions
      */
-    ii->c.cfree = _iterator_free;
+    ii->c.cfree = (netsnmp_container_rc*)_iterator_free;
     ii->c.compare = compare;
-    ii->c.get_size = _iterator_size;
+    ii->c.get_size = (netsnmp_container_size*)_iterator_size;
     ii->c.init = NULL;
-    ii->c.insert = _iterator_insert;
-    ii->c.remove = _iterator_remove;
-    ii->c.release = _iterator_release;
-    ii->c.find = _iterator_find;
-    ii->c.find_next = _iterator_find_next;
+    ii->c.insert = (netsnmp_container_op*)_iterator_insert;
+    ii->c.remove = (netsnmp_container_op*)_iterator_remove;
+    ii->c.release = (netsnmp_container_op*)_iterator_release;
+    ii->c.find = (netsnmp_container_rtn*)_iterator_find;
+    ii->c.find_next = (netsnmp_container_rtn*)_iterator_find_next;
     ii->c.get_subset = NULL;
     ii->c.get_iterator = NULL;
-    ii->c.for_each = _iterator_for_each;
+    ii->c.for_each = (netsnmp_container_func*)_iterator_for_each;
     ii->c.clear = _iterator_clear;
 
     /*

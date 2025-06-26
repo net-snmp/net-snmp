@@ -26,40 +26,40 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -68,31 +68,31 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 
 oid             objid_sysDescr[] = { 1, 3, 6, 1, 2, 1, 1, 1, 0 };
-size_t          length_sysDescr = OID_LENGTH(objid_sysDescr);
+size_t          length_sysDescr = sizeof(objid_sysDescr) / sizeof(oid);
 oid             objid_sysUpTime[] = { 1, 3, 6, 1, 2, 1, 1, 3, 0 };
-size_t          length_sysUpTime = OID_LENGTH(objid_sysUpTime);
+size_t          length_sysUpTime = sizeof(objid_sysUpTime) / sizeof(oid);
 oid             objid_ifOperStatus[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8 };
 size_t          length_ifOperStatus =
-    OID_LENGTH(objid_ifOperStatus);
+    sizeof(objid_ifOperStatus) / sizeof(oid);
 oid             objid_ifInUCastPkts[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 11 };
 size_t          length_ifInUCastPkts =
-    OID_LENGTH(objid_ifInUCastPkts);
+    sizeof(objid_ifInUCastPkts) / sizeof(oid);
 oid             objid_ifInNUCastPkts[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 12 };
 size_t          length_ifInNUCastPkts =
-    OID_LENGTH(objid_ifInNUCastPkts);
+    sizeof(objid_ifInNUCastPkts) / sizeof(oid);
 oid             objid_ifOutUCastPkts[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 17 };
 size_t          length_ifOutUCastPkts =
-    OID_LENGTH(objid_ifOutUCastPkts);
+    sizeof(objid_ifOutUCastPkts) / sizeof(oid);
 oid             objid_ifOutNUCastPkts[] =
     { 1, 3, 6, 1, 2, 1, 2, 2, 1, 18 };
 size_t          length_ifOutNUCastPkts =
-    OID_LENGTH(objid_ifOutNUCastPkts);
+    sizeof(objid_ifOutNUCastPkts) / sizeof(oid);
 oid             objid_ipInReceives[] = { 1, 3, 6, 1, 2, 1, 4, 3, 0 };
 size_t          length_ipInReceives =
-    OID_LENGTH(objid_ipInReceives);
+    sizeof(objid_ipInReceives) / sizeof(oid);
 oid             objid_ipOutRequests[] = { 1, 3, 6, 1, 2, 1, 4, 10, 0 };
 size_t          length_ipOutRequests =
-    OID_LENGTH(objid_ipOutRequests);
+    sizeof(objid_ipOutRequests) / sizeof(oid);
 
 #define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
@@ -276,7 +276,6 @@ main(int argc, char *argv[])
                uptime_string(uptime, buf));
     }
 
-    free(sysdescr);
     if (response)
         snmp_free_pdu(response);
 
@@ -395,7 +394,6 @@ main(int argc, char *argv[])
     snmp_close(ss);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }

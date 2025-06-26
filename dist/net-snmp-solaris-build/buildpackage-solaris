@@ -94,7 +94,7 @@ f snmp /etc/init.d/snmpd=./snmpd-init.d 0755 root sys
 ==
 
 pkgproto -c snmp $TMP=/ |\
-grep -E -v '^d .* / |^d .* /var |^d .* /opt |^ .*perllocal.pod=' |\
+egrep -v '^d .* / |^d .* /var |^d .* /opt |^ .*perllocal.pod=' |\
 sed -e "s/ $owner $group\$//" >> prototype || exit $?
 # and ignore top level directories (must pre-exist)
 

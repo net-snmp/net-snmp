@@ -10,10 +10,14 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <signal.h>
+
+#if HAVE_RAISE
+#define alarm raise
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_logging.h>
@@ -28,8 +32,7 @@
 
 char **argvrestartp, *argvrestartname, *argvrestart;
 
-#ifdef SIGALRM
-static RETSIGTYPE
+RETSIGTYPE
 restart_doit(int a)
 {
     char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -47,26 +50,25 @@ restart_doit(int a)
      *  The use of sigprocmask() is unspecified in a multithreaded process; see
      *  pthread_sigmask(3).
      */
-#ifdef HAVE_SIGPROCMASK
+#if HAVE_SIGPROCMASK
     {
         sigset_t empty_set;
 
         sigemptyset(&empty_set);
         sigprocmask(SIG_SETMASK, &empty_set, NULL);
     }
-#elif defined(HAVE_SIGBLOCK)
+#elif HAVE_SIGBLOCK
     sigsetmask(0);
 #endif
 
     /*
      * do the exec
      */
-#ifdef HAVE_EXECV
+#if HAVE_EXECV
     execv(argvrestartname, argvrestartp);
     setPerrorstatus(argvrestartname);
 #endif
 }
-#endif
 
 int
 restart_hook(int action,
@@ -86,8 +88,8 @@ restart_hook(int action,
     if (tmp == 1 && action == COMMIT) {
 #ifdef SIGALRM
         signal(SIGALRM, restart_doit);
-        alarm(NETSNMP_RESTARTSLEEP);
 #endif
+        alarm(NETSNMP_RESTARTSLEEP);
     }
     return SNMP_ERR_NOERROR;
 }

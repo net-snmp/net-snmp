@@ -23,9 +23,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(ip-forward-mib/data_access/route);
-config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_interface);
-config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access);
+config_require(ip-forward-mib/data_access/route)
+config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_interface)
+config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -205,6 +205,14 @@ config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access)
     inetCidrRouteTable_data *inetCidrRouteTable_allocate_data(void);
     void            inetCidrRouteTable_release_data(inetCidrRouteTable_data
                                                     * data);
+
+    int
+        inetCidrRouteTable_check_dependencies(inetCidrRouteTable_rowreq_ctx
+                                              * rowreq_ctx);
+    int             inetCidrRouteTable_commit(inetCidrRouteTable_rowreq_ctx
+                                              * rowreq_ctx);
+
+         
     inetCidrRouteTable_rowreq_ctx
         * inetCidrRouteTable_row_find_by_mib_index
         (inetCidrRouteTable_mib_index * mib_idx);
@@ -292,7 +300,7 @@ config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access)
                                                inetCidrRouteDest_val_ptr_len,
                                                u_long
                                                inetCidrRoutePfxLen_val,
-                                               const oid *
+                                               oid *
                                                inetCidrRoutePolicy_val_ptr,
                                                size_t
                                                inetCidrRoutePolicy_val_ptr_len,

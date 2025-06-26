@@ -1,19 +1,19 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "hardware/fsys/fsys.h"
+#include <net-snmp/agent/hardware/fsys.h>
 
 #include <stdio.h>
-#ifdef HAVE_SYS_MNTCTL_H
+#if HAVE_SYS_MNTCTL_H
 #include <sys/mntctl.h>
 #endif
-#ifdef HAVE_SYS_VMOUNT_H
+#if HAVE_SYS_VMOUNT_H
 #include <sys/vmount.h>
 #endif
-#ifdef HAVE_SYS_STATFS_H
+#if HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
 #endif
-#ifdef HAVE_SYS_STATVFS_H
+#if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
 
@@ -43,9 +43,8 @@ _fsys_type( int type)
 
         case  MNT_NFS:
         case  MNT_NFS3:
-            return NETSNMP_FS_TYPE_NFS;
         case  MNT_AUTOFS:
-            return NETSNMP_FS_TYPE_AUTOFS;
+            return NETSNMP_FS_TYPE_NFS;
 
     /*
      *  The following code covers selected filesystems
@@ -152,18 +151,15 @@ netsnmp_fsys_arch_load( void )
             entry->flags |= NETSNMP_FS_FLAG_BOOTABLE;
 
         /*
-         *  XXX - identify removable disks
+         *  XXX - identify removeable disks
          */
 
         /*
-         *  Skip retrieving statistics for AUTOFS and optionally for remote
-         *  mounts.
+         *  Optionally skip retrieving statistics for remote mounts
          */
         if ( (entry->flags & NETSNMP_FS_FLAG_REMOTE) &&
             netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
-            continue;
-        if (entry->type == NETSNMP_FS_TYPE_AUTOFS)
             continue;
 
         if ( statfs( entry->path, &stat_buf ) < 0 ) {

@@ -6,7 +6,7 @@ HEADER DISMAN PING MIB
 
 SKIPIFNOT USING_DISMAN_PING_MIB_MODULE
 SKIPIF NETSNMP_DISABLE_SNMPV1
-[ "$(id -ru)" = 0 ] || SKIP "Not permitted to create raw sockets"
+[ "$UID" = 0 ] || SKIP "Not permitted to create raw sockets"
 
 # SNMPv2-TC
 active=1

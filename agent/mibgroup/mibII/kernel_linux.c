@@ -8,11 +8,11 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #include <errno.h>
@@ -179,9 +179,9 @@ static const struct stats_descr ipv4_snmp_stats[] = {
 #define ICMP6_STATS_PREFIX_LEN	5
 #define UDP6_STATS_PREFIX_LEN   4
 
-netsnmp_feature_child_of(linux_ip6_stat_all, libnetsnmpmibs);
+netsnmp_feature_child_of(linux_ip6_stat_all, libnetsnmpmibs)
 
-netsnmp_feature_child_of(linux_read_ip6_stat, linux_ip6_stat_all);
+netsnmp_feature_child_of(linux_read_ip6_stat, linux_ip6_stat_all)
 
 static int
 decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
@@ -195,7 +195,7 @@ decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
         return -1;
 
     /*
-     * Since we are using strtok, there is a possibility of the original data
+     * Since we are using strtok, there is a possiblity of the orginal data
      * getting modified. So we take a local copy for this purpose even though
      * its expensive.
      */
@@ -438,6 +438,9 @@ linux_read_icmp_msg_stat(struct icmp_mib *icmpstat,
 
     if ((ret = linux_read_mibII_stats()) == -1) {
         return -1;
+    } else if (ret) {
+       memcpy(icmpmsgstat, &cached_icmp4_msg_mib, sizeof(*icmpmsgstat));
+       *flag = 1; /* We have a valid icmpmsg */
     }
 
     memcpy(icmpstat, &cached_icmp_mib, sizeof(*icmpstat));

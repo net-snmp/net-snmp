@@ -14,14 +14,14 @@
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteEventTable.h"
 
-netsnmp_feature_require(iquery);
-netsnmp_feature_require(table_tdata);
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(table_tdata)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(iquery_pdu_session);
-netsnmp_feature_require(check_vb_type_and_max_size);
-netsnmp_feature_require(mteevent_removeentry);
-netsnmp_feature_require(check_vb_truthvalue);
-netsnmp_feature_require(table_tdata_insert_row);
+netsnmp_feature_require(iquery_pdu_session)
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(mteevent_removeentry)
+netsnmp_feature_require(check_vb_truthvalue)
+netsnmp_feature_require(table_tdata_insert_row)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_table_registration_info *table_info;
@@ -91,12 +91,10 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
 
     netsnmp_request_info       *request;
     netsnmp_table_request_info *tinfo;
-    struct mteEvent            *entry;
-#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_tdata_row          *row;
+    struct mteEvent            *entry;
     char mteOwner[MTE_STR1_LEN+1];
     char mteEName[MTE_STR1_LEN+1];
-#endif
     long ret;
 
     DEBUGMSGTL(("disman:event:mib", "Event Table handler (%d)\n",
@@ -354,7 +352,7 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
                     break;
                 case RS_CREATEANDGO:
                     entry->flags |= MTE_EVENT_FLAG_ACTIVE;
-                    NETSNMP_FALLTHROUGH;
+                    /* fall-through */
                 case RS_CREATEANDWAIT:
                     entry->flags |= MTE_EVENT_FLAG_VALID;
                     entry->session =

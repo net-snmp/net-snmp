@@ -256,6 +256,7 @@ The most important configure options are:
 	--with-cc=[cross-compiler]
 	--with-ld=[cross-linker]
 	--target=[target-environment]
+	--with-endianness=[big|little]
 
 Other potentially useful options:
 
@@ -269,9 +270,10 @@ Other potentially useful options:
 
 Two simple examples of cross-compiling:
 
-./configure --target=ppc-linux --with-cc=ppc_405-gcc
+./configure --target=ppc-linux --with-cc=ppc_405-gcc --with-endianness=big
 
-./configure --target=powerpc-snmc-linux-gnu --build=i386-redhat-linux
+./configure --target=powerpc-snmc-linux-gnu --build=i386-redhat-linux \
+        --with-endianness=big
 
 A more complex example involves setting environment variables for all
 the flags for the tools needed for the cross compile:
@@ -285,7 +287,7 @@ the flags for the tools needed for the cross compile:
    export LIB='ar rcu' 
 
    ./configure --build=i686-pc-linux-gnu  --host=powerpc \
-           --target=powerpc-hardhat-linux-gnu
+           --target=powerpc-hardhat-linux-gnu --with-endianness=big
 
 
 

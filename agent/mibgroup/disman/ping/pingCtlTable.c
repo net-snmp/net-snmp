@@ -21,10 +21,10 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -36,9 +36,8 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include <linux/param.h>
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
 
 #include "pingCtlTable.h"
@@ -74,10 +73,6 @@ static struct proto {
     socklen_t       salen;      /* length of sockaddr{}s */
     int             icmpproto;  /* IPPROTO_xxx value for ICMP */
 } *pr;
-
-static volatile int    exiting;
-static volatile int    status_snapshot;
-
 
 /*
  *pingCtlTable_variables_oid:
@@ -208,7 +203,6 @@ create_pingCtlTable_data(void)
     StorageNew->pingCtlAdminStatus = 2;
     StorageNew->pingCtlDataFill = strdup("00");
     if (StorageNew->pingCtlDataFill == NULL) {
-        free(StorageNew->pingCtlTargetAddress);
         free(StorageNew);
         return NULL;
     }
@@ -235,22 +229,6 @@ create_pingCtlTable_data(void)
 
     StorageNew->storageType = ST_NONVOLATILE;
     StorageNew->pingProbeHistoryMaxIndex = 0;
-
-    if (StorageNew->pingCtlTargetAddress == NULL ||
-        StorageNew->pingCtlTrapGeneration == NULL ||
-        StorageNew->pingCtlType == NULL ||
-        StorageNew->pingCtlDescr == NULL ||
-        StorageNew->pingCtlSourceAddress == NULL) {
-        free(StorageNew->pingCtlTargetAddress);
-        free(StorageNew->pingCtlDataFill);
-        free(StorageNew->pingCtlTrapGeneration);
-        free(StorageNew->pingCtlType);
-        free(StorageNew->pingCtlDescr);
-        free(StorageNew->pingCtlSourceAddress);
-        free(StorageNew);
-        return NULL;
-    }
-
     return StorageNew;
 }
 
@@ -435,7 +413,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlOwnerIndexLen);
     if (StorageTmp->pingCtlOwnerIndex == NULL) {
         config_perror("invalid specification for pingCtlOwnerIndex");
-        free(StorageTmp);
         return;
     }
 
@@ -445,7 +422,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTestNameLen);
     if (StorageTmp->pingCtlTestName == NULL) {
         config_perror("invalid specification for pingCtlTestName");
-        free(StorageTmp);
         return;
     }
 
@@ -460,7 +436,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTargetAddressLen);
     if (StorageTmp->pingCtlTargetAddress == NULL) {
         config_perror("invalid specification for pingCtlTargetAddress");
-        free(StorageTmp);
         return;
     }
 
@@ -486,7 +461,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDataFillLen);
     if (StorageTmp->pingCtlDataFill == NULL) {
         config_perror("invalid specification for pingCtlDataFill");
-        free(StorageTmp);
         return;
     }
 
@@ -508,7 +482,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTrapGenerationLen);
     if (StorageTmp->pingCtlTrapGeneration == NULL) {
         config_perror("invalid specification for pingCtlTrapGeneration");
-        free(StorageTmp);
         return;
     }
 
@@ -528,7 +501,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTypeLen);
     if (StorageTmp->pingCtlType == NULL) {
         config_perror("invalid specification for pingCtlType");
-        free(StorageTmp);
         return;
     }
 
@@ -538,7 +510,6 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDescrLen);
     if (StorageTmp->pingCtlDescr == NULL) {
         config_perror("invalid specification for pingCtlTrapDescr");
-        free(StorageTmp);
         return;
     }
 
@@ -598,6 +569,7 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
+    size_t          tmpint;
     struct pingCtlTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -626,7 +598,7 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlTargetAddressType, NULL);
+                                       pingCtlTargetAddressType, &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlTargetAddress,
@@ -635,20 +607,20 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlDataSize,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlTimeOut,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlProbeCount,
-                                       NULL);
+                                       &tmpint);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlAdminStatus,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlDataFill,
@@ -657,16 +629,16 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlFrequency,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlMaxRows,
-                                       NULL);
+                                       &tmpint);
 
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlStorageType,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlTrapGeneration,
@@ -676,12 +648,12 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        pingCtlTrapProbeFailureFilter,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        pingCtlTrapTestFailureFilter,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->pingCtlType,
@@ -693,7 +665,7 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlSourceAddressType, NULL);
+                                       pingCtlSourceAddressType, &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->pingCtlSourceAddress,
@@ -702,15 +674,15 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlIfIndex,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       pingCtlByPassRouteTable, NULL);
+                                       pingCtlByPassRouteTable, &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingCtlDSField,
-                                       NULL);
+                                       &tmpint);
 
             if (StorageTmp->pingCtlRowStatus == RS_ACTIVE)
                 StorageTmp->pingCtlRowStatus = RS_NOTINSERVICE;
@@ -718,11 +690,11 @@ store_pingCtlTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingCtlRowStatus,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       pingProbeHistoryMaxIndex, NULL);
+                                       pingProbeHistoryMaxIndex, &tmpint);
 
 
 
@@ -1105,7 +1077,7 @@ in_cksum(unsigned short *addr, int len)
      */
     sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
     sum += (sum >> 16);         /* add carry */
-    answer = (u_short)~sum;     /* truncate to 16 bits */
+    answer = ~sum;              /* truncate to 16 bits */
     return (answer);
 }
 
@@ -1151,7 +1123,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
     if ((n = netsnmp_getaddrinfo(host, serv, &hints, &res)) != 0) {
-#ifdef HAVE_GAI_STRERROR
+#if HAVE_GAI_STRERROR
         snmp_log(LOG_ERR, "host_serv error for %s, %s: %s",
                  (host == NULL) ? "(no hostname)" : host,
                  (serv == NULL) ? "(no service name)" : serv,
@@ -1221,7 +1193,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      * snmpTrap oid 
      */
     snmp_varlist_add_variable(&var_list, objid_snmptrap,
-                              OID_LENGTH(objid_snmptrap),
+                              sizeof(objid_snmptrap) / sizeof(oid),
                               ASN_OBJECT_ID, (u_char *) trap_oid,
                               trap_oid_len * sizeof(oid));
     /*
@@ -1229,7 +1201,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, pingCtlTargetAddress,
-                                OID_LENGTH(pingCtlTargetAddress),
+                                sizeof(pingCtlTargetAddress) / sizeof(oid),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1243,7 +1215,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMinRtt,
-                                OID_LENGTH(pingResultsMinRtt),
+                                sizeof(pingResultsMinRtt) / sizeof(oid),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1256,7 +1228,7 @@ send_ping_trap(struct pingCtlTable_data *item,
      */
     memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMaxRtt,
-                                OID_LENGTH(pingResultsMaxRtt),
+                                sizeof(pingResultsMaxRtt) / sizeof(oid),
                                 vars);
 
     snmp_varlist_add_variable(&var_list, newoid,
@@ -1356,8 +1328,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 	snmp_log_perror("pingCtlTable: failed to create socket");
 	return;
     }
-    /* don't need special permissions any more */
-    NETSNMP_IGNORE_RESULT(setuid(getuid()));
+    setuid(getuid());           /* don't need special permissions any more */
 
     tv.tv_sec = 5;
     tv.tv_usec = 0;
@@ -1437,12 +1408,9 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         ip = (struct ip *) ptr; /* start of IP header */
         hlen1 = ip->ip_hl << 2; /* length of IP header */
 
-        if ((icmplen = len - hlen1) < 8) {
-            DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 8", icmplen));
-            return SNMP_ERR_BADVALUE;
-        }
-
         icmp = (struct icmp *) (ptr + hlen1);   /* start of ICMP header */
+        if ((icmplen = len - hlen1) < 8)
+            DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 8", icmplen));
 
         DEBUGMSGTL(("pingCtlTable", "ICMP type = %d (%sa reply)\n",
                     icmp->icmp_type,
@@ -1454,10 +1422,8 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                 return SNMP_ERR_NOERROR;
             }
 
-            if (icmplen < 16) {
+            if (icmplen < 16)
                 DEBUGMSGTL(("pingCtlTable", "icmplen (%d) < 16", icmplen));
-                return SNMP_ERR_BADVALUE;
-            }
 
             tvsend = (struct timeval *) icmp->icmp_data;
 
@@ -1530,7 +1496,6 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
             temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
 
-            {
             /* add lock to protect */
             pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
             pthread_mutex_lock(&counter_mutex);
@@ -1540,7 +1505,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             temp->pingProbeHistoryIndex =
                 ++(item->pingProbeHistoryMaxIndex);
             pthread_mutex_unlock(&counter_mutex);
-            }
+
 
             temp->pingProbeHistoryResponse = rtt;
             temp->pingProbeHistoryStatus = 1;
@@ -1616,14 +1581,12 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
         temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
 
-        {
         /* add lock to protect */
         pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
         pthread_mutex_lock(&counter_mutex);
         temp->pingProbeHistoryIndex = ++(item->pingProbeHistoryMaxIndex);
         pthread_mutex_unlock(&counter_mutex);
         /* end */
-        }
 
         temp->pingProbeHistoryResponse = item->pingCtlTimeOut * 1000;
         temp->pingProbeHistoryStatus = 4;
@@ -1668,7 +1631,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             0) {
             if (probeFailed >= item->pingCtlTrapProbeFailureFilter)
                 send_ping_trap(item, pingProbeFailed,
-                               OID_LENGTH(pingProbeFailed));
+                               sizeof(pingProbeFailed) / sizeof(oid));
         }
 
 
@@ -1679,7 +1642,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTCOMPLETED)
             != 0) {
             send_ping_trap(item, pingTestCompleted,
-                           OID_LENGTH(pingTestCompleted));
+                           sizeof(pingTestCompleted) / sizeof(oid));
         } else
             if ((item->
                  pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTFAILED)
@@ -1687,7 +1650,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
 
             if (testFailed >= item->pingCtlTrapTestFailureFilter)
                 send_ping_trap(item, pingTestFailed,
-                               OID_LENGTH(pingTestFailed));
+                               sizeof(pingTestFailed) / sizeof(oid));
         }
 
         else if ((item->
@@ -1761,9 +1724,9 @@ run_ping(unsigned int clientreg, void *clientarg)
         unsigned long  *minrtt = NULL;
         unsigned long  *maxrtt = NULL;
         unsigned long  *averagertt = NULL;
-        struct addrinfo *ai = NULL;
 
         datalen = 56;           /* data that goes with ICMP echo request */
+        struct addrinfo *ai = NULL;
         minrtt = malloc(sizeof(unsigned long));
         maxrtt = malloc(sizeof(unsigned long));
         averagertt = malloc(sizeof(unsigned long));
@@ -1849,7 +1812,7 @@ run_ping(unsigned int clientreg, void *clientarg)
         socket_errno = errno;
 
         uid = getuid();
-        NETSNMP_IGNORE_RESULT(setuid(uid));
+        setuid(uid);
 
         source.sin6_family = AF_INET6;
         memset(&firsthop, 0, sizeof(firsthop));
@@ -2290,7 +2253,7 @@ write_pingCtlTargetAddressType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2324,7 +2287,7 @@ write_pingCtlTargetAddressType(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2340,7 +2303,7 @@ write_pingCtlTargetAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTargetAddressType;
         StorageTmp->pingCtlTargetAddressType = *((long *) var_val);
@@ -2379,7 +2342,7 @@ write_pingCtlTargetAddress(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -2409,7 +2372,7 @@ write_pingCtlTargetAddress(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2425,7 +2388,7 @@ write_pingCtlTargetAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTargetAddress;
         tmplen = StorageTmp->pingCtlTargetAddressLen;
@@ -2476,7 +2439,7 @@ write_pingCtlDataSize(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2509,7 +2472,7 @@ write_pingCtlDataSize(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2525,7 +2488,7 @@ write_pingCtlDataSize(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDataSize;
         if ((*((long *) var_val)) >= 0 && (*((long *) var_val)) <= 65507)
@@ -2567,7 +2530,7 @@ write_pingCtlTimeOut(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2600,7 +2563,7 @@ write_pingCtlTimeOut(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2616,7 +2579,7 @@ write_pingCtlTimeOut(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTimeOut;
         if ((*((long *) var_val)) >= 1 && (*((long *) var_val)) <= 60)
@@ -2659,7 +2622,7 @@ write_pingCtlProbeCount(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2692,7 +2655,7 @@ write_pingCtlProbeCount(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2708,7 +2671,7 @@ write_pingCtlProbeCount(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlProbeCount;
 
@@ -2750,7 +2713,7 @@ write_pingCtlAdminStatus(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2780,7 +2743,7 @@ write_pingCtlAdminStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2796,7 +2759,7 @@ write_pingCtlAdminStatus(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlAdminStatus;
         StorageTmp->pingCtlAdminStatus = *((long *) var_val);
@@ -2855,7 +2818,7 @@ write_pingCtlDataFill(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -2885,7 +2848,7 @@ write_pingCtlDataFill(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2901,7 +2864,7 @@ write_pingCtlDataFill(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDataFill;
         tmplen = StorageTmp->pingCtlDataFillLen;
@@ -2949,7 +2912,7 @@ write_pingCtlFrequency(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -2982,7 +2945,7 @@ write_pingCtlFrequency(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -2998,7 +2961,7 @@ write_pingCtlFrequency(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlFrequency;
         StorageTmp->pingCtlFrequency = *((long *) var_val);
@@ -3035,7 +2998,7 @@ write_pingCtlMaxRows(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3068,7 +3031,7 @@ write_pingCtlMaxRows(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3084,7 +3047,7 @@ write_pingCtlMaxRows(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlMaxRows;
         StorageTmp->pingCtlMaxRows = *((long *) var_val);
@@ -3123,7 +3086,7 @@ write_pingCtlStorageType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3156,7 +3119,7 @@ write_pingCtlStorageType(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3172,7 +3135,7 @@ write_pingCtlStorageType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlStorageType;
         StorageTmp->pingCtlStorageType = *((long *) var_val);
@@ -3212,7 +3175,7 @@ write_pingCtlTrapGeneration(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3242,7 +3205,7 @@ write_pingCtlTrapGeneration(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3258,7 +3221,7 @@ write_pingCtlTrapGeneration(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapGeneration;
         tmplen = StorageTmp->pingCtlTrapGenerationLen;
@@ -3308,7 +3271,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3342,7 +3305,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3358,7 +3321,7 @@ write_pingCtlTrapProbeFailureFilter(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapProbeFailureFilter;
 
@@ -3401,7 +3364,7 @@ write_pingCtlTrapTestFailureFilter(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3435,7 +3398,7 @@ write_pingCtlTrapTestFailureFilter(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3451,7 +3414,7 @@ write_pingCtlTrapTestFailureFilter(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlTrapTestFailureFilter;
 
@@ -3496,7 +3459,7 @@ write_pingCtlType(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3525,7 +3488,7 @@ write_pingCtlType(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3541,7 +3504,7 @@ write_pingCtlType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlType;
         tmplen = StorageTmp->pingCtlTypeLen;
@@ -3593,7 +3556,7 @@ write_pingCtlDescr(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3622,7 +3585,7 @@ write_pingCtlDescr(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -3638,7 +3601,7 @@ write_pingCtlDescr(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDescr;
         tmplen = StorageTmp->pingCtlDescrLen;
@@ -3687,7 +3650,7 @@ write_pingCtlSourceAddressType(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3737,7 +3700,7 @@ write_pingCtlSourceAddressType(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlSourceAddressType;
         StorageTmp->pingCtlSourceAddressType = *((long *) var_val);
@@ -3777,7 +3740,7 @@ write_pingCtlSourceAddress(int action,
     static size_t   tmplen;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
     if ((StorageTmp =
@@ -3823,7 +3786,7 @@ write_pingCtlSourceAddress(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlSourceAddress;
         tmplen = StorageTmp->pingCtlSourceAddressLen;
@@ -3874,7 +3837,7 @@ write_pingCtlIfIndex(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -3922,7 +3885,7 @@ write_pingCtlIfIndex(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlIfIndex;
         StorageTmp->pingCtlIfIndex = *((long *) var_val);
@@ -3961,7 +3924,7 @@ write_pingCtlByPassRouteTable(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -4011,7 +3974,7 @@ write_pingCtlByPassRouteTable(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlByPassRouteTable;
         StorageTmp->pingCtlByPassRouteTable = *((long *) var_val);
@@ -4051,7 +4014,7 @@ write_pingCtlDSField(int action,
     static size_t   tmpvar;
     struct pingCtlTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -4100,7 +4063,7 @@ write_pingCtlDSField(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->pingCtlDSField;
         StorageTmp->pingCtlDSField = *((long *) var_val);
@@ -4137,7 +4100,7 @@ write_pingCtlRowStatus(int action,
     struct pingCtlTable_data *StorageTmp;
     static struct pingCtlTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (OID_LENGTH(pingCtlTable_variables_oid) +
+        name_len - (sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -4258,7 +4221,7 @@ write_pingCtlRowStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [OID_LENGTH(pingCtlTable_variables_oid) +
+                  [sizeof(pingCtlTable_variables_oid) / sizeof(oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 snmp_free_varbind(vars);
                 return SNMP_ERR_INCONSISTENTNAME;
@@ -4335,7 +4298,7 @@ write_pingCtlRowStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in
+         * it.  Note that anything done here must be reversable in
          * the UNDO case 
          */
 
@@ -4647,7 +4610,7 @@ pinger(int icmp_sock, int preload, int cmsglen, char *cmsgbuf,
                  && (*pipesize) < (*screen_width))
                 || in_flight(acked, nreceived, ntransmitted,
                              nerrors) < (*screen_width))
-                NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, ".", 1));
+                write(STDOUT_FILENO, ".", 1);
         }
 
         return interval - tokens;
@@ -4709,7 +4672,7 @@ pinger(int icmp_sock, int preload, int cmsglen, char *cmsgbuf,
 
         if (i == 0 && !(options & F_QUIET)) {
             if (options & F_FLOOD)
-                NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "E", 1));
+                write(STDOUT_FILENO, "E", 1);
             else
                 perror("ping: sendmsg");
         }
@@ -4720,7 +4683,7 @@ pinger(int icmp_sock, int preload, int cmsglen, char *cmsgbuf,
 }
 
 /*
- * Set socket buffers, "alloc" is an estimate of memory taken by single packet. 
+ * Set socket buffers, "alloc" is an esimate of memory taken by single packet. 
  */
 
 void
@@ -4899,7 +4862,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
     cur_time.tv_sec = 0;
     cur_time.tv_usec = 0;
 
-    {
     struct pingProbeHistoryTable_data current_temp;
     static int      probeFailed = 0;
     static int      testFailed = 0;
@@ -5013,7 +4975,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             struct timeval  recv_time;
             int             not_ours = 0;       /* Raw socket can receive messages
                                                  * destined to other running pings. */
-            time_t          timep;
 
             iov.iov_len = packlen;
             msg.msg_name = addrbuf;
@@ -5025,6 +4986,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             msg.msg_flags = 0;
 
             cc = recvmsg(icmp_sock, &msg, polling);
+            time_t          timep;
             time(&timep);
             polling = MSG_DONTWAIT;
 
@@ -5078,7 +5040,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
                     temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
 
-                    {
                     /* add lock to protect */
                     pthread_mutex_t counter_mutex =
                         PTHREAD_MUTEX_INITIALIZER;
@@ -5087,7 +5048,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                         ++(item->pingProbeHistoryMaxIndex);
                     pthread_mutex_unlock(&counter_mutex);
                     /* end */
-                    }
 
                     temp->pingProbeHistoryResponse =
                         item->pingCtlTimeOut * 1000;
@@ -5208,7 +5168,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTCOMPLETED)
             != 0) {
             send_ping_trap(item, pingTestCompleted,
-                           OID_LENGTH(pingTestCompleted));
+                           sizeof(pingTestCompleted) / sizeof(oid));
         } else
             if ((item->
                  pingCtlTrapGeneration[0] & PINGTRAPGENERATION_TESTFAILED)
@@ -5216,7 +5176,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
 
             if (testFailed >= item->pingCtlTrapTestFailureFilter)
                 send_ping_trap(item, pingTestFailed,
-                               OID_LENGTH(pingTestFailed));
+                               sizeof(pingTestFailed) / sizeof(oid));
         }
 
         else if ((item->
@@ -5230,7 +5190,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
         probeFailed = 0;
         testFailed = 0;
 
-    }
     }
 
     finish(options, hostname, interval, timing, &rtt, start_time, deadline,
@@ -5309,9 +5268,9 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
 
     if (options & F_FLOOD) {
         if (!csfailed)
-            NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "\b \b", 3));
+            write(STDOUT_FILENO, "\b \b", 3);
         else
-            NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "\bC", 1));
+            write(STDOUT_FILENO, "\bC", 1);
     } else {
         int             i;
         __u8           *cp, *dp;
@@ -5414,7 +5373,6 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
         temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
 
-        {
         /* add lock to protect */
         pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
         pthread_mutex_lock(&counter_mutex);
@@ -5423,7 +5381,7 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
         temp->pingProbeHistoryIndex = ++(item->pingProbeHistoryMaxIndex);
         pthread_mutex_unlock(&counter_mutex);
         /* end */
-        }
+
 
         temp->pingProbeHistoryResponse = triptime;
         temp->pingProbeHistoryStatus = 1;
@@ -5634,7 +5592,7 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
         if (options & F_QUIET)
             goto out;
         if (options & F_FLOOD)
-            NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "E", 1));
+            write(STDOUT_FILENO, "E", 1);
         else if (e->ee_errno != EMSGSIZE)
             snmp_log(LOG_ERR, "ping: local error: %s\n", strerror(e->ee_errno));
         else
@@ -5658,7 +5616,7 @@ receive_error_msg(int icmp_sock, struct sockaddr_in6 *whereto, int options,
         if (options & F_QUIET)
             goto out;
         if (options & F_FLOOD) {
-            NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "\bE", 2));
+            write(STDOUT_FILENO, "\bE", 2);
         } else {
             fflush(stdout);
         }
@@ -5812,7 +5770,7 @@ parse_reply(int *series, struct pingCtlTable_data *item,
                 return 0;
             (*nerrors)++;
             if (options & F_FLOOD) {
-                NETSNMP_IGNORE_RESULT(write(STDOUT_FILENO, "\bE", 2));
+                write(STDOUT_FILENO, "\bE", 2);
                 return 0;
             }
             DEBUGMSGTL(("pingCtlTable", "From %s: icmp_seq=%u ",

@@ -9,17 +9,17 @@
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(header_complex_find_entry);
+netsnmp_feature_require(header_complex_find_entry)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
@@ -251,6 +251,7 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
+    size_t          tmpint;
     struct mteObjectsTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -279,7 +280,7 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->mteObjectsIndex,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OBJECT_ID, cptr,
                                        &StorageTmp->mteObjectsID,
@@ -287,11 +288,11 @@ store_mteObjectsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteObjectsIDWildcard,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->mteObjectsEntryStatus,
-                                       NULL);
+                                       &tmpint);
 
 
 
@@ -388,7 +389,7 @@ write_mteObjectsID(int action,
     struct mteObjectsTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen =
-        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
+        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -416,7 +417,7 @@ write_mteObjectsID(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -432,7 +433,7 @@ write_mteObjectsID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteObjectsID;
         tmplen = StorageTmp->mteObjectsIDLen;
@@ -477,7 +478,7 @@ write_mteObjectsIDWildcard(int action,
     static int      tmpvar;
     struct mteObjectsTable_data *StorageTmp = NULL;
     size_t          newlen =
-        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
+        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
                     3 - 1);
 
 
@@ -507,7 +508,7 @@ write_mteObjectsIDWildcard(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -523,7 +524,7 @@ write_mteObjectsIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteObjectsIDWildcard;
         StorageTmp->mteObjectsIDWildcard = *((long *) var_val);
@@ -566,7 +567,7 @@ write_mteObjectsEntryStatus(int action,
     struct mteObjectsTable_data *StorageTmp = NULL;
     static struct mteObjectsTable_data *StorageNew, *StorageDel;
     size_t          newlen =
-        name_len - (OID_LENGTH(mteObjectsTable_variables_oid) +
+        name_len - (sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
                     3 - 1);
     static int      old_value;
     int             set_value;
@@ -653,7 +654,7 @@ write_mteObjectsEntryStatus(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         if (StorageTmp == NULL) {
             /*
@@ -669,7 +670,7 @@ write_mteObjectsEntryStatus(int action,
             if (header_complex_parse_oid
                 (&
                  (name
-                  [OID_LENGTH(mteObjectsTable_variables_oid) +
+                  [sizeof(mteObjectsTable_variables_oid) / sizeof(oid) +
                    2]), newlen, vars) != SNMPERR_SUCCESS) {
                 /*
                  * XXX: free, zero vars 
@@ -728,7 +729,7 @@ write_mteObjectsEntryStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in
+         * it.  Note that anything done here must be reversable in
          * the UNDO case 
          */
 

@@ -1,30 +1,27 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_SYS_WAIT_H
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 
@@ -41,7 +38,7 @@
 #include "snmptrapd_log.h"
 #include "notification-log-mib/notification_log.h"
 
-netsnmp_feature_child_of(add_default_traphandler, snmptrapd);
+netsnmp_feature_child_of(add_default_traphandler, snmptrapd)
 
 char *syslog_format1 = NULL;
 char *syslog_format2 = NULL;
@@ -302,7 +299,7 @@ void
 free_trap1_fmt(void)
 {
     if (print_format1 && print_format1 != trap1_std_str)
-        free(print_format1);
+        free((char *) print_format1);
     print_format1 = NULL;
 }
 
@@ -318,7 +315,7 @@ void
 free_trap2_fmt(void)
 {
     if (print_format2 && print_format2 != trap2_std_str)
-        free(print_format2);
+        free((char *) print_format2);
     print_format2 = NULL;
 }
 
@@ -455,7 +452,7 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
      * Now try to find the appropriate place in the trap-specific
      * list for this particular trap OID.  If there's a matching OID
      * already, then find it.  Otherwise find the one that follows.
-     * If we run out of entries, the new one should be tacked onto the end.
+     * If we run out of entried, the new one should be tacked onto the end.
      */
     for (traph2 = netsnmp_specific_traphandlers;
          traph2; traph2 = traph2->nextt) {
@@ -649,7 +646,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
     if (SyslogTrap)
         return NETSNMPTRAPD_HANDLER_OK;
 
-    if ((rbuf = calloc(r_len, 1)) == NULL) {
+    if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
         return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
@@ -735,7 +732,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
     if (pdu->trap_type == SNMP_TRAP_AUTHFAIL && dropauth)
         return NETSNMPTRAPD_HANDLER_OK;
 
-    if ((rbuf = calloc(r_len, 1)) == NULL) {
+    if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
         snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
         return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
     }
@@ -810,11 +807,9 @@ int   command_handler( netsnmp_pdu           *pdu,
     size_t          r_len = 64, o_len = 0;
     int             oldquick;
 
-    netsnmp_assert(handler);
-
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
-    if (handler->token && *handler->token) {
+    if (handler && handler->token && *handler->token) {
 	netsnmp_pdu    *v2_pdu = NULL;
 	if (pdu->command == SNMP_MSG_TRAP)
 	    v2_pdu = convert_v1pdu_to_v2(pdu);
@@ -828,7 +823,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         /*
 	 * Format the trap and pass this string to the external command
 	 */
-        if ((rbuf = calloc(r_len, 1)) == NULL) {
+        if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
             snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
             return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
         }
@@ -837,7 +832,7 @@ int   command_handler( netsnmp_pdu           *pdu,
          *  If there's a format string registered for this trap, then use it.
          *  Otherwise use the standard execution format setting.
          */
-        if (handler->format && *handler->format) {
+        if (handler && handler->format && *handler->format) {
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
             realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
@@ -886,121 +881,6 @@ int axforward_handler( netsnmp_pdu           *pdu,
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
-static int add_forwarder_info(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
-{
-    netsnmp_indexed_addr_pair *addr_pair1;
-    struct sockaddr_in *to1 = NULL;
-    struct sockaddr_in *to2 = NULL;
-    int            last_snmpTrapAddress_index = -1;
-    /* snmpTrapAddress_oid.0 is also defined as agentaddr_oid */
-    const oid      snmpTrapAddress_oid[]   = { 1,3,6,1,6,3,18,1,3};
-    /* each forwarder will add this OID with changed last index */
-    oid            forwarder_oid[]   =       { 1,3,6,1,6,3,18,1,3,0};
-    const size_t   snmpTrapAddress_oid_size = OID_LENGTH(snmpTrapAddress_oid);
-    const size_t   forwarder_oid_len = OID_LENGTH(forwarder_oid);
-    struct in_addr agent_addr;
-    struct in_addr my_ip_addr;
-
-    memset(&agent_addr, 0, sizeof(agent_addr));
-    memset(&my_ip_addr, 0, sizeof(my_ip_addr));
-
-    if (pdu && pdu->transport_data &&
-        pdu->transport_data_length == sizeof(*addr_pair1)) {
-        addr_pair1 = (netsnmp_indexed_addr_pair *)pdu->transport_data;
-
-        /*
-         * Get the IPv4 address of the host that this trap was sent from =
-         * last forwarder's IP address.
-         */
-        if (addr_pair1->remote_addr.sa.sa_family == AF_INET) {
-            to1 = (struct sockaddr_in *)&(addr_pair1->remote_addr);
-            agent_addr = to1->sin_addr;
-        }
-        /*
-         * Get the IPv4 address of the host that this trap was sent to =
-         * this forwarder's IP address.
-         */
-        if (addr_pair1->local_addr.sa.sa_family == AF_INET) {
-            to2 = (struct sockaddr_in *)&(addr_pair1->local_addr);
-            my_ip_addr = to2->sin_addr;
-        }
-    }
-
-    if (to1) {
-        netsnmp_variable_list *vblist = NULL;
-        netsnmp_variable_list *var = NULL;
-
-        if (*(in_addr_t *)pdu2->agent_addr == INADDR_ANY) {
-            /*
-             * there was no agent address defined in PDU. copy the forwarding
-             * agent IP address from the transport socket.
-             */
-            *(struct in_addr *)pdu2->agent_addr = agent_addr;
-        }
-
-        vblist = pdu2->variables;
-
-        /*
-         * Iterate over all varbinds in the PDU to see if it already has any
-         * forwarder information.
-         */
-        for (var = vblist; var; var = var->next_variable) {
-            if (snmp_oid_ncompare(var->name, var->name_length,
-                                  snmpTrapAddress_oid,
-                                  snmpTrapAddress_oid_size,
-                                  snmpTrapAddress_oid_size) == 0) {
-                int my_snmpTrapAddress_index =
-                    var->name[var->name_length - 1];
-
-                DEBUGMSGTL(("snmptrapd", "  my_snmpTrapAddress_index=%d, last_snmpTrapAddress_index=%d, my_ip_addr=%s\n",
-                            my_snmpTrapAddress_index,
-                            last_snmpTrapAddress_index,
-                            inet_ntoa(my_ip_addr)));
-
-                if (last_snmpTrapAddress_index < my_snmpTrapAddress_index)
-                    last_snmpTrapAddress_index = my_snmpTrapAddress_index;
-
-                /* Detect forwarding loop. */
-                if (var->val_len < 4) {
-                    snmp_log(LOG_ERR, "Length of IP address of OID .1.3.6.1.6.3.18.1.3.%d in PDU is less than %d bytes = %d\n",
-                             my_snmpTrapAddress_index, 4,
-                             (int)var->val_len);
-                } else {
-                    if (to2 &&
-                        memcmp(var->val.string, &my_ip_addr, 4) == 0) {
-                        snmp_log(LOG_ERR, "Forwarding loop detected, OID .1.3.6.1.6.3.18.1.3.%d already has this forwarder's IP address=%s, not forwarding this trap\n",
-                                 my_snmpTrapAddress_index,
-                                 inet_ntoa(my_ip_addr));
-                        return 0;
-                    }
-                    if (memcmp(var->val.string, &agent_addr, 4) == 0) {
-                        snmp_log(LOG_ERR, "Forwarding loop detected, OID .1.3.6.1.6.3.18.1.3.%d already has the sender's IP address=%s, not forwarding this trap\n",
-                                 my_snmpTrapAddress_index,
-                                 inet_ntoa(agent_addr));
-                        return 0;
-                    }
-                }
-            }
-        } /* for var in vblist */
-
-        DEBUGMSGTL(("snmptrapd",
-                    "  last_snmpTrapAddress_index=%d, adding index=%d\n",
-                    last_snmpTrapAddress_index, last_snmpTrapAddress_index+1));
-        /* Change the last index of this OID to the next available number. */
-        forwarder_oid[forwarder_oid_len - 1] = last_snmpTrapAddress_index + 1;
-
-        /*
-         * Add forwarder IP address as OID to trap payload. Use the value
-         * from the transport, so if a v1 PDU is sent, the same IP is not
-         * duplicated you want every forwarder to add this OID with its
-         * own IP address.
-         */
-        snmp_pdu_add_variable(pdu2, forwarder_oid, forwarder_oid_len,
-                              ASN_IPADDRESS, (u_char *)&agent_addr, 4);
-    }
-    return 1;
-}
-
 /*
  *  Trap handler for forwarding to another destination
  */
@@ -1028,18 +908,10 @@ int   forward_handler( netsnmp_pdu           *pdu,
         return NETSNMPTRAPD_HANDLER_FAIL;
 
     /* XXX: wjh we should be caching sessions here and not always
-       reopening a session.  It's very inefficient, especially with v3
+       reopening a session.  It's very ineffecient, especially with v3
        INFORMS which may require engineID probing */
 
     pdu2 = snmp_clone_pdu(pdu);
-
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_ADD_FORWARDER_INFO) &&
-        !add_forwarder_info(pdu, pdu2)) {
-        snmp_close(ss);
-        return NETSNMPTRAPD_HANDLER_FAIL;
-    }
-
     if (pdu2->transport_data) {
         free(pdu2->transport_data);
         pdu2->transport_data        = NULL;

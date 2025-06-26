@@ -779,9 +779,8 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
  * in and out can overlap
  */
 void AES_encrypt(const unsigned char *in, unsigned char *out,
-                 const void *key_arg)
-{
-	const AES_KEY *const key = key_arg;
+		 const AES_KEY *key) {
+
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL

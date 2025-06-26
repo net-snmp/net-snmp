@@ -15,7 +15,7 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_STD_IP		1,3,6,1,2,1,100,1,101
-extern const oid netsnmp_snmpSTDDomain[];
+extern oid netsnmp_snmpSTDDomain[];
 
     typedef struct netsnmp_std_data_s {
        int outfd;

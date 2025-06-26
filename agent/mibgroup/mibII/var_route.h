@@ -5,17 +5,8 @@
 #ifndef _MIBGROUP_VAR_ROUTE_H
 #define _MIBGROUP_VAR_ROUTE_H
 
-config_require(mibII/ip);
-#ifdef solaris2
-config_require(kernel_sunos5);
-#endif
-
-#if defined(HAVE_SYS_SYSCTL_H) && !defined(linux)
-const struct sockaddr *
-get_address(const void *_ap, int addresses, int wanted);
-const struct in_addr *
-get_in_address(const void *ap, int addresses, int wanted);
-#endif
+config_require(mibII/ip)
+config_arch_require(solaris2, kernel_sunos5)
 
 #if defined(HAVE_IPHLPAPI_H)
 #include <iphlpapi.h>
@@ -24,6 +15,13 @@ get_in_address(const void *ap, int addresses, int wanted);
      extern int      create_flag;
 
      void            init_var_route(void);
+#if defined(RTENTRY_4_4) && !defined(hpux11)
+     struct radix_node;
+     void            load_rtentries(struct radix_node *);
+#endif
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
+     struct sockaddr_in *klgetsa(struct sockaddr_in *);
+#endif
 
      extern FindVarMethod var_ipRouteEntry;
 

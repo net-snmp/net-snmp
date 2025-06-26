@@ -16,10 +16,10 @@
  * This should always be included first before anything else 
  */
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -145,7 +145,6 @@ parse_pingResultsTable(const char *token, char *line)
                               &StorageTmp->pingCtlOwnerIndexLen);
     if (StorageTmp->pingCtlOwnerIndex == NULL) {
         config_perror("invalid specification for pingCtlOwnerIndex");
-        free(StorageTmp);
         return;
     }
 
@@ -155,7 +154,6 @@ parse_pingResultsTable(const char *token, char *line)
                               &StorageTmp->pingCtlTestNameLen);
     if (StorageTmp->pingCtlTestName == NULL) {
         config_perror("invalid specification for pingCtlTestName");
-        free(StorageTmp);
         return;
     }
 
@@ -173,7 +171,6 @@ parse_pingResultsTable(const char *token, char *line)
     if (StorageTmp->pingResultsIpTargetAddress == NULL) {
         config_perror
             ("invalid specification for pingResultsIpTargetAddress");
-        free(StorageTmp);
         return;
     }
 
@@ -204,7 +201,6 @@ parse_pingResultsTable(const char *token, char *line)
     if (StorageTmp->pingResultsLastGoodProbe == NULL) {
         config_perror
             ("invalid specification for pingResultsLastGoodProbe!");
-        free(StorageTmp);
         return;
     }
 
@@ -230,6 +226,7 @@ store_pingResultsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
+    size_t          tmpint;
     struct pingResultsTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -259,12 +256,12 @@ store_pingResultsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->pingResultsOperStatus,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
                                        pingResultsIpTargetAddressType,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
@@ -275,28 +272,28 @@ store_pingResultsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingResultsMinRtt,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingResultsMaxRtt,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingResultsAverageRtt,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
-                                       pingResultsProbeResponses, NULL);
+                                       pingResultsProbeResponses, &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->pingResultsSendProbes,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->
                                        pingResultsRttSumOfSquares,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->

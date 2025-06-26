@@ -49,9 +49,9 @@
 
 #include <ctype.h>
 
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -648,7 +648,7 @@ _mfd_ipv4InterfaceTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1051,7 +1051,7 @@ _mfd_ipv4InterfaceTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1311,7 +1311,7 @@ ipv4InterfaceTable_row_find_by_mib_index(ipv4InterfaceTable_mib_index *
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

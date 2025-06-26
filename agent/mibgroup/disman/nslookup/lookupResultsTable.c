@@ -114,7 +114,6 @@ parse_lookupResultsTable(const char *token, char *line)
                               &StorageTmp->lookupCtlOwnerIndexLen);
     if (StorageTmp->lookupCtlOwnerIndex == NULL) {
         config_perror("invalid specification for lookupCtlOwnerIndex");
-        free(StorageTmp);
         return;
     }
 
@@ -124,7 +123,6 @@ parse_lookupResultsTable(const char *token, char *line)
                               &StorageTmp->lookupCtlOperationNameLen);
     if (StorageTmp->lookupCtlOperationName == NULL) {
         config_perror("invalid specification for lookupCtlOperationName");
-        free(StorageTmp);
         return;
     }
 
@@ -141,7 +139,6 @@ parse_lookupResultsTable(const char *token, char *line)
                               &StorageTmp->lookupResultsAddressLen);
     if (StorageTmp->lookupResultsAddress == NULL) {
         config_perror("invalid specification for lookupResultsAddress");
-        free(StorageTmp);
         return;
     }
 
@@ -168,6 +165,7 @@ store_lookupResultsTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr = NULL;
+    size_t          tmpint;
     struct lookupResultsTable_data *StorageTmp = NULL;
     struct header_complex_index *hcindex = NULL;
 
@@ -198,11 +196,11 @@ store_lookupResultsTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_UNSIGNED, cptr,
                                        &StorageTmp->lookupResultsIndex,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->
-                                       lookupResultsAddressType, NULL);
+                                       lookupResultsAddressType, &tmpint);
             cptr =
                 read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->lookupResultsAddress,

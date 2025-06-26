@@ -20,7 +20,7 @@
 
 #include "ipDefaultRouterTable_data_access.h"
 
-netsnmp_feature_require(container_lifo);
+netsnmp_feature_require(container_lifo)
 
 /** @ingroup interface
  * @addtogroup data_access data_access: Routines to access data
@@ -167,10 +167,9 @@ ipDefaultRouterTable_container_shutdown(netsnmp_container * container_ptr)
  * check entry for update
  */
 static void
-_check_entry_for_updates(void *p, void *q)
+_check_entry_for_updates(ipDefaultRouterTable_rowreq_ctx * rowreq_ctx,
+                         void **magic)
 {
-    ipDefaultRouterTable_rowreq_ctx *rowreq_ctx = p;
-    void **magic = q;
     netsnmp_container *defaultrouter_container = magic[0];
     netsnmp_container *to_delete = (netsnmp_container *) magic[1];
 
@@ -210,10 +209,9 @@ _check_entry_for_updates(void *p, void *q)
  * add new entry
  */
 static void
-_add_new_entry(void *p, void *q)
+_add_new_entry(netsnmp_defaultrouter_entry *defaultrouter_entry,
+               netsnmp_container *container)
 {
-    netsnmp_defaultrouter_entry *defaultrouter_entry = p;
-    netsnmp_container *container = q;
     ipDefaultRouterTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("ipDefaultRouterTable:access", "creating new entry\n"));
@@ -275,8 +273,8 @@ _add_new_entry(void *p, void *q)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  ipDefaultRouterTable_row_prep() for populating data.
@@ -315,12 +313,16 @@ ipDefaultRouterTable_container_load(netsnmp_container * container)
      */
     tmp_ptr[0] = defaultrouter_container->next;
     tmp_ptr[1] = NULL;
-    CONTAINER_FOR_EACH(container, _check_entry_for_updates, tmp_ptr);
+    CONTAINER_FOR_EACH(container,
+                       (netsnmp_container_obj_func *) _check_entry_for_updates,
+                       tmp_ptr);
 
     /*
      * now add any new interfaces
      */
-    CONTAINER_FOR_EACH(defaultrouter_container, _add_new_entry, container);
+    CONTAINER_FOR_EACH(defaultrouter_container,
+                       (netsnmp_container_obj_func *) _add_new_entry,
+                       container);
 
     /*
      * free the container. we've either claimed each entry, or released it,

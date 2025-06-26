@@ -1,7 +1,7 @@
 /*
  *  Interface MIB architecture support
  *
- *  Based on patch 1362403, submitted by Rojer
+ *  Based on patch 1362403, submited by Rojer
  *
  * $Id$
  */
@@ -13,7 +13,7 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef HAVE_SYS_IOCTL_H
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #else
 #error "BSD should have sys/ioctl header"
@@ -31,7 +31,7 @@
 #include <net/if_types.h>
 #include <net/if_media.h>
 
-netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 /*
  * account for minor differences between FreeBSD and OpenBSD.
@@ -136,7 +136,7 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
                     *speed = (u_int) -1; /* 4294967295; */
                     *speed_high = 10000; break;
 #endif
-#if defined(freebsd3)
+#if defined(__FreeBSD__)
 #ifdef IFM_10G_LR
                 case IFM_10G_LR:
 #ifdef IFM_10G_SR
@@ -248,7 +248,7 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
                     *speed = (u_int) -1; /* 4294967295; */
                     *speed_high = 100000; break;
 #endif /* IFM_100G_CR4 */
-#endif /* freebsd3 */
+#endif /* __FreeBSD__ */
             }
             break;
         case IFM_IEEE80211:
@@ -465,6 +465,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     struct sockaddr_dl *adl;
     int amask;
     char *if_name;
+    int flags;
 #ifdef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
     struct timespec startspec;
 
@@ -508,6 +509,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
         ifp = (struct if_msghdr *) cp;
         if_name = NULL;
+        flags = 0;
         adl = NULL;
 
         if (ifp->ifm_type != RTM_IFINFO)
@@ -529,11 +531,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 }
             }
             adl = (struct sockaddr_dl *) a;
-            if_name = malloc(adl->sdl_nlen + 1);
-            if (if_name) {
-                memcpy(if_name, adl->sdl_data, adl->sdl_nlen);
-                if_name[adl->sdl_nlen] = '\0';
-            }
+            if_name = (char *) adl->sdl_data;
+            if_name[adl->sdl_nlen] = '\0';
         }
         if (!(ifp->ifm_addrs & RTA_IFP) || if_name == NULL) {
             snmp_log(LOG_ERR, "ifm_index %u: no interface name in message, "
@@ -542,8 +541,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
 
         entry = netsnmp_access_interface_entry_create(if_name, ifp->ifm_index);
-        free(if_name);
         if(NULL == entry) {
+            netsnmp_access_interface_container_free(container,
+                                                    NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
             free(if_list);
             return -3;
         }

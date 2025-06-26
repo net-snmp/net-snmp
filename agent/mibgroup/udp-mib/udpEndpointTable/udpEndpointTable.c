@@ -243,8 +243,9 @@ udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index * tbl_idx,
     /*
      * make sure there is enough space for udpEndpointLocalAddress data
      */
-    if (tbl_idx->udpEndpointLocalAddress_len <
-        udpEndpointLocalAddress_val_ptr_len) {
+    if ((NULL == tbl_idx->udpEndpointLocalAddress) ||
+        (tbl_idx->udpEndpointLocalAddress_len <
+         (udpEndpointLocalAddress_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -273,8 +274,9 @@ udpEndpointTable_indexes_set_tbl_idx(udpEndpointTable_mib_index * tbl_idx,
     /*
      * make sure there is enough space for udpEndpointRemoteAddress data
      */
-    if (tbl_idx->udpEndpointRemoteAddress_len <
-        udpEndpointRemoteAddress_val_ptr_len) {
+    if ((NULL == tbl_idx->udpEndpointRemoteAddress) ||
+        (tbl_idx->udpEndpointRemoteAddress_len <
+         (udpEndpointRemoteAddress_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -349,7 +351,7 @@ udpEndpointTable_indexes_set(udpEndpointTable_rowreq_ctx * rowreq_ctx,
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != udpEndpointTable_index_to_oid(&rowreq_ctx->oid_idx,
                                            &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

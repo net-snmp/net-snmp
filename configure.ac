@@ -2,7 +2,7 @@
 # the Net-SNMP's COPYING file for more details and other copyrights
 # that may apply:
 #
-# Portions Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+# Portions Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms specified in the COPYING file
 # distributed with the Net-SNMP package.
 #
@@ -15,49 +15,28 @@
 #
 # Process this file with autoconf to produce a configure script.
 #
-AC_INIT([Net-SNMP], [5.10.pre1], [net-snmp-coders@lists.sourceforge.net])
-AC_PREREQ([2.71])
+AC_INIT([Net-SNMP], [5.8], [net-snmp-coders@lists.sourceforge.net])
+AC_PREREQ([2.63])
 AC_CONFIG_SRCDIR([agent/snmpd.c])
 AC_REVISION([$Revision$])
 
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADERS([include/net-snmp/net-snmp-config.h])
+AC_CONFIG_HEADER(include/net-snmp/net-snmp-config.h)
 
 AC_MSG_CACHE_INIT()
 
 #
 # save the configure arguments
 #
-AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"${NETSNMP_CONFIGURE_OPTIONS-$ac_configure_args}",
+AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args",
   [configure options specified])
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
-##
-#   Compilation-related program checks:
-##
-
-AC_LANG([C])
-AC_PROG_CC
-AC_PROG_CPP
-LINKCC=${LINKCC-"$CC"}
-AC_SUBST(LINKCC)
-
-AC_C_CONST
-AC_C_INLINE
-
-#       libtool stuff for shared/static libraries.
 #
-LT_PREREQ([2.2.6])
-LT_INIT([win32-dll])
-LT_LANG([Windows Resource])
-AC_SUBST(LIBTOOL_DEPS)
-
+# Check whether _GNU_SOURCE etc. should be defined
 #
-# Define _GNU_SOURCE for asprintf(); _ALL_SOURCE and _THREAD_SAFE for struct
-# random_data on AIX; __EXTENSIONS__ for Solaris.
-#
-CPPFLAGS="-D_GNU_SOURCE -D_ALL_SOURCE -D_THREAD_SAFE -D__EXTENSIONS__ $CPPFLAGS"
+AC_USE_SYSTEM_EXTENSIONS
 
 ##
 ## Recommended structure:
@@ -119,6 +98,8 @@ AC_SUBST(OTHERAGENTLIBOBJS)
 AC_SUBST(OTHERAGENTLIBLOBJS)
 AC_SUBST(OTHERAGENTLIBLFTS)
 
+AC_SUBST(DLLIBS)
+
 AC_SUBST(PARTIALTARGETFLAGS)
 AC_SUBST(ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE)
 
@@ -137,7 +118,6 @@ AC_CONFIG_FILES([net-snmp-config:net-snmp-config.in],
 		[chmod +x net-snmp-config])
 AC_CONFIG_FILES([net-snmp-create-v3-user:net-snmp-create-v3-user.in],
 		[chmod +x net-snmp-create-v3-user])
-AC_CONFIG_FILES([netsnmp.pc:netsnmp.pc.in netsnmp-agent.pc:netsnmp-agent.pc.in])
 AC_CONFIG_FILES([dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in])
 AC_CONFIG_FILES([local/snmpconf])
 

@@ -9,5 +9,7 @@
 #define INP_FIRST_SYMBOL inpt_queue.tqh_first
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_queue.tqe_next
+#undef INP_PREV_SYMBOL
+#define INP_PREV_SYMBOL inp_queue.tqe_prev
 #endif
 

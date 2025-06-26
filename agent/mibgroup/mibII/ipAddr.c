@@ -9,7 +9,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -21,26 +21,26 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #ifdef irix6
 #define _STANDALONE 1
 #endif
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_SYS_SYSCTL_H
+#if HAVE_SYS_SYSCTL_H
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
@@ -49,55 +49,52 @@
 #define _KERNEL 1
 #endif
 #endif
-#ifdef HAVE_SYS_SYSMP_H
+#if HAVE_SYS_SYSMP_H
 #include <sys/sysmp.h>
 #endif
-#ifdef HAVE_SYS_TCPIPSTATS_H
+#if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_NET_IF_H
+#if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-#ifdef HAVE_NET_IF_VAR_H
+#if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
-#endif
-#ifdef HAVE_NETINET_IN_VAR_H
-#include <netinet/in_var.h>
 #endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#ifdef HAVE_SYS_HASHING_H
+#if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
-#ifdef HAVE_NETINET_IN_VAR_H
+#if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
-#ifdef HAVE_NETINET_IP_H
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
-#ifdef HAVE_NETINET_IP_VAR_H
+#if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
-#ifdef HAVE_INET_MIB2_H
+#if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#ifdef HAVE_SYS_STREAM_H
+#if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_NET_ROUTE_H
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#ifdef HAVE_SYSLOG_H
+#if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#ifdef HAVE_SYS_IOCTL_H
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 
@@ -126,7 +123,7 @@
 #include <winerror.h>
 #endif
 
-netsnmp_feature_require(interface_legacy);
+netsnmp_feature_require(interface_legacy)
 
         /*********************
 	 *
@@ -513,33 +510,27 @@ Address_Scan_Init(void)
     SNMP_FREE(ifc.ifc_buf);
     ifr_counter = 0;
 
-    do {
-        char *tmp_buf;
-
-	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    do
+    {
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
 	    DEBUGMSGTL(("snmpd", "socket open failure in Address_Scan_Init\n"));
 	    return;
 	}
 	num_interfaces += 16;
 
 	ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-        tmp_buf = realloc(ifc.ifc_buf, ifc.ifc_len);
-        if (!tmp_buf) {
-            snmp_log(LOG_ERR, "%s: out of memory", __func__);
-            num_interfaces -= 16;
-            ifc.ifc_len = sizeof(struct ifreq) * num_interfaces;
-            close(fd);
-            return;
-        }
-	ifc.ifc_buf = tmp_buf;
+	ifc.ifc_buf = (char*) realloc(ifc.ifc_buf, ifc.ifc_len);
 	
-        if (ioctl(fd, SIOCGIFCONF, &ifc) < 0) {
-            ifr = NULL;
-            close(fd);
-            return;
-        }
-        close(fd);
-    } while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
+	    if (ioctl(fd, SIOCGIFCONF, &ifc) < 0)
+	    {
+		ifr=NULL;
+		close(fd);
+	   	return;
+	    }
+	    close(fd);
+    }
+    while (ifc.ifc_len >= (sizeof(struct ifreq) * num_interfaces));
     
     ifr = ifc.ifc_req;
 }
@@ -709,10 +700,16 @@ var_ipAddrEntry(struct variable * vp,
         addr_ret = Lowentry.ipAdEntAddr;
         return (u_char *) & addr_ret;
     case IPADIFINDEX:
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
         Lowentry.ipAdEntIfIndex.o_bytes[Lowentry.ipAdEntIfIndex.o_length] = '\0';
         long_return =
             netsnmp_access_interface_index_find(Lowentry.
                                                 ipAdEntIfIndex.o_bytes);
+#else
+        long_return =
+           Interface_Index_By_Name(Lowentry.ipAdEntIfIndex.o_bytes,
+                                   Lowentry.ipAdEntIfIndex.o_length);
+#endif
         return (u_char *) & long_return;
     case IPADNETMASK:
 	*var_len = sizeof(addr_ret);
@@ -947,7 +944,7 @@ var_ipAddrEntry(struct variable *vp,
         return (u_char *) & long_return;
 
     case IPADREASMMAX:
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #else
         long_return = -1;

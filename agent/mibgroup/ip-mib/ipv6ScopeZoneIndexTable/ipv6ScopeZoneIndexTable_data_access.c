@@ -154,10 +154,9 @@ ipv6ScopeZoneIndexTable_container_shutdown(netsnmp_container *container_ptr)
  *
  */
 static void
-_snarf_zoneindex_entry(void *p, void *q)
+_snarf_zoneindex_entry(netsnmp_v6scopezone_entry *scopezone_entry,
+                       netsnmp_container *container)
 {
-    netsnmp_v6scopezone_entry *scopezone_entry = p;
-    netsnmp_container *container = q;
     ipv6ScopeZoneIndexTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGTRACE;
@@ -197,8 +196,8 @@ _snarf_zoneindex_entry(void *p, void *q)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  ipv6ScopeZoneIndexTable_row_prep() for populating data.
@@ -235,7 +234,9 @@ ipv6ScopeZoneIndexTable_container_load(netsnmp_container * container)
      * the container.
      */
 
-     CONTAINER_FOR_EACH(zoneindex, _snarf_zoneindex_entry, container);
+     CONTAINER_FOR_EACH(zoneindex,
+                       (netsnmp_container_obj_func *) _snarf_zoneindex_entry,
+                        container);
     /*
      * free the container. we've either claimed each entry, or released it,
      * so the access function doesn't need to clear the container.

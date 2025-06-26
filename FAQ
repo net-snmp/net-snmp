@@ -1,7 +1,7 @@
       Frequently Asked Questions (FAQ) for the UCD/Net-SNMP package
       =============================================================
 		       FAQ Author: Dave Shield
-			Net-SNMP Version: 5.10.pre1
+			Net-SNMP Version: 5.8
 	    Net-SNMP/UCD-SNMP Project Leader: Wes Hardaker
 	     Email: net-snmp-coders@lists.sourceforge.net
 
@@ -3974,7 +3974,7 @@ How can I register a MIB module in a different (SNMPv3) context?
                                my_variables, sizeof(variable1),
                                sizeof(my_variables)/sizeof(variable1),
                                my_variables_oid,
-                               OID_LENGTH(my_variables_oid),
+                               sizeof(my_variables_oid)/sizeof(oid),
                                DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                                "my_context", -1, 0);
 

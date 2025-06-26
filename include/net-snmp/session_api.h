@@ -24,8 +24,6 @@ extern          "C" {
 #endif
 
     struct session_list;
-    struct timeval;
-
 
     NETSNMP_IMPORT
     void            snmp_sess_init(netsnmp_session *);
@@ -75,7 +73,7 @@ extern          "C" {
      * Returns the request id of the generated packet if applicable, otherwise 1.
      * (There is a special case: if the request id is 0, 1 will be returned).
      * On any error, 0 is returned.
-     * The pdu is freed by snmp_send() unless a failure occurred.
+     * The pdu is freed by snmp_send() unless a failure occured.
      */
     NETSNMP_IMPORT
     int             snmp_send(netsnmp_session *, netsnmp_pdu *);
@@ -94,7 +92,7 @@ extern          "C" {
      * then send the pdu.
      * Returns the request id of the generated packet if applicable, otherwise 1.
      * On any error, 0 is returned.
-     * The pdu is freed by snmp_send() unless a failure occurred.
+     * The pdu is freed by snmp_send() unless a failure occured.
      */
     NETSNMP_IMPORT
     int             snmp_async_send(netsnmp_session *, netsnmp_pdu *,
@@ -170,9 +168,9 @@ extern          "C" {
 #define NETSNMP_SELECT_NOFLAGS  0x00
 #define NETSNMP_SELECT_NOALARMS 0x01
     NETSNMP_IMPORT
-    int             snmp_sess_select_info_flags(struct session_list *, int *, fd_set *,
+    int             snmp_sess_select_info_flags(void *, int *, fd_set *,
                                                 struct timeval *, int *, int);
-    int             snmp_sess_select_info2_flags(struct session_list *, int *,
+    int             snmp_sess_select_info2_flags(void *, int *,
                                                  netsnmp_large_fd_set *,
                                                  struct timeval *, int *, int);
 
@@ -229,13 +227,13 @@ extern          "C" {
      */
 
     NETSNMP_IMPORT
-    struct session_list *snmp_sess_open(netsnmp_session *);
+    void           *snmp_sess_open(netsnmp_session *);
     NETSNMP_IMPORT
-    struct session_list *snmp_sess_pointer(netsnmp_session *);
+    void           *snmp_sess_pointer(netsnmp_session *);
     NETSNMP_IMPORT
-    netsnmp_session *snmp_sess_session(struct session_list *);
+    netsnmp_session *snmp_sess_session(void *);
     NETSNMP_IMPORT
-    netsnmp_session *snmp_sess_session_lookup(struct session_list *);
+    netsnmp_session *snmp_sess_session_lookup(void *);
     NETSNMP_IMPORT
     netsnmp_session *snmp_sess_lookup_by_name(const char *paramName);
 
@@ -244,37 +242,36 @@ extern          "C" {
      */
 
     NETSNMP_IMPORT
-    int             snmp_sess_send(struct session_list *, netsnmp_pdu *);
+    int             snmp_sess_send(void *, netsnmp_pdu *);
     NETSNMP_IMPORT
-    int             snmp_sess_async_send(struct session_list *, netsnmp_pdu *,
+    int             snmp_sess_async_send(void *, netsnmp_pdu *,
                                          netsnmp_callback, void *);
     NETSNMP_IMPORT
-    int             snmp_sess_select_info(struct session_list *, int *, fd_set *,
+    int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
     NETSNMP_IMPORT
-    int             snmp_sess_select_info2(struct session_list *, int *,
+    int             snmp_sess_select_info2(void *, int *,
 					   netsnmp_large_fd_set *,
                                            struct timeval *, int *);
     /*
      * Returns 0 if success, -1 if fail.
      */
     NETSNMP_IMPORT
-    int             snmp_sess_read(struct session_list *, fd_set *);
+    int             snmp_sess_read(void *, fd_set *);
     /*
      * Similar to snmp_sess_read(), but accepts a pointer to a large file
      * descriptor set instead of a pointer to a file descriptor set.
      */
     NETSNMP_IMPORT
-    int             snmp_sess_read2(struct session_list *,
+    int             snmp_sess_read2(void *,
                                     netsnmp_large_fd_set *);
     NETSNMP_IMPORT
-    void            snmp_sess_timeout(struct session_list *);
+    void            snmp_sess_timeout(void *);
     NETSNMP_IMPORT
-    int             snmp_sess_close(struct session_list *slp);
+    int             snmp_sess_close(void *);
 
     NETSNMP_IMPORT
-    int             snmp_sess_synch_response(struct session_list *,
-                                             netsnmp_pdu *,
+    int             snmp_sess_synch_response(void *, netsnmp_pdu *,
                                              netsnmp_pdu **);
 
 #ifdef __cplusplus

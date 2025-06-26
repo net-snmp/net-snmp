@@ -15,10 +15,6 @@
 #ifndef USMDHUSERKEYTABLE_DATA_GET_H
 #define USMDHUSERKEYTABLE_DATA_GET_H
 
-#ifdef HAVE_OPENSSL_DH_H
-#include <openssl/dh.h>
-#endif
-
 #ifdef __cplusplus
 extern          "C" {
 #endif

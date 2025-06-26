@@ -1,7 +1,3 @@
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -9,16 +5,17 @@
 #include "hardware/sensors/hw_sensors.h"
 #include "ucd-snmp/lmsensorsMib.h"
 
-struct reg_and_table {
-    netsnmp_handler_registration *reg;
-    netsnmp_table_registration_info *table;
-};
+netsnmp_container *sensorContainer = NULL;
 
-static netsnmp_container *sensorContainer;
-static struct reg_and_table temp_reg;
-static struct reg_and_table fan_reg;
-static struct reg_and_table volt_reg;
-static struct reg_and_table misc_reg;
+static void initialize_lmSensorsTable(const char *tableName,
+                                      const oid *tableOID,
+                                      netsnmp_container_op *filter,
+                                      int mult);
+
+static int _sensor_filter_temp( netsnmp_container *c, const void *v );
+static int _sensor_filter_fan(  netsnmp_container *c, const void *v );
+static int _sensor_filter_volt( netsnmp_container *c, const void *v );
+static int _sensor_filter_misc( netsnmp_container *c, const void *v );
 
 static const oid lmTempSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,2};
 static const oid lmFanSensorsTable_oid[]    = {1,3,6,1,4,1,2021,13,16,3};
@@ -28,10 +25,31 @@ static const oid lmMiscSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,5};
 const size_t lmSensorsTables_oid_len = OID_LENGTH(lmMiscSensorsTable_oid);
 
 
+/* Initialise the LM Sensors MIB module */
+void
+init_lmsensorsMib(void)
+{
+    DEBUGMSGTL(("ucd-snmp/lmsensorsMib","Initializing LM-SENSORS-MIB tables\n"));
+
+    /* 
+     * Initialise the four LM-SENSORS-MIB tables
+     *
+     * They are almost identical, so we can use the same registration code.
+     */
+    initialize_lmSensorsTable( "lmTempSensorsTable", lmTempSensorsTable_oid,
+                                _sensor_filter_temp, 1000 );  /* MIB asks for mC */
+    initialize_lmSensorsTable( "lmFanSensorsTable",  lmFanSensorsTable_oid,
+                                _sensor_filter_fan,  1);
+    initialize_lmSensorsTable( "lmVoltSensorsTable", lmVoltSensorsTable_oid,
+                                _sensor_filter_volt, 1000 );  /* MIB asks for mV */
+    initialize_lmSensorsTable( "lmMiscSensorsTable", lmMiscSensorsTable_oid,
+                                _sensor_filter_misc, 1 );
+}
+
 /*
  * Common initialisation code, used for setting up all four tables
  */
-static struct reg_and_table
+void
 initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                           netsnmp_container_op *filter, int mult )
 {
@@ -39,9 +57,6 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
     netsnmp_table_registration_info *table_info;
     netsnmp_cache     *cache;
     netsnmp_container *container;
-    struct reg_and_table res;
-
-    memset(&res, 0, sizeof(res));
 
     /*
      * Ensure the HAL sensors module has been initialised,
@@ -74,12 +89,8 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
     table_info = SNMP_MALLOC_TYPEDEF( netsnmp_table_registration_info );
     netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER, 0);
     table_info->min_column = COLUMN_LMSENSORS_INDEX;
-    table_info->max_column = COLUMN_LMSENSORS_SIGNED;
-    if (netsnmp_container_table_register(reg, table_info, container, 0) !=
-        SNMPERR_SUCCESS) {
-        snmp_log(LOG_ERR, "Failed to register the sensors container table\n");
-        return res;
-    }
+    table_info->max_column = COLUMN_LMSENSORS_VALUE;
+    netsnmp_container_table_register( reg, table_info, container, 0 );
 
     /*
      * If the HAL sensors module was configured as an on-demand caching
@@ -92,9 +103,6 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                                             "table_container");
     }
 
-    res.reg = reg;
-    res.table = table_info;
-    return res;
 }
 
 
@@ -103,30 +111,26 @@ initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
  *
  *  Used to ensure that sensor entries appear in the appropriate table.
  */
-static int _sensor_filter_temp( netsnmp_container *c, const void *v )
-{
+int _sensor_filter_temp( netsnmp_container *c, const void *v ) {
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches temperature sensors */
     return (( sp->type == NETSNMP_SENSOR_TYPE_TEMPERATURE ) ? 0 : 1 );
 }
 
-static int _sensor_filter_fan( netsnmp_container *c, const void *v )
-{
+int _sensor_filter_fan( netsnmp_container *c, const void *v ) {
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches fan sensors */
     return (( sp->type == NETSNMP_SENSOR_TYPE_RPM ) ? 0 : 1 );
 }
 
-static int _sensor_filter_volt( netsnmp_container *c, const void *v )
-{
+int _sensor_filter_volt( netsnmp_container *c, const void *v ) {
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Only matches voltage sensors (AC or DC) */
     return ((( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_DC ) ||
              ( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_AC )) ? 0 : 1 );
 }
 
-static int _sensor_filter_misc( netsnmp_container *c, const void *v )
-{
+int _sensor_filter_misc( netsnmp_container *c, const void *v ) {
     const netsnmp_sensor_info *sp = (const netsnmp_sensor_info *)v;
     /* Matches everything except temperature, fan or voltage sensors */
     return ((( sp->type == NETSNMP_SENSOR_TYPE_TEMPERATURE ) ||
@@ -135,41 +139,6 @@ static int _sensor_filter_misc( netsnmp_container *c, const void *v )
              ( sp->type == NETSNMP_SENSOR_TYPE_VOLTAGE_AC  )) ? 1 : 0 );
 }
 
-/* Initialize the LM Sensors MIB module */
-void
-init_lmsensorsMib(void)
-{
-    DEBUGMSGTL(("ucd-snmp/lmsensorsMib","Initializing LM-SENSORS-MIB tables\n"));
-
-    /*
-     * Initialize the four LM-SENSORS-MIB tables
-     *
-     * They are almost identical, so we can use the same registration code.
-     */
-    temp_reg = initialize_lmSensorsTable("lmTempSensorsTable",
-                   lmTempSensorsTable_oid, _sensor_filter_temp,
-                   1000);  /* MIB asks for mC */
-    fan_reg = initialize_lmSensorsTable("lmFanSensorsTable",
-                   lmFanSensorsTable_oid, _sensor_filter_fan,  1);
-    volt_reg = initialize_lmSensorsTable("lmVoltSensorsTable",
-                   lmVoltSensorsTable_oid, _sensor_filter_volt,
-                   1000);  /* MIB asks for mV */
-    misc_reg = initialize_lmSensorsTable("lmMiscSensorsTable",
-                   lmMiscSensorsTable_oid, _sensor_filter_misc, 1);
-}
-
-void
-shutdown_lmsensorsMib(void)
-{
-    netsnmp_table_registration_info_free(misc_reg.table);
-    netsnmp_unregister_table(misc_reg.reg);
-    netsnmp_table_registration_info_free(volt_reg.table);
-    netsnmp_unregister_table(volt_reg.reg);
-    netsnmp_table_registration_info_free(fan_reg.table);
-    netsnmp_unregister_table(fan_reg.reg);
-    netsnmp_table_registration_info_free(temp_reg.table);
-    netsnmp_unregister_table(temp_reg.reg);
-}
 
 /*
  * Handle requests for any of the four lmXxxxSensorsTables 
@@ -225,15 +194,6 @@ lmSensorsTables_handler(
                 /* Multiply the value by the appropriate scaling factor for this table */
                 snmp_set_var_typed_integer( request->requestvb, ASN_GAUGE,
                                             (int)(mult*sensor_info->value));
-                break;
-            case COLUMN_LMSENSORS_SIGNED:
-		/* Only avalable for temperature table */
-	        if (reginfo->rootoid[9] != 2)
-		    netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
-		else
-                    /* Multiply the value by the appropriate scaling factor for this table */
-                    snmp_set_var_typed_integer( request->requestvb, ASN_INTEGER,
-                                                (int)(mult*sensor_info->value));
                 break;
             default:
                 netsnmp_set_request_error(reqinfo, request,

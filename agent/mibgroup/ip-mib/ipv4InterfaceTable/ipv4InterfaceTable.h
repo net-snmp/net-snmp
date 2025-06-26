@@ -25,9 +25,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/ifTable/ifTable);
-config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface);
-config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access);
+config_require(if-mib/ifTable/ifTable)
+config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_interface)
+config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -101,6 +101,12 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access);
     void
         ipv4InterfaceTable_rowreq_ctx_cleanup(ipv4InterfaceTable_rowreq_ctx
                                               * rowreq_ctx);
+
+    int             ipv4InterfaceTable_commit(ipv4InterfaceTable_rowreq_ctx
+                                              * rowreq_ctx);
+        ipv4InterfaceTable_rowreq_ctx
+        * ipv4InterfaceTable_row_find_by_mib_index
+        (ipv4InterfaceTable_mib_index * mib_idx);
 
     extern const oid      ipv4InterfaceTable_oid[];
     extern const int      ipv4InterfaceTable_oid_size;

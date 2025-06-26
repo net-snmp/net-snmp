@@ -15,10 +15,10 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -274,7 +274,7 @@ notifyTable_register_notifications(int major, int minor,
     struct targetAddrTable_struct *ptr = NULL;
     struct targetParamTable_struct *pptr = NULL;
     struct snmpNotifyTable_data *nptr = NULL;
-    int             confirm, close_sess, i;
+    int             confirm, i;
     char            buf[SNMP_MAXBUF_SMALL];
     netsnmp_transport *t = NULL;
     struct agent_add_trap_args *args =
@@ -289,7 +289,6 @@ notifyTable_register_notifications(int major, int minor,
     args->rc = SNMPERR_GENERR;
     confirm = args->confirm;
     ss = args->ss;
-    close_sess = args->close_sess;
     name = args->nameData;
     nameLen = args->nameLen;
     tag = args->tagData;
@@ -313,7 +312,7 @@ notifyTable_register_notifications(int major, int minor,
             snmp_log(LOG_ERR,
                      "Can't register new trap destination: max limit reached: %d",
                      MAX_ENTRIES);
-            snmp_close(ss);
+            snmp_sess_close(ss);
             return (0);
         }
         name = buf;
@@ -336,7 +335,7 @@ notifyTable_register_notifications(int major, int minor,
     if (!t) {
         snmp_log(LOG_ERR,
                 "Cannot add new trap destination, transport is closed.");
-        snmp_close(ss);
+        snmp_sess_close(ss);
         return 0;
     }
     ptr = snmpTargetAddrTable_create();
@@ -361,7 +360,6 @@ notifyTable_register_notifications(int major, int minor,
     ptr->storageType = ST_READONLY;
     ptr->rowStatus = RS_ACTIVE;
     ptr->sess = ss;
-    ptr->close_sess = close_sess;
     DEBUGMSGTL(("trapsess", "adding %s to trap table\n", ptr->nameData));
     snmpTargetAddrTable_add(ptr);
 
@@ -380,10 +378,6 @@ notifyTable_register_notifications(int major, int minor,
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
-        if (!ss->securityName) {
-            snmp_log(LOG_ERR, "Security name is missing.");
-            goto bail;
-        }
         pptr->secNameData = netsnmp_memdup_nt(ss->securityName,
                                               ss->securityNameLen,
                                               &pptr->secNameLen);
@@ -467,11 +461,10 @@ notifyTable_register_notifications(int major, int minor,
     return 0;
 
   bail:
-    snmp_log(LOG_ERR, "Cannot add new trap destination %s\n", name);
+    snmp_log(LOG_ERR, "Cannot add new trap destination");
 
     if (NULL != nptr)
         snmpNotifyTable_remove(nptr);
-    free(nptr);
 
     if (NULL != pptr)
         snmpTargetParamTable_remove(pptr);
@@ -479,7 +472,7 @@ notifyTable_register_notifications(int major, int minor,
     if (NULL != ptr)
         snmpTargetAddrTable_remove(ptr);
 
-    snmp_close(ss);
+    snmp_sess_close(ss);
 
     return 0;
 }
@@ -531,11 +524,11 @@ init_snmpNotifyTable_data(void)
     static int done = 0;
 
     if (++done != 1) {
-        DEBUGMSGTL(("snmpNotifyTable_data", "multiple init calls\n"));
+        DEBUGMSGTL(("snmpNotifyTable_data", "multiple init calls"));
         return;
     }
 
-    DEBUGMSGTL(("snmpNotifyTable_data", "initializing...  \n"));
+    DEBUGMSGTL(("snmpNotifyTable_data", "initializing...  "));
 
     /*
      * we need to be called back later to store our data 
@@ -568,7 +561,7 @@ init_snmpNotifyTable_data(void)
 void
 shutdown_snmpNotifyTable_data(void)
 {
-    DEBUGMSGTL(("snmpNotifyTable_data", "shutting down ... \n"));
+    DEBUGMSGTL(("snmpNotifyTable_data", "shutting down ... "));
 
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                              store_snmpNotifyTable, NULL, FALSE);
@@ -749,6 +742,7 @@ store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
 {
     char            line[SNMP_MAXBUF];
     char           *cptr;
+    size_t          tmpint;
     struct snmpNotifyTable_data *StorageTmp;
     struct header_complex_index *hcindex;
 
@@ -782,15 +776,15 @@ store_snmpNotifyTable(int majorID, int minorID, void *serverarg,
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyType,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyStorageType,
-                                       NULL);
+                                       &tmpint);
             cptr =
                 read_config_store_data(ASN_INTEGER, cptr,
                                        &StorageTmp->snmpNotifyRowStatus,
-                                       NULL);
+                                       &tmpint);
 
             snmpd_store_config(line);
         }

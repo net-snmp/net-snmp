@@ -13,20 +13,20 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -45,11 +45,11 @@
 #include <net-snmp/agent/agent_sysORTable.h>
 #include "master.h"
 
-netsnmp_feature_require(unregister_mib_table_row);
-netsnmp_feature_require(trap_vars_with_context);
-netsnmp_feature_require(calculate_sectime_diff);
-netsnmp_feature_require(allocate_globalcacheid);
-netsnmp_feature_require(remove_index);
+netsnmp_feature_require(unregister_mib_table_row)
+netsnmp_feature_require(trap_vars_with_context)
+netsnmp_feature_require(calculate_sectime_diff)
+netsnmp_feature_require(allocate_globalcacheid)
+netsnmp_feature_require(remove_index)
 
 netsnmp_session *
 find_agentx_session(netsnmp_session * session, int sessid)
@@ -93,10 +93,9 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->contextName = NULL;
     sp->securityEngineID = NULL;
     sp->securityPrivProto = NULL;
-    sp->sessUser = NULL;
 
     /*
-     * This next bit utilizes unused SNMPv3 fields
+     * This next bit utilises unused SNMPv3 fields
      *   to store the subagent OID and description.
      * This really ought to use AgentX-specific fields,
      *   but it hardly seems worth it for a one-off use.
@@ -133,19 +132,19 @@ close_agentx_session(netsnmp_session * session, int sessid)
     if (sessid == -1) {
         /*
          * The following is necessary to avoid locking up the agent when
-         * a subagent dies during a set request. We must clean up the
+         * a sugagent dies during a set request. We must clean up the
          * requests, so that the delegated request will be completed and
          * further requests can be processed
          */
 	while (netsnmp_remove_delegated_requests_for_session(session)) {
-		DEBUGMSGTL(("agentx/master", "Continue removing delegated requests\n"));
+		DEBUGMSGTL(("agentx/master", "Continue removing delegated reqests\n"));
 	}
 
         if (session->subsession != NULL) {
             netsnmp_session *subsession = session->subsession;
             for(; subsession; subsession = subsession->next) {
                 while (netsnmp_remove_delegated_requests_for_session(subsession)) {
-			DEBUGMSGTL(("agentx/master", "Continue removing delegated subsession requests\n"));
+			DEBUGMSGTL(("agentx/master", "Continue removing delegated subsession reqests\n"));
 		}
             }
         }
@@ -445,12 +444,17 @@ agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
      *     as this is valid AgentX syntax.
      */
 
-    /* If a context name was specified, send the trap using that context.
-     * Otherwise, send the trap without the context using the old method */
-    if (pdu->contextName != NULL)
-        send_trap_vars_with_context(-1, -1, pdu->variables, pdu->contextName);
-    else
+	/* If a context name was specified, send the trap using that context.
+	 * Otherwise, send the trap without the context using the old method */
+	if (pdu->contextName != NULL)
+	{
+        send_trap_vars_with_context(-1, -1, pdu->variables, 
+                       pdu->contextName);
+	}
+	else
+	{
         send_trap_vars(-1, -1, pdu->variables);
+	}
 
     return AGENTX_ERR_NOERROR;
 }
@@ -501,9 +505,6 @@ handle_master_agentx_packet(int operation,
         asp = (netsnmp_agent_session *) magic;
     } else {
         asp = init_agent_snmp_session(session, pdu);
-        if (asp == NULL) {
-            return 1;
-        }
     }
 
     DEBUGMSGTL(("agentx/master", "handle pdu (req=0x%lx,trans=0x%lx,sess=0x%lx)\n",

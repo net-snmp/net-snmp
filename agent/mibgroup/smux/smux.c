@@ -8,56 +8,56 @@
 #include <sys/types.h>
 #include <ctype.h>
 
-#ifdef HAVE_IO_H
+#if HAVE_IO_H                   /* win32 */
 #include <io.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_ERR_H
+#if HAVE_ERR_H
 #include <err.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
 #include <errno.h>
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
 #include <sys/stat.h>
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_SYS_FILIO_H
+#if HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
-#ifdef HAVE_SYS_IOCTL_H
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 
@@ -68,7 +68,7 @@
 #include "smux.h"
 #include "snmpd.h"
 
-netsnmp_feature_require(snprint_objid);
+netsnmp_feature_require(snprint_objid)
 
 long            smux_long;
 u_long          smux_ulong;
@@ -81,6 +81,7 @@ int             smux_listen_sd = -1;
 static struct timeval smux_rcv_timeout;
 static long   smux_reqid;
 
+void            init_smux(void);
 static u_char  *smux_open_process(int, u_char *, size_t *, int *);
 static u_char  *smux_rreq_process(int, u_char *, size_t *);
 static u_char  *smux_close_process(int, u_char *, size_t *);
@@ -127,7 +128,8 @@ smux_parse_peer_auth(const char *token, char *cptr)
     char           *password_cptr;
     int             rv;
 
-    if ((aptr = calloc(1, sizeof(smux_peer_auth))) == NULL) {
+    if ((aptr =
+         (smux_peer_auth *) calloc(1, sizeof(smux_peer_auth))) == NULL) {
         snmp_log_perror("smux_parse_peer_auth: malloc");
         return;
     }
@@ -331,7 +333,7 @@ smux_handler(netsnmp_mib_handler *handler,
             if (reqinfo->mode != MODE_SET_RESERVE1)
                 break;
             /* fall through if MODE_SET_RESERVE1 */
-	    NETSNMP_FALLTHROUGH;
+	    /* FALL THROUGH */
 
         default:
             /* SET processing */

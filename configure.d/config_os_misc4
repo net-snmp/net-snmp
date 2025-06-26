@@ -49,6 +49,23 @@ AC_CACHE_CHECK([for location of system kernel],
 AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC", [location of UNIX kernel])
 
 
+#       /dev/kmem existence
+#	    used in agent only
+#
+AC_CACHE_CHECK([for /dev/kmem],
+    ac_cv_HAVE_KMEM,
+   [if test $CDEV_TEST_FLAG /dev/kmem; then
+        ac_cv_HAVE_KMEM="/dev/kmem"
+    fi
+])
+#
+#  Note that it's OK if this device is not found
+#
+if test "x$ac_cv_HAVE_KMEM" = "x/dev/kmem"; then
+    AC_DEFINE_UNQUOTED(HAVE_KMEM,"$ac_cv_HAVE_KMEM", [Define if you have /dev/kmem])
+fi
+
+
 #       Swap device Location
 #           (/dev/dmem or /dev/drum)
 #	    used in agent only
@@ -110,25 +127,26 @@ fi
 AC_CACHE_CHECK([for correct flags to ps],
      ac_cv_ps_flags,
      [
-case "x$PARTIALTARGETOS" in
-    xcygwin|xmingw32*)
-	ac_cv_ps_flags="-e";;
-    *)
-	ac_cv_ps_flags=""
-	for args in -e -el acx -acx "-o pid,tt,state,time,ucomm" ax; do
-	    if test "`($PSPROG $args 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps"; then
-		ac_cv_ps_flags=$args
-		break
-	    fi
-	done
-	if test "x${ac_cv_ps_flags}" = x; then
-	    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
-	    ac_cv_ps_flags="-acx"
-	elif $PSPROG $ac_cv_ps_flags -J 0 >/dev/null 2>&1; then
-	    ac_cv_ps_flags="$ac_cv_ps_flags -J 0"
-	fi
-	;;
-esac
+if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-e"
+elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-el"
+elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="acx"
+elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-acx"
+elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
+elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="ax"
+elif test "x$PARTIALTARGETOS" = "xcygwin"; then
+    ac_cv_ps_flags="-e"
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
+    ac_cv_ps_flags="-e"
+else
+    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
+    ac_cv_ps_flags="-acx"
+fi
 ])
 
 PSCMD="$PSPROG $ac_cv_ps_flags"
@@ -166,29 +184,26 @@ if test $cross_compiling = yes; then
 else
     AC_CACHE_CHECK([if sysctl can read kernel information],
         ac_cv_NETSNMP_CAN_USE_SYSCTL,
-       [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#ifdef TIME_WITH_SYS_TIME
+       [AC_TRY_RUN([
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_SYS_SYSCTL_H
+#if HAVE_SYS_SYSCTL_H
 # include <sys/sysctl.h>
 #endif
-#include <stddef.h>
-#include <stdlib.h>
 
-int main(int argc, char **argv)
-{
+main() {
   int                 mib[2];
   size_t              len;
   struct timeval boottime;
@@ -197,9 +212,16 @@ int main(int argc, char **argv)
   mib[1] = KERN_BOOTTIME;
   
   len = sizeof(boottime);
-  return 1 - (sysctl(mib, 2, &boottime, &len, NULL, 0) == 0 && boottime.tv_sec);
+  sysctl(mib, 2, &boottime, &len, NULL, NULL);
+  if (boottime.tv_sec != 0)
+    exit(0);
+  else
+    exit(1);
 }
-        ]])],[ac_cv_NETSNMP_CAN_USE_SYSCTL=yes],[ac_cv_NETSNMP_CAN_USE_SYSCTL=no],[ac_cv_NETSNMP_CAN_USE_SYSCTL=no])])
+        ],
+        ac_cv_NETSNMP_CAN_USE_SYSCTL=yes,
+        ac_cv_NETSNMP_CAN_USE_SYSCTL=no,
+        ac_cv_NETSNMP_CAN_USE_SYSCTL=no)])
 fi
 
 if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
@@ -208,19 +230,20 @@ fi
 
 
 #   Check whether TCP timer constants are indeed constant
-#       or depend on the kernel clock tick 'hz'.        (FreeBSD)
+#       or depend on the kernel clock tick 'hz'.        (FreeBSD 4.x)
 #
 #       If the latter, then we will need to have a local
 #       variable 'hz' defined and with a suitable value,
 #       whenever we want to  use one one of these 'constants'.
 #
+# 	    used in agent only
+#
 AC_CACHE_CHECK([whether TCP timers depend on 'hz'],
     ac_cv_TCPTV_NEEDS_HZ,
-   [AC_EGREP_CPP([\<hz\>],
+   [AC_EGREP_CPP(hz,
         [
 #include <netinet/tcp_timer.h>
-TCPTV_MIN
-TCPTV_REXMTMAX
+TCPTV_SRTTDFLT
         ],
         ac_cv_TCPTV_NEEDS_HZ=yes,
         ac_cv_TCPTV_NEEDS_HZ=no)])
@@ -228,7 +251,7 @@ TCPTV_REXMTMAX
 if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
     AC_DEFINE(TCPTV_NEEDS_HZ, 1,
         [Define if the TCP timer constants in <netinet/tcp_timer.h>
-         depend on the integer variable 'hz'.  @<:@FreeBSD@:>@])
+         depend on the integer variable 'hz'.  @<:@FreeBSD 4.x@:>@])
 fi
 
 
@@ -243,38 +266,42 @@ case $target_os in
     AC_CHECK_HEADERS(inet/ip.h,ac_inet_ip_h=yes,ac_inet_ip_h=no,
         AC_INCLUDES_DEFAULT([])
         [
-#ifdef HAVE_SYS_STREAM_H
+#if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_INET_COMMON_H
+#if HAVE_INET_COMMON_H
 #include <inet/common.h>
 #endif
         ])
     if test $ac_inet_ip_h = yes ; then
         AC_CACHE_CHECK([for mib2_ipRouteEntry_t in inet/mib2.h],
             ac_cv_mib2_ipRouteEntry_t,
-           [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifdef HAVE_INET_MIB2_H
+           [AC_TRY_COMPILE([
+#if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-               ]], [[
+               ],[
   mib2_ipRouteEntry_t testit;
   if(sizeof(testit))
     return(0);
-               ]])],[ac_cv_mib2_ipRouteEntry_t=yes],[ac_cv_mib2_ipRouteEntry_t=no])])
+               ],
+               ac_cv_mib2_ipRouteEntry_t=yes,
+               ac_cv_mib2_ipRouteEntry_t=no)])
 
         if test "x$ac_cv_mib2_ipRouteEntry_t" = "xyes" ; then
             AC_CACHE_CHECK([whether IRE_CACHE is defined in inet/ip.h],
                 ac_cv_ire_cache,
-               [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifdef HAVE_INET_IP_H
+               [AC_TRY_COMPILE([
+#if HAVE_INET_IP_H
 #include <inet/ip.h>
 #endif
-                   ]], [[
+                   ],[
   int testit=IRE_CACHE;
   if(testit)
     return(0);
-                   ]])],[ac_cv_ire_cache=yes],[ac_cv_ire_cache=no])])
+                   ],
+                   ac_cv_ire_cache=yes,
+                   ac_cv_ire_cache=no)])
         else
             ac_cv_ire_cache=no
         fi
@@ -291,30 +318,6 @@ And this can be very slow.])
     ;;
 esac
 
-#   Check whether SO_BINDTODEVICE is available.
-#
-
-AC_MSG_CHECKING([for SO_BINDTODEVICE])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([
-#include <sys/types.h>
-#include <sys/socket.h>
-], [
-return SO_BINDTODEVICE
-])],
-[AC_DEFINE([HAVE_SO_BINDTODEVICE], [1],
-  [Define to 1 if SO_BINDTODEVICE is available])
- AC_MSG_RESULT([yes])],
-[AC_MSG_RESULT([no])])
-
-#   Check whether struct in_pktinfo.ipi_spec_dst is available.
-#
-
-AC_CHECK_MEMBERS([struct in_pktinfo.ipi_spec_dst], [], [], [
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-])
-
 #   Check whether IP_PKTINFO is usable.
 #
 
@@ -327,7 +330,6 @@ AC_CACHE_CHECK([for IP_PKTINFO ],
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h> /* inet_ntoa() */
 ], [
     void *buf;
     int len;
@@ -365,23 +367,6 @@ if test x$ac_cv_have_ip_pktinfo = xyes; then
     AC_DEFINE(HAVE_IP_PKTINFO, 1, [Set if IP_PKTINFO is usable])
 fi
 
-#   Check whether IPV6_RECVPKTINFO is usable.
-#
-
-AC_CACHE_CHECK([for IPV6_RECVPKTINFO ],
-                [ac_cv_have_ipv6_recvpktinfo],
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([
-#include <netinet/in.h>
-], [
-return IPV6_RECVPKTINFO
-])],
-[ac_cv_have_ipv6_recvpktinfo=yes],
-[ac_cv_have_ipv6_recvpktinfo=no]
-)])
-if test x$ac_cv_have_ipv6_recvpktinfo = xyes; then
-    AC_DEFINE(HAVE_IPV6_RECVPKTINFO, 1, [Set if IPV6_RECVPKTINFO is usable])
-fi
-
 #   Check whether IP_RECVDSTADDR is usable.
 #
 
@@ -394,7 +379,6 @@ AC_CACHE_CHECK([for IP_RECVDSTADDR ],
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h> /* inet_ntoa() */
 ], [
     void *buf;
     int len;

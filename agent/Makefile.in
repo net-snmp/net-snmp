@@ -15,7 +15,7 @@ mysubdir=agent
 #
 # what to install
 #
-SUBDIRS=helpers
+SUBDIRS=helpers mibgroup
 FTSUBDIRS=mibgroup helpers
 
 INSTALLSBINPROGS= @SNMPD@
@@ -121,7 +121,7 @@ VAL_LIBS	= @VAL_LIBS@
 PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
 PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@
 LIBS		= $(USELIBS) @AGENTLIBS@ $(PERLLDOPTS_FOR_APPS) $(VAL_LIBS)
-OUR_AGENT_LIBS	= $(AGENTLIB) $(MIBLIB) $(LIBS)
+OUR_AGENT_LIBS	= $(AGENTLIB) $(MIBLIB) $(LIBS) @DLLIBS@
 CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 		  $(SNMPLIB_INCLUDES) @CPPFLAGS@ 
 
@@ -273,12 +273,9 @@ FTAGENTOBJS=snmpd.ft @other_ftagentobjs@
 #
 # Define OBJS and LOBJS for clean target (just this directory)
 #
-OBJS		= $(LIBAGENTOBJS)  $(MIBOBJS)   $(AGENTOBJS)   \
-		  mib_modules.o  auto_nlist.o
-LOBJS		= $(LLIBAGENTOBJS) $(LMIBOBJS)  $(LAGENTOBJS)  \
-		  mib_modules.lo auto_nlist.lo
-FTOBJS		= $(LLIBAGENTFTS)  $(FTMIBOBJS) $(FTAGENTOBJS) \
-		  mib_modules.ft auto_nlist.ft
+OBJS		= $(LIBAGENTOBJS)  $(AGENTOBJS)  mib_modules.o  auto_nlist.o
+LOBJS		= $(LLIBAGENTOBJS) $(LAGENTOBJS) mib_modules.lo auto_nlist.lo
+FTOBJS		= $(LLIBAGENTFTS) $(FTAGENTOBJS) mib_modules.ft auto_nlist.ft
 
 FEATUREFILE     = $(top_builddir)/include/net-snmp/agent/features.h
 
@@ -288,26 +285,26 @@ all: agentlib subdirs miblib $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 # build stuff targets
 #
 getkstat: getkstat.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $? $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getkstat.o: mibgroup/kernel_sunos5.c
-	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DDODEBUG -c $?
+	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DDODEBUG -c $? 
 
 getmibstat: getmibstat.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $? $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
 getmibstat.o: mibgroup/kernel_sunos5.c
-	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $?
+	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBTARG)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -o $@ ${LAGENTOBJS} ${OUR_AGENT_LIBS}
+snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBTARG) 
+	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} $(USELIBS)
-	$(LIB_LD_CMD) $(AGENTLIB) $(LDFLAGS) ${LLIBAGENTOBJS} $(USELIBS) ${LAGENTLIBS} $(PERLLDOPTS_FOR_LIBS) @AGENTLIBS@
+	$(LIB_LD_CMD) $(AGENTLIB) ${LLIBAGENTOBJS} $(USELIBS) ${LAGENTLIBS} @LD_NO_UNDEFINED@ $(LDFLAGS) $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS) @AGENTLIBS@
 	$(RANLIB) $(AGENTLIB)
 
-libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION): ${LMIBOBJS} $(AGENTLIB) $(USELIBS) subdirs
-	$(LIB_LD_CMD) $(MIBLIB) $(LDFLAGS) ${LMIBOBJS} $(AGENTLIB) $(USELIBS) ${LMIBLIBS} $(PERLLDOPTS_FOR_LIBS) @AGENTLIBS@
+libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION): ${LMIBOBJS} $(AGENTLIB) $(USELIBS)
+	$(LIB_LD_CMD) $(MIBLIB) ${LMIBOBJS} $(AGENTLIB) $(USELIBS) @LD_NO_UNDEFINED@ $(LDFLAGS) ${LMIBLIBS} $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS) @AGENTLIBS@
 	$(RANLIB) $(MIBLIB)
 
 agentlib: $(AGENTLIB)

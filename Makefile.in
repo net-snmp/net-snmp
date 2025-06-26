@@ -6,27 +6,27 @@
 VPATH		= @srcdir@
 
 SUBDIRS		= snmplib @MAINSUBS@
-SUBDIRDEPS      = sedscript
 FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing
 
 CPP		= @CPP@ 					        \
-		-I$(srcdir)/include -I.					\
+		-Iinclude -I$(srcdir)/include -I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
 		-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		        \
 		$(EXTRACPPFLAGS)
 
 INSTALLHEADERS=version.h net-snmp-features.h
 INCLUDESUBDIR=system
 INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h \
-	darwin.h dragonfly.h dynix.h \
+	darwin.h darwin7.h darwin8.h darwin9.h darwin10.h darwin11.h darwin12.h \
+	darwin13.h darwin14.h darwin15.h darwin16.h darwin17.h \
+	dragonfly.h dynix.h \
 	freebsd2.h freebsd3.h freebsd4.h freebsd5.h freebsd6.h \
 	freebsd7.h freebsd8.h freebsd9.h freebsd10.h freebsd11.h \
-	freebsd12.h freebsd13.h freebsd14.h freebsd.h \
+	freebsd12.h freebsd.h kfreebsd.h \
 	generic.h \
-	hpux.h irix.h kfreebsd.h linux.h mingw32.h mingw32msvc.h mips.h \
+	hpux.h irix.h linux.h mingw32.h mingw32msvc.h mips.h \
 	netbsd.h nto-qnx6.h osf5.h \
-	openbsd4.h openbsd5.h openbsd6.h openbsd7.h openbsd8.h \
-	openbsd.h \
+	openbsd.h openbsd6.h openbsd5.h openbsd4.h \
 	solaris2.3.h solaris2.4.h solaris2.5.h solaris2.6.h \
 	solaris.h sunos.h svr5.h sysv.h ultrix4.h
 INCLUDESUBDIR2=machine
@@ -35,7 +35,6 @@ INSTALLBUILTHEADERS=include/net-snmp/net-snmp-config.h
 INSTALLBUILTINCLUDEHEADERS=@FEATUREHEADERS@
 INSTALLBINSCRIPTS=net-snmp-config net-snmp-create-v3-user
 INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
-INSTALL_PKGCONFIG=netsnmp.pc netsnmp-agent.pc
 
 #
 # other install rules.
@@ -114,8 +113,8 @@ agentxtrap snmptrapd: @FEATURETARGS@
 #
 # local build rules
 #
-sedscript: $(srcdir)/sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
-	$(CPP) -I$(srcdir) -Iinclude $(srcdir)/sedscript.in | $(EGREP) '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
+	$(CPP) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
 	echo 's/VERSIONINFO/$(VERSION)/g' >> sedscript
 	echo 's#DATADIR#$(datadir)#g' >> sedscript
 	echo 's#LIBDIR#$(libdir)#g' >> sedscript
@@ -123,14 +122,14 @@ sedscript: $(srcdir)/sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/a
 	echo 's#PERSISTENT_DIRECTORY#$(PERSISTENT_DIRECTORY)#g' >> sedscript
 	echo 's#SYSCONFDIR#@sysconfdir@#g' >> sedscript
 
-EXAMPLE.conf: sedscript $(srcdir)/EXAMPLE.conf.def
+EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
 docs: docsdir 
 
 docsdir: docsdox
 
-docsdox: $(srcdir)/doxygen.conf
+docsdox: doxygen.conf
 	srcdir=$(srcdir) VERSION=$(VERSION) doxygen $(srcdir)/doxygen.conf
 
 net-snmp-config-x: net-snmp-config
@@ -181,7 +180,7 @@ perlmodules: perlmakefiles subdirs
 
 perlmakefiles: perl/Makefile net-snmp-config-x
 
-perl/Makefile: perl/Makefile.PL subdirs
+perl/Makefile: perl/Makefile.PL
 	dir=`pwd` &&							\
 	cd perl &&							\
 	if false; then							\
@@ -276,7 +275,6 @@ configclean: makefileclean
 		libtool include/net-snmp/net-snmp-config.h \
 		net-snmp-config net-snmp-config-x configure-summary \
 		net-snmp-create-v3-user net-snmp-create-v3-user-x
-	rm -f *.pc
 	rm -f mibs/.index
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		include/net-snmp/agent/agent_module_config.h		\
@@ -302,6 +300,16 @@ configclean: makefileclean
 touchit:
 	touch configure include/net-snmp/net-snmp-config.h.in
 	touch config.status
+	touch stamp-h stamp-h.in
+
+Makefile: Makefile.in config.status Makefile.rules Makefile.top
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because the following file(s) changed:"; \
+	    echo "  $?"; \
+	    ./config.status; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
 
 configure_ac = configure.ac \
 	configure.d/config_modules_agent \
@@ -323,6 +331,35 @@ configure_ac = configure.ac \
 	configure.d/config_project_perl_python \
 	configure.d/config_project_types \
 	configure.d/config_project_with_enable
+
+$(srcdir)/include/net-snmp/net-snmp-config.h.in: stamp-h.in
+$(srcdir)/stamp-h.in: $(configure_ac)
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOHEADER)" != "x:"; then \
+	    cd ${srcdir} && LC_COLLATE=C $(AUTOHEADER); \
+	    echo timestamp > ${srcdir}/stamp-h.in; \
+	else \
+	    echo "WARNING: not running autoheader"; \
+	fi
+
+include/net-snmp/net-snmp-config.h: stamp-h
+stamp-h: include/net-snmp/net-snmp-config.h.in config.status
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because the following file(s) changed:"; \
+	    echo "  $?"; \
+	    ./config.status; \
+	    echo timestamp > stamp-h; \
+	else \
+	    echo "WARNING: not running config.status"; \
+	fi
+
+$(srcdir)/configure: $(configure_ac) aclocal.m4
+	@if test "x$(NOAUTODEPS)" = "x" -a "x$(AUTOCONF)" != "x:"; then \
+	    cd ${srcdir} && $(AUTOCONF); \
+	    echo "Please run configure now."; \
+	    sh -c exit 2; \
+	else \
+	    echo "WARNING: not running autoconf"; \
+	fi
 
 gendir=dist/generation-scripts
 generation-scripts: generation-scripts-dirs $(gendir)/gen-transport-headers $(gendir)/gen-security-headers
@@ -347,6 +384,14 @@ $(gendir)/gen-security-headers: $(gendir)/gen-security-headers.in $(gendir)/gen-
 	rm -f $@
 	autoconf -o $@ $<
 	chmod a+x $@
+
+config.status: configure
+	@if test "x$(NOAUTODEPS)" = "x"; then \
+	    echo "running config.status because $? changed"; \
+	    ./config.status --recheck; \
+	else \
+	    echo "WARNING: not running config.status --recheck"; \
+	fi
 
 #
 # Emacs TAGS file
@@ -409,21 +454,11 @@ perlcalloccheck:
 
 dist: tar
 
-rpm: dist
-	rpmtopdir=$$PWD/rpmbuilddir &&					\
-	for d in BUILD RPMS SOURCES SPECS SRPMS; do			\
-	  mkdir -p $${rpmtopdir}/$$d;					\
-	done &&								\
-	cp net-snmp-$(VERSION).tar.gz $${rpmtopdir}/SOURCES &&		\
-	MAKE="$(MAKE)" rpmbuild --define="%_topdir $${rpmtopdir}"	\
-	    -ba dist/net-snmp.spec &&					\
-	find $${rpmtopdir} -name '*rpm'
-
 FAQ.html:
 	local/FAQ2HTML FAQ
 
 .PHONY: docs docsdir mancp testdirs test TAGS
-# note: tags and docs are phony to force rebuilding
+# note: tags and docs are phony to force rebulding
 .PHONY: snmplib agent apps \
 	snmpget snmpbulkget snmpwalk snmpbulkwalk snmptranslate snmpstatus \
 	snmpdelta snmptable snmptest snmpset snmpusm snmpvacm snmpgetnext \

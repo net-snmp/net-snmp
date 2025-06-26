@@ -29,7 +29,7 @@ check_netSnmpHostAddressType_local(int type, long *val, size_t val_len,
        were not covered by the automatic checks by the parent function. */
 
     /** XXX: you make want to check that the requested change from
-        the old value to the new value is legal (ie, the transition
+        the old value to the new value is legal (ie, the transistion
         from one value to another is legal */
 
     if (*val != NETSNMPHOSTADDRESSTYPE_IPV4)
@@ -56,7 +56,7 @@ check_netSnmpHostAddress_local(int type, char *val, size_t val_len,
        were not covered by the automatic checks by the parent function. */
 
     /** XXX: you make want to check that the requested change from
-        the old value to the new value is legal (ie, the transition
+        the old value to the new value is legal (ie, the transistion
         from one value to another is legal */
 
     if (val_len != 4)
@@ -83,7 +83,7 @@ check_netSnmpHostStorage_local(int type, long *val, size_t val_len,
        were not covered by the automatic checks by the parent function. */
 
     /** XXX: you make want to check that the requested change from
-        the old value to the new value is legal (ie, the transition
+        the old value to the new value is legal (ie, the transistion
         from one value to another is legal */
 
     if (*val != ST_NONVOLATILE)
@@ -110,7 +110,7 @@ check_netSnmpHostRowStatus_local(int type, long *val, size_t val_len,
        were not covered by the automatic checks by the parent function. */
 
     /** XXX: you make want to check that the requested change from
-        the old value to the new value is legal (ie, the transition
+        the old value to the new value is legal (ie, the transistion
         from one value to another is legal */
 
     /** if everything looks ok, return SNMP_ERR_NOERROR */

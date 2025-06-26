@@ -112,9 +112,9 @@ void ${context}_valid_columns_set(netsnmp_column_info *vc);
 
 #include "${name}_interface.h"
 
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(check_all_requests_error)
 
 #include <ctype.h>
 
@@ -235,8 +235,6 @@ _${context}_initialize_interface(${context}_registration * reg_ptr,  u_long flag
 
     DEBUGMSGTL(("internal:${context}:_${context}_initialize_interface","called\n"));
 
-    /* Start with clean info, allows re-initializing */
-    memset(tbl_info, 0, sizeof(*tbl_info));
 
     /*************************************************
      *
@@ -998,7 +996,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if(old_string && (old_string != requests->requestvb->buf) &&
@@ -1431,7 +1429,7 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1658,7 +1656,7 @@ ${context}_row_find_by_mib_index(${context}_mib_index *mib_idx)
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp)/sizeof(oid);
 
     /*
      * convert

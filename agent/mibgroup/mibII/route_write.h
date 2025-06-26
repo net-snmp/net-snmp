@@ -6,7 +6,7 @@
 #define _MIBGROUP_ROUTE_WRITE_H
 
 #if !defined(NETSNMP_ENABLE_MFD_REWRITES)
-config_require(mibII/ip);
+config_require(mibII/ip)
 #endif
 
      int             addRoute(u_long, u_long, u_long, u_short);
@@ -15,5 +15,6 @@ config_require(mibII/ip);
      struct rtent   *newCacheRTE(void);
      int             delCacheRTE(u_long);
      struct rtent   *cacheKernelRTE(u_long);
+     WriteMethod     write_rte;
 
 #endif                          /* _MIBGROUP_ROUTE_WRITE_H */

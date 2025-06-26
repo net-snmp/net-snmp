@@ -1,13 +1,13 @@
 #ifndef _SNMPTCPIPV6DOMAIN_H
 #define _SNMPTCPIPV6DOMAIN_H
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-config_require(IPv6Base);
-config_require(SocketBase);
-config_require(TCPBase);
+config_require(IPv6Base)
+config_require(SocketBase)
+config_require(TCPBase)
 
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
 
@@ -21,16 +21,16 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_TCP_IPV6	1,3,6,1,2,1,100,1,6
-NETSNMP_IMPORT const oid netsnmp_TCPIPv6Domain[];
+NETSNMP_IMPORT oid      netsnmp_TCPIPv6Domain[];
 
-netsnmp_transport *
-netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local);
+netsnmp_transport *netsnmp_tcp6_transport(const struct sockaddr_in6 *addr,
+					  int local);
 
 /*
  * "Constructor" for transport domain object.  
  */
 
-void netsnmp_tcpipv6_ctor(void);
+NETSNMP_IMPORT void     netsnmp_tcpipv6_ctor(void);
 
 #ifdef __cplusplus
 }

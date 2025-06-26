@@ -1,8 +1,8 @@
+*~
 *.bak
 *.bs
 *.ft
 *.ft.1
-*.idb
 *.la
 *.lo
 *.made
@@ -13,11 +13,8 @@
 *.out
 *.pdb
 *.rej
-*.sbr
 *.swp
-*~
 .libs/
-__pycache__
 agent/*.exe
 agent/mibgroup/agent_module_dot_conf.h
 agent/mibgroup/agent_module_includes.h
@@ -78,6 +75,7 @@ Makefile
 man/*.[1358]
 man/default_store.3.h
 man/manaliases
+mibs/.index
 mk/
 module_tmp_header.h
 net-snmp-5*
@@ -85,8 +83,6 @@ net-snmp-6*
 net-snmp-config
 net-snmp-config-x
 net-snmp-create-v3-user
-netsnmp-agent.pc
-netsnmp.pc
 NEWS.new*
 perl/*.json
 perl/*.yml
@@ -103,9 +99,7 @@ perl/blib/
 perl/default_store/default_store.c
 perl/NetSNMP.c
 perl/OID/OID.c
-perl/OID/snmp.conf
 perl/SNMP/SNMP.c
-perl/SNMP/snmp.conf
 perl/SNMP/t/*.log
 perl/SNMP/t/*.pid
 perl/SNMP/t/*.stderr
@@ -115,8 +109,6 @@ perl/TrapReceiver/const-xs.inc
 perl/TrapReceiver/TrapReceiver.c
 pm_to_blib
 python/build
-python/netsnmp_python.egg-info/
-python/netsnmp/client_intf.*.so
 sedscript
 snmplib/snmpsm_init.h
 snmplib/snmpsm_shutdown.h
@@ -124,7 +116,6 @@ snmplib/transports/snmp_transport_inits.h
 stamp-h
 TAGS
 testing/failed_tests
-testing/fuzzing/*_fuzzer
 testing/testing/
 win32/*/debug
 win32/*/release

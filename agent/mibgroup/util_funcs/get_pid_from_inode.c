@@ -7,19 +7,16 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
 #endif
 
 # define PROC_PATH          "/proc"
@@ -151,7 +148,7 @@ netsnmp_get_pid_from_inode_init(void)
             strlcpy(path_name + filelen, pidinfo->d_name,
                     sizeof(path_name) - filelen);
 
-            /* The file descriptor is a symbolic link to a socket or a file.*/
+            /* The file discriptor is a symbolic link to a socket or a file.*/
             /* Thus read the symbolic link.*/
             memset(socket_lnk, '\0', NAME_MAX + 1);
             readlen = readlink(path_name, socket_lnk, NAME_MAX);

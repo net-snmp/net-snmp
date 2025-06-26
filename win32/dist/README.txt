@@ -38,8 +38,8 @@ INSTALLATION
 
   The Net-SNMP Windows installer package performs the following tasks:
 
-  - Installs the Net-SNMP binaries and MIB files into the installation folder
-    (defaults to c:\usr). 
+  - Installs the Net-SNMP binaries, MIB files and ActiveState 5.8.x Perl PPM 
+    package into the installation folder (defaults to c:\usr). 
   - Adds (install folder)\bin to the system PATH. 
   - Adds the following registry keys:
     - HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install folder)/etc/snmp;
@@ -100,6 +100,22 @@ can be found in the Net-SNMP Help file in the Start menu.
 
 INSTALLATION - PERL MODULE
 
+  Included in the (install folder)\Perl folder is an ActiveState Perl 
+  5.8.x. PPM package.  Note:  In previous version of Net-SNMP, the PPM
+  package was called Net-SNMP.ppd.  The package has been renamed to
+  NetSNMP.ppd to prevent conflicts with the Net::SNMP package available
+  from ActiveState.
+
+  The Perl modules require the Win32 REGEX (Regular Expression) package which 
+  is available from:
+
+    http://people.delphiforums.com/gjc/gnu_regex.html
+
+  Download gnu_regex.exe, copy it to a temporary file and execute it to 
+  extract the files.
+
+  Copy the extracted gnu_regex.dll to your %windir%\system32 folder.
+
   Remove any existing Net-SNMP Perl modules:
 
     ppm remove NetSNMP
@@ -145,7 +161,7 @@ BUILD INFORMATION
   OS:			Windows 2000 SP4
   Compiler:		MSVC++ 6.0 SP5
   Platform SDK:		February 2003
-  Perl:			Perl 5.30 built from source
+  Perl:			ActivePerl 5.8.2 build 808
   REGEX:		gnu_regex.exe (0.12) - http://people.delphiforums.com/gjc/gnu_regex.html
 
   Source: 		net-snmp-x.x.x.tar.gz

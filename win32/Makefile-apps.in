@@ -19,7 +19,7 @@ CPP=cl.exe
 CPP_PROJ=/I.. /I..\..\include $(CFLAGS)
 
 
-ALL : ..\bin\$(OUTDIR)\$(PROGNAME).exe
+ALL : "..\bin\$(OUTDIR)\$(PROGNAME).exe" "$(INTDIR)"
 
 
 CLEAN :
@@ -28,6 +28,12 @@ CLEAN :
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest"
+
+"..\bin\$(OUTDIR)" :
+    if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
+
+"$(INTDIR)" :
+    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 {..\..\apps}.c{$(INTDIR)}.obj::
    $(CPP) $(CPP_PROJ) $<
@@ -38,9 +44,12 @@ LINK32_FLAGS=netsnmp.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo
 LINK32_OBJS= \
 	"$(INTDIR)\$(PROGNAME).obj"
 
-"..\bin\$(OUTDIR)\$(PROGNAME).exe" : $(DEF_FILE) $(LINK32_OBJS)
+"..\bin\$(OUTDIR)\$(PROGNAME).exe" : "..\bin\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
 !IF "$(LINKTYPE)" == "static" || "$(ALLOW_DLL)" == "1"
     $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
+
+ if exist "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" \
+	    mt.exe -manifest "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest" -outputresource:"..\bin\$(OUTDIR)\$(PROGNAME).exe";1
 !ELSE	# Linktype check
 	-@echo .
 	-@echo Aborting build.  Applications can not be built using --linktype=dynamic
@@ -55,4 +64,4 @@ LINK32_OBJS= \
 !ENDIF 
 !ENDIF 
 
-"$(INTDIR)\$(PROGNAME).obj": ..\..\apps\$(PROGNAME).c
+"$(INTDIR)\$(PROGNAME).obj": ..\..\apps\$(PROGNAME).c "$(INTDIR)"

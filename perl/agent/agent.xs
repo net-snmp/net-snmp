@@ -1,15 +1,11 @@
 /* -*- C -*- */
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#define _WIN32_WINNT 0x501
+#endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#pragma GCC diagnostic pop
-
-#include <float.h>
-#include <math.h>
 #include <netdb.h>
 #include <sys/socket.h>
 
@@ -605,7 +601,6 @@ nari_setValue(me, type, value)
         netsnmp_request_info *request;
         u_long utmp;
         long ltmp;
-        double dtmp;
         uint64_t ulltmp;
         struct counter64 c64;
 	oid myoid[MAX_OID_LEN];
@@ -638,26 +633,12 @@ nari_setValue(me, type, value)
 		  RETVAL = 1;
 		  break;
 	      }
-	      else if (SvTYPE(value) == SVt_NV || SvNOK(value)) {
-		  /* Might be ok - got a double that might be an actual integer */
-		  dtmp = SvNVX(value);
-		  ltmp = SvIV(value);
-		  if (fabs(dtmp - ltmp) > fabs(NV_EPSILON * dtmp)) {
-			snmp_log(LOG_ERR, "Could not convert double to integer in setValue: '%.20g'\n", dtmp);
-			RETVAL = 0;
-			break;
-		  }
-		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
-					   (u_char *) &ltmp, sizeof(ltmp));
-		  RETVAL = 1;
-		  break;
-	      }
-	      else if (SvPOK(value)) {
+	      else if (SvPOKp(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
 		  ltmp = strtol( stringptr, NULL, 0 );
 		  if (errno == EINVAL) {
-			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
+		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
 			RETVAL = 0;
 			break;
 		  }
@@ -668,8 +649,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -688,26 +669,12 @@ nari_setValue(me, type, value)
 		  RETVAL = 1;
 		  break;
 	      }
-	      else if (SvTYPE(value) == SVt_NV || SvNOK(value)) {
-		  /* Might be ok - got a double that might be an actual unsigned */
-		  dtmp = SvNVX(value);
-		  utmp = SvIV(value);
-		  if (fabs(dtmp - utmp) > fabs(NV_EPSILON * dtmp)) {
-			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%.20g'\n", dtmp);
-			RETVAL = 0;
-			break;
-		  }
-		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
-					   (u_char *) &utmp, sizeof(utmp));
-		  RETVAL = 1;
-		  break;
-	      }
-	      else if (SvPOK(value)) {
+	      else if (SvPOKp(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
 		  utmp = strtoul( stringptr, NULL, 0 );
 		  if (errno == EINVAL) {
-			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
+		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
 			RETVAL = 0;
 			break;
 		  }
@@ -718,8 +685,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -731,35 +698,21 @@ nari_setValue(me, type, value)
 		  ulltmp = SvIV(value);
 		  RETVAL = 1;
 	      }
-	      else if (SvTYPE(value) == SVt_NV || SvNOK(value)) {
-		  /* Might be ok - got a double that might be an actual unsigned */
-		  dtmp = SvNVX(value);
-		  ulltmp = SvIV(value);
-		  if (fabs(dtmp - ulltmp) > fabs(NV_EPSILON * dtmp)) {
-			snmp_log(LOG_ERR, "Could not convert double to unsigned in setValue: '%.20g'\n", dtmp);
-			RETVAL = 0;
-			break;
-		  }
-		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
-					   (u_char *) &ulltmp, sizeof(ulltmp));
-		  RETVAL = 1;
-		  break;
-	      }
-	      else if (SvPOK(value)) {
+	      else if (SvPOKp(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
 	          errno = 0;
 		  ulltmp = strtoull( stringptr, NULL, 0 );
 		  if (errno != 0) {
-		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
+		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
 		      RETVAL = 0;
 		  } else
 
 		      RETVAL = 1;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 	      }
 	      if (RETVAL) {
@@ -774,9 +727,9 @@ nari_setValue(me, type, value)
           case ASN_BIT_STR:
           case ASN_OPAQUE:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
-	      if (!SvPOK(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -801,9 +754,9 @@ nari_setValue(me, type, value)
 	       */
 
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
-	      if (!SvPOK(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -828,9 +781,9 @@ nari_setValue(me, type, value)
 
           case ASN_OBJECT_ID:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
-	      if (!SvPOK(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %lu flags %#lx\n",
-			(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }

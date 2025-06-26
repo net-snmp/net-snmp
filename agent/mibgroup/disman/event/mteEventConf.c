@@ -12,7 +12,7 @@
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteEventConf.h"
 
-netsnmp_feature_require(iquery);
+netsnmp_feature_require(iquery)
 
 /** Initializes the mteEventsConf module */
 void
@@ -40,7 +40,7 @@ init_mteEventConf(void)
      * ... and for persistent storage of dynamic event table entries.
      *
      * (The previous implementation didn't store these entries,
-     *  so we don't need to worry about backwards compatibility)
+     *  so we don't need to worry about backwards compatability)
      */
     snmpd_register_config_handler("_mteETable",
                                    parse_mteETable, NULL, NULL);
@@ -109,7 +109,8 @@ _find_typed_mteEvent_entry( const char *owner, const char *ename, int type )
      *    same type, then throw an error and discard it.
      *  But allow combined Set/Notification events.
      */
-    if ((entry->flags & MTE_EVENT_FLAG_VALID) &&
+    if ( entry &&
+        (entry->flags & MTE_EVENT_FLAG_VALID) &&
         (entry->mteEventActions & type )) {
         config_perror("error: duplicate event name");
         return NULL;
@@ -207,7 +208,7 @@ parse_notificationEvent( const char *token, char *line )
                 config_perror("-m option must come first");
                 return;
             case 'i':   /* exact instance */
-            case 'w':   /* "not-wild" (backward compatibility) */
+            case 'w':   /* "not-wild" (backward compatability) */
                 wild = 0;
                 break;
             case 'o':   /* wildcarded object  */

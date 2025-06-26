@@ -31,9 +31,7 @@ check_build_dir()
 # effect: returns the (n+1)th argument
 index()
 {
-    [ $# -gt $1 ] || return
-    shift $1
-    echo $1
+    eval echo \$`expr $1 + 1`
 }
 
 # usage: count arguments
@@ -47,8 +45,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@
 libdir=@libdir@
-# Avoid that configure complains that this script ignores @datarootdir@
-echo "@datarootdir@" >/dev/null
+datarootdir=@datarootdir@
 NSC_LDFLAGS="@LDFLAGS@"
 
 NSC_LIBS="@LIBS@"
@@ -193,13 +190,13 @@ else
     #################################################### client lib
     --libs)
       # use this one == --netsnmp-libs + --external-libs
-      echo $NSC_LIBDIR $NSC_SNMPLIBS $NSC_LIBS
+      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_SNMPLIBS $NSC_LIBS
       ;;
     --netsnmp-libs)
       echo $NSC_LIBDIR $NSC_BASE_SNMP_LIBS
       ;;
     --external-libs)
-      echo $NSC_LNETSNMPLIBS $NSC_LIBS @PERLLDOPTS_FOR_APPS@
+      echo $NSC_LDFLAGS $NSC_LNETSNMPLIBS $NSC_LIBS @PERLLDOPTS_FOR_APPS@
       ;;
     #################################################### agent lib
     --base-agent-libs)
@@ -210,13 +207,13 @@ else
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
-      echo $NSC_LIBDIR $NSC_AGENTLIBS $NSC_LIBS
+      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_AGENTLIBS $NSC_LIBS
       ;;
     --netsnmp-agent-libs)
       echo $NSC_LIBDIR $NSC_BASE_AGENT_LIBS
       ;;
     --external-agent-libs)
-      echo $NSC_LMIBLIBS $NSC_LAGENTLIBS $NSC_LNETSNMPLIBS $NSC_LIBS
+      echo $NSC_LDFLAGS $NSC_LMIBLIBS $NSC_LAGENTLIBS $NSC_LNETSNMPLIBS $NSC_LIBS
       ;;
     ####################################################
     --version|--ver*)
@@ -545,7 +542,7 @@ main (int argc, char **argv)
         exit(1);
     }
 
-#ifdef HAVE_GETPID
+#if HAVE_GETPID
     if (pid_file != NULL) {
       /*
        * unlink the pid_file, if it exists, prior to open.  Without
@@ -662,7 +659,7 @@ EOF
       fi
       cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
-      echo `$cmd`
+      `$cmd`
       result=$?
       if test "x$norm" != "x1" ; then
         echo "removing the temporary code file: $tmpfile"

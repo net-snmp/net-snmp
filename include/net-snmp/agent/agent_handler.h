@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -142,15 +142,10 @@ typedef struct netsnmp_handler_registration_s {
  * function handler definitions 
  */
 
-/**
- * @typedef Netsnmp_Node_Handler
- * @param[in] handler pointer to MIB handler.
- * @param[in] reginfo pointer to registration struct.
- * @param[in] reqinfo pointer to current transaction.
- * @param[in] requests SNMP requests to process.
- */
 typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
+    /** pointer to registration struct */
     netsnmp_handler_registration *reginfo,
+    /** pointer to current transaction */
     netsnmp_agent_request_info *reqinfo,
     netsnmp_request_info *requests);
 
@@ -249,6 +244,10 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(netsnmp_request_info *request,
                                       netsnmp_data_list *node);
     int netsnmp_request_remove_list_data(netsnmp_request_info *request,
+                                         const char *name);
+
+    int
+        netsnmp_request_remove_list_data(netsnmp_request_info *request,
                                          const char *name);
 
     void    *netsnmp_request_get_list_data(netsnmp_request_info

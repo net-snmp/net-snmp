@@ -53,7 +53,7 @@ void init_watched_string(void)
      * to see the output of this debugging statement. 
      */
     DEBUGMSGTL(("example_string_instance",
-                "Initializing example string instance.  Default value = %s\n",
+                "Initalizing example string instance.  Default value = %s\n",
                 my_string));
 
     /*
@@ -94,5 +94,5 @@ void init_watched_string(void)
     netsnmp_register_watched_instance(reginfo, &watcher_info);
 
     DEBUGMSGTL(("example_string_instance",
-                "Done initializing example string instance\n"));
+                "Done initalizing example string instance\n"));
 }

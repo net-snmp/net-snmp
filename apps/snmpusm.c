@@ -12,54 +12,55 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/library/openssl_config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/library/snmp_openssl.h>
-#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
-#include <openssl/dh.h>
-#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
+#include <openssl/dh.h>
+#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 #define CMD_PASSWD_NAME    "passwd"
 #define CMD_PASSWD         1
@@ -91,23 +92,26 @@ static const char *successNotes[CMD_NUM] = {
 #define                   USM_OID_LEN    12
 #define                DH_USM_OID_LEN    11
 
-static oid authKeyOid[MAX_OID_LEN] = { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 };
-static oid ownAuthKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7};
-static oid privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9};
-static oid ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10};
-static oid usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4};
-static oid usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3};
-static oid usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11};
-static oid usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13};
+static oid
+
+authKeyOid[MAX_OID_LEN] = { 1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 6 },
+ownAuthKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 7},
+privKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 9},
+ownPrivKeyOid[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 10},
+usmUserCloneFrom[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 4},
+usmUserSecurityName[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 3},
+usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11},
+usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
 /* diffie helman change key objects */
-static oid usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 };
-static oid usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 };
+usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
+usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 },
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
-static oid usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 };
-static oid usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 };
-static oid usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 };
-static size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
+usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
+usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 },
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
+usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 }
+;
+size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
 
 static
 oid            *authKeyChange = authKeyOid, *privKeyChange = privKeyOid;
@@ -116,7 +120,7 @@ oid            *dhauthKeyChange = usmDHUserAuthKeyChange,
 int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 size_t          usmUserEngineIDLen = 0;
 u_char         *usmUserEngineID = NULL;
-const char     *usmUserPublic_val = NULL;
+char           *usmUserPublic_val = NULL;
 int             docreateandwait = 0;
 
 
@@ -142,7 +146,7 @@ usage(void)
     fprintf(stderr, "\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t-Cp STRING\tSet usmUserPublic value to STRING.\n");
     fprintf(stderr, "\t-Cw\t\tCreate the user with createAndWait.\n");
-    fprintf(stderr, "\t\t\t(it won't be active until you activate it)\n");
+    fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
     fprintf(stderr, "\t-Ck\t\tAllows one to use localized key (must start with 0x)\n");
@@ -365,7 +369,7 @@ main(int argc, char *argv[])
         keychange_len = SNMP_MAXBUF_SMALL,
         keychangepriv_len = SNMP_MAXBUF_SMALL;
 
-    const char     *newpass = NULL, *oldpass = NULL;
+    char           *newpass = NULL, *oldpass = NULL;
     u_char          oldKu[SNMP_MAXBUF_SMALL],
         newKu[SNMP_MAXBUF_SMALL],
         oldkul[SNMP_MAXBUF_SMALL],
@@ -444,7 +448,7 @@ main(int argc, char *argv[])
          * XXX:  Uses the auth type of the calling user, a MD5 user can't
          *       change a SHA user's key.
          */
-        const char *passwd_user;
+        char *passwd_user;
 
         command = CMD_PASSWD;
         oldpass = argv[++arg];
@@ -475,8 +479,7 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            SNMP_FREE(session.securityName);
-            session.securityName = strdup(passwd_user);
+            session.securityName = passwd_user;
         } else {
             /*
              * Use own key object if no user was supplied.
@@ -512,13 +515,13 @@ main(int argc, char *argv[])
              */
 #ifndef NETSNMP_DISABLE_MD5
             session.securityAuthProtoLen =
-                OID_LENGTH(usmHMACMD5AuthProtocol);
+                sizeof(usmHMACMD5AuthProtocol) / sizeof(oid);
             session.securityAuthProto =
                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
                                      session.securityAuthProtoLen);
 #else
             session.securityAuthProtoLen =
-                OID_LENGTH(usmHMACSHA1AuthProtocol);
+                sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid);
             session.securityAuthProto =
                 snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
                                      session.securityAuthProtoLen);
@@ -550,7 +553,7 @@ main(int argc, char *argv[])
 	     */
 	    rval = generate_Ku(session.securityAuthProto,
 			       session.securityAuthProtoLen,
-			       (const u_char *) oldpass, strlen(oldpass),
+			       (u_char *) oldpass, strlen(oldpass),
 			       oldKu, &oldKu_len);
 	    
 	    if (rval != SNMPERR_SUCCESS) {
@@ -594,7 +597,7 @@ main(int argc, char *argv[])
 	} else {
             rval = generate_Ku(session.securityAuthProto,
                                session.securityAuthProtoLen,
-                               (const u_char *) newpass, strlen(newpass),
+                               (u_char *) newpass, strlen(newpass),
                                newKu, &newKu_len);
 
             if (rval != SNMPERR_SUCCESS) {
@@ -871,7 +874,7 @@ main(int argc, char *argv[])
          * change the key of a user if DH is available
          */
 
-        const char *passwd_user;
+        char *passwd_user;
         netsnmp_pdu *dhpdu, *dhresponse = NULL;
         netsnmp_variable_list *vars, *dhvar;
         
@@ -888,8 +891,7 @@ main(int argc, char *argv[])
          * Change the user supplied on command line.
          */
         if ((passwd_user != NULL) && (strlen(passwd_user) > 0)) {
-            free(session.securityName);
-            session.securityName = strdup(passwd_user);
+            session.securityName = passwd_user;
         } else {
             /*
              * Use own key object if no user was supplied.
@@ -1046,7 +1048,6 @@ close_session:
     snmp_close(ss);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }

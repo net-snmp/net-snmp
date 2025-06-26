@@ -7,7 +7,7 @@ and how to use it.
 
 DESCRIPTION:
 
-The Kerberos Security Model does not use USM; it is completely separate
+The Kerberos Security Model does not use USM; it is completely seperate
 and is not tied to USM in any way.  It works by placing the following
 ASN.1 sequence inside of the SNMPv3 msgSecurityParameters:
 

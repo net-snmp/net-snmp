@@ -13,7 +13,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -36,25 +36,34 @@
 
 /* definitions added by configure on-the-fly */
 
-#define config_parse_dot_conf(w,x,y,z) NETSNMP_REQUIRE_SEMICOLON
+#define config_error(x)
 
-#define config_error(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_warning(x)
 
-#define config_warning(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_belongs_in(x)
 
-#define NETSNMP_REQUIRE_SEMICOLON struct netsnmp_unused_struct
+#define config_exclude(x)
 
-#define config_belongs_in(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_arch_require(x,y)
 
-#define config_exclude(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_version_require(x)
 
-#define config_arch_require(x,y) NETSNMP_REQUIRE_SEMICOLON
+#define config_require(x)
 
-#define config_version_require(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_add_mib(x)
 
-#define config_require(x) NETSNMP_REQUIRE_SEMICOLON
+#define config_parse_dot_conf(w,x,y,z)
 
-#define config_add_mib(x) NETSNMP_REQUIRE_SEMICOLON
+/* Define if building universal (internal helper macro) */
+#undef AC_APPLE_UNIVERSAL_BUILD
+
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems. This function is required for `alloca.c' support on those systems.
+   */
+#undef CRAY_STACKSEG_END
+
+/* Define to 1 if using `alloca.c'. */
+#undef C_ALLOCA
 
 /* location of swap device */
 #undef DMEM_LOC
@@ -74,6 +83,13 @@
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #undef HAVE_AES_CFB128_ENCRYPT
 
+/* Define to 1 if you have `alloca', as a function or macro. */
+#undef HAVE_ALLOCA
+
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
+#undef HAVE_ALLOCA_H
+
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #undef HAVE_ARPA_INET_H
 
@@ -85,25 +101,6 @@
 
 /* Define to 1 if you have the `ASN1_STRING_get0_data' function. */
 #undef HAVE_ASN1_STRING_GET0_DATA
-
-/* Define to 1 if the `ASN_BOOLEAN' constant is defined in an SSL header file.
-   */
-#undef HAVE_ASN_BOOLEAN
-
-/* Define to 1 if the `ASN_INTEGER' constant is defined in an SSL header file.
-   */
-#undef HAVE_ASN_INTEGER
-
-/* Define to 1 if the `ASN_OBJECT_ID' constant is defined in an SSL header
-   file. */
-#undef HAVE_ASN_OBJECT_ID
-
-/* Define to 1 if the `ASN_SEQUENCE' constant is defined in an SSL header
-   file. */
-#undef HAVE_ASN_SEQUENCE
-
-/* Define to 1 if the `ASN_SET' constant is defined in an SSL header file. */
-#undef HAVE_ASN_SET
 
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
@@ -129,23 +126,12 @@
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
-/* Define to 1 if you have the <crt_externs.h> header file. */
-#undef HAVE_CRT_EXTERNS_H
-
 /* Define to 1 if you have the <curses.h> header file. */
 #undef HAVE_CURSES_H
-
-/* Define to 1 if you have the declaration of `daylight', and to 0 if you
-   don't. */
-#undef HAVE_DECL_DAYLIGHT
 
 /* Define to 1 if you have the declaration of `sensors_get_all_subfeatures',
    and to 0 if you don't. */
 #undef HAVE_DECL_SENSORS_GET_ALL_SUBFEATURES
-
-/* Define to 1 if you have the declaration of `timezone', and to 0 if you
-   don't. */
-#undef HAVE_DECL_TIMEZONE
 
 /* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
 #undef HAVE_DEFINED_IRE_CACHE
@@ -162,7 +148,8 @@
 /* Define to 1 if you have the `DH_set0_pqg' function. */
 #undef HAVE_DH_SET0_PQG
 
-/* Define to 1 if you have the <dirent.h> header file. */
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
+   */
 #undef HAVE_DIRENT_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -170,6 +157,9 @@
 
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
+
+/* Define to 1 if you have the <dmalloc.h> header file. */
+#undef HAVE_DMALLOC_H
 
 /* Set if the dpkg-query command is available */
 #undef HAVE_DPKG_QUERY
@@ -180,18 +170,6 @@
 /* Define to 1 if you have the `DTLS_method' function. */
 #undef HAVE_DTLS_METHOD
 
-/* Define to 1 if you have the `endfsent' function. */
-#undef HAVE_ENDFSENT
-
-/* Define to 1 if you have the `endnetgrent' function. */
-#undef HAVE_ENDNETGRENT
-
-/* Define to 1 if you have the `ERR_get_error_all' function. */
-#undef HAVE_ERR_GET_ERROR_ALL
-
-/* Define to 1 if you have the `ERR_get_error_func' function. */
-#undef HAVE_ERR_GET_ERROR_FUNC
-
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
@@ -200,9 +178,6 @@
 
 /* Define to 1 if you have the `eval_pv' function. */
 #undef HAVE_EVAL_PV
-
-/* Define to 1 if you have the `EVP_aes_128_cfb' function. */
-#undef HAVE_EVP_AES_128_CFB
 
 /* Define to 1 if you have the `EVP_MD_CTX_create' function. */
 #undef HAVE_EVP_MD_CTX_CREATE
@@ -216,10 +191,10 @@
 /* Define to 1 if you have the `EVP_MD_CTX_new' function. */
 #undef HAVE_EVP_MD_CTX_NEW
 
-/* Define to 1 if you have the `EVP_sha224' function. */
+/* Define if you have EVP_sha224/256 in openssl */
 #undef HAVE_EVP_SHA224
 
-/* Define to 1 if you have the `EVP_sha384' function. */
+/* Define if you have EVP_sha384/512 in openssl */
 #undef HAVE_EVP_SHA384
 
 /* Define to 1 if you have the `execv' function. */
@@ -227,9 +202,6 @@
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
-
-/* Define if FD_CLOEXEC is defined in <fcntl.h> */
-#undef HAVE_FD_CLOEXEC
 
 /* Define to 1 if you have the `fgetc_unlocked' function. */
 #undef HAVE_FGETC_UNLOCKED
@@ -264,9 +236,6 @@
 /* Define to 1 if you have the `getdtablesize' function. */
 #undef HAVE_GETDTABLESIZE
 
-/* Define to 1 if you have the `getfsent' function. */
-#undef HAVE_GETFSENT
-
 /* Define to 1 if you have the `getfsstat' function. */
 #undef HAVE_GETFSSTAT
 
@@ -291,17 +260,8 @@
 /* Define to 1 if you have the `getloadavg' function. */
 #undef HAVE_GETLOADAVG
 
-/* Define to 1 if you have the `getlogin' function. */
-#undef HAVE_GETLOGIN
-
 /* Define to 1 if you have the `getmntent' function. */
 #undef HAVE_GETMNTENT
-
-/* Define to 1 if you have the `getmntinfo' function. */
-#undef HAVE_GETMNTINFO
-
-/* Define to 1 if you have the `getnetgrent' function. */
-#undef HAVE_GETNETGRENT
 
 /* Define to 1 if you have the `getopt' function. */
 #undef HAVE_GETOPT
@@ -384,9 +344,6 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
-/* Set if IPV6_RECVPKTINFO is usable */
-#undef HAVE_IPV6_RECVPKTINFO
-
 /* Set if IP_PKTINFO is usable */
 #undef HAVE_IP_PKTINFO
 
@@ -396,6 +353,9 @@
 /* Define to 1 if you have the `kinfo_get_cpus' function. */
 #undef HAVE_KINFO_GET_CPUS
 
+/* Define if you have /dev/kmem */
+#undef HAVE_KMEM
+
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 
@@ -404,9 +364,6 @@
 
 /* Define to 1 if you have the `krb5_auth_con_getsendsubkey' function. */
 #undef HAVE_KRB5_AUTH_CON_GETSENDSUBKEY
-
-/* Define to 1 if `enctype' is a member of `krb5_keyblock'. */
-#undef HAVE_KRB5_KEYBLOCK_ENCTYPE
 
 /* Define to 1 if you have the <kstat.h> header file. */
 #undef HAVE_KSTAT_H
@@ -477,13 +434,10 @@
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #undef HAVE_LIBSSH2
 
-/* Define to 1 if you have the `libssh2_session_handshake' function. */
-#undef HAVE_LIBSSH2_SESSION_HANDSHAKE
-
-/* Define to 1 if you have the `ssl' library. */
+/* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
-/* Define to 1 if your `ssl' library supports DTLS. */
+/* Define to 1 if your `ssl' library supports DTLS (-lssl). */
 #undef HAVE_LIBSSL_DTLS
 
 /* Define to 1 if you have the <limits.h> header file. */
@@ -508,10 +462,7 @@
 /* Define to 1 if you have the <linux/tasks.h> header file. */
 #undef HAVE_LINUX_TASKS_H
 
-/* Define to 1 if you have the <lm.h> header file. */
-#undef HAVE_LM_H
-
-/* Define to 1 if you have the `load_defaults' function. */
+/* Define if load_defaults() is available in libmysqlclient */
 #undef HAVE_LOAD_DEFAULTS
 
 /* Define to 1 if you have the <locale.h> header file. */
@@ -541,20 +492,14 @@
 /* Define to 1 if you have the <machine/types.h> header file. */
 #undef HAVE_MACHINE_TYPES_H
 
-/* Define to 1 if you have the <mach-o/dyld.h> header file. */
-#undef HAVE_MACH_O_DYLD_H
-
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
-/* Define to 1 if you have the `malloc_trim' function. */
-#undef HAVE_MALLOC_TRIM
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
 
 /* Define to 1 if the system has the type `mib2_ipIfStatsEntry_t'. */
 #undef HAVE_MIB2_IPIFSTATSENTRY_T
-
-/* Define if MIB_IF_TABLE2 is available */
-#undef HAVE_MIB_IF_TABLE2
 
 /* Define to 1 if you have the `mkstemp' function. */
 #undef HAVE_MKSTEMP
@@ -568,14 +513,8 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
-/* Define to 1 if you have the `mysql_init' function. */
+/* Define if mysql_init() is available in libmysqlclient */
 #undef HAVE_MYSQL_INIT
-
-/* Define to 1 if you have the `mysql_options' function. */
-#undef HAVE_MYSQL_OPTIONS
-
-/* Define to 1 if you have the <my_global.h> header file. */
-#undef HAVE_MY_GLOBAL_H
 
 /* Define if MY_INIT() is availabe in libmysqlclient */
 #undef HAVE_MY_INIT
@@ -583,20 +522,17 @@
 /* Define if having my_load_defaults() */
 #undef HAVE_MY_LOAD_DEFAULTS
 
-/* Define to 1 if you have the <my_sys.h> header file. */
-#undef HAVE_MY_SYS_H
-
 /* Define to 1 if you have the <nbutil.h> header file. */
 #undef HAVE_NBUTIL_H
 
 /* Define to 1 if you have the <ncurses/curses.h> header file. */
 #undef HAVE_NCURSES_CURSES_H
 
+/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
+#undef HAVE_NDIR_H
+
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
-
-/* Define to 1 if you have the <netgroup.h> header file. */
-#undef HAVE_NETGROUP_H
 
 /* Define to 1 if you have the <netinet6/in6_pcb.h> header file. */
 #undef HAVE_NETINET6_IN6_PCB_H
@@ -679,23 +615,8 @@
 /* Define to 1 if you have the <netipx/ipx.h> header file. */
 #undef HAVE_NETIPX_IPX_H
 
-/* Define to 1 if you have the <netlink/cache.h> header file. */
-#undef HAVE_NETLINK_CACHE_H
-
-/* Define to 1 if you have the <netlink/msg.h> header file. */
-#undef HAVE_NETLINK_MSG_H
-
 /* Define to 1 if you have the <netlink/netlink.h> header file. */
 #undef HAVE_NETLINK_NETLINK_H
-
-/* Define to 1 if you have the <netlink/route/addr.h> header file. */
-#undef HAVE_NETLINK_ROUTE_ADDR_H
-
-/* Define to 1 if you have the <netlink/route/link.h> header file. */
-#undef HAVE_NETLINK_ROUTE_LINK_H
-
-/* Define to 1 if you have the <netlink/socket.h> header file. */
-#undef HAVE_NETLINK_SOCKET_H
 
 /* Define to 1 if you have the <net/if_arp.h> header file. */
 #undef HAVE_NET_IF_ARP_H
@@ -736,14 +657,8 @@
 /* Define to 1 if you have the `opendir' function. */
 #undef HAVE_OPENDIR
 
-/* Define to 1 if you have the `OpenSSL_add_all_algorithms' function. */
-#undef HAVE_OPENSSL_ADD_ALL_ALGORITHMS
-
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #undef HAVE_OPENSSL_AES_H
-
-/* Define to 1 if you have the <openssl/bio.h> header file. */
-#undef HAVE_OPENSSL_BIO_H
 
 /* Define to 1 if you have the <openssl/des.h> header file. */
 #undef HAVE_OPENSSL_DES_H
@@ -751,41 +666,11 @@
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #undef HAVE_OPENSSL_DH_H
 
-/* Define to 1 if you have the <openssl/err.h> header file. */
-#undef HAVE_OPENSSL_ERR_H
-
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #undef HAVE_OPENSSL_EVP_H
 
 /* Define to 1 if you have the <openssl/hmac.h> header file. */
 #undef HAVE_OPENSSL_HMAC_H
-
-/* Define to 1 if you have the <openssl/objects.h> header file. */
-#undef HAVE_OPENSSL_OBJECTS_H
-
-/* Define to 1 if you have the <openssl/ossl_typ.h> header file. */
-#undef HAVE_OPENSSL_OSSL_TYP_H
-
-/* Define to 1 if you have the <openssl/rand.h> header file. */
-#undef HAVE_OPENSSL_RAND_H
-
-/* Define to 1 if you have the `OPENSSL_sk_num' function. */
-#undef HAVE_OPENSSL_SK_NUM
-
-/* Define to 1 if you have the `OPENSSL_sk_value' function. */
-#undef HAVE_OPENSSL_SK_VALUE
-
-/* Define to 1 if you have the <openssl/ssl.h> header file. */
-#undef HAVE_OPENSSL_SSL_H
-
-/* Define to 1 if you have the <openssl/x509v3.h> header file. */
-#undef HAVE_OPENSSL_X509V3_H
-
-/* Define to 1 if you have the <openssl/x509.h> header file. */
-#undef HAVE_OPENSSL_X509_H
-
-/* Define to 1 if you have the <openssl/x509_vfy.h> header file. */
-#undef HAVE_OPENSSL_X509_VFY_H
 
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
@@ -798,9 +683,6 @@
 
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
-
-/* Define to 1 if you have <pcre2.h>. */
-#undef HAVE_PCRE2_H
 
 /* Define to 1 if you have <pcre.h>. */
 #undef HAVE_PCRE_H
@@ -832,9 +714,6 @@
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 
-/* Define to 1 if you have the `posix_spawn' function. */
-#undef HAVE_POSIX_SPAWN
-
 /* Define to 1 if you have the `pread64' function. */
 #undef HAVE_PREAD64
 
@@ -843,9 +722,6 @@
 
 /* Define if prioritynames variable is declared in <syslog.h> */
 #undef HAVE_PRIORITYNAMES
-
-/* Define to 1 if you have the <process.h> header file. */
-#undef HAVE_PROCESS_H
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
@@ -883,11 +759,11 @@
 /* Define to 1 if you have the <rpm/rpmts.h> header file. */
 #undef HAVE_RPM_RPMTS_H
 
-/* Define if timezone declared as a scalar in <time.h> */
-#undef HAVE_SCALAR_TIMEZONE
-
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
+
+/* Define to 1 if you have the <security/cryptoki.h> header file. */
+#undef HAVE_SECURITY_CRYPTOKI_H
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
@@ -897,9 +773,6 @@
 
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
-
-/* Define to 1 if you have the `setfsent' function. */
-#undef HAVE_SETFSENT
 
 /* Define to 1 if you have the `setgid' function. */
 #undef HAVE_SETGID
@@ -915,9 +788,6 @@
 
 /* Define to 1 if you have the `setmntent' function. */
 #undef HAVE_SETMNTENT
-
-/* Define to 1 if you have the `setnetgrent' function. */
-#undef HAVE_SETNETGRENT
 
 /* Define to 1 if you have the `setsid' function. */
 #undef HAVE_SETSID
@@ -936,6 +806,9 @@
 
 /* Define to 1 if you have the `sigblock' function. */
 #undef HAVE_SIGBLOCK
+
+/* Define to 1 if you have the `sighold' function. */
+#undef HAVE_SIGHOLD
 
 /* Define if SIGHUP is defined in <signal.h>. */
 #undef HAVE_SIGHUP
@@ -958,12 +831,6 @@
 /* Define to 1 if the system has the type `socklen_t'. */
 #undef HAVE_SOCKLEN_T
 
-/* Define to 1 if SO_BINDTODEVICE is available */
-#undef HAVE_SO_BINDTODEVICE
-
-/* Define to 1 if you have the <spawn.h> header file. */
-#undef HAVE_SPAWN_H
-
 /* Define to 1 if you have the `srand' function. */
 #undef HAVE_SRAND
 
@@ -975,12 +842,6 @@
 
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
-
-/* Define to 1 if you have the `SSL_CTX_set_cookie_generate_cb' function. */
-#undef HAVE_SSL_CTX_SET_COOKIE_GENERATE_CB
-
-/* Define to 1 if you have the `SSL_get1_peer_certificate' function. */
-#undef HAVE_SSL_GET1_PEER_CERTIFICATE
 
 /* Define to 1 if you have the `SSL_library_init' function. */
 #undef HAVE_SSL_LIBRARY_INIT
@@ -996,9 +857,6 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdio.h> header file. */
-#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -1104,12 +962,6 @@
 
 /* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
-
-/* Define to 1 if `ia_subnetmask' is a member of `struct in_ifaddr'. */
-#undef HAVE_STRUCT_IN_IFADDR_IA_SUBNETMASK
-
-/* Define to 1 if `ipi_spec_dst' is a member of `struct in_pktinfo'. */
-#undef HAVE_STRUCT_IN_PKTINFO_IPI_SPEC_DST
 
 /* Define to 1 if `ip6s_exthdrtoolong ' is a member of `struct ip6stat'. */
 #undef HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG_
@@ -1235,11 +1087,11 @@
 /* Define to 1 if `tz_dsttime' is a member of `struct timezone'. */
 #undef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
 
+/* Define to 1 if `tm_isdst' is a member of `struct time'. */
+#undef HAVE_STRUCT_TIME_TM_ISDST
+
 /* Define to 1 if `tm_gmtoff' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
-
-/* Define to 1 if `tm_isdst' is a member of `struct tm'. */
-#undef HAVE_STRUCT_TM_TM_ISDST
 
 /* Define to 1 if `udps_discard' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_DISCARD
@@ -1271,14 +1123,15 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
-/* Define to 1 if you have the <sys/callout.h> header file. */
-#undef HAVE_SYS_CALLOUT_H
-
 /* Define to 1 if you have the <sys/cdefs.h> header file. */
 #undef HAVE_SYS_CDEFS_H
 
 /* Define to 1 if you have the <sys/conf.h> header file. */
 #undef HAVE_SYS_CONF_H
+
+/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_DIR_H
 
 /* Define to 1 if you have the <sys/diskio.h> header file. */
 #undef HAVE_SYS_DISKIO_H
@@ -1328,8 +1181,9 @@
 /* Define to 1 if you have the <sys/mount.h> header file. */
 #undef HAVE_SYS_MOUNT_H
 
-/* Define to 1 if you have the <sys/osd.h> header file. */
-#undef HAVE_SYS_OSD_H
+/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_NDIR_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
@@ -1463,6 +1317,9 @@
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
 
+/* Define if a timezone variable is declared in <sys/time.h> */
+#undef HAVE_TIMEZONE_VARIABLE
+
 /* Define to 1 if you have the `TLSv1_method' function. */
 #undef HAVE_TLSV1_METHOD
 
@@ -1523,12 +1380,6 @@
 /* Define to 1 if you have the <validator/validator-config.h> header file. */
 #undef HAVE_VALIDATOR_VALIDATOR_CONFIG_H
 
-/* Define to 1 if you have the `vm_region' function. */
-#undef HAVE_VM_REGION
-
-/* Define to 1 if you have the `vm_region_64' function. */
-#undef HAVE_VM_REGION_64
-
 /* Define to 1 if you have the <vm/swap_pager.h> header file. */
 #undef HAVE_VM_SWAP_PAGER_H
 
@@ -1541,14 +1392,8 @@
 /* Define to 1 if you have the <vm/vm_param.h> header file. */
 #undef HAVE_VM_VM_PARAM_H
 
-/* Define this macro if EVP_MD_CTX_init() returns void */
-#undef HAVE_VOID_EVP_MD_CTX_INIT
-
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
-
-/* Define to 1 if you have the `waitpid' function. */
-#undef HAVE_WAITPID
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
@@ -1558,12 +1403,6 @@
 
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
-
-/* Define to 1 if you have the <wolfssl/wolfcrypt/asn.h> header file. */
-#undef HAVE_WOLFSSL_WOLFCRYPT_ASN_H
-
-/* Define to 1 if you have the <wolfssl/wolfcrypt/logging.h> header file. */
-#undef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
 
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
@@ -1580,34 +1419,14 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
-/* Define if _beginthreadex() is defined in <process.h> */
-#undef HAVE__BEGINTHREADEX
-
-/* Define if _cputs() is defined in <conio.h> */
-#undef HAVE__CPUTS
-
-/* Define if _getch() is defined in <conio.h> */
-#undef HAVE__GETCH
-
-/* Define if _get_osfhandle() is defined in <io.h> */
-#undef HAVE__GET_OSFHANDLE
-
-/* Define to 1 if you have the `_NSGetArgv' function. */
-#undef HAVE__NSGETARGV
-
-/* Define to 1 if you have the `_NSGetExecutablePath' function. */
-#undef HAVE__NSGETEXECUTABLEPATH
-
-/* Define if _open_osfhandle() is defined in <io.h> */
-#undef HAVE__OPEN_OSFHANDLE
-
 /* location of UNIX kernel */
 #undef KERNEL_LOC
 
 /* Path to the lpstat command */
 #undef LPSTAT_PATH
 
-/* Define to the sub-directory where libtool stores uninstalled libraries. */
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
 #undef LT_OBJDIR
 
 /* define if agentx transport is to use domain sockets only */
@@ -1691,9 +1510,6 @@
 /* testing code sections. */
 #undef NETSNMP_ENABLE_TESTING_CODE
 
-/* Type of fd_set::fds_bits */
-#undef NETSNMP_FD_MASK_TYPE
-
 /* if defined always use default auth/priv protocol when creating usmUsers */
 #undef NETSNMP_FORCE_SYSTEM_V3_AUTHPRIV
 
@@ -1705,9 +1521,6 @@
 
 /* ifnet needs to have _KERNEL_STRUCTURES defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-
-/* Type of the third argument of ioctlsocket() */
-#undef NETSNMP_IOCTLSOCKET_ARG
 
 /* Define if you want to remove all non-essential code features. */
 #undef NETSNMP_MINIMAL_CODE
@@ -1740,15 +1553,15 @@
 /* umask permissions to set up persistent files with */
 #undef NETSNMP_PERSISTENT_MASK
 
+/* Size prefix to use to printf a uint32_t */
+#undef NETSNMP_PRI32
+
 /* Size prefix to use to printf a size_t or ssize_t */
 #undef NETSNMP_PRIz
 
 /* Define to 1 if you want to build with reentrant/threaded code (incomplete).
    */
 #undef NETSNMP_REENTRANT
-
-/* Type of the fifth argument of select() */
-#undef NETSNMP_SELECT_TIMEVAL
 
 /* define if you do not want snmptrapd to register as an AgentX subagent */
 #undef NETSNMP_SNMPTRAPD_DISABLE_AGENTX
@@ -1826,34 +1639,95 @@
    function */
 #undef SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
 
-/* Define if the setnetgrent() return type is 'int' */
-#undef SETNETGRENT_RETURNS_INT
+/* The size of `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of `intmax_t', as computed by sizeof. */
+#undef SIZEOF_INTMAX_T
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
 
 /* The size of `sockaddr_un.sun_path', as computed by sizeof. */
 #undef SIZEOF_SOCKADDR_UN_SUN_PATH
+
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at runtime.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
+#undef STACK_DIRECTION
 
 /* Define if statfs takes 2 args and the second argument has type struct
    fs_data. [Ultrix] */
 #undef STAT_STATFS_FS_DATA
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* define if SIOCGIFADDR exists in sys/ioctl.h */
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
 
 /* Define if the TCP timer constants in <netinet/tcp_timer.h> depend on the
-   integer variable 'hz'. [FreeBSD] */
+   integer variable 'hz'. [FreeBSD 4.x] */
 #undef TCPTV_NEEDS_HZ
 
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. This
-   macro is obsolete. */
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
 /* Where is the uname command */
 #undef UNAMEPROG
+
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# undef _TANDEM_SOURCE
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
+
+
+/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
+   significant byte first (like Motorola and SPARC, unlike Intel). */
+#if defined AC_APPLE_UNIVERSAL_BUILD
+# if defined __BIG_ENDIAN__
+#  define WORDS_BIGENDIAN 1
+# endif
+#else
+# ifndef WORDS_BIGENDIAN
+#  undef WORDS_BIGENDIAN
+# endif
+#endif
+
+/* Define to 1 if on MINIX. */
+#undef _MINIX
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+#undef _POSIX_1_SOURCE
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+#undef _POSIX_SOURCE
 
 /* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
@@ -1872,10 +1746,6 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
-
-/* in_addr_t definition if not defined in <netinet/in.h>. Must match the type
-   of sockaddr_in::sin_addr */
-#undef in_addr_t
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
@@ -1910,8 +1780,11 @@
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t
 
-/* Define as a signed integer type capable of holding a process identifier. */
+/* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */
@@ -1941,11 +1814,7 @@
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL
-#if (defined(NETSNMP_USE_OPENSSL) &&            \
-     defined(HAVE_OPENSSL_AES_H) &&             \
-     defined(HAVE_AES_CFB128_ENCRYPT) &&        \
-     defined(HAVE_EVP_AES_128_CFB)) ||          \
-    defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if (defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 #define HAVE_AES 1
 #endif
 
@@ -1962,6 +1831,8 @@
 #endif
 
 #endif /* NETSNMP_NO_AUTOCONF_DEFINITIONS */
+
+
 
 
 /* ********* NETSNMP_MARK_BEGIN_CLEAN_NAMESPACE ********* */
@@ -2167,6 +2038,8 @@
 
 /* The assigned enterprise number for sysObjectID. */
 #define NETSNMP_SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,NETSNMP_OSTYPE
+#define NETSNMP_SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.NETSNMP_OSTYPE
+#define NETSNMP_SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
 #define NETSNMP_NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
@@ -2334,6 +2207,12 @@
  *
  *    -DNETSNMP_NO_INLINE
  *
+ * Header and source files should only test against NETSNMP_USE_INLINE:
+ *
+ *   #ifdef NETSNMP_USE_INLINE
+ *   NETSNMP_INLINE function(int parm) { return parm -1; }
+ *   #endif
+ *
  * Functions which should be static, regardless of whether or not inline
  * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
  * like so:
@@ -2355,6 +2234,7 @@
 #include NETSNMP_MACHINE_INCLUDE_FILE
 
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
+#   define NETSNMP_USE_INLINE 1
 #   ifndef NETSNMP_INLINE
 #      define NETSNMP_INLINE __inline__
 #   endif
@@ -2379,49 +2259,6 @@
 #define NETSNMP_CAN_USE_NLIST
 #endif
 
-/*
- * Note: GCC 4.6 added __BYTE_ORDER__, __ORDER_BIG_ENDIAN__,
- * __ORDER_LITTLE_ENDIAN__ and __ORDER_PDP_ENDIAN__ in SVN r165881. For older
- * gcc versions and also for other compilers, determine the endianness by
- * calling a function that can be inlined.
- */
-#if defined(__BYTE_ORDER__)
-# if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#  define NETSNMP_BIGENDIAN 1
-# elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#  define NETSNMP_BIGENDIAN 0
-# else
-#  error Unknown byte order
-# endif
-#else
-NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
-{
-    union { unsigned long l; unsigned char c; } u;
-
-    u.l = 1;
-
-    return u.c == 0;
-}
-# define NETSNMP_BIGENDIAN netsnmp_bigendian()
-#endif
-
-#if defined(__has_attribute)
-#  if __has_attribute(__fallthrough__)
-#    define NETSNMP_FALLTHROUGH __attribute__((__fallthrough__))
-#  endif
-#endif
-#if !defined NETSNMP_FALLTHROUGH
-#  define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
-#endif
-
-#if defined(__has_attribute)
-#  if __has_attribute(__nonnull__)
-#    define NETSNMP_NONNULL(...) __attribute__((__nonnull__(__VA_ARGS__)))
-#  endif
-#endif
-#if !defined NETSNMP_NONNULL
-#  define NETSNMP_NONNULL(...) /* nonnull */
-#endif
 
 /* ********* NETSNMP_MARK_BEGIN_LEGACY_DEFINITIONS *********/
 /* 
@@ -2577,7 +2414,6 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define HPUX11ID      NETSNMP_HPUX11ID
 #define AIXID         NETSNMP_AIXID
 #define MACOSXID      NETSNMP_MACOSXID
-#define DRAGONFLYID   NETSNMP_DRAGONFLYID
 #define UNKNOWNID     NETSNMP_UNKNOWNID
 
 #define ENTERPRISE_OID            NETSNMP_ENTERPRISE_OID
@@ -2586,6 +2422,8 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define ENTERPRISE_DOT_MIB_LENGTH NETSNMP_ENTERPRISE_DOT_MIB_LENGTH
 
 #define SYSTEM_MIB		  NETSNMP_SYSTEM_MIB
+#define SYSTEM_DOT_MIB		  NETSNMP_SYSTEM_DOT_MIB
+#define SYSTEM_DOT_MIB_LENGTH	  NETSNMP_SYSTEM_DOT_MIB_LENGTH
 
 #define NOTIFICATION_MIB	    NETSNMP_NOTIFICATION_MIB	
 #define NOTIFICATION_DOT_MIB	    NETSNMP_NOTIFICATION_DOT_MIB

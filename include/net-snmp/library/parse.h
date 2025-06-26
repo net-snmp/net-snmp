@@ -54,7 +54,6 @@ SOFTWARE.
         struct enum_list *next;
         int             value;
         char           *label;
-        int             lineno;
     };
 
     /*
@@ -202,7 +201,7 @@ SOFTWARE.
 #endif
     void            netsnmp_init_mib_internals(void);
     void            unload_all_mibs(void);
-    int             add_mibfile(const char*, const char*);
+    int             add_mibfile(const char*, const char*, FILE *);
     int             which_module(const char *);
     NETSNMP_IMPORT
     char           *module_name(int, char *);
@@ -240,6 +239,10 @@ SOFTWARE.
     int             get_mib_parse_error_count(void);
     NETSNMP_IMPORT
     int             snmp_get_token(FILE * fp, char *token, int maxtlen);
+    NETSNMP_IMPORT
+    struct tree    *find_best_tree_node(const char *name,
+                                        struct tree *tree_top,
+                                        u_int * match);
 
 #ifdef __cplusplus
 }

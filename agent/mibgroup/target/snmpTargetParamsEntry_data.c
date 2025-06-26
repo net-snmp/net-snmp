@@ -10,7 +10,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -22,8 +22,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "snmpTargetParamsEntry_data.h"
-
-netsnmp_feature_require(container_compare_mem);
 
 static struct targetParamTable_struct *aPTable = NULL;
 static int _active = 0;
@@ -283,7 +281,7 @@ shutdown_snmpTargetParamsEntry_data(void)
 }
 
 /*
- * store_snmpTargetParamsEntry handles the persistent storage process 
+ * store_snmpTargetParamsEntry handles the presistent storage proccess 
  * for this MIB table. It writes out all the non-volatile rows 
  * to permanent storage on a shutdown  
  */

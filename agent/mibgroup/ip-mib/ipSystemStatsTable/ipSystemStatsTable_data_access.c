@@ -152,10 +152,9 @@ ipSystemStatsTable_container_init(netsnmp_container **container_ptr_ptr,
  * check entry for update
  */
 static void
-_check_for_updates(void *p, void *q)
+_check_for_updates(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
+                   netsnmp_container *stats)
 {
-    ipSystemStatsTable_rowreq_ctx *rowreq_ctx = p;
-    netsnmp_container *stats = q;
     /*
      * check for matching entry. works because indexes are the same.
      */
@@ -203,10 +202,9 @@ _check_for_updates(void *p, void *q)
  * add new entry
  */
 static void
-_add_new(void *p, void *q)
+_add_new(netsnmp_systemstats_entry *systemstats_entry,
+         netsnmp_container *container)
 {
-    netsnmp_systemstats_entry *systemstats_entry = p;
-    netsnmp_container *container = q;
     ipSystemStatsTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("ipSystemStatsTable:access", "creating new entry\n"));
@@ -289,8 +287,8 @@ ipSystemStatsTable_container_shutdown(netsnmp_container *container_ptr)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  ipSystemStatsTable_row_prep() for populating data.
@@ -323,14 +321,16 @@ ipSystemStatsTable_container_load(netsnmp_container *container)
      */
     /*
      * we just got a fresh copy of data. compare it to
-     * what we've already got, and make any adjustments...
+     * what we've already got, and make any adjustements...
      */
-    CONTAINER_FOR_EACH(container, _check_for_updates, stats);
+    CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
+                       _check_for_updates, stats);
 
     /*
      * now add any new entries
      */
-    CONTAINER_FOR_EACH(stats, _add_new, container);
+    CONTAINER_FOR_EACH(stats, (netsnmp_container_obj_func *)
+                       _add_new, container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,

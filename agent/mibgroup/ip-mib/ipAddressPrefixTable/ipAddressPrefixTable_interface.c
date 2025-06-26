@@ -47,15 +47,15 @@
 
 #include <ctype.h>
 
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
-netsnmp_feature_child_of(ipaddressprefixtable_row_find_by_mib_index, ipaddressprefixtable_all);
-netsnmp_feature_child_of(ipaddressprefixtable_container_get, ipaddressprefixtable_all);
-netsnmp_feature_child_of(ipAddressPrefixTable_registration_get, ipaddressprefixtable_all);
-netsnmp_feature_child_of(ipAddressPrefixTable_registration_set, ipaddressprefixtable_all);
-netsnmp_feature_child_of(ipAddressPrefixTable_container_size, ipaddressprefixtable_all);
+netsnmp_feature_child_of(ipaddressprefixtable_row_find_by_mib_index, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipaddressprefixtable_container_get, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_registration_get, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_registration_set, ipaddressprefixtable_all)
+netsnmp_feature_child_of(ipAddressPrefixTable_container_size, ipaddressprefixtable_all)
 
 /**********************************************************************
  **********************************************************************
@@ -853,7 +853,7 @@ _mfd_ipAddressPrefixTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -937,7 +937,8 @@ _cache_free(netsnmp_cache * cache, void *magic)
  * @internal
  */
 static void
-_container_item_free(void *rowreq_ctx, void *context)
+_container_item_free(ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
+                     void *context)
 {
     DEBUGMSGTL(("internal:ipAddressPrefixTable:_container_item_free",
                 "called\n"));
@@ -971,7 +972,9 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container, _container_item_free, NULL);
+    CONTAINER_CLEAR(container,
+                    (netsnmp_container_obj_func *) _container_item_free,
+                    NULL);
 }                               /* _container_free */
 
 /**
@@ -1045,7 +1048,7 @@ ipAddressPrefixTable_row_find_by_mib_index(ipAddressPrefixTable_mib_index *
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -30,26 +30,26 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <signal.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
 #include <stdio.h>
 #include <fcntl.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -73,9 +73,9 @@
 #include "agentx/client.h"
 #endif
 
-netsnmp_feature_child_of(agent_registry_all, libnetsnmpagent);
+netsnmp_feature_child_of(agent_registry_all, libnetsnmpagent)
 
-netsnmp_feature_child_of(unregister_mib_table_row, agent_registry_all);
+netsnmp_feature_child_of(unregister_mib_table_row, agent_registry_all)
 
 /** @defgroup agent_lookup_cache Lookup cache, storing the registered OIDs.
  *     Maintain the cache used for locating sub-trees and OIDs.
@@ -116,7 +116,7 @@ static lookup_cache_context *thecontextcache = NULL;
  *
  * @param newsize set to the maximum size of a cache for a given
  * context.  Set to 0 to completely disable caching, or to -1 to set
- * to the default cache size (8), or to a number of your choosing.  The
+ * to the default cache size (8), or to a number of your chosing.  The
  */
 void
 netsnmp_set_lookup_cache_size(int newsize) {
@@ -157,14 +157,8 @@ get_context_lookup_cache(const char *context) {
     if (!ptr) {
         if (netsnmp_subtree_find_first(context)) {
             ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
-            if (!ptr)
-                return NULL;
             ptr->next = thecontextcache;
             ptr->context = strdup(context);
-            if (!ptr->context) {
-                free(ptr);
-                return NULL;
-            }
             thecontextcache = ptr;
         } else {
             return NULL;
@@ -363,11 +357,6 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     ptr->next = context_subtrees;
     ptr->first_subtree = new_tree;
     ptr->context_name = strdup(context_name);
-    if (!ptr->context_name) {
-        free(ptr);
-        return NULL;
-    }
-
     context_subtrees = ptr;
 
     return ptr->first_subtree;
@@ -505,7 +494,7 @@ netsnmp_subtree_free(netsnmp_subtree *a)
 netsnmp_subtree *
 netsnmp_subtree_deepcopy(netsnmp_subtree *a)
 {
-  netsnmp_subtree *b = calloc(1, sizeof(netsnmp_subtree));
+  netsnmp_subtree *b = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
 
   if (b != NULL) {
     memcpy(b, a, sizeof(netsnmp_subtree));
@@ -572,7 +561,7 @@ netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
                                &ptr->oid_off);
 }
 
-netsnmp_feature_child_of(netsnmp_subtree_compare,netsnmp_unused);
+netsnmp_feature_child_of(netsnmp_subtree_compare,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_SUBTREE_COMPARE
 /** Compares OIDs of given subtrees.
  *
@@ -737,7 +726,7 @@ netsnmp_subtree_split(netsnmp_subtree *current, oid name[], int name_len)
         new_sub->variables = current->variables;
     }
 
-    /* Propagate this split down through any children */
+    /* Propogate this split down through any children */
     if (current->children) {
         new_sub->children = netsnmp_subtree_split(current->children, 
 						  name, name_len);
@@ -880,7 +869,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	case -1:
 	    /*  Existing subtree contains new one.  */
 	    netsnmp_subtree_split(tree1, new_sub->end_a, new_sub->end_len);
-	    NETSNMP_FALLTHROUGH;
+	    /* Fall Through */
 
 	case  0:
 	    /*  The two trees match precisely.  */
@@ -1157,7 +1146,7 @@ netsnmp_register_mib(const char *moduleName,
         netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
     }
-    subtree = calloc(1, sizeof(netsnmp_subtree));
+    subtree = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
     if (subtree == NULL) {
         netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
@@ -1289,6 +1278,7 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.range_ubound = range_ubound;
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
+        reg_parms.contextName = context;
         reg_parms.session = ss;
         reg_parms.reginfo = reginfo;
         reg_parms.contextName = context;
@@ -1668,7 +1658,7 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
  * The parameters priority, range_subid, range_ubound and context
  * should match those used to register the module originally.
  *
- * @param name  the specific OID to unregister if it contains the associated
+ * @param name  the specific OID to unregister if it conatins the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1738,7 +1728,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
         myptr = child;              /* remember this for later */
 
         /*
-        *  Now handle any occurrences in the following subtrees,
+        *  Now handle any occurances in the following subtrees,
         *      as a result of splitting this range.  Due to the
         *      nature of the way such splits work, the first
         *      subtree 'slice' that doesn't refer to the given
@@ -1787,13 +1777,9 @@ unregister_mib_context(oid * name, size_t len, int priority,
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
-    /*
-     * netsnmp_subtree_free() may free the 'context' pointer. Hence, call
-     * invalidate_lookup_cache() before calling netsnmp_subtree_free().
-     */
-    invalidate_lookup_cache(context);
     netsnmp_subtree_free(myptr);
     netsnmp_set_lookup_cache_size(old_lookup_cache_val);
+    invalidate_lookup_cache(context);
     return MIB_UNREGISTERED_OK;
 }
 
@@ -1884,7 +1870,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
  * The parameters priority, range_subid, and range_ubound should
  * match those used to register the module originally.
  *
- * @param name  the specific OID to unregister if it contains the associated
+ * @param name  the specific OID to unregister if it conatins the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1920,7 +1906,7 @@ unregister_mib_range(oid * name, size_t len, int priority,
  * Unregisters a module registered against a given OID at the specified priority.
  * The priority parameter should match that used to register the module originally.
  *
- * @param name  the specific OID to unregister if it contains the associated
+ * @param name  the specific OID to unregister if it conatins the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -1946,7 +1932,7 @@ unregister_mib_priority(oid * name, size_t len, int priority)
 /**
  * Unregisters a module registered against a given OID at the default priority.
  *
- * @param name  the specific OID to unregister if it contains the associated
+ * @param name  the specific OID to unregister if it conatins the associated
  *              context.
  *
  * @param len   the length of the OID, use  OID_LENGTH macro.
@@ -2181,7 +2167,7 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
     return 1;
 }
 
-netsnmp_feature_child_of(get_session_for_oid,netsnmp_unused);
+netsnmp_feature_child_of(get_session_for_oid,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_GET_SESSION_FOR_OID
 netsnmp_session *
 get_session_for_oid(const oid *name, size_t len, const char *context_name)
@@ -2221,7 +2207,7 @@ setup_tree(void)
 
     /* 
      * we need to have the oid's in the heap, that we can *free* it for every case, 
-     * that's the purpose of the duplicate_objid's
+     * thats the purpose of the duplicate_objid's
      */
     netsnmp_register_null(snmp_duplicate_objid(ccitt, 1), 1);
     netsnmp_register_null(snmp_duplicate_objid(iso, 1), 1);
@@ -2271,9 +2257,9 @@ dump_registry(void)
     size_t sl = 256, el = 256, vl = 256, sl_o = 0, el_o = 0, vl_o = 0;
     int i = 0;
 
-    if ((s = calloc(sl, 1)) != NULL &&
-        (e = calloc(sl, 1)) != NULL &&
-        (v = calloc(sl, 1)) != NULL) {
+    if ((s = (u_char *) calloc(sl, 1)) != NULL &&
+        (e = (u_char *) calloc(sl, 1)) != NULL &&
+        (v = (u_char *) calloc(sl, 1)) != NULL) {
 
         subtree_context_cache *ptr;
         for (ptr = context_subtrees; ptr; ptr = ptr->next) {
@@ -2348,7 +2334,7 @@ dump_registry(void)
 /* End of MIB registration code */
 
 
-netsnmp_feature_child_of(register_signal, netsnmp_unused);
+netsnmp_feature_child_of(register_signal, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL
 
 /** @defgroup agent_signals POSIX signals support for agents.

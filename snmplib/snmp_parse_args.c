@@ -20,43 +20,43 @@
 #include <net-snmp/net-snmp-config.h>
 #include <errno.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <ctype.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -201,8 +201,8 @@ netsnmp_parse_args(int argc,
                    void (*proc) (int, char *const *, int),
                    int flags)
 {
-    int             arg, ret, sp = 0;
-    const char     *cp;
+    int             arg, sp = 0;
+    char           *cp;
     char           *Apsz = NULL;
     char           *Xpsz = NULL;
     char           *Cpsz = NULL;
@@ -231,27 +231,18 @@ netsnmp_parse_args(int argc,
         DEBUGMSGTL(("snmp_parse_args", " arg %d = %s\n", arg, argv[arg]));
     }
 
-#ifdef __linux__
-    /*
-     * glibc only resets the internal getopt() state if optind is set to zero.
-     */
-    optind = 0;
-#else
     optind = 1;
-#endif
-    while (optind < argc && (arg = getopt(argc, argv, Opts)) != EOF) {
+    while ((arg = getopt(argc, argv, Opts)) != EOF) {
         DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %c (optarg %s) (sp %d)\n",
                     optind, arg, optarg, sp));
         switch (arg) {
         case '-':
             if (strcasecmp(optarg, "help") == 0) {
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             if (strcasecmp(optarg, "version") == 0) {
                 fprintf(stderr,"NET-SNMP version: %s\n",netsnmp_get_version());
-                ret = NETSNMP_PARSE_ARGS_SUCCESS_EXIT;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_SUCCESS_EXIT);
             }
 
             handle_long_opt(optarg);
@@ -259,19 +250,17 @@ netsnmp_parse_args(int argc,
 
         case 'V':
             fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
-            ret = NETSNMP_PARSE_ARGS_SUCCESS_EXIT;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_SUCCESS_EXIT);
 
         case 'h':
-            ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
+            break;
 
         case 'H':
             init_snmp(NETSNMP_APPLICATION_CONFIG_TYPE);
             fprintf(stderr, "Configuration directives understood:\n");
             read_config_print_usage("  ");
-            ret = NETSNMP_PARSE_ARGS_SUCCESS_EXIT;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_SUCCESS_EXIT);
 
         case 'Y':
             netsnmp_config_remember(optarg);
@@ -293,8 +282,7 @@ netsnmp_parse_args(int argc,
             if (cp != NULL) {
                 fprintf(stderr, "Unknown output option passed to -O: %c.\n", 
 			*cp);
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
@@ -303,8 +291,7 @@ netsnmp_parse_args(int argc,
             if (cp != NULL) {
                 fprintf(stderr, "Unknown input option passed to -I: %c.\n",
 			*cp);
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
@@ -314,8 +301,7 @@ netsnmp_parse_args(int argc,
             if (cp != NULL) {
                 fprintf(stderr,
                         "Unknown parsing option passed to -P: %c.\n", *cp);
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
@@ -323,8 +309,7 @@ netsnmp_parse_args(int argc,
         case 'D':
 #ifdef NETSNMP_NO_DEBUGGING
             fprintf(stderr, "Debug not configured in\n");
-            ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
 #else
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
@@ -337,7 +322,6 @@ netsnmp_parse_args(int argc,
             break;
 
         case 's':
-            free(session->localname);
             session->localname = strdup(optarg);
             break;
 
@@ -360,16 +344,15 @@ netsnmp_parse_args(int argc,
                 fprintf(stderr,
                         "Invalid version specified after -v flag: %s\n",
                         optarg);
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
         case 'p':
             fprintf(stderr, "Warning: -p option is no longer used - ");
             fprintf(stderr, "specify the remote host as HOST:PORT\n");
-            ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
+            break;
 
         case 'T':
         {
@@ -382,8 +365,7 @@ netsnmp_parse_args(int argc,
             if (!tmpcp) {
                 fprintf(stderr, "-T expects a NAME=VALUE pair.\n");
                 free(tmpopt);
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             *tmpcp++ = '\0';
 
@@ -395,11 +377,11 @@ netsnmp_parse_args(int argc,
                 if (!session->transport_configuration) {
                     fprintf(stderr, "failed to initialize the transport configuration container\n");
                     free(tmpopt);
-                    ret = NETSNMP_PARSE_ARGS_ERROR;
-                    goto out;
+                    return (NETSNMP_PARSE_ARGS_ERROR);
                 }
 
                 session->transport_configuration->compare =
+                    (netsnmp_container_compare*)
                     netsnmp_transport_config_compare;
             }
 
@@ -418,8 +400,7 @@ netsnmp_parse_args(int argc,
             session->timeout = (long)(atof(optarg) * 1000000L);
             if (session->timeout <= 0) {
                 fprintf(stderr, "Invalid timeout in seconds after -t flag.\n");
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
@@ -427,8 +408,7 @@ netsnmp_parse_args(int argc,
             session->retries = atoi(optarg);
             if (session->retries < 0 || !isdigit((unsigned char)(optarg[0]))) {
                 fprintf(stderr, "Invalid number of retries after -r flag.\n");
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
@@ -439,26 +419,23 @@ netsnmp_parse_args(int argc,
 		    memset(optarg, '\0', strlen(optarg));
 		} else {
 		    fprintf(stderr, "malloc failure processing -c flag.\n");
-		    ret = NETSNMP_PARSE_ARGS_ERROR;
-                    goto out;
+		    return NETSNMP_PARSE_ARGS_ERROR;
 		}
 	    } else {
-		Cpsz = strdup(optarg);
+		Cpsz = optarg;
 	    }
             break;
 
         case '3':
             if (snmpv3_parse_args(optarg, session, &Apsz, &Xpsz, argc, argv,
                                   flags) < 0){
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
         case 'L':
             if (snmp_log_options(optarg, argc, argv) < 0) {
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 
@@ -478,16 +455,14 @@ netsnmp_parse_args(int argc,
 #endif             /* NETSNMP_SECMOD_USM */
             if (snmpv3_parse_arg(arg, optarg, session, &Apsz, &Xpsz, argc,
                                  argv, flags) < 0){
-                ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                goto out;
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
             break;
 #endif                          /* SNMPV3_CMD_OPTIONS */
 
         case '?':
-        case ':':
-            ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
+            break;
 
         default:
             proc(argc, argv, arg);
@@ -592,11 +567,9 @@ netsnmp_parse_args(int argc,
             snmp_perror(argv[0]);
             fprintf(stderr,
                     "Error generating a key (Ku) from the supplied authentication pass phrase. \n");
-            ret = NETSNMP_PARSE_ARGS_ERROR;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR);
         }
         free(Apsz);
-        Apsz = NULL;
     }
     if (Xpsz) {
         session->securityPrivKeyLen = USM_PRIV_KU_LEN;
@@ -623,23 +596,20 @@ netsnmp_parse_args(int argc,
             snmp_perror(argv[0]);
             fprintf(stderr,
                     "Error generating a key (Ku) from the supplied privacy pass phrase. \n");
-            ret = NETSNMP_PARSE_ARGS_ERROR;
-            goto out;
+            return (NETSNMP_PARSE_ARGS_ERROR);
         }
         free(Xpsz);
-        Xpsz = NULL;
     }
 #endif /* NETSNMP_SECMOD_USM */
 
     /*
      * get the hostname 
      */
-    if (optind >= argc) {
+    if (optind == argc) {
         fprintf(stderr, "No hostname specified.\n");
-        ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-        goto out;
+        return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
     }
-    session->peername = strdup(argv[optind++]); /* hostname */
+    session->peername = argv[optind++]; /* hostname */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     /*
@@ -671,27 +641,17 @@ netsnmp_parse_args(int argc,
                     session->community_len = 0;
                 } else {
                     fprintf(stderr, "No community name specified.\n");
-                    ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
-                    goto out;
+                    return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
                 }
-	    } else {
-                Cpsz = NULL;
-            }
+	    }
 	} else {
             session->community = (unsigned char *)Cpsz;
             session->community_len = strlen(Cpsz);
-            Cpsz = NULL;
         }
     }
 #endif /* support for community based SNMP */
 
-    ret = optind;
-
-out:
-    free(Apsz);
-    free(Xpsz);
-    free(Cpsz);
-    return ret;
+    return optind;
 }
 
 int

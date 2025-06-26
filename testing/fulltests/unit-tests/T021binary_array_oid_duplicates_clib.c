@@ -49,7 +49,7 @@ for (i = 0; i < MAX_ROUNDS; ++i) {
 	    CONTAINER_INSERT(c, &i4);
 	    break;
 	case 3:
-	    /* Insert a duplicate of an earlier OID, so that it
+	    /* Insert a dulicate of an earlier OID, so that it
 	     * changes the binary search behavior */
 	    CONTAINER_INSERT(c, &i1);
 	    break;

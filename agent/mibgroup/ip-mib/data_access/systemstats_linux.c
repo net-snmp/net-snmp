@@ -14,7 +14,6 @@
 #include "systemstats.h"
 #include "systemstats_private.h"
 
-#include <stdint.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <ctype.h>
@@ -36,7 +35,7 @@ netsnmp_access_systemstats_arch_init(void)
 }
 
 /*
-  /proc/net/snmp - Linux 6.6 and lower
+  /proc/net/snmp
 
   Ip: Forwarding DefaultTTL InReceives InHdrErrors InAddrErrors ForwDatagrams InUnknownProtos InDiscards InDelivers OutRequests OutDiscards OutNoRoutes ReasmTimeout ReasmReqds ReasmOKs ReasmFails FragOKs FragFails FragCreates
   Ip: 2 64 7083534 0 0 0 0 0 6860233 6548963 0 0 1 286623 63322 1 259920 0 0
@@ -49,26 +48,6 @@ netsnmp_access_systemstats_arch_init(void)
   
   Udp: InDatagrams NoPorts InErrors OutDatagrams
   Udp: 1491094 122 0 1466178
-*
-  /proc/net/snmp - Linux 6.7 and higher
-
-  Ip: Forwarding DefaultTTL InReceives InHdrErrors InAddrErrors ForwDatagrams InUnknownProtos InDiscards InDelivers OutRequests OutDiscards OutNoRoutes ReasmTimeout ReasmReqds ReasmOKs ReasmFails FragOKs FragFails FragCreates OutTransmits
-  Ip: 1 64 50859058 496 0 37470604 0 0 20472980 7515791 1756 0 0 7264 3632 0 3548 0 7096 44961424
-
-  Icmp: InMsgs InErrors InCsumErrors InDestUnreachs InTimeExcds InParmProbs InSrcQuenchs InRedirects InEchos InEchoReps InTimestamps InTimestampReps InAddrMasks InAddrMaskReps OutMsgs OutErrors OutRateLimitGlobal OutRateLimitHost OutDestUnreachs OutTimeExcds OutParmProbs OutSrcQuenchs OutRedirects OutEchos OutEchoReps OutTimestamps OutTimestampReps OutAddrMasks OutAddrMaskReps
-  Icmp: 114447 2655 0 17589 0 0 0 0 66905 29953 0 0 0 0 143956 0 0 572 16610 484 0 0 0 59957 66905 0 0 0 0
-
-  IcmpMsg: InType0 InType3 InType8 OutType0 OutType3 OutType8 OutType11
-  IcmpMsg: 29953 17589 66905 66905 16610 59957 484
-
-  Tcp: RtoAlgorithm RtoMin RtoMax MaxConn ActiveOpens PassiveOpens AttemptFails EstabResets CurrEstab InSegs OutSegs RetransSegs InErrs OutRsts InCsumErrors
-  Tcp: 1 200 120000 -1 17744 13525 307 3783 6 18093137 9277788 3499 8 7442 0
-
-  Udp: InDatagrams NoPorts InErrors OutDatagrams RcvbufErrors SndbufErrors InCsumErrors IgnoredMulti MemErrors
-  Udp: 2257832 1422 0 2252835 0 0 0 84 0
-
-  UdpLite: InDatagrams NoPorts InErrors OutDatagrams RcvbufErrors SndbufErrors InCsumErrors IgnoredMulti MemErrors
-  UdpLite: 0 0 0 0 0 0 0 0 0
 */
 
 
@@ -121,10 +100,10 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     FILE           *devin;
     char            line[1024];
     netsnmp_systemstats_entry *entry = NULL;
-    int             scan_count, expected_scan_count;
+    int             scan_count;
     char           *stats, *start = line;
     int             len;
-    unsigned long long scan_vals[20];
+    unsigned long long scan_vals[19];
 
     DEBUGMSGTL(("access:systemstats:container:arch", "load v4 (flags %x)\n",
                 load_flags));
@@ -144,19 +123,12 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     /*
      * skip header, but make sure it's the length we expect...
      */
-    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), devin));
+    fgets(line, sizeof(line), devin);
     len = strlen(line);
-    switch (len) {
-    case 224:
-	expected_scan_count = 19;
-	break;
-    case 237:
-	expected_scan_count = 20;
-	break;
-    default:
+    if (224 != len) {
         fclose(devin);
         snmp_log(LOG_ERR, "systemstats_linux: unexpected header length in /proc/net/snmp."
-                 " %d not in { 224, 237 } \n", len);
+                 " %d != 224\n", len);
         return -4;
     }
 
@@ -170,7 +142,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     if (start) {
 
         len = strlen(line);
-        if (len && line[len - 1] == '\n')
+        if (line[len - 1] == '\n')
             line[len - 1] = '\0';
 
         while (*start && *start == ' ')
@@ -191,6 +163,8 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry = netsnmp_access_systemstats_entry_create(1, 0,
                     "ipSystemStatsTable.ipv4");
         if(NULL == entry) {
+            netsnmp_access_systemstats_container_free(container,
+                                                      NETSNMP_ACCESS_SYSTEMSTATS_FREE_NOFLAGS);
             return -3;
         }
 
@@ -205,20 +179,20 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         memset(scan_vals, 0x0, sizeof(scan_vals));
         scan_count = sscanf(stats,
                             "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu"
-                            "%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
+                            "%llu %llu %llu %llu %llu %llu %llu %llu %llu",
                             &scan_vals[0],&scan_vals[1],&scan_vals[2],
                             &scan_vals[3],&scan_vals[4],&scan_vals[5],
                             &scan_vals[6],&scan_vals[7],&scan_vals[8],
                             &scan_vals[9],&scan_vals[10],&scan_vals[11],
                             &scan_vals[12],&scan_vals[13],&scan_vals[14],
                             &scan_vals[15],&scan_vals[16],&scan_vals[17],
-                            &scan_vals[18],&scan_vals[19]);
+                            &scan_vals[18]);
         DEBUGMSGTL(("access:systemstats", "  read %d values\n", scan_count));
 
-        if(scan_count != expected_scan_count) {
+        if(scan_count != 19) {
             snmp_log(LOG_ERR,
                      "error scanning systemstats data (expected %d, got %d)\n",
-                     expected_scan_count, scan_count);
+                     19, scan_count);
             netsnmp_access_systemstats_entry_free(entry);
             return -4;
         }
@@ -250,7 +224,6 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry->stats.HCOutFragFails.high = scan_vals[17] >> 32;
         entry->stats.HCOutFragCreates.low = scan_vals[18] & 0xffffffff;
         entry->stats.HCOutFragCreates.high = scan_vals[18] >> 32;
-        /* entry->stats. = scan_vals[19]; / * OutTransmits */
 
         entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINRECEIVES] = 1;
         entry->stats.columnAvail[IPSYSTEMSTATSTABLE_INHDRERRORS] = 1;
@@ -272,7 +245,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry->stats.columnAvail[IPSYSTEMSTATSTABLE_REFRESHRATE] = 1;
 
         /*
-         * load additional statistics defined by RFC 4293
+         * load addtional statistics defined by RFC 4293
          * As these are supported linux 2.6.22 or later, it is no problem
          * if loading them are failed.
          */
@@ -303,7 +276,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
     int             retval = 0;
 
     DEBUGMSGTL(("access:systemstats:container:arch",
-                "load additional v4 (flags %u)\n", load_flags));
+                "load addtional v4 (flags %u)\n", load_flags));
 
     if (!(devin = fopen("/proc/net/netstat", "r"))) {
         snmp_log_perror("systemstats_linux: cannot open /proc/net/netstat");
@@ -315,7 +288,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
      */
     while (fgets(line, sizeof(line), devin)) {
         if (strncmp(IP_EXT_HEAD, line, sizeof(IP_EXT_HEAD) - 1) == 0) {
-            /* next line should include IPv4 additional statistics */
+            /* next line should includes IPv4 addtional statistics */
             if ((fgets(line, sizeof(line), devin)) == NULL) {
                 retval = -4;
                 break;
@@ -335,7 +308,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
                                 &scan_vals[9], &scan_vals[10], &scan_vals[11]);
             if (scan_count < 6) {
                 snmp_log(LOG_ERR,
-                        "error scanning additional systemstats data"
+                        "error scanning addtional systemstats data"
                         "(minimum expected %d, got %d)\n",
                         6, scan_count);
                 retval = -4;
@@ -382,7 +355,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
 
     if (retval < 0)
         DEBUGMSGTL(("access:systemstats",
-                    "/proc/net/netstat does not include additional stats\n"));
+                    "/proc/net/netstat does not include addtional stats\n"));
 
     return retval;
 }
@@ -411,7 +384,7 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
             break;
 
         len = strlen(line);
-        if (len && line[len - 1] == '\n')
+        if (line[len - 1] == '\n')
             line[len - 1] = '\0';
 
         if (('I' != line[0]) || ('6' != line[2]))
@@ -587,12 +560,10 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
      * try to open file. If we can't, that's ok - maybe the module hasn't
      * been loaded yet.
      */
-    devin = fopen(filename, "r");
-    if (!devin) {
+    if (!(devin = fopen(filename, "r"))) {
         DEBUGMSGTL(("access:systemstats",
                 "Failed to load Systemstats Table (linux1), cannot open %s\n",
                 filename));
-        netsnmp_access_systemstats_entry_free(entry);
         return 0;
     }
     

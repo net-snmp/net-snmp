@@ -81,25 +81,25 @@ LINKCC	        = @LINKCC@
 # 5.3 was at 10, 5.4 is at 15, ...  This leaves some room for needed
 # changes for past releases if absolutely necessary.
 #
-# Most recent change: 45 for the PR#586 - snmpv3 for multithread.
-LIBCURRENT  = 50
+# Most recent change: 35 for release 5.8
+LIBCURRENT  = 35
 LIBAGE      = 0
 LIBREVISION = 0
 
-LIB_LD_CMD      = $(LIBTOOL) --mode=link --tag=CC $(LINKCC) $(CFLAGS) $(LDFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) @LD_NO_UNDEFINED@ -o
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(LINKCC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(INSTALL_PREFIX)$(libdir)
-LINK		= $(LIBTOOL) --mode=link --tag=CC $(LINKCC) $(LDFLAGS)
+LINK		= $(LIBTOOL) --mode=link $(LINKCC)
 # RANLIB 	= @RANLIB@
 RANLIB		= :
 
 # libtool definitions
 .SUFFIXES: .c .o .lo .rc
 .c.lo:
-	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) --mode=compile $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 .rc.lo:
-	$(LIBTOOL) --mode=compile --tag=RC @RC@ -o $@ -i $<
+	$(LIBTOOL) --mode=compile --tag=CC windres -o $@ -i $<
 
 # include paths
 #

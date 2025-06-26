@@ -41,7 +41,7 @@ error "TRUE != 1"
    /** priority for this callback */
     int             priority;
 
-   /** handler that registered to watch this object */
+   /** handler that registred to watch this object */
     netsnmp_mib_handler *watcher;
 
    /** events that the watcher cares about */
@@ -249,7 +249,7 @@ netsnmp_monitor_unregister(oid * object, size_t oid_len, int priority,
 /**
  * Notifies the object monitor of an event.
  *
- * The object monitor functions will save the callback information
+ * The object monitor funtions will save the callback information
  * until all varbinds in the current PDU have been processed and
  * a response has been sent. At that time, the object monitor will
  * determine if there are any watchers monitoring for the event.
@@ -284,7 +284,7 @@ netsnmp_notify_monitor(netsnmp_monitor_callback_header * cbh)
  * @param o     the oid to check for
  * @param o_l   the length of the oid
  *
- * @returns TRUE(1) if a callback is registered
+ * @returns TRUE(1) if a callback is registerd
  * @returns FALSE(0) if no callback is registered
  */
 int
@@ -373,7 +373,7 @@ netsnmp_monitor_process_callbacks(void)
  *
  * @param event the event type
  * @param  o pointer to the oid of the object sending the event
- * @param o_len    the length of the oid
+ * @param o_len    the lenght of the oid
  * @param o_steal set to true if the function may keep the pointer
  *                  to the memory (and free it later). set to false
  *                  to make the function allocate and copy the oid.
@@ -522,7 +522,7 @@ insert_watcher(oid * object, size_t oid_len, monitor_info * mi)
  *              upon return the pointer will be set to the first
  *              monitor_info object for the specified event.
  *
- * @returns TRUE(1) if a callback is registered
+ * @returns TRUE(1) if a callback is registerd
  * @returns FALSE(0) if no callback is registered
  */
 static int
@@ -637,7 +637,7 @@ move_pending_to_ready(void)
                 continue;
 
             /*
-             * create temporary placeholder.
+             * create temprory placeholder.
              *
              * I hate to allocate memory here, as I'd like this code to
              * be fast and lean. But I don't have time to think of another

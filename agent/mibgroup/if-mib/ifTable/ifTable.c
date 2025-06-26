@@ -19,7 +19,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(interface_access_entry_set_admin_status);
+netsnmp_feature_require(interface_access_entry_set_admin_status)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /*
@@ -59,24 +59,21 @@ _if_number_handler(netsnmp_mib_handler *handler,
 
 
 /**
- * Initializes the ifTable module. Called before the snmpd configuration has
- * been read.
+ * Initializes the ifTable module
  */
-static int
-_init_ifTable(int majorID, int minorID, void *serverargs, void *clientarg)
+void
+init_ifTable(void)
 {
     static int      ifTable_did_init = 0;
 
     DEBUGMSGTL(("verbose:ifTable:init_ifTable", "called\n"));
-
-    netsnmp_access_interface_init();
 
     /*
      * TODO:300:o: Perform ifTable one-time module initialization.
      */
     if (++ifTable_did_init != 1) {
         DEBUGMSGTL(("ifTable:init_ifTable", "ignoring duplicate call\n"));
-        return 0;
+        return;
     }
 
     /*
@@ -101,17 +98,7 @@ _init_ifTable(int majorID, int minorID, void *serverargs, void *clientarg)
             initialize_table_ifXTable();
 #endif
     }
-
-    return 0;
 }                               /* init_ifTable */
-
-void
-init_ifTable(void)
-{
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_POST_READ_CONFIG,
-                           _init_ifTable, NULL);
-}
 
 /**
  * Shut-down the ifTable module (agent is exiting)
@@ -192,6 +179,56 @@ shutdown_table_ifTable(void)
     netsnmp_free_all_list_data(ifTable_user_context_p);
     ifTable_user_context_p = NULL;
 }
+
+/**
+ * extra context initialization (eg default values)
+ *
+ * @param rowreq_ctx    : row request context
+ * @param user_init_ctx : void pointer for user (parameter to rowreq_ctx_allocate)
+ *
+ * @retval MFD_SUCCESS  : no errors
+ * @retval MFD_ERROR    : error (context allocate will fail)
+ */
+int
+ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
+                        void *user_init_ctx)
+{
+    DEBUGMSGTL(("verbose:ifTable:ifTable_rowreq_ctx_init", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * TODO:210:o: |-> Perform extra ifTable rowreq initialization. (eg DEFVALS)
+     */
+    if (NULL == user_init_ctx)
+        rowreq_ctx->data.ifentry =
+            netsnmp_access_interface_entry_create(NULL, 0);
+    else
+        rowreq_ctx->data.ifentry =
+            (netsnmp_interface_entry *) user_init_ctx;
+
+    return MFD_SUCCESS;
+}                               /* ifTable_rowreq_ctx_init */
+
+/**
+ * extra context cleanup
+ * @param rowreq_ctx
+ */
+void
+ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
+{
+    DEBUGMSGTL(("verbose:ifTable:ifTable_rowreq_ctx_cleanup", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * TODO:211:o: |-> Perform extra ifTable rowreq cleanup.
+     */
+    if (NULL != rowreq_ctx->data.ifentry) {
+        netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
+        rowreq_ctx->data.ifentry = NULL;
+    }
+}                               /* ifTable_rowreq_ctx_cleanup */
 
 /**
  * pre-request callback
@@ -277,6 +314,36 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
  * * TODO:200:r: Implement ifTable data context functions.
  */
 
+
+/**
+ * set mib index(es)
+ *
+ * @param tbl_idx mib index structure
+ * @param ifIndex_val
+ *
+ * @retval MFD_SUCCESS     : success.
+ * @retval MFD_ERROR       : other error.
+ *
+ * @remark
+ *  This convenience function is useful for setting all the MIB index
+ *  components with a single function call. It is assume that the C values
+ *  have already been mapped from their native/rawformat to the MIB format.
+ */
+int
+ifTable_indexes_set_tbl_idx(ifTable_mib_index * tbl_idx, long ifIndex_val)
+{
+    DEBUGMSGTL(("verbose:ifTable:ifTable_indexes_set_tbl_idx",
+                "called\n"));
+
+    /*
+     * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H 
+     */
+    tbl_idx->ifIndex = ifIndex_val;
+
+
+    return MFD_SUCCESS;
+}                               /* ifTable_indexes_set_tbl_idx */
+
 /**
  * @internal
  * set row context indexes
@@ -296,12 +363,14 @@ ifTable_indexes_set(ifTable_rowreq_ctx * rowreq_ctx, long ifIndex_val)
 {
     DEBUGMSGTL(("verbose:ifTable:ifTable_indexes_set", "called\n"));
 
-    rowreq_ctx->tbl_idx.ifIndex = ifIndex_val;
+    if (MFD_SUCCESS !=
+        ifTable_indexes_set_tbl_idx(&rowreq_ctx->tbl_idx, ifIndex_val))
+        return MFD_ERROR;
 
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != ifTable_index_to_oid(&rowreq_ctx->oid_idx,
                                   &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;
@@ -591,17 +660,6 @@ ifSpeed_get(ifTable_rowreq_ctx * rowreq_ctx, u_long * ifSpeed_val_ptr)
     return MFD_SUCCESS;
 }                               /* ifSpeed_get */
 
-static int is_zero(const char *p, unsigned int len)
-{
-    unsigned int i;
-
-    for (i = 0; i < len; i++)
-        if (p[i])
-            return FALSE;
-
-    return TRUE;
-}
-
 /*---------------------------------------------------------------------
  * IF-MIB::ifEntry.ifPhysAddress
  * ifPhysAddress is subid 6 of ifEntry.
@@ -670,8 +728,12 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    if (is_zero(rowreq_ctx->data.ifPhysAddress,
-                rowreq_ctx->data.ifPhysAddress_len)) {
+    if ((rowreq_ctx->data.ifPhysAddress[0] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[1] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[2] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[3] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[4] == 0) &&
+        (rowreq_ctx->data.ifPhysAddress[5] == 0)) {
         /*
          * all 0s = empty string
          */
@@ -1817,7 +1879,10 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
  * functions are called. If you need to do any undo setup that is not
  * related to a specific column, you can do it here.
  *
- * Note that the undo context has been allocated with ifTable_allocate_data().
+ * Note that the undo context has been allocated with
+ * ifTable_allocate_data(), but may need extra
+ * initialization similar to what you may have done in
+ * ifTable_rowreq_ctx_init().
  * Note that an individual node's undo_setup function will only be called
  * if that node is being set to a new value.
  *
@@ -1988,7 +2053,7 @@ ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully committed this row, set the dirty flag.
+     * if we successfully commited this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -2041,7 +2106,7 @@ ifTable_undo_commit(ifTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-committed this row, clear the dirty flag.
+     * if we successfully un-commited this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -2098,7 +2163,7 @@ The desired state of the interface.  The testing(3) state
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note

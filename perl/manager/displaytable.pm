@@ -508,7 +508,7 @@ Don't print a header row at the top of the table.
 =item -selectorder => [qw(column1 column2)]
 
 Defines the order of the columns.  A value of 1 will use the order of
-the -select statement by textually parsing it's comma separated list.
+the -select statement by textually parsing it's comma seperated list.
 If an array is passed containing the column names, that order will be
 used.
 

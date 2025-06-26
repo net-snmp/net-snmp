@@ -249,7 +249,7 @@ if (param('setuponcall')) {
     print "<p>Please select your oncall schedule and mailing addresses for your groups below:";
     if (!isexpert($remuser)) {
 	print "<ul>\n";
-        print "<li>Values for the days/hours fields can be comma separated lists of hours/days/ranges.  EG: hours: 7-18,0-4.\n";
+        print "<li>Values for the days/hours fields can be comma seperated lists of hours/days/ranges.  EG: hours: 7-18,0-4.\n";
 	print "</ul>\n";
     }
     print "<form method=post><input type=hidden name=setuponcall value=1>\n";

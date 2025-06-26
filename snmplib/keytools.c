@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -29,14 +29,17 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <math.h>
@@ -70,8 +73,8 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 
-netsnmp_feature_child_of(usm_support, libnetsnmp);
-netsnmp_feature_child_of(usm_keytools, usm_support);
+netsnmp_feature_child_of(usm_support, libnetsnmp)
+netsnmp_feature_child_of(usm_keytools, usm_support)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_KEYTOOLS
 
@@ -81,7 +84,7 @@ netsnmp_feature_child_of(usm_keytools, usm_support);
  * Parameters:
  *	*hashtype	MIB OID for the transform type for hashing.
  *	 hashtype_len	Length of OID value.
- *	*P		Pre-allocated bytes of passphrase.
+ *	*P		Pre-allocated bytes of passpharase.
  *	 pplen		Length of passphrase.
  *	*Ku		Buffer to contain Ku.
  *	*kulen		Length of Ku buffer.
@@ -127,7 +130,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 #ifdef NETSNMP_USE_OPENSSL
     EVP_MD_CTX     *ctx = NULL;
     const EVP_MD   *hashfn = NULL;
-#elif defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#elif NETSNMP_USE_INTERNAL_CRYPTO
     SHA_CTX csha1;
     MD5_CTX cmd5;
     char    cryptotype = 0;
@@ -181,22 +184,15 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     ctx = EVP_MD_CTX_new();
 #elif defined(HAVE_EVP_MD_CTX_CREATE)
     ctx = EVP_MD_CTX_create();
-#elif defined(HAVE_VOID_EVP_MD_CTX_INIT)
-    ctx = malloc(sizeof(*ctx));
-    EVP_MD_CTX_init(ctx);
 #else
     ctx = malloc(sizeof(*ctx));
-    if (!EVP_MD_CTX_init(ctx)) {
-        rval = SNMPERR_GENERR;
-        goto generate_Ku_quit;
-    }
+    if (!EVP_MD_CTX_init(ctx))
+        return SNMPERR_GENERR;
 #endif
-    if (!EVP_DigestInit(ctx, hashfn)) {
-        rval = SNMPERR_GENERR;
-        goto generate_Ku_quit;
-    }
+    if (!EVP_DigestInit(ctx, hashfn))
+        return SNMPERR_GENERR;
 
-#elif defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#elif NETSNMP_USE_INTERNAL_CRYPTO
 #ifndef NETSNMP_DISABLE_MD5
     if (NETSNMP_USMAUTH_HMACMD5 == auth_type) {
         if (!MD5_Init(&cmd5))
@@ -222,7 +218,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         }
 #ifdef NETSNMP_USE_OPENSSL
         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
-#elif defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#elif NETSNMP_USE_INTERNAL_CRYPTO
         if (TYPE_SHA1 == cryptotype) {
             rval = !SHA1_Update(&csha1, buf, USM_LENGTH_KU_HASHBLOCK);
         } else {
@@ -231,7 +227,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         if (rval != 0) {
             return SNMPERR_USM_ENCRYPTIONERROR;
         }
-#elif defined(NETSNMP_USE_INTERNAL_MD5)
+#elif NETSNMP_USE_INTERNAL_MD5
         if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
             rval = SNMPERR_USM_ENCRYPTIONERROR;
             goto md5_fin;
@@ -251,7 +247,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      * what about free() 
      */
     }
-#elif defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#elif NETSNMP_USE_INTERNAL_CRYPTO
     if (TYPE_SHA1 == cryptotype) {
         SHA1_Final(Ku, &csha1);
     } else {
@@ -261,7 +257,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     if (ret == SNMPERR_GENERR)
         return SNMPERR_GENERR;
     *kulen = ret;
-#elif defined(NETSNMP_USE_INTERNAL_MD5)
+#elif NETSNMP_USE_INTERNAL_MD5
     if (MDupdate(&MD, buf, 0)) {
         rval = SNMPERR_USM_ENCRYPTIONERROR;
         goto md5_fin;
@@ -302,7 +298,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     return rval;
 
 }                               /* end generate_Ku() */
-#elif defined(NETSNMP_USE_PKCS11)
+#elif NETSNMP_USE_PKCS11
 {
     int             rval = SNMPERR_SUCCESS, auth_type;;
 
@@ -539,7 +535,7 @@ _kul_extend_blumenthal(int needKeyLen, oid *hashoid, u_int hashoid_len,
         needKeyLen -= copyLen;
         *origKulLen += copyLen;
 
-        /** not part of the draft, but stop if we already have enough bits */
+        /** not part of the draft, but stop if we already have enought bits */
         if (needKeyLen <= 0)
             break;
     }
@@ -636,7 +632,7 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
  *       neededKeyLen   The neede key length
  *      *hashoid        MIB OID for the hash transform type.
  *       hashoid_len    Length of the MIB OID hash transform type.
- *       privType       Privacy algorithm type
+ *       privType       Privay algorithm type
  *       engineID       engineID
  *       engineIDLen    Length of engineID
  *     **kulBuf         Pointer to a buffer pointer
@@ -800,7 +796,7 @@ netsnmp_extend_kul(u_int needKeyLen, oid *hashoid, u_int hashoid_len,
  *		*kcstring_len will be returned as exactly twice that same
  *		length though the input buffer may be larger.
  *
- * XXX FIX:     Does not handle variable length keys.
+ * XXX FIX:     Does not handle varibable length keys.
  * XXX FIX:     Does not handle keys larger than the hash algorithm used.
  *
 KeyChange ::=     TEXTUAL-CONVENTION
@@ -947,7 +943,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     /*
      * Sanity check.
      */
-    if (!hashtype || !oldkey || !newkey || !kcstring
+    if (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
         || (oldkey_len != newkey_len ) || (newkey_len == 0)
         || (*kcstring_len < (2 * newkey_len))) {
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
@@ -1227,10 +1223,10 @@ KeyChange ::=     TEXTUAL-CONVENTION
  * XXX:  if the newkey is not long enough, it should be freed and remalloced 
  */
 int
-decode_keychange(const oid *hashtype, u_int hashtype_len,
-                 const u_char *oldkey, size_t oldkey_len,
-                 const u_char *kcstring, size_t kcstring_len,
-                 u_char *newkey, size_t *newkey_len)
+decode_keychange(const oid * hashtype, u_int hashtype_len,
+                 u_char * oldkey, size_t oldkey_len,
+                 u_char * kcstring, size_t kcstring_len,
+                 u_char * newkey, size_t * newkey_len)
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS, auth_type;
@@ -1238,8 +1234,7 @@ decode_keychange(const oid *hashtype, u_int hashtype_len,
     int             ihash_len = 0;
     u_int           nbytes = 0;
 
-    const u_char   *deltap;
-    u_char          hash[SNMP_MAXBUF];
+    u_char         *deltap, hash[SNMP_MAXBUF];
     size_t          delta_len, tmpbuf_len;
     u_char         *tmpbuf = NULL;
 #ifdef NETSNMP_ENABLE_TESTING_CODE

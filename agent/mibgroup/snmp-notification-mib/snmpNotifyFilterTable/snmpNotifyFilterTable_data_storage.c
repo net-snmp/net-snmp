@@ -28,7 +28,7 @@
 #include <ctype.h>
 
 
-netsnmp_feature_require(CONTAINER_FREE_ALL);
+netsnmp_feature_require(CONTAINER_FREE_ALL)
 
 
 /**********************************************************************
@@ -111,7 +111,7 @@ snmpNotifyFilter_storage_create(const u_char *name, size_t name_len,
     DEBUGMSGTL(("verbose:snmpNotifyFilter:storage:create", "called\n"));
 
     /*
-     * check that neither Name or Subtree are larger that maximum sizes
+     * check that neither Name or Subtree are larger that maximun sizes
      * and that their combined length doesn't exceed the table max index len.
      * (+ 1 is for name length)
      */
@@ -211,7 +211,6 @@ snmpNotifyFilter_storage_add(const u_char *profileName, size_t profileName_len,
     if (NULL == data)
         return NULL;
 
-    data->snmpNotifyFilterMask_len = filterMask_len;
     memcpy(data->snmpNotifyFilterMask, filterMask, filterMask_len);
 
     data->snmpNotifyFilterType = filterType;
@@ -259,7 +258,8 @@ snmpNotifyFilter_vacm_view_subtree(const char *profile)
     /*
      * allocate temporary storage
      */
-    tmp = calloc(s->size + 1, sizeof(struct vacm_viewEntry));
+    tmp = (struct vacm_viewEntry*)calloc(sizeof(struct vacm_viewEntry),
+                                         s->size + 1);
     if (NULL == tmp) {
         free(s->array);
         free(s);

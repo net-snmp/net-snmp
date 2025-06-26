@@ -11,6 +11,7 @@
 
 struct snmp_session;
 struct netsnmp_agent_session_s;
+struct netsnmp_agent_session_s;
 
 /* Global variable declarations. */
 

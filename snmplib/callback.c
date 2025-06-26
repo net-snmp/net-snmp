@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -20,23 +20,26 @@
 #include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if !defined(mingw32) && defined(HAVE_SYS_TIME_H)
@@ -50,10 +53,10 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_api.h>
 
-netsnmp_feature_child_of(callbacks_all, libnetsnmp);
+netsnmp_feature_child_of(callbacks_all, libnetsnmp)
 
-netsnmp_feature_child_of(callback_count, callbacks_all);
-netsnmp_feature_child_of(callback_list, callbacks_all);
+netsnmp_feature_child_of(callback_count, callbacks_all)
+netsnmp_feature_child_of(callback_list, callbacks_all)
 
 /*
  * the inline callback methods use major/minor to index into arrays.
@@ -118,7 +121,7 @@ NETSNMP_STATIC_INLINE int
 _callback_lock(int major, int minor, const char* warn, int do_assert)
 {
     int lock_holded=0;
-    NETSNMP_SELECT_TIMEVAL lock_time;
+    struct timeval lock_time = { 0, 1000 };
 
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
@@ -132,11 +135,8 @@ _callback_lock(int major, int minor, const char* warn, int do_assert)
                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
                 SNMP_STRORNULL(lib[minor]) : "null"));
 #endif
-    while (CALLBACK_LOCK_COUNT(major,minor) >= 1 && ++lock_holded < 100) {
-	lock_time.tv_sec = 0;
-	lock_time.tv_usec = 1000;
+    while (CALLBACK_LOCK_COUNT(major,minor) >= 1 && ++lock_holded < 100)
 	select(0, NULL, NULL, NULL, &lock_time);
-    }
 
     if(lock_holded >= 100) {
         if (NULL != warn)
@@ -261,6 +261,7 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                           void *arg, int priority)
 {
     struct snmp_gen_callback *newscp = NULL, *scp = NULL;
+    struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
 
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
@@ -275,8 +276,6 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
         _callback_unlock(major,minor);
         return SNMPERR_GENERR;
     } else {
-        struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
-
         newscp->priority = priority;
         newscp->sc_client_arg = arg;
         newscp->sc_callback = new_callback;

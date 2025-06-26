@@ -24,13 +24,13 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/data_access/interface);
-config_require(if-mib/ifTable/ifTable_interface);
-config_require(if-mib/ifTable/ifTable_data_access);
+config_require(if-mib/data_access/interface)
+config_require(if-mib/ifTable/ifTable_interface)
+config_require(if-mib/ifTable/ifTable_data_access)
 /*
  * conflicts with mibII/interfaces
  */
-config_exclude(mibII/interfaces);
+config_exclude(mibII/interfaces)
     /* *INDENT-ON*  */
 
     /*
@@ -335,6 +335,10 @@ config_exclude(mibII/interfaces);
 
     } ifTable_rowreq_ctx;
 
+    typedef struct ifTable_ref_rowreq_ctx_s {
+        ifTable_rowreq_ctx *rowreq_ctx;
+    } ifTable_ref_rowreq_ctx;
+
     /*
      *********************************************************************
      * function prototypes
@@ -346,6 +350,16 @@ config_exclude(mibII/interfaces);
                                         user_context);
     int             ifTable_post_request(ifTable_registration *
                                          user_context, int rc);
+
+    int             ifTable_rowreq_ctx_init(ifTable_rowreq_ctx *
+                                            rowreq_ctx,
+                                            void *user_init_ctx);
+    void            ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx *
+                                               rowreq_ctx);
+
+    int             ifTable_check_dependencies(ifTable_rowreq_ctx *
+                                               rowreq_ctx);
+    int             ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx);
 
     ifTable_rowreq_ctx *ifTable_row_find_by_mib_index(ifTable_mib_index *
                                                       mib_idx);
@@ -430,6 +444,8 @@ config_exclude(mibII/interfaces);
                                    size_t * ifSpecific_val_ptr_len_ptr);
 
 
+    int             ifTable_indexes_set_tbl_idx(ifTable_mib_index *
+                                                tbl_idx, long ifIndex_val);
     int             ifTable_indexes_set(ifTable_rowreq_ctx * rowreq_ctx,
                                         long ifIndex_val);
 

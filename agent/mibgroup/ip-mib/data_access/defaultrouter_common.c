@@ -19,7 +19,8 @@
  */
 static int _access_defaultrouter_entry_compare_addr(const void *lhs,
                                                     const void *rhs);
-static void _access_defaultrouter_entry_release(void *entry, void *unused);
+static void _access_defaultrouter_entry_release(netsnmp_defaultrouter_entry * entry,
+                                                void *unused);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -116,7 +117,9 @@ netsnmp_access_defaultrouter_container_free(netsnmp_container *container,
         /*
          * free all items.
          */
-        CONTAINER_CLEAR(container, _access_defaultrouter_entry_release, NULL);
+        CONTAINER_CLEAR(container,
+                        (netsnmp_container_obj_func*)_access_defaultrouter_entry_release,
+                        NULL);
     }
 
     if(! (free_flags & NETSNMP_ACCESS_DEFAULTROUTER_FREE_KEEP_CONTAINER))
@@ -247,7 +250,7 @@ netsnmp_access_defaultrouter_entry_copy(netsnmp_defaultrouter_entry *lhs,
 /**
  */
 void
-_access_defaultrouter_entry_release(void *entry, void *context)
+_access_defaultrouter_entry_release(netsnmp_defaultrouter_entry * entry, void *context)
 {
     netsnmp_access_defaultrouter_entry_free(entry);
 }

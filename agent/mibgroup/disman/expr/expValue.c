@@ -3,10 +3,6 @@
  *    Core implementation of expression evaluation
  */
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -70,7 +66,7 @@ netsnmp_variable_list *
 _expValue_evalParam( netsnmp_variable_list *expIdx, int param,
                      oid *suffix, size_t suffix_len )
 {
-    netsnmp_variable_list *var = NULL;
+    netsnmp_variable_list *var = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
     struct expObject  *obj;
     netsnmp_variable_list *val_var  = NULL, *oval_var = NULL;  /* values  */
     netsnmp_variable_list *dd_var   = NULL,  *odd_var = NULL;  /* deltaDs */
@@ -80,14 +76,9 @@ _expValue_evalParam( netsnmp_variable_list *expIdx, int param,
     /*
      * Retrieve the expObject entry for the requested parameter.
      */
-    if (!expIdx || !expIdx->next_variable ||
-                 !expIdx->next_variable->next_variable ) {
+    if ( !var || !expIdx || !expIdx->next_variable ||
+                 !expIdx->next_variable->next_variable )
         return NULL;
-    }
-    var = SNMP_MALLOC_TYPEDEF( netsnmp_variable_list );
-    if (!var) {
-        return NULL;
-    }
 
     *expIdx->next_variable->next_variable->val.integer = param;
     obj = (struct expObject *)
@@ -498,7 +489,7 @@ DIGIT:
             /* 
              * ... or a (single-character) binary operator.
              */
-            NETSNMP_FALLTHROUGH;
+            /* Fallthrough */
         case '+':
         case '*':
         case '/':

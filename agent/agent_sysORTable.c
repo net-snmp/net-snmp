@@ -1,8 +1,8 @@
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -68,7 +68,7 @@ register_sysORTable_sess(oid * oidin,
     DEBUGMSGOID(("agent/sysORTable", oidin, oidlen));
     DEBUGMSG(("agent/sysORTable", ", session %p\n", ss));
 
-    entry = calloc(1, sizeof(struct data_node_s));
+    entry = (data_node)calloc(1, sizeof(struct data_node_s));
     if (entry == NULL) {
         DEBUGMSGTL(("agent/sysORTable", "Failed to allocate new entry\n"));
         return SYS_ORTABLE_REGISTRATION_FAILED;

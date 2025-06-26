@@ -6,7 +6,7 @@ $sess = new SNMP::Session();
 
 sub poller_handler {  
    if (++$i>500) { die "completed 500 polls\n"; };
-   # VarList is undefined if TIMEOUT occurred
+   # VarList is undefined if TIMEOUT occured
    if (!defined($_[1])) { 
        warn "request timed out[$_[0]->{ErrorStr}]\n";
        return;

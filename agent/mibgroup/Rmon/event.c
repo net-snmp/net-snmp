@@ -21,20 +21,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <ctype.h>
@@ -50,7 +50,7 @@
 #include "agutil_api.h"
 #include "row_api.h"
 
-netsnmp_feature_require(snprint_objid);
+netsnmp_feature_require(snprint_objid)
 
 /*
  * File scope definitions section 
@@ -524,7 +524,7 @@ create_explanaition(CRTL_ENTRY_T * evptr, u_char is_rising,
         tmp = strchr(pch, '.');
         if (!tmp)
             break;
-        if (isdigit((unsigned char)tmp[1]) || '"' == tmp[1])
+        if (isdigit(tmp[1]) || '"' == tmp[1])
             break;
         pch = tmp + 1;
     }
@@ -759,7 +759,7 @@ add_event_entry(int ctrl_index,
 #endif
 
 /*
- * Registration & Initialization section
+ * Registration & Initializatio section 
  */
 
 oid             eventTable_variables_oid[] =

@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -19,30 +19,30 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 
@@ -54,11 +54,11 @@
 #include "vacm_vars.h"
 #include "util_funcs/header_generic.h"
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -379,7 +379,7 @@ var_vacm_access(struct variable * vp,
             cp = groupName;
             for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    *cp++ = (char) 255;
+                    *cp++ = 255;
                     ++op;
                 } else
                     *cp++ = (char) *op++;
@@ -394,7 +394,7 @@ var_vacm_access(struct variable * vp,
             cp = contextPrefix;
             for (i = 0; i <= len && op < name + *length; i++) {
                 if (*op > 255) {
-                    *cp++ = (char) 255;
+                    *cp++ = 255;
                     ++op;
                 } else
                     *cp++ = (char) *op++;
@@ -590,7 +590,7 @@ var_vacm_view(struct variable * vp,
                 cp = viewName;
                 for (i = 0; i <= len && op < name + *length; i++) {
                     if (*op > 255) {
-                        *cp++ = (char) 255;
+                        *cp++ = 255;
                         ++op;
                     } else
                         *cp++ = (char) *op++;
@@ -997,9 +997,6 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
         return 1;
     }
     groupNameL = oidIndex[0];
-    if ((groupNameL + 1) > (int) oidLen) {
-        return 1;
-    }
     contextPrefixL = oidIndex[groupNameL + 1];  /* the initial name length */
     if ((int) oidLen != groupNameL + contextPrefixL + 4) {
         return 1;
@@ -1174,15 +1171,14 @@ write_vacmAccessStatus(int action,
         free(newGroupName);
         free(newContextPrefix);
     } else if (action == ACTION) {
-        if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
-                             name_len - ACCESS_MIB_LENGTH,
-                             (u_char **) & newGroupName, &groupNameLen,
-                             (u_char **) & newContextPrefix, &contextPrefixLen,
-                             &model, &level)) {
-            return SNMP_ERR_INCONSISTENTNAME;
-        }
-
-        aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+        access_parse_oid(&name[ACCESS_MIB_LENGTH],
+                         name_len - ACCESS_MIB_LENGTH,
+                         (u_char **) & newGroupName, &groupNameLen,
+                         (u_char **) & newContextPrefix, &contextPrefixLen,
+                         &model, &level);
+        aptr =
+            vacm_getAccessEntry(newGroupName, newContextPrefix, model,
+                                level);
 
         if (aptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
@@ -1202,15 +1198,14 @@ write_vacmAccessStatus(int action,
         free(newGroupName);
         free(newContextPrefix);
     } else if (action == COMMIT) {
-        if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
-                             name_len - ACCESS_MIB_LENGTH,
-                             (u_char **) & newGroupName, &groupNameLen,
-                             (u_char **) & newContextPrefix, &contextPrefixLen,
-                             &model, &level)) {
-            return SNMP_ERR_INCONSISTENTNAME;
-        }
-
-        aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+        access_parse_oid(&name[ACCESS_MIB_LENGTH],
+                         name_len - ACCESS_MIB_LENGTH,
+                         (u_char **) & newGroupName, &groupNameLen,
+                         (u_char **) & newContextPrefix, &contextPrefixLen,
+                         &model, &level);
+        aptr =
+            vacm_getAccessEntry(newGroupName, newContextPrefix, model,
+                                level);
 
         if (aptr) {
             if (long_ret == RS_DESTROY) {
@@ -1222,22 +1217,21 @@ write_vacmAccessStatus(int action,
         free(newContextPrefix);
     } else if (action == UNDO) {
         if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-            if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
-                                 name_len - ACCESS_MIB_LENGTH,
-                                 (u_char **) & newGroupName, &groupNameLen,
-                                 (u_char **) & newContextPrefix, &contextPrefixLen,
-                                 &model, &level)) {
-                return SNMP_ERR_INCONSISTENTNAME;
-            }
-
-            aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+            access_parse_oid(&name[ACCESS_MIB_LENGTH],
+                             name_len - ACCESS_MIB_LENGTH,
+                             (u_char **) & newGroupName, &groupNameLen,
+                             (u_char **) & newContextPrefix,
+                             &contextPrefixLen, &model, &level);
+            aptr =
+                vacm_getAccessEntry(newGroupName, newContextPrefix, model,
+                                    level);
             if (aptr != NULL) {
                 vacm_destroyAccessEntry(newGroupName, newContextPrefix,
                                         model, level);
             }
-            free(newGroupName);
-            free(newContextPrefix);
         }
+        free(newGroupName);
+        free(newContextPrefix);
     }
 
     return SNMP_ERR_NOERROR;

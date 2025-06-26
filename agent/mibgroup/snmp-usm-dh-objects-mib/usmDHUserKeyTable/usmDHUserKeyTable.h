@@ -22,10 +22,10 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_interface);
-config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_access);
-config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_get);
-config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_set);
+config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_interface)
+config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_access)
+config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_get)
+config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_set)
     /* *INDENT-ON*  */
 
     /*
@@ -185,8 +185,16 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
     usmDHUserKeyTable_data *usmDHUserKeyTable_allocate_data(void);
     void            usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *
                                                    data);
+
+    int            
+        usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
+                                             rowreq_ctx);
     int             usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
+    int            
+        usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx
+                                              * rowreq_ctx);
+
     usmDHUserKeyTable_rowreq_ctx
         *usmDHUserKeyTable_row_find_by_mib_index
         (usmDHUserKeyTable_mib_index * mib_idx);

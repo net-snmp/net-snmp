@@ -7,7 +7,7 @@
 extern          "C" {
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -20,7 +20,7 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern const oid netsnmp_AAL5PVCDomain[];
+extern oid  netsnmp_AAL5PVCDomain[]; /* = { NETSNMP_ENTERPRISE_MIB, 3, 3, 3 }; */
 
 netsnmp_transport *netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr,
                                              int local);

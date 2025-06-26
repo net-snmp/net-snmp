@@ -6,13 +6,13 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#ifdef HAVE_SYS_HASHING_H
+#if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
-#ifdef HAVE_NETINET_IN_VAR_H
+#if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
-#ifdef HAVE_SYSLOG_H
+#if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
 
@@ -20,7 +20,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/agent/sysORTable.h>
-#include <net-snmp/data_access/ip_scalars.h>
 
 #include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "ip.h"
@@ -142,7 +141,7 @@ oid             ipaddr_variables_oid[]  = { SNMP_OID_MIB2, 4, 20, 1 };
 oid             iproute_variables_oid[] = { SNMP_OID_MIB2, 4, 21, 1 };
 oid             ipmedia_variables_oid[] = { SNMP_OID_MIB2, 4, 22, 1 };
 oid             ip_module_oid[] = { SNMP_OID_MIB2, 4 };
-int             ip_module_oid_len = OID_LENGTH(ip_module_oid);
+int             ip_module_oid_len = sizeof(ip_module_oid) / sizeof(oid);
 int             ip_module_count = 0;    /* Need to liaise with icmp.c */
 
 void
@@ -248,13 +247,6 @@ long            ipTTL, oldipTTL;
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
-#ifdef IP_NSTATS
-typedef struct ipstat {
-        uint64_t st[IP_NSTATS];
-};
-#define IP_STAT_STRUCTURE      struct ipstat
-#endif
-
 #ifdef dragonfly
 #define IP_STAT_STRUCTURE	struct ip_stats
 #define	USES_TRADITIONAL_IPSTAT
@@ -285,7 +277,7 @@ ip_handler(netsnmp_mib_handler          *handler,
 {
     netsnmp_request_info  *request;
     netsnmp_variable_list *requestvb;
-    long     ret_value = 0;
+    long     ret_value;
     oid      subid;
     int      type = ASN_COUNTER;
 
@@ -415,7 +407,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         ret_value = ipstat.ips_forward;
         break;
     case IPINUNKNOWNPROTOS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_NOPROTO
+#if HAVE_STRUCT_IPSTAT_IPS_NOPROTO
         ret_value = ipstat.ips_noproto;
         break;
 #else
@@ -423,7 +415,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPINDISCARDS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
+#if HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
         ret_value = ipstat.ips_fragdropped;   /* ?? */
         break;
 #else
@@ -431,7 +423,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPINDELIVERS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_DELIVERED
+#if HAVE_STRUCT_IPSTAT_IPS_DELIVERED
         ret_value = ipstat.ips_delivered & 0xffffffff;
         break;
 #else
@@ -439,7 +431,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPOUTREQUESTS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
+#if HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
         ret_value = ipstat.ips_localout & 0xffffffff;
         break;
 #else
@@ -447,7 +439,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPOUTDISCARDS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_ODROPPED
+#if HAVE_STRUCT_IPSTAT_IPS_ODROPPED
         ret_value = ipstat.ips_odropped;
         break;
 #else
@@ -463,14 +455,14 @@ ip_handler(netsnmp_mib_handler          *handler,
         netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
         continue;
     case IPREASMTIMEOUT:
-        ret_value = netsnmp_arch_ip_scalars_ipReasmTimeout_get();
+        ret_value = IPFRAGTTL;
         type = ASN_INTEGER;
         break;
     case IPREASMREQDS:
         ret_value = ipstat.ips_fragments;
         break;
     case IPREASMOKS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
+#if HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
         ret_value = ipstat.ips_reassembled;
         break;
 #else
@@ -481,7 +473,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         ret_value = ipstat.ips_fragdropped + ipstat.ips_fragtimeout;
         break;
     case IPFRAGOKS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_FRAGMENTED
+#if HAVE_STRUCT_IPSTAT_IPS_FRAGMENTED
         ret_value = ipstat.ips_fragments;
         break;
 #else            /* XXX */
@@ -490,7 +482,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         break;
 #endif
     case IPFRAGFAILS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
+#if HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
         ret_value = ipstat.ips_cantfrag;
         break;
 #else
@@ -498,7 +490,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPFRAGCREATES:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
+#if HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
         ret_value = ipstat.ips_ofragments;
         break;
 #else
@@ -506,7 +498,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         continue;
 #endif
     case IPROUTEDISCARDS:
-#ifdef HAVE_STRUCT_IPSTAT_IPS_NOROUTE
+#if HAVE_STRUCT_IPSTAT_IPS_NOROUTE
         ret_value = ipstat.ips_noroute;
         break;
 #else
@@ -720,7 +712,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     struct nmparms  p;
     unsigned int    ulen;
     int             ret;
-    int             magic = (uintptr_t)vmagic;
+    int             magic = (int) vmagic;
     
     if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0) {
         DEBUGMSGTL(("mibII/ip", "Failed to load IP object %d (hpux11)\n", magic));
@@ -891,7 +883,7 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     int             i;
     static int      sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
     size_t          len;
-    int             magic = (uintptr_t) vmagic;
+    int             magic = (int) vmagic;
 
     switch (magic) {
     case IPFORWARDING:
@@ -929,7 +921,7 @@ int
 ip_load(netsnmp_cache *cache, void *vmagic)
 {
     long ret_value = -1;
-    int  magic     = (uintptr_t)vmagic;
+    int  magic     = (int) vmagic;
 
     switch (magic) {
     case IPFORWARDING:
@@ -963,7 +955,7 @@ int
 ip_load(netsnmp_cache *cache, void *vmagic)
 {
     long ret_value = -1;
-    int  magic     = (uintptr_t)vmagic;
+    int  magic     = (int) vmagic;
 
     switch (magic) {
     case IPFORWARDING:

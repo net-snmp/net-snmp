@@ -7,6 +7,8 @@
  * distributed with the Net-SNMP package.
  */
 
+#define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
+
 #ifdef HAVE_CRTDBG_H
 /*
  * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
@@ -20,16 +22,13 @@
 #include <net-snmp/net-snmp-features.h>
 
 #include <ctype.h>
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
 #include <stdio.h>
 #include <sys/types.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -44,7 +43,7 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -62,8 +61,11 @@
 #include <windows.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -75,23 +77,23 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
-netsnmp_feature_child_of(tools_all, libnetsnmp);
+netsnmp_feature_child_of(tools_all, libnetsnmp)
 
-netsnmp_feature_child_of(memory_wrappers, tools_all);
-netsnmp_feature_child_of(valgrind, tools_all);
-netsnmp_feature_child_of(string_time_to_secs, tools_all);
-netsnmp_feature_child_of(netsnmp_check_definedness, valgrind);
+netsnmp_feature_child_of(memory_wrappers, tools_all)
+netsnmp_feature_child_of(valgrind, tools_all)
+netsnmp_feature_child_of(string_time_to_secs, tools_all)
+netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
 
-netsnmp_feature_child_of(uatime_ready, netsnmp_unused);
-netsnmp_feature_child_of(timeval_tticks, netsnmp_unused);
+netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
+netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
 
-netsnmp_feature_child_of(memory_strdup, memory_wrappers);
-netsnmp_feature_child_of(memory_calloc, memory_wrappers);
-netsnmp_feature_child_of(memory_malloc, memory_wrappers);
-netsnmp_feature_child_of(memory_realloc, memory_wrappers);
-netsnmp_feature_child_of(memory_free, memory_wrappers);
+netsnmp_feature_child_of(memory_strdup, memory_wrappers)
+netsnmp_feature_child_of(memory_calloc, memory_wrappers)
+netsnmp_feature_child_of(memory_malloc, memory_wrappers)
+netsnmp_feature_child_of(memory_realloc, memory_wrappers)
+netsnmp_feature_child_of(memory_free, memory_wrappers)
 
-#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_STRDUP
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
 /**
  * This function is a wrapper for the strdup function.
  *
@@ -175,9 +177,9 @@ snmp_realloc(u_char ** buf, size_t * buf_len)
     }
 
     if (*buf == NULL) {
-        new_buf = malloc(new_buf_len);
+        new_buf = (u_char *) malloc(new_buf_len);
     } else {
-        new_buf = realloc(*buf, new_buf_len);
+        new_buf = (u_char *) realloc(*buf, new_buf_len);
     }
 
     if (new_buf != NULL) {
@@ -235,7 +237,7 @@ free_zero(void *buf, size_t size)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
 /**
- * Returns pointer to allocated & set buffer on success, size contains
+ * Returns pointer to allocaed & set buffer on success, size contains
  * number of random bytes filled.  buf is NULL and *size set to KMT
  * error value upon failure.
  *
@@ -248,7 +250,7 @@ u_char         *
 malloc_random(size_t * size)
 {
     int             rval = SNMPERR_SUCCESS;
-    u_char         *buf = calloc(1, *size);
+    u_char         *buf = (u_char *) calloc(1, *size);
 
     if (buf) {
         rval = sc_random(buf, size);
@@ -293,12 +295,12 @@ void *netsnmp_memdup(const void *from, size_t size)
  * NOTE: the returned size DOES NOT include the extra byte for the NULL
  *       termination, just the raw data (i.e. from_size).
  *
- * This is mainly to protect against code that uses str* functions on
+ * This is mainly to protect agains code that uses str* functions on
  * a fixed buffer that may not have a terminating NULL.
  *
  * @param[in] from Pointer to copy memory from.
  * @param[in] from_size Size of the data to be copied.
- * @param[out] to_size Pointer to size var for new block (OPTIONAL)
+ * @param[out] new_size Pointer to size var for new block (OPTIONAL)
  *
  * @return Pointer to the duplicated memory block, or NULL if memory allocation
  * failed.
@@ -327,7 +329,7 @@ void *netsnmp_memdup_nt(const void *from, size_t from_size, size_t *to_size)
  * find the cause of undefined value errors if --track-origins=yes is not
  * sufficient. Does nothing when not running under Valgrind.
  *
- * Note: this requires a fairly recent Valgrind.
+ * Note: this requires a fairly recent valgrind.
  */
 void
 netsnmp_check_definedness(const void *packet, size_t length)
@@ -392,9 +394,7 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
         return 0;
 
     if (NULL == *dest) {
-        s = calloc(1, olen);
-        if (s == NULL)
-            return 0;
+        s = (unsigned char *) calloc(1, olen);
         *dest_len = olen;
     }
     else
@@ -545,7 +545,7 @@ snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
  *
  * @param buf     address of a pointer (pointer to pointer) for the output buffer.
  *                If allow_realloc is set, the buffer may be grown via snmp_realloc
- *                to accommodate the data.
+ *                to accomodate the data.
  *
  * @param buf_len pointer to a size_t containing the initial size of buf.
  *
@@ -583,8 +583,8 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
     }
 
     while (*cp != '\0') {
-        if (!isxdigit((unsigned char)cp[0]) ||
-            !isxdigit((unsigned char)cp[1])) {
+        if (!isxdigit((int) *cp) ||
+            !isxdigit((int) *(cp+1))) {
             if ((NULL != delim) && (NULL != strchr(delim, *cp))) {
                 cp++;
                 continue;
@@ -595,7 +595,7 @@ netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
             return 0;
         }
         /*
-         * if we don't have enough space, realloc.
+         * if we dont' have enough space, realloc.
          * (snmp_realloc will adjust buf_len to new size)
          */
         if ((*offset >= *buf_len) &&
@@ -855,7 +855,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
                                  */
         gotviolation = 1;
         s += sprintf(s, "!!! ");
-        NETSNMP_FALLTHROUGH;
+        /* FALLTHROUGH */
 
     default:                   /* Unknown encoding. */
 
@@ -916,7 +916,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 marker_t
 atime_newMarker(void)
 {
-    marker_t        pm = calloc(1, sizeof(struct timeval));
+    marker_t        pm = (marker_t) calloc(1, sizeof(struct timeval));
     gettimeofday((struct timeval *) pm, NULL);
     return pm;
 }
@@ -1072,8 +1072,6 @@ atime_ready(const_marker_t pm, int delta_ms)
         return 0;
 
     now = atime_newMarker();
-    if (!now)
-        return 0;
 
     diff = atime_diff(pm, now);
     free(now);
@@ -1099,8 +1097,6 @@ uatime_ready(const_marker_t pm, unsigned int delta_ms)
         return 0;
 
     now = atime_newMarker();
-    if (!now)
-        return 0;
 
     diff = uatime_diff(pm, now);
     free(now);
@@ -1152,8 +1148,6 @@ marker_tticks(const_marker_t pm)
 {
     int             res;
     marker_t        now = atime_newMarker();
-    if (!now)
-        return 0;
 
     res = atime_diff(pm, now);
     free(now);
@@ -1325,29 +1319,29 @@ int netsnmp_setenv(const char *envname, const char *envval, int overwrite)
 int
 netsnmp_addrstr_hton(char *ptr, size_t len)
 {
+#ifndef WORDS_BIGENDIAN
     char tmp[8];
     
-    if (!NETSNMP_BIGENDIAN) {
-        if (8 == len) {
-            tmp[0] = ptr[6];
-            tmp[1] = ptr[7];
-            tmp[2] = ptr[4];
-            tmp[3] = ptr[5];
-            tmp[4] = ptr[2];
-            tmp[5] = ptr[3];
-            tmp[6] = ptr[0];
-            tmp[7] = ptr[1];
-            memcpy(ptr, &tmp, 8);
-        }
-        else if (32 == len) {
-            netsnmp_addrstr_hton(ptr,      8);
-            netsnmp_addrstr_hton(ptr + 8,  8);
-            netsnmp_addrstr_hton(ptr + 16, 8);
-            netsnmp_addrstr_hton(ptr + 24, 8);
-        }
-        else
-            return -1;
+    if (8 == len) {
+        tmp[0] = ptr[6];
+        tmp[1] = ptr[7];
+        tmp[2] = ptr[4];
+        tmp[3] = ptr[5];
+        tmp[4] = ptr[2];
+        tmp[5] = ptr[3];
+        tmp[6] = ptr[0];
+        tmp[7] = ptr[1];
+        memcpy (ptr, &tmp, 8);
     }
+    else if (32 == len) {
+        netsnmp_addrstr_hton(ptr   , 8);
+        netsnmp_addrstr_hton(ptr+8 , 8);
+        netsnmp_addrstr_hton(ptr+16, 8);
+        netsnmp_addrstr_hton(ptr+24, 8);
+    }
+    else
+        return -1;
+#endif
 
     return 0;
 }
@@ -1413,12 +1407,3 @@ netsnmp_string_time_to_secs(const char *time_string) {
     return secs;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STRING_TIME_TO_SECS */
-
-const char *netsnmp_gethomedir(void) {
-    const char *homepath = netsnmp_getenv("HOME");
-#ifdef _WIN32
-    if (!homepath)
-        homepath = netsnmp_getenv("USERPROFILE");
-#endif
-    return homepath;
-}

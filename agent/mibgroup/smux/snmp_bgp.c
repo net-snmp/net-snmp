@@ -9,25 +9,25 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_ERR_H
+#if HAVE_ERR_H
 #include <err.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -38,11 +38,11 @@
 
 #include <sys/stat.h>
 #include <sys/socket.h>
-#ifdef HAVE_SYS_FILIO_H
+#if HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
 
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -141,7 +141,7 @@ var_bgp(struct variable *vp,
     *write_method = NULL;
 
     /*
-     * Do not allow access to the peer stuff as it crashes gated.
+     * Donot allow access to the peer stuff as it crashes gated.
      * However A GetNext on the last 23.3.1.9 variable will force gated into
      * the peer stuff and cause it to crash.
      * The only way to fix this is to either solve the Gated problem, or 
@@ -196,7 +196,7 @@ var_bgp(struct variable *vp,
         return NULL;
 
     /*
-     * Any result returned should be within the bgp tree.
+     * Any resullt returned should be within the bgp tree.
      * bgp_mib - static u_int bgp_mib[] = {1, 3, 6, 1, 2, 1, 15};
      */
     if (memcmp(bgp_mib, name, sizeof(bgp_mib)) != 0) {

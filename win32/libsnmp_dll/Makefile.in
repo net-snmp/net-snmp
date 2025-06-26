@@ -55,7 +55,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpIPBaseDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
@@ -108,12 +107,20 @@ CLEAN :
 	-@erase "..\bin\$(OUTDIR)\netsnmp.dll"
 	-@erase "..\bin\$(OUTDIR)\netsnmp.dll.manifest"
 
+"..\lib\$(OUTDIR)" :
+    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
+
+"..\bin\$(OUTDIR)" :
+    if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
+
 .SUFFIXES: .c .obj
 
 {..\..\snmplib}.c{$(INTDIR)}.obj::
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
 {..\..\snmplib\transports}.c{$(INTDIR)}.obj::
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
 
@@ -121,8 +128,12 @@ RSC=rc.exe
 LINK32=link.exe
 LINK32_FLAGS=advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /pdb:"../bin/$(OUTDIR)/netsnmp.pdb" /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)/netsnmp.lib" $(LDFLAGS)
 
-"..\bin\$(OUTDIR)\netsnmp.dll" : $(DEF_FILE) $(LINK32_OBJS)
+"..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) $(LINK32_FLAGS) $(LINK32_OBJS)
+ if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
+	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
+
+
 !IF "$(NO_EXTERNAL_DEPS)" != "1"
 !IF EXISTS("$(PROGNAME).dep")
 !INCLUDE "$(PROGNAME).dep"

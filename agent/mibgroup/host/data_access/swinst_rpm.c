@@ -45,7 +45,7 @@
 #include <net-snmp/data_access/swinst.h>
 #include "swinst_private.h"
 
-netsnmp_feature_require(date_n_time);
+netsnmp_feature_require(date_n_time)
 
    /*
     * Location of RPM package directory.
@@ -53,7 +53,7 @@ netsnmp_feature_require(date_n_time);
     *    - reporting hrSWInstalledLast* objects
     *    - detecting when the cached contents are out of date.
     */
-static char pkg_directory[SNMP_MAXPATH];
+char pkg_directory[SNMP_MAXPATH];
 
 /* ---------------------------------------------------------------------
  */
@@ -73,23 +73,12 @@ netsnmp_swinst_arch_init(void)
 #endif
 
     snprintf( pkg_directory, SNMP_MAXPATH, "%s/Packages", dbpath );
-    
-    if (-1 == stat( pkg_directory, &stat_buf )) {
-
-        /* check for SQLite DB backend */
-        snprintf( pkg_directory, SNMP_MAXPATH, "%s/rpmdb.sqlite", dbpath );
-        
-        if (-1 == stat( pkg_directory, &stat_buf )) {
-            snmp_log(LOG_ERR, "Can't find directory of RPM packages\n");
-            pkg_directory[0] = '\0';
-        }
-    }
-
     SNMP_FREE(rpmdbpath);
     dbpath = NULL;
-#ifdef HAVE_RPMGETPATH
-    rpmFreeRpmrc();
-#endif    
+    if (-1 == stat( pkg_directory, &stat_buf )) {
+        snmp_log(LOG_ERR, "Can't find directory of RPM packages");
+        pkg_directory[0] = '\0';
+    }
 }
 
 void
@@ -108,7 +97,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 
     rpmdbMatchIterator    mi;
     Header                h;
-#ifdef HAVE_HEADERGET
+#if HAVE_HEADERGET
     const char           *g;
     rpmtd                 td_name, td_version, td_release, td_group, td_time;
 #else
@@ -120,7 +109,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     int                   i = 1;
     netsnmp_swinst_entry *entry;
 
-#ifdef HAVE_HEADERGET
+#if HAVE_HEADERGET
     td_name = rpmtdNew();
     td_version = rpmtdNew();
     td_release = rpmtdNew();
@@ -144,7 +133,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
         CONTAINER_INSERT(container, entry);
 
         h = headerLink( h );
-#ifdef HAVE_HEADERGET
+#if HAVE_HEADERGET
         headerGet(h, RPMTAG_NAME, td_name, HEADERGET_EXT);
         headerGet(h, RPMTAG_VERSION, td_version, HEADERGET_EXT);
         headerGet(h, RPMTAG_RELEASE, td_release, HEADERGET_EXT);
@@ -182,7 +171,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
             memcpy(entry->swDate, dt, entry->swDate_len);
         }
 
-#ifdef HAVE_HEADERGET
+#if HAVE_HEADERGET
         rpmtdFreeData(td_name);
         rpmtdFreeData(td_version);
         rpmtdFreeData(td_release);
@@ -193,7 +182,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     }
     rpmdbFreeIterator( mi );
     rpmtsFree( ts );
-#ifdef HAVE_HEADERGET
+#if HAVE_HEADERGET
     rpmtdFree(td_name);
     rpmtdFree(td_version);
     rpmtdFree(td_release);

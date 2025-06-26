@@ -18,30 +18,29 @@
 #ifndef HAVE_PRIORITYNAMES
 #include <errno.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdarg.h>
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #ifdef HAVE_PRIORITYNAMES
- #if defined( HAVE_SYSLOG_H )
-  #include <syslog.h>
- #elif defined ( HAVE_SYS_SYSLOG_H )
-  #include <sys/syslog.h>
- #endif
+#include <sys/syslog.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -85,15 +84,15 @@ debug_indent_get(void)
 const char*
 debug_indent(void)
 {
-    static const char SPACES[] = "                                        "
-        "                                        ";
-
+#define SPACES "                                        " \
+               "                                        "
     if ((sizeof(SPACES) - 1) < (unsigned int)debugindent) {
         snmp_log(LOG_ERR, "Too deep indentation for debug_indent. "
                  "Consider using \"%%*s\", debug_indent_get(), \"\" instead.");
         return SPACES;
     }
-    return &SPACES[sizeof(SPACES) - 1 - debugindent];
+    return SPACES + sizeof(SPACES) - 1 - debugindent;
+#undef SPACES
 }
 
 void
@@ -151,7 +150,7 @@ netsnmp_get_debug_log_level(void)
 static void
 debug_config_debug_log_level(const char *configtoken, char *line)
 {
-#ifndef HAVE_PRIORITYNAMES
+#if !HAVE_PRIORITYNAMES
     static const struct strval_s {
         const char *c_name;
         int         c_val;
@@ -204,7 +203,7 @@ debug_register_tokens(const char *tokens)
             } else if (debug_num_tokens < MAX_DEBUG_TOKENS) {
                 if ('-' == *cp) {
                     ++cp;
-                    status = SNMP_DEBUG_DISABLED;
+                    status = SNMP_DEBUG_EXCLUDED;
                 }
                 else
                     status = SNMP_DEBUG_ACTIVE;
@@ -265,7 +264,7 @@ debug_enable_token_logs (const char *token) {
 }
 
 /*
- * Disable logs on a given token
+ * Diable logs on a given token
  */
 int
 debug_disable_token_logs (const char *token) {
@@ -553,18 +552,6 @@ snmp_get_do_debugging(void)
 }
 
 void
-snmp_set_do_debugoutputall(int val)
-{
-    debug_print_everything = val;
-}
-
-int
-snmp_get_do_debugoutputall(void)
-{
-    return debug_print_everything;
-}
-
-void
 snmp_debug_shutdown(void)
 {
     int i;
@@ -691,40 +678,14 @@ snmp_get_do_debugging(void)
 }
 
 void
-snmp_set_do_debugoutputall(int val)
-{ }
-
-int
-snmp_get_do_debugoutputall(void)
-{
-    return 0;
-}
-
-void
 snmp_debug_shutdown(void)
 {  }
 
 #endif /* NETSNMP_NO_DEBUGGING */
 
-#ifdef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
-#include <wolfssl/options.h>
-#include <wolfssl/wolfcrypt/logging.h>
-
-static void snmp_log_wolfssl_msg(const int logLevel NETSNMP_ATTRIBUTE_UNUSED,
-                                 const char* const msg)
-{
-    DEBUGMSGTL(("snmp_openssl", msg, "\n"));
-}
-#endif
-
 void
 snmp_debug_init(void)
 {
-#ifdef HAVE_WOLFSSL_WOLFCRYPT_LOGGING_H
-    wolfSSL_Debugging_ON();
-    wolfSSL_SetLoggingCb(snmp_log_wolfssl_msg);
-#endif
-
     register_prenetsnmp_mib_handler("snmp", "doDebugging",
                                     debug_config_turn_on_debugging, NULL,
                                     "(1|0)");

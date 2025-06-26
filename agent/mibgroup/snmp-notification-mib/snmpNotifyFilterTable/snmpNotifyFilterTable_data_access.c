@@ -21,10 +21,10 @@
  */
 #include "snmpNotifyFilterTable.h"
 
-#include "snmpNotifyFilterTable_data_storage.h"
+
 #include "snmpNotifyFilterTable_data_access.h"
 
-netsnmp_feature_require(snmpNotifyFilterTable_container_get);
+netsnmp_feature_require(snmpNotifyFilterTable_container_get)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data
@@ -110,7 +110,7 @@ snmpNotifyFilterTable_container_init(netsnmp_container **container_ptr_ptr)
      * For advanced users, you can use a custom container. If you
      * do not create one, one will be created for you.
      */
-    *container_ptr_ptr = snmpNotifyFilter_storage_container_create();
+    *container_ptr_ptr = NULL;
 
 }                               /* snmpNotifyFilterTable_container_init */
 
@@ -161,8 +161,8 @@ snmpNotifyFilterTable_container_shutdown(netsnmp_container *container_ptr)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  snmpNotifyFilterTable_row_prep() for populating data.

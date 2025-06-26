@@ -18,26 +18,27 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
-#include "hardware/fsys/fsys.h"
+#include <net-snmp/agent/hardware/fsys.h>
 #include "host_res.h"
 #include "hrh_filesys.h"
 #include "hrh_storage.h"
 #include "hr_disk.h"
+#include "hr_filesys.h"
 #include <net-snmp/utilities.h>
 
-#ifdef HAVE_MNTENT_H
+#if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
-#ifdef HAVE_SYS_MNTENT_H
+#if HAVE_SYS_MNTENT_H
 #include <sys/mntent.h>
 #endif
-#ifdef HAVE_SYS_MNTTAB_H
+#if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
-#ifdef HAVE_SYS_STATVFS_H
+#if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#ifdef HAVE_SYS_VFS_H
+#if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
 #ifdef HAVE_SYS_PARAM_H
@@ -48,10 +49,10 @@
 #endif
 
 #include <ctype.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
@@ -61,8 +62,8 @@
 #include <sys/statfs.h>
 #endif
 
-netsnmp_feature_require(date_n_time);
-netsnmp_feature_require(ctime_to_timet);
+netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(ctime_to_timet)
 
 #define HRFS_MONOTONICALLY_INCREASING
 
@@ -72,11 +73,14 @@ netsnmp_feature_require(ctime_to_timet);
 	 *   and internal forward declarations
 	 *
 	 *********************/
+netsnmp_fsys_info *HRFS_entry;
 
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
 
-static u_char *when_dumped(const char *filesys, int level, size_t *length);
+static u_char  *when_dumped(char *filesys, int level, size_t * length);
+int             header_hrhfilesys(struct variable *, oid *, size_t *, int,
+                                 size_t *, WriteMethod **);
 
         /*********************
 	 *
@@ -135,10 +139,11 @@ init_hrh_filesys(void)
  * 
  */
 
-static int
-header_hrhfilesys(struct variable *vp, oid *name, size_t *length,
-                  int exact, size_t *var_len, WriteMethod **write_method,
-                  const netsnmp_fsys_info **entry)
+int
+header_hrhfilesys(struct variable *vp,
+                 oid * name,
+                 size_t * length,
+                 int exact, size_t * var_len, WriteMethod ** write_method)
 {
 #define HRFSYS_ENTRY_NAME_LENGTH	11
     oid             newname[MAX_OID_LEN];
@@ -154,10 +159,9 @@ header_hrhfilesys(struct variable *vp, oid *name, size_t *length,
      * Find "next" file system entry 
      */
 
-    *entry = NULL;
     Init_HR_FileSys();
     for (;;) {
-        fsys_idx = Get_Next_HR_FileSys(entry);
+        fsys_idx = Get_Next_HR_FileSys();
         if (fsys_idx == -1)
             break;
         newname[HRFSYS_ENTRY_NAME_LENGTH] = fsys_idx;
@@ -215,11 +219,9 @@ var_hrhfilesys(struct variable *vp,
 {
     int             fsys_idx;
     static char    *string;
-    static char     empty_str[1];
-    const netsnmp_fsys_info *entry = NULL;
 
-    fsys_idx = header_hrhfilesys(vp, name, length, exact, var_len, write_method,
-                                 &entry);
+    fsys_idx =
+        header_hrhfilesys(vp, name, length, exact, var_len, write_method);
     if (fsys_idx == MATCH_FAILED)
         return NULL;
 
@@ -231,40 +233,40 @@ var_hrhfilesys(struct variable *vp,
         free(string);
         string = NULL;
         *var_len = 0;
-        if (asprintf(&string, "%s", entry->path) >= 0)
+        if (asprintf(&string, "%s", HRFS_entry->path) >= 0)
             *var_len = strlen(string);
-        return (u_char *)(string ? string : empty_str);
+        return (u_char *) string;
     case HRFSYS_RMOUNT:
         free(string);
-        if (entry->flags & NETSNMP_FS_FLAG_REMOTE) {
-            if (asprintf(&string, "%s", entry->device) < 0)
+        if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) {
+            if (asprintf(&string, "%s", HRFS_entry->device) < 0)
                 string = NULL;
         } else {
             string = strdup("");
         }
         *var_len = string ? strlen(string) : 0;
-        return (u_char *)(string ? string : empty_str);
+        return (u_char *) string;
 
     case HRFSYS_TYPE:
-        fsys_type_id[fsys_type_len - 1] =
-            (entry->type > _NETSNMP_FS_TYPE_LOCAL ?
-             NETSNMP_FS_TYPE_OTHER : entry->type);
+        fsys_type_id[fsys_type_len - 1] = 
+            (HRFS_entry->type > _NETSNMP_FS_TYPE_LOCAL ?
+                                 NETSNMP_FS_TYPE_OTHER : HRFS_entry->type);
         *var_len = sizeof(fsys_type_id);
         return (u_char *) fsys_type_id;
 
     case HRFSYS_ACCESS:
-	long_return = entry->flags & NETSNMP_FS_FLAG_RONLY ? 2 : 1;
+	long_return = HRFS_entry->flags & NETSNMP_FS_FLAG_RONLY ? 2 : 1;
         return (u_char *) & long_return;
     case HRFSYS_BOOT:
-	long_return = entry->flags & NETSNMP_FS_FLAG_BOOTABLE ? 1 : 2;
+	long_return = HRFS_entry->flags & NETSNMP_FS_FLAG_BOOTABLE ? 1 : 2;
         return (u_char *) & long_return;
     case HRFSYS_STOREIDX:
         long_return = fsys_idx + NETSNMP_MEM_TYPE_MAX;
         return (u_char *) & long_return;
     case HRFSYS_FULLDUMP:
-        return when_dumped(entry->path, FULL_DUMP, var_len);
+        return when_dumped(HRFS_entry->path, FULL_DUMP, var_len);
     case HRFSYS_PARTDUMP:
-        return when_dumped(entry->path, PART_DUMP, var_len);
+        return when_dumped(HRFS_entry->path, PART_DUMP, var_len);
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrhfilesys\n",
                     vp->magic));
@@ -278,38 +280,46 @@ var_hrhfilesys(struct variable *vp,
 	 *  Internal implementation functions
 	 *
 	 *********************/
+static int      HRFS_index;
 
 void
 Init_HR_FileSys(void)
 {
     netsnmp_cache *c = netsnmp_fsys_get_cache();
-    netsnmp_cache_check_and_reload(c);
+    netsnmp_cache_check_and_reload( c );
+
+    HRFS_entry = NULL;
+    HRFS_index = 0;
 }
 
 int
-Get_Next_HR_FileSys(const netsnmp_fsys_info **entry)
+Get_Next_HR_FileSys(void)
 {
-    *entry = *entry ? netsnmp_fsys_get_next(*entry) : netsnmp_fsys_get_first();
+    if ( HRFS_entry ) {
+        HRFS_entry = netsnmp_fsys_get_next( HRFS_entry );
+    } else {     
+        HRFS_entry = netsnmp_fsys_get_first();
+    }
     /* Skip "inactive" entries */
-    while (*entry && !((*entry)->flags & NETSNMP_FS_FLAG_ACTIVE))
-        *entry = netsnmp_fsys_get_next(*entry);
+    while ( HRFS_entry && !(HRFS_entry->flags & NETSNMP_FS_FLAG_ACTIVE))
+        HRFS_entry = netsnmp_fsys_get_next( HRFS_entry );
 
-    return *entry ? (*entry)->idx.oids[0] : -1;
+    HRFS_index = (HRFS_entry ? HRFS_entry->idx.oids[0] : -1 );
+    return HRFS_index;
 }
 
 
 
 static u_char  *
-when_dumped(const char *filesys, int level, size_t *length)
+when_dumped(char *filesys, int level, size_t * length)
 {
     time_t          dumpdate = 0, tmp;
     FILE           *dump_fp;
     char            line[1024];
-    const char     *cp1;
-    char           *cp2, *cp3;
+    char           *cp1, *cp2, *cp3;
 
     /*
-     * Look for the relevant entries in /etc/dumpdates
+     * Look for the relevent entries in /etc/dumpdates
      *
      * This is complicated by the fact that disks are
      *   mounted using block devices, but dumps are
@@ -415,13 +425,7 @@ Get_FSSize(char *dev)
 }
 
 int
-Check_HR_FileSys_NFS(const netsnmp_fsys_info *entry)
+Check_HR_FileSys_NFS (void)
 {
-    return entry->flags & NETSNMP_FS_FLAG_REMOTE ? 1 : 0;
-}
-
-int
-Check_HR_FileSys_AutoFs(const netsnmp_fsys_info *entry)
-{
-    return entry->type == NETSNMP_FS_TYPE_AUTOFS;
+    return (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) ? 1 : 0;
 }

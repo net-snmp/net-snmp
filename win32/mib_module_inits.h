@@ -8,13 +8,7 @@
 
 #ifdef HAVE_WIN32_PLATFORM_SDK
   if (should_init("at")) init_at();
-#if 0
   if (should_init("interfaces")) init_interfaces();
-#else
-  if (should_init("ifTable")) init_ifTable();
-  if (should_init("ifXTable")) init_ifXTable();
-  if (should_init("interface")) init_interface();
-#endif
   if (should_init("tcp")) init_tcp();
   if (should_init("tcpTable")) init_tcpTable();
   if (should_init("icmp")) init_icmp();
@@ -63,7 +57,7 @@
 
 #ifdef USING_HOST_MODULE
   if (should_init("hr_system")) init_hr_system();
-  if (should_init("hrh_storage")) init_hrh_storage();
+  if (should_init("hr_storage")) init_hr_storage();
   if (should_init("hr_device")) init_hr_device();
   if (should_init("hr_other")) init_hr_other();
   if (should_init("hr_proc")) init_hr_proc();
@@ -71,7 +65,7 @@
   if (should_init("hr_print")) init_hr_print();
   if (should_init("hr_disk")) init_hr_disk();
   if (should_init("hr_partition")) init_hr_partition();
-  if (should_init("hrh_filesys")) init_hrh_filesys();
+  if (should_init("hr_filesys")) init_hr_filesys();
   if (should_init("hr_swrun")) init_hr_swrun();
   if (should_init("hr_swinst")) init_hr_swinst();
 #endif

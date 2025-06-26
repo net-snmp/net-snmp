@@ -5,10 +5,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 /*
  * include our parent header 
  */
@@ -130,8 +126,8 @@ etherstats_interface_ioctl_ifindex_get (int fd, const char *name) {
     rc = _etherStats_ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0) {
         DEBUGMSGTL(("access:etherStats:ioctl",
-                    "ifindex_get error on interface '%s'\n", name));
-        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, ifindex_get error on interface '%s'\n", name);
+                    "ifindex_get error on inerface '%s'\n", name));
+        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, ifindex_get error on inerface '%s'\n", name);
         return 0;
 
     }
@@ -143,7 +139,7 @@ etherstats_interface_ioctl_ifindex_get (int fd, const char *name) {
 /*
  * @retval  0 success
  * @retval -1 cannot get ETHTOOL_DRVINFO failed 
- * @retval -2 n_stats zero - no statistics available
+ * @retval -2 n_stats zero - no statistcs available
  * @retval -3 memory allocation for holding the statistics failed
  * @retval -4 cannot get ETHTOOL_GSTRINGS information
  * @retval -5 cannot get ETHTOOL_GSTATS information
@@ -346,8 +342,8 @@ _etherStats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
      */
     if(NULL == name) {
         DEBUGMSGTL(("access:etherStatsTable:ioctl",
-                    "_etherStats_ioctl_get interface name is NULL"));
-        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get interface name is NULL");
+                    "_etherStats_ioctl_get invalid ifname '%s'\n", name));
+        snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get error on inerface '%s'\n", name);
         return -1;
     }
 
@@ -359,7 +355,7 @@ _etherStats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
         if(ourfd < 0) {
             DEBUGMSGTL(("access:etherStatsTable:ioctl",
                         "_etherStats_ioctl_get couldn't create a socket\n"));
-            snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get error on interface '%s'\n", name);
+            snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get error on inerface '%s'\n", name);
 
             return -2;
         }

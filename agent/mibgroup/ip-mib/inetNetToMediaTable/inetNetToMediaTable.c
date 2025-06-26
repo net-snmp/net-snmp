@@ -390,7 +390,7 @@ inetNetToMediaTable_indexes_set(inetNetToMediaTable_rowreq_ctx *
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != inetNetToMediaTable_index_to_oid(&rowreq_ctx->oid_idx,
                                               &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;
@@ -1058,7 +1058,7 @@ inetNetToMediaTable_commit(inetNetToMediaTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully committed this row, set the dirty flag.
+     * if we successfully commited this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -1110,7 +1110,7 @@ inetNetToMediaTable_undo_commit(inetNetToMediaTable_rowreq_ctx *
 
 
     /*
-     * if we successfully un-committed this row, clear the dirty flag.
+     * if we successfully un-commited this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -1383,7 +1383,7 @@ The type of mapping.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -1567,7 +1567,7 @@ The status of this conceptual row.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note

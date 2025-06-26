@@ -47,21 +47,21 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs);
+netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs)
 
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(table_container_row_insert);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-netsnmp_feature_require(check_vb_type_and_max_size);
+netsnmp_feature_require(check_vb_type_and_max_size)
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access);
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access);
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access);
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access);
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -172,7 +172,6 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_post_request;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_get_values;
 #ifndef NETSNMP_DISABLE_SET_SUPPORT
-#ifndef NETSNMP_NO_WRITE_SUPPORT
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_objects;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_set_values;
@@ -182,7 +181,6 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_dependencies;
-#endif
 
 NETSNMP_STATIC_INLINE int
                 _snmpNotifyFilterTable_undo_column(snmpNotifyFilterTable_rowreq_ctx *
@@ -1026,7 +1024,7 @@ _mfd_snmpNotifyFilterTable_get_values(netsnmp_mib_handler *handler, netsnmp_hand
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1127,7 +1125,9 @@ _snmpNotifyFilterTable_check_column(snmpNotifyFilterTable_rowreq_ctx *
         /*
          * check defined range(s). 
          */
-        if (rc == SNMPERR_SUCCESS && var->val_len > 16) {
+        if ((SNMPERR_SUCCESS == rc)
+            && ((var->val_len < 0) || (var->val_len > 16))
+            ) {
             rc = SNMP_ERR_WRONGLENGTH;
         }
         if (SNMPERR_SUCCESS != rc) {
@@ -1634,7 +1634,7 @@ _mfd_snmpNotifyFilterTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -1842,7 +1842,6 @@ _mfd_snmpNotifyFilterTable_irreversible_commit(netsnmp_mib_handler
  * DATA ACCESS
  *
  ***********************************************************************/
-#if 0
 /**
  * @internal
  */
@@ -1882,9 +1881,10 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container, _container_item_free, NULL);
+    CONTAINER_CLEAR(container,
+                    (netsnmp_container_obj_func *) _container_item_free,
+                    NULL);
 }                               /* _container_free */
-#endif
 
 /**
  * @internal
@@ -1917,20 +1917,29 @@ _snmpNotifyFilterTable_container_init(snmpNotifyFilterTable_interface_ctx *
  * shutdown the container with functions or wrappers
  */
 void
-_snmpNotifyFilterTable_container_shutdown
-    (snmpNotifyFilterTable_interface_ctx *if_ctx)
-{
+ 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    _snmpNotifyFilterTable_container_shutdown
+    (snmpNotifyFilterTable_interface_ctx * if_ctx) {
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_shutdown", "called\n"));
 
     snmpNotifyFilterTable_container_shutdown(if_ctx->container);
 
-    /*
-     * Do not free the container here since
-     * shutdown_snmpNotifyFilterTable_data_storage() will free this container
-     * anyway.
-     */
-    /* _container_free(if_ctx->container); */
-    if_ctx->container = NULL;
+    _container_free(if_ctx->container);
+
 }                               /* _snmpNotifyFilterTable_container_shutdown */
 
 /***********************************************************************
@@ -1947,7 +1956,9 @@ static int      _snmpNotifyFilterTable_container_save_rows(int majorID,
 static void     _snmpNotifyFilterTable_container_row_restore(const char
                                                              *token,
                                                              char *buf);
-static void     _snmpNotifyFilterTable_container_row_save(void *data,
+static int
+                _snmpNotifyFilterTable_container_row_save(snmpNotifyFilterTable_rowreq_ctx
+                                                          * rowreq_ctx,
                                                           void *type);
 static char
  
@@ -2040,7 +2051,8 @@ _snmpNotifyFilterTable_container_save_rows(int majorID, int minorID,
     /*
      * save all rows
      */
-    CONTAINER_FOR_EACH(c, _snmpNotifyFilterTable_container_row_save, type);
+    CONTAINER_FOR_EACH(c, (netsnmp_container_obj_func *)
+                       _snmpNotifyFilterTable_container_row_save, type);
 
     read_config_store((char *) type, sep);
     read_config_store((char *) type, "\n");
@@ -2056,11 +2068,10 @@ _snmpNotifyFilterTable_container_save_rows(int majorID, int minorID,
 /************************************************************
  * _snmpNotifyFilterTable_container_row_save
  */
-static void
-_snmpNotifyFilterTable_container_row_save(void *data, void *type)
+static int
+_snmpNotifyFilterTable_container_row_save(snmpNotifyFilterTable_rowreq_ctx
+                                          * rowreq_ctx, void *type)
 {
-    snmpNotifyFilterTable_rowreq_ctx *rowreq_ctx = data;
-
     /*
      * Allocate space for a line with all data for a row. An
      * attempt is made to come up with a default maximum size, but
@@ -2070,7 +2081,7 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
      *
      * 1) allocate space for each column. Comment out columns you don't
      * intend to save. You may also need to add room for any non-
-     * column data you want to store. Remember, data will be stored in
+     * column data you want to store. Remeber, data will be stored in
      * ASCII form, so you need to allow for that. Here are some
      * general guidelines:
      *
@@ -2106,7 +2117,7 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
     int             i;
 
     if (snmpNotifyFilterTable_container_should_save(rowreq_ctx) == 0) {
-        return;
+        return SNMP_ERR_NOERROR;
     }
 
     /*
@@ -2118,13 +2129,13 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
     if (NULL == pos) {
         snmp_log(LOG_ERR, "error saving snmpNotifyFilterTable row "
                  "to persistent file\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
     *pos++ = ' ';
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving snmpNotifyFilterTable row "
                  "to persistent file (too long)\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
 
     /*
@@ -2146,7 +2157,7 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
         if (pos > max) {
             snmp_log(LOG_ERR, "error saving snmpNotifyFilterTable row "
                      "to persistent file (too long)\n");
-            return;
+            return SNMP_ERR_GENERR;
         }
     }
 
@@ -2162,11 +2173,13 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving snmpNotifyFilterTable row "
                  "to persistent file (too long)\n");
-        return;
+        return SNMP_ERR_GENERR;
     }
     read_config_store((char *) type, buf);
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_row_save", "saving line '%s'\n", buf));
+
+    return SNMP_ERR_NOERROR;
 }
 
 static void
@@ -2406,7 +2419,7 @@ snmpNotifyFilterTable_row_find_by_mib_index(snmpNotifyFilterTable_mib_index
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

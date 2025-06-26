@@ -1,5 +1,5 @@
 /*
- * NetBSD implementation for mapping the IP stat arrays into structs
+ * NetBSD implementation for mapping the IP stat arrays into struct's
  * Required for NetBSD versions produced after April 7th 2008 (4+)
  *
  * Based on: http://mail-index.netbsd.org/pkgsrc-users/2008/04/27/msg007095.html

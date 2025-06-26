@@ -24,12 +24,20 @@
  * hpux specific 
  */
 #define MIB_IPCOUNTER_SYMBOL "MIB_ipcounter"
+#define MIB_TCPCOUNTER_SYMBOL "MIB_tcpcounter"
+#define MIB_UDPCOUNTER_SYMBOL "MIB_udpcounter"
 #endif
 
 #if defined(hpux10) || defined(hpux11)
+#undef SWDEVT_SYMBOL
+#undef FSWDEVT_SYMBOL
+#undef NSWAPFS_SYMBOL
+#undef NSWAPDEV_SYMBOL
 #undef LOADAVE_SYMBOL
 #undef PROC_SYMBOL
 #undef NPROC_SYMBOL
+#undef TOTAL_MEMORY_SYMBOL
+#undef MBSTAT_SYMBOL
 #endif
 
 #ifdef hpux11
@@ -44,6 +52,8 @@
 #undef RTHASHSIZE_SYMBOL
 #undef RTHOST_SYMBOL
 #undef RTNET_SYMBOL
+
+#undef PHYSMEM_SYMBOL
 #endif
 
 #define rt_pad1 rt_refcnt

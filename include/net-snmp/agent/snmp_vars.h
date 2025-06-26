@@ -38,7 +38,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -93,8 +93,8 @@ PERFORMANCE OF THIS SOFTWARE.
     extern long     long_return;
     extern u_char   return_buf[];
 
-    extern const oid nullOid[];
-    extern const int nullOidLen;
+    extern oid      nullOid[];
+    extern int      nullOidLen;
 
 #define INST	0xFFFFFFFF      /* used to fill out the instance field of the variables table */
 
@@ -112,6 +112,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
     int             init_agent(const char *);
     void            shutdown_agent(void);
+
+    int             should_init(const char *module_name);
+    void            add_to_init_list(char *module_list);
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     void            netsnmp_enable_subagent(void);

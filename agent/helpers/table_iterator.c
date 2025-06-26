@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -21,7 +21,7 @@
  *  The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
  *  @ingroup table
     Functionally, it is a specialized version of the more
-    generic table helper but eases the burden of GETNEXT processing by
+    generic table helper but easies the burden of GETNEXT processing by
     manually looping through all the data indexes retrieved through
     function calls which should be supplied by the module that wishes
     help.  The module the table_iterator helps should, afterwards,
@@ -43,7 +43,7 @@
 	this request, the job of the loop context is done.  The
         most simple example would be a pointer to an integer which
         simply counts rows from 1 to X.  More commonly, it might be a
-        pointer to a linked list node, or some other internal or
+        pointer to a linked list node, or someother internal or
         external reference to a data set (file seek value, array
         pointer, ...).  If allocated during iteration, either the
         free_loop_context_at_end (preferably) or the free_loop_context
@@ -95,7 +95,7 @@
 
 #include <net-snmp/agent/table_iterator.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -105,16 +105,16 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/stash_cache.h>
 
-netsnmp_feature_child_of(table_iterator_all, mib_helpers);
+netsnmp_feature_child_of(table_iterator_all, mib_helpers)
 
-netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all);
-netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all);
-netsnmp_feature_child_of(table_iterator_row_first, table_iterator_all);
-netsnmp_feature_child_of(table_iterator_row_count, table_iterator_all);
+netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_first, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_count, table_iterator_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
-netsnmp_feature_require(data_list_get_list_node);
-netsnmp_feature_require(oid_stash_add_data);
+netsnmp_feature_require(data_list_get_list_node)
+netsnmp_feature_require(oid_stash_add_data)
 #endif /* NETSNMP_FEATURE_REQUIRE_STASH_CACHE */
 
 /* ==================================
@@ -187,20 +187,16 @@ netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
  *
  * ================================== */
 
-static void *
-netsnmp_iterator_ref(void *p)
+static netsnmp_iterator_info *
+netsnmp_iterator_ref(netsnmp_iterator_info *iinfo)
 {
-    netsnmp_iterator_info *iinfo = p;
-
     iinfo->refcnt++;
     return iinfo;
 }
 
 static void
-netsnmp_iterator_deref(void *p)
+netsnmp_iterator_deref(netsnmp_iterator_info *iinfo)
 {
-    netsnmp_iterator_info *iinfo = p;
-
     if (--iinfo->refcnt == 0)
         netsnmp_iterator_delete_table(iinfo);
 }
@@ -210,8 +206,8 @@ void netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h)
     netsnmp_assert(h);
     netsnmp_assert(h->myvoid);
     ((netsnmp_iterator_info *)(h->myvoid))->refcnt++;
-    h->data_clone = netsnmp_iterator_ref;
-    h->data_free  = netsnmp_iterator_deref;
+    h->data_clone = (void *(*)(void *))netsnmp_iterator_ref;
+    h->data_free  = (void(*)(void *))netsnmp_iterator_deref;
 }
 
 /**
@@ -472,7 +468,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request, *reqtmp = NULL;
     netsnmp_variable_list *index_search = NULL;
     netsnmp_variable_list *free_this_index_search = NULL;
-    void           *callback_loop_context = NULL;
+    void           *callback_loop_context = NULL, *last_loop_context;
     void           *callback_data_context = NULL;
     ti_cache_info  *ti_info = NULL;
     int             request_count = 0;
@@ -825,9 +821,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 /* Is there any point in carrying on? */
                 if (!request_count)
                     break;
-                {
                 /* get the next search possibility */
-                void *last_loop_context = callback_loop_context;
+                last_loop_context = callback_loop_context;
                 index_search =
                     (iinfo->get_next_data_point) (&callback_loop_context,
                                                   &callback_data_context,
@@ -835,7 +830,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 if (iinfo->free_loop_context && last_loop_context &&
                     callback_data_context != last_loop_context) {
                     (iinfo->free_loop_context) (last_loop_context, iinfo);
-                }
+                    last_loop_context = NULL;
                 }
             }
 
@@ -855,8 +850,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         netsnmp_request_get_list_data(request,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
-                        int nc;
-
+                      int nc;
                         table_info = netsnmp_extract_table_info(request);
                         nc = netsnmp_table_next_column(table_info);
                         if (0 == nc) {
@@ -864,6 +858,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             snmp_set_var_objid(request->requestvb,
                                                coloid, reginfo->rootoid_len+2);
                             request->processed = TABLE_ITERATOR_NOTAGAIN;
+                            break;
                         } else {
                           table_info->colnum = nc;
                           hintok = 0;
@@ -913,7 +908,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 }
                 snmp_free_varbind(table_info->indexes);
                 table_info->indexes = snmp_clone_varbind(ti_info->results);
-                NETSNMP_FALLTHROUGH;
+                /* FALL THROUGH */
 
             case MODE_GET:
 #ifndef NETSNMP_NO_WRITE_SUPPORT

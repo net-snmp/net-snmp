@@ -5,17 +5,17 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#ifdef HAVE_NETINET_IP_ICMP_H
+#if HAVE_NETINET_IP_ICMP_H
 #include <netinet/ip_icmp.h>
 #endif
 
 #ifdef NETSNMP_ENABLE_IPV6
-#ifdef HAVE_NETINET_ICMP6_H
+#if HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
 #endif
 #endif /* NETSNMP_ENABLE_IPV6 */
 
-#ifdef HAVE_NETINET_ICMP_VAR_H
+#if HAVE_NETINET_ICMP_VAR_H
 #include <netinet/icmp_var.h>
 #endif
 
@@ -166,10 +166,10 @@ static struct icmp6_mib icmp6stat;
  * registering underneath 
  */
 static const oid icmp_oid[] = { SNMP_OID_MIB2, 5 };
-#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 static const oid icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
 static const oid icmp_msg_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 30 };
 
+#ifdef USES_SNMP_DESIGNED_ICMPSTAT
 struct icmp_stats_table_entry {
 	uint32_t ipVer;
         uint32_t icmpStatsInMsgs;
@@ -638,7 +638,7 @@ init_icmp(void)
     netsnmp_iterator_info *iinfo;
     netsnmp_iterator_info *msg_stats_iinfo;
     netsnmp_table_registration_info *table_info = NULL;
-    netsnmp_table_registration_info *msg_stats_table_info = NULL;
+    netsnmp_table_registration_info *msg_stats_table_info;
 #endif
     netsnmp_handler_registration *scalar_reginfo = NULL;
     int                    rc;
@@ -751,8 +751,6 @@ bail:
         netsnmp_handler_registration_free(msg_stats_reginfo);
     if (table_reginfo)
         netsnmp_handler_registration_free(table_reginfo);
-    if (msg_stats_table_info)
-        free(msg_stats_table_info);
 #endif
     if (scalar_reginfo)
         netsnmp_handler_registration_free(scalar_reginfo);

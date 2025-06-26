@@ -3,7 +3,7 @@
 # that may apply:
 #
 # Portions of this file are copyrighted by:
-# Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+# Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms specified in the COPYING file
 # distributed with the Net-SNMP package.
 #
@@ -31,6 +31,7 @@ mysubdir=snmplib
 # headers
 INSTALLHEADERS=\
 	config_api.h  \
+	definitions.h \
 	mib_api.h     \
 	net-snmp-includes.h \
 	output_api.h  \
@@ -56,6 +57,7 @@ INCLUDESUBDIRHEADERS=README \
 	data_list.h \
 	default_store.h \
 	dir_utils.h \
+	factory.h \
 	fd_event_manager.h \
 	file_utils.h \
 	getopt.h \
@@ -229,11 +231,11 @@ all: standardall
 
 # how to build the libraries.
 libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    $(TOBJS)
-	$(LIB_LD_CMD) $@ $(LDFLAGS) $(TOBJS) @LNETSNMPLIBS@
+	$(LIB_LD_CMD) $@ $(TOBJS) @LD_NO_UNDEFINED@ $(LDFLAGS) @LNETSNMPLIBS@
 	$(RANLIB) $@
 
 libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    $(TOBJS)
-	$(LIB_LD_CMD) $@ $(LDFLAGS) $(TOBJS) @LNETSNMPLIBS@
+	$(LIB_LD_CMD) $@ $(TOBJS) @LD_NO_UNDEFINED@ $(LDFLAGS) @LNETSNMPLIBS@
 	$(RANLIB) $@
 
 #

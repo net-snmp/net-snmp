@@ -4,7 +4,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 
-#ifdef HAVE_SYSLOG_H
+#if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
 #include <stdio.h>
@@ -83,9 +83,8 @@ extern          "C" {
     char *snmp_log_syslogname(const char *syslogname);
     typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
     typedef int (NetsnmpLogHandler)(netsnmp_log_handler*, int, const char *);
-#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
+
     NetsnmpLogHandler log_handler_stdouterr;
-#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
     NetsnmpLogHandler log_handler_file;
     NetsnmpLogHandler log_handler_syslog;
     NetsnmpLogHandler log_handler_callback;
@@ -122,6 +121,15 @@ NETSNMP_IMPORT
 void netsnmp_disable_this_loghandler( netsnmp_log_handler *logh );
 NETSNMP_IMPORT
 void netsnmp_logging_restart(void);
+
+NETSNMP_IMPORT
+netsnmp_log_handler *
+netsnmp_create_stdio_loghandler(int is_stdout, int priority, int priority_max,
+                                const char *tok);
+NETSNMP_IMPORT
+netsnmp_log_handler *
+netsnmp_register_filelog_handler(const char* logfilename, int priority,
+                                 int priority_max, int dont_zero_log);
 
 #ifdef __cplusplus
 }

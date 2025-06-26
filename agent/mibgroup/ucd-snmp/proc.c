@@ -6,50 +6,49 @@
 #include <sys/types.h>          /* helps define struct rlimit */
 #endif
 
-#ifdef HAVE_IO_H                   /* win32 */
+#if HAVE_IO_H                   /* win32 */
 #include <io.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <math.h>
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#if defined(HAVE_PCRE2_H)
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
-#elif defined(HAVE_PCRE_H)
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+#if HAVE_PCRE_H
 #include <pcre.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "mibdefs.h"
 #include "struct.h"
 #include "proc.h"
 #ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
@@ -61,10 +60,7 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "util_funcs.h"
-
-#define PROCMIN 3
-#define PROCMAX 4
-#define PROCCOUNT 5
+#include "kernel.h"
 
 static struct myproc *get_proc_instance(struct myproc *, oid);
 struct myproc  *procwatch = NULL;
@@ -111,7 +107,7 @@ init_proc(void)
     REGISTER_MIB("ucd-snmp/proc", extensible_proc_variables, variable2,
                  proc_variables_oid);
 
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
+#ifdef HAVE_PCRE_H
 #define proc_parse_usage "process-name [max-num] [min-num] [regexp]"
 #else
 #define proc_parse_usage "process-name [max-num] [min-num]"
@@ -137,8 +133,10 @@ proc_free_config(void)
     for (ptmp = procwatch; ptmp != NULL;) {
         ptmp2 = ptmp;
         ptmp = ptmp->next;
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
-        free(ptmp2->regexp.regex_ptr);
+#if HAVE_PCRE_H
+        if (ptmp2->regexp) {
+            free(ptmp2->regexp);
+        }
 #endif
         free(ptmp2);
     }
@@ -195,7 +193,7 @@ proc_parse_config(const char *token, char *cptr)
     /*
      * don't allow two entries with the same name 
      */
-    cptr = copy_nword(cptr, tmpname, sizeof(tmpname));
+    copy_nword(cptr, tmpname, sizeof(tmpname));
     if (get_proc_by_name(tmpname) != NULL) {
         config_perror("Already have an entry for this process.");
         return;
@@ -207,56 +205,40 @@ proc_parse_config(const char *token, char *cptr)
     while (*procp != NULL)
         procp = &((*procp)->next);
 
-    (*procp) = calloc(1, sizeof(struct myproc));
+    (*procp) = (struct myproc *) calloc(1, sizeof(struct myproc));
     if (*procp == NULL)
         return;                 /* memory alloc error */
     numprocs++;
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
-    (*procp)->regexp.regex_ptr = NULL;
+#if HAVE_PCRE_H
+    (*procp)->regexp = NULL;
 #endif
     /*
      * not blank and not a comment 
      */
-    strlcpy((*procp)->name, tmpname, sizeof((*procp)->name));
-    if (cptr) {
+    copy_nword(cptr, (*procp)->name, sizeof((*procp)->name));
+    cptr = skip_not_white(cptr);
+    if ((cptr = skip_white(cptr))) {
         (*procp)->max = atoi(cptr);
         cptr = skip_not_white(cptr);
         if ((cptr = skip_white(cptr))) {
             (*procp)->min = atoi(cptr);
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
+#if HAVE_PCRE_H
             cptr = skip_not_white(cptr);
             if ((cptr = skip_white(cptr))) {
-#ifdef HAVE_PCRE2_H
-                char pcre2_error_msg[128];
-                int pcre2_err_code;
-                size_t pcre2_error_offset;
-
-                DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
-                (*procp)->regexp.regex_ptr =
-                    pcre2_compile((const unsigned char *)cptr, PCRE2_ZERO_TERMINATED, 0, &pcre2_err_code, &pcre2_error_offset, NULL);
-                pcre2_get_error_message(pcre2_err_code,
-                                        (unsigned char *)pcre2_error_msg,
-                                        sizeof(pcre2_error_msg));
-                if ((*procp)->regexp.regex_ptr == NULL) {
-                    config_perror(pcre2_error_msg);
-                }
-#elif defined(HAVE_PCRE_H)
                 const char *pcre_error;
                 int pcre_error_offset;
 
                 DEBUGMSGTL(("ucd-snmp/regexp_proc", "Loading regex %s\n", cptr));
-                (*procp)->regexp.regex_ptr =
-                    pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
-                if ((*procp)->regexp.regex_ptr == NULL) {
+                (*procp)->regexp = pcre_compile(cptr, 0,  &pcre_error, &pcre_error_offset, NULL);
+                if ((*procp)->regexp == NULL) {
                     config_perror(pcre_error);
                 }
-#endif
             }
 #endif
         } else
             (*procp)->min = 0;
     } else {
-        /* Default to assume that we require at least one
+        /* Default to asssume that we require at least one
          *  such process to be running, but no upper limit */
         (*procp)->max = 0;
         (*procp)->min = 1;
@@ -285,7 +267,7 @@ var_extensible_proc(struct variable *vp,
     struct myproc  *proc;
     static long     long_ret;
     static char    *errmsg;
-    static char     empty_str[1];
+
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, numprocs))
@@ -348,14 +330,19 @@ var_extensible_proc(struct variable *vp,
                 }
             }
             *var_len = errmsg ? strlen(errmsg) : 0;
-            return (u_char *)(errmsg ? errmsg : empty_str);
+            return ((u_char *) errmsg);
         case ERRORFIX:
             *write_method = fixProcError;
             long_return = fixproc.result;
             return ((u_char *) & long_return);
         case ERRORFIXCMD:
-            *var_len = strlen(proc->fixcmd);
-            return (u_char *) proc->fixcmd;
+            if (proc->fixcmd) {
+                *var_len = strlen(proc->fixcmd);
+                return (u_char *) proc->fixcmd;
+            }
+            errmsg[0] = 0;
+            *var_len = 0;
+            return ((u_char *) errmsg);
         }
         return NULL;
     }
@@ -409,8 +396,8 @@ sh_count_myprocs(struct myproc *proc)
     if (proc == NULL)
         return 0;
 
-#if defined(USING_HOST_DATA_ACCESS_SWRUN_MODULE) && (defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H))
-    if (proc->regexp.regex_ptr != NULL)
+#if defined(USING_HOST_DATA_ACCESS_SWRUN_MODULE) && defined(HAVE_PCRE_H)
+    if (proc->regexp != NULL)
       return sh_count_procs_by_regex(proc->name, proc->regexp);
 #endif
 
@@ -418,15 +405,15 @@ sh_count_myprocs(struct myproc *proc)
 }
 
 #ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
-netsnmp_feature_require(swrun_count_processes_by_name);
+netsnmp_feature_require(swrun_count_processes_by_name)
 int
 sh_count_procs(char *procname)
 {
   return swrun_count_processes_by_name( procname );
 }
 
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
-netsnmp_feature_require(swrun_count_processes_by_regex);
+#if HAVE_PCRE_H
+netsnmp_feature_require(swrun_count_processes_by_regex)
 int
 sh_count_procs_by_regex(char *procname, netsnmp_regex_ptr regexp)
 {
@@ -597,7 +584,7 @@ sh_count_procs(char *procname)
 
 #elif NETSNMP_OSTYPE == NETSNMP_ULTRIXID
 
-#define	NPROCS		32      /* number of processes to read at once */
+#define	NPROCS		32      /* number of proces to read at once */
 
 extern int      kmem, mem, swap;
 
@@ -878,7 +865,7 @@ sh_count_procs(char *procname)
 }
 #endif                          /* _SLASH_PROC_METHOD_ */
 #else
-netsnmp_feature_require(find_field);
+netsnmp_feature_require(find_field)
 int
 sh_count_procs(char *procname)
 {

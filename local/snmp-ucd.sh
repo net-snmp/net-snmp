@@ -60,7 +60,7 @@ killproc() {	# <program> [signal]
 	#
         pid=`pidofproc $base 2>/dev/null`
 	[ -z "$pid" ] && {
-		pid=`ps $PSARGS | grep -F "$base" | grep -v grep | grep -v $0 | awk '{ print $2 }'`;
+		pid=`ps $PSARGS | egrep $base | egrep -v egrep | egrep -v $0 | awk '{ print $2 }'`;
 	}
 	[ -z "$pid" ] && {
 		echo "`basename $0`: killproc: Could not find process ID."

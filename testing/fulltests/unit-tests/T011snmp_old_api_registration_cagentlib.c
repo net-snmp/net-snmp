@@ -44,4 +44,3 @@ netsnmp_register_old_api("exp.327.b",
 OK(res == MIB_DUPLICATE_REGISTRATION, "Handler registration (2).");
 
 snmp_shutdown("snmp");
-free(sess);

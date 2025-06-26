@@ -11,9 +11,9 @@
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteEvent.h"
 
-netsnmp_feature_child_of(disman_debugging, libnetsnmpmibs);
-netsnmp_feature_child_of(mtetrigger, libnetsnmpmibs);
-netsnmp_feature_child_of(mtetrigger_removeentry, mtetrigger);
+netsnmp_feature_child_of(disman_debugging, libnetsnmpmibs)
+netsnmp_feature_child_of(mtetrigger, libnetsnmpmibs)
+netsnmp_feature_child_of(mtetrigger_removeentry, mtetrigger)
 
 netsnmp_tdata *trigger_table_data;
 
@@ -859,7 +859,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 vp1->index &= ~MTE_ARMED_BOOLEAN;
                 /*
                  * NB: Clear the trigger armed flag even if the
-                 *   (starting) event doesn't actually fire.
+                 *   (starting) event dosn't actually fire.
                  *   Otherwise initially true (but suppressed)
                  *   triggers will fire on the *second* probe.
                  */
@@ -964,7 +964,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 cmp |=  MTE_ARMED_TH_FALL;
                 /*
                  * NB: Clear the trigger armed flag even if the
-                 *   (starting) event doesn't actually fire.
+                 *   (starting) event dosn't actually fire.
                  *   Otherwise initially true (but suppressed)
                  *   triggers will fire on the *second* probe.
                  * Similarly for falling thresholds (see below).
@@ -1012,7 +1012,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      * Similarly, if no fallEvent is configured,
                      *  there's no point in trying to fire it either.
                      */
-                    if (entry->mteTThFallEvent[0] != '\0' ) {
+                    if (entry->mteTThRiseEvent[0] != '\0' ) {
                         entry->mteTriggerXOwner   = entry->mteTThObjOwner;
                         entry->mteTriggerXObjects = entry->mteTThObjects;
                         entry->mteTriggerFired    = vp1;
@@ -1105,7 +1105,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      * Similarly, if no fallEvent is configured,
                      *  there's no point in trying to fire it either.
                      */
-                    if (entry->mteTThDFallEvent[0] != '\0' ) {
+                    if (entry->mteTThDRiseEvent[0] != '\0' ) {
                         entry->mteTriggerXOwner   = entry->mteTThObjOwner;
                         entry->mteTriggerXObjects = entry->mteTThObjects;
                         entry->mteTriggerFired    = vp1;

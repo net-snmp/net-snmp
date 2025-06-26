@@ -35,9 +35,9 @@ for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
         b.high = (uint32_t)(intval[j] >> 32);
         u64Incr(&a, &b);
         d = (uint64_t)a.high << 32 | a.low;
-        OKF((uint64_t)intval[i] + (uint64_t)intval[j] == d,
+        OKF(intval[i] + intval[j] == d,
             ("%" PRId64 " + %" PRId64 " = %" PRId64 " <> %" PRId64, intval[i],
-             intval[j], (uint64_t)intval[i] + (uint64_t)intval[j], d));
+             intval[j], intval[i] + intval[j], d));
     }
 }
         
@@ -51,9 +51,9 @@ for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
         b.high = (uint32_t)(intval[j] >> 32);
         u64Subtract(&a, &b, &c);
         d = (uint64_t)c.high << 32 | c.low;
-        OKF((uint64_t)intval[i] - (uint64_t)intval[j] == d,
+        OKF(intval[i] - intval[j] == d,
             ("%" PRId64 " - %" PRId64 " = %" PRId64 " <> %" PRId64, intval[i],
-             intval[j], (uint64_t)intval[i] - (uint64_t)intval[j], d));
+             intval[j], intval[i] - intval[j], d));
     }
 }
         

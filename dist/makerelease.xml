@@ -21,7 +21,7 @@
 	    them before continuing!
 	  </text>
 	  <commands>
-	    <command expectfailure="1">find . -name 'net-snmp-5*' | grep -E '^[^\?]'</command>
+	    <command expectfailure="1">find . -name 'net-snmp-5*' | egrep '^[^\?]'</command>
 	  </commands>
 	</step>
 	<step type="system" title="Setup Check">
@@ -81,10 +81,8 @@
               my ($major, $minor, $patch, $opps) =
 	          ($self->{'parameters'}{'VERSION'} =~
                       /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
-	      my $digits = $opps ? 5 : $patch ? 4 : 2;
 	      $self->{'parameters'}{'VERSIONFLOAT'} = 
-		  sprintf("%.*f", $digits, $major + $minor/100 + $patch/10000 +
-			  $opps/100000);
+                  $major + $minor/100 + $patch/10000 + $opps/100000;
 
 	      # find out the git branch we're on.
 	      open(GITINFO,"git branch|");
@@ -130,7 +128,7 @@
 	  this step finds outstanding modified files you need to check
 	  them in or revert them before continuing!</text>
 	  <commands>
-	    <command expectfailure="1">git status --porcelain | grep -E '^[^\?]'</command>
+	    <command expectfailure="1">git status --porcelain | egrep '^[^\?]'</command>
 	  </commands>
 	</step>
       </steps>
@@ -509,10 +507,10 @@
 	    This will actually copy the current checked out branch
 	    to the new tag name.  Specifically:
 
-               git tag -u 6E6718AEF1EB5C65C32D1B2A356BC0B552D53CAB -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
+               git tag -u ACB19FD6 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"
 	  </text>
 	  <commands>
-	    <command>git tag -u 6E6718AEF1EB5C65C32D1B2A356BC0B552D53CAB -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
+	    <command>git tag -u ACB19FD6 -s {VERSIONTAGNAME} -m "Tagging of version {VERSION} as {VERSIONTAGNAME}"</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
@@ -547,12 +545,12 @@
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg --use-agent -u 6E6718AEF1EB5C65C32D1B2A356BC0B552D53CAB -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+	    <command>gpg --use-agent -u ACB19FD6 -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:gpg" title="release:gpg">
 	  <commands>
-	    <command>gpg --use-agent -u 6E6718AEF1EB5C65C32D1B2A356BC0B552D53CAB -a --detach-sign net-snmp-{VERSION}.zip</command>
+	    <command>gpg --use-agent -u ACB19FD6 -a --detach-sign net-snmp-{VERSION}.zip</command>
 	  </commands>
 	</step>
 	<step type="command" name="release:nextbranch" title="Don't propagate code modifications"

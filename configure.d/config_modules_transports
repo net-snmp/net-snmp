@@ -49,12 +49,7 @@ while test "x$new_transport_list" != "x"; do
       transport_src="transports/snmp"$i"Domain.c"
       transport_hdr="snmp"$i"Domain.h"
       rel_transport_src="snmplib/"$transport_src
-      case $i in
-	  IPBase)
-	      rel_transport_hdr="snmplib/transports/$transport_hdr";;
-	  *)
-	      rel_transport_hdr="include/net-snmp/library/$transport_hdr";;
-      esac
+      rel_transport_hdr="include/net-snmp/library/"$transport_hdr
       lc_i=`echo $i | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
       ctor_fn="netsnmp_"$lc_i"_ctor"
       if test -f "$srcdir/$rel_transport_src"; then
@@ -73,7 +68,7 @@ while test "x$new_transport_list" != "x"; do
       #---------------------
       # build a pseudo include header that includes current config and
       # system symbols:
-      rm -f conftest.$ac_ext module_tmp_header.i
+      rm -f conftest.$ac_ext module_tmp_header.h
       AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #undef NETSNMP_MINIMAL_CODE
@@ -83,12 +78,12 @@ while test "x$new_transport_list" != "x"; do
 #undef config_error
 #define config_error(foo) config_checkit_error(foo)
 #include "$rel_transport_hdr"]])])
-      $MODULECPP conftest.$ac_ext >module_tmp_header.i 2>/dev/null
+      mv conftest.$ac_ext module_tmp_header.h
 
       #
       # check for dependencies using config_require() macro
       #
-      sub_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_require *( *\(.*\) *).*/\1/p'`
+      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require *( *\(.*\) *).*/\1/'`
       if test "x$sub_list" != "x" ; then
         for j in $sub_list ; do
 	  if echo " $future_new_transport_list $new_transport_list " | $GREP " $j " > /dev/null ; then
@@ -102,7 +97,7 @@ while test "x$new_transport_list" != "x"; do
       #
       # check for errors using config_error() macro
       #
-      error_list=`cat module_tmp_header.i | $SED -n 's/.*config_checkit_error(\(.*\)).*/\1/gp'`
+      error_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_error | $SED 's/.*config_checkit_error(\(.*\)).*/\1/g'`
       if test "x$error_list" != "x" ; then
         echo ""
         AC_MSG_ERROR($error_list)

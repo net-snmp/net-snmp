@@ -14,10 +14,10 @@
 
 #include "var_route.h"
 
-netsnmp_feature_require(oid_stash);
-netsnmp_feature_require(get_routes);
-netsnmp_feature_require(oid_stash_get_data);
-netsnmp_feature_require(oid_stash_add_data);
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(get_routes)
+netsnmp_feature_require(oid_stash_get_data)
+netsnmp_feature_require(oid_stash_add_data)
 
 static netsnmp_oid_stash_node *undoStorage;
 
@@ -197,7 +197,7 @@ ipCidrRouteTable_get_first_data_point(void **my_loop_context,
         return NULL;
     }
 
-    /* We use the positional count as our loop context */
+    /* We use the positinonal count as our loop context */
     *position = 0;
     *my_loop_context = position;
 

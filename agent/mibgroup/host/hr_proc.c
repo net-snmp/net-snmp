@@ -6,10 +6,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -175,7 +175,7 @@ var_hrproc(struct variable * vp,
     switch (vp->magic) {
     case HRPROC_ID:
         *var_len = nullOidLen;
-        return NETSNMP_REMOVE_CONST(void *, nullOid);
+        return (u_char *) nullOid;
     case HRPROC_LOAD:
         cpu = netsnmp_cpu_get_byIdx( proc_idx & HRDEV_TYPE_MASK, 0 );
         if ( !cpu || !cpu->history || !cpu->history[0].total_hist ||

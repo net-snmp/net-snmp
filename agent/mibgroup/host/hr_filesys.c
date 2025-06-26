@@ -24,19 +24,19 @@
 #include "hr_disk.h"
 #include <net-snmp/utilities.h>
 
-#ifdef HAVE_MNTENT_H
+#if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
-#ifdef HAVE_SYS_MNTENT_H
+#if HAVE_SYS_MNTENT_H
 #include <sys/mntent.h>
 #endif
-#ifdef HAVE_SYS_MNTTAB_H
+#if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
-#ifdef HAVE_SYS_STATVFS_H
+#if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
-#ifdef HAVE_SYS_VFS_H
+#if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
 #ifdef HAVE_SYS_PARAM_H
@@ -47,14 +47,14 @@
 #endif
 
 #include <ctype.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#ifdef HAVE_NBUTIL_H
+#if HAVE_NBUTIL_H
 #include <nbutil.h>
 #endif
 
@@ -64,16 +64,12 @@
 #include <sys/statfs.h>
 #endif
 
-netsnmp_feature_require(se_find_free_value_in_slist);
-netsnmp_feature_require(date_n_time);
-netsnmp_feature_require(ctime_to_timet);
-
-#ifndef MNTTYPE_AUTOFS
-#define MNTTYPE_AUTOFS	"autofs"
-#endif
+netsnmp_feature_require(se_find_free_value_in_slist)
+netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(ctime_to_timet)
 
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
-#if defined(HAVE_GETFSSTAT) && defined(MFSNAMELEN)
+#if HAVE_GETFSSTAT && defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
 #define MNTTYPE_UFS	"ufs"
 #define BerkelyFS
@@ -205,7 +201,7 @@ struct mntent  *HRFS_entry;
 #define	FULL_DUMP	0
 #define	PART_DUMP	1
 
-static u_char *when_dumped(const char *filesys, int level, size_t *length);
+static u_char  *when_dumped(char *filesys, int level, size_t * length);
 
         /*********************
 	 *
@@ -379,7 +375,7 @@ var_hrfilesys(struct variable *vp,
          * Not sufficient to identity the file
          *   type precisely, but it's a start.
          */
-#if defined(HAVE_GETFSSTAT) && !defined(MFSNAMELEN)
+#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
         switch (HRFS_entry->HRFS_type) {
         case MOUNT_UFS:
             fsys_type_id[fsys_type_len - 1] = 3;
@@ -564,7 +560,7 @@ var_hrfilesys(struct variable *vp,
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
 	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
 #elif defined(HAVE_GETFSSTAT)
-#ifdef HAVE_STRUCT_STATFS_F_FLAGS
+#if HAVE_STRUCT_STATFS_F_FLAGS
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #else
         long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
@@ -574,7 +570,7 @@ var_hrfilesys(struct variable *vp,
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
-#ifdef HAVE_HASMNTOPT
+#if HAVE_HASMNTOPT
         if (hasmntopt(HRFS_entry, "ro") != NULL)
             long_return = 2;    /* Read Only */
         else
@@ -618,20 +614,20 @@ static FILE    *fp;
 void
 Init_HR_FileSys(void)
 {
-#ifdef HAVE_GETFSSTAT
+#if HAVE_GETFSSTAT
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
     fscount = getvfsstat(NULL, 0, ST_NOWAIT);
 #else
-    fscount = getfsstat(NULL, 0, MNT_WAIT);
+    fscount = getfsstat(NULL, 0, MNT_NOWAIT);
 #endif
     if (fsstats)
-        free(fsstats);
+        free((char *) fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount * sizeof(*fsstats));
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
     getvfsstat(fsstats, fscount * sizeof(*fsstats), ST_NOWAIT);
 #else
-    getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_WAIT);
+    getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
 #endif
     HRFS_index = 0;
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
@@ -668,7 +664,7 @@ Init_HR_FileSys(void)
 #endif
 }
 
-static const char *HRFS_ignores[] = {
+const char     *HRFS_ignores[] = {
 #ifdef MNTTYPE_IGNORE
     MNTTYPE_IGNORE,
 #endif
@@ -681,8 +677,13 @@ static const char *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROCFS
     MNTTYPE_PROCFS,
 #endif
+#ifdef MNTTYPE_AUTOFS
     MNTTYPE_AUTOFS,
+#else
+    "autofs",
+#endif
 #ifdef linux
+    "autofs",
     "bdev",
     "binfmt_misc",
     "cpuset",
@@ -704,6 +705,7 @@ static const char *HRFS_ignores[] = {
     "shm",
     "sockfs",
     "sysfs",
+    "tmpfs",
     "usbdevfs",
     "usbfs",
 #endif
@@ -718,8 +720,7 @@ static const char *HRFS_ignores[] = {
 int
 Get_Next_HR_FileSys(void)
 {
-next:
-#ifdef HAVE_GETFSSTAT
+#if HAVE_GETFSSTAT
     if (HRFS_index >= fscount)
         return -1;
     HRFS_entry = fsstats + HRFS_index;
@@ -745,7 +746,8 @@ next:
         case MNT_PROCFS:
 #endif
         case MNT_SFS:
-            goto next;
+            return Get_Next_HR_FileSys();
+            break;
     }
     return HRFS_index++;
 #else
@@ -765,7 +767,7 @@ next:
 
     for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
         if (!strcmp(HRFS_entry->HRFS_type, *cpp))
-            goto next;
+            return Get_Next_HR_FileSys();
 
     /*
      * Try and ensure that index values are persistent
@@ -792,7 +794,7 @@ next:
 int
 Check_HR_FileSys_NFS (void)
 {
-#if defined(HAVE_GETFSSTAT) && !defined(MFSNAMELEN)
+#if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
     if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
         (HRFS_entry->HRFS_type == MOUNT_AFS))
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
@@ -822,7 +824,7 @@ Check_HR_FileSys_NFS (void)
 	!strcmp( HRFS_entry->HRFS_type, "cifs") ||
 	    /*
 	     * MVFS is Rational ClearCase's view file system
-	     * it is similar to NFS file systems in that it is mounted
+	     * it is similiar to NFS file systems in that it is mounted
 	     * locally or remotely from the ClearCase server
 	     */
 	!strcmp( HRFS_entry->HRFS_type, "mvfs")))
@@ -832,23 +834,12 @@ Check_HR_FileSys_NFS (void)
     return 0;		/* no NFS file system */
 }
 
-/* This function checks whether current file system is an AutoFs
- * HRFS_entry must be valid prior to calling this function
- * return 1 if AutoFs, 0 otherwise
- */
-int
-Check_HR_FileSys_AutoFs(void)
-{
-    return HRFS_entry->HRFS_type &&
-        strcmp(HRFS_entry->HRFS_type, MNTTYPE_AUTOFS) == 0;
-}
-
 void
 End_HR_FileSys(void)
 {
 #ifdef HAVE_GETFSSTAT
     if (fsstats)
-        free(fsstats);
+        free((char *) fsstats);
     fsstats = NULL;
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     if(aixmnt != NULL) {
@@ -866,7 +857,7 @@ End_HR_FileSys(void)
 
 
 static u_char  *
-when_dumped(const char *filesys, int level, size_t *length)
+when_dumped(char *filesys, int level, size_t * length)
 {
     time_t          dumpdate = 0, tmp;
     FILE           *dump_fp;
@@ -874,7 +865,7 @@ when_dumped(const char *filesys, int level, size_t *length)
     char           *cp1, *cp2, *cp3;
 
     /*
-     * Look for the relevant entries in /etc/dumpdates
+     * Look for the relevent entries in /etc/dumpdates
      *
      * This is complicated by the fact that disks are
      *   mounted using block devices, but dumps are

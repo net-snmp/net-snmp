@@ -11,9 +11,9 @@
 #include "netSnmpHostsTable_checkfns.h"
 #include "netSnmpHostsTable_access.h"
 
-netsnmp_feature_require(oid_stash);
-netsnmp_feature_require(oid_stash_get_data);
-netsnmp_feature_require(oid_stash_add_data);
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(oid_stash_get_data)
+netsnmp_feature_require(oid_stash_add_data)
 
 static netsnmp_oid_stash_node *undoStorage = NULL;
 static netsnmp_oid_stash_node *commitStorage = NULL;
@@ -65,9 +65,8 @@ initialize_table_netSnmpHostsTable(void)
     if (!my_handler || !table_info || !iinfo) {
         snmp_log(LOG_ERR,
                  "malloc failed in initialize_table_netSnmpHostsTable");
-        free(my_handler);
-        free(table_info);
         free(iinfo);
+        free(table_info);
         return; /** Serious error. */
     }
 
@@ -550,7 +549,7 @@ netSnmpHostsTable_handler(netsnmp_mib_handler *handler,
         }
     }
 
-    /** clean up after all request processing has ended */
+    /** clean up after all requset processing has ended */
     switch (reqinfo->mode) {
     case MODE_SET_UNDO:
     case MODE_SET_FREE:

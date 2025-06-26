@@ -38,7 +38,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -61,13 +61,13 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
@@ -75,60 +75,60 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <fcntl.h>
 #include <errno.h>
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif
-#ifdef HAVE_SYS_STREAM_H
+#if HAVE_SYS_STREAM_H
 #   ifdef sysv5UnixWare7
 #      define _KMEMUSER 1 /* <sys/stream.h> needs this for queue_t */
 #   endif
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_SYS_SOCKETVAR_H
+#if HAVE_SYS_SOCKETVAR_H
 # include <sys/socketvar.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#ifdef HAVE_NETINET_IP_H
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#ifdef HAVE_NETINET_IP6_H
+#if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
 #endif
-#ifdef HAVE_SYS_QUEUE_H
+#if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
-#ifdef HAVE_NET_ROUTE_H
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#ifdef HAVE_NETINET_IP_VAR_H
+#if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#ifdef HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
-#ifdef HAVE_NETINET_IN_PCB_H
+#if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
-#ifdef HAVE_INET_MIB2_H
+#if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
 
@@ -163,6 +163,19 @@ static char     done_init_agent = 0;
 
 struct module_init_list *initlist = NULL;
 struct module_init_list *noinitlist = NULL;
+
+/*
+ * mib clients are passed a pointer to a oid buffer.  Some mib clients
+ * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
+ * * before they determine if they really need to send results back out
+ * * using it.  If the master agent determined that the client was not the
+ * * right one to talk with, it will use the same oid buffer to pass to the
+ * * rest of the clients, which may not longer be valid.  This should be
+ * * fixed in all clients rather than the master.  However, its not a
+ * * particularily easy bug to track down so this saves debugging time at
+ * * the expense of a few memcpy's.
+ */
+#define MIB_CLIENTS_ARE_EVIL 1
 
 /*
  *      Each variable name is placed in the variable table, without the
@@ -246,7 +259,7 @@ _init_agent_callback_transport(void)
 #endif
 
 /**
- * Initialize the agent.  Calls into init_agent_read_config to set that app's
+ * Initialize the agent.  Calls into init_agent_read_config to set tha app's
  * configuration file in the appropriate default storage space,
  *  NETSNMP_DS_LIB_APPTYPE.  Need to call init_agent before calling init_snmp.
  *
@@ -279,7 +292,9 @@ init_agent(const char *app)
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
 
+#ifdef HAVE_KMEM
     r = init_kmem("/dev/kmem") ? 0 : -EACCES;
+#endif
 
     setup_tree();
 
@@ -350,15 +365,12 @@ init_agent(const char *app)
     return r;
 }                               /* end init_agent() */
 
-const oid       nullOid[] = { 0, 0 };
-const int       nullOidLen = sizeof(nullOid);
+oid             nullOid[] = { 0, 0 };
+int             nullOidLen = sizeof(nullOid);
 
 void
-shutdown_agent(void)
-{
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
-    netsnmp_certs_shutdown();
-#endif
+shutdown_agent(void) {
+
     /* probably some of this can be called as shutdown callback */
     shutdown_tree();
     clear_context();
@@ -372,7 +384,9 @@ shutdown_agent(void)
     clear_callback();
     shutdown_secmod();
     netsnmp_addrcache_destroy();
+#ifdef HAVE_KMEM
     free_kmem();
+#endif
 
     done_init_agent = 0;
 }
@@ -400,7 +414,7 @@ add_to_init_list(char *module_list)
 
     cp = strtok_r(cp, ", :", &st);
     while (cp) {
-        newitem = calloc(1, sizeof(*initlist));
+        newitem = (struct module_init_list *) calloc(1, sizeof(*initlist));
         newitem->module_name = strdup(cp);
         newitem->next = *list;
         *list = newitem;

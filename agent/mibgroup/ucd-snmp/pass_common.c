@@ -1,9 +1,11 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <ctype.h>
+#if HAVE_STDDEF_H
 #include <stddef.h>
+#endif
 #include <stdio.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -222,23 +224,23 @@ netsnmp_internal_pass_set_format(char *buf,
         tmp = *((const long *) var_val);
         switch (var_val_type) {
         case ASN_INTEGER:
-            sprintf(buf, "integer %d", (int) tmp);
+            sprintf(buf, "integer %d\n", (int) tmp);
             break;
         case ASN_COUNTER:
-            sprintf(buf, "counter %d", (int) tmp);
+            sprintf(buf, "counter %d\n", (int) tmp);
             break;
         case ASN_GAUGE:
-            sprintf(buf, "gauge %d", (int) tmp);
+            sprintf(buf, "gauge %d\n", (int) tmp);
             break;
         case ASN_TIMETICKS:
-            sprintf(buf, "timeticks %d", (int) tmp);
+            sprintf(buf, "timeticks %d\n", (int) tmp);
             break;
         }
         break;
     case ASN_IPADDRESS:
         utmp = *((const u_long *) var_val);
         utmp = ntohl(utmp);
-        sprintf(buf, "ipaddress %d.%d.%d.%d",
+        sprintf(buf, "ipaddress %d.%d.%d.%d\n",
                 (int) ((utmp & 0xff000000) >> (8 * 3)),
                 (int) ((utmp & 0xff0000) >> (8 * 2)),
                 (int) ((utmp & 0xff00) >> (8)),
@@ -247,17 +249,17 @@ netsnmp_internal_pass_set_format(char *buf,
     case ASN_OCTET_STR:
         memcpy(buf2, var_val, var_val_len);
         if (var_val_len == 0)
-            sprintf(buf, "string \"\"");
+            sprintf(buf, "string \"\"\n");
         else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
                  (int) var_val_len)
-            snprintf(buf, SNMP_MAXBUF, "string \"%s\"", buf2);
+            snprintf(buf, SNMP_MAXBUF, "string \"%s\"\n", buf2);
         else
-            snprintf(buf, SNMP_MAXBUF, "octet \"%s\"", buf2);
+            snprintf(buf, SNMP_MAXBUF, "octet \"%s\"\n", buf2);
         buf[ SNMP_MAXBUF-1 ] = 0;
         break;
     case ASN_OBJECT_ID:
         sprint_mib_oid(buf2, (const oid *) var_val, var_val_len/sizeof(oid));
-        snprintf(buf, SNMP_MAXBUF, "objectid \"%s\"", buf2);
+        snprintf(buf, SNMP_MAXBUF, "objectid \"%s\"\n", buf2);
         buf[ SNMP_MAXBUF-1 ] = 0;
         break;
     }

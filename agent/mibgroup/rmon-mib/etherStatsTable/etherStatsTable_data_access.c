@@ -11,10 +11,6 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 /*
  * include our parent header 
  */
@@ -189,8 +185,8 @@ etherStatsTable_container_shutdown(netsnmp_container * container_ptr)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  etherStatsTable_row_prep() for populating data.
@@ -241,7 +237,7 @@ etherStatsTable_container_load(netsnmp_container * container)
     }
 
     /*
-     * get the interface names of the devices present in the system, in case of failure retval suggests the reason for failure
+     * get the interface names of the devices present in the system, in case of failure retval suggests the reson for failure
      * and list_head contains null
      */
 
@@ -260,7 +256,7 @@ etherStatsTable_container_load(netsnmp_container * container)
     }
 
     /*
-     * Walk over the list of interface names present in the system and retrieve the statistics
+     * Walk over the list of interface names present in the system and retreive the statistics 
      */
 
     for (p = list_head; p; p = p->ifn_next) {
@@ -276,7 +272,7 @@ etherStatsTable_container_load(netsnmp_container * container)
         etherStatsIndex = (long) etherstats_interface_ioctl_ifindex_get(-1, p->name);
 
         /* 
-         *  get the etherstats contents populated, if the device is not an Ethernet device
+         *  get the etherstats contents populated, if the device is not an ethernet device
          *  the operation will not be supported and an error message will be logged
          */
         

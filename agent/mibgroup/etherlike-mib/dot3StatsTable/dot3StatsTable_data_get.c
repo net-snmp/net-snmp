@@ -104,7 +104,7 @@ dot3StatsTable_indexes_set(dot3StatsTable_rowreq_ctx * rowreq_ctx,
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != dot3StatsTable_index_to_oid(&rowreq_ctx->oid_idx,
                                          &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

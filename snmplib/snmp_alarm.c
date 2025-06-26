@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -18,30 +18,34 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <signal.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -305,7 +309,8 @@ set_an_alarm(void)
 
     if (nextalarm && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 					NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
-#if defined(HAVE_SETITIMER)
+#ifndef WIN32
+# ifdef HAVE_SETITIMER
         struct itimerval it;
 
         it.it_value = delta;
@@ -315,13 +320,17 @@ set_an_alarm(void)
         setitimer(ITIMER_REAL, &it, NULL);
         DEBUGMSGTL(("snmp_alarm", "schedule alarm %d in %ld.%03ld seconds\n",
                     nextalarm, (long) delta.tv_sec, (long)(delta.tv_usec / 1000)));
-#elif defined(SIGALRM)
+# else  /* HAVE_SETITIMER */
+#  ifdef SIGALRM
         signal(SIGALRM, alarm_handler);
         alarm(delta.tv_sec);
         DEBUGMSGTL(("snmp_alarm",
                     "schedule alarm %d in roughly %ld seconds\n", nextalarm,
                     delta.tv_sec));
-#endif
+#  endif  /* SIGALRM */
+# endif  /* HAVE_SETITIMER */
+#endif  /* WIN32 */
+
     } else {
         DEBUGMSGTL(("snmp_alarm", "no alarms found to schedule\n"));
     }

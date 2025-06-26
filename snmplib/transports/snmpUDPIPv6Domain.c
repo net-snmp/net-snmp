@@ -6,7 +6,6 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#include "snmpIPBaseDomain.h"
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/system.h>
 
@@ -19,45 +18,57 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <stddef.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+
+#if defined(HAVE_WINSOCK_H) && !defined(mingw32)
+static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#endif
+
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_NET_IF_H
+#if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
 
-#ifdef HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
+#if HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
 #define SS_FAMILY ss_family
-#elif defined(HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY)
+#elif HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY
 #define SS_FAMILY __ss_family
+#endif
+
+#if defined(darwin)
+#include <stdint.h> /* for uint8_t */
 #endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/tools.h>
@@ -70,14 +81,8 @@
 #include "inet_ntop.h"
 #include "inet_pton.h"
 
-const oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
+oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;
-
-/*
- * needs to be in sync with the definitions in snmplib/snmpTCPDomain.c
- * and perl/agent/agent.xs
- */
-typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
 
 /*
  * Return a string representing the address in data, or else the "far end"
@@ -90,191 +95,7 @@ netsnmp_udp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
     return netsnmp_ipv6_fmtaddr("UDP/IPv6", t, data, len);
 }
 
-#if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
 
-#define netsnmp_udp6_recvfrom_sendto_defined
-
-enum {
-    cmsg_data_size = sizeof(struct in6_pktinfo)
-};
-
-int
-netsnmp_udp6_recvfrom(int s, void *buf, int len, struct sockaddr *from,
-                      socklen_t *fromlen, struct sockaddr *dstip,
-                      socklen_t *dstlen, int *if_index)
-{
-    int r;
-    struct iovec iov;
-    char cmsg[CMSG_SPACE(cmsg_data_size)];
-    struct cmsghdr *cm;
-    struct msghdr msg;
-
-    iov.iov_base = buf;
-    iov.iov_len = len;
-
-    memset(&msg, 0, sizeof msg);
-    msg.msg_name = from;
-    msg.msg_namelen = *fromlen;
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    msg.msg_control = &cmsg;
-    msg.msg_controllen = sizeof(cmsg);
-
-    r = recvmsg(s, &msg, MSG_DONTWAIT);
-
-    if (r == -1) {
-        return -1;
-    }
-
-    {
-        char buf[INET6_ADDRSTRLEN];
-        DEBUGMSGTL(("udp6:recv", "got source addr: %s\n", inet_ntop(AF_INET6,
-                    &(((struct sockaddr_in6 *)from)->sin6_addr), buf,
-                    sizeof(struct sockaddr_in6))));
-    }
-
-    {
-        /* Get the local port number for use in diagnostic messages */
-        int r2 = getsockname(s, dstip, dstlen);
-        netsnmp_assert(r2 == 0);
-    }
-
-    for (cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm)) {
-        if (cm->cmsg_level == IPPROTO_IPV6 && cm->cmsg_type == IPV6_PKTINFO) {
-            struct in6_pktinfo* src = (struct in6_pktinfo *)CMSG_DATA(cm);
-
-            netsnmp_assert(dstip->sa_family == AF_INET6);
-            ((struct sockaddr_in6*)dstip)->sin6_addr = src->ipi6_addr;
-            *if_index = src->ipi6_ifindex;
-
-            {
-                char buf[INET6_ADDRSTRLEN];
-                DEBUGMSGTL(("udp6:recv",
-                            "got destination (local) addr %s, iface %d\n",
-                            inet_ntop(AF_INET6,
-                            &(((struct sockaddr_in6 *)dstip)->sin6_addr), buf,
-                            sizeof(struct sockaddr_in6)), *if_index));
-            }
-        }
-    }
-
-    return r;
-}
-
-int netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
-                        const struct sockaddr *remote, const void *data,
-                        int len)
-{
-    struct iovec iov;
-    struct msghdr m = { NULL };
-    char          cmsg[CMSG_SPACE(cmsg_data_size)];
-    int           rc;
-#ifdef HAVE_SO_BINDTODEVICE
-    char          iface[IFNAMSIZ];
-    socklen_t     ifacelen = IFNAMSIZ;
-#endif
-
-    iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
-    iov.iov_len  = len;
-
-    m.msg_name      = NETSNMP_REMOVE_CONST(void *, remote);
-    m.msg_namelen   = sizeof(struct sockaddr_in6);
-    m.msg_iov       = &iov;
-    m.msg_iovlen    = 1;
-    m.msg_flags     = 0;
-
-    if (srcip && memcmp(&srcip->s6_addr, &in6addr_any, sizeof(struct in6_addr)) != 0) {
-        struct cmsghdr *cm;
-        struct in6_pktinfo ipi;
-        int use_sendto = FALSE;
-
-        memset(cmsg, 0, sizeof(cmsg));
-
-        m.msg_control    = &cmsg;
-        m.msg_controllen = sizeof(cmsg);
-
-        cm = CMSG_FIRSTHDR(&m);
-        cm->cmsg_len = CMSG_LEN(cmsg_data_size);
-
-        cm->cmsg_level = IPPROTO_IPV6;
-        cm->cmsg_type = IPV6_PKTINFO;
-
-        memset(&ipi, 0, sizeof(ipi));
-
-#ifdef HAVE_SO_BINDTODEVICE
-        /*
-         * For asymmetric multihomed users, we only set ifindex to 0 to
-         * let kernel handle return if there was no iface bound to the
-         * socket.
-         */
-        if (getsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface,
-                       &ifacelen) != 0)  {
-            DEBUGMSGTL(("udp6:sendto",
-                        "getsockopt SO_BINDTODEVICE failed: %s\n",
-                        strerror(errno)));
-        } else if (ifacelen == 0) {
-            DEBUGMSGTL(("udp6:sendto",
-                        "sendto: SO_BINDTODEVICE not set\n"));
-        } else {
-            DEBUGMSGTL(("udp6:sendto",
-                        "sendto: SO_BINDTODEVICE dev=%s using ifindex=%d\n",
-                        iface, if_index));
-            use_sendto = TRUE;
-        }
-#endif /* HAVE_SO_BINDTODEVICE */
-
-        ipi.ipi6_addr = *srcip;
-        memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
-
-        {
-            char buf[INET6_ADDRSTRLEN];
-            DEBUGMSGTL(("udp6:sendto", "sending from %s\n",
-                        inet_ntop(AF_INET6, srcip, buf, INET6_ADDRSTRLEN)));
-        }
-
-        /*
-         * For Linux and VRF, use sendto() instead of sendmsg(). Do not pass a
-         * cmsg with IP_PKTINFO set because that would override the bind to
-         * VRF which is set by 'vrf exec' command. That would break VRF.
-         */
-        if (use_sendto) {
-            rc = sendto(fd, data, len, MSG_DONTWAIT, remote,
-                        sizeof(struct sockaddr));
-        } else {
-            rc = sendmsg(fd, &m, MSG_DONTWAIT);
-        }
-        if (rc >= 0 || errno != EINVAL)
-            return rc;
-
-        /*
-         * The error might be caused by broadcast srcip (i.e. we're responding
-         * to a broadcast request) - sendmsg does not like it. Try to resend it
-         * using the interface on which it was received
-         */
-
-        DEBUGMSGTL(("udp6:sendto", "re-sending on iface %d\n", if_index));
-
-        {
-            struct in6_pktinfo ipi;
-            memset(&ipi, 0, sizeof(ipi));
-            ipi.ipi6_addr = in6addr_any;
-            ipi.ipi6_ifindex = if_index;
-            memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
-        }
-
-        rc = sendmsg(fd, &m, MSG_DONTWAIT);
-        if (rc >= 0 || errno != EINVAL)
-            return rc;
-
-        DEBUGMSGTL(("udp6:sendto", "re-sending without source address\n"));
-        m.msg_control = NULL;
-        m.msg_controllen = 0;
-    }
-
-    return sendmsg(fd, &m, MSG_DONTWAIT);
-}
-
-#endif /* HAVE_IPV6_RECVPKTINFO || !WIN32 */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -288,32 +109,24 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
 {
     int             rc = -1;
     socklen_t       fromlen = sizeof(struct sockaddr_in6);
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
 
     if (t != NULL && t->sock >= 0) {
-        addr_pair = SNMP_MALLOC_TYPEDEF(netsnmp_indexed_addr_pair);
-        if (addr_pair == NULL) {
+        from = (struct sockaddr *) malloc(sizeof(struct sockaddr_in6));
+        if (from == NULL) {
             *opaque = NULL;
             *olength = 0;
             return -1;
         } else {
-            from = &addr_pair->remote_addr.sa;
+            memset(from, 0, fromlen);
         }
 
-        while (rc < 0) {
-#ifdef netsnmp_udp6_recvfrom_sendto_defined
-            socklen_t local_addr_len = sizeof(addr_pair->local_addr);
-            rc = netsnmp_udp6_recvfrom(t->sock, buf, size, from, &fromlen,
-                                      &addr_pair->local_addr.sa,
-                                      &local_addr_len, &(addr_pair->if_index));
-#else
-            rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
-#endif /* netsnmp_udp6_recvfrom_sendto_defined */
-            if (rc < 0 && errno != EINTR) {
-                break;
-            }
-        }
+	while (rc < 0) {
+	  rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+	  if (rc < 0 && errno != EINTR) {
+	    break;
+	  }
+	}
 
         if (rc >= 0) {
             DEBUGIF("netsnmp_udp6") {
@@ -327,8 +140,8 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
             DEBUGMSGTL(("netsnmp_udp6", "recvfrom fd %d err %d (\"%s\")\n",
 			t->sock, errno, strerror(errno)));
         }
-        *opaque = (void *) addr_pair;
-        *olength = sizeof(netsnmp_indexed_addr_pair);
+        *opaque = (void *) from;
+        *olength = sizeof(struct sockaddr_in6);
     }
     return rc;
 }
@@ -340,52 +153,32 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
 		  void **opaque, int *olength)
 {
     int rc = -1;
-    const netsnmp_indexed_addr_pair *addr_pair = NULL;
     const struct sockaddr *to = NULL;
 
-    if (opaque != NULL && *opaque != NULL && NULL != olength &&
-        (*olength == sizeof(netsnmp_indexed_addr_pair) ||
-         *olength == sizeof(struct sockaddr_in6))) {
-        addr_pair = (const netsnmp_indexed_addr_pair *) (*opaque);
+    if (opaque != NULL && *opaque != NULL &&
+        *olength == sizeof(struct sockaddr_in6)) {
+        to = (const struct sockaddr *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
-                t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
-        addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
-    } else {
-        int len = -1;
-        if (opaque != NULL && *opaque != NULL && NULL != olength)
-            len = *olength;
-        else if (t != NULL && t->data != NULL)
-            len = t->data_length;
-        snmp_log(LOG_ERR, "unknown addr type of size %d\n", len);
-        return SNMPERR_GENERR;
+               ((t->data_length == sizeof(struct sockaddr_in6)) ||
+                (t->data_length == sizeof(netsnmp_indexed_addr_pair)))) {
+        to = (const struct sockaddr *) (t->data);
     }
-
-    to = &addr_pair->remote_addr.sa;
 
     if (to != NULL && t != NULL && t->sock >= 0) {
         DEBUGIF("netsnmp_udp6") {
-            char *str = netsnmp_udp6_fmtaddr(NULL, addr_pair,
-                                             sizeof(netsnmp_indexed_addr_pair));
+            char *str = netsnmp_udp6_fmtaddr(NULL, to,
+                                             sizeof(struct sockaddr_in6));
             DEBUGMSGTL(("netsnmp_udp6",
                         "send %d bytes from %p to %s on fd %d\n",
                         size, buf, str, t->sock));
             free(str);
         }
-
-        while (rc < 0) {
-#ifdef netsnmp_udp6_recvfrom_sendto_defined
-            rc = netsnmp_udp6_sendto(t->sock,
-                    addr_pair ? &(addr_pair->local_addr.sin6.sin6_addr) : NULL,
-                    addr_pair ? addr_pair->if_index : 0, to, buf, size);
-#else
-            rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr_in6));
-#endif /* netsnmp_udp6_recvfrom_sendto_defined */
-            if (rc < 0 && errno != EINTR) {
-                DEBUGMSGTL(("netsnmp_udp6", "sendto error, rc %d (errno %d)\n",
-                            rc, errno));
-                break;
-            }
-        }
+	while (rc < 0) {
+	    rc = sendto(t->sock, buf, size, 0, to,sizeof(struct sockaddr_in6));
+	    if (rc < 0 && errno != EINTR) {
+		break;
+	    }
+	}
     }
     return rc;
 }
@@ -398,9 +191,8 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
  */
 
 netsnmp_transport *
-netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
+netsnmp_udp6_transport_init(const struct sockaddr_in6 *addr, int flags)
 {
-    const struct sockaddr_in6 *addr = &ep->a.sin6;
     netsnmp_transport *t = NULL;
     int             local = flags & NETSNMP_TSPEC_LOCAL;
     u_char         *addr_ptr;
@@ -470,7 +262,6 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     t->f_send     = netsnmp_udp6_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
-    t->f_setup_session = netsnmp_ipbase_session_init;
     t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
     t->f_get_taddr = netsnmp_ipv6_get_taddr;
 
@@ -481,41 +272,11 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     return t;
 }
 
-static void set_ipv6_v6only_sockopt(int sd)
-{
-#ifdef IPV6_V6ONLY
-    /* Try to restrict PF_INET6 socket to IPv6 communications only. */
-    int optval = 1;
-
-    if (setsockopt(sd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&optval,
-                   sizeof(optval)) != 0) {
-        DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY: %s\n",
-                    strerror(errno)));
-    }
-#endif
-}
-
-static void set_ipv6_recvpktinfo_sockopt(int sd)
-{
-#if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
-    int sockopt = 1;
-
-    if (setsockopt(sd, IPPROTO_IPV6, IPV6_RECVPKTINFO, &sockopt,
-                   sizeof(sockopt)) == -1) {
-        DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_RECVPKTINFO: %s\n",
-                    strerror(errno)));
-    } else {
-        DEBUGMSGTL(("netsnmp_udp6", "set IPV6_RECVPKTINFO\n"));
-    }
-#endif
-}
-
 int
 netsnmp_udp6_transport_bind(netsnmp_transport *t,
-                            const struct netsnmp_ep *ep,
+                            const struct sockaddr_in6 *addr,
                             int flags)
 {
-    const struct sockaddr_in6 *addr = &ep->a.sin6;
     int             local = flags & NETSNMP_TSPEC_LOCAL;
     int             rc = 0;
 
@@ -527,8 +288,15 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
          * be INADDR_ANY, but certainly includes a port number.
          */
 
-        set_ipv6_v6only_sockopt(t->sock);
-        set_ipv6_recvpktinfo_sockopt(t->sock);
+#ifdef IPV6_V6ONLY
+        /* Try to restrict PF_INET6 socket to IPv6 communications only. */
+        {
+            int one=1;
+            if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
+                DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+            } 
+        }
+#endif
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
         return -1;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
@@ -537,33 +305,19 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
     DEBUGIF("netsnmp_udp6") {
         char *str;
         str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
-        DEBUGMSGTL(("netsnmp_udp6", "binding socket: %d to %s\n",
+        DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
                     t->sock, str));
         free(str);
-    }
-    if (flags & NETSNMP_TSPEC_PREBOUND) {
-        DEBUGMSGTL(("netsnmp_udp6", "socket %d is prebound, nothing to do\n",
-                    t->sock));
-        return 0;
-    }
-    rc = netsnmp_bindtodevice(t->sock, ep->iface);
-    if (rc != 0) {
-        DEBUGMSGTL(("netsnmp_udp6", "failed to bind to iface %s: %s\n",
-                    ep->iface, strerror(errno)));
-        goto err;
     }
     rc = bind(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
     if (rc != 0) {
         DEBUGMSGTL(("netsnmp_udp6", "failed to bind for clientaddr: %d %s\n",
                     errno, strerror(errno)));
-        goto err;
+        netsnmp_socketbase_close(t);
+        return -1;
     }
 
     return 0;
-
-err:
-    netsnmp_socketbase_close(t);
-    return -1;
 }
 
 int
@@ -614,7 +368,7 @@ netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t)
 netsnmp_transport *
 netsnmp_udpipv6base_tspec_transport(netsnmp_tdomain_spec *tspec)
 {
-    struct netsnmp_ep ep;
+    struct sockaddr_in6 addr;
     int local;
 
     if (NULL == tspec)
@@ -623,36 +377,40 @@ netsnmp_udpipv6base_tspec_transport(netsnmp_tdomain_spec *tspec)
     local = tspec->flags & NETSNMP_TSPEC_LOCAL;
 
     /** get address from target */
-    if (!netsnmp_sockaddr_in6_3(&ep, tspec->target, tspec->default_target))
+    if (!netsnmp_sockaddr_in6_2(&addr, tspec->target, tspec->default_target))
         return NULL;
 
     if (NULL != tspec->source) {
-        struct netsnmp_ep src_addr;
-
+        struct sockaddr_in6 src_addr, *srcp = &src_addr;
         /** get sockaddr from source */
-        if (!netsnmp_sockaddr_in6_3(&src_addr, tspec->source, ":0"))
+        if (!netsnmp_sockaddr_in6_2(&src_addr, tspec->source, NULL))
             return NULL;
-        return netsnmp_udp6_transport_with_source(&ep, local, &src_addr);
+        return netsnmp_udp6_transport_with_source(&addr, local, srcp);
+     } else {
+        /** if no source and we do not want any default client address */
+        if (tspec->flags & NETSNMP_TSPEC_NO_DFTL_CLIENT_ADDR)
+            return netsnmp_udp6_transport_with_source(&addr, local,
+                                                             NULL);
     }
 
     /** no source and default client address ok */
-    return netsnmp_udp6_transport(&ep, local);
+    return netsnmp_udp6_transport(&addr, local);
 }
 
 netsnmp_transport *
-netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
-              int local, const struct netsnmp_ep *src_addr)
+netsnmp_udp6_transport_with_source(const struct sockaddr_in6 *addr, int local,
+                                   const struct sockaddr_in6 *src_addr)
 {
     netsnmp_transport         *t = NULL;
-    const struct netsnmp_ep   *bind_addr;
+    const struct sockaddr_in6 *bind_addr;
     int                        rc, flags = 0;
 
-    t = netsnmp_udp6_transport_init(ep, local);
+    t = netsnmp_udp6_transport_init(addr, local);
     if (NULL == t)
         return NULL;
 
     if (local) {
-        bind_addr = ep;
+        bind_addr = addr;
         flags |= NETSNMP_TSPEC_LOCAL;
 
 #ifndef NETSNMP_NO_SYSTEMD
@@ -660,9 +418,7 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
          * Maybe the socket was already provided by systemd...
          */
         t->sock = netsnmp_sd_find_inet_socket(PF_INET6, SOCK_DGRAM, -1,
-                                              ntohs(ep->a.sin6.sin6_port));
-        if (t->sock >= 0)
-            flags |= NETSNMP_TSPEC_PREBOUND;
+                                              ntohs(addr->sin6_port));
 #endif
     }
     else
@@ -700,27 +456,21 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
  */
 
 netsnmp_transport *
-netsnmp_udp6_transport(const struct netsnmp_ep *ep, int local)
+netsnmp_udp6_transport(const struct sockaddr_in6 *addr, int local)
 {
-    struct netsnmp_ep client_ep;
-    const char *client_addr;
-
-    memset(&client_ep, 0, sizeof(client_ep));
-    client_ep.a.sin6.sin6_family = AF_INET6;
-
-    if (local)
-        goto out;
-
-    client_addr = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                        NETSNMP_DS_LIB_CLIENT_ADDR);
-    if (!client_addr)
-        goto out;
-
-    if (netsnmp_sockaddr_in6_3(&client_ep, client_addr, ":0") < 0)
-        snmp_log(LOG_ERR, "Parsing clientaddr %s failed\n", client_addr);
-
-out:
-    return netsnmp_udp6_transport_with_source(ep, local, &client_ep);
+    if (!local) {
+        const char *client_socket;
+        client_socket = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_CLIENT_ADDR);
+        if (client_socket) {
+            struct sockaddr_in6 client_addr;
+            if(!netsnmp_sockaddr_in6_2(&client_addr, client_socket, NULL)) {
+                return netsnmp_udp6_transport_with_source(addr, local,
+                                                          &client_addr);
+            }
+        }
+    }
+    return netsnmp_udp6_transport_with_source(addr, local, NULL);
 }
 
 
@@ -927,7 +677,6 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             negate = 0;
             sourcep = NULL;    /* gcc gets confused about sourcep being used */
         } else {
-            char *strmask;
             if (*source == '!') {
                negate = 1;
                sourcep = source + 1;
@@ -937,7 +686,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             }
 
             /* Split the source/netmask parts */
-            strmask = strchr(sourcep, '/');
+            char *strmask = strchr(sourcep, '/');
             if (strmask != NULL)
                 /* Mask given. */
                 *strmask++ = '\0';
@@ -945,7 +694,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
             /* Try to interpret the mask */
             if (strmask == NULL || *strmask == '\0') {
                 /* No mask was given. Assume /128 */
-                memset(mask.s6_addr, 0xff, sizeof(mask.s6_addr));
+                memset(mask.s6_addr, '\xff', sizeof(mask.s6_addr));
             } else {
                 /* Try to interpret mask as a "number of 1 bits". */
                 char* cp;
@@ -954,10 +703,9 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     if (0 <= masklength && masklength <= 128) {
                         const int j = masklength / 8;
                         const int jj = masklength % 8;
-
-                        memset(mask.s6_addr, 0xff, j);
+                        memset(mask.s6_addr, '\xff', j);
                         if (j < 16) {
-                            mask.s6_addr[j] = (0xffu << (8 - jj));
+                            mask.s6_addr[j] = ((uint8_t)~0U << (8 - jj));
                             memset(mask.s6_addr + j + 1, '\0', 15 - j);
                         }
                     } else {
@@ -984,27 +732,16 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 memset(&pton_addr.sin6_addr.s6_addr, '\0',
                        sizeof(struct in6_addr));
             } else if (inet_pton(AF_INET6, sourcep, &pton_addr.sin6_addr) != 1) {
-                /* Nope, wasn't a numeric IPv6 address. Must be IPv4 or a hostname. */
+                /* Nope, wasn't a numeric address. Must be a hostname. */
+#if HAVE_GETADDRINFO
+                int             gai_error;
 
-                /* Try interpreting as dotted quad - IPv4 */
-                struct in_addr network;
-                if (inet_pton(AF_INET, sourcep, &network) > 0){
-                    /* Yes, it's IPv4 - so it's already parsed and we can return. */
-                    DEBUGMSGTL(("com2sec6", "IPv4 detected for IPv6 parser. Skipping.\n"));
+                hints.ai_family = AF_INET6;
+                hints.ai_socktype = SOCK_DGRAM;
+                gai_error = netsnmp_getaddrinfo(sourcep, NULL, &hints, &res);
+                if (gai_error != 0) {
+                    config_perror(gai_strerror(gai_error));
                     return;
-                }
-#ifdef HAVE_GETADDRINFO
-                {
-                    int             gai_error;
-
-                    hints.ai_family = AF_INET6;
-                    hints.ai_socktype = SOCK_DGRAM;
-                    gai_error = netsnmp_getaddrinfo(sourcep, NULL, &hints,
-                                                    &res);
-                    if (gai_error != 0) {
-                        config_perror(gai_strerror(gai_error));
-                        return;
-                    }
                 }
 #else
                 config_perror("getaddrinfo() not available");
@@ -1046,7 +783,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     com2Sec6ListLast = end;
                 }
             }
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
             if (res != &hints)
                 freeaddrinfo(res);
 #endif
@@ -1096,8 +833,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                         const char **secName, const char **contextName)
 {
     const com2Sec6Entry *c;
-    netsnmp_udp_addr_pair *addr_pair = (netsnmp_udp_addr_pair *) opaque;
-    struct sockaddr_in6 *from = (struct sockaddr_in6 *) &(addr_pair->remote_addr);
+    struct sockaddr_in6 *from = (struct sockaddr_in6 *) opaque;
     char           *ztcommunity = NULL;
     char            str6[INET6_ADDRSTRLEN];
 
@@ -1120,11 +856,8 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
      * name.
      */
 
-    DEBUGMSGTL(("netsnmp_udp_getSecName", "opaque = %p (len = %d), sizeof = %d, family = %d (%d)\n",
-                opaque, olength, (int)sizeof(netsnmp_udp_addr_pair),
-                from->sin6_family, AF_INET6));
-    if (opaque == NULL || olength != sizeof(netsnmp_udp_addr_pair) ||
-        from->sin6_family != PF_INET6) {
+    if (opaque == NULL || olength != sizeof(struct sockaddr_in6)
+        || from->sin6_family != PF_INET6) {
         DEBUGMSGTL(("netsnmp_udp6_getSecName",
                     "no IPv6 source address in PDU?\n"));
         return 1;
@@ -1189,10 +922,10 @@ netsnmp_transport *
 netsnmp_udp6_create_tstring(const char *str, int local,
 			    const char *default_target)
 {
-    struct netsnmp_ep ep;
+    struct sockaddr_in6 addr;
 
-    if (netsnmp_sockaddr_in6_3(&ep, str, default_target)) {
-        return netsnmp_udp6_transport(&ep, local);
+    if (netsnmp_sockaddr_in6_2(&addr, str, default_target)) {
+        return netsnmp_udp6_transport(&addr, local);
     } else {
         return NULL;
     }
@@ -1219,11 +952,10 @@ netsnmp_udp6_create_tspec(netsnmp_tdomain_spec *tspec)
 netsnmp_transport *
 netsnmp_udp6_create_ostring(const void *o, size_t o_len, int local)
 {
-    struct netsnmp_ep ep;
+    struct sockaddr_in6 sin6;
 
-    memset(&ep, 0, sizeof(ep));
-    if (netsnmp_ipv6_ostring_to_sockaddr(&ep.a.sin6, o, o_len))
-        return netsnmp_udp6_transport(&ep, local);
+    if (netsnmp_ipv6_ostring_to_sockaddr(&sin6, o, o_len))
+        return netsnmp_udp6_transport(&sin6, local);
     return NULL;
 }
 
@@ -1232,15 +964,12 @@ void
 netsnmp_udpipv6_ctor(void)
 {
     udp6Domain.name = netsnmp_UDPIPv6Domain;
-    udp6Domain.name_length = OID_LENGTH(netsnmp_UDPIPv6Domain);
+    udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
+    udp6Domain.f_create_from_tstring     = NULL;
     udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
     udp6Domain.f_create_from_tspec       = netsnmp_udp6_create_tspec;
     udp6Domain.f_create_from_ostring     = netsnmp_udp6_create_ostring;
-    udp6Domain.prefix = calloc(5, sizeof(char *));
-    if (!udp6Domain.prefix) {
-        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
-        return;
-    }
+    udp6Domain.prefix = (const char**)calloc(5, sizeof(char *));
     udp6Domain.prefix[0] = "udp6";
     udp6Domain.prefix[1] = "ipv6";
     udp6Domain.prefix[2] = "udpv6";

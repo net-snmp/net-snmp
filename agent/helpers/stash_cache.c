@@ -4,12 +4,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-netsnmp_feature_provide(stash_cache);
-netsnmp_feature_child_of(stash_cache, mib_helpers);
+netsnmp_feature_provide(stash_cache)
+netsnmp_feature_child_of(stash_cache, mib_helpers)
 #ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
-netsnmp_feature_require(oid_stash);
-netsnmp_feature_require(oid_stash_iterate);
-netsnmp_feature_require(oid_stash_get_data);
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(oid_stash_iterate)
+netsnmp_feature_require(oid_stash_get_data)
 #endif
 
 #ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
@@ -226,17 +226,13 @@ _netsnmp_stash_cache_load( netsnmp_cache *cache, void *magic )
     return ret;
 }
 
-static void netsnmp_free_var(void *var)
-{
-    snmp_free_var(var);
-}
-
 void
 _netsnmp_stash_cache_free( netsnmp_cache *cache, void *magic )
 {
-    netsnmp_stash_cache_info *cinfo = magic;
-
-    netsnmp_oid_stash_free(&cinfo->cache, netsnmp_free_var);
+    netsnmp_stash_cache_info *cinfo = (netsnmp_stash_cache_info*) magic;
+    netsnmp_oid_stash_free(&cinfo->cache,
+                          (NetSNMPStashFreeNode *) snmp_free_var);
+    return;
 }
 
 /** initializes the stash_cache helper which then registers a stash_cache

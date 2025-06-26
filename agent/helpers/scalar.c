@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -21,7 +21,7 @@
 #include <net-snmp/agent/scalar.h>
 
 #include <stdlib.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -79,19 +79,14 @@ netsnmp_get_scalar_handler(void)
 int
 netsnmp_register_scalar(netsnmp_handler_registration *reginfo)
 {
-    netsnmp_mib_handler *h1 = NULL, *h2 = NULL;
-    oid *tmp;
+    netsnmp_mib_handler *h1, *h2;
+
     /*
      * Extend the registered OID with space for the instance subid
      * (but don't extend the length just yet!)
      */
-    
-    tmp = (oid*)realloc(reginfo->rootoid,
+    reginfo->rootoid = (oid*)realloc(reginfo->rootoid,
                                     (reginfo->rootoid_len+1) * sizeof(oid) );
-    if (tmp == NULL) {
-        goto error;
-    }
-    reginfo->rootoid = tmp;
     reginfo->rootoid[ reginfo->rootoid_len ] = 0;
 
     h1 = netsnmp_get_instance_handler();
@@ -103,7 +98,7 @@ netsnmp_register_scalar(netsnmp_handler_registration *reginfo)
                 return netsnmp_register_serialize(reginfo);
         }
     }
-    error:
+
     snmp_log(LOG_ERR, "register scalar failed\n");
     netsnmp_handler_free(h1);
     netsnmp_handler_free(h2);
@@ -111,6 +106,7 @@ netsnmp_register_scalar(netsnmp_handler_registration *reginfo)
 
     return MIB_REGISTRATION_FAILED;
 }
+
 
 /**
  * This function registers a read only scalar helper handler. This 

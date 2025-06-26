@@ -8,10 +8,10 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -351,7 +351,7 @@ write_mteTriggerThresholdStartup(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -381,7 +381,7 @@ write_mteTriggerThresholdStartup(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -397,7 +397,7 @@ write_mteTriggerThresholdStartup(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdStartup;
         StorageTmp->mteTriggerThresholdStartup = *((long *) var_val);
@@ -437,7 +437,7 @@ write_mteTriggerThresholdRising(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -467,7 +467,7 @@ write_mteTriggerThresholdRising(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -483,7 +483,7 @@ write_mteTriggerThresholdRising(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdRising;
         StorageTmp->mteTriggerThresholdRising = *((long *) var_val);
@@ -523,7 +523,7 @@ write_mteTriggerThresholdFalling(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -553,7 +553,7 @@ write_mteTriggerThresholdFalling(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -569,7 +569,7 @@ write_mteTriggerThresholdFalling(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdFalling;
         StorageTmp->mteTriggerThresholdFalling = *((long *) var_val);
@@ -609,7 +609,7 @@ write_mteTriggerThresholdDeltaRising(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -639,7 +639,7 @@ write_mteTriggerThresholdDeltaRising(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -655,7 +655,7 @@ write_mteTriggerThresholdDeltaRising(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaRising;
         StorageTmp->mteTriggerThresholdDeltaRising = *((long *) var_val);
@@ -695,7 +695,7 @@ write_mteTriggerThresholdDeltaFalling(int action,
     struct mteTriggerTable_data *StorageTmp = NULL;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -725,7 +725,7 @@ write_mteTriggerThresholdDeltaFalling(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -741,7 +741,7 @@ write_mteTriggerThresholdDeltaFalling(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaFalling;
         StorageTmp->mteTriggerThresholdDeltaFalling = *((long *) var_val);
@@ -782,7 +782,7 @@ write_mteTriggerThresholdObjectsOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -812,7 +812,7 @@ write_mteTriggerThresholdObjectsOwner(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -828,7 +828,7 @@ write_mteTriggerThresholdObjectsOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdObjectsOwner;
         tmplen = StorageTmp->mteTriggerThresholdObjectsOwnerLen;
@@ -874,7 +874,7 @@ write_mteTriggerThresholdObjects(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -904,7 +904,7 @@ write_mteTriggerThresholdObjects(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -920,7 +920,7 @@ write_mteTriggerThresholdObjects(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdObjects;
         tmplen = StorageTmp->mteTriggerThresholdObjectsLen;
@@ -966,7 +966,7 @@ write_mteTriggerThresholdRisingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -996,7 +996,7 @@ write_mteTriggerThresholdRisingEventOwner(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1012,7 +1012,7 @@ write_mteTriggerThresholdRisingEventOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdRisingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdRisingEventOwnerLen;
@@ -1058,7 +1058,7 @@ write_mteTriggerThresholdRisingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1088,7 +1088,7 @@ write_mteTriggerThresholdRisingEvent(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1104,7 +1104,7 @@ write_mteTriggerThresholdRisingEvent(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdRisingEvent;
         tmplen = StorageTmp->mteTriggerThresholdRisingEventLen;
@@ -1150,7 +1150,7 @@ write_mteTriggerThresholdFallingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1180,7 +1180,7 @@ write_mteTriggerThresholdFallingEventOwner(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1196,7 +1196,7 @@ write_mteTriggerThresholdFallingEventOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdFallingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdFallingEventOwnerLen;
@@ -1242,7 +1242,7 @@ write_mteTriggerThresholdFallingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1272,7 +1272,7 @@ write_mteTriggerThresholdFallingEvent(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1288,7 +1288,7 @@ write_mteTriggerThresholdFallingEvent(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdFallingEvent;
         tmplen = StorageTmp->mteTriggerThresholdFallingEventLen;
@@ -1334,7 +1334,7 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1364,7 +1364,7 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1380,7 +1380,7 @@ write_mteTriggerThresholdDeltaRisingEventOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaRisingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdDeltaRisingEventOwnerLen;
@@ -1427,7 +1427,7 @@ write_mteTriggerThresholdDeltaRisingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1457,7 +1457,7 @@ write_mteTriggerThresholdDeltaRisingEvent(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1473,7 +1473,7 @@ write_mteTriggerThresholdDeltaRisingEvent(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaRisingEvent;
         tmplen = StorageTmp->mteTriggerThresholdDeltaRisingEventLen;
@@ -1520,7 +1520,7 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1550,7 +1550,7 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1566,7 +1566,7 @@ write_mteTriggerThresholdDeltaFallingEventOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaFallingEventOwner;
         tmplen = StorageTmp->mteTriggerThresholdDeltaFallingEventOwnerLen;
@@ -1613,7 +1613,7 @@ write_mteTriggerThresholdDeltaFallingEvent(int action,
     static size_t   tmplen;
     size_t          newlen =
         name_len -
-        (OID_LENGTH(mteTriggerThresholdTable_variables_oid) + 3 -
+        (sizeof(mteTriggerThresholdTable_variables_oid) / sizeof(oid) + 3 -
          1);
 
 
@@ -1643,7 +1643,7 @@ write_mteTriggerThresholdDeltaFallingEvent(int action,
 
     case RESERVE2:
         /*
-         * memory reservation, final preparation... 
+         * memory reseveration, final preparation... 
          */
         break;
 
@@ -1659,7 +1659,7 @@ write_mteTriggerThresholdDeltaFallingEvent(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversible in the UNDO case 
+         * it.  Note that anything done here must be reversable in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerThresholdDeltaFallingEvent;
         tmplen = StorageTmp->mteTriggerThresholdDeltaFallingEventLen;

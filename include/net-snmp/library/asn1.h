@@ -2,13 +2,6 @@
 #define ASN1_H
 
 #include <net-snmp/library/oid.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_ASN_BOOLEAN
-#include <openssl/ssl.h> /* ASN_BOOLEAN etc. */
-#endif
 
 #ifdef __cplusplus
 extern          "C" {
@@ -50,54 +43,35 @@ SOFTWARE.
  * Use is subject to license terms specified in the COPYING file
  */
 
+#define MIN_OID_LEN	    2
+#define MAX_OID_LEN	    128 /* max subid's in an oid */
 #ifndef MAX_NAME_LEN            /* conflicts with some libraries */
 #define MAX_NAME_LEN	    MAX_OID_LEN /* obsolete. use MAX_OID_LEN */
 #endif
 
-#if defined(__GNUC__) && !defined(__STRICT_ANSI__)
-/*
- * If x is an array, x and &(x)[0] have different types. If x is a pointer,
- * x and &(x)[0] have the same type. Trigger a build error if x is a pointer
- * by making the compiler evaluate sizeof(int[-1]).
- */
-#define OID_LENGTH(x)                                                   \
-    (sizeof(x) / sizeof((x)[0]) +                                       \
-     sizeof(int[-__builtin_types_compatible_p(typeof(x), typeof(&(x)[0]))]))
-#else
-#define OID_LENGTH(x)  (sizeof(x) / sizeof((x)[0]))
-#endif
+#define OID_LENGTH(x)  (sizeof(x)/sizeof(oid))
 
 
-#ifndef HAVE_ASN_BOOLEAN
-#define ASN_BOOLEAN	    0x01U
-#endif
-#ifndef HAVE_ASN_INTEGER
-#define ASN_INTEGER	    0x02U
-#endif
-#define ASN_BIT_STR	    0x03U
-#define ASN_OCTET_STR	    0x04U
-#define ASN_NULL	    0x05U
-#ifndef HAVE_ASN_OBJECT_ID
-#define ASN_OBJECT_ID	    0x06U
-#endif
-#ifndef HAVE_ASN_SEQUENCE
-#define ASN_SEQUENCE	    0x10U
-#endif
-#ifndef HAVE_ASN_SET
-#define ASN_SET		    0x11U
-#endif
+#define ASN_BOOLEAN	    ((u_char)0x01)
+#define ASN_INTEGER	    ((u_char)0x02)
+#define ASN_BIT_STR	    ((u_char)0x03)
+#define ASN_OCTET_STR	    ((u_char)0x04)
+#define ASN_NULL	    ((u_char)0x05)
+#define ASN_OBJECT_ID	    ((u_char)0x06)
+#define ASN_SEQUENCE	    ((u_char)0x10)
+#define ASN_SET		    ((u_char)0x11)
 
-#define ASN_UNIVERSAL	    0x00U
-#define ASN_APPLICATION     0x40U
-#define ASN_CONTEXT	    0x80U
-#define ASN_PRIVATE	    0xC0U
+#define ASN_UNIVERSAL	    ((u_char)0x00)
+#define ASN_APPLICATION     ((u_char)0x40)
+#define ASN_CONTEXT	    ((u_char)0x80)
+#define ASN_PRIVATE	    ((u_char)0xC0)
 
-#define ASN_PRIMITIVE	    0x00U
-#define ASN_CONSTRUCTOR	    0x20U
+#define ASN_PRIMITIVE	    ((u_char)0x00)
+#define ASN_CONSTRUCTOR	    ((u_char)0x20)
 
-#define ASN_LONG_LEN	    0x80U
-#define ASN_EXTENSION_ID    0x1FU
-#define ASN_BIT8	    0x80U
+#define ASN_LONG_LEN	    (0x80)
+#define ASN_EXTENSION_ID    (0x1F)
+#define ASN_BIT8	    (0x80)
 
 #define IS_CONSTRUCTOR(byte)	((byte) & ASN_CONSTRUCTOR)
 #define IS_EXTENSION_ID(byte)	(((byte) & ASN_EXTENSION_ID) == ASN_EXTENSION_ID)
@@ -133,9 +107,9 @@ SOFTWARE.
      * base value for the second octet of the tag - the
      * second octet was the value for the tag 
      */
-#define ASN_OPAQUE_TAG2 0x30U
+#define ASN_OPAQUE_TAG2 ((u_char)0x30)
 
-#define ASN_OPAQUE_TAG2U 0x2fU /* second octet of tag for union */
+#define ASN_OPAQUE_TAG2U ((u_char)0x2f) /* second octet of tag for union */
 
     /*
      * All the ASN.1 types for SNMP "should have been" defined in this file,
@@ -245,7 +219,7 @@ SOFTWARE.
     u_char         *asn_parse_objid(u_char *, size_t *, u_char *, oid *,
                                     size_t *);
     NETSNMP_IMPORT
-    u_char         *asn_build_objid(u_char *, size_t *, u_char, const oid *,
+    u_char         *asn_build_objid(u_char *, size_t *, u_char, oid *,
                                     size_t);
     NETSNMP_IMPORT
     u_char         *asn_parse_null(u_char *, size_t *, u_char *);

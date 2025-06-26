@@ -420,8 +420,9 @@ _cache_load(netsnmp_cache * cache, void *vmagic)
  */
 /** remove a row from the table */
 static void
-sctpAssocTable_freeEntry_cb(void *entry, void *magic)
+sctpAssocTable_freeEntry_cb(sctpAssocTable_entry * entry, void *magic)
 {
+
     sctpAssocTable_entry_free(entry);
 }
 
@@ -444,7 +445,8 @@ _cache_free(netsnmp_cache * cache, void *magic)
     /*
      * empty (but don't free) cache here
      */
-    CONTAINER_CLEAR(container, sctpAssocTable_freeEntry_cb, NULL);
+    CONTAINER_CLEAR(container, (netsnmp_container_obj_func *)
+                    sctpAssocTable_freeEntry_cb, NULL);
 }                               /* _cache_free */
 
 sctpAssocTable_entry *

@@ -2,7 +2,7 @@
 
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -15,7 +15,7 @@
 
 #include <net-snmp/agent/snmp_get_statistic.h>
 
-netsnmp_feature_require(helper_statistics);
+netsnmp_feature_require(helper_statistics)
 
 void
 init_target_counters(void)

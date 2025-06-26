@@ -11,9 +11,9 @@
 #include "util_funcs/header_generic.h"
 #include "snmpEngine.h"
 
-netsnmp_feature_child_of(snmpengine_all, libnetsnmpmibs);
+netsnmp_feature_child_of(snmpengine_all, libnetsnmpmibs)
 
-netsnmp_feature_child_of(register_snmpEngine_scalars_context, snmpengine_all);
+netsnmp_feature_child_of(register_snmpEngine_scalars_context, snmpengine_all)
 
 struct variable2 snmpEngine_variables[] = {
     {SNMPENGINEID, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
@@ -71,7 +71,7 @@ register_snmpEngine_scalars_context(const char *contextName)
                          sizeof(struct variable2),
                          sizeof(snmpEngine_variables)/sizeof(struct variable2),
                          snmpEngine_variables_oid,
-                         OID_LENGTH(snmpEngine_variables_oid),
+                         sizeof(snmpEngine_variables_oid)/sizeof(oid),
                          DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                          contextName, -1, 0);
 }
@@ -98,7 +98,7 @@ var_snmpEngine(struct variable *vp,
     static long     long_ret;
     static unsigned char engineID[SNMP_MAXBUF];
 
-    *write_method = (WriteMethod*)0;    /* assume it isn't writable for the time being */
+    *write_method = (WriteMethod*)0;    /* assume it isnt writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 
     if (header_generic(vp, name, length, exact, var_len, write_method))

@@ -10,7 +10,7 @@ extern          "C" {
 #endif
 
 #define MAX_CALLBACK_IDS    2
-#define MAX_CALLBACK_SUBIDS 18
+#define MAX_CALLBACK_SUBIDS 17
 
     /*
      * Callback Major Types 
@@ -29,8 +29,6 @@ extern          "C" {
 #define SNMP_CALLBACK_SESSION_INIT		5
 #define SNMP_CALLBACK_PRE_READ_CONFIG	        7
 #define SNMP_CALLBACK_PRE_PREMIB_READ_CONFIG	8
-#define SNMP_CALLBACK_MIB_REQUEST_INFO		9
-#define SNMP_CALLBACK_FREE_SESSION		10
 
 
     /*

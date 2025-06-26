@@ -7,16 +7,20 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
@@ -25,7 +29,7 @@
 #include <net-snmp/utilities.h>
 #include <net-snmp/config_api.h>
 
-const oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
+oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
 static netsnmp_tdomain aliasDomain;
 
 /* simple storage mechanism */
@@ -97,14 +101,11 @@ void
 netsnmp_alias_ctor(void)
 {
     aliasDomain.name = netsnmp_snmpALIASDomain;
-    aliasDomain.name_length = OID_LENGTH(netsnmp_snmpALIASDomain);
-    aliasDomain.prefix = calloc(2, sizeof(char *));
-    if (!aliasDomain.prefix) {
-        snmp_log(LOG_ERR, "calloc() failed - out of memory\n");
-        return;
-    }
+    aliasDomain.name_length = sizeof(netsnmp_snmpALIASDomain) / sizeof(oid);
+    aliasDomain.prefix = (const char **)calloc(2, sizeof(char *));
     aliasDomain.prefix[0] = "alias";
 
+    aliasDomain.f_create_from_tstring     = NULL;
     aliasDomain.f_create_from_tstring_new = netsnmp_alias_create_tstring;
     aliasDomain.f_create_from_ostring     = netsnmp_alias_create_ostring;
 

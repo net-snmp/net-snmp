@@ -17,17 +17,15 @@
 
 #include <net-snmp/agent/row_merge.h>
 
-#include <stdint.h>
-
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-netsnmp_feature_provide(row_merge);
-netsnmp_feature_child_of(row_merge, row_merge_all);
-netsnmp_feature_child_of(row_merge_all, mib_helpers);
+netsnmp_feature_provide(row_merge)
+netsnmp_feature_child_of(row_merge, row_merge_all)
+netsnmp_feature_child_of(row_merge_all, mib_helpers)
 
 
 #ifndef NETSNMP_FEATURE_REMOVE_ROW_MERGE
@@ -58,7 +56,7 @@ netsnmp_get_row_merge_handler(int prefix_len)
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a row_merge handler at the same time for you. */
-netsnmp_feature_child_of(register_row_merge, row_merge_all);
+netsnmp_feature_child_of(register_row_merge, row_merge_all)
 #ifndef NETSNMP_FEATURE_REMOVE_REGISTER_ROW_MERGE
 int
 netsnmp_register_row_merge(netsnmp_handler_registration *reginfo)
@@ -268,9 +266,10 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         /*
          * allocate memory for saved structure
          */
-        rm_status->saved_requests = calloc(count+1,
+        rm_status->saved_requests =
+            (netsnmp_request_info**)calloc(count+1,
                                            sizeof(netsnmp_request_info*));
-        rm_status->saved_status = calloc(count, sizeof(char));
+        rm_status->saved_status = (char*)calloc(count,sizeof(char));
     }
 
     saved_status = rm_status->saved_status;

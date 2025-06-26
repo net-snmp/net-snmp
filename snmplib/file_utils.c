@@ -2,18 +2,18 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
-#ifdef HAVE_IO_H
+#if HAVE_IO_H
 #include <io.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #   include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #   include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #   include <string.h>
 #else
 #  include <strings.h>
@@ -21,7 +21,7 @@
 
 #include <sys/types.h>
 
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #   include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
@@ -33,13 +33,17 @@
 
 #include <errno.h>
 
+#if HAVE_DMALLOC_H
+#  include <dmalloc.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/file_utils.h>
 
-netsnmp_feature_child_of(file_utils_all, libnetsnmp);
-netsnmp_feature_child_of(file_utils, file_utils_all);
-netsnmp_feature_child_of(file_close, file_utils_all);
+netsnmp_feature_child_of(file_utils_all, libnetsnmp)
+netsnmp_feature_child_of(file_utils, file_utils_all)
+netsnmp_feature_child_of(file_close, file_utils_all)
 
 #ifndef NETSNMP_FEATURE_REMOVE_FILE_UTILS
 /*------------------------------------------------------------------
@@ -91,7 +95,7 @@ netsnmp_file_new(const char *name, int fs_flags, mode_t mode, u_int ns_flags)
         return NULL;
 
     if (ns_flags & NETSNMP_FILE_STATS) {
-        filei->stats = calloc(1, sizeof(*(filei->stats)));
+        filei->stats = (struct stat*)calloc(1, sizeof(*(filei->stats)));
         if (NULL == filei->stats)
             DEBUGMSGT(("nsfile:new", "no memory for stats\n"));
         else if (stat(name, filei->stats) != 0)
@@ -186,7 +190,7 @@ netsnmp_file_open(netsnmp_file * filei)
         return filei->fd;
 
     /*
-     * try to open the file, logging an error if we failed
+     * try to open the file, loging an error if we failed
      */
     if (0 == filei->mode)
         filei->fd = open(filei->name, filei->fs_flags);
@@ -244,16 +248,14 @@ netsnmp_file_close(netsnmp_file * filei)
 #endif /* NETSNMP_FEATURE_REMOVE_FILE_CLOSE */
 
 void
-netsnmp_file_container_free(void *file, void *context)
+netsnmp_file_container_free(netsnmp_file *file, void *context)
 {
     netsnmp_file_release(file);
 }
 
 int
-netsnmp_file_compare_name(const void *p, const void *q)
+netsnmp_file_compare_name(netsnmp_file *lhs, netsnmp_file *rhs)
 {
-    const netsnmp_file *lhs = p, *rhs = q;
-
     netsnmp_assert((NULL != lhs) && (NULL != rhs));
     netsnmp_assert((NULL != lhs->name) && (NULL != rhs->name));
 

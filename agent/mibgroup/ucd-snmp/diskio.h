@@ -1,31 +1,18 @@
 #ifndef _MIBGROUP_DISKIO_H
 #define _MIBGROUP_DISKIO_H
 
-config_require(util_funcs/header_simple_table);
-config_add_mib(UCD-DISKIO-MIB);
-#if defined(aix4)
-config_require(ucd-snmp/diskio_aix);
-#elif defined(bsdi3)
-config_require(ucd-snmp/diskio_bsdi);
-#elif defined(darwin)
-config_require(ucd-snmp/diskio_darwin);
-#elif defined(freebsd3)
-config_require(ucd-snmp/diskio_freebsd);
-#elif defined(linux)
-config_require(ucd-snmp/diskio_linux);
-#elif defined(openbsd4)
-config_require(ucd-snmp/diskio_openbsd);
-#elif defined(netbsd1)
-config_require(ucd-snmp/diskio_netbsd);
-#elif defined(solaris2)
-config_require(ucd-snmp/diskio_solaris);
-#endif
+config_require(util_funcs/header_simple_table)
+config_add_mib(UCD-DISKIO-MIB)
 
-void            init_diskio(void);
-int             diskio_cache_valid(time_t now);
-void            diskio_set_cache_time(time_t now);
-void            devla_getstats(unsigned int regno, void *dummy);
-FindVarMethod   var_diskio;
+    /*
+     * Define all our functions using prototyping for ANSI compilers 
+     */
+    /*
+     * These functions are then defined in the example.c file 
+     */
+     void            init_diskio(void);
+     FindVarMethod   var_diskio;
+
 
 /*
  * Magic number definitions.  These numbers are the last oid index
@@ -48,8 +35,5 @@ FindVarMethod   var_diskio;
 #define DISKIO_NREADX           12
 #define DISKIO_NWRITTENX        13
 #define DISKIO_BUSYTIME		14
-
-/* sampling interval, in seconds */
-#define DISKIO_SAMPLE_INTERVAL 5
 
 #endif                          /* _MIBGROUP_DISKIO_H */

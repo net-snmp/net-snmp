@@ -167,10 +167,8 @@ tcpListenerTable_container_shutdown(netsnmp_container *container_ptr)
  * add new entry
  */
 static void
-_add_connection(void *p, void *q)
+_add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
 {
-    netsnmp_tcpconn_entry *entry = p;
-    netsnmp_container *container = q;
     tcpListenerTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("tcpListenerTable:access", "creating new entry\n"));
@@ -180,23 +178,23 @@ _add_connection(void *p, void *q)
      * the container
      */
     rowreq_ctx = tcpListenerTable_allocate_rowreq_ctx(entry, NULL);
-    if (!rowreq_ctx) {
-        snmp_log(LOG_ERR,
-                 "memory allocation failed while loading tcpListenerTable cache.\n");
-        netsnmp_access_tcpconn_entry_free(entry);
-        return;
-    }
-    if (tcpListenerTable_indexes_set(rowreq_ctx, entry->loc_addr_len,
-            (char *)entry->loc_addr, entry->loc_addr_len, entry->loc_port) !=
-            MFD_SUCCESS) {
-        snmp_log(LOG_ERR,
-                 "error setting index while loading tcpListenerTable cache.\n");
-        tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
-        return;
-    }
-    if (CONTAINER_INSERT(container, rowreq_ctx) < 0) {
-        snmp_log(LOG_ERR, "tcpListenerTable insert failed.\n");
-        tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == tcpListenerTable_indexes_set(rowreq_ctx,
+                                                     entry->loc_addr_len,
+                                                     (char *) entry->loc_addr,
+                                                     entry->loc_addr_len,
+                                                     entry->loc_port))) {
+        CONTAINER_INSERT(container, rowreq_ctx);
+    } else {
+        if (rowreq_ctx) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "tcpListenerTable cache.\n");
+            tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
+        } else {
+            snmp_log(LOG_ERR, "memory allocation failed while loading "
+                     "tcpListenerTable cache.\n");
+            netsnmp_access_tcpconn_entry_free(entry);
+        }
     }
 }
 
@@ -221,8 +219,8 @@ _add_connection(void *p, void *q)
  *  While loading the data, the only important thing is the indexes.
  *  If access to your data is cheap/fast (e.g. you have a pointer to a
  *  structure in memory), it would make sense to update the data here.
- *  If, however, the accessing the data involves more work (e.g. parsing
- *  some other existing data, or performing calculations to derive the data),
+ *  If, however, the accessing the data invovles more work (e.g. parsing
+ *  some other existing data, or peforming calculations to derive the data),
  *  then you can limit yourself to setting the indexes and saving any
  *  information you will need later. Then use the saved information in
  *  tcpListenerTable_row_prep() for populating data.
@@ -249,7 +247,8 @@ tcpListenerTable_container_load(netsnmp_container *container)
     /*
      * got all the connections. pull out the active ones.
      */
-    CONTAINER_FOR_EACH(raw_data, _add_connection, container);
+    CONTAINER_FOR_EACH(raw_data, (netsnmp_container_obj_func *)
+                       _add_connection, container);
 
     /*
      * free the container. we've either claimed each entry, or released it,

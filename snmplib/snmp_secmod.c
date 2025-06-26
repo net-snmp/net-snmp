@@ -14,16 +14,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -114,7 +118,7 @@ register_sec_mod(int secmod, const char *modname,
     return SNMPERR_SUCCESS;
 }
 
-netsnmp_feature_child_of(unregister_sec_mod, netsnmp_unused);
+netsnmp_feature_child_of(unregister_sec_mod, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_UNREGISTER_SEC_MOD
 int
 unregister_sec_mod(int secmod)

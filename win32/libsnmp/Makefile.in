@@ -55,7 +55,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpIPBaseDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
@@ -105,19 +104,24 @@ CLEAN :
 	-@for %f in $(LIB32_OBJS) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
 
+"..\lib\$(OUTDIR)" :
+    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
+
 .SUFFIXES: .c .obj
 
 {..\..\snmplib}.c{$(INTDIR)}.obj::
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
 {..\..\snmplib\transports}.c{$(INTDIR)}.obj::
+   @if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $<
 
 
 RSC=rc.exe
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmp.lib" $(LDFLAGS)
-"..\lib\$(OUTDIR)\netsnmp.lib" : $(DEF_FILE) $(LIB32_OBJS)
+"..\lib\$(OUTDIR)\netsnmp.lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
     $(LIB32) $(LIB32_FLAGS) $(DEF_FLAGS) $(LIB32_OBJS)
 
 

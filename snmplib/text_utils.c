@@ -4,13 +4,13 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #   include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #   include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #   include <string.h>
 #else
 #  include <strings.h>
@@ -18,10 +18,10 @@
 
 #include <sys/types.h>
 
-#ifdef HAVE_LIMITS_H
+#if HAVE_LIMITS_H
 #   include <limits.h>
 #endif
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #   include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
@@ -33,17 +33,21 @@
 
 #include <errno.h>
 
+#if HAVE_DMALLOC_H
+#  include <dmalloc.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/text_utils.h>
 
-netsnmp_feature_child_of(text_utils, libnetsnmp);
+netsnmp_feature_child_of(text_utils, libnetsnmp)
 
-netsnmp_feature_provide(text_utils);
+netsnmp_feature_provide(text_utils)
 #ifdef NETSNMP_FEATURE_REQUIRE_TEXT_UTILS
-netsnmp_feature_require(file_utils);
+netsnmp_feature_require(file_utils)
 #endif /* NETSNMP_FEATURE_REQUIRE_TEXT_UTILS */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TEXT_UTILS
@@ -153,7 +157,7 @@ netsnmp_file_text_parse(netsnmp_file *f, netsnmp_container *cin,
     return c;
 }
 
-netsnmp_feature_child_of(text_token_container_from_file, netsnmp_unused);
+netsnmp_feature_child_of(text_token_container_from_file, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_TEXT_TOKEN_CONTAINER_FROM_FILE
 netsnmp_container *
 netsnmp_text_token_container_from_file(const char *file, u_int flags,
@@ -335,7 +339,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             li.line_max =  lpi->line_max;
         else
             li.line_max = STRINGMAX;
-        li.line = calloc(li.line_max, 1);
+        li.line = (char *)calloc(li.line_max, 1);
         if (NULL == li.line) {
             snmp_log(LOG_ERR,"malloc failed\n");
             return;
@@ -406,7 +410,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             mem = NULL;
             
             if (lpi->flags & PMLP_FLAG_ALLOC_LINE) {
-	        li.line = calloc(li.line_max, 1);
+	        li.line = (char *)calloc(li.line_max, 1);
                 if (NULL == li.line) {
                     snmp_log(LOG_ERR,"malloc failed\n");
                     break;

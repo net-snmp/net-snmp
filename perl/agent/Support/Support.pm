@@ -26,7 +26,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter getLeaf);
 @EXPORT    = qw(registerAgent getOidElement setOidElement);
 @EXPORT_OK = qw();
-$VERSION = '5.10';
+$VERSION = '5.08';
 
 use strict;
 use warnings;
@@ -187,7 +187,7 @@ sub my_snmp_handler {
     print STDERR "processing a request of type " . 
 	$request_info->getMode() . "\n" if ($debugging) ;
     #
-    # Process each varbind in the list of requests
+    # Process each varbind in teh list of requests
     #
     for($request = $requests; $request; $request = $request->next()) {
       my $oid = $request->getOID();

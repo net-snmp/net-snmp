@@ -16,15 +16,15 @@
 
 #include <net-snmp/net-snmp-features.h>
 
-netsnmp_feature_child_of(ipaddress_common, libnetsnmpmibs);
+netsnmp_feature_child_of(ipaddress_common, libnetsnmpmibs)
 
-netsnmp_feature_child_of(ipaddress_common_copy_utilities, ipaddress_common);
-netsnmp_feature_child_of(ipaddress_entry_copy, ipaddress_common);
-netsnmp_feature_child_of(ipaddress_entry_update, ipaddress_common);
-netsnmp_feature_child_of(ipaddress_prefix_copy, ipaddress_common_copy_utilities);
+netsnmp_feature_child_of(ipaddress_common_copy_utilities, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_entry_copy, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_entry_update, ipaddress_common)
+netsnmp_feature_child_of(ipaddress_prefix_copy, ipaddress_common_copy_utilities)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_IPADDRESS_ENTRY_COPY
-netsnmp_feature_require(ipaddress_arch_entry_copy);
+netsnmp_feature_require(ipaddress_arch_entry_copy)
 #endif /* NETSNMP_FEATURE_REQUIRE_IPADDRESS_ENTRY_COPY */
 
 /**---------------------------------------------------------------------*/
@@ -33,7 +33,8 @@ netsnmp_feature_require(ipaddress_arch_entry_copy);
  */
 static int _access_ipaddress_entry_compare_addr(const void *lhs,
                                                 const void *rhs);
-static void _access_ipaddress_entry_release(void *entry, void *unused);
+static void _access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry,
+                                            void *unused);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -182,7 +183,9 @@ netsnmp_access_ipaddress_container_free(netsnmp_container *container, u_int free
         /*
          * free all items.
          */
-        CONTAINER_CLEAR(container, _access_ipaddress_entry_release, NULL);
+        CONTAINER_CLEAR(container,
+                        (netsnmp_container_obj_func*)_access_ipaddress_entry_release,
+                        NULL);
     }
 
     if(! (free_flags & NETSNMP_ACCESS_IPADDRESS_FREE_KEEP_CONTAINER))
@@ -203,9 +206,6 @@ netsnmp_access_ipaddress_entry_create(void)
     netsnmp_ipaddress_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_ipaddress_entry);
     int rc = 0;
-
-    if (!entry)
-        return NULL;
 
     entry->oid_index.len = 1;
     entry->oid_index.oids = &entry->ns_ia_index;
@@ -526,7 +526,7 @@ netsnmp_ipaddress_ipv6_prefix_len(struct in6_addr mask)
 /**
  */
 void
-_access_ipaddress_entry_release(void *entry, void *context)
+_access_ipaddress_entry_release(netsnmp_ipaddress_entry * entry, void *context)
 {
     netsnmp_access_ipaddress_entry_free(entry);
 }

@@ -20,7 +20,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/data_access/interface.h>
-#include "at_unix.h"
 #include "../at.h"
 
 #if defined(_AIX)
@@ -85,7 +84,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
         if (at_ptr == (auto_nlist_value(ARPTAB_SYMBOL) +
                        arptab_current * sizeof(struct arphd))) {
             /*
-             * Unused
+             * Usused
              */
             arptab_current++;
             at_ptr = at[arptab_current].at_next;

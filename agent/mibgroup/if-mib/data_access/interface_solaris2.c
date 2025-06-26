@@ -18,7 +18,7 @@
 #include <strings.h>
 #include <string.h>
 
-netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all);
+netsnmp_feature_child_of(interface_arch_set_admin_status, interface_all)
 
 static int _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ifEntry_t *);
 static int _match_ifname_v4addr(void *ifname, void *ipaddr);
@@ -121,7 +121,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         entry->type = ife.ifType;
         entry->mtu = ife.ifMtu;
         entry->speed = ife.ifSpeed;
-        entry->speed_high = ife.ifHighSpeed;
+        entry->speed_high = entry->speed / 1000000;
         entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED;
         entry->oper_status = ife.ifOperStatus;
         entry->admin_status = ife.ifAdminStatus;
@@ -211,6 +211,8 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if (error) {
         DEBUGMSGTL(("access:interface:container:arch", 
                     "error %d, free container\n", error));
+        netsnmp_access_interface_container_free(container,
+            NETSNMP_ACCESS_INTERFACE_FREE_NOFLAGS);
         return -2;
     }
 

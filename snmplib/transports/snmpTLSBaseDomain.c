@@ -2,28 +2,30 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/types.h>
 
-netsnmp_feature_require(cert_util);
+netsnmp_feature_require(cert_util)
 
-#ifdef HAVE_STRING_H
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #include <errno.h>
 #include <ctype.h>
-#include "../memcheck.h"
 
 /* OpenSSL Includes */
 #include <openssl/bio.h>
@@ -42,46 +44,22 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_assert.h>
-#include <net-snmp/library/snmp_impl.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/read_config.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
 
-#ifndef X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS
-#define X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS 0
-#endif
-
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
 int openssl_local_index;
 
-#ifndef HAVE_ERR_GET_ERROR_ALL
-/*
- * A backport of the OpenSSL 3.0 ERR_get_error_all() function. See also
- * OpenSSL commit b13342e933c5 ("Modernise the ERR functionality further (new
- * functions and deprecations)").
- */
-static unsigned long ERR_get_error_all(const char **file, int *line,
-                                       const char **func,
-                                       const char **data, int *flags)
-{
-    *func = "(?)";
-#ifdef HAVE_ERR_GET_ERROR_FUNC
-    ERR_get_error_func(func);
-#endif
-    return ERR_get_error_line_data(file, line, data, flags);
-}
-#endif
-
 /* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
-    char subject[SNMP_MAXBUF_MEDIUM], issuer[SNMP_MAXBUF_MEDIUM], *fingerprint;
+    char buf[1024], *fingerprint;
     X509 *thecert;
     netsnmp_cert *cert;
     _netsnmp_verify_info *verify_info;
@@ -93,12 +71,10 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     
     /* things to do: */
 
-    X509_NAME_oneline(X509_get_subject_name(thecert), subject, sizeof(subject));
-    X509_NAME_oneline(X509_get_issuer_name(thecert), issuer, sizeof(issuer));
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, NS_HASH_SHA1);
-    DEBUGMSGTL(("tls_x509:verify", " subject: %s\n", subject));
-    DEBUGMSGTL(("tls_x509:verify", "  issuer: %s\n", issuer));
-    DEBUGMSGTL(("tls_x509:verify", "      fp: %s\n", fingerprint ?
+    X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, -1);
+    DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
+    DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
                 fingerprint : "unknown"));
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
@@ -133,7 +109,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
         } else {
             DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
             /* log where we are and why called */
-            snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d fp=%s subject='%s' issuer='%s' err=%i:%s\n", ok, ctx, depth, fingerprint, subject, issuer, err, X509_verify_cert_error_string(err));
+            snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err));
             SNMP_FREE(fingerprint);
             return 0;
         }
@@ -175,7 +151,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
     char            *fingerprint;
 
     fingerprint =
-        netsnmp_openssl_cert_get_fingerprint(remote_cert, NS_HASH_SHA1);
+        netsnmp_openssl_cert_get_fingerprint(remote_cert, -1);
 
     if (!fingerprint) {
         /* no peer cert */
@@ -192,7 +168,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 
         if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, NS_HASH_SHA1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
     }
 
     if (!tlsdata->their_fingerprint && try_default) {
@@ -204,7 +180,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 
         if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, NS_HASH_SHA1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
     }
     
     if (tlsdata->their_fingerprint) {
@@ -232,15 +208,13 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
-    char            *their_hostname;
-    size_t           their_hostname_len;
+    char            *check_name;
     int              ret;
-    size_t           i;
+    
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
-
-    remote_cert = SSL_get_peer_certificate(ssl);
-    if (!remote_cert) {
+    
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
         DEBUGMSGTL(("tls_x509:verify",
                     "remote connection provided no certificate (yet)\n"));
@@ -258,41 +232,88 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 
     case NO_FINGERPRINT_AVAILABLE:
         if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
-            char *lower_hostname;
+            GENERAL_NAMES      *onames;
+            const GENERAL_NAME *oname = NULL;
+            int                 i, j;
+            int                 count;
+            char                buf[SPRINT_MAX_LEN];
+            int                 is_wildcarded = 0;
+            char               *compare_to;
 
-            their_hostname_len = strlen(tlsdata->their_hostname);
-            their_hostname = tlsdata->their_hostname;
-            
-            /* RFC 6353: convert their_hostname to lowercase */
-            lower_hostname = calloc(their_hostname_len + 1, sizeof(char));
-            if (NULL == lower_hostname) {
-                LOGANDDIE("Failed to allocate memory to convert hostname to lowercase");
+            /* see if the requested hostname has a wildcard prefix */
+            if (strncmp(tlsdata->their_hostname, "*.", 2) == 0) {
+                is_wildcarded = 1;
+                compare_to = tlsdata->their_hostname + 2;
+            } else {
+                compare_to = tlsdata->their_hostname;
             }
-            for (i = 0; i < their_hostname_len; ++i) {
-                lower_hostname[i] = tolower((unsigned char) their_hostname[i]);
+
+            /* if the hostname we were expecting to talk to matches
+               the cert, then we can accept this connection. */
+
+            /* check against the DNS subjectAltName */
+            onames = (GENERAL_NAMES *)X509_get_ext_d2i(remote_cert,
+                                                       NID_subject_alt_name,
+                                                       NULL, NULL );
+            if (NULL != onames) {
+                count = sk_GENERAL_NAME_num(onames);
+
+                for (i=0 ; i <count; ++i)  {
+                    oname = sk_GENERAL_NAME_value(onames, i);
+                    if (GEN_DNS == oname->type) {
+
+                        /* get the value */
+                        ASN1_STRING_to_UTF8((unsigned char**)&check_name,
+                                            oname->d.ia5);
+
+                        /* convert to lowercase for comparisons */
+                        for (j = 0 ;
+                             *check_name && j < sizeof(buf)-1;
+                             ++check_name, ++j ) {
+                            if (isascii(*check_name))
+                                buf[j] = tolower(0xFF & *check_name);
+                        }
+                        if (j < sizeof(buf))
+                            buf[j] = '\0';
+                        check_name = buf;
+                        
+                        if (is_wildcarded) {
+                            /* we *only* allow passing till the first '.' */
+                            /* ie *.example.com can't match a.b.example.com */
+                            check_name = strchr(check_name, '.') + 1;
+                        }
+
+                        DEBUGMSGTL(("tls_x509:verify", "checking subjectAltname of dns:%s\n", check_name));
+                        if (strcmp(compare_to, check_name) == 0) {
+
+                            DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns:%s\n", check_name));
+                            return SNMPERR_SUCCESS;
+                        }
+                    }
+                }
             }
-            /* RFC 1034 section 3.5
-               Disable support for "w*.example.com" and "*w.example.com"
-               multilevel wildcards
-            */
-            if (1 == X509_check_host(remote_cert,
-                                   lower_hostname,
-                                   their_hostname_len,
-                                   X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS,
-                                   NULL)) {
-                DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
-                free(lower_hostname);
+
+            /* check the common name for a match */
+            check_name =
+                netsnmp_openssl_cert_get_commonName(remote_cert, NULL, NULL);
+
+            if (is_wildcarded) {
+                /* we *only* allow passing till the first '.' */
+                /* ie *.example.com can't match a.b.example.com */
+                if (check_name)
+                    check_name = strchr(check_name, '.');
+                if (check_name)
+                    check_name++;
+            }
+
+            if (check_name && strcmp(compare_to, check_name) == 0) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", check_name));
                 return SNMPERR_SUCCESS;
             }
-            free(lower_hostname);
-            if (1 == X509_check_ip_asc(remote_cert,
-                                      their_hostname,
-                                      0)) {
-                DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of IP: %s\n", their_hostname));
-                return SNMPERR_SUCCESS;
-            }
-            snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", their_hostname);
+
+            snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", tlsdata->their_hostname);
             return SNMPERR_GENERR;
+
         }
         /* XXX: check for hostname match instead */
         snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");
@@ -321,12 +342,11 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     */
     /* Implementation notes:
        + path validation is taken care of during the openssl verify
-         routines, our part of which is handled in verify_callback
+         routines, our part of which is hanlded in verify_callback
          above.
        + fingerprint verification happens below.
     */
-    remote_cert = SSL_get_peer_certificate(ssl);
-    if (!remote_cert) {
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
         DEBUGMSGTL(("tls_x509:verify",
                     "remote connection provided no certificate (yet)\n"));
@@ -405,50 +425,23 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 int
 _trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
     netsnmp_cert *trustcert;
-    netsnmp_cert *candidate;
-    netsnmp_void_array *matching = NULL;
-
-    int                 i;
 
     DEBUGMSGTL(("sslctx_client", "Trying to load a trusted certificate: %s\n",
                 certspec));
 
     /* load this identifier into the trust chain */
     trustcert = netsnmp_cert_find(NS_CERT_CA,
-                                  NS_CERTKEY_FINGERPRINT,
+                                  NS_CERTKEY_MULTIPLE,
                                   certspec);
-
-    /* loop through all CA certs in the given files */
-    if (!trustcert) {
-        matching = netsnmp_certs_find(NS_CERT_CA,
-                                      NS_CERTKEY_FILE,
-                                      certspec);
-        for (i = 0; (matching) && (i < matching->size); ++i) {
-            candidate = (netsnmp_cert*)matching->array[i];
-            if (netsnmp_cert_trust(the_ctx, candidate) != SNMPERR_SUCCESS) {
-                free(matching->array);
-                free(matching);
-                LOGANDDIE("failed to load trust certificate");
-            }
-        } /** matching loop */
-
-        if (matching) {
-            free(matching->array);
-            free(matching);
-            return 1;
-	}
-    }
-
-    /* fall back to trusting the remote peer certificate */
     if (!trustcert)
         trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                       NS_CERTKEY_MULTIPLE,
                                       certspec);
     if (!trustcert)
         LOGANDDIE("failed to find requested certificate to trust");
-
+        
     /* Add the certificate to the context */
-    if (netsnmp_cert_trust(the_ctx, trustcert) != SNMPERR_SUCCESS)
+    if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
         LOGANDDIE("failed to load trust certificate");
 
     return 1;
@@ -473,19 +466,10 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
     }
 }    
 
-#ifndef TLS1_3_VERSION
-#define TLS1_3_VERSION 0x304
-#endif
-
 SSL_CTX *
 _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
     char         *cipherList;
-#ifdef SSL_CTX_set_min_proto_version
-    const char   *tlsMinVersion;
-    const char   *tlsMaxVersion;
-    int          tlsVersion;
-#endif
     X509_LOOKUP  *lookup;
     X509_STORE   *cert_store = NULL;
 
@@ -497,7 +481,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
                                     NETSNMP_DS_LIB_X509_CRL_FILE);
     if (NULL != crlFile) {
         cert_store = SSL_CTX_get_cert_store(the_ctx);
-        DEBUGMSGTL(("sslctx_common", "loading CRL: %s\n", crlFile));
+        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
         if (!cert_store)
             LOGANDDIE("failed to find certificate store");
         if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
@@ -508,65 +492,6 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         X509_STORE_set_flags(cert_store,
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
     }
-
-#ifdef SSL_CTX_set_min_proto_version
-    tlsVersion = TLS1_2_VERSION;
-    tlsMinVersion = "tls1_2";
-    tlsMinVersion = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                          NETSNMP_DS_LIB_TLS_MIN_VERSION);
-    if (NULL != tlsMinVersion) {
-        if (strcmp("tls1",tlsMinVersion) == 0) {
-           tlsVersion = TLS1_VERSION;
-        }
-        else if (strcmp("tls1_1",tlsMinVersion) == 0) {
-           tlsVersion = TLS1_1_VERSION;
-        }
-        else if (strcmp("tls1_2",tlsMinVersion) == 0) {
-           tlsVersion = TLS1_2_VERSION;
-        }
-        else if (strcmp("tls1_3",tlsMinVersion) == 0) {
-           tlsVersion = TLS1_3_VERSION;
-        }
-        else {
-            LOGANDDIE("Invalid tlsMinVersion value");
-        }
-    }
-    if (1 == SSL_CTX_set_min_proto_version(the_ctx, tlsVersion)) {
-        snmp_log(LOG_INFO,"Set tlsMinVersion to '%s'\n", tlsMinVersion);
-    }
-    else {
-        LOGANDDIE("Set tlsMinVersion failed");
-    }
-
-    tlsVersion = TLS1_3_VERSION;
-    tlsMaxVersion = "tls1_3";
-    tlsMaxVersion = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                          NETSNMP_DS_LIB_TLS_MAX_VERSION);
-    if (NULL != tlsMaxVersion) {
-        if (strcmp("tls1",tlsMaxVersion) == 0) {
-            tlsVersion = TLS1_VERSION;
-        }
-        else if (strcmp("tls1_1",tlsMaxVersion) == 0) {
-            tlsVersion = TLS1_1_VERSION;
-        }
-        else if (strcmp("tls1_2",tlsMaxVersion) == 0) {
-            tlsVersion = TLS1_2_VERSION;
-        }
-        else if (strcmp("tls1_3",tlsMaxVersion) == 0) {
-            tlsVersion = TLS1_3_VERSION;
-        }
-        else {
-            LOGANDDIE("Invalid tlsMaxVersion value");
-        }
-    }
-
-    if (1 == SSL_CTX_set_max_proto_version(the_ctx, tlsVersion)) {
-        snmp_log(LOG_INFO,"Set tlsMaxVersion to '%s'\n", tlsMaxVersion);
-    }
-    else {
-        LOGANDDIE("Set tlsMaxVersion failed");
-    }
-#endif
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
@@ -583,8 +508,6 @@ SSL_CTX *
 sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
-    X509         *ocert;
-    const char   *msg;
 
     /***********************************************************************
      * Set up the client context
@@ -592,10 +515,8 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     the_ctx = SSL_CTX_new(NETSNMP_REMOVE_CONST(SSL_METHOD *, method));
     if (!the_ctx) {
         snmp_log(LOG_ERR, "ack: %p\n", the_ctx);
-        msg = "can't create a new context";
-        goto err;
+        LOGANDDIE("can't create a new context");
     }
-    MAKE_MEM_DEFINED(the_ctx, 256/*sizeof(*the_ctx)*/);
     SSL_CTX_set_read_ahead (the_ctx, 1); /* Required for DTLS */
         
     SSL_CTX_set_verify(the_ctx,
@@ -613,48 +534,25 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
     }
 
-    if (!id_cert) {
-        msg = "error finding client identity keys";
-        goto err;
-    }
+    if (!id_cert)
+        LOGANDDIE ("error finding client identity keys");
 
-    if (!id_cert->key || !id_cert->key->okey) {
-        msg = "failed to load private key";
-        goto err;
-    }
+    if (!id_cert->key || !id_cert->key->okey)
+        LOGANDDIE("failed to load private key");
 
     DEBUGMSGTL(("sslctx_client", "using public key: %s\n",
                 id_cert->info.filename));
     DEBUGMSGTL(("sslctx_client", "using private key: %s\n",
                 id_cert->key->info.filename));
 
-    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0) {
-        msg = "failed to set the client certificate to use";
-        goto err;
-    }
+    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
+        LOGANDDIE("failed to set the certificate to use");
 
-    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0) {
-        msg = "failed to set the client private key to use";
-        goto err;
-    }
+    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
+        LOGANDDIE("failed to set the private key to use");
 
-    if (!SSL_CTX_check_private_key(the_ctx)) {
-        msg = "client public and private keys incompatible";
-        goto err;
-    }
-
-    while (id_cert->issuer_cert) {
-        id_cert = id_cert->issuer_cert;
-        if (id_cert->ocert)
-        {
-            ocert = X509_dup(id_cert->ocert);
-            DEBUGMSGTL(("sslctx_client", "adding cert-chain certificate %p", ocert));
-            if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert)) {
-                msg = "failed to add intermediate client certificate";
-                goto err;
-            }
-        }
-    }
+    if (!SSL_CTX_check_private_key(the_ctx))
+        LOGANDDIE("public and private keys incompatible");
 
     if (tlsbase->their_identity)
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
@@ -668,33 +566,22 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                     peer_cert ? peer_cert->info.filename : "none"));
 
         /* Trust the expected certificate */
-        if (netsnmp_cert_trust(the_ctx, peer_cert) != SNMPERR_SUCCESS) {
-            msg = "failed to set verify paths";
-            goto err;
-        }
+        if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
+            LOGANDDIE ("failed to set verify paths");
     }
 
-    /* trust a certificate (possibly a CA) specifically passed in */
+    /* trust a certificate (possibly a CA) aspecifically passed in */
     if (tlsbase->trust_cert) {
-        if (!_trust_this_cert(the_ctx, tlsbase->trust_cert)) {
-            SSL_CTX_free(the_ctx);
+        if (!_trust_this_cert(the_ctx, tlsbase->trust_cert))
             return 0;
-        }
     }
 
     return _sslctx_common_setup(the_ctx, tlsbase);
-
-err:
-    snmp_log(LOG_ERR, "%s\n", msg);
-    SSL_CTX_free(the_ctx);
-    return 0;
 }
 
 SSL_CTX *
 sslctx_server_setup(const SSL_METHOD *method) {
     netsnmp_cert *id_cert;
-    X509         *ocert;
-    const char	 *msg;
 
     /***********************************************************************
      * Set up the server context
@@ -702,54 +589,29 @@ sslctx_server_setup(const SSL_METHOD *method) {
     /* setting up for ssl */
     SSL_CTX *the_ctx = SSL_CTX_new(NETSNMP_REMOVE_CONST(SSL_METHOD *, method));
     if (!the_ctx) {
-        msg = "can't create a new server context";
-        goto err;
+        LOGANDDIE("can't create a new context");
     }
-    MAKE_MEM_DEFINED(the_ctx, 256/*sizeof(*the_ctx)*/);
 
     id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
-    if (!id_cert) {
-        msg = "error finding server identity keys";
-        goto err;
-    }
+    if (!id_cert)
+        LOGANDDIE ("error finding server identity keys");
 
-    if (!id_cert->key || !id_cert->key->okey) {
-        msg = "failed to load server private key";
-        goto err;
-    }
+    if (!id_cert->key || !id_cert->key->okey)
+        LOGANDDIE("failed to load private key");
 
     DEBUGMSGTL(("sslctx_server", "using public key: %s\n",
                 id_cert->info.filename));
     DEBUGMSGTL(("sslctx_server", "using private key: %s\n",
                 id_cert->key->info.filename));
 
-    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0) {
-        msg = "failed to set the server certificate to use";
-        goto err;
-    }
+    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
+        LOGANDDIE("failed to set the certificate to use");
 
-    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0) {
-        msg = "failed to set the server private key to use";
-        goto err;
-    }
+    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
+        LOGANDDIE("failed to set the private key to use");
 
-    if (!SSL_CTX_check_private_key(the_ctx)) {
-        msg ="server public and private keys incompatible";
-        goto err;
-    }
-
-    while (id_cert->issuer_cert) {
-        id_cert = id_cert->issuer_cert;
-        if (id_cert->ocert)
-        {
-            ocert = X509_dup(id_cert->ocert);
-            DEBUGMSGTL(("sslctx_server", "adding cert-chain certificate %p", ocert));
-            if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert)) {
-                msg = "failed to add intermediate server certificate";
-                goto err;
-            }
-        }
-    }
+    if (!SSL_CTX_check_private_key(the_ctx))
+        LOGANDDIE("public and private keys incompatible");
 
     SSL_CTX_set_read_ahead(the_ctx, 1); /* XXX: DTLS only? */
 
@@ -759,14 +621,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
-    SSL_CTX_set_options(the_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
-
     return _sslctx_common_setup(the_ctx, NULL);
-    
-err:
-    snmp_log(LOG_ERR, "%s\n", msg);
-    SSL_CTX_free(the_ctx);
-    return NULL;
 }
 
 int
@@ -812,7 +667,7 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
                              struct snmp_session *sess) {
     /* the default security model here should be TSM; most other
        things won't work with TLS because we'll throw out the packet
-       if it doesn't have a proper tmStateRef (and only TSM generates
+       if it doesn't have a proper tmStateRef (and onyl TSM generates
        this at the moment */
     if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
         if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
@@ -862,7 +717,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 }
 
 int
-tls_get_verify_info_index(void) {
+tls_get_verify_info_index() {
     return openssl_local_index;
 }
 
@@ -912,16 +767,6 @@ netsnmp_tlsbase_ctor(void) {
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsAlgorithms",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_TLS_ALGORITMS);
-
-    /* What TLS version should be used at least */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsMinVersion",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_TLS_MIN_VERSION);
-
-    /* What TLS version should be used at max */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsMaxVersion",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_TLS_MAX_VERSION);
 
     /*
      * for the client
@@ -1096,7 +941,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     return SNMPERR_SUCCESS;
 }
 
-netsnmp_feature_child_of(_x509_get_error, netsnmp_unused);
+netsnmp_feature_child_of(_x509_get_error, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE__X509_GET_ERROR
 const char * _x509_get_error(int x509failvalue, const char *location) {
     static const char *reason = NULL;
@@ -1256,7 +1101,7 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
 #endif /* NETSNMP_FEATURE_REMOVE__X509_GET_ERROR */
 
 void _openssl_log_error(int rc, SSL *con, const char *location) {
-    const char     *reason, *file, *func, *data;
+    const char     *reason, *file, *data;
     unsigned long   numerical_reason;
     int             flags, line;
 
@@ -1322,17 +1167,24 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
 
     /* other errors */
     while ((numerical_reason =
-            ERR_get_error_all(&file, &line, &func, &data, &flags)) != 0) {
-        snmp_log(LOG_ERR, "%s (file %s, func %s, line %d)\n",
-                 ERR_error_string(numerical_reason, NULL), file, func, line);
+            ERR_get_error_line_data(&file, &line, &data, &flags)) != 0) {
+        snmp_log(LOG_ERR, " error: #%lu (file %s, line %d)\n",
+                 numerical_reason, file, line);
 
         /* if we have a text translation: */
         if (data && (flags & ERR_TXT_STRING)) {
             snmp_log(LOG_ERR, "  Textual Error: %s\n", data);
-        }
+            /*
+             * per openssl man page: If it has been allocated by
+             * OPENSSL_malloc(), *flags&ERR_TXT_MALLOCED is true.
+             *
+             * arggh... stupid openssl prototype for ERR_get_error_line_data
+             * wants a const char **, but returns something that we might
+             * need to free??
+             */
+            if (flags & ERR_TXT_MALLOCED)
+                OPENSSL_free(NETSNMP_REMOVE_CONST(void *, data));        }
     }
-    /* clear openssl error ring buffer */
-    ERR_clear_error();
-
+    
     snmp_log(LOG_ERR, "---- End of OpenSSL Errors ----\n");
 }

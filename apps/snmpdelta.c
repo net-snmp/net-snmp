@@ -28,46 +28,45 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
 
-#define MAX_DESCRIPTOR 64
 #define MAX_ARGS 256
 #define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
@@ -81,7 +80,7 @@ struct varInfo {
     oid            *info_oid;
     int             type;
     size_t          oidlen;
-    char            descriptor[MAX_DESCRIPTOR];
+    char            descriptor[64];
     u_int           value;
     struct counter64 c64value;
     float           max;
@@ -187,8 +186,8 @@ int
 wait_for_peak_start(int period, int peak)
 {
     struct timeval  m_time, *tv = &m_time;
-    struct tm       tm, *local_time;
-    time_t          SecondsAtNextHour, tv_sec;
+    struct tm       tm;
+    time_t          SecondsAtNextHour;
     int             target = 0;
     int             seconds;
 
@@ -202,12 +201,7 @@ wait_for_peak_start(int period, int peak)
     /*
      * Create a tm struct from it 
      */
-    tv_sec = tv->tv_sec;
-    local_time = localtime(&tv_sec);
-    if (local_time)
-        memcpy(&tm, local_time, sizeof(tm));
-    else
-        memset(&tm, 0, sizeof(tm));
+    memcpy(&tm, localtime((time_t *) & tv->tv_sec), sizeof(tm));
 
     /*
      * Calculate the next hour 
@@ -216,8 +210,6 @@ wait_for_peak_start(int period, int peak)
     tm.tm_min = 0;
     tm.tm_hour++;
     SecondsAtNextHour = mktime(&tm);
-    if (SecondsAtNextHour == (time_t)-1)
-        return -1;
 
     /*
      * Now figure out the amount of time to sleep 
@@ -269,7 +261,7 @@ sprint_descriptor(char *buffer, struct varInfo *vip)
     cp++;
     if (cp < buf)
         cp = buf;
-    strlcpy(buffer, cp, MAX_DESCRIPTOR);
+    strcpy(buffer, cp);
 
     if (buf != NULL) {
         free(buf);
@@ -322,7 +314,7 @@ wait_for_period(int period)
     Sleep(period * 1000);
 #else                   /* WIN32 */
     struct timeval  m_time, *tv = &m_time;
-    struct tm       tm, *local_time;
+    struct tm       tm;
     int             count;
     static int      target = 0;
     time_t          nexthour;
@@ -332,18 +324,11 @@ wait_for_period(int period)
     if (target) {
         target += period;
     } else {
-        time_t tv_sec = tv->tv_sec;
-        local_time = localtime(&tv_sec);
-        if (local_time)
-            memcpy(&tm, local_time, sizeof(tm));
-        else
-            memset(&tm, 0, sizeof(tm));
+        memcpy(&tm, localtime((time_t *) & tv->tv_sec), sizeof(tm));
         tm.tm_sec = 0;
         tm.tm_min = 0;
         tm.tm_hour++;
         nexthour = mktime(&tm);
-        if (nexthour == (time_t)-1)
-            return;
 
         target = (nexthour - tv->tv_sec) % period;
         if (target == 0)
@@ -404,7 +389,7 @@ main(int argc, char *argv[])
     int             sum;        /* what the heck is this for, its never used? */
     char            filename[128] = { 0 };
     struct timeval  tv;
-    struct tm       tm, *local_time;
+    struct tm       tm;
     char            timestring[64] = { 0 }, valueStr[64] = {
     0}, maxStr[64] = {
     0};
@@ -527,25 +512,17 @@ main(int argc, char *argv[])
         if (status == STAT_SUCCESS) {
             if (response->errstat == SNMP_ERR_NOERROR) {
                 if (timestamp) {
-                    time_t tv_sec;
-
-                    gettimeofday(&tv, NULL);
-                    tv_sec = tv.tv_sec;
-                    local_time = localtime(&tv_sec);
-                    if (local_time)
-                        memcpy(&tm, local_time, sizeof(tm));
-                    else
-                        memset(&tm, 0, sizeof(tm));
+                    gettimeofday(&tv, (struct timezone *) 0);
+                    memcpy(&tm, localtime((time_t *) & tv.tv_sec),
+                           sizeof(tm));
                     if (((period % 60)
                          && (!peaks || ((period * peaks) % 60)))
                         || keepSeconds)
-                        snprintf(timestring, sizeof timestring,
-                                " [%02d:%02d:%02d %d/%d]",
+                        sprintf(timestring, " [%02d:%02d:%02d %d/%d]",
                                 tm.tm_hour, tm.tm_min, tm.tm_sec,
                                 tm.tm_mon + 1, tm.tm_mday);
                     else
-                        snprintf(timestring, sizeof timestring,
-                                " [%02d:%02d %d/%d]",
+                        sprintf(timestring, " [%02d:%02d %d/%d]",
                                 tm.tm_hour, tm.tm_min,
                                 tm.tm_mon + 1, tm.tm_mday);
                 }
@@ -600,12 +577,12 @@ main(int argc, char *argv[])
 
                     if (tableForm) {
                         if (count == begin) {
-                            snprintf(outstr, sizeof outstr, "%s", timestring + 1);
+                            sprintf(outstr, "%s", timestring + 1);
                         } else {
                             outstr[0] = '\0';
                         }
                     } else {
-                        snprintf(outstr, sizeof outstr, "%s %s", timestring,
+                        sprintf(outstr, "%s %s", timestring,
                                 vip->descriptor);
                     }
 
@@ -618,25 +595,24 @@ main(int argc, char *argv[])
                             printvalue =
                                 ((float) value * 100) / delta_time;
                             if (tableForm)
-                                snprintf(valueStr, sizeof valueStr, "\t%.2f", printvalue);
+                                sprintf(valueStr, "\t%.2f", printvalue);
                             else
-                                snprintf(valueStr, sizeof valueStr, " /sec: %.2f",
+                                sprintf(valueStr, " /sec: %.2f",
                                         printvalue);
                         }
                     } else {
                         printvalue = (float) value;
-                        snprintf(valueStr, sizeof valueStr, " /%d sec: ", period);
+                        sprintf(valueStr, " /%d sec: ", period);
                         if (vip->type == ASN_COUNTER64)
                             printU64(valueStr + strlen(valueStr),
                                      &c64value);
                         else
-                            snprintf(valueStr + strlen(valueStr),
-                                     sizeof(valueStr) - strlen(valueStr), 
-                                     "%u", value);
+                            sprintf(valueStr + strlen(valueStr), "%u",
+                                    value);
                     }
 
                     if (!peaks) {
-                        strlcat(outstr, valueStr, sizeof outstr);
+                        strcat(outstr, valueStr);
                     } else {
                         print = 0;
                         if (vip->peak_count == -1) {
@@ -648,13 +624,13 @@ main(int argc, char *argv[])
                                 vip->peak = printvalue;
                             if (++vip->peak_count == peaks) {
                                 if (deltat)
-                                    snprintf(peakStr, sizeof peakStr, 
+                                    sprintf(peakStr,
                                             " /sec: %.2f	(%d sec Peak: %.2f)",
                                             vip->peak_average /
                                             vip->peak_count, period,
                                             vip->peak);
                                 else
-                                    snprintf(peakStr, sizeof peakStr, 
+                                    sprintf(peakStr,
                                             " /%d sec: %.0f	(%d sec Peak: %.0f)",
                                             period,
                                             vip->peak_average /
@@ -664,7 +640,7 @@ main(int argc, char *argv[])
                                 vip->peak = 0;
                                 vip->peak_count = 0;
                                 print = 1;
-                                strlcat(outstr, peakStr, sizeof outstr);
+                                strcat(outstr, peakStr);
                             }
                         }
                     }
@@ -674,15 +650,15 @@ main(int argc, char *argv[])
                             vip->max = printvalue;
                         }
                         if (deltat)
-                            snprintf(maxStr, sizeof maxStr, "	(Max: %.2f)", vip->max);
+                            sprintf(maxStr, "	(Max: %.2f)", vip->max);
                         else
-                            snprintf(maxStr, sizeof maxStr, "	(Max: %.0f)", vip->max);
-                        strlcat(outstr, maxStr, sizeof outstr);
+                            sprintf(maxStr, "	(Max: %.0f)", vip->max);
+                        strcat(outstr, maxStr);
                     }
 
                     if (print) {
                         if (fileout) {
-                            snprintf(filename, sizeof filename, "%s-%s", gateway,
+                            sprintf(filename, "%s-%s", gateway,
                                     vip->descriptor);
                             print_log(filename, outstr + 1);
                         } else {
@@ -772,7 +748,6 @@ close_session:
     snmp_close(ss);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return (exit_code);
 }

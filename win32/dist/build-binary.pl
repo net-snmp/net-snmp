@@ -11,18 +11,15 @@ use File::Copy;
 use File::Spec;
 use Cwd 'abs_path';
 
-sub which {
-    my ($cmd) = @_;
-    for my $p (split(';', $ENV{'PATH'})) {
-	my $q = File::Spec->catfile($p, $cmd . '.exe');
-	return $q if -e $q;
-    }
-}
-
 print "------------------------------------------------------\n";
 
-my $tar_command = which 'tar';
-my $gzip_command = which 'gzip';
+my $tar_command;
+my $gzip_command;
+for my $msysbindir (("C:\\msys\\1.0\\bin", "C:\\mingw\\msys\\1.0\\bin")) {
+    $tar_command = File::Spec->catfile($msysbindir, "tar.exe");
+    $gzip_command = File::Spec->catfile($msysbindir, "gzip.exe");
+    last if (-f $tar_command);
+}
 
 if (! (-f $tar_command)) {
   die ("Could not find tar command");
@@ -30,7 +27,6 @@ if (! (-f $tar_command)) {
 else {
   print "tar command:  $tar_command\n";
 }
-if (! (-f $gzip_command)) { $gzip_command = "c:/msys64/usr/bin/gzip.exe"; }
 if (! (-f $gzip_command)) {
   die ("Could not find gzip command");
 }
@@ -47,11 +43,10 @@ die("makensis.exe not found") if (!(-f $makensis));
 
 my $target_arch = $ENV{TARGET_CPU} ? $ENV{TARGET_CPU} : $ENV{Platform} ?
                   $ENV{Platform} : "x86";
-my $openssldir = $ENV{OPENSSLDIR} ? $ENV{OPENSSLDIR} :
-                 $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
+my $openssldir = $target_arch eq "x64" ? "C:\\OpenSSL-Win64" :
                  "C:\\OpenSSL-Win32";
 my $opensslincdir = $openssldir . "\\include";
-my $openssllibdir = $openssldir . "\\lib\\VC\\x64";
+my $openssllibdir = $openssldir . "\\lib\\VC";
 
 my $version = "unknown";
 my $version_for_perl = "unknown";
@@ -70,7 +65,6 @@ my $perl_dir = File::Spec->catdir($top_dir, "perl");
 
 print "\ntop_dir:      $top_dir\n";
 print "win32_dir:    $win32_dir\n";
-print "openssldir:   $openssldir\n";
 print "perl_dir:     $perl_dir\n";
 print "install base: $install_base\n\n";
 
@@ -302,8 +296,7 @@ print "\n\nBuilding installer:\n";
 print "=============================\n\n";
 
 my $suffix = $ENV{LIB} =~ /\\x64|\\amd64/ ? "x64" : "x86";
-if (system("\"$makensis\" /DPRODUCT_MAJ_VERSION=\"$version_maj\" /DPRODUCT_MIN_VERSION=\"$version_min\" /DPRODUCT_REVISION=\"$version_rev\" /DPRODUCT_EXE_VERSION=\"$installer_exe_version\" /DINSTALLER_PLATFORM=\"$suffix\" \"$install_base/net-snmp.nsi\" >makensis.out") != 0) {
-    system("type makensis.out");
+if (system("\"$makensis\" /DPRODUCT_MAJ_VERSION=\"$version_maj\" /DPRODUCT_MIN_VERSION=\"$version_min\" /DPRODUCT_REVISION=\"$version_rev\" /DPRODUCT_EXE_VERSION=\"$installer_exe_version\" /DINSTALLER_PLATFORM=\"$suffix\" \"$install_base/net-snmp.nsi\"") != 0) {
     die("Building installer failed");
 }
 
@@ -371,17 +364,8 @@ sub build {
   print "\n";
   print "12. Install development files       $install_devel\n";
 
-  my $opensslsubdir .= $linktype eq "dynamic" ? "\\MD" : "\\MT";
-  if ($debug eq "enabled") {
-      $opensslsubdir .= "d";
-  }
-
   my $configOpts =
       ($openssl eq "enabled" ? "--with-ssl" : "" )
-      . " " .
-      ($openssl eq "enabled" ? "--with-sslincdir=$opensslincdir" : "" )
-      . " " .
-      ($openssl eq "enabled" ? "--with-ssllibdir=$openssllibdir$opensslsubdir" : "" )
       . " " .
       ($sdk eq "enabled" ? "--with-sdk" : "" )
       . " " .
@@ -395,6 +379,9 @@ sub build {
   
   # Set to not search for non-existent ".dep" files
   $ENV{NO_EXTERNAL_DEPS}="1";
+
+  $ENV{INCLUDE} .= ";$opensslincdir";
+  $ENV{LIB}     .= ";$openssllibdir";
 
   # Set PATH environment variable so Perl make tests can locate the DLL
   $ENV{PATH} = File::Spec->catdir($top_dir, "bin", $debug eq "enabled" ? "debug" : "release") . ";$ENV{PATH}";

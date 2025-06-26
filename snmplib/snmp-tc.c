@@ -7,22 +7,22 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <ctype.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -30,16 +30,15 @@
 #endif
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 
-netsnmp_feature_child_of(snmp_tc_all, libnetsnmp);
+netsnmp_feature_child_of(snmp_tc_all, libnetsnmp)
 
-netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused);
-netsnmp_feature_child_of(date_n_time, snmp_tc_all);
-netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all);
-netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all);
+netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused)
+netsnmp_feature_child_of(date_n_time, snmp_tc_all)
+netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all)
+netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all)
 
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS
 /*
@@ -136,7 +135,6 @@ date_n_time(const time_t * when, size_t * length)
      * Null time
      */
     if (when == NULL || *when == 0 || *when == (time_t) - 1) {
-invalid_time:
         string[0] = 0;
         string[1] = 0;
         string[2] = 1;
@@ -154,9 +152,6 @@ invalid_time:
      * Basic 'local' time handling
      */
     tm_p = localtime(when);
-    if (!tm_p)
-        goto invalid_time;
-
     yauron = tm_p->tm_year + 1900;
     string[0] = (u_char)(yauron >> 8);
     string[1] = (u_char)yauron;
@@ -168,7 +163,7 @@ invalid_time:
     string[7] = 0;
     *length = 8;
 
-#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || HAVE_DECL_TIMEZONE
+#if defined(HAVE_STRUCT_TM_TM_GMTOFF) || defined(HAVE_TIMEZONE_VARIABLE)
     /*
      * Timezone offset
      */
@@ -259,15 +254,9 @@ ctime_to_timet(const char *str)
      *  Cope with timezone and DST
      */
 
-#ifdef HAVE_STRUCT_TM_TM_ISDST
-#if HAVE_DECL_DAYLIGHT==1
+#ifdef HAVE_STRUCT_TIME_TM_ISDST
     tm.tm_isdst = !!daylight;
-#else
-    tm.tm_isdst = 0;
-#endif
-#if defined(HAVE_DECL_TIMEZONE) && defined(HAVE_SCALAR_TIMEZONE)
     tm.tm_sec -= timezone;
-#endif
 #endif
 
     return (mktime(&tm));
@@ -384,7 +373,7 @@ check_rowstatus_transition(int oldValue, int newValue)
 
     switch (newValue) {
         /*
-         * these two end up being equivalent as far as checking the 
+         * these two end up being equivelent as far as checking the 
          * status goes, although the final states are based on the 
          * newValue. 
          */
@@ -440,7 +429,7 @@ check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION */
 
-netsnmp_feature_child_of(check_storage_transition, snmp_tc_all);
+netsnmp_feature_child_of(check_storage_transition, snmp_tc_all)
 #ifndef NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION
 char
 check_storage_transition(int oldValue, int newValue)

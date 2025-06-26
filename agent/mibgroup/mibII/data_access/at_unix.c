@@ -19,7 +19,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
 #include "../at.h"
-#include "at_unix.h"
 
 /*
  * var_atEntry(...
@@ -137,7 +136,7 @@ var_atEntry(struct variable *vp,
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
         *var_len = sizeof long_return;
         long_return = lowIfIndex ? lowIfIndex : 1;
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         if (lowIfIndex == 0)
             return NULL;
 #endif

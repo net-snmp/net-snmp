@@ -11,7 +11,7 @@ AH_TOP([/*
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  *
@@ -38,11 +38,7 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL
-#if (defined(NETSNMP_USE_OPENSSL) &&            \
-     defined(HAVE_OPENSSL_AES_H) &&             \
-     defined(HAVE_AES_CFB128_ENCRYPT) &&        \
-     defined(HAVE_EVP_AES_128_CFB)) ||          \
-    defined(NETSNMP_USE_INTERNAL_CRYPTO)
+#if (defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 #define HAVE_AES 1
 #endif
 
@@ -59,6 +55,8 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 #endif
 
 #endif /* NETSNMP_NO_AUTOCONF_DEFINITIONS */
+
+
 
 
 /* ********* NETSNMP_MARK_BEGIN_CLEAN_NAMESPACE ********* */
@@ -264,6 +262,8 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 
 /* The assigned enterprise number for sysObjectID. */
 #define NETSNMP_SYSTEM_MIB		1,3,6,1,4,1,8072,3,2,NETSNMP_OSTYPE
+#define NETSNMP_SYSTEM_DOT_MIB		1.3.6.1.4.1.8072.3.2.NETSNMP_OSTYPE
+#define NETSNMP_SYSTEM_DOT_MIB_LENGTH	10
 
 /* The assigned enterprise number for notifications. */
 #define NETSNMP_NOTIFICATION_MIB		1,3,6,1,4,1,8072,4
@@ -431,6 +431,12 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
  *
  *    -DNETSNMP_NO_INLINE
  *
+ * Header and source files should only test against NETSNMP_USE_INLINE:
+ *
+ *   #ifdef NETSNMP_USE_INLINE
+ *   NETSNMP_INLINE function(int parm) { return parm -1; }
+ *   #endif
+ *
  * Functions which should be static, regardless of whether or not inline
  * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
  * like so:
@@ -452,6 +458,7 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 #include NETSNMP_MACHINE_INCLUDE_FILE
 
 #if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
+#   define NETSNMP_USE_INLINE 1
 #   ifndef NETSNMP_INLINE
 #      define NETSNMP_INLINE __inline__
 #   endif
@@ -476,49 +483,6 @@ AH_BOTTOM([/* end of definitions added by configure on-the-fly */
 #define NETSNMP_CAN_USE_NLIST
 #endif
 
-/*
- * Note: GCC 4.6 added __BYTE_ORDER__, __ORDER_BIG_ENDIAN__,
- * __ORDER_LITTLE_ENDIAN__ and __ORDER_PDP_ENDIAN__ in SVN r165881. For older
- * gcc versions and also for other compilers, determine the endianness by
- * calling a function that can be inlined.
- */
-#if defined(__BYTE_ORDER__)
-# if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#  define NETSNMP_BIGENDIAN 1
-# elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#  define NETSNMP_BIGENDIAN 0
-# else
-#  error Unknown byte order
-# endif
-#else
-NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
-{
-    union { unsigned long l; unsigned char c; } u;
-
-    u.l = 1;
-
-    return u.c == 0;
-}
-# define NETSNMP_BIGENDIAN netsnmp_bigendian()
-#endif
-
-#if defined(__has_attribute)
-#  if __has_attribute(__fallthrough__)
-#    define NETSNMP_FALLTHROUGH __attribute__((__fallthrough__))
-#  endif
-#endif
-#if !defined NETSNMP_FALLTHROUGH
-#  define NETSNMP_FALLTHROUGH do {} while (0) /* fallthrough */
-#endif
-
-#if defined(__has_attribute)
-#  if __has_attribute(__nonnull__)
-#    define NETSNMP_NONNULL(...) __attribute__((__nonnull__(__VA_ARGS__)))
-#  endif
-#endif
-#if !defined NETSNMP_NONNULL
-#  define NETSNMP_NONNULL(...) /* nonnull */
-#endif
 
 /* ********* NETSNMP_MARK_BEGIN_LEGACY_DEFINITIONS *********/
 /* 
@@ -674,7 +638,6 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define HPUX11ID      NETSNMP_HPUX11ID
 #define AIXID         NETSNMP_AIXID
 #define MACOSXID      NETSNMP_MACOSXID
-#define DRAGONFLYID   NETSNMP_DRAGONFLYID
 #define UNKNOWNID     NETSNMP_UNKNOWNID
 
 #define ENTERPRISE_OID            NETSNMP_ENTERPRISE_OID
@@ -683,6 +646,8 @@ NETSNMP_STATIC_INLINE int netsnmp_bigendian(void)
 #define ENTERPRISE_DOT_MIB_LENGTH NETSNMP_ENTERPRISE_DOT_MIB_LENGTH
 
 #define SYSTEM_MIB		  NETSNMP_SYSTEM_MIB
+#define SYSTEM_DOT_MIB		  NETSNMP_SYSTEM_DOT_MIB
+#define SYSTEM_DOT_MIB_LENGTH	  NETSNMP_SYSTEM_DOT_MIB_LENGTH
 
 #define NOTIFICATION_MIB	    NETSNMP_NOTIFICATION_MIB	
 #define NOTIFICATION_DOT_MIB	    NETSNMP_NOTIFICATION_DOT_MIB

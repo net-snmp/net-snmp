@@ -345,8 +345,9 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
     /*
      * make sure there is enough space for tcpConnectionLocalAddress data
      */
-    if (tbl_idx->tcpConnectionLocalAddress_len <
-        tcpConnectionLocalAddress_val_ptr_len) {
+    if ((NULL == tbl_idx->tcpConnectionLocalAddress) ||
+        (tbl_idx->tcpConnectionLocalAddress_len <
+         (tcpConnectionLocalAddress_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -377,8 +378,9 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
     /*
      * make sure there is enough space for tcpConnectionRemAddress data
      */
-    if (tbl_idx->tcpConnectionRemAddress_len <
-        tcpConnectionRemAddress_val_ptr_len) {
+    if ((NULL == tbl_idx->tcpConnectionRemAddress) ||
+        (tbl_idx->tcpConnectionRemAddress_len <
+         (tcpConnectionRemAddress_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -440,7 +442,7 @@ tcpConnectionTable_indexes_set(tcpConnectionTable_rowreq_ctx * rowreq_ctx,
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != tcpConnectionTable_index_to_oid(&rowreq_ctx->oid_idx,
                                              &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;
@@ -843,7 +845,7 @@ tcpConnectionTable_commit(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
     }
 
     /*
-     * if we successfully committed this row, set the dirty flag.
+     * if we successfully commited this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -893,7 +895,7 @@ tcpConnectionTable_undo_commit(tcpConnectionTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-committed this row, clear the dirty flag.
+     * if we successfully un-commited this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -962,7 +964,7 @@ The state of this TCP connection.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note

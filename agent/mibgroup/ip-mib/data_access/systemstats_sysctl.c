@@ -13,8 +13,15 @@
 #include "../ipSystemStatsTable/ipSystemStatsTable.h"
 #include "systemstats_private.h"
 
+#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
+#if NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
+#define _KERNEL_STRUCTURES
+#endif
+
 #include <sys/types.h>
-#include <unistd.h>
 #include <dirent.h>
 #include <ctype.h>
 
@@ -22,26 +29,13 @@
 #include <sys/sysctl.h>
 #include <sys/protosw.h>
 
-#if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
-#define _KERNEL 1
-#define _I_DEFINED_KERNEL
-#endif
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL_STRUCTURES
-#define _KERNEL_STRUCTURES
-#endif
 #include <net/if.h>
-#ifdef _I_DEFINED_KERNEL
-#undef _KERNEL
-#endif
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
-#ifdef HAVE_NETINET_ICMP6_H
-#include <netinet/icmp6.h>
-#endif
-#ifdef HAVE_NETINET6_IP6_VAR_H
+#if HAVE_NETINET6_IP6_VAR_H
 #include <sys/queue.h>
 #include <netinet6/ip6_var.h>
 #endif
@@ -70,7 +64,7 @@ struct	ip6stat {
 	u_quad_t ip6s_localout;		/* total ip packets generated here */
 	u_quad_t ip6s_odropped;		/* lost packets due to nobufs, etc. */
 	u_quad_t ip6s_reassembled;	/* total packets reassembled ok */
-	u_quad_t ip6s_fragmented;	/* datagrams successfully fragmented */
+	u_quad_t ip6s_fragmented;	/* datagrams sucessfully fragmented */
 	u_quad_t ip6s_ofragments;	/* output fragments created */
 	u_quad_t ip6s_cantfrag;		/* don't fragment flag was set, etc. */
 	u_quad_t ip6s_badoptions;	/* error in option processing */
@@ -587,7 +581,7 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
     entry->stats.InHdrErrors = ip6stat.ip6s_badoptions + ip6stat.ip6s_tooshort
                              + ip6stat.ip6s_toosmall + ip6stat.ip6s_badvers
 			     + ip6stat.ip6s_toomanyhdr;
-#ifdef HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG
+#if HAVE_STRUCT_IP6STAT_IP6S_EXTHDRTOOLONG
     entry->stats.InHdrErrors += ip6stat.ip6s_exthdrtoolong;
 #endif
     entry->stats.columnAvail[IPSYSTEMSTATSTABLE_INHDRERRORS] = 1;
@@ -694,6 +688,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     FILE           *devin;
     char           line[1024];
     char           *start = line;
+    int            rc;
     char           *scan_str;
     uintmax_t       scan_val;
     netsnmp_systemstats_entry *entry = NULL;
@@ -711,6 +706,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     /*
      * Read each per interface statistics proc file
      */
+    rc = 0;
     while ((dev_snmp6_entry = readdir(dev_snmp6_dir)) != NULL) {
         if (dev_snmp6_entry->d_name[0] == '.')
             continue;

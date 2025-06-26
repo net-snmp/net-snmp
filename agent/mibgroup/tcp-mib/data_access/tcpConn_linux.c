@@ -133,7 +133,7 @@ _load4(netsnmp_container *container, u_int load_flags)
     }
     
     setvbuf(in, rbuf, _IOFBF, rbufsize);
-    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), in)); /* skip header */
+    fgets(line, sizeof(line), in); /* skip header */
 
     /*
      *   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
@@ -242,9 +242,7 @@ _load4(netsnmp_container *container, u_int load_flags)
          * add entry to container
          */
         entry->arbitrary_index = CONTAINER_SIZE(container) + 1;
-        if (CONTAINER_INSERT(container, entry) < 0) {
-            netsnmp_access_tcpconn_entry_free(entry);
-        }
+        CONTAINER_INSERT(container, entry);
     }
 
     fclose(in);
@@ -280,7 +278,7 @@ _load6(netsnmp_container *container, u_int load_flags)
     }
 
     setvbuf(in, rbuf, _IOFBF, rbufsize);
-    NETSNMP_IGNORE_RESULT(fgets(line, sizeof(line), in)); /* skip header */
+    fgets(line, sizeof(line), in); /* skip header */
 
     /*
      * Note: PPC (big endian)
@@ -391,9 +389,7 @@ _load6(netsnmp_container *container, u_int load_flags)
          * add entry to container
          */
         entry->arbitrary_index = CONTAINER_SIZE(container) + 1;
-        if (CONTAINER_INSERT(container, entry) < 0) {
-            netsnmp_access_tcpconn_entry_free(entry);
-        }
+        CONTAINER_INSERT(container, entry);
     }
 
     fclose(in);

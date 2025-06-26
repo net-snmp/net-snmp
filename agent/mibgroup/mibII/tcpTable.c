@@ -9,7 +9,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -18,31 +18,31 @@
 #include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
-#ifdef HAVE_NETINET_TCP_H
+#if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-#ifdef HAVE_NETINET_TCP_TIMER_H
+#if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
 #endif
-#ifdef HAVE_NETINET_TCPIP_H
+#if HAVE_NETINET_TCPIP_H
 #include <netinet/tcpip.h>
 #endif
-#ifdef HAVE_NETINET_TCP_VAR_H
+#if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
-#ifdef HAVE_NETLINK_NETLINK_H
+#if HAVE_NETLINK_NETLINK_H
 #include <netlink/netlink.h>
 #include <netlink/msg.h>
 #include <linux/inet_diag.h>
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #if defined(HAVE_KVM_GETFILE2) || !defined(openbsd5)
 #undef HAVE_KVM_GETFILES
 #endif
 #endif
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
 #include <kvm.h>
 #include <sys/sysctl.h>
 #define _KERNEL
@@ -61,9 +61,9 @@
 #include "tcp.h"
 #include "tcpTable.h"
 
-netsnmp_feature_child_of(tcptable_all, libnetsnmpmibs);
+netsnmp_feature_child_of(tcptable_all, libnetsnmpmibs)
 
-netsnmp_feature_child_of(tcp_count_connections, tcptable_all);
+netsnmp_feature_child_of(tcp_count_connections, tcptable_all)
 
 #ifdef hpux11
 #define	TCPTABLE_ENTRY_TYPE	mib_tcpConnEnt 
@@ -107,7 +107,7 @@ struct netsnmp_tcpConnEntry_s {
 #define	TCPTABLE_REMOTEPORT	inp_fport
 #define	TCPTABLE_IS_LINKED_LIST
 
-#elif defined(HAVE_KVM_GETFILES)
+#elif HAVE_KVM_GETFILES
 #define	TCPTABLE_ENTRY_TYPE	struct kinfo_file
 #define	TCPTABLE_STATE		t_state 
 #define	TCPTABLE_LOCALADDRESS	inp_laddru[0]
@@ -120,13 +120,7 @@ struct netsnmp_tcpConnEntry_s {
 
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
 struct netsnmp_inpcb_s {
-#if __FreeBSD_version >= 1200026
-    struct xinpcb   pcb;
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
-    struct in4pcb    pcb;
-#else
     struct inpcb    pcb;
-#endif
     int             state;
     netsnmp_inpcb  *inp_next;
 };
@@ -134,21 +128,11 @@ struct netsnmp_inpcb_s {
 #define INP_NEXT_SYMBOL		inp_next
 #define	TCPTABLE_ENTRY_TYPE	netsnmp_inpcb 
 #define	TCPTABLE_STATE		state 
-#define	TCPTABLE_IS_LINKED_LIST
-#define INP_NEXT_SYMBOL		inp_next
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 999010400
-#define	TCPTABLE_LOCALADDRESS	pcb.in4p_ip.ip_src.s_addr 
-#define	TCPTABLE_LOCALPORT	pcb.in4p_pcb.inp_lport
-#define	TCPTABLE_REMOTEADDRESS	pcb.in4p_ip.ip_dst.s_addr 
-#define	TCPTABLE_REMOTEPORT	pcb.in4p_pcb.inp_fport
-#define	TCPTABLE_TCPCB          pcb.in4p_pcb.inp_ppcb
-#else
 #define	TCPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
 #define	TCPTABLE_LOCALPORT	pcb.inp_lport
 #define	TCPTABLE_REMOTEADDRESS	pcb.inp_faddr.s_addr 
 #define	TCPTABLE_REMOTEPORT	pcb.inp_fport
-#define TCPTABLE_TCPCB		pcb.inp_ppcb
-#endif
+#define	TCPTABLE_IS_LINKED_LIST
 
 #endif                          /* hpux11 */
 
@@ -251,7 +235,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
     netsnmp_variable_list *requestvb;
     netsnmp_table_request_info *table_info;
     TCPTABLE_ENTRY_TYPE	  *entry;
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
     int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 #endif
     oid      subid;
@@ -277,7 +261,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 
             switch (subid) {
             case TCPCONNSTATE:
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
                 state = StateMap[entry->TCPTABLE_STATE];
 #else
                 state = entry->TCPTABLE_STATE;
@@ -346,9 +330,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #ifndef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
 int
 TCP_Count_Connections( void ) {
-#if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
     tcpTable_load(NULL, NULL);
-#endif
     return tcp_estab;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
@@ -393,7 +375,7 @@ tcpTable_next_entry( void **loop_context,
     netsnmp_variable_list *idx;
     long port;
 
-#ifdef HAVE_KVM_GETFILES
+#if HAVE_KVM_GETFILES
     while (i < tcp_size && (tcp_head[i].so_protocol != IPPROTO_TCP
 	    || tcp_head[i].so_family != AF_INET))
 	i++;
@@ -619,11 +601,30 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 static const int linux_states[12] = { 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
 
-#ifdef HAVE_NETLINK_NETLINK_H
+#if HAVE_NETLINK_NETLINK_H
 
-#ifndef HAVE_LIBNL3
-#error libnl-3 is required. Please install the libnl-3 and libnl-route-3 development packages and remove --without-nl from the configure options if necessary.
-#endif
+#if !defined(HAVE_LIBNL3)
+/* libnl3 API implemented on top of the libnl1 API */
+
+#define nl_sock nl_handle
+
+static const char *nl_geterror_compat(int e)
+{
+    return nl_geterror();
+}
+
+#define nl_geterror(e) nl_geterror_compat(e)
+
+static struct nl_handle *nl_socket_alloc(void)
+{
+    return nl_handle_alloc();
+}
+
+static void nl_socket_free(struct nl_handle *ns)
+{
+    nl_handle_destroy(ns);
+}
+#endif /* HAVE_LIBNL3 */
 
 static int
 tcpTable_load_netlink(void)
@@ -750,7 +751,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     tcpTable_free(cache, NULL);
 
-#ifdef HAVE_NETLINK_NETLINK_H
+#if HAVE_NETLINK_NETLINK_H
 	if (tcpTable_load_netlink() == 0) {
 		return 0;
 	}
@@ -861,7 +862,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     return -1;
 }
 
-#elif defined(HAVE_KVM_GETFILES)
+#elif HAVE_KVM_GETFILES
 
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
@@ -987,20 +988,12 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-#if __FreeBSD_version >= 1200026
-        nnew->state = StateMap[((NS_ELEM *) xig)->t_state];
-#else
         nnew->state = StateMap[((NS_ELEM *) xig)->xt_tp.t_state];
-#endif
         if (nnew->state == 5 /* established */ ||
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
         memcpy(&(nnew->pcb), &(((NS_ELEM *) xig)->xt_inp),
-#if __FreeBSD_version >= 1200026
-                           sizeof(struct xinpcb));
-#else
                            sizeof(struct inpcb));
-#endif
 
 #ifdef INP_ISIPV6
 	if (INP_ISIPV6(&nnew->pcb))
@@ -1050,22 +1043,18 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     /*
      *  Set up a linked list
      */
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-    entry  = TAILQ_FIRST(&table.inpt_queue);
-#else
     entry  = table.INP_FIRST_SYMBOL;
-#endif
     while (entry) {
    
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
-        if (!NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(nnew->pcb))) {
+        if (!NETSNMP_KLOOKUP(entry, (char *)&(nnew->pcb), sizeof(struct inpcb))) {
             DEBUGMSGTL(("mibII/tcpTable:TcpTable_load", "klookup failed\n"));
             break;
         }
 
-        if (!NETSNMP_KLOOKUP(nnew->TCPTABLE_TCPCB, (char *)&tcpcb, sizeof(struct tcpcb))) {
+        if (!NETSNMP_KLOOKUP(nnew->pcb.inp_ppcb, (char *)&tcpcb, sizeof(struct tcpcb))) {
             DEBUGMSGTL(("mibII/tcpTable:TcpTable_load", "klookup failed\n"));
             break;
         }
@@ -1078,11 +1067,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
 
-#if defined(__NetBSD__) && __NetBSD_Version__ >= 699002800
-        if (entry == TAILQ_FIRST(&table.inpt_queue))
-#else
         if (entry == table.INP_FIRST_SYMBOL)
-#endif
             break;
     }
 

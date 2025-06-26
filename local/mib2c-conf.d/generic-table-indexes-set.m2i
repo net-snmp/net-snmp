@@ -105,7 +105,7 @@ ${context}_indexes_set(${context}_rowreq_ctx *rowreq_ctx$gtis_tmp)
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if(0 != ${context}_index_to_oid(&rowreq_ctx->oid_idx,
                                     &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

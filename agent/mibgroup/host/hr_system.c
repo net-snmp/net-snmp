@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -16,7 +16,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -36,7 +36,7 @@
 #include "sys/proc.h"
 #endif
 #ifndef mingw32
-#ifdef HAVE_UTMPX_H
+#if HAVE_UTMPX_H
 #include <utmpx.h>
 #else
 #include <utmp.h>
@@ -45,7 +45,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#ifdef HAVE_LM_H
+#ifdef WIN32
 #include <lm.h>
 #endif
 
@@ -79,13 +79,13 @@
 #include <sys/sysctl.h>
 #endif
 
-netsnmp_feature_require(date_n_time);
+netsnmp_feature_require(date_n_time)
 
 #if !defined(UTMP_FILE) && defined(_PATH_UTMP)
 #define UTMP_FILE _PATH_UTMP
 #endif
 
-#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 void            setutent(void);
 void            endutent(void);
 struct utmp    *getutent(void);
@@ -115,7 +115,7 @@ static long     get_max_solaris_processes(void);
 static int      get_load_dev(void);
 static int      count_users(void);
 extern int      count_processes(void);
-#ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
 static int      count_kthreads = 1;
 
 static void parse_count_kthreads(const char *token, const char *line)
@@ -202,7 +202,7 @@ init_hr_system(void)
 #ifdef NPROC_SYMBOL
     auto_nlist(NPROC_SYMBOL, 0, 0);
 #endif
-#ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
     snmpd_register_const_config_handler("count_kthreads",
                                         parse_count_kthreads, NULL,
 					"0|1    0 to exclude kernel threads from hrSystemProcesses.0");
@@ -273,7 +273,7 @@ var_hrsys(struct variable * vp,
 #ifdef linux
     FILE           *fp;
 #endif
-#if defined(NETSNMP_CAN_USE_SYSCTL) && defined(CTL_KERN) && defined(KERN_MAXPROC)
+#if NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int      maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     size_t          buf_size;
 #endif
@@ -303,7 +303,7 @@ var_hrsys(struct variable * vp,
     case HRSYS_LOAD_PARAM:
 #ifdef linux
         if((fp = fopen("/proc/cmdline", "r")) != NULL) {
-            NETSNMP_IGNORE_RESULT(fgets(string, sizeof(string), fp));
+            fgets(string, sizeof(string), fp);
             fclose(fp);
         } else {
             return NULL;
@@ -318,7 +318,7 @@ var_hrsys(struct variable * vp,
         }
         strlcpy(string,bootparam,sizeof(string));
 #else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         sprintf(string, "ask Dave");    /* XXX */
@@ -329,12 +329,12 @@ var_hrsys(struct variable * vp,
         long_return = count_users();
         return (u_char *) & long_return;
     case HRSYS_PROCS:
-#ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
         long_return = swrun_count_processes(count_kthreads);
-#elif defined(USING_HOST_HR_SWRUN_MODULE)
+#elif USING_HOST_HR_SWRUN_MODULE
         long_return = count_processes();
 #else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -343,7 +343,7 @@ var_hrsys(struct variable * vp,
     case HRSYS_MAXPROCS:
 #if defined(NR_TASKS)
         long_return = NR_TASKS; /* <linux/tasks.h> */
-#elif defined(NETSNMP_CAN_USE_SYSCTL) && defined(CTL_KERN) && defined(KERN_MAXPROC)
+#elif NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
 	{
 	    int nproc = 0;
 
@@ -367,7 +367,7 @@ var_hrsys(struct variable * vp,
 	    long_return = nproc;
 	}
 #else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
         long_return = 0;
@@ -433,7 +433,7 @@ set_solaris_bootcommand_parameter(int action,
         case RESERVE2: {
             /* create copy of old value */
             if(statP) {
-                int old_val_len = strlen((const char *)statP);
+                int old_val_len=strlen(statP);
                 if(old_val_len >= sizeof(old_value)) {
                     p_old_value=(char *)malloc(old_val_len+1);
                     if(p_old_value==NULL) {
@@ -441,7 +441,7 @@ set_solaris_bootcommand_parameter(int action,
                         return SNMP_ERR_GENERR;
                     } 
                 }
-                strlcpy(p_old_value, (const char *)statP, old_val_len+1);
+                strlcpy(p_old_value,statP,old_val_len+1);
             } else { 
                 p_old_value=NULL;
             }
@@ -537,16 +537,16 @@ static long get_max_solaris_processes(void) {
     static long maxprocs=-1;
 
     /* assume only necessary to compute once, since /etc/system must be modified */
-    if (maxprocs >= 0)
-        return maxprocs;
+    if (maxprocs == -1) {
+        if ( (ksc=kstat_open()) != NULL && 
+             (ks=kstat_lookup(ksc, "unix", 0, "var")) != NULL && 
+             (kstat_read(ksc, ks, &v) != -1)) {
 
-    ksc = kstat_open();
-    if (ksc) {
-        ks = kstat_lookup(ksc, NETSNMP_REMOVE_CONST(char *, "unix"), 0,
-                          NETSNMP_REMOVE_CONST(char *, "var"));
-        if (ks && kstat_read(ksc, ks, &v) != -1)
-            maxprocs = v.v_proc;
-        kstat_close(ksc);
+            maxprocs=v.v_proc;
+        }
+        if(ksc) {
+            kstat_close(ksc);
+        }
     }
 
     return maxprocs;
@@ -593,7 +593,7 @@ ns_set_time(int action,
             int minutes_from_utc= 0;
 
             if (var_val_len == 11) {
-                /* timezone information was present */
+                /* timezone inforamation was present */
                 hours_from_utc=(int)var_val[9];
                 minutes_from_utc=(int)var_val[10];
             }
@@ -607,8 +607,7 @@ ns_set_time(int action,
             newtimetm.tm_mday=(int)var_val[3];
 
             /* determine if day light savings time in effect DST */
-            if (hours_from_utc*60*60+minutes_from_utc*60 ==
-                (timezone >= 0 ? timezone : -timezone)) {
+            if ( ( hours_from_utc*60*60+minutes_from_utc*60 ) == abs(timezone) ) {
                 newtimetm.tm_isdst=0;
             } else {
                 newtimetm.tm_isdst=1;
@@ -676,7 +675,7 @@ count_users(void)
 {
     int             total = 0;
 #ifndef WIN32
-#ifdef HAVE_UTMPX_H
+#if HAVE_UTMPX_H
 #define setutent setutxent
 #define pututline pututxline
 #define getutent getutxent
@@ -722,7 +721,7 @@ count_users(void)
     return total;
 }
 
-#if defined(UTMP_FILE) && !defined(HAVE_UTMPX_H)
+#if defined(UTMP_FILE) && !HAVE_UTMPX_H
 
 static FILE    *utmp_file;
 static struct utmp utmp_rec;

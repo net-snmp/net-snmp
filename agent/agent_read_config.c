@@ -10,15 +10,15 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef HAVE_SYS_PARAM_H
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #else
 #include <sys/types.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -27,36 +27,36 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#ifdef HAVE_NETINET_IP_H
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#ifdef HAVE_NETINET_IP6_H
+#if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
 #endif
-#ifdef HAVE_SYS_QUEUE_H
+#if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#ifdef HAVE_SYS_SOCKETVAR_H
+#if HAVE_SYS_SOCKETVAR_H
 #ifndef dynix
 #include <sys/socketvar.h>
 #else
@@ -64,31 +64,31 @@
 #endif
 #endif
 #endif
-#ifdef HAVE_SYS_STREAM_H
+#if HAVE_SYS_STREAM_H
 #   ifdef sysv5UnixWare7
 #      define _KMEMUSER 1   /* <sys/stream.h> needs this for queue_t */
 #   endif
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_NET_ROUTE_H
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
-#ifdef HAVE_NETINET_IP_VAR_H
+#if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
 #ifdef NETSNMP_ENABLE_IPV6
-#ifdef HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
+#if HAVE_NETNETSNMP_ENABLE_IPV6_IP6_VAR_H
 #include <netinet6/ip6_var.h>
 #endif
 #endif
-#ifdef HAVE_NETINET_IN_PCB_H
+#if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
-#ifdef HAVE_INET_MIB2_H
+#if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef HAVE_PWD_H
@@ -112,20 +112,9 @@
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"
 
-netsnmp_feature_child_of(agent_read_config_all, libnetsnmpagent);
+netsnmp_feature_child_of(agent_read_config_all, libnetsnmpagent)
 
-netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all);
-
-void netsnmp_set_agent_user_id(int uid)
-{
-    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_USERID, uid);
-}
-
-void netsnmp_set_agent_group_id(int gid)
-{
-    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_GROUPID,
-                       gid);
-}
+netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
 
 #ifdef HAVE_UNISTD_H
 void
@@ -139,7 +128,8 @@ snmpd_set_agent_user(const char *token, char *cptr)
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
-            netsnmp_set_agent_user_id(uid);
+	    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_USERID, uid);
 	}
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
     } else {
@@ -147,9 +137,10 @@ snmpd_set_agent_user(const char *token, char *cptr)
 
         info = getpwnam(cptr);
         if (info)
-            netsnmp_set_agent_user_id(info->pw_uid);
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_USERID, info->pw_uid);
         else
-            config_perror("User not found in password database");
+            config_perror("User not found in passwd database");
         endpwent();
 #endif
     }
@@ -165,7 +156,8 @@ snmpd_set_agent_group(const char *token, char *cptr)
         if (*ecp != 0) {
             config_perror("Bad number");
 	} else {
-            netsnmp_set_agent_group_id(gid);
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_GROUPID, gid);
 	}
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
     } else {
@@ -173,7 +165,8 @@ snmpd_set_agent_group(const char *token, char *cptr)
 
         info = getgrnam(cptr);
         if (info)
-            netsnmp_set_agent_group_id(info->gr_gid);
+            netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_GROUPID, info->gr_gid);
         else
             config_perror("Group not found in group database");
         endgrent();
@@ -200,6 +193,7 @@ snmpd_set_agent_address(const char *token, char *cptr)
          * append to the older specification string 
          */
         snprintf(buf, sizeof(buf), "%s,%s", ptr, cptr);
+	buf[sizeof(buf) - 1] = '\0';
     } else {
         strlcpy(buf, cptr, sizeof(buf));
     }
@@ -334,11 +328,12 @@ snmpd_register_const_config_handler(const char *token,
 {
     DEBUGMSGTL(("snmpd_register_app_config_handler",
                 "registering .conf token for \"%s\"\n", token));
-    register_const_app_config_handler(token, parser, releaser, help);
+    register_app_config_handler(token, (void(*)(const char *, char *))parser,
+                                releaser, help);
 }
 
 #ifdef NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER
-netsnmp_feature_require(unregister_app_config_handler);
+netsnmp_feature_require(unregister_app_config_handler)
 #endif /* NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER */
 
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPD_UNREGISTER_CONFIG_HANDLER
@@ -350,7 +345,7 @@ snmpd_unregister_config_handler(const char *token)
 #endif /* NETSNMP_FEATURE_REMOVE_SNMPD_UNREGISTER_CONFIG_HANDLER */
 
 /*
- * this function is intended for use by mib-modules to store permanent
+ * this function is intended for use by mib-modules to store permenant
  * configuration information generated by sets or persistent counters 
  */
 void

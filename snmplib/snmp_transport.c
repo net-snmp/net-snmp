@@ -11,21 +11,24 @@
 #include <net-snmp/library/snmp_transport.h>
 
 #include <stdio.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
 #include <ctype.h>
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/output_api.h>
@@ -77,12 +80,12 @@
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/read_config.h>
 
-netsnmp_feature_child_of(transport_all, libnetsnmp);
+netsnmp_feature_child_of(transport_all, libnetsnmp)
 
-netsnmp_feature_child_of(tdomain_support, transport_all);
-netsnmp_feature_child_of(tdomain_transport_oid, transport_all);
-netsnmp_feature_child_of(sockaddr_size, transport_all);
-netsnmp_feature_child_of(transport_cache, transport_all);
+netsnmp_feature_child_of(tdomain_support, transport_all)
+netsnmp_feature_child_of(tdomain_transport_oid, transport_all)
+netsnmp_feature_child_of(sockaddr_size, transport_all)
+netsnmp_feature_child_of(transport_cache, transport_all)
 
 /*
  * Our list of supported transport domains.  
@@ -96,15 +99,15 @@ static netsnmp_tdomain *domain_list = NULL;
  * The standard SNMP domains.  
  */
 
-const oid       netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
+oid             netsnmpUDPDomain[] = { 1, 3, 6, 1, 6, 1, 1 };
 size_t          netsnmpUDPDomain_len = OID_LENGTH(netsnmpUDPDomain);
-const oid       netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
+oid             netsnmpCLNSDomain[] = { 1, 3, 6, 1, 6, 1, 2 };
 size_t          netsnmpCLNSDomain_len = OID_LENGTH(netsnmpCLNSDomain);
-const oid       netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
+oid             netsnmpCONSDomain[] = { 1, 3, 6, 1, 6, 1, 3 };
 size_t          netsnmpCONSDomain_len = OID_LENGTH(netsnmpCONSDomain);
-const oid       netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
+oid             netsnmpDDPDomain[] = { 1, 3, 6, 1, 6, 1, 4 };
 size_t          netsnmpDDPDomain_len = OID_LENGTH(netsnmpDDPDomain);
-const oid       netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
+oid             netsnmpIPXDomain[] = { 1, 3, 6, 1, 6, 1, 5 };
 size_t          netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
 
 static netsnmp_container *_container = NULL;
@@ -291,7 +294,6 @@ int
 netsnmp_transport_filter_add(const char *addrtxt)
 {
     char *tmp;
-    int res;
 
     /*
      * create the container, if needed
@@ -306,10 +308,7 @@ netsnmp_transport_filter_add(const char *addrtxt)
         snmp_log(LOG_ERR,"netsnmp_transport_filter_add strdup failed\n");
         return(-1);
     }
-    res = CONTAINER_INSERT(filtered, tmp);
-    if (res)
-        free(tmp);
-    return res;
+    return CONTAINER_INSERT(filtered, tmp);
 }
 
 int
@@ -456,7 +455,9 @@ netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
         char *str = netsnmp_transport_peer_string(t,
                                                   opaque ? *opaque : NULL,
                                                   olength ? *olength : 0);
-        DEBUGMSGT_NC(("transport:recv","%d bytes from %s\n", length, str));
+        if (debugLength)
+            DEBUGMSGT_NC(("transport:recv","%d bytes from %s\n",
+                          length, str));
         SNMP_FREE(str);
     }
 
@@ -564,7 +565,7 @@ netsnmp_tdomain_register(netsnmp_tdomain *n)
 
 
 
-netsnmp_feature_child_of(tdomain_unregister, netsnmp_unused);
+netsnmp_feature_child_of(tdomain_unregister, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_UNREGISTER
 int
 netsnmp_tdomain_unregister(netsnmp_tdomain *n)
@@ -637,7 +638,7 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
     const char * const *spec = NULL;
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
-    const char **lspec = NULL;
+    char **lspec = NULL;
     char *tokenized_domain = NULL;
 
     application = tspec->application;
@@ -712,8 +713,6 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
         const char *cp;
         if ((cp = strchr(str, ':')) != NULL) {
             char* mystring = (char*)malloc(cp + 1 - str);
-            if (mystring == NULL)
-                return NULL;
             memcpy(mystring, str, cp - str);
             mystring[cp - str] = '\0';
             addr = cp + 1;
@@ -746,20 +745,14 @@ netsnmp_tdomain_transport_tspec(netsnmp_tdomain_spec *tspec)
                 const char *cp = default_domain;
                 char *ptr = NULL;
                 tokenized_domain = strdup(default_domain);
-                if (!tokenized_domain)
-                    return NULL;
 
                 while (*++cp) if (*cp == ',') commas++;
                 lspec = calloc(commas+2, sizeof(char *));
-                if (!lspec) {
-                    free(tokenized_domain);
-                    return NULL;
-                }
                 commas = 1;
                 lspec[0] = strtok_r(tokenized_domain, ",", &ptr);
                 while ((lspec[commas++] = strtok_r(NULL, ",", &ptr)))
                     ;
-                spec = lspec;
+                spec = (const char * const *)lspec;
             }
         } else {
             spec = netsnmp_lookup_default_domains(application);
@@ -883,11 +876,6 @@ netsnmp_tdomain_transport(const char *str, int local,
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_TRANSPORT_OID
-/*
- * The format of @dom and @o follows the TDomain and TAddress textual
- * conventions from RFC 2579. For the actual TAddress format definitions,
- * see e.g. SnmpUDPAddress in RFC 1906.
- */
 netsnmp_transport *
 netsnmp_tdomain_transport_oid(const oid * dom,
                               size_t dom_len,
@@ -980,28 +968,17 @@ netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
 }
 
 int
-netsnmp_transport_config_compare(const void *p, const void *q)
-{
-    const netsnmp_transport_config *left = p, *right = q;
-
+netsnmp_transport_config_compare(netsnmp_transport_config *left,
+                                 netsnmp_transport_config *right) {
     return strcmp(left->key, right->key);
 }
 
 netsnmp_transport_config *
-netsnmp_transport_create_config(const char *key, const char *value)
-{
+netsnmp_transport_create_config(char *key, char *value) {
     netsnmp_transport_config *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_transport_config);
-    if (!entry)
-        return NULL;
     entry->key = strdup(key);
     entry->value = strdup(value);
-    if (!entry->key || !entry->value) {
-        free(entry->key);
-        free(entry->value);
-        free(entry);
-        return NULL;
-    }
     return entry;
 }
 
@@ -1019,8 +996,8 @@ typedef struct trans_cache_s {
     int count; /* number of times this transport has been returned */
 } trans_cache;
 
-static void _tc_free_item(void *tc, void *context);
-static int _tc_compare(const void *p, const void *q);
+static void _tc_free_item(trans_cache *tc, void *context);
+static int _tc_compare(trans_cache *lhs, trans_cache *rhs);
 
 /** initialize transport cache */
 static int
@@ -1039,8 +1016,8 @@ _tc_init(void)
     }
 
     _container->container_name = strdup("trans_cache");
-    _container->free_item = _tc_free_item;
-    _container->compare = _tc_compare;
+    _container->free_item = (netsnmp_container_obj_func*) _tc_free_item;
+    _container->compare = (netsnmp_container_compare*) _tc_compare;
 
     return 0;
 }
@@ -1051,10 +1028,8 @@ _tc_init(void)
  * sort by af, type, local
  */
 static int
-_tc_compare(const void *p, const void *q)
+_tc_compare(trans_cache *lhs, trans_cache *rhs)
 {
-    const trans_cache *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
 
     DEBUGMSGTL(("9:transport:cache:compare", "%p/%p\n", lhs, rhs));
@@ -1075,7 +1050,7 @@ _tc_compare(const void *p, const void *q)
         return 1;
 
     if (AF_INET == lhs->af) {
-        const struct sockaddr_in *lha = &lhs->bind_addr.sin,
+        struct sockaddr_in *lha = &lhs->bind_addr.sin,
             *rha = &rhs->bind_addr.sin;
         if (lha->sin_addr.s_addr < rha->sin_addr.s_addr)
             return -1;
@@ -1089,7 +1064,7 @@ _tc_compare(const void *p, const void *q)
     }
 #ifdef NETSNMP_ENABLE_IPV6
     else if (AF_INET6 == lhs->af) {
-        const struct sockaddr_in6 *lha = &lhs->bind_addr.sin6,
+        struct sockaddr_in6 *lha = &lhs->bind_addr.sin6,
             *rha = &rhs->bind_addr.sin6;
         int rc = memcmp(lha->sin6_addr.s6_addr, rha->sin6_addr.s6_addr,
                         sizeof(rha->sin6_addr.s6_addr));
@@ -1129,7 +1104,7 @@ _tc_free(trans_cache *tc)
 }
 
 static void
-_tc_free_item(void *tc, void *context)
+_tc_free_item(trans_cache *tc, void *context)
 {
     _tc_free(tc);
 }
@@ -1147,10 +1122,9 @@ _tc_remove(trans_cache *tc)
 
 static trans_cache *
 _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
-           unsigned addr_size, netsnmp_transport *t)
+           netsnmp_transport *t)
 {
     trans_cache *tc = SNMP_MALLOC_TYPEDEF(trans_cache);
-
     if (NULL == tc) {
         snmp_log(LOG_ERR, "failed to allocate trans_cache\n");
         return NULL;
@@ -1161,7 +1135,7 @@ _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
     tc->local = local;
     tc->t = t;
     if (addr)
-        memcpy(&tc->bind_addr, addr, addr_size);
+        memcpy(&tc->bind_addr, addr, sizeof(tc->bind_addr));
     /** we only understand ipv6 and ipv6 sockaddrs in compare */
     if (AF_INET != tc->af && AF_INET6 != tc->af)
         NETSNMP_LOGONCE((LOG_WARNING, "transport cache not tested for af %d\n",
@@ -1171,7 +1145,7 @@ _tc_create(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
 
 static trans_cache *
 _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
-        unsigned addr_size, netsnmp_transport *t)
+        netsnmp_transport *t)
 {
     trans_cache *tc;
     int rc;
@@ -1184,7 +1158,7 @@ _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
             return NULL;
     }
 
-    tc = _tc_create(af, type, local, addr, addr_size, t);
+    tc = _tc_create(af, type, local, addr, t);
     if (NULL == tc) {
         DEBUGMSGTL(("transport:cache:add",
                     "could not create transport cache\n"));
@@ -1202,8 +1176,7 @@ _tc_add(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
 }
 
 trans_cache *
-_tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
-         unsigned addr_size)
+_tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr)
 {
     trans_cache tc, *rtn;
 
@@ -1217,7 +1190,7 @@ _tc_find(int af, int type, int local, const netsnmp_sockaddr_storage *addr,
     tc.type = type;
     tc.local = local;
     if (addr)
-        memcpy(&tc.bind_addr, addr, addr_size);
+        memcpy(&tc.bind_addr, addr, sizeof(tc.bind_addr));
 
     rtn = CONTAINER_FIND(_container, &tc);
     DEBUGMSGTL(("transport:cache:find", "%p\n", rtn));
@@ -1297,8 +1270,7 @@ netsnmp_transport_cache_remove(netsnmp_transport *t)
  */
 netsnmp_transport *
 netsnmp_transport_cache_get(int af, int type, int local,
-                            const netsnmp_sockaddr_storage *bind_addr,
-                            unsigned addr_size)
+                            const netsnmp_sockaddr_storage *bind_addr)
 {
     trans_cache       *tc;
     netsnmp_transport *t;
@@ -1307,9 +1279,9 @@ netsnmp_transport_cache_get(int af, int type, int local,
 
 #define USE_CACHE 1
 
-#ifdef USE_CACHE
+#if USE_CACHE
     /** check for existing transport */
-    tc = _tc_find(af, type, local, bind_addr, addr_size);
+    tc = _tc_find(af, type, local, bind_addr);
     if (tc) {
         DEBUGMSGTL(("transport:cache:get", "using existing transport %p\n",
                     tc->t));
@@ -1326,16 +1298,17 @@ netsnmp_transport_cache_get(int af, int type, int local,
     }
     DEBUGMSGTL(("transport:cache:get", "new transport %p\n", t));
 
-#ifdef USE_CACHE
+#if USE_CACHE
     /** create transport cache for new transport */
-    tc = _tc_add(af, type, local, bind_addr, addr_size, t);
+    tc = _tc_add(af, type, local, bind_addr, t);
     if (NULL == tc) {
-        DEBUGMSGTL(("transport:cache:get", "could not create transport cache entry\n"));
+        DEBUGMSGTL(("transport:cache:get", "could not create transport cache\n"));
         /*
-         * We have a transport, just no cache for it. Let's continue on and
-         * hope for the best.
+         * hmmm.. this isn't really a critical error, is it? We have a
+         * transport, just no cache for it. Let's continue on and hope for the
+         * best.
          */
-        return t;
+        /** return -1; */
     }
     tc->count = 1;
 #endif
@@ -1346,13 +1319,12 @@ netsnmp_transport_cache_get(int af, int type, int local,
 int
 netsnmp_transport_cache_save(int af, int type, int local,
                              const netsnmp_sockaddr_storage *addr,
-                             unsigned addr_size,
                              netsnmp_transport *t)
 {
     if (NULL == t)
         return 1;
 
-    if (NULL == _tc_add(af, type, local, addr, addr_size, t))
+    if (NULL == _tc_add(af, type, local, addr, t))
         return 1;
 
     return 0;

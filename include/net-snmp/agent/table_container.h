@@ -60,10 +60,32 @@ extern          "C" {
     netsnmp_container_table_container_extract(netsnmp_request_info *request);
 
     /** find the context data used by the table_container helper */
+#ifdef NETSNMP_USE_INLINE
+    NETSNMP_STATIC_INLINE void *
+    netsnmp_container_table_row_extract(netsnmp_request_info *request)
+    {
+        /*
+         * NOTE: this function must match in table_container.c and table_container.h.
+         *       if you change one, change them both!
+         */
+        return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
+    }
+
+    NETSNMP_STATIC_INLINE void *
+    netsnmp_container_table_extract_context(netsnmp_request_info *request)
+    {
+        /*
+         * NOTE: this function must match in table_container.c and table_container.h.
+         *       if you change one, change them both!
+         */
+        return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
+    }
+#else
     void *
     netsnmp_container_table_row_extract(netsnmp_request_info *request);
     void *
     netsnmp_container_table_extract_context(netsnmp_request_info *request);
+#endif /* inline */
 
     void netsnmp_container_table_row_insert(netsnmp_request_info *request,
                                             netsnmp_index *row);

@@ -280,8 +280,9 @@ ipAddressPrefixTable_indexes_set_tbl_idx(ipAddressPrefixTable_mib_index *
     /*
      * make sure there is enough space for ipAddressPrefixPrefix data
      */
-    if (tbl_idx->ipAddressPrefixPrefix_len <
-        ipAddressPrefixPrefix_val_ptr_len) {
+    if ((NULL == tbl_idx->ipAddressPrefixPrefix) ||
+        (tbl_idx->ipAddressPrefixPrefix_len <
+         (ipAddressPrefixPrefix_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -335,7 +336,7 @@ ipAddressPrefixTable_indexes_set(ipAddressPrefixTable_rowreq_ctx *
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != ipAddressPrefixTable_index_to_oid(&rowreq_ctx->oid_idx,
                                                &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

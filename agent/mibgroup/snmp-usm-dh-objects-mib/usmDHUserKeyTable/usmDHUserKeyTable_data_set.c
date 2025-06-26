@@ -9,7 +9,6 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
-#include <net-snmp/library/openssl_config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -29,9 +28,8 @@ usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
      * The set value must be composed of 2 parts, the first being the
      * current value 
      */
-    u_char         *current_value = NULL;
-    size_t          current_value_len = 0;
-    int             ret = MFD_SUCCESS;
+    u_char         *current_value;
+    size_t          current_value_len;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserCheckValue",
                 "called\n"));
@@ -42,23 +40,22 @@ usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
         return MFD_ERROR;
 
     if (val_len != current_value_len * 2)
-        ret = MFD_NOT_VALID_NOW;
+        return MFD_NOT_VALID_NOW;
 
-    else if (memcmp(current_value, val, current_value_len) != 0)
-        ret = SNMP_ERR_WRONGVALUE;     /* mandated error string */
+    if (memcmp(current_value, val, current_value_len) != 0)
+        return SNMP_ERR_WRONGVALUE;     /* mandated error string */
 
-    SNMP_FREE(current_value);
-    return ret;
+    return MFD_SUCCESS;
 }
 
 int
 usmDHSetKey(struct usmUser *user, int for_auth_key,
             u_char *val, size_t val_len)
 {
-    DH             *dh = NULL;
-    BIGNUM         *other_pub = NULL;
-    u_char         *key = NULL;
-    size_t          key_len = 0;
+    DH             *dh;
+    BIGNUM         *other_pub;
+    u_char         *key;
+    size_t          key_len;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHSetKey", "called\n"));
     /*
@@ -79,16 +76,11 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
     key_len = DH_size(dh);
     key = malloc(DH_size(dh));
     if (!key)
-    {
-        BN_clear_free(other_pub);
         return MFD_ERROR;
-    }
 
     if (DH_compute_key(key, other_pub, dh)) {
         u_char        **replkey;
         size_t          replkey_size;
-
-        BN_clear_free(other_pub);
 
         if (for_auth_key) {
             replkey_size = user->authKeyLen;
@@ -102,22 +94,16 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
          * is it large enough? 
          */
         if (key_len < replkey_size)
-        {
-            SNMP_FREE(key);
             return MFD_ERROR;
-        }
 
         /*
          * copy right most bits, per the object requirements 
          */
         SNMP_FREE(*replkey);
         *replkey = netsnmp_memdup(key + key_len - replkey_size, replkey_size);
-        SNMP_FREE(key);
 
         return MFD_SUCCESS;
     }
-    SNMP_FREE(other_pub);
-    SNMP_FREE(key);
 
     return MFD_ERROR;
 }
@@ -362,7 +348,7 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
 
     /*
-     * if we successfully committed this row, set the dirty flag.
+     * if we successfully commited this row, set the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
@@ -407,7 +393,7 @@ usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
 
 
     /*
-     * if we successfully un-committed this row, clear the dirty flag.
+     * if we successfully un-commited this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -518,7 +504,7 @@ The object used to change any given user's Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -719,7 +705,7 @@ The object used to change the agents own Authentication Key
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -903,7 +889,7 @@ The object used to change any given user's Privacy Key using
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -1105,7 +1091,7 @@ The object used to change the agent's own Privacy Key using a
  * check the length, to make sure you don't overflow your storage space.
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note

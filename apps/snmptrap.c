@@ -25,42 +25,42 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_SYS_SOCKET_H
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -119,7 +119,7 @@ optProc(int argc, char *const *argv, int opt)
 int
 main(int argc, char *argv[])
 {
-    netsnmp_session session, *ss = NULL;
+    netsnmp_session session, *ss;
     netsnmp_pdu    *pdu, *response;
     oid             name[MAX_OID_LEN];
     size_t          name_length;
@@ -214,9 +214,6 @@ main(int argc, char *argv[])
             session.engineBoots = 1;
         if (session.engineTime == 0)    /* not really correct, */
             session.engineTime = get_uptime();  /* but it'll work. Sort of. */
-
-        set_enginetime(session.securityEngineID, session.securityEngineIDLen,
-                       session.engineBoots, session.engineTime, TRUE);
     }
 
     ss = snmp_add(&session,
@@ -253,7 +250,7 @@ main(int argc, char *argv[])
             memcpy(pdu->enterprise, objid_enterprise,
                    sizeof(objid_enterprise));
             pdu->enterprise_length =
-                OID_LENGTH(objid_enterprise);
+                sizeof(objid_enterprise) / sizeof(oid);
         } else {
             name_length = MAX_OID_LEN;
             if (!snmp_parse_oid(argv[arg], name, &name_length)) {
@@ -323,18 +320,18 @@ main(int argc, char *argv[])
         trap = argv[arg];
         if (*trap == 0) {
             sysuptime = get_uptime();
-            snprintf(csysuptime, sizeof csysuptime, "%ld", sysuptime);
+            sprintf(csysuptime, "%ld", sysuptime);
             trap = csysuptime;
         }
         snmp_add_var(pdu, objid_sysuptime,
-                     OID_LENGTH(objid_sysuptime), 't', trap);
+                     sizeof(objid_sysuptime) / sizeof(oid), 't', trap);
         if (++arg == argc) {
             fprintf(stderr, "Missing trap-oid parameter\n");
             usage();
             goto out;
         }
         if (snmp_add_var
-            (pdu, objid_snmptrap, OID_LENGTH(objid_snmptrap),
+            (pdu, objid_snmptrap, sizeof(objid_snmptrap) / sizeof(oid),
              'o', argv[arg]) != 0) {
             snmp_perror(argv[arg]);
             goto out;
@@ -381,7 +378,6 @@ close_session:
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }

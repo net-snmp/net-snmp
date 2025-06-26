@@ -314,8 +314,9 @@ tcpListenerTable_indexes_set_tbl_idx(tcpListenerTable_mib_index * tbl_idx,
     /*
      * make sure there is enough space for tcpListenerLocalAddress data
      */
-    if (tbl_idx->tcpListenerLocalAddress_len <
-        tcpListenerLocalAddress_val_ptr_len) {
+    if ((NULL == tbl_idx->tcpListenerLocalAddress) ||
+        (tbl_idx->tcpListenerLocalAddress_len <
+         (tcpListenerLocalAddress_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -370,7 +371,7 @@ tcpListenerTable_indexes_set(tcpListenerTable_rowreq_ctx * rowreq_ctx,
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != tcpListenerTable_index_to_oid(&rowreq_ctx->oid_idx,
                                            &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;

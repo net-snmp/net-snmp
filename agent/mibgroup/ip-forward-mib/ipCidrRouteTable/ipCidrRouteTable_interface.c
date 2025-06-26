@@ -47,17 +47,17 @@
 
 #include <ctype.h>
 
-netsnmp_feature_child_of(ipCidrRouteTable_external_access, libnetsnmpmibs);
-netsnmp_feature_require(row_merge);
-netsnmp_feature_require(baby_steps);
-netsnmp_feature_require(table_container_row_insert);
-netsnmp_feature_require(check_all_requests_error);
+netsnmp_feature_child_of(ipCidrRouteTable_external_access, libnetsnmpmibs)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 
-netsnmp_feature_child_of(ipCidrRouteTable_container_size, ipCidrRouteTable_external_access);
-netsnmp_feature_child_of(ipCidrRouteTable_registration_set, ipCidrRouteTable_external_access);
-netsnmp_feature_child_of(ipCidrRouteTable_registration_get, ipCidrRouteTable_external_access);
-netsnmp_feature_child_of(ipCidrRouteTable_container_get, ipCidrRouteTable_external_access);
+netsnmp_feature_child_of(ipCidrRouteTable_container_size, ipCidrRouteTable_external_access)
+netsnmp_feature_child_of(ipCidrRouteTable_registration_set, ipCidrRouteTable_external_access)
+netsnmp_feature_child_of(ipCidrRouteTable_registration_get, ipCidrRouteTable_external_access)
+netsnmp_feature_child_of(ipCidrRouteTable_container_get, ipCidrRouteTable_external_access)
 /**********************************************************************
  **********************************************************************
  ***
@@ -1093,7 +1093,7 @@ _mfd_ipCidrRouteTable_get_values(netsnmp_mib_handler *handler,
 
         /*
          * if the buffer wasn't used previously for the old data (i.e. it
-         * was allocated memory)  and the get routine replaced the pointer,
+         * was allcoated memory)  and the get routine replaced the pointer,
          * we need to free the previous pointer.
          */
         if (old_string && (old_string != requests->requestvb->buf) &&
@@ -1924,7 +1924,7 @@ _mfd_ipCidrRouteTable_commit(netsnmp_mib_handler *handler,
 
     if (rowreq_ctx->rowreq_flags & MFD_ROW_DIRTY) {
         /*
-         * if we successfully committed this row, set the dirty flag. Use the
+         * if we successfully commited this row, set the dirty flag. Use the
          * current value + 1 (i.e. dirty = # rows changed).
          * this is checked in post_request...
          */
@@ -2222,7 +2222,8 @@ _cache_free(netsnmp_cache * cache, void *magic)
  * @internal
  */
 static void
-_container_item_free(void *rowreq_ctx, void *context)
+_container_item_free(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
+                     void *context)
 {
     DEBUGMSGTL(("internal:ipCidrRouteTable:_container_item_free",
                 "called\n"));
@@ -2255,7 +2256,9 @@ _container_free(netsnmp_container *container)
     /*
      * free all items. inefficient, but easy.
      */
-    CONTAINER_CLEAR(container, _container_item_free, NULL);
+    CONTAINER_CLEAR(container,
+                    (netsnmp_container_obj_func *) _container_item_free,
+                    NULL);
 }                               /* _container_free */
 
 /**
@@ -2334,7 +2337,7 @@ ipCidrRouteTable_row_find_by_mib_index(ipCidrRouteTable_mib_index *
      * set up storage for OID
      */
     oid_idx.oids = oid_tmp;
-    oid_idx.len = OID_LENGTH(oid_tmp);
+    oid_idx.len = sizeof(oid_tmp) / sizeof(oid);
 
     /*
      * convert

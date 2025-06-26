@@ -8,13 +8,13 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright Â© 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
 
 #include <net-snmp/net-snmp-config.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
@@ -227,7 +227,7 @@ var_hrdevice(struct variable *vp,
              int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             dev_idx, type;
-    const oid      *oid_p;
+    oid            *oid_p;
     const char     *tmp_str;
     static char     string[1024];
 
@@ -252,7 +252,7 @@ really_try_next:
             (NULL!=(tmp_str=((*device_descr[type])(dev_idx))))) {
             strlcpy(string, tmp_str, sizeof(string));
         } else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             sprintf(string, "a black box of some sort");
@@ -266,12 +266,12 @@ really_try_next:
             oid_p = nullOid;
             *var_len = nullOidLen;
         }
-        return NETSNMP_REMOVE_CONST(void *, oid_p);
+        return (u_char *) oid_p;
     case HRDEV_STATUS:
         if (device_status[type] != NULL)
             long_return = ((*device_status[type]) (dev_idx));
         else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             long_return = 2;    /* Assume running */
@@ -283,7 +283,7 @@ really_try_next:
         if (device_errors[type] != NULL)
             long_return = (*device_errors[type]) (dev_idx);
         else
-#ifdef NETSNMP_NO_DUMMY_VALUES
+#if NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
             long_return = 0;    /* Assume OK */

@@ -31,45 +31,45 @@ SOFTWARE.
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NCURSES_CURSES_H
+#if HAVE_NCURSES_CURSES_H
 #include <ncurses/curses.h>
-#elif defined(HAVE_CURSES_H)
+#elif HAVE_CURSES_H
 #include <curses.h>
 #endif
 #include <signal.h>
@@ -190,14 +190,9 @@ add(netsnmp_pdu *pdu, const char *mibnodename,
         snmp_perror(mibnodename);
         fprintf(stderr, "couldn't find mib node %s, giving up\n",
                 mibnodename);
-#ifdef HAVE_CURSES_H
+#if HAVE_CURSES_H
         endwin();
 #endif
-        exit(1);
-    }
-
-    if (base_length + indexlen > sizeof(base) / sizeof(base[0])) {
-        fprintf(stderr, "internal error for %s, giving up\n", mibnodename);
         exit(1);
     }
 
@@ -229,7 +224,7 @@ collect_procs(netsnmp_session *ss, netsnmp_pdu *pdu,
         status = snmp_synch_response(ss, pdu, &response);
         if (status != STAT_SUCCESS || !response) {
             snmp_sess_perror(progname, ss);
-#ifdef HAVE_CURSES_H
+#if HAVE_CURSES_H
             endwin();
 #endif
             exit(1);
@@ -237,7 +232,7 @@ collect_procs(netsnmp_session *ss, netsnmp_pdu *pdu,
         if (response->errstat != SNMP_ERR_NOERROR) {
             fprintf(stderr, "%s: Error in packet: %s\n", progname,
                     snmp_errstring(response->errstat));
-#ifdef HAVE_CURSES_H
+#if HAVE_CURSES_H
             endwin();
 #endif
             exit(1);
@@ -322,7 +317,7 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         status = snmp_synch_response(ss, pdu, &response);
         if (status != STAT_SUCCESS || !response) {
             snmp_sess_perror(progname, ss);
-#ifdef HAVE_CURSES_H
+#if HAVE_CURSES_H
             endwin();
 #endif
             exit(1);
@@ -337,64 +332,50 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         proc.hrSWRunIndex = vlp->name[base_length];
 
         vlp2 = response->variables;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         len = vlp2->val_len;
         proc.hrSWRunName = malloc(len+1);
         memcpy(proc.hrSWRunName, vlp2->val.string, len);
         proc.hrSWRunName[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         proc.hrSWRunID = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         len = vlp2->val_len;
         proc.hrSWRunPath = malloc(len+1);
         memcpy(proc.hrSWRunPath, vlp2->val.string, len);
         proc.hrSWRunPath[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         len = vlp2->val_len;
         proc.hrSWRunParameters = malloc(len+1);
         memcpy(proc.hrSWRunParameters, vlp2->val.string, len);
         proc.hrSWRunParameters[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         proc.hrSWRunType = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         proc.hrSWRunStatus = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         proc.hrSWRunPerfCPU = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
-            vlp2->type == SNMP_NOSUCHOBJECT) goto next;
+        if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
         proc.hrSWRunPerfMem = *vlp2->val.integer;
 
         count++;
-        {
-            struct hrSWRunTable *tmp_procs;
+        procs = realloc(procs, count*sizeof(procs[0]));
+        procs[count-1] = proc;
 
-            tmp_procs = realloc(procs, count * sizeof(procs[0]));
-            if (tmp_procs) {
-                procs = tmp_procs;
-                procs[count - 1] = proc;
-            }
-        }
         snmp_free_pdu(response);
         vlp2 = vlp;
         vlp = vlp->next_variable;
@@ -736,15 +717,13 @@ snmpps(int argc, char *argv[])
         pinx++;
     }
 
-    free_perf(procs, count);
     snmp_close(ss);
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
 
 
-#ifdef HAVE_CURSES_H
+#if HAVE_CURSES_H
 static void endtop(int sig)
 {
     endwin();
@@ -886,10 +865,7 @@ int snmptop(int argc, char **argv)
 
         clock = time(NULL);
         ptm = localtime(&clock);
-        if (ptm)
-            strftime(timestr, sizeof(timestr), "%H:%M:%S", ptm);
-        else
-            snprintf(timestr, sizeof(timestr), "(unknown)");
+        strftime(timestr, sizeof(timestr), "%H:%M:%S", ptm);
 
         clear();
         move(0, 0);
@@ -999,9 +975,7 @@ int snmptop(int argc, char **argv)
     }
     endwin();
 
-    free_perf(oproc, ocount);
     snmp_close(ss);
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return 0;
 }
@@ -1023,6 +997,6 @@ int main(int argc, char **argv)
 
     if (strcmp(progname, "snmpps") == 0) return snmpps(argc, argv);
     if (strcmp(progname, "snmptop") == 0) return snmptop(argc, argv);
-    fprintf(stderr, "%s: unknown program name\n", progname);
+    fprintf(stderr, "%s: unknown prognam name\n", progname);
     exit(1);
 }

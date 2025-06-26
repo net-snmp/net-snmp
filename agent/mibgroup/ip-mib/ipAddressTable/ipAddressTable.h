@@ -23,10 +23,10 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(if-mib/data_access/interface);
-config_require(ip-mib/data_access/ipaddress);
-config_require(ip-mib/ipAddressTable/ipAddressTable_interface);
-config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
+config_require(if-mib/data_access/interface)
+config_require(ip-mib/data_access/ipaddress)
+config_require(ip-mib/ipAddressTable/ipAddressTable_interface)
+config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -186,7 +186,14 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
     ipAddressTable_data *ipAddressTable_allocate_data(void);
     void            ipAddressTable_release_data(ipAddressTable_data *
                                                 data);
-    ipAddressTable_rowreq_ctx
+
+    int
+        ipAddressTable_check_dependencies(ipAddressTable_rowreq_ctx *
+                                          rowreq_ctx);
+    int             ipAddressTable_commit(ipAddressTable_rowreq_ctx *
+                                          rowreq_ctx);
+
+        ipAddressTable_rowreq_ctx
         * ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index *
                                                mib_idx);
 

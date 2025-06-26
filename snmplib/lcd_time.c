@@ -13,16 +13,16 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -32,8 +32,11 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
@@ -50,8 +53,8 @@
 
 #include <net-snmp/library/transform_oids.h>
 
-netsnmp_feature_child_of(usm_support, libnetsnmp);
-netsnmp_feature_child_of(usm_lcd_time, usm_support);
+netsnmp_feature_child_of(usm_support, libnetsnmp)
+netsnmp_feature_child_of(usm_lcd_time, usm_support)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_LCD_TIME
 
@@ -364,12 +367,12 @@ set_enginetime(const u_char * engineID,
             QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
         }
 
-        e = calloc(1, sizeof(*e));
+        e = (Enginetime) calloc(1, sizeof(*e));
 
         e->next = etimelist[iindex];
         etimelist[iindex] = e;
 
-        e->engineID = calloc(1, engineID_len);
+        e->engineID = (u_char *) calloc(1, engineID_len);
         memcpy(e->engineID, engineID, engineID_len);
 
         e->engineID_len = engineID_len;
@@ -500,17 +503,17 @@ hash_engineID(const u_char * engineID, u_int engineID_len)
      */
 #ifndef NETSNMP_DISABLE_MD5
     rval = sc_hash(usmHMACMD5AuthProtocol,
-                   OID_LENGTH(usmHMACMD5AuthProtocol),
+                   sizeof(usmHMACMD5AuthProtocol) / sizeof(oid),
                    engineID, engineID_len, buf, &buf_len);
     if (rval == SNMPERR_SC_NOT_CONFIGURED) {
         /* fall back to sha1 */
         rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   OID_LENGTH(usmHMACSHA1AuthProtocol),
+                   sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid),
                    engineID, engineID_len, buf, &buf_len);
     }
 #else
     rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   OID_LENGTH(usmHMACSHA1AuthProtocol),
+                   sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid),
                    engineID, engineID_len, buf, &buf_len);
 #endif
     QUITFUN(rval, hash_engineID_quit);

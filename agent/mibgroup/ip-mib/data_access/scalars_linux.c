@@ -9,7 +9,7 @@
 
 #include <net-snmp/data_access/ip_scalars.h>
 
-netsnmp_feature_require(register_num_file_instance);
+netsnmp_feature_require(register_num_file_instance)
 
 static const char ipfw_name[] = "/proc/sys/net/ipv4/conf/all/forwarding";
 static const char ipttl_name[] = "/proc/sys/net/ipv4/ip_default_ttl";
@@ -139,7 +139,7 @@ netsnmp_arch_ip_scalars_ipDefaultTTL_set(u_long value)
 
     rc = fprintf(filep, "%ld", value);
     fclose(filep);
-    if (rc <= 0) {
+    if (1 != rc) {
         DEBUGMSGTL(("access:ipDefaultTTL", "could not write %s\n",
                     ipttl_name));
         return SNMP_ERR_GENERR;

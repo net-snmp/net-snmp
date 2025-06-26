@@ -3,4 +3,8 @@
  *
  */
 
-config_require(if-mib/ifTable);
+#ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
+config_require(if-mib/ifTable)
+#else
+config_require(mibII/interfaces)
+#endif

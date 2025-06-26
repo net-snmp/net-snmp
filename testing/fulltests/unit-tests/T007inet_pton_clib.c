@@ -24,7 +24,7 @@ for (i = 0; i < sizeof(in_testdata)/sizeof(in_testdata[0]); ++i) {
     OKF(inet_pton(AF_INET, in_testdata[i].s, &in_addr) == 1,
 	("IPv4 inet_pton(%s)", in_testdata[i].s));
     OK(ntohl(in_addr.s_addr)
-       == (((uint32_t)b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]),
+       == ((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]),
        "inet_pton() value");
     OK(inet_ntop(AF_INET, &in_addr, str, sizeof(str)) == str,
        "IPv4 inet_ntop()");

@@ -22,9 +22,47 @@
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
 #endif
 
+                        /*
+                         * For 'timeval' 
+                         */
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
-#if defined(HAVE_SYS_SELECT_H)
-#include <sys/select.h>
+#if 1
+/*
+ * If neither the Microsoft winsock header file nor the MinGW winsock header
+ * file has already been included, do this now.
+ */
+# if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#  if !defined(__MINGW32__) && !defined(HAVE_WIN32_PLATFORM_SDK) && \
+    _MSC_VER -0 <= 1200 && _WIN32_WINNT -0 >= 0x0400
+    /*
+     * When using the MSVC 6 header files, including <winsock2.h> when
+     * _WIN32_WINNT >= 0x0400 results in a compilation error. Hence include
+     * <windows.h> instead, because <winsock2.h> is included from inside
+     * <windows.h> when _WIN32_WINNT >= 0x0400. The SDK version of <windows.h>
+     * does not include <winsock2.h> however.
+     */
+#   include <windows.h>
+#  else
+#   include <winsock2.h>
+#  endif
+#  include <ws2tcpip.h>
+# elif defined(HAVE_WINSOCK_H)
+#  include <winsock.h>
+# endif
 #endif
 
 #if defined(WIN32) && !defined(cygwin)
@@ -40,6 +78,10 @@ typedef pid_t netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS -1
 #endif
 
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>		/* For definition of in_addr_t */
+#endif
+
 #include <net-snmp/library/oid.h>
 
 #ifdef __cplusplus
@@ -47,11 +89,15 @@ extern "C" {
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-#ifdef WIN32
-typedef int socklen_t;
-#else
 typedef u_int socklen_t;
 #endif
+
+#ifndef HAVE_IN_ADDR_T
+  /*
+   * The type in_addr_t must match the type of sockaddr_in::sin_addr.
+   * For MSVC and MinGW32, this is u_long.
+   */
+typedef u_long in_addr_t;
 #endif
 
 #ifndef HAVE_SSIZE_T
@@ -66,16 +112,6 @@ typedef long ssize_t;
 typedef unsigned long int nfds_t;
 #endif
 
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
-/*
- * Abstract the pcre typedef such that not all *.c files have to include
- * <pcre.h>.
- */
-typedef struct {
-    void *regex_ptr;
-} netsnmp_regex_ptr;
-#endif
- 
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
@@ -102,7 +138,6 @@ typedef union {
 } netsnmp_vardata;
 
 
-#define MIN_OID_LEN	    2
 #define MAX_OID_LEN	    128 /* max subid's in an oid */
 
 /** @typedef struct variable_list netsnmp_variable_list
@@ -247,10 +282,9 @@ typedef struct snmp_pdu {
 } netsnmp_pdu;
 
 
-/**
- * @typedef struct snmp_session netsnmp_session
- * Typedefs the snmp_session struct into netsnmp_session.
- */
+/** @typedef struct snmp_session netsnmp_session
+ * Typedefs the snmp_session struct intonetsnmp_session */
+        struct snmp_session;
 typedef struct snmp_session netsnmp_session;
 
 /** for openssl this should match up with EVP_MAX_MD_SIZE */
@@ -299,7 +333,7 @@ struct snmp_session {
     long            version;
     /** Number of retries before timeout. */
     int             retries;
-    /** Message timeout in μs before first retry and between retries */
+    /** Number of uS until first timeout, then exponential backoff */
     long            timeout;        
     u_long          flags;
     struct snmp_session *subsession;
@@ -421,67 +455,12 @@ struct snmp_session {
      * XXX: or should we add a new field into this structure?
      */
     void           *myvoid;
-
-    /**
-     * session specific user
-     */
-    struct usmUser *sessUser;
 };
 
-typedef struct netsnmp_index_s {
-    size_t          len;
-    oid            *oids;
-} netsnmp_index;
 
-typedef struct netsnmp_void_array_s {
-    size_t          size;
-    void          **array;
-} netsnmp_void_array;
-
-/*
- * references to various types
- */
-typedef struct netsnmp_ref_void_s {
-    void           *val;
-} netsnmp_ref_void;
-
-typedef union {
-    u_long          ul;
-    u_int           ui;
-    u_short         us;
-    u_char          uc;
-    long            sl;
-    int             si;
-    short           ss;
-    char            sc;
-    char           *cp;
-    void           *vp;
-} netsnmp_cvalue;
-
-/*
- * Structure for holding a set of file descriptors, similar to fd_set.
- *
- * This structure however can hold so-called large file descriptors
- * (>= FD_SETSIZE or 1024) on Unix systems or more than FD_SETSIZE (64)
- * sockets on Windows systems.
- *
- * It is safe to allocate this structure on the stack.
- *
- * This structure must be initialized by calling netsnmp_large_fd_set_init()
- * and must be cleaned up via netsnmp_large_fd_set_cleanup(). If this last
- * function is not called this may result in a memory leak.
- *
- * The members of this structure are:
- * lfs_setsize: maximum set size.
- * lsf_setptr:  points to lfs_set if lfs_setsize <= FD_SETSIZE, and otherwise
- *              to dynamically allocated memory.
- * lfs_set:     file descriptor / socket set data if lfs_setsize <= FD_SETSIZE.
- */
-typedef struct netsnmp_large_fd_set_s {
-    unsigned        lfs_setsize;
-    fd_set         *lfs_setptr;
-    fd_set          lfs_set;
-} netsnmp_large_fd_set;
+#include <net-snmp/library/types.h>
+#include <net-snmp/definitions.h>
+#include <net-snmp/library/snmp_api.h>
 
 #ifdef __cplusplus
 }

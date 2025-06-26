@@ -23,9 +23,9 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(tcp-mib/data_access/tcpConn);
-config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_interface);
-config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access);
+config_require(tcp-mib/data_access/tcpConn)
+config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_interface)
+config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -269,7 +269,35 @@ config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access);
     tcpConnectionTable_data *tcpConnectionTable_allocate_data(void);
     void            tcpConnectionTable_release_data(tcpConnectionTable_data
                                                     * data);
-    tcpConnectionTable_rowreq_ctx
+
+    int
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        tcpConnectionTable_check_dependencies(tcpConnectionTable_rowreq_ctx
+                                              * rowreq_ctx);
+    int             tcpConnectionTable_commit(tcpConnectionTable_rowreq_ctx
+                                              * rowreq_ctx);
+
+         
+         
+         
+         
+         
+         
+        tcpConnectionTable_rowreq_ctx
         * tcpConnectionTable_row_find_by_mib_index
         (tcpConnectionTable_mib_index * mib_idx);
 

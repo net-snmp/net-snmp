@@ -25,40 +25,40 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -128,12 +128,10 @@ main(int argc, char *argv[])
     int             status;
     int             failures = 0;
     int             exitval = 1;
-    char           *posix_env;
 
     SOCK_STARTUP;
 
-    posix_env = strdup("POSIXLY_CORRECT=1");
-    putenv(posix_env);
+    putenv(strdup("POSIXLY_CORRECT=1"));
 
     /*
      * get the common command line arguments 
@@ -168,8 +166,8 @@ main(int argc, char *argv[])
      */
     for (; arg < argc; arg++) {
         DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %s %s %s\n",
-                    arg, argv[arg], arg+1 < argc ? argv[arg+1] : "",
-                    arg+2 < argc ? argv[arg+2] : ""));
+                    arg,argv[arg], arg+1 < argc ? argv[arg+1] : NULL,
+                    arg+2 < argc ? argv[arg+2] : NULL));
         names[current_name++] = argv[arg++];
         if (arg < argc) {
             switch (*argv[arg]) {
@@ -184,7 +182,6 @@ main(int argc, char *argv[])
             case 'x':
             case 'd':
             case 'b':
-            case 'n': /* undocumented */
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
             case 'I':
             case 'U':
@@ -285,8 +282,6 @@ close_session:
     snmp_close(ss);
 
 out:
-    free(posix_env);
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }

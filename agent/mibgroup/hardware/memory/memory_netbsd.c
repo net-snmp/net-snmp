@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/sysctl.h>
-#ifdef HAVE_SYS_VMMETER_H
+#if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
 #include <sys/swap.h>
@@ -202,7 +202,7 @@ swapinfo(long pagesize)
     if ( n <= 1 )
         return;
 
-    s = calloc(n, sizeof(struct swapent));
+    s = (struct swapent*)calloc(n, sizeof(struct swapent));
     swapctl( SWAP_STATS, s, n );
 
     for (i = 0; i < n; ++i) {
@@ -211,7 +211,7 @@ swapinfo(long pagesize)
             continue;
         if (!mem->descr) {
          /* sprintf(buf, "swap #%d", s[i].se_dev); */
-            snprintf(buf, sizeof buf, "swap %s",  s[i].se_path);
+            sprintf(buf, "swap %s",  s[i].se_path);
             mem->descr = strdup( buf );
         }
         mem->units = pagesize;

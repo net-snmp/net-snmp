@@ -86,7 +86,7 @@ delayed_instance_handler(netsnmp_mib_handler *handler,
          * certain period of time 
          */
         snmp_alarm_register(delay_time, /* seconds */
-                            0,  /* don't repeat. */
+                            0,  /* dont repeat. */
                             return_delayed_response,    /* the function
                                                          * to call */
                             /*
@@ -164,7 +164,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
     case MODE_GET:
     case MODE_GETNEXT:
         /*
-         * return the current delay time 
+         * return the currend delay time 
          */
         snmp_set_var_typed_value(cache->requests->requestvb,
                                  ASN_INTEGER,
@@ -209,7 +209,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
 
         /*
          * Add our temporary information to the request itself.
-         * This is then retrievable later.  The free function
+         * This is then retrivable later.  The free function
          * passed auto-frees it when the request is later
          * deleted.  
          */
@@ -231,7 +231,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
     case MODE_SET_UNDO:
         /*
          * ack, something somewhere failed.  We reset back to the
-         * previously old value by extracting the previously
+         * previously old value by extracting the previosuly
          * stored information back out of the request 
          */
         delay_time =

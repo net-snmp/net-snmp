@@ -10,9 +10,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-netsnmp_feature_require(agentx_enable_subagent);
-netsnmp_feature_require(agent_check_and_process);
-netsnmp_feature_require(enable_stderrlog);
+netsnmp_feature_require(agentx_enable_subagent)
+netsnmp_feature_require(agent_check_and_process)
+netsnmp_feature_require(enable_stderrlog)
 
 /*
  * include our parent header 
@@ -179,7 +179,7 @@ main(int argc, char **argv)
         init_master_agent();    /* open the port to listen on (defaults to udp:161) */
 
     /*
-     * In case we receive a request to stop (kill -TERM or kill -INT) 
+     * In case we recevie a request to stop (kill -TERM or kill -INT) 
      */
     keep_running = 1;
     signal(SIGTERM, stop_server);

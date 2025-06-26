@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # eval_tools.sh
 #
@@ -140,7 +139,7 @@ VERIFY() {	# <path_to_file(s)>
 		missingfiles=true
 	done
 
-	[ "$missingfiles" = true ] && exit 255
+	[ "$missingfiles" = true ] && exit 1000
 }
 
 NEWOUTPUTFILE() {
@@ -157,7 +156,7 @@ STARTTEST() {
 		return
 	}
 	echo "FAILED: Output file already exists: \"$junkoutputfile\"."
-	exit 255
+	exit 1000
 }
 
 
@@ -390,18 +389,15 @@ ECHOSENDSIGKILL() {
     fi
 }
 
-# Wait until the shell statement "$@" evaluates to true.
-WAITFORCOND() {
+# Wait until the shell statement "$@" evaluates to false.
+WAITFORNOTCOND() {
     CAN_USLEEP
     if [ $SNMP_CAN_USLEEP = 1 ] ; then
         sleeptime=`expr $SNMP_SLEEP '*' 50`
     else 
         sleeptime=`expr $SNMP_SLEEP '*' 5`
     fi
-    while [ $sleeptime -gt 0 ]; do
-	if eval "$*"; then
-	    break
-	fi
+    while [ $sleeptime -gt 0 ] && eval "$@"; do
         if [ $SNMP_CAN_USLEEP = 1 ]; then
             sleep .1
         else
@@ -409,6 +405,11 @@ WAITFORCOND() {
         fi
         sleeptime=`expr $sleeptime - 1`
     done
+}
+
+# Wait until the shell statement "$@" evaluates to true.
+WAITFORCOND() {
+    WAITFORNOTCOND if "$@;" then false ";" else true ";" fi
 }
 
 WAITFORAGENT() {
@@ -431,7 +432,7 @@ WAITFORTRAPD() {
 
 # Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-    WAITFORCOND "grep $1 $2 >/dev/null 2>&1"
+    WAITFORCOND grep "$1" "$2" ">/dev/null" "2>&1"
 }
 
 GOOD() {
@@ -474,7 +475,7 @@ CHECKANDDIE() {
 # Returns: Count of matched lines.
 #
 CHECKEXACT() {	# <pattern_to_match_exactly>
-	rval=`grep -E -c "^$*\$|^$*[^a-zA-Z0-9_]|[^a-zA-Z0-9_]$*\$|[^a-zA-Z0-9_]$*[^a-zA-Z0-9_]" "$junkoutputfile" 2>/dev/null`
+	rval=`egrep -c "^$*\$|^$*[^a-zA-Z0-9_]|[^a-zA-Z0-9_]$*\$|[^a-zA-Z0-9_]$*[^a-zA-Z0-9_]" "$junkoutputfile" 2>/dev/null`
 	snmp_last_test_result=$rval
 	EXPECTRESULT 1  # default
 	return $rval
@@ -523,7 +524,6 @@ STARTPROG() {
     if test -f $CFG_FILE; then
 	COMMAND="$COMMAND -C -c $CFG_FILE"
     fi
-    COMMAND="$COMMAND -f"
     if [ "x$PORT_SPEC" != "x" ]; then
         COMMAND="$COMMAND $PORT_SPEC"
     fi
@@ -535,10 +535,13 @@ STARTPROG() {
         OUTPUTENVVARS $LOG_FILE.command
         echo $COMMAND >> $LOG_FILE.command
     fi
-    {
-	{ $COMMAND; } >$LOG_FILE.stdout 2>&1
-	echo $? >$LOG_FILE.exitcode
-    } &
+    if [ "x$OSTYPE" = "xmsys" ]; then
+      $COMMAND > $LOG_FILE.stdout 2>&1 &
+      ## COMMAND="cmd.exe //c start //min $COMMAND"
+      ## start $COMMAND > $LOG_FILE.stdout 2>&1
+    else
+      $COMMAND > $LOG_FILE.stdout 2>&1
+    fi
 }
 
 #------------------------------------ -o-
@@ -612,7 +615,7 @@ STOPPROG() {
 	echo "$COMMAND ($1)" >> $SNMP_TMPDIR/invoked
 	VERBOSE_OUT 0 "$COMMAND ($1)"
         $COMMAND >/dev/null 2>&1
-        WAITFORCOND "! ISRUNNING $pid"
+        WAITFORNOTCOND "ISRUNNING $pid"
     fi
 }
 
@@ -682,23 +685,6 @@ FINISHED() {
 	    rm -f core
 	fi
 	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
-	if [ -n "$APPVEYOR" ] || [ -n "$CIRRUS_CI" ]; then
-	    {
-		find "$SNMP_TMPDIR" -type f |
-		    while read -r f; do
-			local lines
-			echo "==== $f"
-			lines=$(wc -l "$f" | { read -r a b; echo "$a"; })
-			if [ "$lines" -gt 512 ]; then
-			    head -n 256 "$f"
-			    echo "..."
-			    tail -n 256 "$f"
-			else
-			    cat "$f"
-			fi
-		    done;
-	    } 1>&2
-	fi
 	exit 1
     fi
 

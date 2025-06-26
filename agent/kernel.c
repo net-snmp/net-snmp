@@ -18,24 +18,24 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>
 #include <errno.h>
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_FCNTL_H
+#if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_KVM_H
+#if HAVE_KVM_H
 #include <kvm.h>
 #endif
 
@@ -44,8 +44,13 @@
 #include "kernel.h"
 #include <net-snmp/agent/ds_agent.h>
 
-#if defined(HAVE_KVM_H) && !defined(NETSNMP_NO_KMEM_USAGE) && !defined(__FreeBSD__)
-kvm_t *kd;
+#ifndef NULL
+#define NULL 0
+#endif
+
+
+#if HAVE_KVM_H
+kvm_t *kd = NULL;
 
 /**
  * Initialize the support for accessing kernel virtual memory.
@@ -57,7 +62,7 @@ init_kmem(const char *file)
 {
     int res = TRUE;
 
-#ifdef HAVE_KVM_OPENFILES
+#if HAVE_KVM_OPENFILES
     char            err[4096];
 
     kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, err);
@@ -105,7 +110,7 @@ klookup(unsigned long off, void *target, size_t siz)
         return 0;
     result = kvm_read(kd, off, target, siz);
     if (result != siz) {
-#ifdef HAVE_KVM_OPENFILES
+#if HAVE_KVM_OPENFILES
         snmp_log(LOG_ERR, "kvm_read(*, %lx, %p, %x) = %d: %s\n", off,
                  target, (unsigned) siz, result, kvm_geterr(kd));
 #else
@@ -130,22 +135,13 @@ free_kmem(void)
     }
 }
 
-#elif defined(HAVE_NLIST_H) && !defined(__linux__) && !defined(__FreeBSD__) && \
-    !defined(NETSNMP_NO_KMEM_USAGE)
+#else                           /* HAVE_KVM_H */
+
+#ifdef HAVE_KMEM
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);
 int             swap = -1, mem = -1, kmem = -1;
-
-static void netsnmp_cloexec(int fd)
-{
-    if (fd < 0)
-        return;
-#ifdef HAVE_FD_CLOEXEC
-    if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
-        snmp_log_perror("fcntl(FD_CLOEXEC)");
-#endif
-}
 
 /**
  * Initialize the support for accessing kernel virtual memory.
@@ -164,20 +160,23 @@ init_kmem(const char *file)
         snmp_log_perror(file);
         res = FALSE;
     }
-    netsnmp_cloexec(kmem);
+    if (kmem >= 0)
+        fcntl(kmem, F_SETFD, 1/*FD_CLOEXEC*/);
     mem = open("/dev/mem", O_RDONLY);
     if (mem < 0 && !no_root_access) {
         snmp_log_perror("/dev/mem");
         res = FALSE;
     }
-    netsnmp_cloexec(mem);
+    if (mem >= 0)
+        fcntl(mem, F_SETFD, 1/*FD_CLOEXEC*/);
 #ifdef DMEM_LOC
     swap = open(DMEM_LOC, O_RDONLY);
     if (swap < 0 && !no_root_access) {
         snmp_log_perror(DMEM_LOC);
         res = FALSE;
     }
-    netsnmp_cloexec(swap);
+    if (swap >= 0)
+        fcntl(swap, F_SETFD, 1/*FD_CLOEXEC*/);
 #endif
     return res;
 }
@@ -259,57 +258,7 @@ free_kmem(void)
         kmem = -1;
     }
 }
-#elif defined(__FreeBSD__)
-kvm_t *kd;
 
-/**
- * Initialize the libkvm descriptor. On FreeBSD we can use most of libkvm
- * without requiring /dev/kmem access.  Only kvm_nlist() and kvm_read() need
- * that, and we don't use them.
- *
- * @return TRUE upon success; FALSE upon failure.
- */
-int
-init_kmem(const char *file)
-{
-    char err[4096];
+#endif                          /* HAVE_KMEM */
 
-    kd = kvm_openfiles(NULL, "/dev/null", NULL, O_RDONLY, err);
-    if (!kd) {
-        snmp_log(LOG_CRIT, "init_kmem: kvm_openfiles failed: %s\n", err);
-        return FALSE;
-    }
-    return TRUE;
-}
-
-/**
- * A stub to return failure to any attempt to read kernel memory.  Our
- * libkvm handle doesn't enable /dev/kmem access.  MIB implementations should
- * use unprivileged to fetch information about the system.
- */
-int
-klookup(unsigned long off, void *target, size_t siz)
-{
-    return 0;
-}
-
-void
-free_kmem(void)
-{
-    if (kd != NULL) {
-        (void)kvm_close(kd);
-        kd = NULL;
-    }
-}
-#else
-int
-init_kmem(const char *file)
-{
-    return 1;  /* success */
-}
-
-void
-free_kmem(void)
-{
-}
-#endif
+#endif                          /* HAVE_KVM_H */

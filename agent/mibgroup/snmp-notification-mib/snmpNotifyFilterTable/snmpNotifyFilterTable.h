@@ -26,8 +26,8 @@ extern          "C" {
      * other required module components 
      */
     /* *INDENT-OFF*  */
-config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface);
-config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access);
+config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface)
+config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access)
     /* *INDENT-ON*  */
 
     /*
@@ -258,7 +258,50 @@ config_require(snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable
         snmpNotifyFilterTable_rowreq_ctx_cleanup
         (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx);
 
-    snmpNotifyFilterTable_rowreq_ctx
+    int
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        snmpNotifyFilterTable_check_dependencies
+        (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx);
+    int
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        snmpNotifyFilterTable_commit(snmpNotifyFilterTable_rowreq_ctx *
+                                     rowreq_ctx);
+
+         
+         
+         
+         
+         
+         
+        snmpNotifyFilterTable_rowreq_ctx
         * snmpNotifyFilterTable_row_find_by_mib_index
         (snmpNotifyFilterTable_mib_index * mib_idx);
 

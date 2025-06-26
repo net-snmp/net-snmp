@@ -13,28 +13,28 @@
 #include <net-snmp/net-snmp-features.h>
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && NETSNMP_TRANSPORT_TLSBASE_DOMAIN
-netsnmp_feature_child_of(cert_util_all, libnetsnmp);
-netsnmp_feature_child_of(cert_util, cert_util_all);
+netsnmp_feature_child_of(cert_util_all, libnetsnmp)
+netsnmp_feature_child_of(cert_util, cert_util_all)
 #ifdef NETSNMP_FEATURE_REQUIRE_CERT_UTIL
-netsnmp_feature_require(container_directory);
-netsnmp_feature_require(container_fifo);
-netsnmp_feature_require(container_dup);
-netsnmp_feature_require(container_free_all);
-netsnmp_feature_require(subcontainer_find);
+netsnmp_feature_require(container_directory)
+netsnmp_feature_require(container_fifo)
+netsnmp_feature_require(container_dup)
+netsnmp_feature_require(container_free_all)
+netsnmp_feature_require(subcontainer_find)
 
-netsnmp_feature_child_of(cert_map_remove, netsnmp_unused);
-netsnmp_feature_child_of(cert_map_find, netsnmp_unused);
-netsnmp_feature_child_of(tlstmparams_external, cert_util_all);
-netsnmp_feature_child_of(tlstmparams_container, tlstmparams_external);
-netsnmp_feature_child_of(tlstmparams_remove, tlstmparams_external);
-netsnmp_feature_child_of(tlstmparams_find, tlstmparams_external);
-netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused);
-netsnmp_feature_child_of(tlstmaddr_external, cert_util_all);
-netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external);
-netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external);
+netsnmp_feature_child_of(cert_map_remove, netsnmp_unused)
+netsnmp_feature_child_of(cert_map_find, netsnmp_unused)
+netsnmp_feature_child_of(tlstmparams_external, cert_util_all)
+netsnmp_feature_child_of(tlstmparams_container, tlstmparams_external)
+netsnmp_feature_child_of(tlstmparams_remove, tlstmparams_external)
+netsnmp_feature_child_of(tlstmparams_find, tlstmparams_external)
+netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused)
+netsnmp_feature_child_of(tlstmaddr_external, cert_util_all)
+netsnmp_feature_child_of(tlstmaddr_container, tlstmaddr_external)
+netsnmp_feature_child_of(tlstmAddr_get_serverId, tlstmaddr_external)
 
-netsnmp_feature_child_of(cert_fingerprints, cert_util_all);
-netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
+netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
+netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all)
 
 #endif /* NETSNMP_FEATURE_REQUIRE_CERT_UTIL */
 
@@ -42,30 +42,44 @@ netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
 
 #include <ctype.h>
 
-#include <stddef.h>
-
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 
-#ifdef HAVE_SYS_STAT_H
+#if HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
+#if HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 
-#include <net-snmp/library/snmp.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/system.h>
@@ -90,7 +104,7 @@ netsnmp_feature_child_of(tls_fingerprint_build, cert_util_all);
  * bump this value whenever cert index format changes, so indexes
  * will be regenerated with new format.
  */
-#define CERT_INDEX_FORMAT  2
+#define CERT_INDEX_FORMAT  1
 
 static netsnmp_container *_certs = NULL;
 static netsnmp_container *_keys = NULL;
@@ -104,18 +118,18 @@ static netsnmp_container *_trusted_certs = NULL;
 static void _setup_containers(void);
 
 static void _cert_indexes_load(void);
-static void _cert_free(void *cert, void *context);
-static void _key_free(void *key, void *context);
-static int  _cert_compare(const void *p, const void *q);
-static int  _cert_sn_compare(const void *p, const void *q);
-static int  _cert_sn_ncompare(const void *p, const void *q);
-static int  _cert_cn_compare(const void *p, const void *q);
-static int  _cert_fn_compare(const void *p, const void *q);
-static int  _cert_fn_ncompare(const void *p, const void *q);
+static void _cert_free(netsnmp_cert *cert, void *context);
+static void _key_free(netsnmp_key *key, void *context);
+static int  _cert_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_sn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_sn_ncompare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_cn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_fn_compare(netsnmp_cert_common *lhs,
+                             netsnmp_cert_common *rhs);
+static int  _cert_fn_ncompare(netsnmp_cert_common *lhs,
+                              netsnmp_cert_common *rhs);
 static void _find_partner(netsnmp_cert *cert, netsnmp_key *key);
 static netsnmp_cert *_find_issuer(netsnmp_cert *cert);
-static netsnmp_void_array *_cert_reduce_subset_first(netsnmp_void_array *matching);
-static netsnmp_void_array *_cert_reduce_subset_what(netsnmp_void_array *matching, int what);
 static netsnmp_void_array *_cert_find_subset_fn(const char *filename,
                                                 const char *directory);
 static netsnmp_void_array *_cert_find_subset_sn(const char *subject);
@@ -134,7 +148,7 @@ void netsnmp_key_free(netsnmp_key *key);
 
 static int _certindex_add( const char *dirname, int i );
 
-static int _time_filter(const void *text, void *ctx);
+static int _time_filter(netsnmp_file *f, struct stat *idx);
 
 static void _init_tlstmCertToTSN(void);
 #define TRUSTCERT_CONFIG_TOKEN "trustCert"
@@ -190,7 +204,7 @@ _setup_trusted_certs(void)
         return;
     }
     _trusted_certs->container_name = strdup("trusted certificates");
-    _trusted_certs->compare = netsnmp_str_compare;
+    _trusted_certs->compare = (netsnmp_container_compare*) strcmp;
 }
 
 /*
@@ -250,18 +264,21 @@ netsnmp_certs_init(void)
 void
 netsnmp_certs_shutdown(void)
 {
-    netsnmp_container ***c, **containers[] = {
-        &_tlstmParams, &_tlstmAddr, &_maps, &_certs, &_keys, NULL
-    };
-
     DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
-
-    for (c = containers; *c; c++) {
-        if (!**c)
-            continue;
-        CONTAINER_FREE_ALL(**c, NULL);
-        CONTAINER_FREE(**c);
-        **c = NULL;
+    if (_maps) {
+        CONTAINER_FREE_ALL(_maps, NULL);
+        CONTAINER_FREE(_maps);
+        _maps = NULL;
+    }
+    if (NULL != _certs) {
+        CONTAINER_FREE_ALL(_certs, NULL);
+        CONTAINER_FREE(_certs);
+        _certs = NULL;
+    }
+    if (NULL != _keys) {
+        CONTAINER_FREE_ALL(_keys, NULL);
+        CONTAINER_FREE(_keys);
+        _keys = NULL;
     }
     _netsnmp_release_trustcerts();
 }
@@ -332,18 +349,14 @@ _get_cert_container(const char *use)
 {
     netsnmp_container *c;
 
-    int rc;
-
     c = netsnmp_container_find("certs:binary_array");
     if (NULL == c) {
         snmp_log(LOG_ERR, "could not create container for %s\n", use);
         return NULL;
     }
     c->container_name = strdup(use);
-    c->free_item = _cert_free;
-    c->compare = _cert_compare;
-
-    CONTAINER_SET_OPTIONS(c, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
+    c->free_item = (netsnmp_container_obj_func*)_cert_free;
+    c->compare = (netsnmp_container_compare*)_cert_compare;
 
     return c;
 }
@@ -352,8 +365,6 @@ static void
 _setup_containers(void)
 {
     netsnmp_container *additional_keys;
-
-    int rc;
 
     _certs = _get_cert_container("netsnmp certificates");
     if (NULL == _certs)
@@ -368,8 +379,7 @@ _setup_containers(void)
     }
     additional_keys->container_name = strdup("certs_cn");
     additional_keys->free_item = NULL;
-    additional_keys->compare = _cert_cn_compare;
-    CONTAINER_SET_OPTIONS(additional_keys, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
+    additional_keys->compare = (netsnmp_container_compare*)_cert_cn_compare;
     netsnmp_container_add_index(_certs, additional_keys);
 
     /** additional keys: subject name */
@@ -381,9 +391,8 @@ _setup_containers(void)
     }
     additional_keys->container_name = strdup("certs_sn");
     additional_keys->free_item = NULL;
-    additional_keys->compare = _cert_sn_compare;
-    additional_keys->ncompare = _cert_sn_ncompare;
-    CONTAINER_SET_OPTIONS(additional_keys, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
+    additional_keys->compare = (netsnmp_container_compare*)_cert_sn_compare;
+    additional_keys->ncompare = (netsnmp_container_compare*)_cert_sn_ncompare;
     netsnmp_container_add_index(_certs, additional_keys);
 
     /** additional keys: file name */
@@ -395,9 +404,8 @@ _setup_containers(void)
     }
     additional_keys->container_name = strdup("certs_fn");
     additional_keys->free_item = NULL;
-    additional_keys->compare = _cert_fn_compare;
-    additional_keys->ncompare = _cert_fn_ncompare;
-    CONTAINER_SET_OPTIONS(additional_keys, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
+    additional_keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
+    additional_keys->ncompare = (netsnmp_container_compare*)_cert_fn_ncompare;
     netsnmp_container_add_index(_certs, additional_keys);
 
     _keys = netsnmp_container_find("cert_keys:binary_array");
@@ -407,8 +415,8 @@ _setup_containers(void)
         return;
     }
     _keys->container_name = strdup("netsnmp certificate keys");
-    _keys->free_item = _key_free;
-    _keys->compare = _cert_fn_compare;
+    _keys->free_item = (netsnmp_container_obj_func*)_key_free;
+    _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
 
     _setup_trusted_certs();
 }
@@ -420,9 +428,9 @@ netsnmp_cert_map_container(void)
 }
 
 static netsnmp_cert *
-_new_cert(const char *dirname, const char *filename, int certType, int offset,
-          int allowed_uses, int hashType, const char *fingerprint,
-          const char *common_name,  const char *subject)
+_new_cert(const char *dirname, const char *filename, int certType,
+          int hashType, const char *fingerprint, const char *common_name,
+          const char *subject)
 {
     netsnmp_cert    *cert;
 
@@ -442,10 +450,8 @@ _new_cert(const char *dirname, const char *filename, int certType, int offset,
 
     cert->info.dir = strdup(dirname);
     cert->info.filename = strdup(filename);
-    /* only the first certificate is allowed to be a remote peer */
-    cert->info.allowed_uses = allowed_uses;
+    cert->info.allowed_uses = NS_CERT_REMOTE_PEER;
     cert->info.type = certType;
-    cert->offset = offset;
     if (fingerprint) {
         cert->hash_type = hashType;
         cert->fingerprint = strdup(fingerprint);
@@ -477,7 +483,7 @@ _new_key(const char *dirname, const char *filename)
         return NULL;
     }
 
-#if !defined(_MSC_VER) && !defined(__MINGW32__)
+#if !defined(_MSC_VER)
     if ((fstat.st_mode & S_IROTH) || (fstat.st_mode & S_IWOTH)) {
         snmp_log(LOG_ERR,
                  "refusing to read world readable or writable key %s\n", fn);
@@ -546,22 +552,20 @@ netsnmp_key_free(netsnmp_key *key)
 }
 
 static void
-_cert_free(void *cert, void *context)
+_cert_free(netsnmp_cert *cert, void *context)
 {
     netsnmp_cert_free(cert);
 }
 
 static void
-_key_free(void *key, void *context)
+_key_free(netsnmp_key *key, void *context)
 {
     netsnmp_key_free(key);
 }
 
 static int
-_cert_compare(const void *p, const void *q)
+_cert_compare(netsnmp_cert *lhs, netsnmp_cert *rhs)
 {
-    const netsnmp_cert *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
     netsnmp_assert((lhs->fingerprint != NULL) &&
                    (rhs->fingerprint != NULL));
@@ -571,8 +575,7 @@ _cert_compare(const void *p, const void *q)
 }
 
 static int
-_cert_path_compare(const netsnmp_cert_common *lhs,
-                   const netsnmp_cert_common *rhs)
+_cert_path_compare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
 {
     int rc;
 
@@ -588,9 +591,8 @@ _cert_path_compare(const netsnmp_cert_common *lhs,
 }
 
 static int
-_cert_cn_compare(const void *p, const void *q)
+_cert_cn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs)
 {
-    const netsnmp_cert *lhs = p, *rhs = q;
     int rc;
     const char *lhcn, *rhcn;
 
@@ -610,13 +612,13 @@ _cert_cn_compare(const void *p, const void *q)
         return rc;
 
     /** in case of equal common names, sub-sort by path */
-    return _cert_path_compare(&lhs->info, &rhs->info);
+    return _cert_path_compare((netsnmp_cert_common*)lhs,
+                              (netsnmp_cert_common*)rhs);
 }
 
 static int
-_cert_sn_compare(const void *p, const void *q)
+_cert_sn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs)
 {
-    const netsnmp_cert *lhs = p, *rhs = q;
     int rc;
     const char *lhsn, *rhsn;
 
@@ -636,13 +638,13 @@ _cert_sn_compare(const void *p, const void *q)
         return rc;
 
     /** in case of equal common names, sub-sort by path */
-    return _cert_path_compare(&lhs->info, &rhs->info);
+    return _cert_path_compare((netsnmp_cert_common*)lhs,
+                              (netsnmp_cert_common*)rhs);
 }
 
 static int
-_cert_fn_compare(const void *p, const void *q)
+_cert_fn_compare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
 {
-    const netsnmp_cert_common *lhs = p, *rhs = q;
     int rc;
 
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
@@ -656,10 +658,8 @@ _cert_fn_compare(const void *p, const void *q)
 }
 
 static int
-_cert_fn_ncompare(const void *p, const void *q)
+_cert_fn_ncompare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
 {
-    const netsnmp_cert_common *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
     netsnmp_assert((lhs->filename != NULL) && (rhs->filename != NULL));
 
@@ -667,10 +667,8 @@ _cert_fn_ncompare(const void *p, const void *q)
 }
 
 static int
-_cert_sn_ncompare(const void *p, const void *q)
+_cert_sn_ncompare(netsnmp_cert *lhs, netsnmp_cert *rhs)
 {
-    const netsnmp_cert *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
     netsnmp_assert((lhs->subject != NULL) && (rhs->subject != NULL));
 
@@ -706,9 +704,9 @@ _type_from_filename(const char *filename)
 /*
  * filter functions; return 1 to include file, 0 to exclude
  */
-static int _cert_cert_filter(const void *text, void *ctx)
+static int
+_cert_cert_filter(const char *filename)
 {
-    const char *filename = text;
     int  len = strlen(filename);
     const char *pos;
 
@@ -890,13 +888,31 @@ _certindex_new( const char *dirname )
  * certificate utility functions
  *
  */
-static BIO *
-netsnmp_open_bio(const char *dir, const char *filename)
+static X509 *
+netsnmp_ocert_get(netsnmp_cert *cert)
 {
     BIO            *certbio;
+    X509           *ocert = NULL;
+    EVP_PKEY       *okey = NULL;
     char            file[SNMP_MAXPATH];
+    int             is_ca;
 
-    DEBUGMSGT(("9:cert:read", "Checking file %s\n", filename));
+    if (NULL == cert)
+        return NULL;
+
+    if (cert->ocert)
+        return cert->ocert;
+
+    if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
+        cert->info.type = _type_from_filename(cert->info.filename);
+        if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
+            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
+                     cert->info.type, cert->info.filename);
+            return NULL;
+        }
+    }
+
+    DEBUGMSGT(("9:cert:read", "Checking file %s\n", cert->info.filename));
 
     certbio = BIO_new(BIO_s_file());
     if (NULL == certbio) {
@@ -904,23 +920,90 @@ netsnmp_open_bio(const char *dir, const char *filename)
         return NULL;
     }
 
-    snprintf(file, sizeof(file),"%s/%s", dir, filename);
+    snprintf(file, sizeof(file),"%s/%s", cert->info.dir, cert->info.filename);
     if (BIO_read_filename(certbio, file) <=0) {
-        snmp_log(LOG_ERR, "error reading certificate/key %s into BIO\n", file);
+        snmp_log(LOG_ERR, "error reading certificate %s into BIO\n", file);
         BIO_vfree(certbio);
         return NULL;
     }
 
-    return certbio;
-}
+    if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
+        char *pos = strrchr(cert->info.filename, '.');
+        if (NULL == pos)
+            return NULL;
+        cert->info.type = _cert_ext_type(++pos);
+        netsnmp_assert(cert->info.type != NS_CERT_TYPE_UNKNOWN);
+    }
 
-static void
-netsnmp_ocert_parse(netsnmp_cert *cert, X509 *ocert)
-{
-    int             is_ca;
+    switch (cert->info.type) {
+
+        case NS_CERT_TYPE_DER:
+            ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
+            if (NULL != ocert)
+                break;
+            (void)BIO_reset(certbio);
+            /* Check for PEM if DER didn't work */
+            /* FALLTHROUGH */
+
+        case NS_CERT_TYPE_PEM:
+            ocert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
+            if (NULL == ocert)
+                break;
+            if (NS_CERT_TYPE_DER == cert->info.type) {
+                DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
+                cert->info.type = NS_CERT_TYPE_PEM;
+            }
+            /** check for private key too */
+            if (NULL == cert->key) {
+                (void)BIO_reset(certbio);
+                okey =  PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
+                if (NULL != okey) {
+                    netsnmp_key  *key;
+                    DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
+                               cert->info.filename));
+                    key = _new_key(cert->info.dir, cert->info.filename);
+                    if (NULL != key) {
+                        key->okey = okey;
+                        if (-1 == CONTAINER_INSERT(_keys, key)) {
+                            DEBUGMSGT(("cert:read:key:add",
+                                       "error inserting key into container\n"));
+                            netsnmp_key_free(key);
+                            key = NULL;
+                        }
+                        else {
+                            DEBUGMSGT(("cert:read:partner", "%s match found!\n",
+                                       cert->info.filename));
+                            key->cert = cert;
+                            cert->key = key;
+                            cert->info.allowed_uses |= NS_CERT_IDENTITY;
+                        }
+                    }
+                } /* null return from read */
+            } /* null key */
+            break;
+#ifdef CERT_PKCS12_SUPPORT_MAYBE_LATER
+        case NS_CERT_TYPE_PKCS12:
+            (void)BIO_reset(certbio);
+            PKCS12 *p12 = d2i_PKCS12_bio(certbio, NULL);
+            if ( (NULL != p12) && (PKCS12_verify_mac(p12, "", 0) ||
+                                   PKCS12_verify_mac(p12, NULL, 0)))
+                PKCS12_parse(p12, "", NULL, &cert, NULL);
+            break;
+#endif
+        default:
+            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
+                     cert->info.type, cert->info.filename);
+    }
+
+    BIO_vfree(certbio);
+
+    if (NULL == ocert) {
+        snmp_log(LOG_ERR, "error parsing certificate file %s\n",
+                 cert->info.filename);
+        return NULL;
+    }
 
     cert->ocert = ocert;
-
     /*
      * X509_check_ca return codes:
      * 0 not a CA
@@ -948,118 +1031,18 @@ netsnmp_ocert_parse(netsnmp_cert *cert, X509 *ocert)
         }
         DEBUGMSGT(("9:cert:add:issuer", "CA issuer: %s\n", cert->issuer));
     }
-
+    
     if (NULL == cert->fingerprint) {
-        cert->hash_type = NS_HASH_SHA1;
+        cert->hash_type = netsnmp_openssl_cert_get_hash_type(ocert);
         cert->fingerprint =
             netsnmp_openssl_cert_get_fingerprint(ocert, cert->hash_type);
     }
-
+    
     if (NULL == cert->common_name) {
         cert->common_name =netsnmp_openssl_cert_get_commonName(ocert, NULL,
                                                                NULL);
         DEBUGMSGT(("9:cert:add:name","%s\n", cert->common_name));
     }
-
-}
-
-static X509 *
-netsnmp_ocert_get(netsnmp_cert *cert)
-{
-    BIO            *certbio;
-    X509           *ocert = NULL;
-    X509           *ncert = NULL;
-    EVP_PKEY       *okey = NULL;
-
-    if (NULL == cert)
-        return NULL;
-
-    if (cert->ocert)
-        return cert->ocert;
-
-    if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
-        cert->info.type = _type_from_filename(cert->info.filename);
-        if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
-            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
-                     cert->info.type, cert->info.filename);
-            return NULL;
-        }
-    }
-
-    certbio = netsnmp_open_bio(cert->info.dir, cert->info.filename);
-    if (!certbio) {
-        return NULL;
-    }
-
-    switch (cert->info.type) {
-
-        case NS_CERT_TYPE_DER:
-            (void)BIO_seek(certbio, cert->offset);
-            ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
-            if (NULL != ocert)
-                break;
-            /* Check for PEM if DER didn't work */
-            NETSNMP_FALLTHROUGH;
-
-        case NS_CERT_TYPE_PEM:
-            (void)BIO_seek(certbio, cert->offset);
-            ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
-            if (NULL == ocert)
-                break;
-            if (NS_CERT_TYPE_DER == cert->info.type) {
-                DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
-                cert->info.type = NS_CERT_TYPE_PEM;
-            }
-            /** check for private key too, but only if we're the first certificate */
-            if (0 == cert->offset && NULL == cert->key) {
-                okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
-                if (NULL != okey) {
-                    netsnmp_key  *key;
-                    DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
-                               cert->info.filename));
-                    key = _new_key(cert->info.dir, cert->info.filename);
-                    if (NULL != key) {
-                        key->okey = okey;
-                        if (-1 == CONTAINER_INSERT(_keys, key)) {
-                            DEBUGMSGT(("cert:read:key:add",
-                                       "error inserting key into container\n"));
-                            netsnmp_key_free(key);
-                            key = NULL;
-                        }
-                        else {
-                            DEBUGMSGT(("cert:read:partner", "%s match found!\n",
-                                       cert->info.filename));
-                            key->cert = cert;
-                            cert->key = key;
-                            cert->info.allowed_uses |= NS_CERT_IDENTITY;
-                        }
-                    }
-                } /* null return from read */
-            } /* null key */
-            break;
-#ifdef CERT_PKCS12_SUPPORT_MAYBE_LATER
-        case NS_CERT_TYPE_PKCS12:
-            (void)BIO_seek(certbio, cert->offset);
-            PKCS12 *p12 = d2i_PKCS12_bio(certbio, NULL);
-            if ( (NULL != p12) && (PKCS12_verify_mac(p12, "", 0) ||
-                                   PKCS12_verify_mac(p12, NULL, 0)))
-                PKCS12_parse(p12, "", NULL, &cert, NULL);
-            break;
-#endif
-        default:
-            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
-                     cert->info.type, cert->info.filename);
-    }
-
-    BIO_vfree(certbio);
-
-    if (NULL == ocert) {
-        snmp_log(LOG_ERR, "error parsing certificate file %s\n",
-                 cert->info.filename);
-        return NULL;
-    }
-
-    netsnmp_ocert_parse(cert, ocert);
 
     return ocert;
 }
@@ -1069,6 +1052,7 @@ netsnmp_okey_get(netsnmp_key  *key)
 {
     BIO            *keybio;
     EVP_PKEY       *okey;
+    char            file[SNMP_MAXPATH];
 
     if (NULL == key)
         return NULL;
@@ -1076,8 +1060,19 @@ netsnmp_okey_get(netsnmp_key  *key)
     if (key->okey)
         return key->okey;
 
-    keybio = netsnmp_open_bio(key->info.dir, key->info.filename);
-    if (!keybio) {
+    snprintf(file, sizeof(file),"%s/%s", key->info.dir, key->info.filename);
+    DEBUGMSGT(("cert:key:read", "Checking file %s\n", key->info.filename));
+
+    keybio = BIO_new(BIO_s_file());
+    if (NULL == keybio) {
+        snmp_log(LOG_ERR, "error creating BIO\n");
+        return NULL;
+    }
+
+    if (BIO_read_filename(keybio, file) <=0) {
+        snmp_log(LOG_ERR, "error reading certificate %s into BIO\n",
+                 key->info.filename);
+        BIO_vfree(keybio);
         return NULL;
     }
 
@@ -1163,7 +1158,7 @@ netsnmp_cert_load_x509(netsnmp_cert *cert)
             cert->issuer_cert =  _find_issuer(cert);
             if (NULL == cert->issuer_cert) {
                 DEBUGMSGT(("cert:load:warn",
-                           "couldn't load full CA chain for cert %s\n",
+                           "couldn't load CA chain for cert %s\n",
                            cert->info.filename));
                 rc = CERT_LOAD_PARTIAL;
                 break;
@@ -1172,7 +1167,7 @@ netsnmp_cert_load_x509(netsnmp_cert *cert)
         /** get issuer ocert */
         if ((NULL == cert->issuer_cert->ocert) &&
             (netsnmp_ocert_get(cert->issuer_cert) == NULL)) {
-            DEBUGMSGT(("cert:load:warn", "couldn't load full cert chain for %s\n",
+            DEBUGMSGT(("cert:load:warn", "couldn't load cert chain for %s\n",
                        cert->info.filename));
             rc = CERT_LOAD_PARTIAL;
             break;
@@ -1193,7 +1188,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         return;
     }
 
-    if (key) {
+    if(key) {
         if (key->cert) {
             DEBUGMSGT(("cert:partner", "key already has partner\n"));
             return;
@@ -1206,8 +1201,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
             return;
         *pos = 0;
 
-        matching = _cert_reduce_subset_first(_cert_find_subset_fn( filename,
-                                             key->info.dir ));
+        matching = _cert_find_subset_fn( filename, key->info.dir );
         if (!matching)
             return;
         if (1 == matching->size) {
@@ -1227,7 +1221,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
             DEBUGMSGT(("cert:partner", "%s matches multiple certs\n",
                           key->info.filename));
     }
-    else if (cert) {
+    else if(cert) {
         if (cert->key) {
             DEBUGMSGT(("cert:partner", "cert already has partner\n"));
             return;
@@ -1265,49 +1259,64 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
     }
 }
 
-static netsnmp_key *
-_add_key(EVP_PKEY *okey, const char* dirname, const char* filename, FILE *index)
+static int
+_add_certfile(const char* dirname, const char* filename, FILE *index)
 {
-    netsnmp_key  *key;
+    X509         *ocert;
+    EVP_PKEY     *okey;
+    netsnmp_cert *cert = NULL;
+    netsnmp_key  *key = NULL;
+    char          certfile[SNMP_MAXPATH];
+    int           type;
 
-    key = _new_key(dirname, filename);
-    if (NULL == key) {
-        return NULL;
+    if (((const void*)NULL == dirname) || (NULL == filename))
+        return -1;
+
+    type = _type_from_filename(filename);
+    netsnmp_assert(type != NS_CERT_TYPE_UNKNOWN);
+
+    snprintf(certfile, sizeof(certfile),"%s/%s", dirname, filename);
+
+    DEBUGMSGT(("9:cert:file:add", "Checking file: %s (type %d)\n", filename,
+               type));
+
+    if (NS_CERT_TYPE_KEY == type) {
+        key = _new_key(dirname, filename);
+        if (NULL == key)
+            return -1;
+        okey = netsnmp_okey_get(key);
+        if (NULL == okey) {
+            netsnmp_key_free(key);
+            return -1;
+        }
+        key->okey = okey;
+        if (-1 == CONTAINER_INSERT(_keys, key)) {
+            DEBUGMSGT(("cert:key:file:add:err",
+                       "error inserting key into container\n"));
+            netsnmp_key_free(key);
+            key = NULL;
+        }
     }
-
-    key->okey = okey;
-
-    if (-1 == CONTAINER_INSERT(_keys, key)) {
-        DEBUGMSGT(("cert:key:file:add:err",
-                   "error inserting key into container\n"));
-        netsnmp_key_free(key);
-        key = NULL;
+    else {
+        cert = _new_cert(dirname, filename, type, -1, NULL, NULL, NULL);
+        if (NULL == cert)
+            return -1;
+        ocert = netsnmp_ocert_get(cert);
+        if (NULL == ocert) {
+            netsnmp_cert_free(cert);
+            return -1;
+        }
+        cert->ocert = ocert;
+        if (-1 == CONTAINER_INSERT(_certs, cert)) {
+            DEBUGMSGT(("cert:file:add:err",
+                       "error inserting cert into container\n"));
+            netsnmp_cert_free(cert);
+            cert = NULL;
+        }
     }
-    if (index) {
-        fprintf(index, "k:%s\n", filename);
-    }
-
-    return key;
-}
-
-static netsnmp_cert *
-_add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int offset,
-          int allowed_uses, FILE *index)
-{
-    netsnmp_cert *cert;
-
-    cert = _new_cert(dirname, filename, type, offset,
-                     allowed_uses, -1, NULL, NULL, NULL);
-    if (NULL == cert)
-        return NULL;
-
-    netsnmp_ocert_parse(cert, ocert);
-
-    if (-1 == CONTAINER_INSERT(_certs, cert)) {
-        DEBUGMSGT(("cert:file:add:err",
-                   "error inserting cert into container\n"));
-        netsnmp_cert_free(cert);
-        return NULL;
+    if ((NULL == cert) && (NULL == key)) {
+        DEBUGMSGT(("cert:file:add:failure", "for %s\n", certfile));
+        return -1;
     }
 
     if (index) {
@@ -1315,141 +1324,11 @@ _add_cert(X509 *ocert, const char* dirname, const char* filename, int type, int 
         /** fingerprint max = 64*3=192 for sha512 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %d %d %d %d %s '%s' '%s'\n", filename,
-                    cert->info.type, cert->offset, cert->info.allowed_uses,
-                    cert->hash_type, cert->fingerprint,
+            fprintf(index, "c:%s %d %d %s '%s' '%s'\n", filename,
+                    cert->info.type, cert->hash_type, cert->fingerprint,
                     cert->common_name, cert->subject);
-    }
-
-    return cert;
-}
-
-static int
-_add_certfile(const char* dirname, const char* filename, FILE *index)
-{
-    BIO          *certbio;
-    X509         *ocert = NULL;
-    X509         *ncert;
-    EVP_PKEY     *okey = NULL;
-    netsnmp_cert *cert = NULL;
-    netsnmp_key  *key = NULL;
-    char          certfile[SNMP_MAXPATH];
-    int           type;
-    int           offset = 0;
-
-    if (((const void*)NULL == dirname) || (NULL == filename))
-        return -1;
-
-    type = _type_from_filename(filename);
-    if (type == NS_CERT_TYPE_UNKNOWN) {
-        snmp_log(LOG_ERR, "certificate file '%s' type not recognised, ignoring\n", filename);
-        return -1;
-    }
-
-    certbio = netsnmp_open_bio(dirname, filename);
-    if (!certbio) {
-        return -1;
-    }
-
-    switch (type) {
-
-       case NS_CERT_TYPE_KEY: 
-
-           okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
-           if (NULL == okey)
-               snmp_log(LOG_ERR, "error parsing key file %s\n", filename);
-           else {
-               key = _add_key(okey, dirname, filename, index);
-               if (NULL == key) {
-                   EVP_PKEY_free(okey);
-                      okey = NULL;
-               }
-           }
-           break;
-
-        case NS_CERT_TYPE_DER:
-
-            ocert = d2i_X509_bio(certbio, NULL); /* DER/ASN1 */
-            if (NULL != ocert) {
-                if (!_add_cert(ocert, dirname, filename, type, 0,
-                               NS_CERT_REMOTE_PEER, index)) {
-                    X509_free(ocert);
-                    ocert = NULL;
-                }
-                break;
-            }
-            (void)BIO_reset(certbio);
-            /* Check for PEM if DER didn't work */
-            NETSNMP_FALLTHROUGH;
-
-        case NS_CERT_TYPE_PEM:
-
-            if (NS_CERT_TYPE_DER == type) {
-                DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
-                type = NS_CERT_TYPE_PEM;
-            }
-
-            /* read the private key first so we can record this in the index */
-            okey = PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
-
-            (void)BIO_reset(certbio);
-
-            /* certs are read after the key */
-	    ocert = ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
-            if (NULL != ocert) {
-                cert = _add_cert(ncert, dirname, filename, type, 0,
-                                 okey ? NS_CERT_IDENTITY | NS_CERT_REMOTE_PEER :
-                                 NS_CERT_REMOTE_PEER, index);
-                if (NULL == cert) {
-                    X509_free(ocert);
-                    ocert = ncert = NULL;
-                }
-            }
-            while (NULL != ncert) {
-                offset = BIO_tell(certbio);
-                ncert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
-                if (ncert) {
-                    if (NULL == _add_cert(ncert, dirname, filename, type, offset, 0, index)) {
-                        X509_free(ncert);
-                        ncert = NULL;
-                    }
-                }
-            }
-
-            if (okey && cert) {
-                DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
-                           cert->info.filename));
-                key = _add_key(okey, dirname, filename, NULL);
-                if (NULL != key) {
-                    DEBUGMSGT(("cert:read:partner", "%s match found!\n",
-                               cert->info.filename));
-                    key->cert = cert;
-                    cert->key = key;
-                }
-                else {
-                    EVP_PKEY_free(okey);
-                    okey = NULL;
-                }
-            } else if (okey) {
-                EVP_PKEY_free(okey);
-                okey = NULL;
-            }
-
-            break;
-
-#ifdef CERT_PKCS12_SUPPORT_MAYBE_LATER
-        case NS_CERT_TYPE_PKCS12:
-#endif
-
-        default:
-            break;
-    }
-
-    BIO_vfree(certbio);
-
-    if ((NULL == ocert) && (NULL == okey)) {
-        snmp_log(LOG_ERR, "certificate file '%s' contained neither certificate nor key, ignoring\n", certfile);
-        return -1;
+        else if (key)
+            fprintf(index, "k:%s\n", filename);
     }
 
     return 0;
@@ -1463,10 +1342,8 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     struct stat     idx_stat;
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
     char            fingerprint[EVP_MAX_MD_SIZE*3], common_name[64+1], type_str[15];
-    char            subject[SNMP_MAXBUF_SMALL], hash_str[15], offset_str[15];
-    char            allowed_uses_str[15];
-    ssize_t         offset;
-    int             count = 0, type, allowed_uses, hash, version;
+    char            subject[SNMP_MAXBUF_SMALL], hash_str[15];
+    int             count = 0, type, hash, version;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
     netsnmp_container *newer, *found;
@@ -1506,10 +1383,10 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
      */
     newer =
         netsnmp_directory_container_read_some(NULL, dirname,
-                                              _time_filter, &idx_stat,
+                                              (netsnmp_directory_filter*)
+                                              _time_filter,(void*)&idx_stat,
                                               NETSNMP_DIR_NSFILE |
-                                              NETSNMP_DIR_NSFILE_STATS |
-                                              NETSNMP_DIR_ALLOW_DUPLICATES);
+                                              NETSNMP_DIR_NSFILE_STATS);
     if (newer) {
         DEBUGMSGT(("cert:index:parse", "Index outdated; files modified\n"));
         CONTAINER_FREE_ALL(newer, NULL);
@@ -1533,7 +1410,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     /*
      * check index format version
      */
-    NETSNMP_IGNORE_RESULT(fgets(tmpstr, sizeof(tmpstr), index));
+    fgets(tmpstr, sizeof(tmpstr), index);
     pos = strrchr(tmpstr, ' ');
     if (pos) {
         ++pos;
@@ -1543,8 +1420,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
         DEBUGMSGT(("cert:index:add", "missing or wrong index format!\n"));
         fclose(index);
         SNMP_FREE(idxname);
-        count = -1;
-        goto free_cert_container;
+        return -1;
     }
     while (1) {
         if (NULL == fgets(tmpstr, sizeof(tmpstr), index))
@@ -1554,8 +1430,6 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             pos = &tmpstr[2];
             if ((NULL == (pos=copy_nword(pos, filename, sizeof(filename)))) ||
                 (NULL == (pos=copy_nword(pos, type_str, sizeof(type_str)))) ||
-                (NULL == (pos=copy_nword(pos, offset_str, sizeof(offset_str)))) ||
-                (NULL == (pos=copy_nword(pos, allowed_uses_str, sizeof(allowed_uses_str)))) ||
                 (NULL == (pos=copy_nword(pos, hash_str, sizeof(hash_str)))) ||
                 (NULL == (pos=copy_nword(pos, fingerprint,
                                          sizeof(fingerprint)))) ||
@@ -1568,11 +1442,9 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
                 break;
             }
             type = atoi(type_str);
-            offset = atoi(offset_str);
-            allowed_uses = atoi(allowed_uses_str);
             hash = atoi(hash_str);
-            cert = _new_cert(dirname, filename, type, offset, allowed_uses, hash,
-                             fingerprint, common_name, subject);
+            cert = (void*)_new_cert(dirname, filename, type, hash, fingerprint,
+                                    common_name, subject);
             if (cert && 0 == CONTAINER_INSERT(found, cert))
                 ++count;
             else {
@@ -1620,8 +1492,6 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
                        count));
         }
     }
-
-free_cert_container:
     if (count < 0)
         CONTAINER_FREE_ALL(found, NULL);
     CONTAINER_FREE(found);
@@ -1676,10 +1546,10 @@ _add_certdir(const char *dirname)
      */
     cert_container =
         netsnmp_directory_container_read_some(NULL, dirname,
-                                              _cert_cert_filter, NULL,
+                                              (netsnmp_directory_filter*)
+                                              &_cert_cert_filter, NULL,
                                               NETSNMP_DIR_RELATIVE_PATH |
-                                              NETSNMP_DIR_EMPTY_OK |
-                                              NETSNMP_DIR_ALLOW_DUPLICATES);
+                                              NETSNMP_DIR_EMPTY_OK );
     if (NULL == cert_container) {
         DEBUGMSGT(("cert:index:dir",
                     "error creating container for cert files\n"));
@@ -1762,14 +1632,12 @@ _cert_indexes_load(void)
 }
 
 static void
-_cert_print(void *p, void *context)
+_cert_print(netsnmp_cert *c, void *context)
 {
-    netsnmp_cert *c = p;
-
     if (NULL == c)
         return;
 
-    DEBUGMSGT(("cert:dump", "cert %s in %s at offset %d\n", c->info.filename, c->info.dir, c->offset));
+    DEBUGMSGT(("cert:dump", "cert %s in %s\n", c->info.filename, c->info.dir));
     DEBUGMSGT(("cert:dump", "   type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
               _mode_str(c->info.allowed_uses)));
@@ -1796,10 +1664,8 @@ _cert_print(void *p, void *context)
 }
 
 static void
-_key_print(void *p, void *context)
+_key_print(netsnmp_key *k, void *context)
 {
-    netsnmp_key *k = p;
-
     if (NULL == k)
         return;
 
@@ -1811,8 +1677,8 @@ _key_print(void *p, void *context)
 void
 netsnmp_cert_dump_all(void)
 {
-    CONTAINER_FOR_EACH(_certs, _cert_print, NULL);
-    CONTAINER_FOR_EACH(_keys, _key_print, NULL);
+    CONTAINER_FOR_EACH(_certs, (netsnmp_container_obj_func*)_cert_print, NULL);
+    CONTAINER_FOR_EACH(_keys, (netsnmp_container_obj_func*)_key_print, NULL);
 }
 
 #ifdef CERT_MAIN
@@ -1846,6 +1712,8 @@ main(int argc, char** argv)
 
 #endif /* CERT_MAIN */
 
+static netsnmp_cert *_cert_find_fp(const char *fingerprint);
+
 void
 netsnmp_fp_lowercase_and_strip_colon(char *fp)
 {
@@ -1870,7 +1738,7 @@ netsnmp_fp_lowercase_and_strip_colon(char *fp)
     for (++pos; *pos; ++pos) {
         if (':' == *pos)
             continue;
-        *dest++ = tolower(0xFF & *pos);
+        *dest++ = isalpha(0xFF & *pos) ? tolower(0xFF & *pos) : *pos;
     }
     *dest = *pos; /* nul termination */
 }
@@ -1973,8 +1841,7 @@ netsnmp_cert_find(int what, int where, void *hint)
         netsnmp_void_array *matching;
 
         DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
-        matching = _cert_reduce_subset_what(_cert_find_subset_fn(
-                                            filename, NULL ), what);
+        matching = _cert_find_subset_fn( filename, NULL );
         if (!matching)
             return NULL;
         if (1 == matching->size)
@@ -2018,32 +1885,6 @@ netsnmp_cert_find(int what, int where, void *hint)
                result->info.allowed_uses));
             
     return result;
-}
-
-netsnmp_void_array *
-netsnmp_certs_find(int what, int where, void *hint)
-{
-
-    DEBUGMSGT(("certs:find:params", "looking for %s(%d) in %s(0x%x), hint %p\n",
-               _mode_str(what), what, _where_str(where), where, hint));
-
-    if (NS_CERTKEY_FILE == where) {
-        /** hint == filename */
-        char               *filename = (char*)hint;
-        netsnmp_void_array *matching;
-
-        DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
-        matching = _cert_reduce_subset_what(_cert_find_subset_fn(
-                                            filename, NULL ), what);
-
-        return matching;
-    } /* where = NS_CERTKEY_FILE */
-    else { /* unknown location */
-
-        DEBUGMSGT(("certs:find:err", "unhandled location %d for %d\n", where,
-                   what));
-        return NULL;
-    }
 }
 
 #ifndef NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS
@@ -2208,7 +2049,7 @@ netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
                                 SNMPERR_GENERR);
 
     /* Put the certificate into the store */
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(cert, NS_HASH_SHA1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(cert, -1);
     DEBUGMSGTL(("cert:trust",
                 "putting trusted cert %p = %s in certstore %p\n", cert,
                 fingerprint, certstore));
@@ -2356,7 +2197,7 @@ _reduce_subset(netsnmp_void_array *matching, const char *filename)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient solution, but this is just happening at
+         * the most efficient soloution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2424,7 +2265,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
         }
         /*
          * shrink array by shifting everything down a spot. Might not be
-         * the most efficient solution, but this is just happening at
+         * the most efficient soloution, but this is just happening at
          * startup and hopefully most certs won't have common prefixes.
          */
         --newsize;
@@ -2441,124 +2282,6 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
                    matching->size, newsize));
         matching->size = newsize;
     }
-}
-
-/*
- * reduce subset by eliminating any certificates that are not the
- * first certificate in a file. This allows us to ignore certificate
- * chains when testing for specific certificates, and to match keys
- * to the first certificate only.
- */
-static netsnmp_void_array *
-_cert_reduce_subset_first(netsnmp_void_array *matching)
-{
-    netsnmp_cert *cc;
-    int i = 0, j, newsize;
-
-    if ((NULL == matching))
-        return matching;
-
-    newsize = matching->size;
-
-    for( ; i < matching->size; ) {
-        /*
-         * if we've shifted matches down we'll hit a NULL entry before
-         * we hit the end of the array.
-         */
-        if (NULL == matching->array[i])
-            break;
-        /*
-         * skip over valid matches. The first entry has an offset of zero.
-         */
-        cc = (netsnmp_cert*)matching->array[i];
-        if (0 == cc->offset) {
-            ++i;
-            continue;
-        }
-        /*
-         * shrink array by shifting everything down a spot. Might not be
-         * the most efficient solution, but this is just happening at
-         * startup and hopefully most certs won't have common prefixes.
-         */
-        --newsize;
-        for ( j=i; j < newsize; ++j )
-            matching->array[j] = matching->array[j+1];
-        matching->array[j] = NULL;
-        /** no ++i; just shifted down, need to look at same position again */
-    }
-    /*
-     * if we shifted, set the new size
-     */
-    if (newsize != matching->size) {
-        DEBUGMSGT(("9:cert:subset:first", "shrank from %" NETSNMP_PRIz "d to %d\n",
-                   matching->size, newsize));
-        matching->size = newsize;
-    }
-
-    if (0 == matching->size) {
-        free(matching->array);
-        SNMP_FREE(matching);
-    }
-
-    return matching;
-}
-
-/*
- * reduce subset by eliminating any certificates that do not match
- * purpose specified.
- */
-static netsnmp_void_array *
-_cert_reduce_subset_what(netsnmp_void_array *matching, int what)
-{
-    netsnmp_cert_common *cc;
-    int i = 0, j, newsize;
-
-    if ((NULL == matching))
-        return matching;
-
-    newsize = matching->size;
-
-    for( ; i < matching->size; ) {
-        /*
-         * if we've shifted matches down we'll hit a NULL entry before
-         * we hit the end of the array.
-         */
-        if (NULL == matching->array[i])
-            break;
-        /*
-         * skip over valid matches. The first entry has an offset of zero.
-         */
-        cc = (netsnmp_cert_common *)matching->array[i];
-        if ((cc->allowed_uses & what)) {
-            ++i;
-            continue;
-        }
-        /*
-         * shrink array by shifting everything down a spot. Might not be
-         * the most efficient solution, but this is just happening at
-         * startup and hopefully most certs won't have common prefixes.
-         */
-        --newsize;
-        for ( j=i; j < newsize; ++j )
-            matching->array[j] = matching->array[j+1];
-        matching->array[j] = NULL;
-        /** no ++i; just shifted down, need to look at same position again */
-    }
-    /*
-     * if we shifted, set the new size
-     */
-    if (newsize != matching->size) {
-        DEBUGMSGT(("9:cert:subset:what", "shrank from %" NETSNMP_PRIz "d to %d\n",
-                   matching->size, newsize));
-        matching->size = newsize;
-    }
-
-    if (0 == matching->size) {
-        free(matching->array);
-        SNMP_FREE(matching);
-    }
-
-    return matching;
 }
 
 static netsnmp_void_array *
@@ -2673,11 +2396,8 @@ _key_find_fn(const char *filename)
 #endif
 
 static int
-_time_filter(const void *text, void *ctx)
+_time_filter(netsnmp_file *f, struct stat *idx)
 {
-    const netsnmp_file *f = text;
-    struct stat *idx = ctx;
-
     /** include if mtime or ctime newer than index mtime */
     if (f && idx && f->stats &&
         ((f->stats->st_mtime >= idx->st_mtime) ||
@@ -2698,7 +2418,7 @@ _time_filter(const void *text, void *ctx)
  * ***************************************************************************/
 #define MAP_CONFIG_TOKEN "certSecName"
 static void _parse_map(const char *token, char *line);
-static void _map_free(void *map, void *ctx);
+static void _map_free(netsnmp_cert_map* entry, void *ctx);
 static void _purge_config_entries(void);
 
 static void
@@ -2803,16 +2523,14 @@ netsnmp_cert_map_find(netsnmp_cert_map *map)
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_MAP_FIND */
 
 static void
-_map_free(void *map, void *context)
+_map_free(netsnmp_cert_map *map, void *context)
 {
     netsnmp_cert_map_free(map);
 }
 
 static int
-_map_compare(const void *p, const void *q)
+_map_compare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
 {
-    const netsnmp_cert_map *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
 
     if (lhs->priority < rhs->priority)
@@ -2824,11 +2542,9 @@ _map_compare(const void *p, const void *q)
 }
 
 static int
-_map_fp_compare(const void *p, const void *q)
+_map_fp_compare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
 {
-    const netsnmp_cert_map *lhs = p, *rhs = q;
     int rc;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
 
     if ((rc = strcmp(lhs->fingerprint, rhs->fingerprint)) != 0)
@@ -2843,10 +2559,8 @@ _map_fp_compare(const void *p, const void *q)
 }
 
 static int
-_map_fp_ncompare(const void *p, const void *q)
+_map_fp_ncompare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
 {
-    const netsnmp_cert_map *lhs = p, *rhs = q;
-
     netsnmp_assert((lhs != NULL) && (rhs != NULL));
 
     return strncmp(lhs->fingerprint, rhs->fingerprint,
@@ -2865,8 +2579,8 @@ netsnmp_cert_map_container_create(int with_fp)
     }
 
     chain_map->container_name = strdup("cert_map");
-    chain_map->free_item = _map_free;
-    chain_map->compare = _map_compare;
+    chain_map->free_item = (netsnmp_container_obj_func*)_map_free;
+    chain_map->compare = (netsnmp_container_compare*)_map_compare;
 
     if (!with_fp)
         return chain_map;
@@ -2882,8 +2596,8 @@ netsnmp_cert_map_container_create(int with_fp)
         return NULL;
     }
     fp->container_name = strdup("cert2sn_fp");
-    fp->compare = _map_fp_compare;
-    fp->ncompare = _map_fp_ncompare;
+    fp->compare = (netsnmp_container_compare*)_map_fp_compare;
+    fp->ncompare = (netsnmp_container_compare*)_map_fp_ncompare;
     netsnmp_container_add_index(chain_map, fp);
 
     return chain_map;
@@ -2932,7 +2646,7 @@ _purge_config_entries(void)
     
     /*
      * duplicate cert_maps and then iterate over the copy. That way we can
-     * add/remove to cert_maps without disturbing the iterator.
+     * add/remove to cert_maps without distrubing the iterator.
 xx
      */
     tmp_maps = CONTAINER_DUP(cert_maps, NULL, 0);
@@ -3034,7 +2748,7 @@ netsnmp_certToTSN_parse_common(char **line)
         map->fingerprint = strdup(buf);
     } else {
         map->fingerprint =
-            netsnmp_openssl_cert_get_fingerprint(tmpcert->ocert, NS_HASH_SHA1);
+            netsnmp_openssl_cert_get_fingerprint(tmpcert->ocert, -1);
     }
     
     if (NULL == *line) {
@@ -3048,7 +2762,7 @@ netsnmp_certToTSN_parse_common(char **line)
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     if ((buf[0] != '-') || (buf[1] != '-')) {
-        netsnmp_config_error("unexpected format: %s\n", *line);
+        netsnmp_config_error("unexpected fromat: %s\n", *line);
         goto end;
     }
     if (strcmp(&buf[2], "sn") == 0) {
@@ -3138,7 +2852,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
     
     /*
      * duplicate cert_maps and then iterate over the copy. That way we can
-     * add/remove to cert_maps without disturbing the iterator.
+     * add/remove to cert_maps without distrubing the iterator.
      */
     new_maps = CONTAINER_DUP(cert_maps, NULL, 0);
     if (NULL == new_maps) {
@@ -3506,18 +3220,14 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
                                  char *id, size_t *id_len, char *fp,
                                  size_t *fp_len, u_char *ht)
 {
-    size_t fp_len_save = *fp_len - 1;
+    size_t fp_len_save = *fp_len;
 
     /*
      * Calling this function with name == NULL, fp == NULL or id == NULL would
      * trigger a memory leak.
      */
-    if (!name || !fp || !id || *name_len == 0 || *id_len == 0 || *fp_len == 0)
+    if (!name || !fp || !id)
         return -1;
-
-    (*name_len)--;
-    (*fp_len)--;
-    (*id_len)--;
 
     *line = read_config_read_octet_string(*line, (u_char **)&name, name_len);
     if (NULL == *line) {

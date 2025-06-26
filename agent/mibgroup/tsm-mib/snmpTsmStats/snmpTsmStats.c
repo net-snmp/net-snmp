@@ -11,9 +11,9 @@
 
 static netsnmp_handler_registration* _myreg = NULL;
 
-netsnmp_feature_require(helper_statistics);
+netsnmp_feature_require(helper_statistics)
 
-netsnmp_feature_child_of(shutdown_snmptsmsession, netsnmp_unused);
+netsnmp_feature_child_of(shutdown_snmptsmsession, netsnmp_unused)
 
 /** Initializes the snmpTsmStats module */
 void
@@ -35,7 +35,7 @@ init_snmpTsmStats(void)
     }
     rc = NETSNMP_REGISTER_STATISTIC_HANDLER(_myreg, 1, TSM);
     if (MIB_REGISTERED_OK != rc) {
-        snmp_log(LOG_ERR, "failed to register snmpTsmStats module\n");
+        snmp_log(LOG_ERR, "failed to register snmpTsmStats mdoule\n");
         netsnmp_handler_registration_free(_myreg);
         _myreg = NULL;
     }

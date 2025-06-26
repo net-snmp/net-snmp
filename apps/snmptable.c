@@ -27,39 +27,39 @@ SOFTWARE.
 ******************************************************************/
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#ifdef TIME_WITH_SYS_TIME
+#if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# ifdef HAVE_SYS_TIME_H
+# if HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_SELECT_H
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #include <stdio.h>
-#ifdef HAVE_NETDB_H
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -220,7 +220,7 @@ usage(void)
     fprintf(stderr, "\t\t\t  b:       brief field names\n");
     fprintf(stderr, "\t\t\t  B:       do not use GETBULK requests\n");
     fprintf(stderr, "\t\t\t  c<NUM>:  print table in columns of <NUM> chars width\n");
-    fprintf(stderr, "\t\t\t  f<STR>:  print table delimited with <STR>\n");
+    fprintf(stderr, "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
     fprintf(stderr, "\t\t\t  h:       print only the column headers\n");
     fprintf(stderr, "\t\t\t  H:       print no column headers\n");
     fprintf(stderr, "\t\t\t  i:       print index values\n");
@@ -363,7 +363,6 @@ close_session:
     snmp_close(ss);
 
 out:
-    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
@@ -382,26 +381,24 @@ print_table(void)
 
     for (field = 0; field < fields; field++) {
         if (column_width != 0)
-            snprintf(string_buf, sizeof string_buf, "%%%s%d.%ds",
-                     left_justify_flag, column_width + 1, column_width );
+            sprintf(string_buf, "%%%s%d.%ds", left_justify_flag,
+                    column_width + 1, column_width );
         else if (field_separator == NULL)
-            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
-                     left_justify_flag, column[field].width + 1);
+            sprintf(string_buf, "%%%s%ds", left_justify_flag,
+                    column[field].width + 1);
         else if (field == 0 && !show_index)
-            snprintf(string_buf, sizeof string_buf, "%%s");
+            sprintf(string_buf, "%%s");
         else
-            snprintf(string_buf, sizeof string_buf, "%s%%s",
-                     field_separator);
+            sprintf(string_buf, "%s%%s", field_separator);
         column[field].fmt = strdup(string_buf);
     }
     if (show_index) {
         if (column_width)
-            snprintf(string_buf, sizeof string_buf, "\nindex: %%s\n");
+            sprintf(string_buf, "\nindex: %%s\n");
         else if (field_separator == NULL)
-            snprintf(string_buf, sizeof string_buf, "%%%s%ds",
-                     left_justify_flag, index_width);
+            sprintf(string_buf, "%%%s%ds", left_justify_flag, index_width);
         else
-            snprintf(string_buf, sizeof string_buf, "%%s");
+            sprintf(string_buf, "%%s");
         index_fmt = strdup(string_buf);
     }
 
@@ -548,16 +545,11 @@ get_field_names(void)
             break;
         }
         if (fields == 1) {
-            column = malloc(sizeof(*column));
+            column = (struct column *) malloc(sizeof(*column));
         } else {
-            struct column *tmp_column;
-
-            tmp_column = realloc(column, fields * sizeof(*column));
-            if (!tmp_column) {
-                fprintf(stderr, "Out of memory\n");
-                exit(1);
-            }
-            column = tmp_column;
+            column =
+                (struct column *) realloc(column,
+                                          fields * sizeof(*column));
         }
         column[fields - 1].label = strdup(name_p);
         column[fields - 1].width = strlen(name_p);
@@ -652,32 +644,29 @@ get_table_entries(netsnmp_session * ss)
                 if (entries >= allocated) {
                     if (allocated == 0) {
                         allocated = 10;
-                        data = malloc(allocated * fields * sizeof(char *));
+                        data =
+                            (char **) malloc(allocated * fields *
+                                             sizeof(char *));
                         memset(data, 0,
                                allocated * fields * sizeof(char *));
                         if (show_index)
-                            indices = malloc(allocated * sizeof(char *));
+                            indices =
+                                (char **) malloc(allocated *
+                                                 sizeof(char *));
                     } else {
-                        void *tmp_data = NULL, *tmp_indices = NULL;
-
                         allocated += 10;
-                        tmp_data = realloc(data, allocated * fields *
-                                           sizeof(char *));
+                        data =
+                            (char **) realloc(data,
+                                              allocated * fields *
+                                              sizeof(char *));
+                        memset(data + entries * fields, 0,
+                               (allocated -
+                                entries) * fields * sizeof(char *));
                         if (show_index)
-                            tmp_indices = realloc(indices, allocated *
+                            indices =
+                                (char **) realloc(indices,
+                                                  allocated *
                                                   sizeof(char *));
-                        if (tmp_data && (!show_index || tmp_indices)) {
-                            data = tmp_data;
-                            memset(data + entries * fields, 0,
-                                   (allocated - entries) * fields *
-                                   sizeof(char *));
-                            if (show_index)
-                                indices = tmp_indices;
-                        } else {
-                            free(tmp_data);
-                            free(tmp_indices);
-                            allocated -= 10;
-                        }
                     }
                 }
                 dp = data + (entries - 1) * fields;
@@ -720,6 +709,7 @@ get_table_entries(netsnmp_session * ss)
                              vars->name_length)) {
                             break;
                         }
+                        i = vars->name_length - rootlen + 1;
                         if (localdebug || show_index) {
                             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                               NETSNMP_DS_LIB_EXTENDED_INDEX)) {
@@ -736,7 +726,6 @@ get_table_entries(netsnmp_session * ss)
                                     break;
                                 case NETSNMP_OID_OUTPUT_FULL:
                                 case NETSNMP_OID_OUTPUT_NUMERIC:
-				case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                                 case NETSNMP_OID_OUTPUT_UCD:
                                     name_p = buf + strlen(table_name)+1;
                                     name_p = strchr(name_p, '.')+1;
@@ -764,13 +753,6 @@ get_table_entries(netsnmp_session * ss)
                     if (localdebug && buf) {
                         printf("%s => taken\n", buf);
                     }
-                    if (dp[col]) {
-                        fprintf(stderr, "OID not increasing: %s\n", buf);
-                        running = 0;
-                        end_of_table = 1;
-                        exitval = 2;
-                        break;
-                    }
                     out_len = 0;
                     sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
@@ -788,11 +770,8 @@ get_table_entries(netsnmp_session * ss)
                         column[col].width = i;
                     }
                 }
-                if (buf) {
+                if (buf)
                     free(buf);
-                    buf = NULL;
-                    buf_len = 0;
-                }
 
                 if (end_of_table) {
                     --entries;
@@ -800,7 +779,8 @@ get_table_entries(netsnmp_session * ss)
                      * not part of this subtree 
                      */
                     if (localdebug) {
-                        printf("End of table\n");
+                        printf("End of table: %s\n",
+                               buf ? (char *) buf : "[NIL]");
                     }
                     snmp_free_pdu(response);
                     running = 0;
@@ -929,7 +909,6 @@ getbulk_table_entries(netsnmp_session * ss)
                             break;
                         case NETSNMP_OID_OUTPUT_FULL:
                         case NETSNMP_OID_OUTPUT_NUMERIC:
-			case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                         case NETSNMP_OID_OUTPUT_UCD:
                             name_p = buf + strlen(table_name)+1;
                             name_p = strchr(name_p, '.')+1;
@@ -988,13 +967,6 @@ getbulk_table_entries(netsnmp_session * ss)
                             index_width = i;
                     }
                     dp = data + row * fields;
-                    if (dp[col]) {
-                        fprintf(stderr, "OID not increasing: %s\n", buf);
-                        exitval = 2;
-                        end_of_table = 1;
-                        running = 0;
-                        break;
-                    }
                     out_len = 0;
                     sprint_realloc_value((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length,
@@ -1016,11 +988,8 @@ getbulk_table_entries(netsnmp_session * ss)
                     memcpy(name, last_var->name,
                            name_length * sizeof(oid));
                 }
-                if (buf) {
+                if (buf)
                     free(buf);
-                    buf = NULL;
-                    buf_len = 0;
-                }
             } else {
                 /*
                  * error in response, print it 

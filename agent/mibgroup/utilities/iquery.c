@@ -13,12 +13,12 @@
 #include "agentx/subagent.h"
 #include "utilities/iquery.h"
 
-netsnmp_feature_child_of(iquery_all, libnetsnmpmibs);
-netsnmp_feature_child_of(iquery, iquery_all);
-netsnmp_feature_child_of(iquery_community_session, iquery_all);
-netsnmp_feature_child_of(iquery_pdu_session, iquery_all);
+netsnmp_feature_child_of(iquery_all, libnetsnmpmibs)
+netsnmp_feature_child_of(iquery, iquery_all)
+netsnmp_feature_child_of(iquery_community_session, iquery_all)
+netsnmp_feature_child_of(iquery_pdu_session, iquery_all)
 
-netsnmp_feature_require(query_set_default_session);
+netsnmp_feature_require(query_set_default_session)
 
 #ifndef NETSNMP_FEATURE_REMOVE_IQUERY
 
@@ -224,12 +224,12 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
         ss->securityEngineIDLen = engIDLen;
         if ( version == SNMP_VERSION_3 ) {
             ss->securityNameLen = strlen(secName);
-            ss->securityName = netsnmp_memdup(secName, ss->securityNameLen + 1);
+            ss->securityName = netsnmp_memdup(secName, ss->securityNameLen);
         } else {
             ss->community = netsnmp_memdup(secName, strlen(secName));
             ss->community_len = strlen(secName);
         }
-        ss->myvoid = (void *)netsnmp_check_outstanding_agent_requests;
+        ss->myvoid = netsnmp_check_outstanding_agent_requests;
         ss->flags |= SNMP_FLAGS_RESP_CALLBACK | SNMP_FLAGS_DONT_PROBE;
     }
 #endif

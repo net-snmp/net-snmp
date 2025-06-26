@@ -27,7 +27,7 @@
 
 #include "snmpNotifyFilterTable_interface.h"
 
-netsnmp_feature_require(check_storage_transition);
+netsnmp_feature_require(check_storage_transition)
 
 const oid       snmpNotifyFilterTable_oid[] =
     { SNMPNOTIFYFILTERTABLE_OID };
@@ -339,8 +339,9 @@ snmpNotifyFilterTable_indexes_set_tbl_idx(snmpNotifyFilterTable_mib_index *
     /*
      * make sure there is enough space for snmpNotifyFilterProfileName data
      */
-    if (tbl_idx->snmpNotifyFilterProfileName_len <
-        snmpNotifyFilterProfileName_val_ptr_len) {
+    if ((NULL == tbl_idx->snmpNotifyFilterProfileName) ||
+        (tbl_idx->snmpNotifyFilterProfileName_len <
+         (snmpNotifyFilterProfileName_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -358,8 +359,9 @@ snmpNotifyFilterTable_indexes_set_tbl_idx(snmpNotifyFilterTable_mib_index *
     /*
      * make sure there is enough space for snmpNotifyFilterSubtree data
      */
-    if (tbl_idx->snmpNotifyFilterSubtree_len <
-        snmpNotifyFilterSubtree_val_ptr_len) {
+    if ((NULL == tbl_idx->snmpNotifyFilterSubtree) ||
+        (tbl_idx->snmpNotifyFilterSubtree_len <
+         (snmpNotifyFilterSubtree_val_ptr_len))) {
         snmp_log(LOG_ERR, "not enough space for value\n");
         return MFD_ERROR;
     }
@@ -414,7 +416,7 @@ snmpNotifyFilterTable_indexes_set(snmpNotifyFilterTable_rowreq_ctx *
     /*
      * convert mib index to oid index
      */
-    rowreq_ctx->oid_idx.len = OID_LENGTH(rowreq_ctx->oid_tmp);
+    rowreq_ctx->oid_idx.len = sizeof(rowreq_ctx->oid_tmp) / sizeof(oid);
     if (0 != snmpNotifyFilterTable_index_to_oid(&rowreq_ctx->oid_idx,
                                                 &rowreq_ctx->tbl_idx)) {
         return MFD_ERROR;
@@ -972,7 +974,7 @@ snmpNotifyFilterTable_commit(snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx)
      */
 
     /*
-     * if we successfully committed this row, set the dirty flag.
+     * if we successfully commited this row, set the dirty flag.
      */
     rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
 
@@ -1015,7 +1017,7 @@ snmpNotifyFilterTable_undo_commit(snmpNotifyFilterTable_rowreq_ctx *
 
 
     /*
-     * if we successfully un-committed this row, clear the dirty flag.
+     * if we successfully un-commited this row, clear the dirty flag.
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_DIRTY;
@@ -1112,7 +1114,7 @@ The bit mask which, in combination with the corresponding
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -1309,7 +1311,7 @@ This object indicates whether the family of filter subtrees
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -1486,7 +1488,7 @@ The storage type for this conceptual row.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
@@ -1665,7 +1667,7 @@ The status of this conceptual row.
  * is detailed in the description for an object).
  *
  * You should check that the requested change between the undo value and the
- * new value is legal (ie, the transition from one value to another
+ * new value is legal (ie, the transistion from one value to another
  * is legal).
  *      
  *@note
