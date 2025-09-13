@@ -4,8 +4,8 @@ scriptdir="$(cd "$(dirname "$0")" && pwd)"
 
 install_android_ndk() {
     echo "Installing Android NDK..."
-    wget --quiet https://dl.google.com/android/repository/android-ndk-r26b-linux.zip
-    unzip -oq android-ndk-r26b-linux.zip
+    wget --quiet https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+    unzip -oq android-ndk-r27d-linux.zip
 }
 
 case "$(uname)" in

@@ -32,7 +32,7 @@ case "$(uname -a)" in
 esac
 case "$MODE" in
     Android)
-	NDK=$PWD/android-ndk-r26b/toolchains/llvm/prebuilt/linux-x86_64/bin
+	NDK=$PWD/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin
 	export PATH="${NDK}:${PATH}"
 	export CC=aarch64-linux-android34-clang
 	;;

@@ -361,7 +361,7 @@ if [ "$with_openssl" != "internal" ] &&
     options+=(--enable-blumenthal-aes)
 fi
 security_modules=(usm tsm)
-if [ -e /usr/include/krb5.h ]; then
+if [ "${MODE}" != Android ] && [ -e /usr/include/krb5.h ]; then
     security_modules+=(ksm)
 fi
 case "$(uname):${MODE}" in
