@@ -204,6 +204,10 @@ agentx_config_init(void)
                                   agentx_parse_agentx_socket, NULL,
                                   "AgentX bind address");
 
+#ifdef USING_AGENTX_MASTER_MODULE
+    /*
+     * tokens for master agent
+     */
     agentx_register_config_handler("agentxRetries",
                                   agentx_parse_agentx_retries, NULL,
                                   "AgentX Retries");
@@ -218,10 +222,6 @@ agentx_config_init(void)
     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                        NETSNMP_DS_AGENT_AGENTX_TIMEOUT, 1000L * 1000L);
 
-#ifdef USING_AGENTX_MASTER_MODULE
-    /*
-     * tokens for master agent
-     */
     if (MASTER_AGENT == agent_role) {
         snmpd_register_config_handler("master",
                                       agentx_parse_master, NULL,
