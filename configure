@@ -30716,6 +30716,11 @@ if test "x$ac_cv_func_AES_cfb128_encrypt" = xyes ||
     fi
 fi
 
+if test "x$enable_des" = "xno"; then
+    encrmodes=`echo $encrmodes | $SED 's/DES //'`
+fi
+
+
 
 
 
