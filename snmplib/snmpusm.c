@@ -4703,7 +4703,19 @@ usm_create_usmUser_from_string(char *line, const char **errorMsg)
 
         newuser->engineID = ebuf;
         newuser->engineIDLen = eout_len;
-        cp = copy_nword(cp, buf, sizeof(buf));
+
+        /*
+        * set the lcd entry for this engineID to the minimum boots/time
+        * values so that its a known engineid and won't return a report pdu.
+        * This is mostly important when receiving v3 traps so that the usm
+        * will at least continue processing them.
+        * Note: We do this at the end so that it only runs if the parsing
+        * was successful
+        */
+        set_enginetime(newuser->engineID, newuser->engineIDLen, 1, 0, 0);
+
+
+        cp = copy_nword(cp, buf, sizeof(buf));        
     } else {
         newuser->engineID = snmpv3_generate_engineID(&ret);
         if (ret == 0) {
