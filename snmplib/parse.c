@@ -4985,6 +4985,11 @@ static int elemcmp(const void *a, const void *b)
     return strcmp(*s1, *s2);
 }
 
+
+#ifdef WIN32
+#include <dirent.h>
+#endif
+
 /*
  * Scan a directory and return all filenames found as an array of pointers to
  * directory entries (@result).

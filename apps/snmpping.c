@@ -632,7 +632,11 @@ int main(int argc, char **argv)
         username[32] = '\0';
         usernameLen = strlen(username); /* TODO session.securityNameLen */
     } else {
+#if defined(WIN32) || defined(_WIN32)
+	strncpy(username, getenv("USERNAME") ? getenv("USERNAME") : "unknown", sizeof(username) - 1);
+#else
         strncpy(username, getlogin(), sizeof(username) - 1);
+#endif
         username[32] = '\0';
         usernameLen = strlen(username);
     }

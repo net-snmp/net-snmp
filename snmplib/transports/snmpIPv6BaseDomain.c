@@ -62,11 +62,17 @@
 #define IF_NAMESIZE 12
 #endif
 
+#if defined(WIN32) || defined(_WIN32)
+/* Don't redefine - use system definition */
+#else
+static const struct in6_addr in6addr_any;
+#endif
 
+#if 0
 #if defined(HAVE_WINSOCK_H) && !defined(mingw32)
 static const struct in6_addr in6addr_any; /*IN6ADDR_ANY_INIT*/
 #endif
-
+#endif
 
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 static unsigned

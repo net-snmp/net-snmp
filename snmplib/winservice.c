@@ -23,12 +23,18 @@ labelFIN:                                       \
 
 #else
 
+#if defined(__MINGW32__) || defined(__MINGW64__)
+/* MinGW doesn't support __try/__except, so disable SEH */
+#define TRY if(1)
+#define FINALLY if(1)
+#define CATCH if(0)
+#define LEAVE do {} while(0)
+#else
 #define TRY __try
-#define LEAVE __leave
 #define FINALLY __finally
-
-#endif                          /* mingw32 */
-
+#define CATCH __except(EXCEPTION_EXECUTE_HANDLER)
+#define LEAVE __leave
+#endif
 
 #if defined(WIN32) && defined(HAVE_WIN32_PLATFORM_SDK) && !defined(mingw32)
 #pragma comment(lib, "iphlpapi.lib")
@@ -37,6 +43,7 @@ labelFIN:                                       \
 #ifdef USING_WINEXTDLL_MODULE
 #pragma comment(lib, "snmpapi.lib")
 #pragma comment(lib, "mgmtapi.lib")
+#endif
 #endif
 #endif
 

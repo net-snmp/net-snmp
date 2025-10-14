@@ -16,6 +16,12 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#if defined(WIN32) || defined(_WIN32)
+#ifndef NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT
+#define NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT 5000
+#endif
+#endif
+
 #include <sys/types.h>
 #ifdef HAVE_IO_H
 #include <io.h>
