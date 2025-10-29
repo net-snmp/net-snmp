@@ -132,6 +132,7 @@ main(int argc, char *argv[])
     char           *specific = NULL, *description = NULL, *agent = NULL;
     in_addr_t      *pdu_in_addr_t;
 #endif
+    char           *posix_env;
 
     SOCK_STARTUP;
 
@@ -141,7 +142,8 @@ main(int argc, char *argv[])
     else
         prognam = argv[0];
 
-    putenv(strdup("POSIXLY_CORRECT=1"));
+    posix_env = strdup("POSIXLY_CORRECT=1");
+    putenv(posix_env);
 
     if (strcmp(prognam, "snmpinform") == 0)
         inform = 1;
@@ -381,6 +383,7 @@ close_session:
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
+    free(posix_env);
     netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
