@@ -435,8 +435,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlOwnerIndexLen);
     if (StorageTmp->pingCtlOwnerIndex == NULL) {
         config_perror("invalid specification for pingCtlOwnerIndex");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -445,8 +444,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTestNameLen);
     if (StorageTmp->pingCtlTestName == NULL) {
         config_perror("invalid specification for pingCtlTestName");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -460,8 +458,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTargetAddressLen);
     if (StorageTmp->pingCtlTargetAddress == NULL) {
         config_perror("invalid specification for pingCtlTargetAddress");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -486,8 +483,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDataFillLen);
     if (StorageTmp->pingCtlDataFill == NULL) {
         config_perror("invalid specification for pingCtlDataFill");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -508,8 +504,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTrapGenerationLen);
     if (StorageTmp->pingCtlTrapGeneration == NULL) {
         config_perror("invalid specification for pingCtlTrapGeneration");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -528,8 +523,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlTypeLen);
     if (StorageTmp->pingCtlType == NULL) {
         config_perror("invalid specification for pingCtlType");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -538,8 +532,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlDescrLen);
     if (StorageTmp->pingCtlDescr == NULL) {
         config_perror("invalid specification for pingCtlTrapDescr");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -553,8 +546,7 @@ parse_pingCtlTable(const char *token, char *line)
                               &StorageTmp->pingCtlSourceAddressLen);
     if (StorageTmp->pingCtlSourceAddress == NULL) {
         config_perror("invalid specification for pingCtlSourceAddress");
-        free(StorageTmp);
-        return;
+        goto out;
     }
 
     line =
@@ -584,6 +576,18 @@ parse_pingCtlTable(const char *token, char *line)
     /* pingCtlTable_cleaner(pingCtlTableStorage); */
 
     DEBUGMSGTL(("pingCtlTable", "done.\n"));
+
+out:
+    SNMP_FREE(StorageTmp->pingCtlOwnerIndex);
+    SNMP_FREE(StorageTmp->pingCtlTestName);
+    SNMP_FREE(StorageTmp->pingCtlTargetAddress);
+    SNMP_FREE(StorageTmp->pingCtlDataFill);
+    SNMP_FREE(StorageTmp->pingCtlTrapGeneration);
+    SNMP_FREE(StorageTmp->pingCtlType);
+    SNMP_FREE(StorageTmp->pingCtlDescr);
+    SNMP_FREE(StorageTmp->pingCtlSourceAddress);
+    free(StorageTmp);
+    return;
 }
 
 
@@ -4250,7 +4254,7 @@ write_pingCtlRowStatus(int action,
             vars = NULL;
 
             /*
-             * 将name为空的三个索引字段加到var变量列表的末尾 
+             * Add the three index fields where name is null to the tail of the var variable list. 
              */
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0);  /* pingCtlOwnerIndex */
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0);  /* pingCtlTestName */
