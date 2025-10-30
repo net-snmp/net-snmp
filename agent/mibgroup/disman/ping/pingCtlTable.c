@@ -4249,9 +4249,6 @@ write_pingCtlRowStatus(int action,
              */
             vars = NULL;
 
-            /*
-             * 将name为空的三个索引字段加到var变量列表的末尾 
-             */
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0);  /* pingCtlOwnerIndex */
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0);  /* pingCtlTestName */
 
