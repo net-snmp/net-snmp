@@ -1476,16 +1476,16 @@ init_master_agent(void)
 
     if (cptr) {
         buf = strdup(cptr);
-        if (!buf) {
-            snmp_log(LOG_ERR,
-                     "Error processing transport \"%s\"\n", cptr);
-            return 1;
-        }
     } else {
         /*
          * No, so just specify the default port.  
          */
         buf = strdup("");
+    }
+    if (!buf) {
+        snmp_log(LOG_ERR,
+                    "Error processing transport \"%s\"\n", cptr ? cptr : "default");
+        return 1;
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
