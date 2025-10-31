@@ -55,14 +55,24 @@ diskio_getstats(void)
         if (ndisk == 0)
             return 0;
         dkname = malloc(ndisk * sizeof(char *));
+        if (dkname == NULL) {
+            perror("Can't alloc memory for dkname");
+            return 0;
+        }
+
         dkn_size = 0;
         if (sysctl(nmib, 2, NULL, &dkn_size, NULL, 0) < 0) {
             perror("Can't get size of HW_DISKNAMES mib");
             return 0;
         }
         t = malloc(dkn_size);
+        if (t == NULL) {
+            perror("Can't alloc memory for t");
+            return 0;
+        }
         if (sysctl(nmib, 2, t, &dkn_size, NULL, 0) < 0) {
             perror("Can't get size of HW_DISKNAMES mib");
+            free(t);
             return 0;
         }
         for (i = 0, tp = strtok(t, " "); tp && i < ndisk; i++,
@@ -71,6 +81,10 @@ diskio_getstats(void)
         }
         free(t);
         dk = malloc(ndisk * sizeof(*dk));
+        if (dk == NULL) {
+            perror("Can't alloc memory for dk");
+            return 0;
+        }
     }
     if (sysctl(dmib, 3, dk, &size, NULL, 0) < 0) {
         perror("Can't get HW_DISKSTATS/HW_IOSTATS mib");
