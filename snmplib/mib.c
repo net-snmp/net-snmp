@@ -2741,22 +2741,24 @@ netsnmp_init_mib(void)
         env_var = entry;
     }
 
-    DEBUGMSGTL(("init_mib",
-                "Seen MIBS: Looking in '%s' for mib files ...\n",
-                env_var));
-    entry = strtok_r(env_var, ENV_SEPARATOR, &st);
-    while (entry) {
-        if (strcasecmp(entry, DEBUG_ALWAYS_TOKEN) == 0) {
-            read_all_mibs();
-        } else if (strstr(entry, "/") != NULL) {
-            read_mib(entry);
-        } else {
-            netsnmp_read_module(entry);
+    if (env_var != NULL) {
+        DEBUGMSGTL(("init_mib",
+                    "Seen MIBS: Looking in '%s' for mib files ...\n",
+                    env_var));
+        entry = strtok_r(env_var, ENV_SEPARATOR, &st);
+        while (entry) {
+            if (strcasecmp(entry, DEBUG_ALWAYS_TOKEN) == 0) {
+                read_all_mibs();
+            } else if (strstr(entry, "/") != NULL) {
+                read_mib(entry);
+            } else {
+                netsnmp_read_module(entry);
+            }
+            entry = strtok_r(NULL, ENV_SEPARATOR, &st);
         }
-        entry = strtok_r(NULL, ENV_SEPARATOR, &st);
+        adopt_orphans();
+        SNMP_FREE(env_var);
     }
-    adopt_orphans();
-    SNMP_FREE(env_var);
 
     env_var = netsnmp_getenv("MIBFILES");
     if (env_var != NULL) {
