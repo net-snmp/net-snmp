@@ -201,6 +201,9 @@ create_pingCtlTable_data(void)
         return NULL;
     StorageNew->pingCtlTargetAddressType = 1;
     StorageNew->pingCtlTargetAddress = strdup("");
+    if (StorageNew->pingCtlTargetAddress == NULL) {
+        goto out;
+    }
     StorageNew->pingCtlTargetAddressLen = 0;
     StorageNew->pingCtlDataSize = 0;
     StorageNew->pingCtlTimeOut = 3;
@@ -208,24 +211,34 @@ create_pingCtlTable_data(void)
     StorageNew->pingCtlAdminStatus = 2;
     StorageNew->pingCtlDataFill = strdup("00");
     if (StorageNew->pingCtlDataFill == NULL) {
-        free(StorageNew->pingCtlTargetAddress);
-        free(StorageNew);
-        return NULL;
+        goto out;
     }
     StorageNew->pingCtlDataFillLen = strlen(StorageNew->pingCtlDataFill);
     StorageNew->pingCtlFrequency = 0;
     StorageNew->pingCtlMaxRows = 50;
     StorageNew->pingCtlStorageType = 1;
     StorageNew->pingCtlTrapGeneration = strdup("");
+    if (StorageNew->pingCtlTrapGeneration == NULL) {
+        goto out;
+    }
     StorageNew->pingCtlTrapGenerationLen = 0;
     StorageNew->pingCtlTrapProbeFailureFilter = 1;
     StorageNew->pingCtlTrapTestFailureFilter = 1;
     StorageNew->pingCtlType = calloc(1, sizeof(oid) * sizeof(2));       /* 0.0 */
+    if (StorageNew->pingCtlType == NULL) {
+        goto out;
+    }
     StorageNew->pingCtlTypeLen = 2;
     StorageNew->pingCtlDescr = strdup("");
+    if (StorageNew->pingCtlDescr == NULL) {
+        goto out;
+    }
     StorageNew->pingCtlDescrLen = 0;
     StorageNew->pingCtlSourceAddressType = 1;
     StorageNew->pingCtlSourceAddress = strdup("");
+    if (StorageNew->pingCtlSourceAddress == NULL) {
+        goto out;
+    }
     StorageNew->pingCtlSourceAddressLen = 0;
     StorageNew->pingCtlIfIndex = 0;
     StorageNew->pingCtlByPassRouteTable = 2;
@@ -236,22 +249,16 @@ create_pingCtlTable_data(void)
     StorageNew->storageType = ST_NONVOLATILE;
     StorageNew->pingProbeHistoryMaxIndex = 0;
 
-    if (StorageNew->pingCtlTargetAddress == NULL ||
-        StorageNew->pingCtlTrapGeneration == NULL ||
-        StorageNew->pingCtlType == NULL ||
-        StorageNew->pingCtlDescr == NULL ||
-        StorageNew->pingCtlSourceAddress == NULL) {
-        free(StorageNew->pingCtlTargetAddress);
-        free(StorageNew->pingCtlDataFill);
-        free(StorageNew->pingCtlTrapGeneration);
-        free(StorageNew->pingCtlType);
-        free(StorageNew->pingCtlDescr);
-        free(StorageNew->pingCtlSourceAddress);
-        free(StorageNew);
-        return NULL;
-    }
-
     return StorageNew;
+out:
+    SNMP_FREE(StorageNew->pingCtlTargetAddress);
+    SNMP_FREE(StorageNew->pingCtlDataFill);
+    SNMP_FREE(StorageNew->pingCtlTrapGeneration);
+    SNMP_FREE(StorageNew->pingCtlType);
+    SNMP_FREE(StorageNew->pingCtlDescr);
+    SNMP_FREE(StorageNew->pingCtlSourceAddress);
+    free(StorageNew);
+    return NULL;
 }
 
 static void free_pingCtlTable_data(struct pingCtlTable_data *StorageDel)
