@@ -1155,8 +1155,8 @@ snmp_input(int op, netsnmp_session *session,
 		    return 1;		/* ??? */
 		}
 	    }
-            memcpy(trapOid, vars->val.objid, vars->val_len);
-            trapOidLen = vars->val_len /sizeof(oid);
+            trapOidLen = SNMP_MIN(sizeof(trapOid), vars->val_len) / sizeof(oid);
+            memcpy(trapOid, vars->val.objid, trapOidLen * sizeof(oid));
             break;
 
         default:
