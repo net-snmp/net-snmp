@@ -74,5 +74,6 @@ OKF((rc == SNMPERR_SUCCESS),
 
 free(packet);
 netsnmp_cleanup_session(&session);
+snmp_shutdown("testing");
 
 SOCK_CLEANUP;
