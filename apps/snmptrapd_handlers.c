@@ -1114,6 +1114,12 @@ snmp_input(int op, netsnmp_session *session,
 	     */
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
                 trapOidLen = pdu->enterprise_length;
+                /*
+                 * Drop packets that would trigger an out-of-bounds trapOid[]
+                 * access.
+                 */
+                if (trapOidLen < 1 || trapOidLen > OID_LENGTH(trapOid) - 2)
+                    return 1;
                 memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
                 if (trapOid[trapOidLen - 1] != 0) {
                     trapOid[trapOidLen++] = 0;
