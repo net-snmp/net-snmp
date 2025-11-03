@@ -146,7 +146,8 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                             *cp = ' ';
 
             entry->hrSWRunParameters_len
-                = sprintf(entry->hrSWRunParameters, "%.*s",
+                = snprintf(entry->hrSWRunParameters,
+                          sizeof(entry->hrSWRunParameters), "%.*s",
                           (int)sizeof(entry->hrSWRunParameters) - 1,
                           buf + ret + 1);
         } else {
