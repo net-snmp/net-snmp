@@ -3440,6 +3440,9 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
     static const char *errpre = "build bitstring";
     size_t          start_offset = *offset;
 
+    if (str == NULL && strlength != 0) 
+        return 0;
+
     while ((*pkt_len - *offset) < strlength) {
         if (!(r && asn_realloc(pkt, pkt_len))) {
             return 0;
