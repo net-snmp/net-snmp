@@ -1126,6 +1126,9 @@ snmp_input(int op, netsnmp_session *session,
             } else {
                 memcpy(trapOid, stdTrapOidRoot, sizeof(stdTrapOidRoot));
                 trapOidLen = OID_LENGTH(stdTrapOidRoot);  /* 9 */
+                /* Drop packets with an invalid trap type. */
+                if (pdu->trap_type == LONG_MAX)
+                    return 1;
                 trapOid[trapOidLen++] = pdu->trap_type+1;
             }
             break;
