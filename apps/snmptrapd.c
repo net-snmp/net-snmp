@@ -284,6 +284,11 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
 {
 #ifdef NETSNMP_USE_LIBWRAP
     char *addr_string = NULL;
+    /* 'char *' wrapers on 'const char *' STRING_UNKNOWN value for hosts_ctl */
+    char name[sizeof("snmptrapd")] = "snmptrapd";
+    char name_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
+    char addr_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
+    char user_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
         /*
@@ -308,8 +313,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
         if (xp)
             *xp = '\0';
 
-        if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
-		      sbuf, STRING_UNKNOWN) == 0) {
+        if (hosts_ctl(name, name_unknown, sbuf, user_unknown) == 0) {
             DEBUGMSGTL(("snmptrapd:libwrap", "%s rejected", addr_string));
             SNMP_FREE(addr_string);
             return 0;
@@ -317,8 +321,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
       }
       SNMP_FREE(addr_string);
     } else {
-        if (hosts_ctl("snmptrapd", STRING_UNKNOWN,
-                      STRING_UNKNOWN, STRING_UNKNOWN) == 0) {
+        if (hosts_ctl(name, name_unknown, addr_unknown, user_unknown) == 0) {
             DEBUGMSGTL(("snmptrapd:libwrap", "[unknown] rejected"));
             return 0;
         }

@@ -1037,6 +1037,11 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     char *tcpudpaddr = NULL, *name;
     short not_log_connection;
 
+    /* 'char *' wrapers on 'const char *' STRING_UNKNOWN value for hosts_ctl */
+    char name_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
+    char addr_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
+    char user_unknown[sizeof(STRING_UNKNOWN)] = STRING_UNKNOWN;
+
     name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                  NETSNMP_DS_LIB_APPTYPE);
 
@@ -1079,7 +1084,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         if (xp)
             *xp = '\0';
  
-        if (hosts_ctl(name, STRING_UNKNOWN, sbuf, STRING_UNKNOWN)) {
+        if (hosts_ctl(name, name_unknown, sbuf, user_unknown)) {
             if (!not_log_connection) {
                 snmp_log(allow_severity, "Connection from %s\n", addr_string);
             }
@@ -1096,7 +1101,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
          */
         if (0 == strncmp(addr_string, "callback", 8))
             ;
-        else if (hosts_ctl(name, STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+        else if (hosts_ctl(name, name_unknown, addr_unknown, user_unknown)){
             if (!not_log_connection) {
                 snmp_log(allow_severity, "Connection from <UNKNOWN> (%s)\n", addr_string);
             };
