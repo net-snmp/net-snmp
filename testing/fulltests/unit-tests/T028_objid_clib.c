@@ -1,23 +1,27 @@
 /* HEADER ASN OBJECT ID parsing and encoding */
 
 static const struct testdata_s {
+    int      valid;
     oid      objid[5];
     uint16_t objid_length;
     u_char   encoded[14];
     uint16_t encoded_length;
 } testdata[] = {
-    { {},                0, { 6, 1, 0 },       3 },
-    { { 0 },             1, { 6, 1, 0 },       3 },
-    { { 1 },             1, { 6, 1, 40 },      3 },
-    { { 0, 0 },          2, { 6, 1, 0 },       3 },
-    { { 1, 3 },          2, { 6, 1, 0x2b },    3 },
-    { { 1, 3, 4 },       3, { 6, 2, 0x2b, 4 }, 4 },
-    { { 1, 3, 4444444 }, 3, { 6, 5, 0x2b, 0x82, 0x8f, 0xa2, 0x1c }, 7 },
-    { { 0, 0, 4294967295, 0, 4294967295 }, 5,
+    { 1, {},                0, { 6, 1, 0 },       3 },
+    { 1, { 0 },             1, { 6, 1, 0 },       3 },
+    { 1, { 1 },             1, { 6, 1, 40 },      3 },
+    { 1, { 0, 0 },          2, { 6, 1, 0 },       3 },
+    { 1, { 0, 39 },         2, { 6, 1, 39 },      3 },
+    { 0, { 0, 40 },         2                       },
+    { 0, { 1, 40 },         2                       },
+    { 1, { 1, 3 },          2, { 6, 1, 0x2b },    3 },
+    { 1, { 1, 3, 4 },       3, { 6, 2, 0x2b, 4 }, 4 },
+    { 1, { 1, 3, 4444444 }, 3, { 6, 5, 0x2b, 0x82, 0x8f, 0xa2, 0x1c }, 7 },
+    { 1, { 0, 0, 4294967295, 0, 4294967295 }, 5,
       { 6, 12, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f },
       14 },
-    { { 1, 3, 1ull << 32 }, 3, { 6, 2, 0x2b, 0 }, 4 },
-    { { 2, (1ull << 32) - 2 * 40 - 1 }, 2,
+    { 1, { 1, 3, 1ull << 32 }, 3, { 6, 2, 0x2b, 0 }, 4 },
+    { 1, { 2, (1ull << 32) - 2 * 40 - 1 }, 2,
       { 6, 5, 0x8f, 0xff, 0xff, 0xff, 0x7f }, 7 },
 };
 
@@ -30,7 +34,7 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         size_t datalength = sizeof(data);
         uint8_t *res = asn_build_objid(data, &datalength, ASN_OBJECT_ID,
                                        t->objid, t->objid_length);
-        OKF(res != NULL, ("[%d] asn_build_objid()", i));
+        OKF(!!res == t->valid, ("[%d] asn_build_objid()", i));
         if (res != NULL) {
             uint16_t encoded_length = sizeof(data) - datalength;
             OKF(t->encoded_length == encoded_length,
@@ -53,7 +57,7 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         int res = asn_realloc_rbuild_objid(&pkt, &pkt_len, &offset, TRUE,
                                            ASN_OBJECT_ID, t->objid,
                                            t->objid_length);
-        OKF(res != 0, ("[%d] asn_realloc_rbuild_objid()", i));
+        OKF(!!res == t->valid, ("[%d] asn_realloc_rbuild_objid()", i));
         if (res != 0) {
             OKF(t->encoded_length == offset,
                 ("[%d] encoded length %d <> %" NETSNMP_PRIz "d", i,
@@ -71,7 +75,7 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         }
         free(pkt);
     }
-    {
+    if (t->encoded_length) {
         size_t datalength = t->encoded_length;
         u_char type;
         oid objid[8];
