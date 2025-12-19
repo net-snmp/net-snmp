@@ -1152,6 +1152,8 @@ snmp_input(int op, netsnmp_session *session,
 		 * Let's look through the full list....
 		 */
 		for ( vars = pdu->variables; vars; vars=vars->next_variable) {
+                    if (vars->type != ASN_OBJECT_ID)
+                        continue;
                     if (!snmp_oid_compare(vars->name, vars->name_length,
                                           snmpTrapOid, OID_LENGTH(snmpTrapOid)))
                         break;
