@@ -21,8 +21,11 @@ static const struct testdata_s {
       { 6, 12, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f },
       14 },
     { 1, { 1, 3, 1ull << 32 }, 3, { 6, 2, 0x2b, 0 }, 4 },
+    { 1, { 2, 99, 1 },       3, { 6, 3, 0x81, 0x33, 1 }, 5 },
     { 1, { 2, (1ull << 32) - 2 * 40 - 1 }, 2,
       { 6, 5, 0x8f, 0xff, 0xff, 0xff, 0x7f }, 7 },
+    { 0, { 2, (1ull << 32) - 2 * 40 }, 2 },
+    { 0, { 3, 0, 1 },       3 },
 };
 
 int i, j;
@@ -34,7 +37,9 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         size_t datalength = sizeof(data);
         uint8_t *res = asn_build_objid(data, &datalength, ASN_OBJECT_ID,
                                        t->objid, t->objid_length);
-        OKF(!!res == t->valid, ("[%d] asn_build_objid()", i));
+        OKF(!!res == t->valid, ("[%d] asn_build_objid() %s; OID %s", i,
+                                res ? "succeeded" : "failed",
+                                t->valid ? "valid" : "not valid"));
         if (res != NULL) {
             uint16_t encoded_length = sizeof(data) - datalength;
             OKF(t->encoded_length == encoded_length,
@@ -57,7 +62,9 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         int res = asn_realloc_rbuild_objid(&pkt, &pkt_len, &offset, TRUE,
                                            ASN_OBJECT_ID, t->objid,
                                            t->objid_length);
-        OKF(!!res == t->valid, ("[%d] asn_realloc_rbuild_objid()", i));
+        OKF(!!res == t->valid, ("[%d] asn_realloc_rbuild_objid() %s; OID %s",
+                                i, res ? "succeeded" : "failed",
+                                t->valid ? "valid" : "not valid"));
         if (res != 0) {
             OKF(t->encoded_length == offset,
                 ("[%d] encoded length %d <> %" NETSNMP_PRIz "d", i,
