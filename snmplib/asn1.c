@@ -1636,7 +1636,8 @@ asn_build_objid(u_char * data,
         /*
          * combine the first two values 
          */
-        if (objid[1] >= 40 && objid[0] < 2) {
+        if ((objid[1] >= 40 && objid[0] < 2) ||
+            objid[1] > UINT32_MAX - objid[0] * 40) {
             ERROR_MSG("build objid: bad second subidentifier");
             return NULL;
         }
@@ -3322,8 +3323,8 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
         /*
          * Combine the first two values.  
          */
-        if (objid[1] >= 40 && objid[0] < 2) {
-            ERROR_MSG("build objid: bad second subidentifier");
+        if ((objid[1] >= 40 && objid[0] < 2) ||
+            objid[1] > UINT32_MAX - objid[0] * 40) {
             return 0;
         }
         if (!store_uint32(pkt, pkt_len, offset, r, objid[0] * 40 + objid[1]))
