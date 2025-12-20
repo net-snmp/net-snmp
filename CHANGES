@@ -3,6 +3,48 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.9.5*:
+
+    snmptrapd:
+      - fixed a critical vulnerability triggered by a specially crafted trap
+
+    snmpd:
+      - Make UCD-SNMP::dskTable dynamic if includeAllDisks is set.") added
+	a verification that drops all filesystems not present in other_fs[]
+	table. So add 'ubifs' in other_fs[] to fix it.
+
+    configure:
+      - Change the default OpenSSL path into /usr Change the default
+	OpenSSL path from /usr/local/ssl into /usr since that is the
+	default location for all current Linux distributions.
+
+    unspecified:
+      - Remove redundant declarations These changes aim to remove redundant
+	declarations from the Net-SNMP source code. They are most easily
+	exposed with adding -Wredundant-decls to CPPFLAGS for the gcc
+	compiler. Redundant declarations in other used modules and mib2c
+	generated code are left in place. The changes consist of: - Removal
+	of duplicate declarations in header files, other or the same. -
+	Removal of duplicate declarations in source files, where the
+	prototype already exists in the appropriate header file. - Fixing
+	declaration of register log handler functions. - Use of forward
+	declared struct, rather than extern function or char. " prefix to
+	subject and ran autoreconf ]
+
+    Add:
+      - Wredundant-decls to the developer options
+
+    Remove:
+      - Wredundant-decls from the developer options   Revert commit
+	ad80e335b8af because this option causes a lot of noise for the Perl
+	header files.
+
+    Win32:
+      - WinExtDLL: Fix the build Fix the following build error:
+	mibgroup/winExtDLL.c:360:14: error: implicit declaration of
+	function 'should_init' [-Wimplicit-function-declaration] 360 |	   
+	   if (!should_init(dll_basename)) { |		    ^~~~~~~~~~~
+
 *5.9.4*:
 
     IMPORTANT: SNMP over TLS and/or DTLS are not functioning properly
