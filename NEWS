@@ -7,6 +7,9 @@ listing of all changes made to the code.
 
     Many changes beyond the small set listed below:
 
+    snmptrapd:
+      - fixed a critical vulnerability triggered by a specially crafted trap
+
     snmpd:
       - Invoke a callback upon authentication failure This allows detecting
         failed authentication attempts in a custom SNMP agent. [
