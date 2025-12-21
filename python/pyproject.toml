@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netsnmp-python"
+version = "1.0a1"
+description = "The Net-SNMP Python Interface"
+authors = [{name = "G. S. Marzot", email = "giovanni.marzot@sparta.com"}]
+urls = {Homepage = "http://www.net-snmp.org"}
+dependencies = []
+
+[tool.setuptools]
+packages = ["netsnmp"]
