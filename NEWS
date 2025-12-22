@@ -12,12 +12,10 @@ listing of all changes made to the code.
     snmplib:
       - Add support for IPV6_RECVPKTINFO 
       - Port the SSH domain transport to FreeBSD 
-      - Do not filter internal requests when source filtering is enabled 
       - Improve error handling in parse_enumlist and other parsing functions 
       - Filter out non-ASCII characters from output 
       - Fix multiple memory leaks in MIB parsing, OID handling, and transport filters 
-      - Fix multiple buffer overflows and out-of-bounds accesses (ASN_OCTET_STR, hex_to_binary, etc.) 
-      - Fix integer overflows in asn_parse_signed_int64 and other locations 
+      - Fix multiple buffer overflows triggered when creating ASN packets
       - Fix handling of large/negative values (integer underflows/overflows) 
       - Fix segmentation faults when `varbind` cannot be constructed or buf is null 
       - Fix crash in netsnmp_parse_args when passing invalid argument lists 
@@ -27,17 +25,14 @@ listing of all changes made to the code.
       - Make UCD-SNMP::dskTable dynamic if includeAllDisks is set.") added
 	a verification that drops all filesystems not present in other_fs[]
 	table. So add 'ubifs' in other_fs[] to fix it.
-      - Release memory back to the system (malloc_trim) after freeing cache data 
       - Fix SIGHUP handling for engineID changes and agent port changes 
-      - Fix nsLogMaxLevel handling to match MIB description 
       - Fix a use-after-free in unregister_mib_context() 
       - Fix regression of memory leak when using RPMDB macros 
       - Improve cache management: clear timer_id on stop, keep cache flags unchanged 
       - Always open libkvm in "safe mode" on FreeBSD 
-      - Fix crash when snmptrapd terminates the TCP connection 
+      - Fix crash when snmptrapd subagent terminates the TCP connection 
 
     apps:
-      - snmptrapd: Fix integer overflows and out-of-bounds trapOid access 
       - snmpusm: Improve error handling and fix memory leaks 
       - sshtosnmp: Avoid EINVAL when passing credentials over SSH unix domain socket 
       - snmptest: Plug a possible memory leak 
@@ -45,7 +40,6 @@ listing of all changes made to the code.
 
     MIBs:
       - EtherLike-MIB: Optimize Linux implementation to use netlink statistics 
-      - UCD-SNMP-MIB: Add 'ubifs' to other_fs 
       - IP-MIB: Add Linux 6.7 compatibility for parsing /proc/net/snmp 
       - LM-SENSORS-MIB: Support negative temperatures 
       - SNMP-TLS-TM-MIB: Update to RFC 9456 and allow TLS protocols higher than TLS1.0 
@@ -53,14 +47,10 @@ listing of all changes made to the code.
 
     building:
       - Add support for Windows on ARM 
-      - Add Android build target and switch to latest Android SDK 
       - Support OpenBSD 8, FreeBSD 15/16, and DragonflyBSD 
       - Fix build for OS/X versions prior to 10.6.0 
       - Windows: Bump OpenSSL version and fix library paths 
       - MinGW64: Switch from pkg-config to pkgconf 
-      - Add --with-wolfssl support for building with wolfSSL instead of OpenSSL 
-      - CI improvements: Add Appveyor support, shellcheck fixes, and upgrade actions 
-      - Add gitattributes file to enforce LF line endings
       - Add --with-wolfssl Add support for building and linking with the
 	wolfSSL library instead of OpenSSL. Other changes that have been
 	included in this patch are: - Only enable AES support if
