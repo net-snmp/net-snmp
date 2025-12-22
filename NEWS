@@ -5,24 +5,122 @@ listing of all changes made to the code.
 
 *5.10*:
 
-    Many changes beyond the small set listed below:
-
     snmptrapd:
       - fixed a critical vulnerability triggered by a specially crafted trap
 
+    snmplib:
+      - Reject invalid input in asn_realloc_rbuild_string to prevent
+        NULL dereference 
+      - Fix memory leaks in parse_enumlist, netsnmp_transport_filter_add,
+        and se_add_pair_to_list
+      - Optimize init_snmp_enum to be faster by calling calloc once 
+      - Do not truncate AGENT-CAPABILITIES descriptions 
+      - Use libssh2_session_handshake when available instead of deprecated
+        startup function 
+      - Rework se_add_pair_to_slist to insert into storage before adding to list 
+      - Check env_var before reading MIB 
+      - Fix parsing of OIDs 0.40.x and 1.40.x 
+      - Fix buffer overflow in ASN_OCTET_STR index allocation 
+      - Fix stack buffer overflow in se_read_conf and other buffer overflows 
+      - Fix out-of-bounds access in netsnmp_hex_to_binary and snmp_log_options 
+      - Fix NULL pointer dereferences in netsnmp_ds_handle_config and
+        netsnmp_ds_parse_boolean
+
     snmpd:
-      - Invoke a callback upon authentication failure This allows detecting
-        failed authentication attempts in a custom SNMP agent. [
-        bvanassche: edited commit message ]
+      - systemstats_linux: Improve support of "Ip:" fields list from 
+        kernel /proc/net/snmp 
+      - diskio: Use snprintf for device path generation on Linux  and add 
+        malloc checks for BSDs
+      - pingCtlTable: Unified handling of memory allocation errors and releases
+      - Revert exclusion of certain MIBs if Netlink library is not available 
+      - Fix segfaults when varbind cannot be constructed (null pointer) 
+      - Fix use-after-free in unregister_mib_context 
+      - Fix crash caused by buf being a null pointer in snmp_agent.c 
+      - Fix loadave.c out-of-bounds access 
+      - Fix possible unix socket path overflow with strncpy 
+      - Fix write_vacmAccessStatus use-after-free in mibII 
       - Security vulnerabilty in the ping MIB reported by Christopher Ertl
         from Microsoft fixed
 
-    configure:
+    apps:
+      - mib2c-update: Fix broken search path and allow specifying
+        generated file name 
+      - mib2c: Install correct filename for generic-get-in_addr_t
+      - snmpset/agentxtrap: Fix memory leaks 
+
+    perl:
+      - Do not send callbacks upon failures to avoid double-frees 
+      - Do not crash on resend callbacks 
+      - Revert "fix resource leaks" patch because it introduced crashes 
+      - Suppress warning message for Socket6 
+
+    building:
+      - Support FreeBSD 15 and 16 
+      - Support OpenBSD 8
+      - Add build support for Windows on ARM
+      - MinGW64: Switch from pkg-config to pkgconf 
+      - Remove NOAUTODEPS support from Makefile.in 
+      - Make --disable-des work
       - Add --with-wolfssl Add support for building and linking with the
         wolfSSL library instead of OpenSSL. Other changes that have been
         included in this patch are: - Only enable AES support if
         EVP_aes_128_cfb() is available. - Add support for detecting SSL
         functions if these have been defined as macros.
+
+
+*5.9.5*
+
+    snmptrapd:
+      - fixed a critical vulnerability (CVE-2025-68615) which can be triggered
+        by a specially crafted trap
+
+    snmplib:
+      - Add support for IPV6_RECVPKTINFO 
+      - Port the SSH domain transport to FreeBSD 
+      - Improve error handling in parse_enumlist and other parsing functions 
+      - Filter out non-ASCII characters from output 
+      - Fix multiple memory leaks in MIB parsing, OID handling, and transport filters 
+      - Fix multiple buffer overflows triggered when creating ASN packets
+      - Fix handling of large/negative values (integer underflows/overflows) 
+      - Fix segmentation faults when `varbind` cannot be constructed or buf is null 
+      - Fix crash in netsnmp_parse_args when passing invalid argument lists 
+      - Fix SNMPv3 multithreading support for snmp_sess_open() 
+
+    snmpd:
+      - Make UCD-SNMP::dskTable dynamic if includeAllDisks is set.") added
+	a verification that drops all filesystems not present in other_fs[]
+	table. So add 'ubifs' in other_fs[] to fix it.
+      - Fix SIGHUP handling for engineID changes and agent port changes 
+      - Fix a use-after-free in unregister_mib_context() 
+      - Fix regression of memory leak when using RPMDB macros 
+      - Improve cache management: clear timer_id on stop, keep cache flags unchanged 
+      - Always open libkvm in "safe mode" on FreeBSD 
+      - Fix crash when snmptrapd subagent terminates the TCP connection 
+
+    apps:
+      - snmpusm: Improve error handling and fix memory leaks 
+      - sshtosnmp: Avoid EINVAL when passing credentials over SSH unix domain socket 
+      - snmptest: Plug a possible memory leak 
+      - snmpget: Avoid leak if parsing OID fails 
+
+    MIBs:
+      - EtherLike-MIB: Optimize Linux implementation to use netlink statistics 
+      - IP-MIB: Add Linux 6.7 compatibility for parsing /proc/net/snmp 
+      - LM-SENSORS-MIB: Support negative temperatures 
+      - SNMP-TLS-TM-MIB: Update to RFC 9456 and allow TLS protocols higher than TLS1.0 
+      - HOST-RESOURCES-MIB: Add support for RPM SQLite DB background 
+
+    building:
+      - Add support for Windows on ARM 
+      - Support OpenBSD 8, FreeBSD 15/16, and DragonflyBSD 
+      - Fix build for OS/X versions prior to 10.6.0 
+      - Windows: Bump OpenSSL version and fix library paths 
+      - MinGW64: Switch from pkg-config to pkgconf 
+      - Add --with-wolfssl Add support for building and linking with the
+	wolfSSL library instead of OpenSSL. Other changes that have been
+	included in this patch are: - Only enable AES support if
+	EVP_aes_128_cfb() is available. - Add support for detecting SSL
+	functions if these have been defined as macros.
 
 *5.9.4*:
 
