@@ -67,7 +67,6 @@ listing of all changes made to the code.
         EVP_aes_128_cfb() is available. - Add support for detecting SSL
         functions if these have been defined as macros.
 
-
 *5.9.5*
 
     snmptrapd:
