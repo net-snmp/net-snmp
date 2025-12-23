@@ -27,6 +27,9 @@
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #include <net-snmp/config_api.h>
 #include <net-snmp/output_api.h>
