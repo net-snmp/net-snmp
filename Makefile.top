@@ -83,7 +83,7 @@ LINKCC	        = @LINKCC@
 #
 # Most recent change: 45 for the PR#586 - snmpv3 for multithread.
 LIBCURRENT  = 50
-LIBAGE      = 0
+LIBAGE      = 1
 LIBREVISION = 0
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link --tag=CC $(LINKCC) $(CFLAGS) $(LDFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) @LD_NO_UNDEFINED@ -o

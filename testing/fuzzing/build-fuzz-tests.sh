@@ -6,6 +6,7 @@ scriptdir=$(cd "$(dirname "$0")" && pwd)
 libs=$(sed -n 's/^NSC_LNETSNMPLIBS="\(.*\)"$/\1/p' ./net-snmp-config;
        sed -n "s/^PERLLDOPTS_FOR_LIBS='\(.*\)'/\1/p" ./config.log)
 for fuzzname in testing/fuzzing/*_fuzzer.c; do
+    {
     fuzzname=${fuzzname%_fuzzer.c}
     fuzzname=${fuzzname#testing/fuzzing/}
     echo "Compiling testing/fuzzing/${fuzzname}_fuzzer.c"
@@ -23,4 +24,6 @@ for fuzzname in testing/fuzzing/*_fuzzer.c; do
         agent/helpers/.libs/libnetsnmphelpers.a \
 	snmplib/.libs/libnetsnmp.a ${libs} \
         -o "$OUT/${fuzzname}_fuzzer"
+    } &
 done
+wait

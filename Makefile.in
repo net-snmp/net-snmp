@@ -244,7 +244,10 @@ pythonuninstall:
 	echo "WARNING: python doesn't support uninstall"
 
 pythontest:
-	@(dir=`pwd`; cd python; $(PYMAKE) test --basedir=$$dir) ; \
+	@(export LD_LIBRARY_PATH="$$PWD/snmplib/.libs:$$PWD/agent/.libs:$$PWD/agent/helpers/.libs:"; \
+	export MIBDIRS="$$PWD/mibs"; \
+	export PYTHONPATH=$$(echo "$$PWD"/python/build/lib.*); \
+	$(PYTHON) -m unittest python/netsnmp/tests/test.py)
 	if test $$? != 0 ; then \
 	   exit 1 ; \
 	fi

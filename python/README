@@ -70,7 +70,11 @@ Installation:
 
    cd net-snmp/python
    python setup.py build
-   python setup.py test (requires a locally running agent w/ config provided)
+   export LD_LIBRARY_PATH="$PWD/snmplib/.libs:$PWD/agent/.libs:$PWD/agent/helpers/.libs:"
+   export MIBDIRS="$PWD/mibs"
+   export PYTHONPATH="$(echo $PWD/build/lib.*)"
+   # Requires a locally running agent w/ config provided.
+   python -m unittest netsnmp/tests/test.py
    python setup.py install
 
 
