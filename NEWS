@@ -3,6 +3,12 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.9.5.2*
+
+    building:
+      - Fix an issue with needing limits.h included.
+      - update to autoconf 2.72
+
 *5.9.5.1*
 
 Only a version numbering fix.
