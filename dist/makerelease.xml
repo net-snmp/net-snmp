@@ -633,7 +633,7 @@
 	  </commands>
  -->
 	</step>
-	<step type="system" stepname="publish:editpatches"
+	<step type="informational" stepname="publish:editpatches"
 	      skipunless="'{RELEASETYPE}' eq 'full'"
 	      title="Update the SF Official Patch tracker">
 	  <text>
