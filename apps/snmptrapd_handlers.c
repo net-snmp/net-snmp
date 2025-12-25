@@ -1115,7 +1115,7 @@ snmp_input(int op, netsnmp_session *session,
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
                 trapOidLen = pdu->enterprise_length;
                 memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
-                if (trapOidLen >= 0 && trapOid[trapOidLen - 1] != 0) {
+                if (trapOidLen > 0 && trapOid[trapOidLen - 1] != 0) {
                     trapOid[trapOidLen++] = 0;
                 }
                 trapOid[trapOidLen++] = pdu->specific_type;
