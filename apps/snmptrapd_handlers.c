@@ -1,6 +1,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-features.h>
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -1120,6 +1123,11 @@ snmp_input(int op, netsnmp_session *session,
                 }
                 trapOid[trapOidLen++] = pdu->specific_type;
             } else {
+                /*
+                 * Prevent that pdu->trap_type + 1 triggers an integer overflow.
+                 */
+                if (pdu->trap_type == LONG_MAX - 1)
+                    return 1;
                 memcpy(trapOid, stdTrapOidRoot, sizeof(stdTrapOidRoot));
                 trapOidLen = OID_LENGTH(stdTrapOidRoot);  /* 9 */
                 trapOid[trapOidLen++] = pdu->trap_type+1;
