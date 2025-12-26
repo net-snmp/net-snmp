@@ -523,7 +523,7 @@ write_snmpNotifyRowStatus(int action,
     static struct snmpNotifyTable_data *StorageDel;
     size_t          newlen = name_len - snmpNotifyTable_offset;
     static int      old_value;
-    int             set_value = *((long *) var_val);
+    int             set_value = var_val ? *((long *) var_val) : RS_NONEXISTENT;
     static netsnmp_variable_list *vars, *vp;
 
     DEBUGMSGTL(("snmpNotifyTable",
@@ -645,7 +645,7 @@ write_snmpNotifyRowStatus(int action,
             if (StorageNew != NULL) {
                 snmpNotifyTable_add(StorageNew);
             }
-        } else if (set_value != RS_DESTROY) {
+        } else if (set_value != RS_DESTROY && set_value != RS_NONEXISTENT) {
             /*
              * set the flag? 
              */
@@ -653,7 +653,7 @@ write_snmpNotifyRowStatus(int action,
                 return SNMP_ERR_GENERR; /* should never ever get here */
             
             old_value = StorageTmp->snmpNotifyRowStatus;
-            StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
+            StorageTmp->snmpNotifyRowStatus = set_value;
         } else {
             /*
              * destroy...  extract it for now 

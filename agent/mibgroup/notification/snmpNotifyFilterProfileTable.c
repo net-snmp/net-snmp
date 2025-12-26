@@ -394,7 +394,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
     static struct snmpNotifyFilterProfileTable_data *StorageDel;
     size_t          newlen = name_len - table_offset;
     static int      old_value;
-    int             set_value = *((long *) var_val);
+    int             set_value = var_val ? *((long *) var_val) : RS_NONEXISTENT;
     netsnmp_variable_list *vars;
 
 
@@ -530,7 +530,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
             /*
              * XXX: ack, and if it is NULL? 
              */
-        } else if (set_value != RS_DESTROY) {
+        } else if (set_value != RS_DESTROY && set_value != RS_NONEXISTENT) {
             /*
              * set the flag? 
              */
@@ -538,8 +538,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                 return SNMP_ERR_GENERR; /* should never ever get here */
             
             old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
-            StorageTmp->snmpNotifyFilterProfileRowStatus =
-                *((long *) var_val);
+            StorageTmp->snmpNotifyFilterProfileRowStatus = set_value;
         } else {
             /*
              * destroy...  extract it for now 
