@@ -392,6 +392,8 @@ case "$(uname):${MODE}" in
     esac
 
 case "$MODE" in
+    developer)
+	options+=(--enable-developer);;
     disable-ipv6)
 	;;
     disable-set)
