@@ -1,6 +1,4 @@
 image:
-  - Ubuntu
-  - Ubuntu1604
   - Ubuntu2004
   - macos-monterey
   - Visual Studio 2022
@@ -15,26 +13,6 @@ environment:
 
 matrix:
   exclude:
-    - image: Ubuntu
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu
-      BUILD: INSTALLER
-    - image: Ubuntu
-      BUILD: MinGW32
-    - image: Ubuntu
-      BUILD: MSYS2
-    - image: Ubuntu
-      BUILD: MinGW64
-    - image: Ubuntu1604
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu1604
-      BUILD: INSTALLER
-    - image: Ubuntu1604
-      BUILD: MinGW32
-    - image: Ubuntu1604
-      BUILD: MSYS2
-    - image: Ubuntu1604
-      BUILD: MinGW64
     - image: Ubuntu2004
       BUILD: MSVCSTATIC64
     - image: Ubuntu2004
