@@ -18175,46 +18175,6 @@ CFLAGS=$lt_save_CFLAGS
 #   Build environment:
 ##
 
-for opt in -Werror=declaration-after-statement
-do
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
-printf %s "checking whether the compiler supports $opt... " >&6; }
-    netsnmp_save_CFLAGS="$CFLAGS"
-    if test x$opt != x-Wstrict-prototypes; then
-      CFLAGS="-Werror $opt $CFLAGS"
-    else
-      CFLAGS="$opt $CFLAGS"
-    fi
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-      CFLAGS="$opt $netsnmp_save_CFLAGS"
-
-else case e in #(
-  e)
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-      CFLAGS="$netsnmp_save_CFLAGS"
-     ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-done
-
 #   developer build
 #       (enabled by default when building from SVN checkout)
 #
@@ -18222,8 +18182,8 @@ if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
     developer="yes"
 fi
 if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for developer gcc flags" >&5
-printf %s "checking for developer gcc flags... " >&6; }
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Checking for developer compiler flags" >&5
+printf "%s\n" "$as_me: Checking for developer compiler flags" >&6;}
     #       WWWXXX - strict type checking
     #
     netsnmp_save_CFLAGS="$CFLAGS"
@@ -18270,6 +18230,47 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
     done
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $DEVFLAGS" >&5
 printf "%s\n" "$DEVFLAGS" >&6; }
+
+    for opt in -Werror=declaration-after-statement
+    do
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the compiler supports $opt" >&5
+printf %s "checking whether the compiler supports $opt... " >&6; }
+        netsnmp_save_CFLAGS="$CFLAGS"
+        if test x$opt != x-Wstrict-prototypes; then
+          CFLAGS="-Werror $opt $CFLAGS"
+        else
+          CFLAGS="$opt $CFLAGS"
+        fi
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+
+          { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+          CFLAGS="$opt $netsnmp_save_CFLAGS"
+
+else case e in #(
+  e)
+          { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+          CFLAGS="$netsnmp_save_CFLAGS"
+         ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+    done
+
 else
     DEVFLAGS=""
 fi
