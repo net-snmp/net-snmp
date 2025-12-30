@@ -5347,6 +5347,14 @@ snmp_async_send(netsnmp_session * session,
     return snmp_sess_async_send(sessp, pdu, callback, cb_data);
 }
 
+int
+snmp_async_send_cp(netsnmp_session * session, netsnmp_pdu *pdu,
+                   snmp_callback callback, void *cb_data, int cp_inc)
+{
+    void           *sessp = snmp_sess_pointer(session);
+    return snmp_sess_async_send_cp(sessp, pdu, callback, cb_data, cp_inc);
+}
+
 /**
  * Send a PDU asynchronously.
  *
@@ -5363,7 +5371,8 @@ snmp_async_send(netsnmp_session * session,
  */
 static int
 _sess_async_send(struct session_list *slp,
-                 netsnmp_pdu *pdu, snmp_callback callback, void *cb_data)
+                 netsnmp_pdu *pdu, snmp_callback callback, void *cb_data,
+                 int cp_inc)
 {
     netsnmp_session *session;
     struct snmp_internal_session *isp;
@@ -5478,6 +5487,10 @@ _sess_async_send(struct session_list *slp,
         rp->request_id = pdu->reqid;
         rp->message_id = pdu->msgid;
         rp->callback = callback;
+        if (cp_inc) {
+            netsnmp_refcnt_void *aux_cb_data = (netsnmp_refcnt_void*) cb_data;
+            aux_cb_data->refcnt++;
+	}
         rp->cb_data = cb_data;
         rp->retries = 0;
         if (pdu->flags & UCD_MSG_FLAG_PDU_TIMEOUT) {
@@ -5539,6 +5552,15 @@ snmp_sess_async_send(struct session_list *slp,
                      netsnmp_pdu *pdu,
                      snmp_callback callback, void *cb_data)
 {
+
+    return snmp_sess_async_send_cp(slp, pdu, callback, cb_data, 0);
+}
+
+int
+snmp_sess_async_send_cp(struct session_list *slp, netsnmp_pdu *pdu,
+                        snmp_callback callback, void *cb_data,
+                        int cp_inc)
+{
     int             rc;
 
     if (slp == NULL) {
@@ -5548,7 +5570,8 @@ snmp_sess_async_send(struct session_list *slp,
     /*
      * send pdu
      */
-    rc = _sess_async_send(slp, pdu, callback, cb_data);
+
+    rc = _sess_async_send(slp, pdu, callback, cb_data, cp_inc);
     if (rc == 0)
         SET_SNMP_ERROR(slp->session->s_snmp_errno);
     return rc;
