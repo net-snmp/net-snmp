@@ -27,6 +27,22 @@ check_build_dir()
       fi
 }
 
+filter_cflags()
+{
+    read -r all_cflags
+    for cflag in ${all_cflags}; do
+	case "$cflag" in
+	    -fsanitize*)
+		echo -n "$cflag ";;
+	    -f*|-g*|-O*|-pipe|-W*|-I.)
+	        ;;
+	    *)
+		echo -n "$cflag ";;
+	esac
+    done
+    echo
+}
+
 # usage: index n arguments
 # effect: returns the (n+1)th argument
 index()
@@ -143,10 +159,11 @@ else
       ;;
     #################################################### compile
     --base-cflags)
-      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
+      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR} | filter_cflags
       ;;
     --cflags|--cf*)
-      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR}
+      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR} |
+	filter_cflags
       ;;
     --srcdir)
       echo $NSC_SRCDIR
@@ -188,7 +205,7 @@ else
       echo $result
       ;;
     --build-command)
-      echo "@CC@ @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@"
+      echo "@CC@ @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@" | filter_cflags
       ;;
     #################################################### client lib
     --libs)
