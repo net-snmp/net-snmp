@@ -112,7 +112,7 @@ else
       fi
       ;;
     --indent-options|--in*)
-      echo "indent -orig -nbc -bap -nut -nfca `(cd $NSC_INCDIR/net-snmp; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
+      echo "indent -orig -nbc -bap -nut -nfca `(if [ -e $NSC_INCDIR ]; then cd $NSC_INCDIR/net-snmp; else cd include/net-snmp; fi && perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' ./*/*.h)`"
       ;;
     --configure-options|--con*)
       echo @CONFIGURE_OPTIONS@
