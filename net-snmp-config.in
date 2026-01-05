@@ -235,7 +235,7 @@ else
     --create-snmpv3-user)
       done=1
       shift
-      net-snmp-create-v3-user $*
+      net-snmp-create-v3-user "$@"
       exit $?
       ;;
 
