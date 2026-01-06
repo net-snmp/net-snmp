@@ -31,10 +31,12 @@ my $v6 = defined($ARGV[0]) && $ARGV[0] eq "ipv6";
 my ($af, $dest, $noaddr);
 if ($v6) {
     $af = AF_INET6;
+    # dns.google
     $dest = '2001:4860:4860::8888';
     $noaddr = '::';
 } else {
     $af = AF_INET;
+    # dns.google
     $dest = '8.8.8.8';
     $noaddr = '0.0.0.0';
 }
