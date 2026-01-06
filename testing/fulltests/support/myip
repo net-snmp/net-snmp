@@ -31,10 +31,12 @@ my $v6 = defined($ARGV[0]) && $ARGV[0] eq "ipv6";
 my ($af, $dest, $noaddr);
 if ($v6) {
     $af = AF_INET6;
+    # dns.google
     $dest = '2001:4860:4860::8888';
     $noaddr = '::';
- } else {
+} else {
     $af = AF_INET;
+    # dns.google
     $dest = '8.8.8.8';
     $noaddr = '0.0.0.0';
 }
@@ -43,15 +45,8 @@ my $myip;
 if ($v6) {
     connect($sock, pack_sockaddr_in6(53, inet_pton($af, $dest)));
     my ($port, $ip6_address) = sockaddr_in6(getsockname($sock));
-    socket(my $sock2, $af, SOCK_DGRAM, 0);
-    my $i = 1;
-    while (1) {
-	bind($sock2, sockaddr_in6($i, $ip6_address)) && last;
-	$i++;
-    }
     $myip = inet_ntop($af, $ip6_address);
     exit 1 if $myip eq $noaddr;
-    $myip = $myip . '%' . $i;
 } else {
     connect($sock, pack_sockaddr_in(53, inet_pton($af, $dest)));
     my ($port, $myaddr) = sockaddr_in(getsockname($sock));

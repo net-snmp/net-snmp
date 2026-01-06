@@ -427,6 +427,7 @@ sub call_build_script {
     while (<B>) {
 	$lastline = $_;
     }
+    close(B);
     chomp($lastline);
 
     DEBUG("  result: $lastline\n");

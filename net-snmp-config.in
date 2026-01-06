@@ -112,7 +112,7 @@ else
       fi
       ;;
     --indent-options|--in*)
-      echo "indent -orig -nbc -bap -nut -nfca `(cd $NSC_INCDIR/net-snmp; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
+      echo "indent -orig -nbc -bap -nut -nfca `(if [ -e $NSC_INCDIR ]; then cd $NSC_INCDIR/net-snmp; else cd include/net-snmp; fi && perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' ./*/*.h)`"
       ;;
     --configure-options|--con*)
       echo @CONFIGURE_OPTIONS@
@@ -235,7 +235,7 @@ else
     --create-snmpv3-user)
       done=1
       shift
-      net-snmp-create-v3-user $*
+      net-snmp-create-v3-user "$@"
       exit $?
       ;;
 
@@ -662,7 +662,7 @@ EOF
       fi
       cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
-      echo `$cmd`
+      $cmd
       result=$?
       if test "x$norm" != "x1" ; then
         echo "removing the temporary code file: $tmpfile"
