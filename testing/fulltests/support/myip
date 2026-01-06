@@ -33,7 +33,7 @@ if ($v6) {
     $af = AF_INET6;
     $dest = '2001:4860:4860::8888';
     $noaddr = '::';
- } else {
+} else {
     $af = AF_INET;
     $dest = '8.8.8.8';
     $noaddr = '0.0.0.0';
