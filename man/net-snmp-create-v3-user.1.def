@@ -15,6 +15,11 @@ new user in the net-snmp configuration file (/var/net-snmp/snmpd.conf by default
 \fB\-\-version\fR
 displays the net-snmp version number
 .TP
+\fB\-f\fR
+create a user without checking for running snmpd daemons
+
+if snmpd is still running with \fB\-f\fR set, user creation will fail silently
+.TP
 \fB\-ro\fR
 create a user with read-only permissions
 .TP
