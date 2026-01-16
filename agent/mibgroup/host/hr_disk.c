@@ -161,8 +161,6 @@ parse_disk_config(const char *token, char *cptr)
                 config_perror("Out of memory");
                 SNMP_FREE(d_new);
                 SNMP_FREE(di_curr);
-                SNMP_FREE(d_set);
-                SNMP_FREE(d_str);
                 return;
             }
             name++;
@@ -189,7 +187,6 @@ parse_disk_config(const char *token, char *cptr)
                 SNMP_FREE(d_new);
                 SNMP_FREE(di_curr);
                 SNMP_FREE(d_set);
-                SNMP_FREE(d_str);
                 return;
             }
             if (neg) {
@@ -207,7 +204,6 @@ parse_disk_config(const char *token, char *cptr)
             d_str = strdup(name);
             if (!d_str) {
                 SNMP_FREE(d_new);
-                SNMP_FREE(d_str);
                 SNMP_FREE(di_curr);
                 SNMP_FREE(d_set);
                 config_perror("Out of memory");
@@ -225,7 +221,6 @@ parse_disk_config(const char *token, char *cptr)
         di_curr->item_next =
             (conf_disk_item *) malloc(sizeof(conf_disk_item));
         if (!di_curr->item_next) {
-            SNMP_FREE(di_curr->item_next);
             SNMP_FREE(d_new);
             SNMP_FREE(di_curr);
             SNMP_FREE(d_set);
