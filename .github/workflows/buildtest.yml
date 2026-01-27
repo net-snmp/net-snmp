@@ -6,12 +6,32 @@ on: [push, pull_request]
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        mode: [regular, developer, disable-ipv6, disable-set, mini, read-only, without-nl, wolfssl, Android]
+        include:
+          - os: ubuntu-latest
+            mode: regular
+          - os: ubuntu-latest
+            mode: developer
+          - os: ubuntu-latest
+            mode: disable-ipv6
+          - os: ubuntu-latest
+            mode: disable-set
+          - os: ubuntu-latest
+            mode: mini
+          - os: ubuntu-latest
+            mode: read-only
+          - os: ubuntu-latest
+            mode: without-nl
+          - os: ubuntu-latest
+            mode: wolfssl
+          - os: ubuntu-latest
+            mode: Android
+          - os: macos-latest
+            mode: regular
 
     env:
       MODE: ${{ matrix.mode }}
