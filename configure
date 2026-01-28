@@ -37512,50 +37512,6 @@ printf "%s\n" "#define HAVE_IP_PKTINFO 1" >>confdefs.h
 
 fi
 
-#   Check whether IPV6_RECVPKTINFO is usable.
-#
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for IPV6_RECVPKTINFO " >&5
-printf %s "checking for IPV6_RECVPKTINFO ... " >&6; }
-if test ${ac_cv_have_ipv6_recvpktinfo+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <netinet/in.h>
-
-int
-main (void)
-{
-
-return IPV6_RECVPKTINFO
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_have_ipv6_recvpktinfo=yes
-else case e in #(
-  e) ac_cv_have_ipv6_recvpktinfo=no
- ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_have_ipv6_recvpktinfo" >&5
-printf "%s\n" "$ac_cv_have_ipv6_recvpktinfo" >&6; }
-if test x$ac_cv_have_ipv6_recvpktinfo = xyes; then
-
-printf "%s\n" "#define HAVE_IPV6_RECVPKTINFO 1" >>confdefs.h
-
-fi
-
 #   Check whether IP_RECVDSTADDR is usable.
 #
 
