@@ -259,6 +259,12 @@ var_diskio(struct variable * vp,
 	case DISKIO_WRITES:
 	    long_ret = (signed long) drivestat[indx].stats[kIDXNumWrites];
 	    return (u_char *) & long_ret;
+	case DISKIO_LA1:
+	case DISKIO_LA5:
+	case DISKIO_LA15:
+	    /* Hardening: Darwin doesn't provide disk load averages here yet. */
+	    long_ret = 0;
+	    return (u_char *) & long_ret;
 	case DISKIO_NREADX:
 	    *var_len = 8;
 	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesReadXlo];
@@ -268,6 +274,12 @@ var_diskio(struct variable * vp,
 	    *var_len = 8;
 	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesWrittenXlo];
 	    c64_ret.high = (signed long) drivestat[indx].stats[kIDXBytesWrittenXhi];
+	    return (u_char *) & c64_ret;
+	case DISKIO_BUSYTIME:
+	    /* Hardening: return zero until native Darwin busy-time is wired up. */
+	    *var_len = sizeof(struct counter64);
+	    c64_ret.low = 0;
+	    c64_ret.high = 0;
 	    return (u_char *) & c64_ret;
 	default:
 	    ERROR_MSG("diskio.c: don't know how to handle this request.");
