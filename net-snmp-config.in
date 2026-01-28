@@ -33,14 +33,14 @@ filter_cflags()
     for cflag in ${all_cflags}; do
 	case "$cflag" in
 	    -fsanitize*)
-		echo -n "$cflag ";;
+		printf '%s ' "$cflag";;
 	    -f*|-g*|-O*|-pipe|-W*|-I.)
 	        ;;
 	    *)
-		echo -n "$cflag ";;
+		printf '%s ' "$cflag";;
 	esac
     done
-    echo
+    printf '\n'
 }
 
 # usage: index n arguments
