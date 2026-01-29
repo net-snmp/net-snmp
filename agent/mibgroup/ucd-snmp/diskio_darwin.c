@@ -266,12 +266,12 @@ var_diskio(struct variable * vp,
 	    long_ret = 0;
 	    return (u_char *) & long_ret;
 	case DISKIO_NREADX:
-	    *var_len = 8;
+	    *var_len = sizeof(struct counter64);
 	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesReadXlo];
 	    c64_ret.high = (signed long) drivestat[indx].stats[kIDXBytesReadXhi];
 	    return (u_char *) & c64_ret;
 	case DISKIO_NWRITTENX:
-	    *var_len = 8;
+	    *var_len = sizeof(struct counter64);
 	    c64_ret.low = (signed long) drivestat[indx].stats[kIDXBytesWrittenXlo];
 	    c64_ret.high = (signed long) drivestat[indx].stats[kIDXBytesWrittenXhi];
 	    return (u_char *) & c64_ret;
