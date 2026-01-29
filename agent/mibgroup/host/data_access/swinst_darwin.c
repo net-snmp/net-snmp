@@ -361,6 +361,8 @@ _check_classic_app(CFURLRef currentURL, CFStringRef *prodName,
      */
     FSRef theFSRef;
     int theResFile;
+    VersRecHndl versHandle;
+    StringPtr longVersionPtr;
 
     if ((NULL == prodName) || (NULL == version))
        return -1;
@@ -377,12 +379,12 @@ _check_classic_app(CFURLRef currentURL, CFStringRef *prodName,
         SNMP_CFRelease(*prodName);
         return -1;
     }
-    VersRecHndl versHandle = (VersRecHndl)Get1IndResource('vers', 1);
+    versHandle = (VersRecHndl)Get1IndResource('vers', 1);
     if (versHandle != NULL) {
         *version = CFStringCreateWithPascalString(kCFAllocatorDefault,
                        (**versHandle).shortVersion, kCFStringEncodingMacRoman);
         if (*version == NULL) {
-            StringPtr longVersionPtr = (**versHandle).shortVersion;
+            longVersionPtr = (**versHandle).shortVersion;
             longVersionPtr = (StringPtr)(((Ptr) longVersionPtr) +
                               1 + ((unsigned char) *longVersionPtr));
             *version = CFStringCreateWithPascalString(kCFAllocatorDefault,

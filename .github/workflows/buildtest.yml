@@ -27,3 +27,22 @@ jobs:
 
     - name: test
       run: ci/test.sh
+
+  build_and_test_macos:
+    name: build_and_test (macos)
+    runs-on: macos-latest
+
+    env:
+      MODE: regular
+
+    steps:
+    - uses: actions/checkout@main
+
+    - name: install required packages
+      run: sudo bash -c "MODE=$MODE ci/install.sh"
+
+    - name: build
+      run: ci/build.sh
+
+    - name: test
+      run: ci/test.sh
