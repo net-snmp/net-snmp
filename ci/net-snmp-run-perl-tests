@@ -1,10 +1,11 @@
 #!/bin/sh
 
 lib_dirs() {
-    find . \( -name '*.dylib' -o -name '*.so' \) \
-        | grep -v NetSNMP/agent/default_store \
-        | sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' \
-        | sort -u | tr '\n' :
+    find . \( -name '*.dylib' -o -name '*.so' \) |
+	grep -v NetSNMP/agent/default_store |
+	sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' |
+	sort -u |
+	tr '\n' :
 }
 
 case "$(uname)" in
