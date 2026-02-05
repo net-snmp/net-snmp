@@ -640,6 +640,11 @@ netsnmp_parse_args(int argc,
         goto out;
     }
     session->peername = strdup(argv[optind++]); /* hostname */
+    if (session->peername == NULL) {
+        fprintf(stderr, "strdup hostname failed - out of memory.\n");
+        ret = NETSNMP_PARSE_ARGS_ERROR;
+        goto out;
+    }
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     /*
