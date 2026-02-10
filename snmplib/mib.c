@@ -512,8 +512,36 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     term = *hint++;
                 else
                     term = 0;
-                if (width == 0)  /* Handle malformed hint strings */
-                    width = 1;
+            }
+
+            /*
+             * Handle zero-width display hint specs (RFC 2579 Section 3.1).
+             * Zero-width specs emit literal characters (separator/terminator)
+             * without consuming any data bytes.
+             */
+            if (width == 0) {
+                char literal[2] = {0, 0};
+                int is_last_spec = (*hint == '\0');
+                while (repeat > 0 && separ) {
+                    repeat--;
+                    /* RFC 2579: suppress trailing separator */
+                    if (is_last_spec && repeat == 0)
+                        break;
+                    literal[0] = separ;
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      literal))
+                        return 0;
+                }
+                /* RFC 2579: suppress trailing terminator */
+                if (term && !is_last_spec) {
+                    literal[0] = term;
+                    if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
+                                      literal))
+                        return 0;
+                }
+                if (is_last_spec)
+                    break;  /* Hint exhausted, cannot consume more data */
+                continue;
             }
 
             while (repeat && cp < ecp) {
