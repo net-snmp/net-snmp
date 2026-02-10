@@ -998,8 +998,9 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
         int max_capability = 0;
         /* Scan for the highest negotiated capability, highest priority
            (100baseTx-FDX) to lowest (10baseT-HDX). */
-        int media_priority[] = {8, 9, 7, 6, 5}; 	/* media_names[i-5] */
-        for (i = 0; media_priority[i]; i++){
+        int media_priority[] = {8, 9, 7, 6, 5};
+        int num_priorities = sizeof(media_priority) / sizeof(media_priority[0]);
+        for (i = 0; i < num_priorities; i++)
             if (negotiated & (1 << media_priority[i])) {
                 max_capability = media_priority[i];
                 break;
