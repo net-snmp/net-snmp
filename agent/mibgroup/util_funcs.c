@@ -271,7 +271,7 @@ get_exec_output(struct extensible *ex)
 
     DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
 
-    sprintf(cachefile, "%s/%s", get_persistent_directory(), NETSNMP_CACHEFILE);
+    snprintf(cachefile, sizeof cachefile, "%s/%s", get_persistent_directory(), NETSNMP_CACHEFILE);
 #ifdef NETSNMP_EXCACHETIME
     curtime = time(NULL);
     if (curtime > (cachetime + NETSNMP_EXCACHETIME) ||
