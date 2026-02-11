@@ -285,6 +285,24 @@ filebase=`echo $filebase | $SED 's/elf//'`
 filebase=`echo $filebase | $SED 's/aout//'`
 filebase=`echo $filebase | $SED 's/ecoff//'`
 filebase=`echo $filebase | $SED 's/coff//'`
+
+# FreeBSD: when the detected FreeBSD major version is newer than the newest
+# versioned system header, fall back to the newest versioned system header.
+case "${filebase}" in
+    freebsd[0-9]*)
+        fbver=`echo "$filebase" | $SED 's/^freebsd\([0-9][0-9]*\).*$/\1/'`
+        case "$fbver" in
+            ''|*[!0-9]*) ;;
+            *)
+                if test "${fbver}" -ge 17 \
+                   && test ! -f "${srcdir}/include/net-snmp/system/${filebase}.h"; then
+                    filebase=freebsd16
+                fi
+                ;;
+        esac
+        ;;
+esac
+
 while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/system/$filebase.h
 do
     last=$filebase
