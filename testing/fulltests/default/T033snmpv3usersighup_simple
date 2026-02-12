@@ -1,0 +1,75 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER SNMPv3 user add/delete with SIGHUP
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIFNOT USING_SNMPV3_USMUSER_MODULE
+SKIPIFNOT NETSNMP_CAN_DO_CRYPTO
+SKIPIFNOT NETSNMP_ENABLE_SCAPI_AUTHPRIV
+
+#
+# Begin test
+#
+
+# standard SNMPv3 USM agent configuration
+DEFSECURITYLEVEL=authPriv
+. ./Sv3usmconfigagent
+
+USER1=user1
+USER1_AUTHPASS=user1_authpass
+USER1_PRIVPASS=user1_privpass
+
+USER2=user2
+USER2_AUTHPASS=user2_authpass
+USER2_PRIVPASS=user2_privpass
+
+#The "exactEngineID"
+AGENT_ENGINEID=0x8000b85c03049081004b00
+
+#Add user in snmpd.conf and start the agent
+CONFIGAGENT exactEngineID $AGENT_ENGINEID
+CONFIGAGENT createUser $USER1 $DEFAUTHTYPE $USER1_AUTHPASS $DEFPRIVTYPE $USER1_PRIVPASS
+CONFIGAGENT rouser $USER1 priv
+
+# Start the agent
+STARTAGENT
+
+#Perform snmpget with user1
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $USER1 -l ap -a $DEFAUTHTYPE \
+-A $USER1_AUTHPASS -x $DEFPRIVTYPE -X $USER1_PRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.1.0 = Hex-STRING: 80 00 B8 5C 03 04 90 81 00 4B 00"
+
+#Delete user1 configuration from snpmd.conf
+> $SNMP_CONFIG_FILE
+
+#Add user2 configuration in snmpd.conf
+CONFIGAGENT exactEngineID $AGENT_ENGINEID
+CONFIGAGENT createUser $USER2 $DEFAUTHTYPE $USER2_AUTHPASS $DEFPRIVTYPE $USER2_PRIVPASS
+CONFIGAGENT rouser $USER2 priv
+
+#Send SIGHUP and check snmpget with user1 as well as user2
+if ISDEFINED HAVE_SIGHUP; then
+HUPAGENT
+DELAY
+
+#Perform snmpget with user1 and validate the response, operation should fail as user1 is deleted from snmpd.conf
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $USER1 -l ap -a $DEFAUTHTYPE \
+-A $USER1_AUTHPASS -x $DEFPRIVTYPE -X $USER1_PRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE "Reason: authorizationError (access denied to that object)"
+
+#Perform snmpget with user2 and validate the response, operation should succeed as user2 is added in snmpd.conf
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $USER2 -l ap -a $DEFAUTHTYPE \
+-A $USER2_AUTHPASS -x $DEFPRIVTYPE -X $USER2_PRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.2.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.2.0 = INTEGER: 1"
+
+fi
+
+## stop agent and finish
+STOPAGENT
+FINISHED

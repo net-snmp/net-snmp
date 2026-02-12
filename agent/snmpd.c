@@ -306,14 +306,7 @@ RETSIGTYPE
 SnmpdShutDown(int a)
 {
     netsnmp_running = 0;
-#ifdef WIN32SERVICE
-    /*
-     * In case of windows, select() in receive() function will not return 
-     * on signal. Thats why following function is called, which closes the 
-     * socket descriptors and causes the select() to return
-     */
     snmp_close(main_session);
-#endif
 }
 
 #ifdef SIGHUP
