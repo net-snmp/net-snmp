@@ -16,7 +16,7 @@ $auth_pass $priv_pass $bad_comm $bad_name $bad_oid $bad_port $bad_host
 $bad_auth_pass $bad_priv_pass $bad_sec_name $bad_version);
 
 # common parameters used in SNMP::Session creation and tests
-$agent_host = 'localhost' if (!defined($agent_host));
+$agent_host = '127.0.0.1' if (!defined($agent_host));
 $agent_port = 8765 if (!defined($agent_port));
 our $trap_port = 8764;
 $mibdir = '/usr/local/share/snmp/mibs' if (!defined($mibdir));

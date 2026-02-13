@@ -1,13 +1,10 @@
 image:
-  - Ubuntu
-  - Ubuntu1604
   - Ubuntu2004
   - Ubuntu2204
   - macos-monterey
   - Visual Studio 2022
 
 environment:
-  CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
   matrix:
     - BUILD: MSVCDYNAMIC64
     - BUILD: MSVCSTATIC64
@@ -17,35 +14,25 @@ environment:
 
 matrix:
   exclude:
-    - image: Ubuntu
+    - image: Ubuntu2004
       BUILD: MSVCSTATIC64
-    - image: Ubuntu
+    - image: Ubuntu2004
       BUILD: INSTALLER
-    - image: Ubuntu
+    - image: Ubuntu2004
       BUILD: MinGW32
-    - image: Ubuntu
+    - image: Ubuntu2004
       BUILD: MSYS2
-    - image: Ubuntu
+    - image: Ubuntu2004
       BUILD: MinGW64
-    - image: Ubuntu1604
+    - image: Ubuntu2204
       BUILD: MSVCSTATIC64
-    - image: Ubuntu1604
+    - image: Ubuntu2204
       BUILD: INSTALLER
-    - image: Ubuntu1604
+    - image: Ubuntu2204
       BUILD: MinGW32
-    - image: Ubuntu1604
+    - image: Ubuntu2204
       BUILD: MSYS2
-    - image: Ubuntu1604
-      BUILD: MinGW64
-    - image: Ubuntu2004
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu2004
-      BUILD: INSTALLER
-    - image: Ubuntu2004
-      BUILD: MinGW32
-    - image: Ubuntu2004
-      BUILD: MSYS2
-    - image: Ubuntu2004
+    - image: Ubuntu2204
       BUILD: MinGW64
     - image: Ubuntu2204
       BUILD: MSVCSTATIC64

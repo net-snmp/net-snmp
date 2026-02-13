@@ -165,6 +165,7 @@ main(int argc, char **argv)
         failcount += test_etime();
     }
 
+    snmp_shutdown("testing");
 
     fprintf(stdout, "1..%d\n", testcount);
     return 0;

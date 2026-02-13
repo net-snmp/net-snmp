@@ -1470,16 +1470,16 @@ init_master_agent(void)
 
     if (cptr) {
         buf = strdup(cptr);
-        if (!buf) {
-            snmp_log(LOG_ERR,
-                     "Error processing transport \"%s\"\n", cptr);
-            return 1;
-        }
     } else {
         /*
          * No, so just specify the default port.  
          */
         buf = strdup("");
+    }
+    if (!buf) {
+        snmp_log(LOG_ERR,
+                    "Error processing transport \"%s\"\n", cptr ? cptr : "default");
+        return 1;
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
@@ -3663,6 +3663,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
 check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
 {
@@ -3682,6 +3683,7 @@ check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 int
 handle_pdu(netsnmp_agent_session *asp)

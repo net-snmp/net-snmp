@@ -416,7 +416,8 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     ourEngineID_len =
         snmpv3_get_engineID((u_char*) ourEngineID, ourEngineID_len);
     netsnmp_assert_or_return(ourEngineID_len != 0 &&
-                             ourEngineID_len <= *parms->secEngineIDLen,
+                             ourEngineID_len <= *parms->secEngineIDLen &&
+                             *parms->secEngineIDLen <= sizeof(ourEngineID),
                              SNMPERR_GENERR);
     memcpy(parms->secEngineID, ourEngineID, *parms->secEngineIDLen);
 

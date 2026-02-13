@@ -189,8 +189,13 @@ netsnmp_handler_registration_create(const char *name,
 
     the_reg->handler = handler;
     the_reg->priority = DEFAULT_MIB_PRIORITY;
-    if (name)
+    if (name) {
         the_reg->handlerName = strdup(name);
+        if (NULL == the_reg->handlerName) {
+            SNMP_FREE(the_reg);
+            return NULL;
+        }
+    }
     the_reg->rootoid = snmp_duplicate_objid(reg_oid, reg_oid_len);
     the_reg->rootoid_len = reg_oid_len;
     return the_reg;

@@ -1,7 +1,23 @@
 #!/bin/sh
 
-LD_LIBRARY_PATH="$(find . -name '*.so' | grep -v NetSNMP/agent/default_store | sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' | sort -u | tr '\n' :)" &&
-export LD_LIBRARY_PATH &&
+lib_dirs() {
+    find . \( -name '*.dylib' -o -name '*.so' \) |
+	grep -v NetSNMP/agent/default_store |
+	sed 's,^\./,'"$PWD/"',;s,/[^/]*$,,' |
+	sort -u |
+	tr '\n' :
+}
+
+case "$(uname)" in
+    Darwin)
+        DYLD_LIBRARY_PATH="$(lib_dirs)"
+        export DYLD_LIBRARY_PATH
+        ;;
+    *)
+        LD_LIBRARY_PATH="$(lib_dirs)"
+        export LD_LIBRARY_PATH
+        ;;
+esac
 make perlmakefiles &&
 cd perl &&
 make &&

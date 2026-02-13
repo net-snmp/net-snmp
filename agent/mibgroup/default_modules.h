@@ -23,7 +23,9 @@ config_require(mibII/vacm_conf);
 
 #else /* !NETSNMP_MINI_AGENT == the full shabang */
 
+#if !defined(__linux__) || defined(HAVE_NETLINK_ROUTE_ADDR_H)
 config_require(mibII);
+#endif
 config_require(ucd_snmp);
 config_require(notification);
 config_require(notification-log-mib);

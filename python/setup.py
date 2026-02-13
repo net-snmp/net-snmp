@@ -41,15 +41,6 @@ else:
     libs = re.findall(r"(?:^|\s+)-l(\S+)", netsnmp_libs)
 
 setup(
-    name="netsnmp-python", version="1.0a1",
-    description = 'The Net-SNMP Python Interface',
-    author = 'G. S. Marzot',
-    author_email = 'giovanni.marzot@sparta.com',
-    url = 'http://www.net-snmp.org',
-    license="BSD",
-    packages=find_packages(),
-    test_suite = "netsnmp.tests.test",
-
     ext_modules = [
        Extension("netsnmp.client_intf", ["netsnmp/client_intf.c"],
                  define_macros=defines,

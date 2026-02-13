@@ -427,6 +427,7 @@ main(int argc, char *argv[])
     char           *prognam;
     char           *cp = NULL;
     const char     *sysUpTime = NULL;
+    char           *posix_env;
 
     /* initialize tcpip, if necessary */
     SOCK_STARTUP;
@@ -437,7 +438,8 @@ main(int argc, char *argv[])
     else
         prognam = argv[0];
 
-    putenv(strdup("POSIXLY_CORRECT=1"));
+    posix_env = strdup("POSIXLY_CORRECT=1");
+    putenv(posix_env);
 
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
                            NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD, 1);
@@ -605,6 +607,7 @@ main(int argc, char *argv[])
     snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
 
 out:
+    free(posix_env);
     SOCK_CLEANUP;
     return result;
 }

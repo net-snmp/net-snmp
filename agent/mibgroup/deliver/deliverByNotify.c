@@ -44,7 +44,7 @@ size_t netsnmp_max_message_number_oid_len = 13;
 
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 
-#define DEFAULT_MAX_DELIVER_SIZE -1;
+#define DEFAULT_MAX_DELIVER_SIZE -1
 static int default_max_size;
 unsigned int alarm_reg;
 static netsnmp_container *deliver_container;

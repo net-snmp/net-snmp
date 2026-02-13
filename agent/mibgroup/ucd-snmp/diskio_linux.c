@@ -177,11 +177,8 @@ add_device(char *path, int addNewDisks)
     }
 
     /* first find the path for this device */
-    device[0] = '\0';
-    if (*path != '/') {
-        strlcpy(device, "/dev/", STRMAX - 1);
-    }
-    strncat(device, path, STRMAX - 1);
+    if (STRMAX <= snprintf(device, STRMAX, "%s%s", (*path != '/') ? "/dev/" : "", path))
+        netsnmp_config_error("Device path '%s' is too long and was truncated to '%s'", path, device);
 
     /* check for /dev existence */
     if (stat(device, &stbuf) != 0) {    /* ENOENT */
@@ -283,6 +280,7 @@ get_sysfs_stats(void)
     head.length = 0;
 
     for (i = 0; i < numdisks; i++) {
+        linux_diskio   *pTemp;
         FILE *f = fopen(disks[i].syspath, "r");
 
         if (f == NULL) {
@@ -298,7 +296,6 @@ get_sysfs_stats(void)
             continue;
         }
 
-        linux_diskio   *pTemp;
         if (head.length == head.alloc) {
             head.alloc += DISK_INCR;
             head.indices = realloc(head.indices,

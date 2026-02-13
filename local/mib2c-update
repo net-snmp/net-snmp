@@ -125,7 +125,7 @@ do_diff()
     local rcs=0
     safecd $DD_ORIG
     echo "  checking files in $1 ($PWD)"
-	files=`ls ./*"$UPDATE_OID"* 2>/dev/null`
+	files=`ls ./*"$UPDATE_OID_NAME"* 2>/dev/null`
     if [ -n "$files" ]; then
         for f in $files; do
             diff -U $FUZZ -p -b -w --show-c-function \
@@ -157,7 +157,7 @@ do_cp()
         die "src $src is not a directory"
     fi
     safecd "$src"
-    files=`ls ./*"$UPDATE_OID"* 2>/dev/null| grep -E "(file|onf|m2d|txt|\.c|\.h)$"`
+    files=`ls ./*"$UPDATE_OID_NAME"* 2>/dev/null| grep -E "(file|onf|m2d|txt|\.c|\.h)$"`
     if [ -z "$files" ]; then
        echo "   no files to copy from $src"
     else
@@ -174,7 +174,7 @@ do_cp()
 save_diff()
 {
     echo "Creating patch for your custom code"
-    cnt=`ls "$UPDATE_CURR/"*"$UPDATE_OID"* 2>/dev/null | grep -E "(file|onf|m2d|txt|\.c|\.h)$" | wc -l`
+    cnt=`ls "$UPDATE_CURR/"*"$UPDATE_OID_NAME"* 2>/dev/null | grep -E "(file|onf|m2d|txt|\.c|\.h)$" | wc -l`
     if [ "$cnt" -eq 0 ]; then
         echo "   no custom code!"
         FIRST_RUN=1
@@ -194,7 +194,7 @@ gen_code()
     copy_defaults . "$UPDATE_NEW"
 
     safecd "$UPDATE_NEW"
-    files=`ls ./*"$UPDATE_OID"* 2>/dev/null | grep -v "^default"`
+    files=`ls ./*"$UPDATE_OID_NAME"* 2>/dev/null | grep -v "^default"`
     if [ -n "$files" ]; then
        rm -f $files > /dev/null 2>&1 
     fi
@@ -326,7 +326,10 @@ if [ $? -ne 1 ]; then
 fi
 
 UPDATE_DATE=`date "+%F_%I.%M"`
-echo "Starting regneration of $UPDATE_OID using $UPDATE_CONF at $UPDATE_DATE"
+if [ -z "$UPDATE_OID_NAME" ]; then
+    UPDATE_OID_NAME=$(echo "$UPDATE_OID" | awk -F'::' '{print $2}')
+fi
+echo "Starting regeneration of $UPDATE_OID filename $UPDATE_OID_NAME using $UPDATE_CONF at $UPDATE_DATE"
 
 if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
     echo "It appears that the last run of mib2c-update was not able to merge"

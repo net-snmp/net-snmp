@@ -843,18 +843,32 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     for (request = requests; request; request = request->next) {
         netsnmp_variable_list *varbind;
         SnmpVarBindList win_varbinds;
+        AsnOctetString  tmp_context_info;
+        AsnOctetString *pContextInfo = NULL;
         AsnInteger32    ErrorStatus;
         AsnInteger32    ErrorIndex;
         BOOL            result;
         BOOL            copy_value;
 
         memset(&win_varbinds, 0, sizeof(win_varbinds));
+        memset(&tmp_context_info, 0, sizeof(tmp_context_info));
 
         if (request->processed || rc != SNMP_ERR_NOERROR)
             goto free_win_varbinds;
 
         if (reqinfo->mode == MODE_SET_RESERVE1)
             alloc_context_info(request->index);
+
+        if (ext_dll_info->pfSnmpExtensionQueryEx) {
+            /*
+             * Only SNMP set operations need per-varbind context information.
+             * For GET/GETNEXT requests, pass an empty context buffer.
+             */
+            if (reqinfo->mode == MODE_GET || reqinfo->mode == MODE_GETNEXT)
+                pContextInfo = &tmp_context_info;
+            else
+                pContextInfo = get_context_info(request->index);
+        }
 
         varbind = request->requestvb;
         netsnmp_assert(varbind);
@@ -920,7 +934,7 @@ retry:
             result = ext_dll_info->pfSnmpExtensionQueryEx(nRequestType,
                                                           1,
                                                           &win_varbinds,
-                                                          get_context_info(request->index),
+                                                          pContextInfo,
                                                           &ErrorStatus,
                                                           &ErrorIndex);
         } else if (ext_dll_info->pfSnmpExtensionQuery) {

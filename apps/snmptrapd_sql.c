@@ -1119,7 +1119,7 @@ _sql_save(void *p, void *dontcare)
 static void
 _sql_process_queue(u_int dontcare, void *meeither)
 {
-    int        rc;
+    int        sql_has_connected, rc;
 
     /** bail if the queue is empty */
     if( 0 == CONTAINER_SIZE(_sql.queue))
@@ -1137,7 +1137,7 @@ _sql_process_queue(u_int dontcare, void *meeither)
         (void) netsnmp_mysql_connect();
     }
 
-    int sql_has_connected = _sql.connected;
+    sql_has_connected = _sql.connected;
 
     CONTAINER_FOR_EACH(_sql.queue, _sql_save, NULL);
 

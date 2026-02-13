@@ -333,9 +333,10 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 
     DEBUGMSGT(("logging:options", "optarg: '%s', argc %d, argv '%s'\n",
                optarg, argc, argv ? argv[0] : "NULL"));
-    optarg++;
     if (!*cp)
         cp = &missing_opt;
+    else
+        optarg++;
 
     /*
      * Support '... -Lx=value ....' syntax

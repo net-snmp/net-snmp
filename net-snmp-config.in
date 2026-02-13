@@ -27,6 +27,22 @@ check_build_dir()
       fi
 }
 
+filter_cflags()
+{
+    read -r all_cflags
+    for cflag in ${all_cflags}; do
+	case "$cflag" in
+	    -fsanitize*)
+		printf '%s ' "$cflag";;
+	    -f*|-g*|-O*|-pipe|-W*|-I.)
+	        ;;
+	    *)
+		printf '%s ' "$cflag";;
+	esac
+    done
+    printf '\n'
+}
+
 # usage: index n arguments
 # effect: returns the (n+1)th argument
 index()
@@ -112,7 +128,7 @@ else
       fi
       ;;
     --indent-options|--in*)
-      echo "indent -orig -nbc -bap -nut -nfca `(cd $NSC_INCDIR/net-snmp; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
+      echo "indent -orig -nbc -bap -nut -nfca `(if [ -e $NSC_INCDIR ]; then cd $NSC_INCDIR/net-snmp; else cd include/net-snmp; fi && perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' ./*/*.h)`"
       ;;
     --configure-options|--con*)
       echo @CONFIGURE_OPTIONS@
@@ -143,10 +159,11 @@ else
       ;;
     #################################################### compile
     --base-cflags)
-      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR}
+      echo @CFLAGS@ @CPPFLAGS@ -I${NSC_INCLUDEDIR} | filter_cflags
       ;;
     --cflags|--cf*)
-      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR}
+      echo @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@ -I. -I${NSC_INCLUDEDIR} |
+	filter_cflags
       ;;
     --srcdir)
       echo $NSC_SRCDIR
@@ -188,7 +205,7 @@ else
       echo $result
       ;;
     --build-command)
-      echo "@CC@ @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@"
+      echo "@CC@ @CFLAGS@ @DEVFLAGS@ @CPPFLAGS@" | filter_cflags
       ;;
     #################################################### client lib
     --libs)
@@ -235,7 +252,7 @@ else
     --create-snmpv3-user)
       done=1
       shift
-      net-snmp-create-v3-user $*
+      net-snmp-create-v3-user "$@"
       exit $?
       ;;
 
@@ -662,7 +679,7 @@ EOF
       fi
       cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I${NSC_INCLUDEDIR} -o $outname $tmpfile $cfiles $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS $ldflags"
       echo "running: $cmd"
-      echo `$cmd`
+      $cmd
       result=$?
       if test "x$norm" != "x1" ; then
         echo "removing the temporary code file: $tmpfile"
