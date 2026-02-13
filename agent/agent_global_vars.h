@@ -32,4 +32,5 @@ extern const size_t sysuptime_oid_len;
 extern const oid    version_sysoid[];
 extern const int    version_sysoid_len;
 
+extern unsigned char connected_subagents;
 #endif /* _AGENT_GLOBAL_VARS_H_ */

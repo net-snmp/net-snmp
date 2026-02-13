@@ -1037,6 +1037,13 @@ subagent_register_ping_alarm(int majorID, int minorID,
          */
         ss->securityModel = snmp_alarm_register(ping_interval, SA_REPEAT,
                                                 agentx_check_session, ss);
+
+          /* Send ping, to set 'subagent_connected' flag */
+          snmp_log(LOG_INFO, "Sending ping.\n");
+
+          if (!agentx_send_ping(ss)) {
+              snmp_log(LOG_ERR, "ping to subagent failed.\n");
+          }
     } else {
         /*
          * attempt to open it later instead 
