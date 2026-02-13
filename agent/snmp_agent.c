@@ -2139,6 +2139,18 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         return 1;
     }
 
+    /* 
+     * For subagents: Don't process non-AgentX packets till connected to master-agent.
+     * This check only applies when running in SUB_AGENT mode.
+     */
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
+        if (!IS_AGENTX_VERSION(pdu->version) && connected_subagents <= 0) {
+             snmp_log(LOG_INFO, "AgentX subagent not yet connected.\n");
+             return 1;
+        }
+    }
+
     /*
      * RESPONSE messages won't get this far, but TRAP-like messages
      * might.  
