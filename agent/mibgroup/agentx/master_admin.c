@@ -39,11 +39,16 @@
 #include "agentx/subagent.h"
 #include "agentx/master_admin.h"
 
+#include <limits.h>
+
 #include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_sysORTable.h>
 #include "master.h"
+
+/* Counter for connected subagents to support multiple subagents */
+unsigned char connected_subagents = 0;
 
 netsnmp_feature_require(unregister_mib_table_row);
 netsnmp_feature_require(trap_vars_with_context);
@@ -130,6 +135,12 @@ close_agentx_session(netsnmp_session * session, int sessid)
         return AGENTX_ERR_NOT_OPEN;
 
     DEBUGMSGTL(("agentx/master", "close %8p, %d\n", session, sessid));
+
+    /* Decrement connected subagent count on session close */
+    if (connected_subagents > 0) {
+        connected_subagents--;
+    }
+
     if (sessid == -1) {
         /*
          * The following is necessary to avoid locking up the agent when
@@ -555,6 +566,10 @@ handle_master_agentx_packet(int operation,
 
     case AGENTX_MSG_PING:
         asp->status = agentx_ping_response(session, pdu);
+        /* Increment counter for connected subagent (cap at UCHAR_MAX) */
+        if (connected_subagents < UCHAR_MAX) {
+             connected_subagents++;
+        }
         break;
 
         /*
