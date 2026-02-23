@@ -52,16 +52,33 @@ auto_nlist_value(const char *string)
     }
     if (*ptr == 0) {
         *ptr = (struct autonlist *) malloc(sizeof(struct autonlist));
+        if (*ptr == NULL) {
+            snmp_log(LOG_ERR, "auto_nlist: malloc failed\n");
+            return 0;
+        }
         memset(*ptr, 0, sizeof(struct autonlist));
         it = *ptr;
         it->left = 0;
         it->right = 0;
         it->symbol = (char *) malloc(strlen(string) + 1);
+        if (it->symbol == NULL) {
+            snmp_log(LOG_ERR, "auto_nlist: malloc failed\n");
+            free(*ptr);
+            *ptr = NULL;
+            return 0;
+        }
         strcpy(it->symbol, string);
         /*
-         * allocate an extra byte for inclusion of a preceding '_' later 
+         * allocate an extra byte for inclusion of a preceding '_' later
          */
         it->nl[0].n_name = (char *) malloc(strlen(string) + 2);
+        if (it->nl[0].n_name == NULL) {
+            snmp_log(LOG_ERR, "auto_nlist: malloc failed\n");
+            free(it->symbol);
+            free(*ptr);
+            *ptr = NULL;
+            return 0;
+        }
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         strcpy(it->nl[0].n_name, string);
         it->nl[0].n_name[strlen(string)+1] = '\0';
