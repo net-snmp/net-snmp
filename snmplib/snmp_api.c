@@ -1971,24 +1971,6 @@ create_user_from_session(netsnmp_session * session) {
 #endif
 }
 
-static void netsnmp_free_one_tr_cfg(void *data, void *context)
-{
-    netsnmp_transport_config *c = data;
-
-    free(c->key);
-    free(c->value);
-    free(c);
-}
-
-static void netsnmp_free_transport_config(netsnmp_container *tc)
-{
-    if (!tc)
-        return;
-
-    CONTAINER_CLEAR(tc, netsnmp_free_one_tr_cfg, NULL);
-    CONTAINER_FREE(tc);
-}
-
 /* Free the memory owned by a session but not the session object itself. */
 void netsnmp_cleanup_session(netsnmp_session *s)
 {
@@ -2008,7 +1990,6 @@ void netsnmp_cleanup_session(netsnmp_session *s)
     free(s->trap_stats);
 #endif /* NETSNMP_NO_TRAP_STATS */
     usm_free_user(s->sessUser);
-    netsnmp_free_transport_config(s->transport_configuration);
     memset(s, 0, sizeof(*s));
 }
 
