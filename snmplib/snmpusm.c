@@ -2954,8 +2954,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                    netsnmp_session * sess,      /* IN     - session which got the message  */
                    u_char msg_flags)
 {                               /* IN     - v3 Message flags.              */
-    size_t          remaining = wholeMsgLen - (u_int)
-        ((u_long) * secParams - (u_long) * wholeMsg);
+    size_t          remaining = wholeMsgLen - (size_t)(secParams - wholeMsg);
     u_int           boots_uint;
     u_int           time_uint;
 #ifdef HAVE_AES
