@@ -203,6 +203,34 @@ real_init_master(void)
     DEBUGMSGTL(("agentx/master", "initializing...   DONE\n"));
 }
 
+
+static netsnmp_refcnt_void *
+netsnmp_create_delegated_box(void *val_ptr)
+{
+    netsnmp_refcnt_void * box = NULL;
+
+    box = SNMP_MALLOC_TYPEDEF(netsnmp_refcnt_void);
+    if (box) {
+        box->refcnt = 1;
+        box->val = val_ptr;
+    }
+      
+    return box;
+}
+
+static
+netsnmp_delete_delegated_box(netsnmp_refcnt_void * box)
+{
+    if (box) {
+        box->refcnt--;
+        box->val = 0;
+        if (box->refcnt <= 0)
+	    SNMP_FREE(box);
+    }
+    return;
+}
+
+
         /*
          * Handle the response from an AgentX subagent,
          *   merging the answers back into the original query
@@ -212,7 +240,8 @@ agentx_got_response(int operation,
                     netsnmp_session * session,
                     int reqid, netsnmp_pdu *pdu, void *magic)
 {
-    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) magic;
+    netsnmp_refcnt_void *cache_box = (netsnmp_refcnt_void *) magic;
+    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) cache_box->val;
     int             i, ret;
     netsnmp_request_info *requests, *request;
     netsnmp_variable_list *var;
@@ -222,8 +251,10 @@ agentx_got_response(int operation,
         DEBUGMSGTL(("agentx/master", "response too late on session %8p\n",
                     session));
         /* response is too late, free the cache */
-        if (magic)
-            netsnmp_free_delegated_cache((netsnmp_delegated_cache*) magic);
+        if (magic) {
+            netsnmp_free_delegated_cache(cache);
+            netsnmp_delete_delegated_box(cache_box);
+	}
         return 1;
     }
     requests = cache->requests;
@@ -261,6 +292,7 @@ agentx_got_response(int operation,
                 DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
             }
             netsnmp_free_delegated_cache(cache);
+            netsnmp_delete_delegated_box(cache_box);
             return 0;
         }
 
@@ -279,6 +311,7 @@ agentx_got_response(int operation,
         netsnmp_set_request_error(cache->reqinfo, requests,     /* XXXWWW: should be index=0 */
                                   SNMP_ERR_GENERR);
         netsnmp_free_delegated_cache(cache);
+        netsnmp_delete_delegated_box(cache_box);
         return 0;
 
     case NETSNMP_CALLBACK_OP_RESEND:
@@ -296,6 +329,7 @@ agentx_got_response(int operation,
         snmp_log(LOG_ERR, "Unknown operation %d in agentx_got_response\n",
                  operation);
         netsnmp_free_delegated_cache(cache);
+        netsnmp_delete_delegated_box(cache_box);
         return 0;
     }
 
@@ -359,6 +393,7 @@ agentx_got_response(int operation,
                                       SNMP_ERR_GENERR);
         }
         netsnmp_free_delegated_cache(cache);
+        netsnmp_delete_delegated_box(cache_box);
         DEBUGMSGTL(("agentx/master", "end error branch\n"));
         return 1;
     } else if (cache->reqinfo->mode == MODE_GET ||
@@ -420,8 +455,10 @@ agentx_got_response(int operation,
     DEBUGMSGTL(("agentx/master",
                 "handle_agentx_response() finishing...\n"));
     netsnmp_free_delegated_cache(cache);
+    netsnmp_delete_delegated_box(cache_box);
     return 1;
 }
+
 
 /*
  *
@@ -446,7 +483,8 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request = requests;
     netsnmp_pdu    *pdu;
     void           *cb_data;
-    int             result;
+    void           *cb_data_box;
+    int            result;
 
     DEBUGMSGTL(("agentx/master",
                 "agentx master handler starting, mode = 0x%02x\n",
@@ -606,12 +644,14 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     else
         cb_data = NULL;
 
+    cb_data_box  = netsnmp_create_delegated_box(cb_data);
+
     /*
      * send the requests out.
      */
     DEBUGMSGTL(("agentx/master", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 (unsigned)pdu->reqid, (unsigned)pdu->transid, (unsigned)pdu->sessid));
-    result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
+    result = snmp_async_send_cp(ax_session, pdu, agentx_got_response, cb_data_box, 1);
     if (result == 0) {
         snmp_free_pdu(pdu);
     }
