@@ -18225,6 +18225,9 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
     SNMPLIBPATH="$tmpset"
     eval tmpset="$tmpset"
 done
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+    SNMPLIBPATH="$(cygpath --mixed "$SNMPLIBPATH")"
+fi
 printf "%s\n" "#define SNMPLIBPATH \"$SNMPLIBPATH\"" >>confdefs.h
 
 
@@ -18239,6 +18242,9 @@ while test "x$tmpset" != "x$SNMPSHAREPATH"; do
     SNMPSHAREPATH="$tmpset"
     eval tmpset="$tmpset"
 done
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+    SNMPSHAREPATH="$(cygpath --mixed "$SNMPSHAREPATH")"
+fi
 printf "%s\n" "#define SNMPSHAREPATH \"$SNMPSHAREPATH\"" >>confdefs.h
 
 
@@ -18246,12 +18252,13 @@ printf "%s\n" "#define SNMPSHAREPATH \"$SNMPSHAREPATH\"" >>confdefs.h
 #       MIBDIRS   (default)
 #
 if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
-    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
+    PATH_SEP=":"
     if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
         #
         #    USe Windows-style path separator
-        NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
+        PATH_SEP=";"
     fi
+    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs${PATH_SEP}$SNMPSHAREPATH/mibs"
     printf "%s\n" "#define NETSNMP_DEFAULT_MIBDIRS \"$NETSNMP_DEFAULT_MIBDIRS\"" >>confdefs.h
 
 fi
@@ -18265,6 +18272,9 @@ while test "x$tmpset" != "x$SNMPCONFPATH"; do
     SNMPCONFPATH="$tmpset"
     eval tmpset="$tmpset"
 done
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+    SNMPCONFPATH="$(cygpath --mixed "$SNMPCONFPATH")"
+fi
 printf "%s\n" "#define SNMPCONFPATH \"$SNMPCONFPATH\"" >>confdefs.h
 
 
