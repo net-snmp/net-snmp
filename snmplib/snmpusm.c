@@ -2908,6 +2908,19 @@ usm_check_secLevel(int level, struct usmUser *user)
         DEBUGMSG(("usm", "\n"));
         return 1;
     }
+    if ((level == SNMP_SEC_LEVEL_NOAUTH)
+        &&
+        (netsnmp_oid_equals
+         (user->authProtocol, user->authProtocolLen, usmNoAuthProtocol,
+          sizeof(usmNoAuthProtocol) / sizeof(oid)) != 0)) {
+        DEBUGMSGTL(("usm", "Level: %d\n", level));
+        DEBUGMSGTL(("usm", "User (%s) Auth Protocol: ", user->name));
+        DEBUGMSGOID(("usm", user->authProtocol, user->authProtocolLen));
+        DEBUGMSG(("usm", ", User Priv Protocol: "));
+        DEBUGMSGOID(("usm", user->privProtocol, user->privProtocolLen));
+        DEBUGMSG(("usm", "\n"));
+        return 1;
+    }
 
     return 0;
 }                               /* end usm_check_secLevel() */
