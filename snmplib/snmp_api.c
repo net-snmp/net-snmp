@@ -4151,6 +4151,7 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
     static const oid wrongDigest[] = { 1, 3, 6, 1, 6, 3, 15, 1, 1, 5, 0 };
     static const oid decryptionError[] =
         { 1, 3, 6, 1, 6, 3, 15, 1, 1, 6, 0 };
+    static const oid snmpUnknownContexts[] = {1, 3, 6, 1, 6, 3, 12, 1, 5, 0};
     const oid      *err_var;
     int             err_var_len;
 #ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
@@ -4199,6 +4200,11 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
 #endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
         err_var = decryptionError;
         err_var_len = ERROR_STAT_LENGTH;
+        break;
+    case SNMPERR_BAD_CONTEXT:
+        stat_ind = STAT_SNMPUNKNOWNCONTEXTS;
+        err_var = snmpUnknownContexts;
+        err_var_len = sizeof(snmpUnknownContexts) / sizeof(snmpUnknownContexts[0]);
         break;
     default:
         return SNMPERR_GENERR;
