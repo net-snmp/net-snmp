@@ -1232,7 +1232,6 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\library\snmp_transport.h"
   Delete "$INSTDIR\include\net-snmp\library\container_binary_array.h"
   Delete "$INSTDIR\include\net-snmp\library\data_list.h"
-  Delete "$INSTDIR\include\net-snmp\library\factory.h"
   Delete "$INSTDIR\include\net-snmp\library\md5.h"
   Delete "$INSTDIR\include\net-snmp\library\scapi.h"
   Delete "$INSTDIR\include\net-snmp\library\snmpCallbackDomain.h"
