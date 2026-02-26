@@ -14,6 +14,10 @@
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
+#ifdef _AIX
+#define MSG_DONTWAIT MSG_NONBLOCK
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
