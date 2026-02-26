@@ -156,7 +156,7 @@ netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
     if (NULL==containers)
         return -1;
 
-    tmp.name = NETSNMP_REMOVE_CONST(char *, name);
+    tmp.name = name;
     ct = (container_type *)CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
         DEBUGMSGT(("container_registry",
