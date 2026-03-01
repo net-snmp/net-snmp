@@ -495,7 +495,15 @@ netsnmp_parse_args(int argc,
         }
     }
     DEBUGMSGTL(("snmp_parse_args", "finished: %d/%d\n", optind, argc));
-    
+
+    if (set_enginetime(session->securityEngineID,
+                       session->securityEngineIDLen,
+                       session->engineBoots, session->engineTime, TRUE)
+        != SNMPERR_SUCCESS) {
+        fprintf(stderr, "Failed to set engine boots/time\n");
+        return NETSNMP_PARSE_ARGS_ERROR;
+    }
+
     /*
      * save command line parameters which should have precedence above config file settings
      *    (There ought to be a more scalable approach than this....)
