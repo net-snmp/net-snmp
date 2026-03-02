@@ -1863,17 +1863,7 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         return NULL;
     }
 
-    if (transport->f_setup_session) {
-        if (SNMPERR_SUCCESS !=
-            transport->f_setup_session(transport, in_session)) {
-            netsnmp_transport_free(transport);
-            return NULL;
-        }
-    }
-        
-            
     DEBUGMSGTL(("snmp_sess_add", "fd %d\n", transport->sock));
-
 
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
         transport->f_close(transport);
@@ -1909,14 +1899,21 @@ snmp_sess_add_ex(netsnmp_session * in_session,
                     "adding v3 session -- maybe engineID probe now\n"));
         if (!snmpv3_engineID_probe(slp, slp->session)) {
             DEBUGMSGTL(("snmp_sess_add", "engine ID probe failed\n"));
-            snmp_sess_close(slp);
-            return NULL;
+            goto close_session;
         }
     }
 
     slp->session->flags &= ~SNMP_FLAGS_DONT_PROBE;
 
-    return (void *) slp;
+    if (transport->f_setup_session &&
+        transport->f_setup_session(transport, slp->session) != SNMPERR_SUCCESS)
+        goto close_session;
+
+    return slp;
+
+close_session:
+    snmp_sess_close(slp);
+    return NULL;
 }                               /*  end snmp_sess_add_ex()  */
 
 
