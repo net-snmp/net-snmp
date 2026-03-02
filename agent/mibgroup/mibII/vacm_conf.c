@@ -1307,8 +1307,8 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
 
             DEBUGMSGTL(("mibII/vacm_vars",
                         "vacm_in_view: ver=%ld, community=%s\n",
-                        pdu->version, buf));
-            free(buf);
+                        pdu->version, buf ? buf : "NULL"));
+            SNMP_FREE(buf);
         }
 
         /*
