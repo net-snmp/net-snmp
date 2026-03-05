@@ -310,12 +310,53 @@ _ssll_clear(netsnmp_container *c, netsnmp_container_obj_func *f,
     ++c->sync;
 }
 
+static netsnmp_container *netsnmp_container_get_ssll(void);
+
+static netsnmp_container *
+_ssll_duplicate(netsnmp_container *c, void *ctx, u_int flags)
+{
+    netsnmp_transport_config *item;
+    netsnmp_container *dup;
+    netsnmp_iterator *iter;
+
+    if (flags) {
+        snmp_log(LOG_ERR, "%s does not support flags yet\n", __func__);
+        return NULL;
+    }
+
+    dup = netsnmp_container_get_ssll();
+    if (!dup) {
+        snmp_log(LOG_ERR, "%s: out of memory\n", __func__);
+        return NULL;
+    }
+
+    /*
+     * deal with container stuff
+     */
+    if (netsnmp_container_data_dup(dup, c) != 0)
+        goto fail;
+
+    /* deep copy */
+    iter = CONTAINER_ITERATOR(c);
+    for (item = ITERATOR_FIRST(iter); item; item = ITERATOR_NEXT(iter))
+        CONTAINER_INSERT(dup, netsnmp_transport_create_config(item->key,
+                                                              item->value));
+    ITERATOR_RELEASE(iter);
+
+    return dup;
+
+fail:
+    _ssll_free(dup);
+    return NULL;
+}
+
+
 /**********************************************************************
  *
  *
  *
  **********************************************************************/
-netsnmp_container *
+static netsnmp_container *
 netsnmp_container_get_ssll(void)
 {
     /*
@@ -335,6 +376,7 @@ netsnmp_container_get_ssll(void)
     sl->c.get_iterator =_ssll_iterator_get;
     sl->c.for_each = _ssll_for_each;
     sl->c.clear = _ssll_clear;
+    sl->c.duplicate = _ssll_duplicate;
 
     return &sl->c;
 }
