@@ -286,21 +286,24 @@ filebase=`echo $filebase | $SED 's/aout//'`
 filebase=`echo $filebase | $SED 's/ecoff//'`
 filebase=`echo $filebase | $SED 's/coff//'`
 
-# FreeBSD: when the detected FreeBSD major version is newer than the newest
-# versioned system header, fall back to the newest versioned system header.
+# FreeBSD: if the detected versioned header does not exist, fall back to the
+# newest shipped versioned FreeBSD header instead of degrading to freebsd.h.
 case "${filebase}" in
     freebsd[0-9]*)
-        fbver=`echo "$filebase" | $SED 's/^freebsd\([0-9][0-9]*\).*$/\1/'`
-        case "$fbver" in
-            ''|*[!0-9]*) ;;
-            *)
-                if test "${fbver}" -ge 17 \
-                   && test ! -f "${srcdir}/include/net-snmp/system/${filebase}.h"; then
-                    filebase=freebsd16
-                fi
-                ;;
-        esac
-        ;;
+	if test ! -f "${srcdir}/include/net-snmp/system/${filebase}.h"; then
+	    newest_freebsd_header=`ls "${srcdir}"/include/net-snmp/system/freebsd[0-9]*.h 2>/dev/null \
+		| $SED 's|.*/freebsd\([0-9][0-9]*\)\.h|\1|' \
+		| sort -n \
+		| tail -1`
+	    case "$newest_freebsd_header" in
+		''|*[!0-9]*)
+		    ;;
+		*)
+		    filebase="freebsd${newest_freebsd_header}"
+		    ;;
+	    esac
+	fi
+	;;
 esac
 
 while test "x$filebase" != "x$last" -a ! -f $srcdir/include/net-snmp/system/$filebase.h
