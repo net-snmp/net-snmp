@@ -37056,6 +37056,23 @@ then :
 else case e in #(
   e)
 case "x$PARTIALTARGETOS" in
+    xfreebsd*)
+	ac_cv_ps_flags=""
+	for args in -e -el acx -acx "-o pid,tt,state,time,ucomm" ax; do
+	    if test "`($PSPROG $args 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps"; then
+		ac_cv_ps_flags=$args
+		break
+	    fi
+	done
+	if test "x${ac_cv_ps_flags}" = x; then
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to determine valid ps flags...  defaulting..." >&5
+printf "%s\n" "$as_me: WARNING: Unable to determine valid ps flags...  defaulting..." >&2;}
+	    ac_cv_ps_flags="-acx"
+	fi
+	if $PSPROG $ac_cv_ps_flags -J 0 >/dev/null 2>&1; then
+	    ac_cv_ps_flags="$ac_cv_ps_flags -J 0"
+	fi
+	;;
     xcygwin|xmingw32*)
 	ac_cv_ps_flags="-e";;
     *)
@@ -37070,8 +37087,6 @@ case "x$PARTIALTARGETOS" in
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to determine valid ps flags...  defaulting..." >&5
 printf "%s\n" "$as_me: WARNING: Unable to determine valid ps flags...  defaulting..." >&2;}
 	    ac_cv_ps_flags="-acx"
-	elif $PSPROG $ac_cv_ps_flags -J 0 >/dev/null 2>&1; then
-	    ac_cv_ps_flags="$ac_cv_ps_flags -J 0"
 	fi
 	;;
 esac
