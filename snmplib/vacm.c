@@ -176,8 +176,16 @@ vacm_parse_config_view(const char *token, const char *line)
 
     view.viewStatus = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return;
+    }
     view.viewStorageType = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return;
+    }
     view.viewType = atoi(line);
     line = skip_token_const(line);
     len = sizeof(view.viewName);
@@ -293,12 +301,28 @@ _vacm_parse_config_access_common(struct vacm_accessEntry **aptr,
 
     access.status = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return NULL;
+    }
     access.storageType = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return NULL;
+    }
     access.securityModel = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return NULL;
+    }
     access.securityLevel = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return NULL;
+    }
     access.contextMatch = atoi(line);
     line = skip_token_const(line);
     len  = sizeof(access.groupName);
@@ -365,6 +389,10 @@ vacm_parse_config_auth_access(const char *token, const char *line)
         return;
 
     authtype = atoi(line);
+    if (authtype < 0 || authtype >= VACM_MAX_VIEWS) {
+        config_perror("invalid authtype");
+        return;
+    }
     line = skip_token_const(line);
 
     view = (char *) aptr->views[authtype];
@@ -411,8 +439,16 @@ vacm_parse_config_group(const char *token, const char *line)
 
     group.status = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return;
+    }
     group.storageType = atoi(line);
     line = skip_token_const(line);
+    if (!line) {
+        config_perror("incomplete line");
+        return;
+    }
     group.securityModel = atoi(line);
     line = skip_token_const(line);
     len = sizeof(group.securityName);
