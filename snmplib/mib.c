@@ -2875,6 +2875,7 @@ shutdown_mib(void)
         Prefix = NULL;
     SNMP_FREE(confmibs);
     SNMP_FREE(confmibdir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, NULL);
 }
 
 /**
