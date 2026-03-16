@@ -729,6 +729,7 @@ netsnmp_init_mib_internals(void)
 
     memset(nbuckets, 0, sizeof(nbuckets));
     memset(tbuckets, 0, sizeof(tbuckets));
+    free(tclist);
     tc_alloc = TC_INCR;
     tclist = calloc(tc_alloc, sizeof(struct tc));
     build_translation_table();
