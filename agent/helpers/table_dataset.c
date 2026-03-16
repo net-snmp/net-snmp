@@ -499,16 +499,31 @@ netsnmp_table_data_set_create_newrowstash
     newrow_stash   *newrowstash = NULL;
     netsnmp_table_row *newrow   = NULL;
 
-    newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
+    if (table_info == NULL || table_info->indexes == NULL)
+        return NULL;
 
-    if (newrowstash != NULL) {
-        newrowstash->created = 1;
-        newrow = netsnmp_table_data_set_create_row_from_defaults
-            (datatable->default_row);
-        newrow->indexes = snmp_clone_varbind(table_info->indexes);
-        newrowstash->newrow = newrow;
+    newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
+    if (newrowstash == NULL)
+        return NULL;
+
+    newrow = netsnmp_table_data_set_create_row_from_defaults
+        (datatable->default_row);
+    if (newrow == NULL) {
+        SNMP_FREE(newrowstash);
+        return NULL;
     }
 
+    
+    newrow->indexes = snmp_clone_varbind(table_info->indexes);
+    if (newrow->indexes == NULL) {
+        netsnmp_table_dataset_delete_row(newrow);
+        SNMP_FREE(newrowstash);
+        return NULL;
+    }
+    
+
+    newrowstash->created = 1;
+    newrowstash->newrow = newrow;
     return newrowstash;
 }
 
@@ -585,6 +600,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                         newrowstash =
                              netsnmp_table_data_set_create_newrowstash(
                                                  datatable, table_info);
+                        if (newrowstash == NULL) {
+                            netsnmp_set_request_error(reqinfo, request,
+                                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+                            continue;
+                        }
                         newrow = newrowstash->newrow;
                     } else if (datatable->rowstatus_column == 0) {
                         /*
@@ -604,10 +624,16 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
                     if (newrowstash == NULL) {
                         netsnmp_set_request_error(reqinfo, request,
-                                                  SNMP_ERR_GENERR);
+                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
                         continue;
                     }
                     newrow = netsnmp_table_data_set_clone_row(row);
+                    if (newrow == NULL) {
+                        SNMP_FREE(newrowstash);
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
+                        continue;
+                    }
                     newrowstash->newrow = newrow;
                 }
                 netsnmp_oid_stash_add_data(stashp, suffix, suffix_len,
@@ -689,6 +715,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     newrowstash =
                              netsnmp_table_data_set_create_newrowstash(
                                                  datatable, table_info);
+                    if (newrowstash == NULL) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
+                        continue;
+                    }
                     newrow = newrowstash->newrow;
                     row    = newrow;
                     netsnmp_oid_stash_add_data(stashp, suffix, suffix_len,
