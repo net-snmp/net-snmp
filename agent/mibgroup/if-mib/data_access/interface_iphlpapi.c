@@ -206,3 +206,10 @@ netsnmp_arch_set_admin_status(struct netsnmp_interface_entry_s *entry,
     }
     return 0;
 }
+
+int
+netsnmp_arch_set_ifalias(struct netsnmp_interface_entry_s *entry,
+                         const char *alias, size_t alias_len)
+{
+    return -1;
+}

@@ -360,3 +360,15 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
     return (-1);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */
+
+int
+netsnmp_arch_set_ifalias(netsnmp_interface_entry *entry,
+                         const char *alias, size_t alias_len)
+{
+    DEBUGMSGTL(("access:interface:arch", "set_ifalias\n"));
+
+    /*
+     * XXX Not supported yet
+     */
+    return (-1);
+}

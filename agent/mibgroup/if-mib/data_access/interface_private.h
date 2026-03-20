@@ -10,3 +10,5 @@ int netsnmp_arch_interface_container_load(struct netsnmp_container_s* container,
 oid netsnmp_arch_interface_index_find(const char *name);
 int netsnmp_arch_set_admin_status(struct netsnmp_interface_entry_s * entry,
                                   int ifAdminStatus_val);
+int netsnmp_arch_set_ifalias(struct netsnmp_interface_entry_s * entry,
+                             const char *alias, size_t alias_len);

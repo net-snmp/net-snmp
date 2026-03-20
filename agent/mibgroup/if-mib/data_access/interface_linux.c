@@ -8,6 +8,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
+#include <stdarg.h>
 #include "interface_private.h"
 
 netsnmp_feature_require(fd_event_manager);
@@ -327,13 +328,14 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
     }
 }
 
-#ifdef HAVE_PCI_LOOKUP_NAME
-
 /* Get value from sysfs file */
-static int sysfs_get_id(const char *path, unsigned short *id)
+static int sysfs_get_value(const char* path, const char* format, ...)
 {
+    va_list args;
     FILE *fin;
     int n;
+
+    va_start(args, format);
 
     if (!(fin = fopen(path, "r"))) {
         DEBUGMSGTL(("access:interface",
@@ -341,12 +343,14 @@ static int sysfs_get_id(const char *path, unsigned short *id)
 	return 0;
     }
 
-    n = fscanf(fin, "%hx", id);
+    n = vfscanf(fin, format, args);
     fclose(fin);
+    va_end(args);
 
-    return n == 1;
+    return n;
 }
 
+#ifdef HAVE_PCI_LOOKUP_NAME
 /* Get interface description for PCI device
  * by using sysfs to find vendor and device
  * then lookup name (-lpci)
@@ -367,13 +371,13 @@ _arch_interface_description_get(netsnmp_interface_entry *entry)
     snprintf(buf, sizeof(buf),
 	     "/sys/class/net/%s/device/vendor", entry->name);
 
-    if (!sysfs_get_id(buf, &vendor_id))
+    if (sysfs_get_value(buf, "%hx", &vendor_id) != 1)
 	return;
 
     snprintf(buf, sizeof(buf),
 	     "/sys/class/net/%s/device/device", entry->name);
 
-    if (!sysfs_get_id(buf, &device_id))
+    if (sysfs_get_value(buf, "%hx", &device_id) != 1)
 	return;
 
     descr = pci_lookup_name(pci_access, buf, sizeof(buf),
@@ -389,6 +393,43 @@ _arch_interface_description_get(netsnmp_interface_entry *entry)
     }
 }
 #endif
+
+static void
+_arch_interface_alias_get(netsnmp_interface_entry *entry)
+{
+    char buf[64];
+
+    snprintf(buf, sizeof(buf),
+	     "/sys/class/net/%s/ifalias", entry->name);
+
+    if (sysfs_get_value(buf, "%63[^\n]", buf) != 1)
+	return;
+
+    strcpy(entry->ifAlias, buf);
+    entry->ifAlias_len = strlen(buf);
+}
+
+int
+netsnmp_arch_set_ifalias(netsnmp_interface_entry *entry,
+                         const char *alias, size_t alias_len)
+{
+    char path[64];
+    FILE *fout;
+
+    snprintf(path, sizeof(path),
+	     "/sys/class/net/%s/ifalias", entry->name);
+
+    if (!(fout = fopen(path, "w"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s for writing\n", path));
+        return -1;
+    }
+
+    fwrite(alias, 1, alias_len, fout);
+    fclose(fout);
+
+    return 0;
+}
 
 
 #ifdef NETSNMP_ENABLE_IPV6
@@ -766,6 +807,9 @@ static void netsnmp_retrieve_link_info(struct nl_sock *nl_sock, int fd,
 #ifdef HAVE_PCI_LOOKUP_NAME
 	_arch_interface_description_get(entry);
 #endif
+
+	_arch_interface_alias_get(entry);
+
         netsnmp_retrieve_one_link_info(rtnl_link, fd, entry, TRUE);
         ret = CONTAINER_INSERT(container, entry);
         netsnmp_assert(ret == 0);
