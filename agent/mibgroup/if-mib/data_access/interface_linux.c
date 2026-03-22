@@ -329,7 +329,9 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
 }
 
 /* Get value from sysfs file */
-static int sysfs_get_value(const char* path, const char* format, ...)
+static int sysfs_get_value(const char *path, const char *format, ...)
+    NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+static int sysfs_get_value(const char *path, const char *format, ...)
 {
     va_list args;
     FILE *fin;

@@ -481,8 +481,8 @@ netsnmp_access_interface_entry_set_ifalias(netsnmp_interface_entry * entry,
 
     rc = netsnmp_arch_set_ifalias(entry, alias, alias_len);
     if (0 == rc) {
-        memcpy(entry->ifAlias, alias, alias_len);
-        entry->ifAlias[alias_len] = '\0';
+        snprintf(entry->ifAlias, sizeof(entry->ifAlias), "%.*s",
+                 (int)alias_len, alias);
         entry->ifAlias_len = alias_len;
     }
 
@@ -726,8 +726,9 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
                 return -2;
         }
     }
-    if (strcmp(lhs->ifAlias, rhs->ifAlias) != 0) {
-        strcpy(lhs->ifAlias, rhs->ifAlias);
+    if (lhs->ifAlias_len != rhs->ifAlias_len ||
+        memcmp(lhs->ifAlias, rhs->ifAlias, rhs->ifAlias_len) != 0) {
+        memcpy(lhs->ifAlias, rhs->ifAlias, rhs->ifAlias_len);
         lhs->ifAlias_len = rhs->ifAlias_len;
     }
     lhs->type = rhs->type;
