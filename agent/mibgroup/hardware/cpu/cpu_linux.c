@@ -40,6 +40,12 @@ void init_cpu_linux( void ) {
     char buf[1024], *cp;
     int  i, n = 0;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+
+    if (!cpu) {
+        snmp_log(LOG_ERR, "%s: failed to allocate overall CPU entry\n",
+                 __func__);
+        return;
+    }
     strcpy(cpu->name, "Overall CPU statistics");
 
     fp = fopen( CPU_FILE, "r" );
@@ -51,6 +57,12 @@ void init_cpu_linux( void ) {
         if ( sscanf( buf, "processor : %d", &i ) == 1)  {
             n++;
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
+            if (!cpu) {
+                snmp_log(LOG_ERR, "%s: failed to allocate per-CPU entry\n",
+                         __func__);
+                fclose(fp);
+                return;
+            }
             cpu->status = 2;  /* running */
             sprintf( cpu->name, "cpu%d", i );
 #if defined(__s390__) || defined(__s390x__)
@@ -63,6 +75,12 @@ void init_cpu_linux( void ) {
             if (sscanf( buf, "processor %d:", &i ) == 1)  {
                 n++;
                 cpu = netsnmp_cpu_get_byIdx( i, 1 );
+                if (!cpu) {
+                    snmp_log(LOG_ERR, "%s: failed to allocate per-CPU entry\n",
+                             __func__);
+                    fclose(fp);
+                    return;
+                }
                 cpu->status = 2;  /* running */
                 sprintf(cpu->name, "cpu%d", i);
                 strlcat(cpu->descr, "An S/390 CPU", sizeof(cpu->descr));

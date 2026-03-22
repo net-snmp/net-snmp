@@ -46,6 +46,12 @@ void init_cpu_nlist( void ) {
     int           model_mib[] = { CTL_HW, HW_MODEL };
     char           descr[ SNMP_MAXBUF ];
     netsnmp_cpu_info     *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
+
+    if (!cpu) {
+        snmp_log(LOG_ERR, "%s: failed to allocate overall CPU entry\n",
+                 __func__);
+        return;
+    }
     strcpy(cpu->name, "Overall CPU statistics");
 
     i = sizeof(n);
@@ -57,6 +63,11 @@ void init_cpu_nlist( void ) {
         n = 1;   /* Single CPU system */
     for ( i=0; i<n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
+        if (!cpu) {
+            snmp_log(LOG_ERR, "%s: failed to allocate per-CPU entry\n",
+                     __func__);
+            return;
+        }
         cpu->status = 2;  /* running */
         sprintf(cpu->name, "cpu%d", i);
         sprintf(cpu->descr, "%s", descr);
@@ -72,6 +83,11 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     long   cpu_stats[CPUSTATES];
     struct vmmeter mem_stats;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
+
+    if (!cpu) {
+        snmp_log(LOG_ERR, "%s: missing overall CPU entry\n", __func__);
+        return -1;
+    }
 
     auto_nlist( CPU_SYMBOL, (char *) cpu_stats, sizeof(cpu_stats));
     auto_nlist( MEM_SYMBOL, (char *)&mem_stats, sizeof(mem_stats));
@@ -101,6 +117,10 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #ifdef PER_CPU_INFO
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
+        if (!cpu) {
+            snmp_log(LOG_ERR, "%s: missing per-CPU entry\n", __func__);
+            continue;
+        }
         /* XXX - per-CPU statistics */
     }
 #else
