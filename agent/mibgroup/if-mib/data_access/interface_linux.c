@@ -8,6 +8,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/snmp_vars.h>
+#include <stdarg.h>
 #include "interface_private.h"
 
 netsnmp_feature_require(fd_event_manager);
@@ -330,8 +331,10 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
 #ifdef HAVE_PCI_LOOKUP_NAME
 
 /* Get value from sysfs file */
-static int sysfs_get_id(const char *path, unsigned short *id)
+static int NETSNMP_ATTRIBUTE_FORMAT(scanf, 2, 3)
+sysfs_get_value(const char *path, const char *format, ...)
 {
+    va_list args;
     FILE *fin;
     int n;
 
@@ -341,10 +344,12 @@ static int sysfs_get_id(const char *path, unsigned short *id)
 	return 0;
     }
 
-    n = fscanf(fin, "%hx", id);
+    va_start(args, format);
+    n = vfscanf(fin, format, args);
     fclose(fin);
+    va_end(args);
 
-    return n == 1;
+    return n;
 }
 
 /* Get interface description for PCI device
@@ -367,13 +372,13 @@ _arch_interface_description_get(netsnmp_interface_entry *entry)
     snprintf(buf, sizeof(buf),
 	     "/sys/class/net/%s/device/vendor", entry->name);
 
-    if (!sysfs_get_id(buf, &vendor_id))
+    if (sysfs_get_value(buf, "%hx", &vendor_id) != 1)
 	return;
 
     snprintf(buf, sizeof(buf),
 	     "/sys/class/net/%s/device/device", entry->name);
 
-    if (!sysfs_get_id(buf, &device_id))
+    if (sysfs_get_value(buf, "%hx", &device_id) != 1)
 	return;
 
     descr = pci_lookup_name(pci_access, buf, sizeof(buf),
