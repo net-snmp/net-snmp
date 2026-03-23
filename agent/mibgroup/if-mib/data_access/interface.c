@@ -461,6 +461,34 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ACCESS_ENTRY_SET_ADMIN_STATUS */
 
+/**
+ * set interface alias
+ *
+ * @retval 0   : success
+ * @retval < 0 : error
+ */
+int
+netsnmp_access_interface_entry_set_ifalias(netsnmp_interface_entry * entry,
+                                           const char *alias,
+                                           size_t alias_len)
+{
+    int rc;
+
+    DEBUGMSGTL(("access:interface:entry", "set_ifalias\n"));
+
+    if (NULL == entry)
+        return -1;
+
+    rc = netsnmp_arch_set_ifalias(entry, alias, alias_len);
+    if (0 == rc) {
+        snprintf(entry->ifAlias, sizeof(entry->ifAlias), "%.*s",
+                 (int)alias_len, alias);
+        entry->ifAlias_len = alias_len;
+    }
+
+    return rc;
+}
+
 /**---------------------------------------------------------------------*/
 /*
  * Utility routines
@@ -697,6 +725,11 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
             if (!lhs->descr)
                 return -2;
         }
+    }
+    if (lhs->ifAlias_len != rhs->ifAlias_len ||
+        memcmp(lhs->ifAlias, rhs->ifAlias, rhs->ifAlias_len) != 0) {
+        memcpy(lhs->ifAlias, rhs->ifAlias, rhs->ifAlias_len);
+        lhs->ifAlias_len = rhs->ifAlias_len;
     }
     lhs->type = rhs->type;
     lhs->speed = rhs->speed;

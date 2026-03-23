@@ -2467,6 +2467,11 @@ ifAlias_set(ifXTable_rowreq_ctx * rowreq_ctx, char *ifAlias_val_ptr,
     rowreq_ctx->data.ifAlias_len =
         ifAlias_val_ptr_len / sizeof(ifAlias_val_ptr[0]);
 
+    if (netsnmp_access_interface_entry_set_ifalias(rowreq_ctx->data.ifentry,
+                                                   ifAlias_val_ptr,
+                                                   ifAlias_val_ptr_len) != 0)
+        return MFD_NOT_WRITABLE;
+
     return MFD_SUCCESS;
 }                               /* ifAlias_set */
 
@@ -2495,6 +2500,10 @@ ifAlias_undo(ifXTable_rowreq_ctx * rowreq_ctx)
            (rowreq_ctx->undo->ifAlias_len *
             sizeof(rowreq_ctx->data.ifAlias[0])));
     rowreq_ctx->data.ifAlias_len = rowreq_ctx->undo->ifAlias_len;
+    netsnmp_access_interface_entry_set_ifalias(rowreq_ctx->data.ifentry,
+                                               rowreq_ctx->data.ifAlias,
+                                               rowreq_ctx->data.ifAlias_len);
+
 
 
     return MFD_SUCCESS;

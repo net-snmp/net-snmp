@@ -92,6 +92,11 @@ ifXTable_row_prep(ifXTable_rowreq_ctx * rowreq_ctx)
 
     netsnmp_assert(NULL != rowreq_ctx);
 
+    memcpy(rowreq_ctx->data.ifAlias, rowreq_ctx->data.ifentry->ifAlias,
+           rowreq_ctx->data.ifentry->ifAlias_len);
+    rowreq_ctx->data.ifAlias[rowreq_ctx->data.ifentry->ifAlias_len] = '\0';
+    rowreq_ctx->data.ifAlias_len = rowreq_ctx->data.ifentry->ifAlias_len;
+
     /*
      * TODO:390:o: Prepare row for request.
      * If populating row data was delayed, this is the place to

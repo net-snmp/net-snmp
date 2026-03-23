@@ -405,3 +405,15 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INTERFACE_ARCH_SET_ADMIN_STATUS */
 
+
+int
+netsnmp_arch_set_ifalias(netsnmp_interface_entry *entry,
+                         const char *alias, size_t alias_len)
+{
+    DEBUGMSGTL(("access:interface:arch", "set_ifalias\n"));
+
+    /* not implemented */
+    snmp_log(LOG_ERR, "netsnmp_arch_set_ifalias is not (yet) implemented for FreeBSD.\n");
+
+    return -1;
+}

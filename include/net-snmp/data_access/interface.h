@@ -186,6 +186,9 @@ typedef struct netsnmp_interface_entry_s {
     char    v6_if_id_len;
     u_char  v6_if_id[8];
 
+    char    ifAlias[64];
+    size_t  ifAlias_len;    /* # of char elements, not bytes */
+
     /*-----------------------------------------------
      * platform/arch/access specific data
      */
@@ -267,6 +270,10 @@ void netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry);
 int
 netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 	                                                int ifAdminStatus);
+
+int
+netsnmp_access_interface_entry_set_ifalias(netsnmp_interface_entry * entry,
+                                           const char *alias, size_t alias_len);
 
 /*
  * find entry in container
