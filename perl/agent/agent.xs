@@ -855,7 +855,19 @@ nari_setValue(me, type, value)
 
               RETVAL = 1;
               break;
-              
+			case ASN_FLOAT:
+				/* We want a floating point number here here */
+				if ((SvTYPE(value) == SVt_PVMG) || SvNOK(value)) {
+					dtmp = SvNOK(value);
+					snmp_set_var_typed_value(request->requestvb, (u_char)type,
+					   (u_char *) &dtmp, sizeof(dtmp));
+					RETVAL = 1;
+				} else {
+					snmp_log(LOG_ERR, "Non-double value passed to setValue with ASN_FLOAT: type was %lu flags %#lx\n",
+						(unsigned long)SvTYPE(value), (unsigned long)SvFLAGS(value));
+					RETVAL = 0;
+				}
+				break;
             default:
                 snmp_log(LOG_ERR, "unknown var value type: %d\n",
                         type);
