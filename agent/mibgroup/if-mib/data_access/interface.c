@@ -570,12 +570,14 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
                         "Error expanding ifHCInUcastPkts to 64bits\n"));
         }
 
-        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
-                                       &new_vals->stats.iucast,
-                                       &prev_vals->old_stats->iucast,
-                                       &need_wrap_check))
-            DEBUGMSGTL(("access:interface",
-                    "Error expanding ifHCInUcastPkts to 64bits\n"));
+        /*
+         * The iucast c64 wrap-check is inside the CALCULATE_UCAST
+         * conditional above -- either iall or iucast is processed,
+         * never both.  This unconditional call was a bug: when
+         * CALCULATE_UCAST is set, new_vals->stats.iucast is always
+         * {0,0} (never populated on Linux), causing a spurious
+         * 2^32 adjustment.
+         */
 
         if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.imcast,
                                        &new_vals->stats.imcast,
@@ -667,6 +669,20 @@ netsnmp_access_interface_entry_calculate_stats(netsnmp_interface_entry *entry)
 }
 
 /**
+ * Compare two counter64 values.
+ * @return  1 if a > b, -1 if a < b, 0 if equal
+ */
+static int
+_c64_compare(const struct counter64 *a, const struct counter64 *b)
+{
+    if (a->high != b->high)
+        return (a->high > b->high) ? 1 : -1;
+    if (a->low != b->low)
+        return (a->low > b->low) ? 1 : -1;
+    return 0;
+}
+
+/**
  * copy interface entry data (after checking for counter wraps)
  *
  * @retval -2 : malloc failed
@@ -676,6 +692,22 @@ int
 netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
                                     netsnmp_interface_entry * rhs)
 {
+    /*
+     * Save previous iucast/iall before update_stats() overwrites
+     * them.  On Linux, iucast = iall - imcast (CALCULATE_UCAST).
+     * Per-CPU aggregation races in bond/team drivers can make
+     * imcast > iall momentarily, wrapping u64Subtract to near
+     * 2^64, or cause transient iucast decreases.
+     *
+     * RFC 2863 requires monotonically non-decreasing counters
+     * absent a discontinuity.  Hold previous iucast when the
+     * computed value would decrease and iall is non-decreasing.
+     */
+    struct counter64 prev_iucast = lhs->stats.iucast;
+    struct counter64 prev_iall   = lhs->stats.iall;
+    int had_calc_ucast =
+        (lhs->ns_flags & NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST);
+
     DEBUGMSGTL(("access:interface", "copy\n"));
 
     /*
@@ -683,6 +715,38 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
      */
     netsnmp_access_interface_entry_update_stats(lhs, rhs);
     netsnmp_access_interface_entry_calculate_stats(lhs);
+
+    /* Enforce iucast monotonicity for CALCULATE_UCAST platforms. */
+    if (had_calc_ucast) {
+        int iall_decreased  = (_c64_compare(&lhs->stats.iall,
+                                            &prev_iall) < 0);
+        int iucast_underflow = (_c64_compare(&lhs->stats.iucast,
+                                             &lhs->stats.iall) > 0);
+
+        if (iucast_underflow) {
+            /* u64Subtract wrapped: imcast > iall due to per-CPU race. */
+            DEBUGMSGTL(("access:interface",
+                     "ifHCInUcastPkts underflow on %s"
+                     " (iucast=%u:%u > iall=%u:%u),"
+                     " holding previous iucast=%u:%u\n",
+                     lhs->name ? lhs->name : "?",
+                     lhs->stats.iucast.high, lhs->stats.iucast.low,
+                     lhs->stats.iall.high, lhs->stats.iall.low,
+                     prev_iucast.high, prev_iucast.low));
+            lhs->stats.iucast = prev_iucast;
+        } else if (!iall_decreased
+                   && _c64_compare(&lhs->stats.iucast,
+                                   &prev_iucast) < 0) {
+            /* iall non-decreasing but iucast decreased -- race. */
+            DEBUGMSGTL(("access:interface",
+                     "ifHCInUcastPkts would decrease on %s"
+                     " (%u:%u -> %u:%u), holding previous\n",
+                     lhs->name ? lhs->name : "?",
+                     prev_iucast.high, prev_iucast.low,
+                     lhs->stats.iucast.high, lhs->stats.iucast.low));
+            lhs->stats.iucast = prev_iucast;
+        }
+    }
 
     /*
      * update data
