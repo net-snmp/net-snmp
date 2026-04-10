@@ -394,12 +394,76 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
          * bridge if we come to it).
          */
         if (rowreq_ctx->known_missing) {
+            DEBUGMSGTL(("ifTable:access",
+                     "interface %s returned from missing"
+                     " state, setting discontinuity time\n",
+                     rowreq_ctx->data.ifName));
             rowreq_ctx->known_missing = 0;
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
             rowreq_ctx->data.ifCounterDiscontinuityTime =
                 netsnmp_get_agent_uptime();
 #endif
         }
+
+        /*
+         * RFC 2863 Section 3.1.5: Detect counter discontinuity
+         * even without a known_missing transition.
+         *
+         * On Linux with team/bond devices, removing or adding
+         * slave ports (or link down/up) can reset kernel per-CPU
+         * counters without the interface disappearing from the
+         * ifTable.
+         *
+         * RFC 2863 requires: "The value of sysUpTime on the most
+         * recent occasion at which any one or more of this
+         * interface's counters suffered a discontinuity."
+         *
+         * We only perform this check when the platform provides
+         * native 64-bit counters (HAS_HIGH_SPEED).  On platforms
+         * with 32-bit-only counters (OpenBSD, FreeBSD, Windows)
+         * the stored previous stats are synthetically expanded
+         * by netsnmp_c64_check32_and_update(), so comparing them
+         * against raw new values would yield false positives
+         * after every 32-bit wrap.
+         */
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
+        {
+            netsnmp_interface_entry *prev = rowreq_ctx->data.ifentry;
+            if (prev && prev->name && ifentry->name
+                && (prev->ns_flags
+                    & NETSNMP_INTERFACE_FLAGS_HAS_HIGH_SPEED)) {
+                int disc = 0;
+                if (ifentry->stats.ibytes.high < prev->stats.ibytes.high
+                    || (ifentry->stats.ibytes.high
+                            == prev->stats.ibytes.high
+                        && ifentry->stats.ibytes.low
+                            < prev->stats.ibytes.low))
+                    disc = 1;
+                if (ifentry->stats.iall.high < prev->stats.iall.high
+                    || (ifentry->stats.iall.high
+                            == prev->stats.iall.high
+                        && ifentry->stats.iall.low
+                            < prev->stats.iall.low))
+                    disc = 1;
+                if (ifentry->stats.obytes.high < prev->stats.obytes.high
+                    || (ifentry->stats.obytes.high
+                            == prev->stats.obytes.high
+                        && ifentry->stats.obytes.low
+                            < prev->stats.obytes.low))
+                    disc = 1;
+                if (disc) {
+                    DEBUGMSGTL(("ifTable:access",
+                             "counter discontinuity detected on %s"
+                             " (counter decrease without missing"
+                             " transition), updating"
+                             " ifCounterDiscontinuityTime\n",
+                             prev->name));
+                    rowreq_ctx->data.ifCounterDiscontinuityTime =
+                        netsnmp_get_agent_uptime();
+                }
+            }
+        }
+#endif
 
         /*
          * Check for changes, then update
