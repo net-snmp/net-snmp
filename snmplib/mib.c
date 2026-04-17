@@ -474,7 +474,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
     if (hint) {
         int             repeat, width = 1;
-        long            value;
+        unsigned long   value;
         char            code = 'd', separ = 0, term = 0, ch, intbuf[32];
 #define HEX2DIGIT_NEED_INIT 3
         char            hex2digit = HEX2DIGIT_NEED_INIT;
@@ -551,7 +551,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     }
                     break;
                 case 'd':
-                    sprintf(intbuf, "%ld", value);
+                    sprintf(intbuf, "%lu", value);
                     if (!snmp_cstrcat
                         (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
