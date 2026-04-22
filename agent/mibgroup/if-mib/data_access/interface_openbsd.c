@@ -371,7 +371,7 @@ netsnmp_openbsd_interface_get_if_speed(char *name, u_int *speed, u_int *speed_hi
                 _openbsd_interface_ifmedia_to_speed(media_list[i], &t_speed, &t_speed_high);
 
                 if (t_speed_high > m_speed_high ||
-                    (t_speed_high == m_speed_high && t_speed > t_speed)) {
+                    (t_speed_high == m_speed_high && t_speed > m_speed)) {
                     m_speed_high = t_speed_high; m_speed = t_speed;
                 }
             }
