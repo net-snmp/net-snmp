@@ -252,5 +252,6 @@ close_session:
 
 out:
     SOCK_CLEANUP;
+	netsnmp_cleanup_session(&session);
     return exitval;
 }                               /* end main() */
