@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <limits.h>
@@ -27,8 +28,45 @@
 #define IDX_CPU_BASE    200
 #define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
 #define IDX_PCI_BASE   1000
+#define IDX_SCSI_BASE  2000
 #define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
+
+#define HWMON_BUCKETS   256   /* slots in the hwmon hash table */
+#define HWMON_SLOT_SZ    20   /* index slots per chip (chip + up to 19 sensors) */
+#define NVME_BUCKETS     64   /* slots for standalone NVMe (no PCI parent) */
+#define SCSI_BUCKETS     64   /* slots for SATA/SAS disks */
+
+/* FNV-1a 32-bit hash — used for stable index assignment */
+static uint32_t
+_fnv1a_hash(const char *s)
+{
+    uint32_t h = 2166136261u;
+    while (*s) {
+        h ^= (unsigned char)*s++;
+        h *= 16777619u;
+    }
+    return h;
+}
+
+/* Map a string key to a free slot in a linear-probe hash table of `buckets`
+ * entries.  `used` is a caller-allocated zero-initialised char array of size
+ * `buckets`.  Returns the slot index, or -1 when the table is full. */
+static int
+_hash_alloc_slot(const char *key, char *used, int buckets)
+{
+    int slot = (int)(_fnv1a_hash(key) % (uint32_t)buckets);
+    int tries = 0;
+
+    while (used[slot] && tries < buckets) {
+        slot = (slot + 1) % buckets;
+        tries++;
+    }
+    if (tries == buckets)
+        return -1;
+    used[slot] = 1;
+    return slot;
+}
 
 /* ---- helpers ------------------------------------------------------------- */
 
@@ -641,6 +679,26 @@ _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
     return parent_idx;
 }
 
+/* Find the deepest PCI device whose realpath is a prefix of `path`.
+ * Used to attach non-PCI devices (SCSI disks) to their controller. */
+static int
+_pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
+{
+    int i, best_idx = 0, best_len = 0;
+    size_t plen = strlen(path);
+
+    for (i = 0; i < nmap; i++) {
+        int mlen = (int)strlen(map[i].real_path);
+        if (mlen <= best_len || (size_t)mlen >= plen)
+            continue;
+        if (strncmp(path, map[i].real_path, mlen) == 0 && path[mlen] == '/')  {
+            best_len = mlen;
+            best_idx = map[i].idx;
+        }
+    }
+    return best_idx;
+}
+
 static void
 _load_pci(pci_entity_map **map_out, int *nmap_out)
 {
@@ -866,11 +924,160 @@ free_bdfs:
 /* ---- Phase 5: NVMe controllers and namespaces ---------------------------- */
 
 static void
-_load_nvme(int *next_nvme_idx, pci_entity_map *pci_map, int pci_map_n)
+_load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], val[256], rp[PATH_MAX];
+    char used[SCSI_BUCKETS];
+
+    memset(used, 0, sizeof(used));
+
+    dir = opendir(BLOCK_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        netsnmp_entity_info *e;
+        int slot, pci_idx;
+        const char *p;
+
+        if (de->d_name[0] == '.')
+            continue;
+
+        /* Only plain 'sd' disks: skip nvme, md, bcache, loop, dm, sr */
+        if (strncmp(de->d_name, "sd", 2) != 0)
+            continue;
+
+        /* Skip partitions: sdaN has a digit somewhere after 'sd' */
+        for (p = de->d_name + 2; *p && !isdigit((unsigned char)*p); p++)
+            ;
+        if (*p)
+            continue;
+
+        /* Resolve device symlink to get full sysfs path */
+        snprintf(path, sizeof(path), "%s/%s/device", BLOCK_PATH, de->d_name);
+        if (!realpath(path, rp))
+            continue;
+
+        /* Use the HCTL string (basename of realpath) as stable hash key */
+        p = strrchr(rp, '/');
+        if (!p)
+            continue;
+        p++;  /* e.g. "0:0:0:0" */
+
+        slot = _hash_alloc_slot(p, used, SCSI_BUCKETS);
+        if (slot < 0)
+            continue;
+
+        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+
+        e = netsnmp_entity_create(IDX_SCSI_BASE + slot);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_MODULE;
+        e->is_fru     = TV_TRUE;
+        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        strlcpy(e->name, de->d_name, sizeof(e->name));
+
+        snprintf(path, sizeof(path), "%s/%s/device/model", BLOCK_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        _trim_trailing(val);
+        if (val[0]) {
+            strlcpy(e->model_name, val, sizeof(e->model_name));
+            strlcpy(e->descr, val, sizeof(e->descr));
+        } else {
+            strlcpy(e->descr, de->d_name, sizeof(e->descr));
+        }
+
+        snprintf(path, sizeof(path), "%s/%s/device/vendor", BLOCK_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        _trim_trailing(val);
+        _set_if_valid(e->mfg_name, sizeof(e->mfg_name), val);
+
+        snprintf(path, sizeof(path), "%s/%s/device/rev", BLOCK_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        _set_if_valid(e->fw_rev, sizeof(e->fw_rev), val);
+
+        /* Serial number from VPD page 0x80: bytes 0-3 are header,
+         * bytes 4+ are the ASCII serial string. */
+        {
+            FILE *f;
+            unsigned char vpd[256];
+            size_t nr;
+
+            snprintf(path, sizeof(path), "%s/%s/device/vpd_pg80",
+                     BLOCK_PATH, de->d_name);
+            f = fopen(path, "rb");
+            if (f) {
+                nr = fread(vpd, 1, sizeof(vpd), f);
+                fclose(f);
+                if (nr > 4 && vpd[1] == 0x80) {
+                    size_t slen = (vpd[2] << 8) | vpd[3];
+                    if (slen > nr - 4)
+                        slen = nr - 4;
+                    if (slen > 0 && slen < sizeof(e->serial)) {
+                        memcpy(e->serial, vpd + 4, slen);
+                        e->serial[slen] = '\0';
+                        /* right-strip spaces */
+                        while (slen > 0 && e->serial[slen-1] == ' ')
+                            e->serial[--slen] = '\0';
+                    }
+                }
+            }
+        }
+
+        /* Size in GiB or TiB from /sys/block/sdX/size (512-byte sectors) */
+        {
+            unsigned long long sectors = 0;
+            char rot = '1';
+            const char *model = e->model_name[0] ? e->model_name : de->d_name;
+            char size_str[32] = "";
+
+            snprintf(path, sizeof(path), "%s/%s/size", BLOCK_PATH, de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            if (val[0])
+                sectors = strtoull(val, NULL, 10);
+
+            if (sectors) {
+                unsigned long long bytes = sectors * 512ULL;
+                unsigned long long tib = bytes >> 40;
+                unsigned long long gib = bytes >> 30;
+                if (tib >= 1)
+                    snprintf(size_str, sizeof(size_str), "%lluTiB", tib);
+                else
+                    snprintf(size_str, sizeof(size_str), "%lluGiB", gib);
+            }
+
+            snprintf(path, sizeof(path), "%s/%s/queue/rotational",
+                     BLOCK_PATH, de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            if (val[0])
+                rot = val[0];
+
+            if (size_str[0])
+                snprintf(e->descr, sizeof(e->descr), "%s (%s, %s)",
+                         model, rot == '0' ? "SSD" : "HDD", size_str);
+            else
+                snprintf(e->descr, sizeof(e->descr), "%s (%s)",
+                         model, rot == '0' ? "SSD" : "HDD");
+        }
+
+        snprintf(e->uris, sizeof(e->uris), "file:///sys/block/%s", de->d_name);
+    }
+    closedir(dir);
+}
+
+static void
+_load_nvme(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
     struct dirent *de;
     char path[512], val[256];
+    char used[NVME_BUCKETS];
+
+    memset(used, 0, sizeof(used));
 
     dir = opendir(NVME_PATH);
     if (!dir)
@@ -878,7 +1085,7 @@ _load_nvme(int *next_nvme_idx, pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int idx, pci_idx, ns_base;
+        int idx, pci_idx, slot;
 
         if (de->d_name[0] == '.')
             continue;
@@ -887,12 +1094,14 @@ _load_nvme(int *next_nvme_idx, pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         pci_idx = val[0] ? _pci_find_idx(pci_map, pci_map_n, val) : 0;
 
-        ns_base = (*next_nvme_idx)++;
         if (pci_idx) {
             e = netsnmp_entity_get_byIdx(pci_idx);
             idx = pci_idx;
         } else {
-            idx = IDX_NVME_BASE + ns_base;
+            slot = _hash_alloc_slot(de->d_name, used, NVME_BUCKETS);
+            if (slot < 0)
+                continue;
+            idx = IDX_NVME_BASE + slot;
             e = netsnmp_entity_create(idx);
         }
         if (!e)
@@ -986,7 +1195,7 @@ _hwmon_class(const char *name)
 }
 
 static void
-_load_hwmon(int *next_hwmon_idx)
+_load_hwmon(void)
 {
     static const char *prefixes[] = { "temp", "fan", "in", NULL };
     DIR *dir;
@@ -994,6 +1203,9 @@ _load_hwmon(int *next_hwmon_idx)
     char path[512];
     hwmon_entry *chips, *tmp;
     int  pi, chip_count, chip_cap, ci;
+    char used[HWMON_BUCKETS];
+
+    memset(used, 0, sizeof(used));
 
     dir = opendir(HWMON_PATH);
     if (!dir)
@@ -1033,10 +1245,21 @@ _load_hwmon(int *next_hwmon_idx)
 
     for (ci = 0; ci < chip_count; ci++) {
         netsnmp_entity_info *e;
-        int chip_idx, sensor_seq, n;
+        int chip_base, slot, sensor_seq, n;
+        char rp[PATH_MAX], key[PATH_MAX + 32];
 
-        chip_idx = (*next_hwmon_idx)++;
-        e = netsnmp_entity_create(IDX_SENSOR_BASE + chip_idx * 20);
+        /* Build a stable key from the realpath of the hwmon dir */
+        snprintf(path, sizeof(path), "%s/%s", HWMON_PATH, chips[ci].dir);
+        if (!realpath(path, rp))
+            strlcpy(rp, path, sizeof(rp));
+        snprintf(key, sizeof(key), "%s|%s", chips[ci].name, rp);
+
+        slot = _hash_alloc_slot(key, used, HWMON_BUCKETS);
+        if (slot < 0)
+            continue;
+
+        chip_base = IDX_SENSOR_BASE + slot * HWMON_SLOT_SZ;
+        e = netsnmp_entity_create(chip_base);
         if (!e)
             continue;
 
@@ -1058,14 +1281,16 @@ _load_hwmon(int *next_hwmon_idx)
                 if (access(path, F_OK) != 0)
                     break;
 
+                if (sensor_seq >= HWMON_SLOT_SZ)
+                    break;  /* no more slots for this chip */
+
                 snprintf(sensor_name, sizeof(sensor_name), "%s%d", pfx, n);
-                se = netsnmp_entity_create(IDX_SENSOR_BASE +
-                                           chip_idx * 20 + sensor_seq);
+                se = netsnmp_entity_create(chip_base + sensor_seq);
                 sensor_seq++;
                 if (!se) continue;
 
                 se->iana_class = IANA_PHYS_SENSOR;
-                se->parent_idx = IDX_SENSOR_BASE + chip_idx * 20;
+                se->parent_idx = chip_base;
                 strlcpy(se->name,  sensor_name, sizeof(se->name));
                 strlcpy(se->descr, sensor_name, sizeof(se->descr));
 
@@ -1148,8 +1373,6 @@ _load_power_supply(void)
 int
 netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
-    int nvme_seq  = 0;
-    int hwmon_seq = 0;
     pci_entity_map *pci_map = NULL;
     int pci_map_n = 0;
 
@@ -1160,8 +1383,9 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_caches();
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
-    _load_nvme(&nvme_seq, pci_map, pci_map_n);
-    _load_hwmon(&hwmon_seq);
+    _load_scsi_disks(pci_map, pci_map_n);
+    _load_nvme(pci_map, pci_map_n);
+    _load_hwmon();
     _load_power_supply();
 
     free(pci_map);
