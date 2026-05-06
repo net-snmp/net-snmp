@@ -14,6 +14,7 @@
 
 #define DMI_PATH    "/sys/class/dmi/id"
 #define PCI_PATH    "/sys/bus/pci/devices"
+#define USB_PATH    "/sys/bus/usb/devices"
 #define NET_PATH    "/sys/class/net"
 #define NVME_PATH   "/sys/class/nvme"
 #define BLOCK_PATH  "/sys/block"
@@ -29,6 +30,7 @@
 #define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
 #define IDX_PCI_BASE   1000
 #define IDX_SCSI_BASE  2000
+#define IDX_USB_BASE   2200
 #define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
 
@@ -36,6 +38,7 @@
 #define HWMON_SLOT_SZ    20   /* index slots per chip (chip + up to 19 sensors) */
 #define NVME_BUCKETS     64   /* slots for standalone NVMe (no PCI parent) */
 #define SCSI_BUCKETS     64   /* slots for SATA/SAS disks */
+#define USB_BUCKETS      64   /* slots for USB devices */
 
 /* FNV-1a 32-bit hash — used for stable index assignment */
 static uint32_t
@@ -924,6 +927,88 @@ free_bdfs:
 /* ---- Phase 5: NVMe controllers and namespaces ---------------------------- */
 
 static void
+_load_usb(pci_entity_map *pci_map, int pci_map_n)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], val[256], rp[PATH_MAX];
+    char used[USB_BUCKETS];
+
+    memset(used, 0, sizeof(used));
+
+    dir = opendir(USB_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        netsnmp_entity_info *e;
+        int slot, pci_idx;
+        const char *name = de->d_name;
+
+        if (name[0] == '.')
+            continue;
+        /* Skip interface entries (e.g. "1-6:1.0") */
+        if (strchr(name, ':'))
+            continue;
+        /* Skip root hub entries (e.g. "usb1") — already represented by PCI */
+        if (strncmp(name, "usb", 3) == 0)
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
+        if (!realpath(path, rp))
+            continue;
+
+        slot = _hash_alloc_slot(name, used, USB_BUCKETS);
+        if (slot < 0)
+            continue;
+
+        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+
+        e = netsnmp_entity_create(IDX_USB_BASE + slot);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_MODULE;
+        e->is_fru     = TV_FALSE;
+        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        strlcpy(e->name, name, sizeof(e->name));
+
+        snprintf(path, sizeof(path), "%s/%s/product", USB_PATH, name);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0]) {
+            strlcpy(e->model_name, val, sizeof(e->model_name));
+            strlcpy(e->descr, val, sizeof(e->descr));
+        }
+
+        snprintf(path, sizeof(path), "%s/%s/manufacturer", USB_PATH, name);
+        _sysfs_read(path, val, sizeof(val));
+        _set_if_valid(e->mfg_name, sizeof(e->mfg_name), val);
+
+        snprintf(path, sizeof(path), "%s/%s/serial", USB_PATH, name);
+        _sysfs_read(path, val, sizeof(val));
+        _set_if_valid(e->serial, sizeof(e->serial), val);
+
+        /* Device version (BCD, e.g. "02.00") */
+        snprintf(path, sizeof(path), "%s/%s/bcdDevice", USB_PATH, name);
+        _sysfs_read(path, val, sizeof(val));
+        _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
+
+        /* Fallback description when no product string */
+        if (!e->descr[0]) {
+            char vid[8] = "", pid[8] = "";
+            snprintf(path, sizeof(path), "%s/%s/idVendor", USB_PATH, name);
+            _sysfs_read(path, vid, sizeof(vid));
+            snprintf(path, sizeof(path), "%s/%s/idProduct", USB_PATH, name);
+            _sysfs_read(path, pid, sizeof(pid));
+            snprintf(e->descr, sizeof(e->descr), "USB Device %s:%s", vid, pid);
+        }
+
+        snprintf(e->uris, sizeof(e->uris), "file:///sys/bus/usb/devices/%s", name);
+    }
+    closedir(dir);
+}
+
+static void
 _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
@@ -1383,6 +1468,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_caches();
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
+    _load_usb(pci_map, pci_map_n);
     _load_scsi_disks(pci_map, pci_map_n);
     _load_nvme(pci_map, pci_map_n);
     _load_hwmon();
