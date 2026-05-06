@@ -7,6 +7,8 @@ static netsnmp_entity_info        *_ent_head = NULL;
 static netsnmp_cache              *_ent_cache = NULL;
 static netsnmp_entity_contains_row *_contains = NULL;
 static int                          _contains_n = 0;
+static netsnmp_entity_alias_row    *_alias = NULL;
+static int                          _alias_n = 0;
 
 u_long entity_last_change = 0;
 
@@ -65,12 +67,68 @@ netsnmp_entity_contains_row *netsnmp_entity_contains_get(int n)
     return &_contains[n];
 }
 
+static int _cmp_alias(const void *a, const void *b)
+{
+    const netsnmp_entity_alias_row *ra = (const netsnmp_entity_alias_row *)a;
+    const netsnmp_entity_alias_row *rb = (const netsnmp_entity_alias_row *)b;
+    if (ra->phys_idx != rb->phys_idx)
+        return ra->phys_idx - rb->phys_idx;
+    return ra->logical_idx - rb->logical_idx;
+}
+
+void netsnmp_entity_alias_rebuild(void)
+{
+    netsnmp_entity_info *e;
+    int count = 0;
+
+    SNMP_FREE(_alias);
+    _alias_n = 0;
+
+    for (e = _ent_head; e; e = e->next)
+        if (e->ifindex > 0)
+            count++;
+
+    if (!count)
+        return;
+
+    _alias = (netsnmp_entity_alias_row *)
+        malloc(count * sizeof(netsnmp_entity_alias_row));
+    if (!_alias)
+        return;
+
+    _alias_n = 0;
+    for (e = _ent_head; e; e = e->next) {
+        if (e->ifindex > 0) {
+            _alias[_alias_n].phys_idx    = e->idx;
+            _alias[_alias_n].logical_idx = 0;
+            _alias[_alias_n].ifindex     = e->ifindex;
+            _alias_n++;
+        }
+    }
+
+    qsort(_alias, _alias_n, sizeof(_alias[0]), _cmp_alias);
+}
+
+int netsnmp_entity_alias_count(void)
+{
+    return _alias_n;
+}
+
+netsnmp_entity_alias_row *netsnmp_entity_alias_get(int n)
+{
+    if (n < 0 || n >= _alias_n)
+        return NULL;
+    return &_alias[n];
+}
+
 static void
 _entity_cache_free(netsnmp_cache *cache, void *magic)
 {
     netsnmp_entity_free_list();
     SNMP_FREE(_contains);
     _contains_n = 0;
+    SNMP_FREE(_alias);
+    _alias_n = 0;
 }
 
 void init_entity(void)
@@ -89,6 +147,8 @@ void shutdown_entity(void)
     netsnmp_entity_free_list();
     SNMP_FREE(_contains);
     _contains_n = 0;
+    SNMP_FREE(_alias);
+    _alias_n = 0;
 }
 
 netsnmp_cache *netsnmp_entity_get_cache(void)

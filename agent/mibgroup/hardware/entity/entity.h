@@ -28,6 +28,7 @@ typedef struct netsnmp_entity_info_s {
     int     parent_rel_pos;
     int     iana_class;
     int     is_fru;
+    int     ifindex;        /* >0 for port entities with an if-MIB mapping */
     char    descr[256];
     char    name[64];
     char    hw_rev[64];
@@ -49,6 +50,13 @@ typedef struct {
     int child_idx;
 } netsnmp_entity_contains_row;
 
+/* Sorted (phys_idx, logical_idx) pairs for entAliasMappingTable */
+typedef struct {
+    int phys_idx;
+    int logical_idx;    /* 0 when no entLogicalTable is implemented */
+    int ifindex;        /* the if-MIB ifIndex this port maps to */
+} netsnmp_entity_alias_row;
+
 extern u_long entity_last_change;
 
 netsnmp_cache *netsnmp_entity_get_cache(void);
@@ -63,6 +71,10 @@ int                           netsnmp_entity_contains_count(void);
 netsnmp_entity_contains_row  *netsnmp_entity_contains_get(int n);
 void                          netsnmp_entity_contains_rebuild(void);
 void                          netsnmp_entity_parent_rel_pos_rebuild(void);
+
+int                        netsnmp_entity_alias_count(void);
+netsnmp_entity_alias_row  *netsnmp_entity_alias_get(int n);
+void                       netsnmp_entity_alias_rebuild(void);
 
 int netsnmp_entity_arch_load(netsnmp_cache *, void *);
 

@@ -1,5 +1,6 @@
 config_require(hardware/entity/entity);
 config_require(hardware/entity/entPhysicalTable);
+config_require(hardware/entity/entAliasMappingTable);
 config_require(hardware/entity/entLastChangeTime);
 
 #if defined(linux)

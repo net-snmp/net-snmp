@@ -782,8 +782,12 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 snprintf(path, sizeof(path), "%s/%s/ifindex",
                          NET_PATH, nde->d_name);
                 ifindex = _sysfs_read_int(path);
-                if (ifindex > 0 && !e->alias[0])
-                    snprintf(e->alias, sizeof(e->alias), "ifIndex.%d", ifindex);
+                if (ifindex > 0) {
+                    e->ifindex = ifindex;
+                    if (!e->alias[0])
+                        snprintf(e->alias, sizeof(e->alias),
+                                 "ifIndex.%d", ifindex);
+                }
 
                 break;
             }
@@ -1122,6 +1126,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     free(pci_map);
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
+    netsnmp_entity_alias_rebuild();
     entity_last_change = netsnmp_get_agent_uptime();
     return 0;
 }
