@@ -16,15 +16,17 @@
 #define NVME_PATH   "/sys/class/nvme"
 #define BLOCK_PATH  "/sys/block"
 #define HWMON_PATH  "/sys/class/hwmon"
+#define PSY_PATH    "/sys/class/power_supply"
 
 #define IDX_CHASSIS      1
 #define IDX_BASEBOARD   10
 #define IDX_BIOS        20
 #define IDX_MEMORY     100
 #define IDX_DIMM_BASE  110
-#define IDX_CPU_BASE   200
-#define IDX_PCI_BASE  1000
-#define IDX_NVME_BASE 3000
+#define IDX_CPU_BASE    200
+#define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
+#define IDX_PCI_BASE   1000
+#define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
 
 /* ---- helpers ------------------------------------------------------------- */
@@ -358,7 +360,97 @@ _load_dimms(void)
     pclose(fp);
 }
 
-/* ---- Phase 4: PCI devices ------------------------------------------------ */
+/* ---- Phase 4: CPU caches ------------------------------------------------- */
+
+static void
+_load_caches(void)
+{
+    DIR *cpu_dir, *cache_dir;
+    struct dirent *cpu_de, *cache_de;
+    char path[512], val[64];
+    int seen_pkg[64];
+
+    memset(seen_pkg, 0, sizeof(seen_pkg));
+
+    cpu_dir = opendir("/sys/devices/system/cpu");
+    if (!cpu_dir)
+        return;
+
+    while ((cpu_de = readdir(cpu_dir))) {
+        int cpu_num, phys_id, cache_idx;
+        char cache_path[512];
+
+        if (sscanf(cpu_de->d_name, "cpu%d", &cpu_num) != 1)
+            continue;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/physical_package_id",
+                 cpu_de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        if (!val[0])
+            continue;
+        phys_id = atoi(val);
+        if (phys_id < 0 || phys_id >= 64 || seen_pkg[phys_id])
+            continue;
+        seen_pkg[phys_id] = 1;
+
+        snprintf(cache_path, sizeof(cache_path),
+                 "/sys/devices/system/cpu/%s/cache", cpu_de->d_name);
+        cache_dir = opendir(cache_path);
+        if (!cache_dir)
+            continue;
+
+        while ((cache_de = readdir(cache_dir))) {
+            char type[32], size[32];
+            int level;
+            netsnmp_entity_info *e;
+
+            if (sscanf(cache_de->d_name, "index%d", &cache_idx) != 1)
+                continue;
+
+            snprintf(path, sizeof(path), "%s/%s/level", cache_path, cache_de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            if (!val[0])
+                continue;
+            level = atoi(val);
+
+            snprintf(path, sizeof(path), "%s/%s/type", cache_path, cache_de->d_name);
+            _sysfs_read(path, type, sizeof(type));
+
+            snprintf(path, sizeof(path), "%s/%s/size", cache_path, cache_de->d_name);
+            _sysfs_read(path, size, sizeof(size));
+
+            e = netsnmp_entity_create(IDX_CACHE_BASE + phys_id * 10 + cache_idx);
+            if (!e)
+                continue;
+
+            e->iana_class = IANA_PHYS_MODULE;
+            e->parent_idx = IDX_CPU_BASE + phys_id;
+            e->is_fru     = TV_FALSE;
+
+            if (strcmp(type, "Unified") == 0)
+                snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
+            else if (strcmp(type, "Data") == 0)
+                snprintf(e->name,  sizeof(e->name),  "L%d-cache-data", level);
+            else if (strcmp(type, "Instruction") == 0)
+                snprintf(e->name,  sizeof(e->name),  "L%d-cache-instr", level);
+            else
+                snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
+
+            if (strcmp(type, "Unified") == 0)
+                snprintf(e->descr, sizeof(e->descr), "L%d cache %s", level, size);
+            else
+                snprintf(e->descr, sizeof(e->descr), "L%d %s cache %s",
+                         level, type, size);
+
+            strlcpy(e->model_name, size, sizeof(e->model_name));
+        }
+        closedir(cache_dir);
+    }
+    closedir(cpu_dir);
+}
+
+/* ---- Phase 5: PCI devices ------------------------------------------------ */
 
 static int
 _cmp_bdf(const void *a, const void *b)
@@ -368,19 +460,134 @@ _cmp_bdf(const void *a, const void *b)
     return strcmp(*sa, *sb);
 }
 
+static const char *
+_pci_class_descr(long class_val)
+{
+    int base = (int)((class_val >> 16) & 0xFF);
+    int sub  = (int)((class_val >>  8) & 0xFF);
+
+    switch (base) {
+    case 0x00:
+        return sub == 0x01 ? "VGA-compatible device" : "Unclassified device";
+    case 0x01:
+        switch (sub) {
+        case 0x00: return "SCSI controller";
+        case 0x01: return "IDE controller";
+        case 0x02: return "Floppy disk controller";
+        case 0x04: return "RAID controller";
+        case 0x06: return "SATA controller";
+        case 0x08: return "NVM Express controller";
+        default:   return "Storage controller";
+        }
+    case 0x02:
+        switch (sub) {
+        case 0x00: return "Ethernet controller";
+        case 0x80: return "Network controller";
+        default:   return "Network controller";
+        }
+    case 0x03:
+        return sub == 0x00 ? "VGA-compatible controller" : "Display controller";
+    case 0x04:
+        switch (sub) {
+        case 0x00: return "Multimedia video controller";
+        case 0x01: return "Multimedia audio controller";
+        case 0x03: return "Audio device";
+        default:   return "Multimedia controller";
+        }
+    case 0x05:
+        switch (sub) {
+        case 0x00: return "RAM memory";
+        case 0x01: return "Flash memory";
+        default:   return "Memory controller";
+        }
+    case 0x06:
+        switch (sub) {
+        case 0x00: return "Host bridge";
+        case 0x01: return "ISA bridge";
+        case 0x02: return "EISA bridge";
+        case 0x04: return "PCI bridge";
+        case 0x05: return "PCMCIA bridge";
+        case 0x07: return "CardBus bridge";
+        case 0x09: return "PCI-E to PCI bridge";
+        default:   return "Bridge";
+        }
+    case 0x07:
+        switch (sub) {
+        case 0x00: return "Serial controller";
+        case 0x01: return "Parallel controller";
+        case 0x03: return "Modem";
+        default:   return "Communication controller";
+        }
+    case 0x08:
+        switch (sub) {
+        case 0x00: return "PIC";
+        case 0x01: return "DMA controller";
+        case 0x02: return "Timer";
+        case 0x03: return "RTC";
+        case 0x05: return "SD host controller";
+        case 0x06: return "IOMMU";
+        case 0x80: return "System peripheral";
+        default:   return "System peripheral";
+        }
+    case 0x09:
+        switch (sub) {
+        case 0x00: return "Keyboard controller";
+        case 0x02: return "Mouse controller";
+        default:   return "Input device";
+        }
+    case 0x0a: return "Docking station";
+    case 0x0b: return "Processor";
+    case 0x0c:
+        switch (sub) {
+        case 0x00: return "FireWire controller";
+        case 0x03: return "USB controller";
+        case 0x05: return "SMBus controller";
+        case 0x07: return "IPMI interface";
+        default:   return "Serial bus controller";
+        }
+    case 0x0d:
+        switch (sub) {
+        case 0x00: return "iRDA controller";
+        case 0x11: return "Bluetooth controller";
+        case 0x12: return "Broadband controller";
+        case 0x20: return "802.11a controller";
+        case 0x21: return "802.11b controller";
+        default:   return "Wireless controller";
+        }
+    case 0x0e: return "Intelligent controller";
+    case 0x0f: return "Satellite communications controller";
+    case 0x10: return "Encryption controller";
+    case 0x11:
+        switch (sub) {
+        case 0x00: return "DPIO module";
+        case 0x01: return "Performance counters";
+        default:   return "Signal processing controller";
+        }
+    default: return NULL;
+    }
+}
+
 static int
 _pci_class_to_iana(long class_val)
 {
     int base = (int)((class_val >> 16) & 0xFF);
     int sub  = (int)((class_val >>  8) & 0xFF);
 
-    if (base == 0x02)
+    switch (base) {
+    case 0x02:                          /* Network controller */
+    case 0x0d:                          /* Wireless controller */
         return IANA_PHYS_PORT;
-    if (base == 0x06 && sub == 0x00)
-        return IANA_PHYS_BACKPLANE;
-    if (base == 0x06 && sub == 0x04)
-        return IANA_PHYS_CONTAINER;
-    return IANA_PHYS_MODULE;
+    case 0x06:                          /* Bridge */
+        if (sub == 0x00)
+            return IANA_PHYS_BACKPLANE; /* Host bridge / root complex */
+        return IANA_PHYS_CONTAINER;     /* PCI-PCI, CardBus, etc. */
+    case 0x0b:                          /* Processor */
+        return IANA_PHYS_CPU;
+    case 0x11:                          /* Signal processing (thermal, etc.) */
+        return IANA_PHYS_SENSOR;
+    default:
+        return IANA_PHYS_MODULE;
+    }
 }
 
 typedef struct pci_entity_map_s {
@@ -514,6 +721,42 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
             strlcpy(e->model_name, val, sizeof(e->model_name));
+
+        snprintf(path, sizeof(path), "%s/%s/subsystem_vendor", PCI_PATH, bdfs[i]);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0]) {
+            char subdev[32] = "";
+            char tmp[64];
+            snprintf(path, sizeof(path), "%s/%s/subsystem_device", PCI_PATH, bdfs[i]);
+            _sysfs_read(path, subdev, sizeof(subdev));
+            if (subdev[0])
+                snprintf(tmp, sizeof(tmp), "%s:%s", val, subdev);
+            else
+                strlcpy(tmp, val, sizeof(tmp));
+            strlcpy(e->sw_rev, tmp, sizeof(e->sw_rev));
+        }
+
+        snprintf(path, sizeof(path), "%s/%s/revision", PCI_PATH, bdfs[i]);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0])
+            strlcpy(e->hw_rev, val, sizeof(e->hw_rev));
+
+        {
+            char link[512];
+            ssize_t llen;
+            snprintf(path, sizeof(path), "%s/%s/driver", PCI_PATH, bdfs[i]);
+            llen = readlink(path, link, sizeof(link) - 1);
+            if (llen > 0) {
+                char *drv;
+                link[llen] = '\0';
+                drv = strrchr(link, '/');
+                strlcpy(e->descr, drv ? drv + 1 : link, sizeof(e->descr));
+            } else {
+                const char *cls_descr = _pci_class_descr(class_val);
+                if (cls_descr)
+                    strlcpy(e->descr, cls_descr, sizeof(e->descr));
+            }
+        }
 
         snprintf(netpath, sizeof(netpath), "%s/%s/net", PCI_PATH, bdfs[i]);
         netdir = opendir(netpath);
@@ -788,6 +1031,73 @@ _load_hwmon(int *next_hwmon_idx)
     free(chips);
 }
 
+/* ---- Phase 8: enrich hwmon power-supply entities from /sys/class/power_supply */
+
+static void
+_load_power_supply(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], val[256];
+
+    dir = opendir(PSY_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        netsnmp_entity_info *e;
+        char mfg[128], model[128], serial[64], tech[64], type[32];
+
+        if (de->d_name[0] == '.')
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s/type", PSY_PATH, de->d_name);
+        _sysfs_read(path, type, sizeof(type));
+        if (strcmp(type, "Battery") != 0)
+            continue;
+
+        /* Find the hwmon entity whose model_name matches this PSY name */
+        for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+            if (strcmp(e->model_name, de->d_name) == 0)
+                break;
+        }
+        if (!e)
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s/manufacturer", PSY_PATH, de->d_name);
+        _sysfs_read(path, mfg, sizeof(mfg));
+
+        snprintf(path, sizeof(path), "%s/%s/model_name", PSY_PATH, de->d_name);
+        _sysfs_read(path, model, sizeof(model));
+
+        snprintf(path, sizeof(path), "%s/%s/serial_number", PSY_PATH, de->d_name);
+        _sysfs_read(path, serial, sizeof(serial));
+
+        snprintf(path, sizeof(path), "%s/%s/technology", PSY_PATH, de->d_name);
+        _sysfs_read(path, tech, sizeof(tech));
+
+        if (mfg[0])
+            strlcpy(e->mfg_name, mfg, sizeof(e->mfg_name));
+        if (model[0]) {
+            strlcpy(e->model_name, model, sizeof(e->model_name));
+            strlcpy(e->descr,      model, sizeof(e->descr));
+        }
+        if (serial[0])
+            strlcpy(e->serial, serial, sizeof(e->serial));
+
+        if (tech[0] && model[0])
+            snprintf(e->descr, sizeof(e->descr), "%s (%s)", model, tech);
+        else if (tech[0])
+            strlcpy(e->descr, tech, sizeof(e->descr));
+
+        snprintf(path, sizeof(path), "%s/%s/capacity", PSY_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0])
+            snprintf(e->alias, sizeof(e->alias), "capacity:%s%%", val);
+    }
+    closedir(dir);
+}
+
 /* ---- Top-level load ------------------------------------------------------ */
 
 int
@@ -802,10 +1112,12 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 
     _load_dmi();
     _load_cpus();
+    _load_caches();
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
     _load_nvme(&nvme_seq, pci_map, pci_map_n);
     _load_hwmon(&hwmon_seq);
+    _load_power_supply();
 
     free(pci_map);
     netsnmp_entity_parent_rel_pos_rebuild();
