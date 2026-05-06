@@ -819,7 +819,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 snprintf(e->model_name, sizeof(e->model_name), "0x%04x", did);
         }
 
-        /* Class description: libpci first, then our own table as fallback */
+        /* Class description: libpci first, then our own table, then model */
         if (class_val) {
             int cls_sub = (int)((class_val >> 8) & 0xFFFF);
             lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
@@ -833,12 +833,34 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                     strlcpy(e->descr, fb, sizeof(e->descr));
             }
         }
+        /* Fall back to model name when class lookup produced nothing */
+        if (!e->descr[0] && e->model_name[0])
+            strlcpy(e->descr, e->model_name, sizeof(e->descr));
 
         /* Revision */
         snprintf(path, sizeof(path), "%s/%s/revision", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
             strlcpy(e->hw_rev, val, sizeof(e->hw_rev));
+
+        /* PCIe link speed and width appended to description */
+        {
+            char speed[64] = "", width[16] = "";
+            snprintf(path, sizeof(path), "%s/%s/current_link_speed",
+                     PCI_PATH, bdfs[i]);
+            _sysfs_read(path, speed, sizeof(speed));
+            snprintf(path, sizeof(path), "%s/%s/current_link_width",
+                     PCI_PATH, bdfs[i]);
+            _sysfs_read(path, width, sizeof(width));
+            if (speed[0] && width[0]) {
+                if (e->descr[0])
+                    snprintf(e->descr, sizeof(e->descr), "%s, x%s %s",
+                             e->descr, width, speed);
+                else
+                    snprintf(e->descr, sizeof(e->descr), "x%s %s",
+                             width, speed);
+            }
+        }
 
         /* Bound driver → sw_rev */
         {
