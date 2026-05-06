@@ -1030,15 +1030,20 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         if (de->d_name[0] == '.')
             continue;
 
-        /* Only plain 'sd' disks: skip nvme, md, bcache, loop, dm, sr */
-        if (strncmp(de->d_name, "sd", 2) != 0)
-            continue;
-
-        /* Skip partitions: sdaN has a digit somewhere after 'sd' */
-        for (p = de->d_name + 2; *p && !isdigit((unsigned char)*p); p++)
-            ;
-        if (*p)
-            continue;
+        /* Accept 'sd' disks and 'sr' optical drives only */
+        {
+            int is_sd = strncmp(de->d_name, "sd", 2) == 0;
+            int is_sr = strncmp(de->d_name, "sr", 2) == 0;
+            if (!is_sd && !is_sr)
+                continue;
+            /* Skip partitions on sd devices (e.g. sda1) */
+            if (is_sd) {
+                for (p = de->d_name + 2; *p && !isdigit((unsigned char)*p); p++)
+                    ;
+                if (*p)
+                    continue;
+            }
+        }
 
         /* Resolve device symlink to get full sysfs path */
         snprintf(path, sizeof(path), "%s/%s/device", BLOCK_PATH, de->d_name);
@@ -1085,9 +1090,8 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->fw_rev, sizeof(e->fw_rev), val);
 
-        /* Serial number from VPD page 0x80: bytes 0-3 are header,
-         * bytes 4+ are the ASCII serial string. */
-        {
+        if (strncmp(de->d_name, "sd", 2) == 0) {
+            /* Serial from VPD page 0x80: header is 4 bytes, rest is ASCII */
             FILE *f;
             unsigned char vpd[256];
             size_t nr;
@@ -1105,48 +1109,51 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
                     if (slen > 0 && slen < sizeof(e->serial)) {
                         memcpy(e->serial, vpd + 4, slen);
                         e->serial[slen] = '\0';
-                        /* right-strip spaces */
                         while (slen > 0 && e->serial[slen-1] == ' ')
                             e->serial[--slen] = '\0';
                     }
                 }
             }
-        }
 
-        /* Size in GiB or TiB from /sys/block/sdX/size (512-byte sectors) */
-        {
-            unsigned long long sectors = 0;
-            char rot = '1';
-            const char *model = e->model_name[0] ? e->model_name : de->d_name;
-            char size_str[32] = "";
+            /* Size and media type in description */
+            {
+                unsigned long long sectors = 0;
+                char rot = '1';
+                const char *model = e->model_name[0] ? e->model_name : de->d_name;
+                char size_str[32] = "";
 
-            snprintf(path, sizeof(path), "%s/%s/size", BLOCK_PATH, de->d_name);
-            _sysfs_read(path, val, sizeof(val));
-            if (val[0])
-                sectors = strtoull(val, NULL, 10);
+                snprintf(path, sizeof(path), "%s/%s/size", BLOCK_PATH, de->d_name);
+                _sysfs_read(path, val, sizeof(val));
+                if (val[0])
+                    sectors = strtoull(val, NULL, 10);
 
-            if (sectors) {
-                unsigned long long bytes = sectors * 512ULL;
-                unsigned long long tib = bytes >> 40;
-                unsigned long long gib = bytes >> 30;
-                if (tib >= 1)
-                    snprintf(size_str, sizeof(size_str), "%lluTiB", tib);
+                if (sectors) {
+                    unsigned long long bytes = sectors * 512ULL;
+                    unsigned long long tib = bytes >> 40;
+                    unsigned long long gib = bytes >> 30;
+                    if (tib >= 1)
+                        snprintf(size_str, sizeof(size_str), "%lluTiB", tib);
+                    else
+                        snprintf(size_str, sizeof(size_str), "%lluGiB", gib);
+                }
+
+                snprintf(path, sizeof(path), "%s/%s/queue/rotational",
+                         BLOCK_PATH, de->d_name);
+                _sysfs_read(path, val, sizeof(val));
+                if (val[0])
+                    rot = val[0];
+
+                if (size_str[0])
+                    snprintf(e->descr, sizeof(e->descr), "%s (%s, %s)",
+                             model, rot == '0' ? "SSD" : "HDD", size_str);
                 else
-                    snprintf(size_str, sizeof(size_str), "%lluGiB", gib);
+                    snprintf(e->descr, sizeof(e->descr), "%s (%s)",
+                             model, rot == '0' ? "SSD" : "HDD");
             }
-
-            snprintf(path, sizeof(path), "%s/%s/queue/rotational",
-                     BLOCK_PATH, de->d_name);
-            _sysfs_read(path, val, sizeof(val));
-            if (val[0])
-                rot = val[0];
-
-            if (size_str[0])
-                snprintf(e->descr, sizeof(e->descr), "%s (%s, %s)",
-                         model, rot == '0' ? "SSD" : "HDD", size_str);
-            else
-                snprintf(e->descr, sizeof(e->descr), "%s (%s)",
-                         model, rot == '0' ? "SSD" : "HDD");
+        } else {
+            /* Optical drive: just use model as description */
+            const char *model = e->model_name[0] ? e->model_name : de->d_name;
+            snprintf(e->descr, sizeof(e->descr), "%s (Optical)", model);
         }
 
         snprintf(e->uris, sizeof(e->uris), "file:///sys/block/%s", de->d_name);
