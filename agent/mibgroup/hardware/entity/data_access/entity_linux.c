@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <limits.h>
+#include <pci/pci.h>
 
 #define DMI_PATH    "/sys/class/dmi/id"
 #define PCI_PATH    "/sys/bus/pci/devices"
@@ -354,7 +355,11 @@ _load_dimms(void)
         } else if (strcmp(field, "Part Number") == 0) {
             _set_if_valid(e->model_name, sizeof(e->model_name), value);
         } else if (strcmp(field, "Speed") == 0) {
-            _set_if_valid(e->hw_rev, sizeof(e->hw_rev), value);
+            if (!_is_placeholder(value) &&
+                strcmp(value, "Unknown") != 0) {
+                strlcat(e->descr, " @ ", sizeof(e->descr));
+                strlcat(e->descr, value, sizeof(e->descr));
+            }
         }
     }
     pclose(fp);
@@ -641,11 +646,12 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], val[256], netpath[512];
+    char path[512], val[256], netpath[512], namebuf[256];
     char **bdfs = NULL, **tmp;
     int   nbdfs = 0, cap = 0, i;
     pci_entity_map *map;
     netsnmp_entity_info *e;
+    struct pci_access *pacc;
 
     *map_out = NULL;
     *nmap_out = 0;
@@ -682,13 +688,19 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
     if (!map)
         goto free_bdfs;
 
+    pacc = pci_alloc();
+    pci_init(pacc);
+
     for (i = 0; i < nbdfs; i++) {
-        long class_val;
-        int  idx;
-        DIR *netdir;
+        long         class_val;
+        unsigned int vid, did;
+        int          idx;
+        DIR         *netdir;
         struct dirent *nde;
+        char        *lname;
 
         class_val = 0;
+        vid = did = 0;
         idx = IDX_PCI_BASE + i + 1;
 
         strlcpy(map[i].bdf, bdfs[i], sizeof(map[i].bdf));
@@ -704,6 +716,8 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         e->parent_idx = IDX_BASEBOARD;
         strlcpy(e->name,  bdfs[i], sizeof(e->name));
         strlcpy(e->descr, bdfs[i], sizeof(e->descr));
+        snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
+                 PCI_PATH, bdfs[i]);
 
         snprintf(path, sizeof(path), "%s/%s/class", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
@@ -715,32 +729,57 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         snprintf(path, sizeof(path), "%s/%s/vendor", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
-            strlcpy(e->mfg_name, val, sizeof(e->mfg_name));
+            vid = (unsigned int)strtoul(val, NULL, 16);
 
         snprintf(path, sizeof(path), "%s/%s/device", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
-            strlcpy(e->model_name, val, sizeof(e->model_name));
+            did = (unsigned int)strtoul(val, NULL, 16);
 
-        snprintf(path, sizeof(path), "%s/%s/subsystem_vendor", PCI_PATH, bdfs[i]);
-        _sysfs_read(path, val, sizeof(val));
-        if (val[0]) {
-            char subdev[32] = "";
-            char tmp[64];
-            snprintf(path, sizeof(path), "%s/%s/subsystem_device", PCI_PATH, bdfs[i]);
-            _sysfs_read(path, subdev, sizeof(subdev));
-            if (subdev[0])
-                snprintf(tmp, sizeof(tmp), "%s:%s", val, subdev);
+        /* Vendor name */
+        if (vid) {
+            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                    PCI_LOOKUP_VENDOR | PCI_LOOKUP_NO_NUMBERS,
+                                    vid);
+            if (lname && lname[0])
+                strlcpy(e->mfg_name, lname, sizeof(e->mfg_name));
             else
-                strlcpy(tmp, val, sizeof(tmp));
-            strlcpy(e->sw_rev, tmp, sizeof(e->sw_rev));
+                snprintf(e->mfg_name, sizeof(e->mfg_name), "0x%04x", vid);
         }
 
+        /* Device / product name */
+        if (vid && did) {
+            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                    PCI_LOOKUP_DEVICE | PCI_LOOKUP_NO_NUMBERS,
+                                    vid, did);
+            if (lname && lname[0])
+                strlcpy(e->model_name, lname, sizeof(e->model_name));
+            else
+                snprintf(e->model_name, sizeof(e->model_name), "0x%04x", did);
+        }
+
+        /* Class description: libpci first, then our own table as fallback */
+        if (class_val) {
+            int cls_sub = (int)((class_val >> 8) & 0xFFFF);
+            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                    PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
+                                    cls_sub);
+            if (lname && lname[0])
+                strlcpy(e->descr, lname, sizeof(e->descr));
+            else {
+                const char *fb = _pci_class_descr(class_val);
+                if (fb)
+                    strlcpy(e->descr, fb, sizeof(e->descr));
+            }
+        }
+
+        /* Revision */
         snprintf(path, sizeof(path), "%s/%s/revision", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
             strlcpy(e->hw_rev, val, sizeof(e->hw_rev));
 
+        /* Bound driver → sw_rev */
         {
             char link[512];
             ssize_t llen;
@@ -750,11 +789,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 char *drv;
                 link[llen] = '\0';
                 drv = strrchr(link, '/');
-                strlcpy(e->descr, drv ? drv + 1 : link, sizeof(e->descr));
-            } else {
-                const char *cls_descr = _pci_class_descr(class_val);
-                if (cls_descr)
-                    strlcpy(e->descr, cls_descr, sizeof(e->descr));
+                strlcpy(e->sw_rev, drv ? drv + 1 : link, sizeof(e->sw_rev));
             }
         }
 
@@ -814,6 +849,8 @@ free_bdf:
         }
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
     }
+
+    pci_cleanup(pacc);
 
     *map_out = map;
     *nmap_out = nbdfs;
@@ -885,6 +922,15 @@ _load_nvme(int *next_nvme_idx, pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->fw_rev, sizeof(e->fw_rev), val);
 
+        snprintf(path, sizeof(path), "%s/%s/uuid", NVME_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0] && strcmp(val, "00000000-0000-0000-0000-000000000000") != 0) {
+            if (_parse_uuid(val, e->uuid))
+                e->uuid_len = 16;
+        }
+
+        snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
+                 NVME_PATH, de->d_name);
     }
     closedir(dir);
 }
@@ -1042,7 +1088,7 @@ _load_power_supply(void)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], val[256];
+    char path[512];
 
     dir = opendir(PSY_PATH);
     if (!dir)
@@ -1093,11 +1139,6 @@ _load_power_supply(void)
             snprintf(e->descr, sizeof(e->descr), "%s (%s)", model, tech);
         else if (tech[0])
             strlcpy(e->descr, tech, sizeof(e->descr));
-
-        snprintf(path, sizeof(path), "%s/%s/capacity", PSY_PATH, de->d_name);
-        _sysfs_read(path, val, sizeof(val));
-        if (val[0])
-            snprintf(e->alias, sizeof(e->alias), "capacity:%s%%", val);
     }
     closedir(dir);
 }

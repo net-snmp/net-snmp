@@ -150,10 +150,12 @@ _phys_handler(netsnmp_mib_handler *handler,
             snmp_set_var_typed_integer(req->requestvb, ASN_INTEGER, e->is_fru);
             break;
         case COL_MFGDATE:
-        case COL_URIS:
-            /* empty string = unknown / not available */
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
                                      _empty_string, 0);
+            break;
+        case COL_URIS:
+            snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
+                                     (u_char *)e->uris, strlen(e->uris));
             break;
         case COL_UUID:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,

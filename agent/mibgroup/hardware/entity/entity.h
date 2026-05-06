@@ -39,6 +39,7 @@ typedef struct netsnmp_entity_info_s {
     char    model_name[128];
     char    alias[128];
     char    asset_id[64];
+    char    uris[256];
     u_char  uuid[16];
     size_t  uuid_len;
     struct netsnmp_entity_info_s *next;
