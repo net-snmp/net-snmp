@@ -12,6 +12,11 @@
 #include <limits.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <linux/ethtool.h>
+#include <linux/sockios.h>
 #ifdef HAVE_PCI_PCI_H
 #include <pci/pci.h>
 #endif
@@ -42,6 +47,7 @@
 #define IDX_RTC_BASE   2400
 #define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
+#define IDX_SFP_BASE   10000
 
 #define HWMON_BUCKETS   256   /* slots in the hwmon hash table */
 #define HWMON_SLOT_SZ    20   /* index slots per chip (chip + up to 19 sensors) */
@@ -453,7 +459,7 @@ static void
 _load_caches(void)
 {
     DIR *cpu_dir, *cache_dir;
-    struct dirent *cpu_de, *cache_de;
+    const struct dirent *cpu_de, *cache_de;
     char path[512], val[64];
     int seen_pkg[64];
 
@@ -497,6 +503,7 @@ _load_caches(void)
 
             snprintf(path, sizeof(path), "%s/%s/level", cache_path, cache_de->d_name);
             _sysfs_read(path, val, sizeof(val));
+            // cppcheck-suppress identicalConditionAfterEarlyExit
             if (!val[0])
                 continue;
             level = atoi(val);
@@ -745,6 +752,309 @@ _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
     return best_idx;
 }
 
+/* Ordered by bit index (matches ethtool output order).
+ * Sentinel: bit == -1.  Works with both ETHTOOL_GLINKSETTINGS and the
+ * legacy ETHTOOL_GSET fallback (bits 0-30 fit in the u32 supported field). */
+static const struct { int bit; const char *name; } _nic_link_modes[] = {
+    { ETHTOOL_LINK_MODE_10baseT_Half_BIT,             "10baseT/Half"          },
+    { ETHTOOL_LINK_MODE_10baseT_Full_BIT,             "10baseT/Full"          },
+    { ETHTOOL_LINK_MODE_100baseT_Half_BIT,            "100baseT/Half"         },
+    { ETHTOOL_LINK_MODE_100baseT_Full_BIT,            "100baseT/Full"         },
+    { ETHTOOL_LINK_MODE_1000baseT_Half_BIT,           "1000baseT/Half"        },
+    { ETHTOOL_LINK_MODE_1000baseT_Full_BIT,           "1000baseT/Full"        },
+    { ETHTOOL_LINK_MODE_10000baseT_Full_BIT,          "10000baseT/Full"       },
+    { ETHTOOL_LINK_MODE_2500baseX_Full_BIT,           "2500baseX/Full"        },
+    { ETHTOOL_LINK_MODE_1000baseKX_Full_BIT,          "1000baseKX/Full"       },
+    { ETHTOOL_LINK_MODE_10000baseKX4_Full_BIT,        "10000baseKX4/Full"     },
+    { ETHTOOL_LINK_MODE_10000baseKR_Full_BIT,         "10000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_20000baseMLD2_Full_BIT,       "20000baseMLD2/Full"    },
+    { ETHTOOL_LINK_MODE_20000baseKR2_Full_BIT,        "20000baseKR2/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseKR4_Full_BIT,        "40000baseKR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseCR4_Full_BIT,        "40000baseCR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseSR4_Full_BIT,        "40000baseSR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseLR4_Full_BIT,        "40000baseLR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseKR4_Full_BIT,        "56000baseKR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseCR4_Full_BIT,        "56000baseCR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseSR4_Full_BIT,        "56000baseSR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseLR4_Full_BIT,        "56000baseLR4/Full"     },
+    /* Extended modes (bits 31+, only visible via ETHTOOL_GLINKSETTINGS) */
+    { ETHTOOL_LINK_MODE_25000baseCR_Full_BIT,         "25000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_25000baseKR_Full_BIT,         "25000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_25000baseSR_Full_BIT,         "25000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseCR2_Full_BIT,        "50000baseCR2/Full"     },
+    { ETHTOOL_LINK_MODE_50000baseKR2_Full_BIT,        "50000baseKR2/Full"     },
+    { ETHTOOL_LINK_MODE_100000baseKR4_Full_BIT,       "100000baseKR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseSR4_Full_BIT,       "100000baseSR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseCR4_Full_BIT,       "100000baseCR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseLR4_ER4_Full_BIT,   "100000baseLR4_ER4/Full"},
+    { ETHTOOL_LINK_MODE_50000baseSR2_Full_BIT,        "50000baseSR2/Full"     },
+    { ETHTOOL_LINK_MODE_1000baseX_Full_BIT,           "1000baseX/Full"        },
+    { ETHTOOL_LINK_MODE_10000baseCR_Full_BIT,         "10000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseSR_Full_BIT,         "10000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseLR_Full_BIT,         "10000baseLR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseLRM_Full_BIT,        "10000baseLRM/Full"     },
+    { ETHTOOL_LINK_MODE_10000baseER_Full_BIT,         "10000baseER/Full"      },
+    { ETHTOOL_LINK_MODE_2500baseT_Full_BIT,           "2500baseT/Full"        },
+    { ETHTOOL_LINK_MODE_5000baseT_Full_BIT,           "5000baseT/Full"        },
+    { ETHTOOL_LINK_MODE_50000baseKR_Full_BIT,         "50000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseSR_Full_BIT,         "50000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseCR_Full_BIT,         "50000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseLR_ER_FR_Full_BIT,   "50000baseLR_ER_FR/Full"},
+    { ETHTOOL_LINK_MODE_50000baseDR_Full_BIT,         "50000baseDR/Full"      },
+    { ETHTOOL_LINK_MODE_100000baseKR2_Full_BIT,       "100000baseKR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseSR2_Full_BIT,       "100000baseSR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseCR2_Full_BIT,       "100000baseCR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseLR2_ER2_FR2_Full_BIT, "100000baseLR2_ER2_FR2/Full" },
+    { ETHTOOL_LINK_MODE_100000baseDR2_Full_BIT,       "100000baseDR2/Full"    },
+    { ETHTOOL_LINK_MODE_200000baseKR4_Full_BIT,       "200000baseKR4/Full"    },
+    { ETHTOOL_LINK_MODE_200000baseSR4_Full_BIT,       "200000baseSR4/Full"    },
+    { ETHTOOL_LINK_MODE_200000baseLR4_ER4_FR4_Full_BIT, "200000baseLR4_ER4_FR4/Full" },
+    { ETHTOOL_LINK_MODE_200000baseDR4_Full_BIT,       "200000baseDR4/Full"    },
+    { ETHTOOL_LINK_MODE_200000baseCR4_Full_BIT,       "200000baseCR4/Full"    },
+    { -1, NULL }
+};
+
+static const char *
+_arphrd_descr(int arphrd)
+{
+    switch (arphrd) {
+    case 1:   return "Ethernet interface";          /* ARPHRD_ETHER */
+    case 24:  return "IEEE1394 interface";          /* ARPHRD_IEEE1394 */
+    case 32:  return "InfiniBand interface";        /* ARPHRD_INFINIBAND */
+    case 256: return "SLIP interface";              /* ARPHRD_SLIP */
+    case 512: return "PPP interface";               /* ARPHRD_PPP */
+    case 768: return "IP tunnel interface";         /* ARPHRD_TUNNEL */
+    case 769: return "IPv6 tunnel interface";       /* ARPHRD_TUNNEL6 */
+    case 772: return "Loopback network interface";  /* ARPHRD_LOOPBACK */
+    case 774: return "FDDI interface";              /* ARPHRD_FDDI */
+    case 776: return "IPv6-in-IPv4 interface";      /* ARPHRD_SIT */
+    case 783: return "IRDA interface";              /* ARPHRD_IRDA */
+    default:  return NULL;
+    }
+}
+
+static void
+_nic_scan_ethtool(netsnmp_entity_info *e, const char *ifname, int sfp_idx)
+{
+    int fd;
+    struct ifreq ifr;
+    struct ethtool_drvinfo drvinfo;
+    struct ethtool_cmd ecmd;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0)
+        return;
+
+    /* Firmware version and driver info */
+    memset(&drvinfo, 0, sizeof(drvinfo));
+    drvinfo.cmd = ETHTOOL_GDRVINFO;
+    memset(&ifr, 0, sizeof(ifr));
+    strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+    ifr.ifr_data = (void *)&drvinfo;
+    if (ioctl(fd, SIOCETHTOOL, &ifr) == 0) {
+        if (drvinfo.fw_version[0]) {
+            char tmp[sizeof(e->fw_rev)];
+            strlcpy(tmp, drvinfo.fw_version, sizeof(tmp));
+            _trim_trailing(tmp);
+            if (tmp[0])
+                strlcpy(e->fw_rev, tmp, sizeof(e->fw_rev));
+        }
+        if (drvinfo.driver[0]) {
+            if (drvinfo.version[0])
+                snprintf(e->sw_rev, sizeof(e->sw_rev), "%s %s",
+                         drvinfo.driver, drvinfo.version);
+            else
+                strlcpy(e->sw_rev, drvinfo.driver, sizeof(e->sw_rev));
+        }
+    }
+
+    /* Port type and supported link modes appended to description.
+     * Try ETHTOOL_GLINKSETTINGS (extended bitmask) first, fall back to
+     * the legacy ETHTOOL_GSET which exposes only bits 0-30. */
+    {
+        struct {
+            struct ethtool_link_settings s;
+            __u32 buf[3 * 8]; /* 8 words × 32 bits = 256 mode bits per mask */
+        } req;
+        const __u32 *sup_words;
+        int sup_nwords;
+        __u8 port;
+        const char *port_s;
+        char modes_buf[192];
+        int first;
+
+        sup_words  = NULL;
+        sup_nwords = 0;
+        port       = PORT_OTHER;
+        port_s     = NULL;
+        modes_buf[0] = '\0';
+        first = 1;
+
+        /* Probe: kernel returns negated required nwords */
+        memset(&req, 0, sizeof(req));
+        req.s.cmd = ETHTOOL_GLINKSETTINGS;
+        memset(&ifr, 0, sizeof(ifr));
+        strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+        ifr.ifr_data = (void *)&req;
+        if (ioctl(fd, SIOCETHTOOL, &ifr) == 0 &&
+            req.s.link_mode_masks_nwords < 0) {
+            __s8 n = -req.s.link_mode_masks_nwords;
+            if (n > 0 && n <= 8) {
+                req.s.cmd = ETHTOOL_GLINKSETTINGS;
+                req.s.link_mode_masks_nwords = n;
+                memset(&ifr, 0, sizeof(ifr));
+                strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+                ifr.ifr_data = (void *)&req;
+                if (ioctl(fd, SIOCETHTOOL, &ifr) == 0) {
+                    sup_words  = req.buf; /* supported is first nwords */
+                    sup_nwords = n;
+                    port       = req.s.port;
+                }
+            }
+        }
+
+        /* Legacy fallback: pack the u32 bitmask into buf[0] */
+        if (!sup_words) {
+            memset(&ecmd, 0, sizeof(ecmd));
+            ecmd.cmd = ETHTOOL_GSET;
+            memset(&ifr, 0, sizeof(ifr));
+            strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+            ifr.ifr_data = (void *)&ecmd;
+            if (ioctl(fd, SIOCETHTOOL, &ifr) == 0) {
+                req.buf[0] = ecmd.supported;
+                sup_words  = req.buf;
+                sup_nwords = 1;
+                port       = ecmd.port;
+            }
+        }
+
+        if (sup_words) {
+            char base[sizeof(e->descr)];
+            int mi;
+            switch (port) {
+            case PORT_TP:    port_s = "twisted pair";  break;
+            case PORT_AUI:   port_s = "AUI";           break;
+            case PORT_MII:   port_s = "MII";           break;
+            case PORT_FIBRE: port_s = "fibre";         break;
+            case PORT_BNC:   port_s = "BNC";           break;
+            case PORT_DA:    port_s = "direct attach"; break;
+            default:         break;
+            }
+
+            for (mi = 0; _nic_link_modes[mi].bit >= 0; mi++) {
+                int bit  = _nic_link_modes[mi].bit;
+                int word = bit / 32;
+                if (word >= sup_nwords)
+                    continue;
+                if (!((sup_words[word] >> (bit % 32)) & 1u))
+                    continue;
+                if (!first)
+                    strlcat(modes_buf, " ", sizeof(modes_buf));
+                strlcat(modes_buf, _nic_link_modes[mi].name, sizeof(modes_buf));
+                first = 0;
+            }
+
+            strlcpy(base, e->descr, sizeof(base));
+            if (port_s && modes_buf[0])
+                snprintf(e->descr, sizeof(e->descr), "%s (%s: %s)",
+                         base, port_s, modes_buf);
+            else if (port_s)
+                snprintf(e->descr, sizeof(e->descr), "%s (%s)", base, port_s);
+            else if (modes_buf[0])
+                snprintf(e->descr, sizeof(e->descr), "%s (%s)", base, modes_buf);
+        }
+    }
+
+    /* SFP/transceiver submodule */
+    {
+        struct ethtool_modinfo modinfo;
+        struct {
+            __u32 cmd;
+            __u32 magic;
+            __u32 offset;
+            __u32 len;
+            __u8  data[256];
+        } eeeprom;
+
+        memset(&modinfo, 0, sizeof(modinfo));
+        modinfo.cmd = ETHTOOL_GMODULEINFO;
+        memset(&ifr, 0, sizeof(ifr));
+        strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+        ifr.ifr_data = (void *)&modinfo;
+        if (ioctl(fd, SIOCETHTOOL, &ifr) == 0) {
+            __u32 elen = modinfo.eeprom_len;
+            if (elen > 256) elen = 256;
+
+            memset(&eeeprom, 0, sizeof(eeeprom));
+            eeeprom.cmd    = ETHTOOL_GMODULEEEPROM;
+            eeeprom.offset = 0;
+            eeeprom.len    = elen;
+            memset(&ifr, 0, sizeof(ifr));
+            strlcpy(ifr.ifr_name, ifname, IFNAMSIZ);
+            ifr.ifr_data = (void *)&eeeprom;
+
+            if (ioctl(fd, SIOCETHTOOL, &ifr) == 0) {
+                netsnmp_entity_info *sfp;
+                sfp = netsnmp_entity_create(sfp_idx);
+                if (sfp) {
+                    const char *id_s, *conn_s = NULL;
+                    char part[17], sfpdescr[80];
+                    const __u8 *d = eeeprom.data;
+
+                    sfp->iana_class = IANA_PHYS_MODULE;
+                    sfp->parent_idx = e->idx;
+                    sfp->is_fru     = TV_TRUE;
+
+                    switch (d[0]) {         /* identifier byte */
+                    case 0x02: id_s = "SFP";    break;
+                    case 0x03: id_s = "SFP+";   break;
+                    case 0x0c: id_s = "QSFP";   break;
+                    case 0x0d: id_s = "QSFP+";  break;
+                    case 0x11: id_s = "QSFP28"; break;
+                    default:   id_s = "module";  break;
+                    }
+
+                    switch (d[2]) {         /* connector byte */
+                    case 0x01: conn_s = "SC";             break;
+                    case 0x07: conn_s = "LC";             break;
+                    case 0x0b: conn_s = "optical pigtail"; break;
+                    case 0x21: conn_s = "copper pigtail"; break;
+                    case 0x22: conn_s = "RJ45";           break;
+                    case 0x23: conn_s = "non-separable";  break;
+                    }
+
+                    if (conn_s)
+                        snprintf(sfpdescr, sizeof(sfpdescr),
+                                 "%s transceiver (%s)", id_s, conn_s);
+                    else
+                        snprintf(sfpdescr, sizeof(sfpdescr),
+                                 "%s transceiver", id_s);
+                    strlcpy(sfp->descr, sfpdescr, sizeof(sfp->descr));
+
+                    /* Part number: bytes 40-55, ASCII space-padded */
+                    memcpy(part, d + 40, 16);
+                    part[16] = '\0';
+                    _trim_trailing(part);
+                    if (part[0])
+                        strlcpy(sfp->model_name, part, sizeof(sfp->model_name));
+
+                    /* Wavelength (nm) in hw_rev if non-zero (copper DAC = 0) */
+                    {
+                        int wl = ((int)d[60] << 8) | d[61];
+                        if (wl > 0) {
+                            char wl_s[16];
+                            snprintf(wl_s, sizeof(wl_s), "%dnm", wl);
+                            strlcpy(sfp->hw_rev, wl_s, sizeof(sfp->hw_rev));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    close(fd);
+}
+
 static void
 _load_pci(pci_entity_map **map_out, int *nmap_out)
 {
@@ -956,7 +1266,25 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 e->iana_class = IANA_PHYS_PORT;
                 e->is_fru     = TV_FALSE;
                 strlcpy(e->name,  nde->d_name, sizeof(e->name));
-                strlcpy(e->descr, nde->d_name, sizeof(e->descr));
+
+                {
+                    char typepath[512];
+                    int arphrd;
+                    const char *ifdescr;
+
+                    snprintf(typepath, sizeof(typepath), "%s/%s/type",
+                             NET_PATH, nde->d_name);
+                    arphrd = _sysfs_read_int(typepath);
+                    ifdescr = _arphrd_descr(arphrd);
+                    if (arphrd == 1 /* ARPHRD_ETHER */) {
+                        snprintf(typepath, sizeof(typepath), "%s/%s/wireless",
+                                 NET_PATH, nde->d_name);
+                        if (access(typepath, F_OK) == 0)
+                            ifdescr = "Wireless interface";
+                    }
+                    strlcpy(e->descr, ifdescr ? ifdescr : nde->d_name,
+                            sizeof(e->descr));
+                }
 
                 snprintf(path, sizeof(path), "%s/%s/address",
                          NET_PATH, nde->d_name);
@@ -975,6 +1303,8 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                         snprintf(e->alias, sizeof(e->alias),
                                  "ifIndex.%d", ifindex);
                 }
+
+                _nic_scan_ethtool(e, nde->d_name, IDX_SFP_BASE + i);
 
                 break;
             }
@@ -1023,7 +1353,7 @@ static void
 _load_usb(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
-    struct dirent *de;
+    const struct dirent *de;
     char path[512], val[256], rp[PATH_MAX];
     char used[USB_BUCKETS];
 
@@ -1186,13 +1516,13 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         if (strncmp(de->d_name, "sd", 2) == 0) {
             /* Serial from VPD page 0x80: header is 4 bytes, rest is ASCII */
             FILE *f;
-            unsigned char vpd[256];
-            size_t nr;
 
             snprintf(path, sizeof(path), "%s/%s/device/vpd_pg80",
                      BLOCK_PATH, de->d_name);
             f = fopen(path, "rb");
             if (f) {
+                unsigned char vpd[256];
+                size_t nr;
                 nr = fread(vpd, 1, sizeof(vpd), f);
                 fclose(f);
                 if (nr > 4 && vpd[1] == 0x80) {
@@ -1223,11 +1553,10 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
                 if (sectors) {
                     unsigned long long bytes = sectors * 512ULL;
                     unsigned long long tib = bytes >> 40;
-                    unsigned long long gib = bytes >> 30;
                     if (tib >= 1)
                         snprintf(size_str, sizeof(size_str), "%lluTiB", tib);
                     else
-                        snprintf(size_str, sizeof(size_str), "%lluGiB", gib);
+                        snprintf(size_str, sizeof(size_str), "%lluGiB", bytes >> 30);
                 }
 
                 snprintf(path, sizeof(path), "%s/%s/queue/rotational",
@@ -1270,7 +1599,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int idx, pci_idx, slot;
+        int idx, pci_idx;
 
         if (de->d_name[0] == '.')
             continue;
@@ -1283,7 +1612,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
             e = netsnmp_entity_get_byIdx(pci_idx);
             idx = pci_idx;
         } else {
-            slot = _hash_alloc_slot(de->d_name, used, NVME_BUCKETS);
+            int slot = _hash_alloc_slot(de->d_name, used, NVME_BUCKETS);
             if (slot < 0)
                 continue;
             idx = IDX_NVME_BASE + slot;
@@ -1501,7 +1830,7 @@ static void
 _load_power_supply(void)
 {
     DIR *dir;
-    struct dirent *de;
+    const struct dirent *de;
     char path[512];
 
     dir = opendir(PSY_PATH);
@@ -1629,7 +1958,7 @@ _alias_diskio(void)
     while (fgets(line, sizeof(line), f)) {
         int major, minor;
         char devname[64];
-        netsnmp_entity_info *e;
+        const netsnmp_entity_info *e;
         oid target[OID_LENGTH(diskio_base) + 1];
 
         if (sscanf(line, " %d %d %63s", &major, &minor, devname) != 3)
@@ -1678,7 +2007,7 @@ _alias_diskio(void)
             int n;
             int already = 0;
             for (n = 0; n < netsnmp_entity_alias_count(); n++) {
-                netsnmp_entity_alias_row *r = netsnmp_entity_alias_get(n);
+                const netsnmp_entity_alias_row *r = netsnmp_entity_alias_get(n);
                 if (r && r->phys_idx == e->idx &&
                     r->target_oid_len > 0 &&
                     r->target_oid[r->target_oid_len - 2] ==
@@ -1748,7 +2077,8 @@ _alias_lm_sensors(void)
         while ((feat = sensors_get_features(chip, &feat_nr))) {
             int sf_type;
             const sensors_subfeature *sub;
-            netsnmp_entity_info *e, *parent;
+            netsnmp_entity_info *e;
+            const netsnmp_entity_info *parent;
             oid target[LM_BASE_LEN + 1];
             int idx_1based;
 
@@ -1842,7 +2172,7 @@ _alias_lm_sensors(void)
 
     for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
         int sensor_type, sensor_num, hwmon_num;
-        netsnmp_entity_info *parent;
+        const netsnmp_entity_info *parent;
         const char *np;
         _lm_sensor_entry *tmp;
 
