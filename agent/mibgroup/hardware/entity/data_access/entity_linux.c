@@ -1294,34 +1294,6 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
                 e->uuid_len = 16;
         }
 
-        /* Fallback: first namespace wwid starting with "uuid." */
-        if (!e->uuid_len) {
-            DIR *nsdir;
-            struct dirent *nse;
-            char nspath[512];
-
-            snprintf(nspath, sizeof(nspath), "%s/%s", NVME_PATH, de->d_name);
-            nsdir = opendir(nspath);
-            if (nsdir) {
-                while ((nse = readdir(nsdir))) {
-                    /* namespace entries: nvme0n1, nvme0n2, … */
-                    if (strncmp(nse->d_name, de->d_name, strlen(de->d_name)) != 0)
-                        continue;
-                    if (nse->d_name[strlen(de->d_name)] != 'n')
-                        continue;
-                    snprintf(path, sizeof(path), "/sys/class/block/%s/wwid",
-                             nse->d_name);
-                    _sysfs_read(path, val, sizeof(val));
-                    if (strncmp(val, "uuid.", 5) == 0) {
-                        if (_parse_uuid(val + 5, e->uuid))
-                            e->uuid_len = 16;
-                        break;
-                    }
-                }
-                closedir(nsdir);
-            }
-        }
-
         snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
                  NVME_PATH, de->d_name);
     }
