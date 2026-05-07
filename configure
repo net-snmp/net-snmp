@@ -24714,6 +24714,101 @@ fi
 
 fi
 
+#
+# Opportunistically link libsensors v3 when available.
+# Used by hardware/entity for accurate entAliasMappingTable index ordering.
+# This is separate from --with-lm-sensors (which enables the sensor MIB modules).
+#
+if test "x$ac_cv_header_sensors_sensors_h" = "xyes" && \
+   test "x$ac_cv_have_decl_sensors_get_all_subfeatures" = "xyes"; then
+
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing sensors_get_detected_chips" >&5
+printf %s "checking for library containing sensors_get_detected_chips... " >&6; }
+if test ${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char sensors_get_detected_chips (void);
+int
+main (void)
+{
+return sensors_get_detected_chips ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  netsnmp_result="none required"
+else case e in #(
+  e) for netsnmp_cur_lib in sensors ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char sensors_get_detected_chips (void);
+int
+main (void)
+{
+return sensors_get_detected_chips ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+          done ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS="${netsnmp_result}" ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS" >&5
+printf "%s\n" "$netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+fi
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
