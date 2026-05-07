@@ -1,0 +1,22 @@
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    autoconf \
+    ca-certificates \
+    file \
+    libpci-dev \
+    libsensors-dev \
+    libssl-dev \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY . .
+
+RUN ./configure \
+      --with-defaults \
+      --disable-embedded-perl \
+      --without-perl-modules \
+      --with-mib-modules="hardware/entity" \
+ && make -j"$(nproc)"

@@ -21,9 +21,13 @@ case "$(uname)" in
 		;;
 	    *)
 		packages="
+		    autoconf
+		    build-essential
+		    file
 		    libatm1-dev
 		    libkrb5-dev
 		    libpci-dev
+		    rsync
 		    libmariadb-client-lgpl-dev
 		    libmariadb-dev
 		    libmariadb-dev-compat
