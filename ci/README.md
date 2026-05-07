@@ -75,8 +75,7 @@ docker run --rm -it -v $(pwd):/src net-snmp-deps bash
 Inside the container:
 
 ```sh
-./configure --with-defaults --disable-embedded-perl --without-perl-modules \
-  --with-mib-modules="hardware/entity"
+./configure --with-defaults --disable-embedded-perl --without-perl-modules 
 make -j$(nproc)
 ```
 
@@ -104,7 +103,6 @@ Then add the package to `ci/install.sh` and rebuild the deps image.
 
 ```sh
 ./configure --with-defaults \
-  --with-mib-modules="hardware/entity" \
   --disable-embedded-perl --without-perl-modules
 make -j$(nproc)
 ```
