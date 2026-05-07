@@ -1711,7 +1711,7 @@ _hwmon_class(const char *name)
 static void
 _load_hwmon(void)
 {
-    static const char *prefixes[] = { "temp", "fan", "in", NULL };
+    static const char *prefixes[] = { "temp", "fan", "in", "curr", "power", "energy", "humidity", NULL };
     DIR *dir;
     struct dirent *de;
     char path[512];
@@ -2080,13 +2080,40 @@ _alias_lm_sensors(void)
             netsnmp_entity_info *e;
             const netsnmp_entity_info *parent;
             oid target[LM_BASE_LEN + 1];
-            int idx_1based;
+            int idx_1based = 0;
+            const char *type_descr;
 
             switch (feat->type) {
-            case SENSORS_FEATURE_TEMP: sf_type = SENSORS_SUBFEATURE_TEMP_INPUT; break;
-            case SENSORS_FEATURE_FAN:  sf_type = SENSORS_SUBFEATURE_FAN_INPUT;  break;
-            case SENSORS_FEATURE_IN:   sf_type = SENSORS_SUBFEATURE_IN_INPUT;   break;
-            default: continue;
+            case SENSORS_FEATURE_TEMP:
+                sf_type    = SENSORS_SUBFEATURE_TEMP_INPUT;
+                type_descr = "Temperature sensor";
+                break;
+            case SENSORS_FEATURE_FAN:
+                sf_type    = SENSORS_SUBFEATURE_FAN_INPUT;
+                type_descr = "Fan sensor";
+                break;
+            case SENSORS_FEATURE_IN:
+                sf_type    = SENSORS_SUBFEATURE_IN_INPUT;
+                type_descr = "Voltage sensor";
+                break;
+            case SENSORS_FEATURE_POWER:
+                sf_type    = SENSORS_SUBFEATURE_POWER_INPUT;
+                type_descr = "Power sensor";
+                break;
+            case SENSORS_FEATURE_CURR:
+                sf_type    = SENSORS_SUBFEATURE_CURR_INPUT;
+                type_descr = "Current sensor";
+                break;
+            case SENSORS_FEATURE_ENERGY:
+                sf_type    = SENSORS_SUBFEATURE_ENERGY_INPUT;
+                type_descr = "Energy sensor";
+                break;
+            case SENSORS_FEATURE_HUMIDITY:
+                sf_type    = SENSORS_SUBFEATURE_HUMIDITY_INPUT;
+                type_descr = "Humidity sensor";
+                break;
+            default:
+                continue;
             }
 
             /* Only count features that have a readable _input value —
@@ -2095,6 +2122,7 @@ _alias_lm_sensors(void)
             if (!sub)
                 continue;
 
+            /* OID aliasing only for the three types tracked by lmSensors MIB */
             switch (feat->type) {
             case SENSORS_FEATURE_TEMP:
                 idx_1based = ++temp_count;
@@ -2104,16 +2132,21 @@ _alias_lm_sensors(void)
                 idx_1based = ++fan_count;
                 memcpy(target, _lm_fan_base, sizeof(_lm_fan_base));
                 break;
-            default: /* SENSORS_FEATURE_IN */
+            case SENSORS_FEATURE_IN:
                 idx_1based = ++volt_count;
                 memcpy(target, _lm_volt_base, sizeof(_lm_volt_base));
                 break;
+            default:
+                break;
             }
-            target[LM_BASE_LEN] = (oid)idx_1based;
+            if (idx_1based)
+                target[LM_BASE_LEN] = (oid)idx_1based;
 
             /* Find the entity sensor whose parent chip is this hwmon device
              * and whose sysfs name matches the libsensors feature name */
             for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+                char *lm_label;
+
                 if (e->iana_class != IANA_PHYS_SENSOR)
                     continue;
                 parent = netsnmp_entity_get_byIdx(e->parent_idx);
@@ -2123,7 +2156,20 @@ _alias_lm_sensors(void)
                     continue;
                 if (strcmp(e->name, feat->name) != 0)
                     continue;
-                netsnmp_entity_alias_add_oid(e->idx, 0, target, LM_BASE_LEN + 1);
+
+                /* Enrich description with libsensors label */
+                lm_label = sensors_get_label(chip, feat);
+                if (lm_label) {
+                    snprintf(e->descr, sizeof(e->descr), "%s: %s",
+                             type_descr, lm_label);
+                    free(lm_label);
+                } else {
+                    strlcpy(e->descr, type_descr, sizeof(e->descr));
+                }
+
+                if (idx_1based)
+                    netsnmp_entity_alias_add_oid(e->idx, 0, target,
+                                                 LM_BASE_LEN + 1);
                 break;
             }
         }
