@@ -18,10 +18,6 @@
 
 static oid _alias_table_oid[] = { 1, 3, 6, 1, 2, 1, 47, 1, 3, 2 };
 
-/* OID prefix for ifEntry.ifIndex — 1.3.6.1.2.1.2.2.1.1 */
-static oid _ifentry_ifindex_oid[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 1 };
-#define IFENTRY_IFINDEX_LEN OID_LENGTH(_ifentry_ifindex_oid)
-
 /* ---- Iterator ------------------------------------------------------------ */
 
 static netsnmp_variable_list *
@@ -89,13 +85,9 @@ _alias_handler(netsnmp_mib_handler *handler,
 
         /* Column 2: entAliasMappingIdentifier */
         if (tinfo->colnum == 2) {
-            oid id_oid[IFENTRY_IFINDEX_LEN + 1];
-
-            memcpy(id_oid, _ifentry_ifindex_oid, sizeof(_ifentry_ifindex_oid));
-            id_oid[IFENTRY_IFINDEX_LEN] = (oid)row->ifindex;
             snmp_set_var_typed_value(req->requestvb, ASN_OBJECT_ID,
-                                     (u_char *)id_oid,
-                                     (IFENTRY_IFINDEX_LEN + 1) * sizeof(oid));
+                                     (u_char *)row->target_oid,
+                                     row->target_oid_len * sizeof(oid));
         } else {
             netsnmp_set_request_error(reqinfo, req, SNMP_NOSUCHOBJECT);
         }

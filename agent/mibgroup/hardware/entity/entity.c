@@ -9,6 +9,7 @@ static netsnmp_entity_contains_row *_contains = NULL;
 static int                          _contains_n = 0;
 static netsnmp_entity_alias_row    *_alias = NULL;
 static int                          _alias_n = 0;
+static int                          _alias_cap = 0;
 
 u_long entity_last_change = 0;
 
@@ -76,6 +77,10 @@ static int _cmp_alias(const void *a, const void *b)
     return ra->logical_idx - rb->logical_idx;
 }
 
+/* OID prefix for ifEntry.ifIndex — 1.3.6.1.2.1.2.2.1.1 */
+static const oid _ifentry_ifindex_prefix[] = { 1,3,6,1,2,1,2,2,1,1 };
+#define IFENTRY_PREFIX_LEN OID_LENGTH(_ifentry_ifindex_prefix)
+
 void netsnmp_entity_alias_rebuild(void)
 {
     netsnmp_entity_info *e;
@@ -83,6 +88,7 @@ void netsnmp_entity_alias_rebuild(void)
 
     SNMP_FREE(_alias);
     _alias_n = 0;
+    _alias_cap = 0;
 
     for (e = _ent_head; e; e = e->next)
         if (e->ifindex > 0)
@@ -95,18 +101,55 @@ void netsnmp_entity_alias_rebuild(void)
         malloc(count * sizeof(netsnmp_entity_alias_row));
     if (!_alias)
         return;
+    _alias_cap = count;
 
     _alias_n = 0;
     for (e = _ent_head; e; e = e->next) {
         if (e->ifindex > 0) {
             _alias[_alias_n].phys_idx    = e->idx;
             _alias[_alias_n].logical_idx = 0;
-            _alias[_alias_n].ifindex     = e->ifindex;
+            memcpy(_alias[_alias_n].target_oid, _ifentry_ifindex_prefix,
+                   sizeof(_ifentry_ifindex_prefix));
+            _alias[_alias_n].target_oid[IFENTRY_PREFIX_LEN] = (oid)e->ifindex;
+            _alias[_alias_n].target_oid_len = IFENTRY_PREFIX_LEN + 1;
             _alias_n++;
         }
     }
 
     qsort(_alias, _alias_n, sizeof(_alias[0]), _cmp_alias);
+}
+
+void netsnmp_entity_alias_add_oid(int phys_idx, int logical_idx,
+                                   const oid *target, size_t target_len)
+{
+    netsnmp_entity_alias_row *row;
+
+    if (target_len > ENTITY_ALIAS_OID_LEN)
+        return;
+
+    if (_alias_n >= _alias_cap) {
+        int newcap = _alias_cap ? _alias_cap * 2 : 16;
+        netsnmp_entity_alias_row *tmp =
+            (netsnmp_entity_alias_row *)realloc(_alias,
+                newcap * sizeof(netsnmp_entity_alias_row));
+        if (!tmp)
+            return;
+        _alias = tmp;
+        _alias_cap = newcap;
+    }
+
+    row = &_alias[_alias_n];
+    row->phys_idx    = phys_idx;
+    row->logical_idx = logical_idx;
+    memcpy(row->target_oid, target, target_len * sizeof(oid));
+    row->target_oid_len = target_len;
+    _alias_n++;
+}
+
+void netsnmp_entity_alias_sort(void)
+{
+    if (_alias_n > 0)
+        qsort(_alias, _alias_n, sizeof(_alias[0]), _cmp_alias);
 }
 
 int netsnmp_entity_alias_count(void)
@@ -129,6 +172,7 @@ _entity_cache_free(netsnmp_cache *cache, void *magic)
     _contains_n = 0;
     SNMP_FREE(_alias);
     _alias_n = 0;
+    _alias_cap = 0;
 }
 
 void init_entity(void)
@@ -149,6 +193,7 @@ void shutdown_entity(void)
     _contains_n = 0;
     SNMP_FREE(_alias);
     _alias_n = 0;
+    _alias_cap = 0;
 }
 
 netsnmp_cache *netsnmp_entity_get_cache(void)

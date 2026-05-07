@@ -51,11 +51,15 @@ typedef struct {
     int child_idx;
 } netsnmp_entity_contains_row;
 
+/* Max OID length for alias target (covers all target MIBs + one index component) */
+#define ENTITY_ALIAS_OID_LEN 16
+
 /* Sorted (phys_idx, logical_idx) pairs for entAliasMappingTable */
 typedef struct {
-    int phys_idx;
-    int logical_idx;    /* 0 when no entLogicalTable is implemented */
-    int ifindex;        /* the if-MIB ifIndex this port maps to */
+    int    phys_idx;
+    int    logical_idx;    /* 0 when no entLogicalTable is implemented */
+    oid    target_oid[ENTITY_ALIAS_OID_LEN];
+    size_t target_oid_len;
 } netsnmp_entity_alias_row;
 
 extern u_long entity_last_change;
@@ -76,6 +80,10 @@ void                          netsnmp_entity_parent_rel_pos_rebuild(void);
 int                        netsnmp_entity_alias_count(void);
 netsnmp_entity_alias_row  *netsnmp_entity_alias_get(int n);
 void                       netsnmp_entity_alias_rebuild(void);
+void                       netsnmp_entity_alias_add_oid(int phys_idx,
+                               int logical_idx,
+                               const oid *target, size_t target_len);
+void                       netsnmp_entity_alias_sort(void);
 
 int netsnmp_entity_arch_load(netsnmp_cache *, void *);
 

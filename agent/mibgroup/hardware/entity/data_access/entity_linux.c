@@ -819,12 +819,18 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 snprintf(e->model_name, sizeof(e->model_name), "0x%04x", did);
         }
 
-        /* Class description: libpci first, then our own table, then model */
-        if (class_val) {
+        /* Description: model name first, then class string, then BDF fallback */
+        if (e->model_name[0])
+            strlcpy(e->descr, e->model_name, sizeof(e->descr));
+        else if (class_val) {
             int cls_sub = (int)((class_val >> 8) & 0xFFFF);
             lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
                                     PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
                                     cls_sub);
+            if (lname) {
+                /* trim libpci result — some builds return whitespace on miss */
+                while (*lname == ' ' || *lname == '\t') lname++;
+            }
             if (lname && lname[0])
                 strlcpy(e->descr, lname, sizeof(e->descr));
             else {
@@ -833,9 +839,6 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                     strlcpy(e->descr, fb, sizeof(e->descr));
             }
         }
-        /* Fall back to model name when class lookup produced nothing */
-        if (!e->descr[0] && e->model_name[0])
-            strlcpy(e->descr, e->model_name, sizeof(e->descr));
 
         /* Revision */
         snprintf(path, sizeof(path), "%s/%s/revision", PCI_PATH, bdfs[i]);
@@ -853,9 +856,11 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                      PCI_PATH, bdfs[i]);
             _sysfs_read(path, width, sizeof(width));
             if (speed[0] && width[0]) {
-                if (e->descr[0])
+                char base[sizeof(e->descr)];
+                strlcpy(base, e->descr, sizeof(base));
+                if (base[0])
                     snprintf(e->descr, sizeof(e->descr), "%s, x%s %s",
-                             e->descr, width, speed);
+                             base, width, speed);
                 else
                     snprintf(e->descr, sizeof(e->descr), "x%s %s",
                              width, speed);
@@ -1482,6 +1487,229 @@ _load_power_supply(void)
     closedir(dir);
 }
 
+/* ---- Phase 9: UCD-DISKIO aliases ----------------------------------------- */
+
+/*
+ * Map disk entities (sda, sr0, nvme0 …) to UCD-DISKIO-MIB diskIOEntry rows.
+ * diskIOIndex is the 1-based position of the device in /proc/diskstats.
+ * For NVMe: entity name is "nvme0" but diskstats lists "nvme0n1" (namespace).
+ *   We match "nvme{N}n{M}" to entity "nvme{N}" and use the first namespace seen.
+ */
+static void
+_alias_diskio(void)
+{
+    /* diskIOEntry.diskIOIndex: 1.3.6.1.4.1.2021.13.15.1.1.1 */
+    static const oid diskio_base[] = { 1,3,6,1,4,1,2021,13,15,1,1,1 };
+    FILE *f;
+    char line[256];
+    int diskio_idx = 0;
+
+    f = fopen("/proc/diskstats", "r");
+    if (!f)
+        return;
+
+    while (fgets(line, sizeof(line), f)) {
+        int major, minor;
+        char devname[64];
+        netsnmp_entity_info *e;
+        oid target[OID_LENGTH(diskio_base) + 1];
+
+        if (sscanf(line, " %d %d %63s", &major, &minor, devname) != 3)
+            continue;
+        diskio_idx++;
+
+        /* Direct match: sda, sr0, etc. */
+        e = NULL;
+        {
+            netsnmp_entity_info *ep;
+            for (ep = netsnmp_entity_get_first(); ep;
+                 ep = netsnmp_entity_get_next(ep)) {
+                if (strcmp(ep->name, devname) == 0) {
+                    e = ep;
+                    break;
+                }
+            }
+        }
+
+        /* NVMe namespace: "nvme0n1" → match entity "nvme0" (first ns only) */
+        if (!e && strncmp(devname, "nvme", 4) == 0) {
+            const char *p = devname + 4;
+            while (*p && isdigit((unsigned char)*p)) p++;
+            if (*p == 'n') {
+                char base[64];
+                netsnmp_entity_info *ep;
+                int ctrl_len = (int)(p - devname);
+
+                snprintf(base, sizeof(base), "%.*s", ctrl_len, devname);
+                for (ep = netsnmp_entity_get_first(); ep;
+                     ep = netsnmp_entity_get_next(ep)) {
+                    if (strcmp(ep->name, base) == 0) {
+                        /* Only bind on the first namespace (avoid duplicates) */
+                        e = ep;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!e)
+            continue;
+
+        /* Skip if this entity already received a diskio alias */
+        {
+            int n;
+            int already = 0;
+            for (n = 0; n < netsnmp_entity_alias_count(); n++) {
+                netsnmp_entity_alias_row *r = netsnmp_entity_alias_get(n);
+                if (r && r->phys_idx == e->idx &&
+                    r->target_oid_len > 0 &&
+                    r->target_oid[r->target_oid_len - 2] ==
+                        diskio_base[OID_LENGTH(diskio_base) - 2]) {
+                    already = 1;
+                    break;
+                }
+            }
+            if (already)
+                continue;
+        }
+
+        memcpy(target, diskio_base, sizeof(diskio_base));
+        target[OID_LENGTH(diskio_base)] = (oid)diskio_idx;
+        netsnmp_entity_alias_add_oid(e->idx, 0,
+                                      target, OID_LENGTH(diskio_base) + 1);
+    }
+    fclose(f);
+}
+
+/* ---- Phase 10: LM-SENSORS aliases ---------------------------------------- */
+
+/*
+ * Map hwmon sensor entities to LM-SENSORS-MIB rows.
+ * lmTempSensorsIndex / lmFanSensorsIndex / lmVoltSensorsIndex are
+ * assigned by the lm_sensors module in chip-discovery order (hwmon0,
+ * hwmon1, …) with a separate sequential counter per sensor type.
+ *
+ * Our sensor entities (IANA_PHYS_SENSOR children of hwmonN chip entities)
+ * replicate that ordering: sort by (hwmon_number, sensor_number) grouped by
+ * type to derive the same 1-based indices the lm_sensors module uses.
+ *
+ * Note: This assumes libsensors enumerates chips in hwmonN order.  When
+ * custom sensors.conf reordering is in effect the indices may diverge.
+ */
+
+typedef struct {
+    int phys_idx;
+    int hwmon_num;
+    int sensor_num;
+    int sensor_type; /* 0=temp, 1=fan, 2=volt */
+} _lm_sensor_entry;
+
+static int
+_cmp_lm_sensor(const void *a, const void *b)
+{
+    const _lm_sensor_entry *sa = (const _lm_sensor_entry *)a;
+    const _lm_sensor_entry *sb = (const _lm_sensor_entry *)b;
+
+    if (sa->sensor_type != sb->sensor_type)
+        return sa->sensor_type - sb->sensor_type;
+    if (sa->hwmon_num != sb->hwmon_num)
+        return sa->hwmon_num - sb->hwmon_num;
+    return sa->sensor_num - sb->sensor_num;
+}
+
+static void
+_alias_lm_sensors(void)
+{
+    /* lmTempSensorsEntry.lmTempSensorsIndex: 1.3.6.1.4.1.2021.13.16.2.1.1 */
+    static const oid lm_temp_base[] = { 1,3,6,1,4,1,2021,13,16,2,1,1 };
+    /* lmFanSensorsEntry.lmFanSensorsIndex:  1.3.6.1.4.1.2021.13.16.3.1.1 */
+    static const oid lm_fan_base[]  = { 1,3,6,1,4,1,2021,13,16,3,1,1 };
+    /* lmVoltSensorsEntry.lmVoltSensorsIndex: 1.3.6.1.4.1.2021.13.16.4.1.1 */
+    static const oid lm_volt_base[] = { 1,3,6,1,4,1,2021,13,16,4,1,1 };
+#define LM_BASE_LEN OID_LENGTH(lm_temp_base)
+
+    _lm_sensor_entry *arr = NULL;
+    int n = 0, cap = 0;
+    netsnmp_entity_info *e;
+    int temp_count = 0, fan_count = 0, volt_count = 0;
+    int i;
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        int sensor_type, sensor_num, hwmon_num;
+        netsnmp_entity_info *parent;
+        const char *np;
+        _lm_sensor_entry *tmp;
+
+        if (e->iana_class != IANA_PHYS_SENSOR)
+            continue;
+
+        if (strncmp(e->name, "temp", 4) == 0)
+            sensor_type = 0;
+        else if (strncmp(e->name, "fan", 3) == 0)
+            sensor_type = 1;
+        else if (strncmp(e->name, "in", 2) == 0)
+            sensor_type = 2;
+        else
+            continue;
+
+        np = e->name;
+        while (*np && !isdigit((unsigned char)*np)) np++;
+        sensor_num = *np ? atoi(np) : 0;
+
+        parent = netsnmp_entity_get_byIdx(e->parent_idx);
+        if (!parent)
+            continue;
+        hwmon_num = 0;
+        if (strncmp(parent->name, "hwmon", 5) == 0)
+            hwmon_num = atoi(parent->name + 5);
+
+        if (n >= cap) {
+            cap = cap ? cap * 2 : 64;
+            tmp = (_lm_sensor_entry *)realloc(arr, cap * sizeof(*arr));
+            if (!tmp) { free(arr); return; }
+            arr = tmp;
+        }
+        arr[n].phys_idx    = e->idx;
+        arr[n].hwmon_num   = hwmon_num;
+        arr[n].sensor_num  = sensor_num;
+        arr[n].sensor_type = sensor_type;
+        n++;
+    }
+
+    if (!n) { free(arr); return; }
+
+    qsort(arr, n, sizeof(arr[0]), _cmp_lm_sensor);
+
+    for (i = 0; i < n; i++) {
+        oid target[LM_BASE_LEN + 1];
+        int idx_1based;
+
+        switch (arr[i].sensor_type) {
+        case 0:
+            idx_1based = ++temp_count;
+            memcpy(target, lm_temp_base, sizeof(lm_temp_base));
+            break;
+        case 1:
+            idx_1based = ++fan_count;
+            memcpy(target, lm_fan_base, sizeof(lm_fan_base));
+            break;
+        case 2:
+            idx_1based = ++volt_count;
+            memcpy(target, lm_volt_base, sizeof(lm_volt_base));
+            break;
+        default:
+            continue;
+        }
+
+        target[LM_BASE_LEN] = (oid)idx_1based;
+        netsnmp_entity_alias_add_oid(arr[i].phys_idx, 0,
+                                      target, LM_BASE_LEN + 1);
+    }
+
+    free(arr);
+#undef LM_BASE_LEN
+}
+
 /* ---- Top-level load ------------------------------------------------------ */
 
 int
@@ -1507,6 +1735,9 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
     netsnmp_entity_alias_rebuild();
+    _alias_diskio();
+    _alias_lm_sensors();
+    netsnmp_entity_alias_sort();
     entity_last_change = netsnmp_get_agent_uptime();
     return 0;
 }
