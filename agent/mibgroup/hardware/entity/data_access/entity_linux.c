@@ -10,6 +10,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <limits.h>
+#include <time.h>
+#include <errno.h>
 #ifdef HAVE_PCI_PCI_H
 #include <pci/pci.h>
 #endif
@@ -1823,44 +1825,49 @@ _alias_lm_sensors(void)
 #undef LM_BASE_LEN
 }
 
-/* ---- Persistent hash ----------------------------------------------------- */
+/* ---- Persistent hash and last-change time -------------------------------- */
 
-#define ENTITY_HASH_FILE "entity_hash"
+#define ENTITY_STATE_FILE "entity_state"
 
 static uint32_t _saved_hash = 0;
 
 static void
-_load_saved_hash(void)
+_read_entity_state(void)
 {
     char path[512];
-    unsigned int v = 0;
+    unsigned int h = 0;
+    unsigned long t = 0;
     FILE *f;
 
     snprintf(path, sizeof(path), "%s/%s",
-             get_persistent_directory(), ENTITY_HASH_FILE);
+             get_persistent_directory(), ENTITY_STATE_FILE);
     f = fopen(path, "r");
-    if (f) {
-        if (fscanf(f, "%x", &v) != 1)
-            v = 0;
-        fclose(f);
+    if (!f)
+        return;
+    if (fscanf(f, "%x %lu", &h, &t) == 2) {
+        _saved_hash        = (uint32_t)h;
+        entity_last_change = (u_long)t;
     }
-    _saved_hash = (uint32_t)v;
+    fclose(f);
 }
 
 static void
-_save_hash(uint32_t hash)
+_write_entity_state(void)
 {
     char path[512];
     FILE *f;
 
     snprintf(path, sizeof(path), "%s/%s",
-             get_persistent_directory(), ENTITY_HASH_FILE);
+             get_persistent_directory(), ENTITY_STATE_FILE);
     f = fopen(path, "w");
-    if (f) {
-        fprintf(f, "%08x\n", (unsigned)hash);
-        fclose(f);
-        _saved_hash = hash;
+    if (!f) {
+        snmp_log(LOG_ERR, "entity: cannot write %s: %s\n",
+                 path, strerror(errno));
+        return;
     }
+    fprintf(f, "%08x %lu\n", (unsigned)_saved_hash,
+            (unsigned long)entity_last_change);
+    fclose(f);
 }
 
 /* ---- Top-level load ------------------------------------------------------ */
@@ -1874,9 +1881,9 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     static int first_load = 1;
 
     if (first_load) {
-        _load_saved_hash();
+        _read_entity_state();
         hash_before = _saved_hash;
-        first_load = 0;
+        first_load  = 0;
     } else {
         hash_before = _entity_list_hash();
     }
@@ -1904,15 +1911,15 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     netsnmp_entity_alias_sort();
 
     hash_after = _entity_list_hash();
-    if (hash_after != hash_before)
-        entity_last_change = netsnmp_get_agent_uptime();
-    if (hash_after != _saved_hash)
-        _save_hash(hash_after);
+    if (hash_after != hash_before) {
+        entity_last_change = (u_long)time(NULL);
+        _saved_hash        = hash_after;
+        _write_entity_state();
+    }
 
     return 0;
 }
 
 void init_entity_linux(void)
 {
-    /* Nothing: netsnmp_entity_arch_load() is called by the cache */
 }
