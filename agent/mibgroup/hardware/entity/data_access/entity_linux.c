@@ -15,6 +15,9 @@
 #ifdef HAVE_PCI_PCI_H
 #include <pci/pci.h>
 #endif
+#if defined(HAVE_SENSORS_SENSORS_H) && defined(NETSNMP_USE_SENSORS_V3)
+#include <sensors/sensors.h>
+#endif
 
 #define DMI_PATH    "/sys/class/dmi/id"
 #define PCI_PATH    "/sys/bus/pci/devices"
@@ -1698,18 +1701,114 @@ _alias_diskio(void)
 
 /* ---- Phase 10: LM-SENSORS aliases ---------------------------------------- */
 
+/* OID bases shared by both implementations */
+static const oid _lm_temp_base[] = { 1,3,6,1,4,1,2021,13,16,2,1,1 };
+static const oid _lm_fan_base[]  = { 1,3,6,1,4,1,2021,13,16,3,1,1 };
+static const oid _lm_volt_base[] = { 1,3,6,1,4,1,2021,13,16,4,1,1 };
+#define LM_BASE_LEN OID_LENGTH(_lm_temp_base)
+
+#if defined(HAVE_SENSORS_SENSORS_H) && defined(NETSNMP_USE_SENSORS_V3)
+
 /*
- * Map hwmon sensor entities to LM-SENSORS-MIB rows.
- * lmTempSensorsIndex / lmFanSensorsIndex / lmVoltSensorsIndex are
- * assigned by the lm_sensors module in chip-discovery order (hwmon0,
- * hwmon1, …) with a separate sequential counter per sensor type.
+ * libsensors v3 implementation.
  *
- * Our sensor entities (IANA_PHYS_SENSOR children of hwmonN chip entities)
- * replicate that ordering: sort by (hwmon_number, sensor_number) grouped by
- * type to derive the same 1-based indices the lm_sensors module uses.
+ * Enumerate chips via sensors_get_detected_chips(), which follows the same
+ * sensors.conf discovery order used by the lmsensors_v3 module.  For each
+ * chip, match features with an _input subfeature (the only ones lmsensors_v3
+ * counts) to the corresponding entity sensor by (hwmon_num, feature_name).
+ * This produces entAliasMappingIdentifier OIDs that agree with the actual
+ * lmTempSensors / lmFanSensors / lmVoltSensors row indices.
+ */
+static void
+_alias_lm_sensors(void)
+{
+    static int sensors_ready = 0;
+    const sensors_chip_name *chip;
+    const sensors_feature   *feat;
+    int chip_nr = 0, feat_nr;
+    int temp_count = 0, fan_count = 0, volt_count = 0;
+
+    if (!sensors_ready) {
+        if (sensors_init(NULL) != 0)
+            return;
+        sensors_ready = 1;
+    }
+
+    while ((chip = sensors_get_detected_chips(NULL, &chip_nr))) {
+        const char *p;
+        int hwmon_num;
+
+        /* chip->path ends with ".../hwmon/hwmonN" — extract N */
+        p = strrchr(chip->path, '/');
+        if (!p || strncmp(p + 1, "hwmon", 5) != 0)
+            continue;
+        hwmon_num = atoi(p + 6);
+
+        feat_nr = 0;
+        while ((feat = sensors_get_features(chip, &feat_nr))) {
+            int sf_type;
+            const sensors_subfeature *sub;
+            netsnmp_entity_info *e, *parent;
+            oid target[LM_BASE_LEN + 1];
+            int idx_1based;
+
+            switch (feat->type) {
+            case SENSORS_FEATURE_TEMP: sf_type = SENSORS_SUBFEATURE_TEMP_INPUT; break;
+            case SENSORS_FEATURE_FAN:  sf_type = SENSORS_SUBFEATURE_FAN_INPUT;  break;
+            case SENSORS_FEATURE_IN:   sf_type = SENSORS_SUBFEATURE_IN_INPUT;   break;
+            default: continue;
+            }
+
+            /* Only count features that have a readable _input value —
+             * mirrors the counting in lmsensors_v3.c exactly */
+            sub = sensors_get_subfeature(chip, feat, sf_type);
+            if (!sub)
+                continue;
+
+            switch (feat->type) {
+            case SENSORS_FEATURE_TEMP:
+                idx_1based = ++temp_count;
+                memcpy(target, _lm_temp_base, sizeof(_lm_temp_base));
+                break;
+            case SENSORS_FEATURE_FAN:
+                idx_1based = ++fan_count;
+                memcpy(target, _lm_fan_base, sizeof(_lm_fan_base));
+                break;
+            default: /* SENSORS_FEATURE_IN */
+                idx_1based = ++volt_count;
+                memcpy(target, _lm_volt_base, sizeof(_lm_volt_base));
+                break;
+            }
+            target[LM_BASE_LEN] = (oid)idx_1based;
+
+            /* Find the entity sensor whose parent chip is this hwmon device
+             * and whose sysfs name matches the libsensors feature name */
+            for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+                if (e->iana_class != IANA_PHYS_SENSOR)
+                    continue;
+                parent = netsnmp_entity_get_byIdx(e->parent_idx);
+                if (!parent || strncmp(parent->name, "hwmon", 5) != 0)
+                    continue;
+                if (atoi(parent->name + 5) != hwmon_num)
+                    continue;
+                if (strcmp(e->name, feat->name) != 0)
+                    continue;
+                netsnmp_entity_alias_add_oid(e->idx, 0, target, LM_BASE_LEN + 1);
+                break;
+            }
+        }
+    }
+}
+
+#else  /* no libsensors v3 — fall back to hwmon-number sort */
+
+/*
+ * Fallback implementation (no libsensors).
  *
- * Note: This assumes libsensors enumerates chips in hwmonN order.  When
- * custom sensors.conf reordering is in effect the indices may diverge.
+ * Sort sensor entities by (sensor_type, hwmon_number, sensor_number) and
+ * assign sequential 1-based indices.  This matches lmSensors index order
+ * only when the kernel hwmon device numbering happens to agree with the
+ * sensors.conf chip discovery order.
  */
 
 typedef struct {
@@ -1735,14 +1834,6 @@ _cmp_lm_sensor(const void *a, const void *b)
 static void
 _alias_lm_sensors(void)
 {
-    /* lmTempSensorsEntry.lmTempSensorsIndex: 1.3.6.1.4.1.2021.13.16.2.1.1 */
-    static const oid lm_temp_base[] = { 1,3,6,1,4,1,2021,13,16,2,1,1 };
-    /* lmFanSensorsEntry.lmFanSensorsIndex:  1.3.6.1.4.1.2021.13.16.3.1.1 */
-    static const oid lm_fan_base[]  = { 1,3,6,1,4,1,2021,13,16,3,1,1 };
-    /* lmVoltSensorsEntry.lmVoltSensorsIndex: 1.3.6.1.4.1.2021.13.16.4.1.1 */
-    static const oid lm_volt_base[] = { 1,3,6,1,4,1,2021,13,16,4,1,1 };
-#define LM_BASE_LEN OID_LENGTH(lm_temp_base)
-
     _lm_sensor_entry *arr = NULL;
     int n = 0, cap = 0;
     netsnmp_entity_info *e;
@@ -1802,15 +1893,15 @@ _alias_lm_sensors(void)
         switch (arr[i].sensor_type) {
         case 0:
             idx_1based = ++temp_count;
-            memcpy(target, lm_temp_base, sizeof(lm_temp_base));
+            memcpy(target, _lm_temp_base, sizeof(_lm_temp_base));
             break;
         case 1:
             idx_1based = ++fan_count;
-            memcpy(target, lm_fan_base, sizeof(lm_fan_base));
+            memcpy(target, _lm_fan_base, sizeof(_lm_fan_base));
             break;
         case 2:
             idx_1based = ++volt_count;
-            memcpy(target, lm_volt_base, sizeof(lm_volt_base));
+            memcpy(target, _lm_volt_base, sizeof(_lm_volt_base));
             break;
         default:
             continue;
@@ -1822,8 +1913,10 @@ _alias_lm_sensors(void)
     }
 
     free(arr);
-#undef LM_BASE_LEN
 }
+
+#endif /* HAVE_SENSORS_SENSORS_H && NETSNMP_USE_SENSORS_V3 */
+#undef LM_BASE_LEN
 
 /* ---- Persistent hash and last-change time -------------------------------- */
 
