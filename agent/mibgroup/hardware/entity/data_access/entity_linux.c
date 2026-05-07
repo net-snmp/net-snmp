@@ -1823,6 +1823,46 @@ _alias_lm_sensors(void)
 #undef LM_BASE_LEN
 }
 
+/* ---- Persistent hash ----------------------------------------------------- */
+
+#define ENTITY_HASH_FILE "entity_hash"
+
+static uint32_t _saved_hash = 0;
+
+static void
+_load_saved_hash(void)
+{
+    char path[512];
+    unsigned int v = 0;
+    FILE *f;
+
+    snprintf(path, sizeof(path), "%s/%s",
+             get_persistent_directory(), ENTITY_HASH_FILE);
+    f = fopen(path, "r");
+    if (f) {
+        if (fscanf(f, "%x", &v) != 1)
+            v = 0;
+        fclose(f);
+    }
+    _saved_hash = (uint32_t)v;
+}
+
+static void
+_save_hash(uint32_t hash)
+{
+    char path[512];
+    FILE *f;
+
+    snprintf(path, sizeof(path), "%s/%s",
+             get_persistent_directory(), ENTITY_HASH_FILE);
+    f = fopen(path, "w");
+    if (f) {
+        fprintf(f, "%08x\n", (unsigned)hash);
+        fclose(f);
+        _saved_hash = hash;
+    }
+}
+
 /* ---- Top-level load ------------------------------------------------------ */
 
 int
@@ -1830,9 +1870,16 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
     pci_entity_map *pci_map = NULL;
     int pci_map_n = 0;
-    uint32_t hash_before;
+    uint32_t hash_before, hash_after;
+    static int first_load = 1;
 
-    hash_before = _entity_list_hash();
+    if (first_load) {
+        _load_saved_hash();
+        hash_before = _saved_hash;
+        first_load = 0;
+    } else {
+        hash_before = _entity_list_hash();
+    }
     netsnmp_entity_free_list();
 
     _load_dmi();
@@ -1856,8 +1903,11 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _alias_lm_sensors();
     netsnmp_entity_alias_sort();
 
-    if (_entity_list_hash() != hash_before)
+    hash_after = _entity_list_hash();
+    if (hash_after != hash_before)
         entity_last_change = netsnmp_get_agent_uptime();
+    if (hash_after != _saved_hash)
+        _save_hash(hash_after);
 
     return 0;
 }
