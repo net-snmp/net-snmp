@@ -12,7 +12,7 @@
  * Column 2: entAliasMappingIdentifier (OID / RowPointer)
  *
  * Each physical port entity with a known ifIndex gets one row with
- * entAliasLogicalIndexOrZero = 0 (no entLogicalTable implemented) and
+ * entAliasLogicalIndexOrZero = 0 (agent-wide, not bound to a specific logical entity) and
  * entAliasMappingIdentifier pointing to ifEntry.ifIndex.N.
  */
 

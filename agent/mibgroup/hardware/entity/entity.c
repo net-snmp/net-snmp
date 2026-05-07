@@ -1,15 +1,18 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/system.h>
+#include <net-snmp/library/snmpv3.h>
 #include "entity.h"
 
-static netsnmp_entity_info        *_ent_head = NULL;
-static netsnmp_cache              *_ent_cache = NULL;
-static netsnmp_entity_contains_row *_contains = NULL;
-static int                          _contains_n = 0;
-static netsnmp_entity_alias_row    *_alias = NULL;
-static int                          _alias_n = 0;
-static int                          _alias_cap = 0;
+static netsnmp_entity_info             *_ent_head = NULL;
+static netsnmp_cache                   *_ent_cache = NULL;
+static netsnmp_entity_contains_row     *_contains = NULL;
+static int                              _contains_n = 0;
+static netsnmp_entity_alias_row        *_alias = NULL;
+static int                              _alias_n = 0;
+static int                              _alias_cap = 0;
+static netsnmp_entity_logical_row      *_log_head = NULL;
 
 u_long entity_last_change = 0;
 
@@ -168,6 +171,7 @@ static void
 _entity_cache_free(netsnmp_cache *cache, void *magic)
 {
     netsnmp_entity_free_list();
+    netsnmp_entity_logical_free_list();
     SNMP_FREE(_contains);
     _contains_n = 0;
     SNMP_FREE(_alias);
@@ -189,6 +193,7 @@ void init_entity(void)
 void shutdown_entity(void)
 {
     netsnmp_entity_free_list();
+    netsnmp_entity_logical_free_list();
     SNMP_FREE(_contains);
     _contains_n = 0;
     SNMP_FREE(_alias);
@@ -281,4 +286,101 @@ void netsnmp_entity_free_list(void)
         SNMP_FREE(e);
     }
     _ent_head = NULL;
+}
+
+/* ---- entLogicalTable list management ------------------------------------- */
+
+netsnmp_entity_logical_row *netsnmp_entity_logical_get_first(void)
+{
+    return _log_head;
+}
+
+netsnmp_entity_logical_row *
+netsnmp_entity_logical_get_next(netsnmp_entity_logical_row *r)
+{
+    return r ? r->next : NULL;
+}
+
+netsnmp_entity_logical_row *netsnmp_entity_logical_get_byIdx(int idx)
+{
+    netsnmp_entity_logical_row *r;
+    for (r = _log_head; r; r = r->next)
+        if (r->idx == idx)
+            return r;
+    return NULL;
+}
+
+netsnmp_entity_logical_row *netsnmp_entity_logical_create(int idx)
+{
+    netsnmp_entity_logical_row *r, *prev;
+
+    r = SNMP_MALLOC_TYPEDEF(netsnmp_entity_logical_row);
+    if (!r)
+        return NULL;
+    r->idx = idx;
+
+    if (!_log_head || _log_head->idx > idx) {
+        r->next = _log_head;
+        _log_head = r;
+        return r;
+    }
+    for (prev = _log_head; prev->next && prev->next->idx < idx;
+         prev = prev->next)
+        ;
+    r->next = prev->next;
+    prev->next = r;
+    return r;
+}
+
+void netsnmp_entity_logical_free_list(void)
+{
+    netsnmp_entity_logical_row *r, *next;
+    for (r = _log_head; r; r = next) {
+        next = r->next;
+        SNMP_FREE(r);
+    }
+    _log_head = NULL;
+}
+
+/*
+ * Populate the logical table.  One row per unique SNMP context:
+ * index 1 = default (empty) context with the local engine ID.
+ * Called from netsnmp_entity_arch_load() on each cache refresh.
+ */
+void netsnmp_entity_logical_load(void)
+{
+    /* snmpUDPDomain: 1.3.6.1.6.1.1 */
+    static const oid _udp_domain[] = { 1,3,6,1,6,1,1 };
+    /* zeroDotZero */
+    static const oid _zero_dot_zero[] = { 0,0 };
+
+    netsnmp_entity_logical_row *r;
+    in_addr_t myaddr;
+
+    netsnmp_entity_logical_free_list();
+
+    r = netsnmp_entity_logical_create(1);
+    if (!r)
+        return;
+
+    strlcpy(r->descr, "local SNMP agent", sizeof(r->descr));
+
+    memcpy(r->type_oid, _zero_dot_zero, sizeof(_zero_dot_zero));
+    r->type_oid_len = OID_LENGTH(_zero_dot_zero);
+
+    memcpy(r->tdomain, _udp_domain, sizeof(_udp_domain));
+    r->tdomain_len = OID_LENGTH(_udp_domain);
+
+    /* TAddress for snmpUDPDomain: 4-byte IPv4 + 2-byte port (big-endian) */
+    myaddr = get_myaddr();  /* returns address in network byte order */
+    memcpy(r->taddress, &myaddr, 4);
+    r->taddress[4] = 0;    /* port 161 high byte */
+    r->taddress[5] = 161;  /* port 161 low byte  */
+    r->taddress_len = 6;
+
+    r->context_engine_id_len =
+        snmpv3_get_engineID(r->context_engine_id,
+                            sizeof(r->context_engine_id));
+
+    r->context_name[0] = '\0';   /* default context */
 }

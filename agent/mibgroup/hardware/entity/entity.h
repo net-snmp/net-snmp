@@ -57,7 +57,7 @@ typedef struct {
 /* Sorted (phys_idx, logical_idx) pairs for entAliasMappingTable */
 typedef struct {
     int    phys_idx;
-    int    logical_idx;    /* 0 when no entLogicalTable is implemented */
+    int    logical_idx;    /* 0 = agent-wide alias (not bound to a logical entity) */
     oid    target_oid[ENTITY_ALIAS_OID_LEN];
     size_t target_oid_len;
 } netsnmp_entity_alias_row;
@@ -86,5 +86,29 @@ void                       netsnmp_entity_alias_add_oid(int phys_idx,
 void                       netsnmp_entity_alias_sort(void);
 
 int netsnmp_entity_arch_load(netsnmp_cache *, void *);
+
+/* entLogicalTable rows */
+typedef struct netsnmp_entity_logical_row_s {
+    int    idx;
+    char   descr[256];
+    oid    type_oid[16];
+    size_t type_oid_len;
+    u_char taddress[6];        /* snmpUDPDomain: 4-byte IPv4 + 2-byte port */
+    size_t taddress_len;
+    oid    tdomain[16];
+    size_t tdomain_len;
+    u_char context_engine_id[32];
+    size_t context_engine_id_len;
+    char   context_name[32];
+    struct netsnmp_entity_logical_row_s *next;
+} netsnmp_entity_logical_row;
+
+netsnmp_entity_logical_row *netsnmp_entity_logical_get_first(void);
+netsnmp_entity_logical_row *netsnmp_entity_logical_get_next(
+                                netsnmp_entity_logical_row *);
+netsnmp_entity_logical_row *netsnmp_entity_logical_get_byIdx(int idx);
+netsnmp_entity_logical_row *netsnmp_entity_logical_create(int idx);
+void                        netsnmp_entity_logical_free_list(void);
+void                        netsnmp_entity_logical_load(void);
 
 #endif /* NETSNMP_HARDWARE_ENTITY_H */

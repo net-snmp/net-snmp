@@ -20,6 +20,7 @@
 #define BLOCK_PATH  "/sys/block"
 #define HWMON_PATH  "/sys/class/hwmon"
 #define PSY_PATH    "/sys/class/power_supply"
+#define RTC_PATH    "/sys/class/rtc"
 
 #define IDX_CHASSIS      1
 #define IDX_BASEBOARD   10
@@ -31,6 +32,7 @@
 #define IDX_PCI_BASE   1000
 #define IDX_SCSI_BASE  2000
 #define IDX_USB_BASE   2200
+#define IDX_RTC_BASE   2400
 #define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
 
@@ -223,6 +225,7 @@ _load_dmi(void)
     e->is_fru     = TV_TRUE;
     strlcpy(e->name,  "chassis",        sizeof(e->name));
     strlcpy(e->descr, "System Chassis", sizeof(e->descr));
+    snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
     _dmi_field("sys_vendor",     e->mfg_name,   sizeof(e->mfg_name));
     _dmi_field("product_name",   e->model_name, sizeof(e->model_name));
     _dmi_field("product_serial", e->serial,     sizeof(e->serial));
@@ -240,6 +243,7 @@ _load_dmi(void)
     e->is_fru     = TV_TRUE;
     strlcpy(e->name,  "baseboard", sizeof(e->name));
     strlcpy(e->descr, "Baseboard", sizeof(e->descr));
+    snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
     _dmi_field("board_vendor",  e->mfg_name,   sizeof(e->mfg_name));
     _dmi_field("board_name",    e->model_name, sizeof(e->model_name));
     _dmi_field("board_serial",  e->serial,     sizeof(e->serial));
@@ -253,6 +257,7 @@ _load_dmi(void)
     e->parent_idx = IDX_BASEBOARD;
     strlcpy(e->name,  "bios", sizeof(e->name));
     strlcpy(e->descr, "BIOS", sizeof(e->descr));
+    snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
     _dmi_field("bios_vendor",  e->mfg_name, sizeof(e->mfg_name));
     _dmi_field("bios_version", e->fw_rev,   sizeof(e->fw_rev));
     if (e->fw_rev[0]) {
@@ -295,6 +300,8 @@ _load_cpus(void)
                     e->parent_idx     = IDX_BASEBOARD;
                     e->is_fru         = TV_TRUE;
                     snprintf(e->name, sizeof(e->name), "cpu%d", phys_id);
+                    snprintf(e->uris, sizeof(e->uris),
+                             "file:///sys/devices/system/cpu/cpu%d", phys_id);
                     if (descr[0])
                         strlcpy(e->descr, descr, sizeof(e->descr));
                     else
@@ -312,6 +319,8 @@ _load_cpus(void)
             e->parent_idx     = IDX_BASEBOARD;
             e->is_fru         = TV_TRUE;
             snprintf(e->name, sizeof(e->name), "cpu%d", phys_id);
+            snprintf(e->uris, sizeof(e->uris),
+                     "file:///sys/devices/system/cpu/cpu%d", phys_id);
             if (descr[0])
                 strlcpy(e->descr, descr, sizeof(e->descr));
         }
@@ -339,6 +348,7 @@ _load_dimms(void)
         e->parent_idx = IDX_BASEBOARD;
         strlcpy(e->name, "memory", sizeof(e->name));
         strlcpy(e->descr, "System Memory", sizeof(e->descr));
+        snprintf(e->uris, sizeof(e->uris), "file:///sys/devices/system/memory");
     }
     e = NULL;
 
@@ -473,6 +483,8 @@ _load_caches(void)
             e->iana_class = IANA_PHYS_MODULE;
             e->parent_idx = IDX_CPU_BASE + phys_id;
             e->is_fru     = TV_FALSE;
+            snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
+                     cache_path, cache_de->d_name);
 
             if (strcmp(type, "Unified") == 0)
                 snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
@@ -1387,6 +1399,8 @@ _load_hwmon(void)
         strlcpy(e->name,  chips[ci].dir, sizeof(e->name));
         strlcpy(e->descr, chips[ci].name, sizeof(e->descr));
         strlcpy(e->model_name, chips[ci].name, sizeof(e->model_name));
+        snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
+                 HWMON_PATH, chips[ci].dir);
 
         sensor_seq = 1;
         for (pi = 0; prefixes[pi]; pi++) {
@@ -1412,6 +1426,8 @@ _load_hwmon(void)
                 se->parent_idx = chip_base;
                 strlcpy(se->name,  sensor_name, sizeof(se->name));
                 strlcpy(se->descr, sensor_name, sizeof(se->descr));
+                snprintf(se->uris, sizeof(se->uris), "file://%s/%s/%s%d_input",
+                         HWMON_PATH, chips[ci].dir, pfx, n);
 
                 snprintf(path, sizeof(path), "%s/%s/%s%d_label",
                          HWMON_PATH, chips[ci].dir, pfx, n);
@@ -1487,7 +1503,55 @@ _load_power_supply(void)
     closedir(dir);
 }
 
-/* ---- Phase 9: UCD-DISKIO aliases ----------------------------------------- */
+/* ---- Phase 9: RTC devices ------------------------------------------------- */
+
+static void
+_load_rtc(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], val[128];
+    int idx = IDX_RTC_BASE;
+
+    dir = opendir(RTC_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        netsnmp_entity_info *e;
+        char *sp;
+
+        if (strncmp(de->d_name, "rtc", 3) != 0 || !isdigit((unsigned char)de->d_name[3]))
+            continue;
+
+        e = netsnmp_entity_create(idx++);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_MODULE;
+        e->parent_idx = IDX_BASEBOARD;
+        strlcpy(e->name, de->d_name, sizeof(e->name));
+
+        snprintf(path, sizeof(path), "%s/%s/name", RTC_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        /* sysfs name may have extra tokens (e.g. "rtc_cmos 00:00") — keep first word */
+        if ((sp = strchr(val, ' ')) != NULL)
+            *sp = '\0';
+
+        if (val[0]) {
+            strlcpy(e->descr,      val, sizeof(e->descr));
+            strlcpy(e->model_name, val, sizeof(e->model_name));
+        } else {
+            strlcpy(e->descr,      de->d_name, sizeof(e->descr));
+            strlcpy(e->model_name, de->d_name, sizeof(e->model_name));
+        }
+
+        snprintf(e->uris, sizeof(e->uris), "file://%s/%s", RTC_PATH, de->d_name);
+    }
+    closedir(dir);
+}
+
+/* ---- Phase 10: UCD-DISKIO aliases ----------------------------------------- */
 
 /*
  * Map disk entities (sda, sr0, nvme0 …) to UCD-DISKIO-MIB diskIOEntry rows.
@@ -1730,10 +1794,12 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_nvme(pci_map, pci_map_n);
     _load_hwmon();
     _load_power_supply();
+    _load_rtc();
 
     free(pci_map);
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
+    netsnmp_entity_logical_load();
     netsnmp_entity_alias_rebuild();
     _alias_diskio();
     _alias_lm_sensors();
