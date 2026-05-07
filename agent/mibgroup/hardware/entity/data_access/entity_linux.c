@@ -56,6 +56,30 @@ _fnv1a_hash(const char *s)
     return h;
 }
 
+static uint32_t
+_entity_list_hash(void)
+{
+    netsnmp_entity_info *e;
+    uint32_t h = 2166136261u;
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        h ^= (uint32_t)e->idx;          h *= 16777619u;
+        h ^= (uint32_t)e->parent_idx;   h *= 16777619u;
+        h ^= (uint32_t)e->iana_class;   h *= 16777619u;
+        h ^= (uint32_t)e->is_fru;       h *= 16777619u;
+        h ^= (uint32_t)e->ifindex;      h *= 16777619u;
+        h ^= _fnv1a_hash(e->name);      h *= 16777619u;
+        h ^= _fnv1a_hash(e->serial);    h *= 16777619u;
+        h ^= _fnv1a_hash(e->fw_rev);    h *= 16777619u;
+        h ^= _fnv1a_hash(e->hw_rev);    h *= 16777619u;
+        h ^= _fnv1a_hash(e->mfg_name);  h *= 16777619u;
+        h ^= _fnv1a_hash(e->model_name);h *= 16777619u;
+        h ^= _fnv1a_hash(e->alias);     h *= 16777619u;
+        h ^= _fnv1a_hash(e->uris);      h *= 16777619u;
+    }
+    return h;
+}
+
 /* Map a string key to a free slot in a linear-probe hash table of `buckets`
  * entries.  `used` is a caller-allocated zero-initialised char array of size
  * `buckets`.  Returns the slot index, or -1 when the table is full. */
@@ -1806,7 +1830,9 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
     pci_entity_map *pci_map = NULL;
     int pci_map_n = 0;
+    uint32_t hash_before;
 
+    hash_before = _entity_list_hash();
     netsnmp_entity_free_list();
 
     _load_dmi();
@@ -1829,7 +1855,10 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _alias_diskio();
     _alias_lm_sensors();
     netsnmp_entity_alias_sort();
-    entity_last_change = netsnmp_get_agent_uptime();
+
+    if (_entity_list_hash() != hash_before)
+        entity_last_change = netsnmp_get_agent_uptime();
+
     return 0;
 }
 
