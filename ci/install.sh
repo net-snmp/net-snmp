@@ -23,6 +23,7 @@ case "$(uname)" in
 		packages="
 		    libatm1-dev
 		    libkrb5-dev
+		    libpci-dev
 		    libmariadb-client-lgpl-dev
 		    libmariadb-dev
 		    libmariadb-dev-compat

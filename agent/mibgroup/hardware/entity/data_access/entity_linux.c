@@ -10,7 +10,9 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <limits.h>
+#ifdef HAVE_PCI_PCI_H
 #include <pci/pci.h>
+#endif
 
 #define DMI_PATH    "/sys/class/dmi/id"
 #define PCI_PATH    "/sys/bus/pci/devices"
@@ -719,12 +721,15 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], val[256], netpath[512], namebuf[256];
+    char path[512], val[256], netpath[512];
     char **bdfs = NULL, **tmp;
     int   nbdfs = 0, cap = 0, i;
     pci_entity_map *map;
     netsnmp_entity_info *e;
+#ifdef HAVE_PCI_LOOKUP_NAME
+    char namebuf[256];
     struct pci_access *pacc;
+#endif
 
     *map_out = NULL;
     *nmap_out = 0;
@@ -761,8 +766,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
     if (!map)
         goto free_bdfs;
 
+#ifdef HAVE_PCI_LOOKUP_NAME
     pacc = pci_alloc();
     pci_init(pacc);
+#endif
 
     for (i = 0; i < nbdfs; i++) {
         long         class_val;
@@ -770,7 +777,9 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         int          idx;
         DIR         *netdir;
         struct dirent *nde;
+#ifdef HAVE_PCI_LOOKUP_NAME
         char        *lname;
+#endif
 
         class_val = 0;
         vid = did = 0;
@@ -811,23 +820,27 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
         /* Vendor name */
         if (vid) {
+#ifdef HAVE_PCI_LOOKUP_NAME
             lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
                                     PCI_LOOKUP_VENDOR | PCI_LOOKUP_NO_NUMBERS,
                                     vid);
             if (lname && lname[0])
                 strlcpy(e->mfg_name, lname, sizeof(e->mfg_name));
             else
+#endif
                 snprintf(e->mfg_name, sizeof(e->mfg_name), "0x%04x", vid);
         }
 
         /* Device / product name */
         if (vid && did) {
+#ifdef HAVE_PCI_LOOKUP_NAME
             lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
                                     PCI_LOOKUP_DEVICE | PCI_LOOKUP_NO_NUMBERS,
                                     vid, did);
             if (lname && lname[0])
                 strlcpy(e->model_name, lname, sizeof(e->model_name));
             else
+#endif
                 snprintf(e->model_name, sizeof(e->model_name), "0x%04x", did);
         }
 
@@ -835,21 +848,31 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         if (e->model_name[0])
             strlcpy(e->descr, e->model_name, sizeof(e->descr));
         else if (class_val) {
-            int cls_sub = (int)((class_val >> 8) & 0xFFFF);
-            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
-                                    PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
-                                    cls_sub);
-            if (lname) {
-                /* trim libpci result — some builds return whitespace on miss */
-                while (*lname == ' ' || *lname == '\t') lname++;
+#ifdef HAVE_PCI_LOOKUP_NAME
+            {
+                int cls_sub = (int)((class_val >> 8) & 0xFFFF);
+                lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                        PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
+                                        cls_sub);
+                if (lname) {
+                    /* trim libpci result — some builds return whitespace on miss */
+                    while (*lname == ' ' || *lname == '\t') lname++;
+                }
+                if (lname && lname[0])
+                    strlcpy(e->descr, lname, sizeof(e->descr));
+                else {
+                    const char *fb = _pci_class_descr(class_val);
+                    if (fb)
+                        strlcpy(e->descr, fb, sizeof(e->descr));
+                }
             }
-            if (lname && lname[0])
-                strlcpy(e->descr, lname, sizeof(e->descr));
-            else {
+#else
+            {
                 const char *fb = _pci_class_descr(class_val);
                 if (fb)
                     strlcpy(e->descr, fb, sizeof(e->descr));
             }
+#endif
         }
 
         /* Revision */
@@ -950,7 +973,9 @@ free_bdf:
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
     }
 
+#ifdef HAVE_PCI_LOOKUP_NAME
     pci_cleanup(pacc);
+#endif
 
     *map_out = map;
     *nmap_out = nbdfs;
