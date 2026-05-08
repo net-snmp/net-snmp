@@ -43,8 +43,19 @@ def parse_snmp_file(lines):
     """Parse snmpwalk lines into dict of index -> {attr -> value}."""
     entities = {}
     pattern = re.compile(r'^ENTITY-MIB::entPhysical(\w+)\.(\d+) = [^:]+: (.+)$')
+    alias_pattern = re.compile(
+        r'^ENTITY-MIB::entAliasMappingIdentifier\.(\d+)\.(\d+) = OID: (.+)$'
+    )
     for line in lines:
         line = line.strip()
+        m = alias_pattern.match(line)
+        if m:
+            idx, logical_idx, val = int(m.group(1)), int(m.group(2)), m.group(3).strip()
+            if idx not in entities:
+                entities[idx] = {}
+            entities[idx].setdefault('AliasMappings', []).append((logical_idx, val))
+            continue
+
         m = pattern.match(line)
         if not m:
             continue
@@ -89,24 +100,38 @@ def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
         is_last = (i == len(child_list) - 1)
         e = entities[idx]
         name = e.get('Name', '')
-        cls_val = e.get('Class', '0')
-        cls_name = class_prefix(cls_val)
+        model = e.get('ModelName', '')
+        descr = e.get('Descr', '')
+        header_attrs = set()
 
         connector = '└── ' if is_last else '├── '
-        header = f"{prefix}{connector}{cls_name}[{idx}]"
-        if name:
-            header += f": {name}"
+        header = f"{prefix}{connector}[{idx}]"
+        if model:
+            header += f" {model}"
+            header_attrs.add('ModelName')
+            if name:
+                header += f" ({name})"
+        elif name:
+            header += f" {name}"
+        elif descr:
+            header += f" {descr}"
+            header_attrs.add('Descr')
         print(header)
 
         spacer = '    ' if is_last else '│   '
         child_prefix = prefix + spacer
         attr_indent = prefix + ('│   ' if not is_last else '    ')
         for attr, label in ATTRIBUTES:
-            if attr in hidden_attrs:
+            if attr in hidden_attrs or attr in header_attrs:
                 continue
             value = e.get(attr, '')
             if value:
                 print(f"{attr_indent}{label}: {value}")
+        for logical_idx, value in sorted(e.get('AliasMappings', [])):
+            if logical_idx:
+                print(f"{attr_indent}alias-mapping[{logical_idx}]: {value}")
+            else:
+                print(f"{attr_indent}alias-mapping: {value}")
 
         if children.get(idx):
             print(f"{child_prefix}│")
