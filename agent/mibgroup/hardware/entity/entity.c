@@ -5,6 +5,7 @@
 #include <net-snmp/library/snmpv3.h>
 #include "entity.h"
 
+#include <ctype.h>
 #include <errno.h>
 
 static netsnmp_entity_info             *_ent_head = NULL;
@@ -30,6 +31,27 @@ static int _cmp_contains(const void *a, const void *b)
     if (ra->parent_idx != rb->parent_idx)
         return ra->parent_idx - rb->parent_idx;
     return ra->child_idx - rb->child_idx;
+}
+
+static int _entity_uri_matches(const char *uris, const char *uri)
+{
+    size_t uri_len;
+
+    if (!uris || !uri || !uri[0])
+        return 0;
+
+    uri_len = strlen(uri);
+    while (*uris) {
+        while (isspace((unsigned char)*uris))
+            uris++;
+        if (strncmp(uris, uri, uri_len) == 0 &&
+            (!uris[uri_len] || isspace((unsigned char)uris[uri_len])))
+            return 1;
+        while (*uris && !isspace((unsigned char)*uris))
+            uris++;
+    }
+
+    return 0;
 }
 
 void netsnmp_entity_contains_rebuild(void)
@@ -240,7 +262,7 @@ netsnmp_entity_info *netsnmp_entity_get_by_uri(const char *uri)
         netsnmp_cache_check_and_reload(_ent_cache);
 
     for (e = _ent_head; e; e = e->next)
-        if (strcmp(e->uris, uri) == 0)
+        if (_entity_uri_matches(e->uris, uri))
             return e;
     return NULL;
 }

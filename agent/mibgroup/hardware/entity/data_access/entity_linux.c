@@ -188,6 +188,71 @@ _trim_trailing(char *s)
         s[--len] = '\0';
 }
 
+static void
+_append_uri(char *uris, size_t urisz, const char *uri)
+{
+    size_t len;
+
+    if (!uri || !uri[0] || urisz == 0)
+        return;
+
+    len = strlen(uris);
+    if (len == 0) {
+        strlcpy(uris, uri, urisz);
+        return;
+    }
+
+    if (len + 1 >= urisz)
+        return;
+    uris[len++] = ' ';
+    uris[len] = '\0';
+    strlcpy(uris + len, uri, urisz - len);
+}
+
+static void
+_append_file_uri(char *uris, size_t urisz, const char *path)
+{
+    char uri[PATH_MAX + 8];
+
+    if (!path || !path[0])
+        return;
+    snprintf(uri, sizeof(uri), "file://%s", path);
+    _append_uri(uris, urisz, uri);
+}
+
+static void
+_block_append_uris(netsnmp_entity_info *e, const char *block_name)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[PATH_MAX], target[PATH_MAX], dev_path[PATH_MAX];
+
+    if (!e || !block_name || !block_name[0])
+        return;
+
+    e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "/sys/block/%s", block_name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+    snprintf(dev_path, sizeof(dev_path), "/dev/%s", block_name);
+    _append_file_uri(e->uris, sizeof(e->uris), dev_path);
+
+    dir = opendir("/dev/disk/by-id");
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        if (de->d_name[0] == '.')
+            continue;
+        snprintf(path, sizeof(path), "/dev/disk/by-id/%s", de->d_name);
+        if (!realpath(path, target))
+            continue;
+        if (strcmp(target, dev_path) == 0)
+            _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+
+    closedir(dir);
+}
+
 static int
 _hex_nibble(char c)
 {
@@ -1618,7 +1683,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
             strlcpy(e->descr, "Optical drive", sizeof(e->descr));
         }
 
-        snprintf(e->uris, sizeof(e->uris), "file:///sys/block/%s", de->d_name);
+        _block_append_uris(e, de->d_name);
     }
     closedir(dir);
 }
