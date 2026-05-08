@@ -191,18 +191,20 @@ _trim_trailing(char *s)
 static void
 _append_uri(char *uris, size_t urisz, const char *uri)
 {
-    size_t len;
+    size_t len, uri_len;
 
     if (!uri || !uri[0] || urisz == 0)
         return;
 
+    uri_len = strlen(uri);
     len = strlen(uris);
     if (len == 0) {
-        strlcpy(uris, uri, urisz);
+        if (uri_len < urisz)
+            strlcpy(uris, uri, urisz);
         return;
     }
 
-    if (len + 1 >= urisz)
+    if (len + 1 + uri_len >= urisz)
         return;
     uris[len++] = ' ';
     uris[len] = '\0';
@@ -221,20 +223,16 @@ _append_file_uri(char *uris, size_t urisz, const char *path)
 }
 
 static void
-_block_append_uris(netsnmp_entity_info *e, const char *block_name)
+_block_append_by_id_uris(char *uris, size_t urisz, const char *block_name)
 {
     DIR *dir;
     struct dirent *de;
     char path[PATH_MAX], target[PATH_MAX], dev_path[PATH_MAX];
 
-    if (!e || !block_name || !block_name[0])
+    if (!block_name || !block_name[0])
         return;
 
-    e->uris[0] = '\0';
-    snprintf(path, sizeof(path), "/sys/block/%s", block_name);
-    _append_file_uri(e->uris, sizeof(e->uris), path);
     snprintf(dev_path, sizeof(dev_path), "/dev/%s", block_name);
-    _append_file_uri(e->uris, sizeof(e->uris), dev_path);
 
     dir = opendir("/dev/disk/by-id");
     if (!dir)
@@ -247,10 +245,111 @@ _block_append_uris(netsnmp_entity_info *e, const char *block_name)
         if (!realpath(path, target))
             continue;
         if (strcmp(target, dev_path) == 0)
-            _append_file_uri(e->uris, sizeof(e->uris), path);
+            _append_file_uri(uris, urisz, path);
     }
 
     closedir(dir);
+}
+
+static void
+_block_append_uris(netsnmp_entity_info *e, const char *block_name)
+{
+    char path[PATH_MAX];
+
+    if (!e || !block_name || !block_name[0])
+        return;
+
+    e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "/sys/block/%s", block_name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+    snprintf(path, sizeof(path), "/dev/%s", block_name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+    _block_append_by_id_uris(e->uris, sizeof(e->uris), block_name);
+}
+
+static void
+_nvme_append_uris(netsnmp_entity_info *e, const char *ctrl_name)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[PATH_MAX];
+    size_t len;
+
+    if (!e || !ctrl_name || !ctrl_name[0])
+        return;
+
+    e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "%s/%s", NVME_PATH, ctrl_name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+    snprintf(path, sizeof(path), "/dev/%s", ctrl_name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+
+    dir = opendir(BLOCK_PATH);
+    if (!dir)
+        return;
+
+    len = strlen(ctrl_name);
+    while ((de = readdir(dir))) {
+        if (strncmp(de->d_name, ctrl_name, len) != 0)
+            continue;
+        if (de->d_name[len] != 'n')
+            continue;
+        if (!isdigit((unsigned char)de->d_name[len + 1]))
+            continue;
+
+        snprintf(path, sizeof(path), "/sys/block/%s", de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        snprintf(path, sizeof(path), "/dev/%s", de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        _block_append_by_id_uris(e->uris, sizeof(e->uris), de->d_name);
+    }
+
+    closedir(dir);
+}
+
+static void
+_usb_append_uris(netsnmp_entity_info *e, const char *name)
+{
+    char path[PATH_MAX], val[64], vendor[32], product[32], serial[128];
+    char busnum_str[32], devnum_str[32];
+    int busnum, devnum;
+    const char *sp;
+
+    if (!e || !name || !name[0])
+        return;
+
+    e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+
+    snprintf(path, sizeof(path), "%s/%s/busnum", USB_PATH, name);
+    _sysfs_read(path, busnum_str, sizeof(busnum_str));
+    snprintf(path, sizeof(path), "%s/%s/devnum", USB_PATH, name);
+    _sysfs_read(path, devnum_str, sizeof(devnum_str));
+    busnum = busnum_str[0] ? atoi(busnum_str) : 0;
+    devnum = devnum_str[0] ? atoi(devnum_str) : 0;
+    if (busnum > 0 && devnum > 0) {
+        snprintf(path, sizeof(path), "/dev/bus/usb/%03d/%03d", busnum, devnum);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        snprintf(path, sizeof(path), "usb://%03d/%03d", busnum, devnum);
+        _append_uri(e->uris, sizeof(e->uris), path);
+    }
+
+    snprintf(path, sizeof(path), "%s/%s/idVendor", USB_PATH, name);
+    _sysfs_read(path, vendor, sizeof(vendor));
+    snprintf(path, sizeof(path), "%s/%s/idProduct", USB_PATH, name);
+    _sysfs_read(path, product, sizeof(product));
+    snprintf(path, sizeof(path), "%s/%s/serial", USB_PATH, name);
+    _sysfs_read(path, serial, sizeof(serial));
+    if (vendor[0] && product[0]) {
+        for (sp = serial; *sp && !isspace((unsigned char)*sp); sp++)
+            ;
+        if (serial[0] && !*sp)
+            snprintf(val, sizeof(val), "usb:v%sp%s:%s", vendor, product, serial);
+        else
+            snprintf(val, sizeof(val), "usb:v%sp%s", vendor, product);
+        _append_uri(e->uris, sizeof(e->uris), val);
+    }
 }
 
 static int
@@ -1467,7 +1566,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
 
-        snprintf(e->uris, sizeof(e->uris), "file:///sys/bus/usb/devices/%s", name);
+        _usb_append_uris(e, name);
     }
     closedir(dir);
 }
@@ -1755,8 +1854,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
                 e->uuid_len = 16;
         }
 
-        snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
-                 NVME_PATH, de->d_name);
+        _nvme_append_uris(e, de->d_name);
     }
     closedir(dir);
 }

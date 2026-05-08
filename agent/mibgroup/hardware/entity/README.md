@@ -150,5 +150,19 @@ example:
 - `file:///dev/sda`
 - `file:///dev/disk/by-id/ata-SAMSUNG_MZ7LH960...`
 
+NVMe controller rows also include controller and namespace paths when available,
+for example:
+
+- `file:///dev/nvme0`
+- `file:///sys/block/nvme0n1`
+- `file:///dev/nvme0n1`
+- `file:///dev/disk/by-id/nvme-Samsung_SSD...`
+
+USB rows also include device-node and identity URIs when available, for example:
+
+- `file:///dev/bus/usb/001/006`
+- `usb://001/006`
+- `usb:v046dp0825:SERIAL`
+
 External agents should use the same URI string when looking up an
 `entPhysicalIndex`.
