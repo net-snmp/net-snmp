@@ -270,8 +270,6 @@ _load_dmi(void)
     _dmi_field("product_uuid", val, sizeof(val));
     if (_parse_uuid(val, e->uuid))
         e->uuid_len = 16;
-    if (e->model_name[0])
-        strlcpy(e->descr, e->model_name, sizeof(e->descr));
 
     e = netsnmp_entity_create(IDX_BASEBOARD);
     if (!e) return;
@@ -285,8 +283,6 @@ _load_dmi(void)
     _dmi_field("board_name",    e->model_name, sizeof(e->model_name));
     _dmi_field("board_serial",  e->serial,     sizeof(e->serial));
     _dmi_field("board_version", e->hw_rev,     sizeof(e->hw_rev));
-    if (e->model_name[0])
-        strlcpy(e->descr, e->model_name, sizeof(e->descr));
 
     e = netsnmp_entity_create(IDX_BIOS);
     if (!e) return;
@@ -1386,13 +1382,12 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, name, sizeof(e->name));
+        strlcpy(e->descr, "USB device", sizeof(e->descr));
 
         snprintf(path, sizeof(path), "%s/%s/product", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));
-        if (val[0]) {
+        if (val[0])
             strlcpy(e->model_name, val, sizeof(e->model_name));
-            strlcpy(e->descr, val, sizeof(e->descr));
-        }
 
         snprintf(path, sizeof(path), "%s/%s/manufacturer", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));
@@ -1407,19 +1402,98 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
 
-        /* Fallback description when no product string */
-        if (!e->descr[0]) {
-            char vid[8] = "", pid[8] = "";
-            snprintf(path, sizeof(path), "%s/%s/idVendor", USB_PATH, name);
-            _sysfs_read(path, vid, sizeof(vid));
-            snprintf(path, sizeof(path), "%s/%s/idProduct", USB_PATH, name);
-            _sysfs_read(path, pid, sizeof(pid));
-            snprintf(e->descr, sizeof(e->descr), "USB Device %s:%s", vid, pid);
-        }
-
         snprintf(e->uris, sizeof(e->uris), "file:///sys/bus/usb/devices/%s", name);
     }
     closedir(dir);
+}
+
+static void
+_block_size_descr(unsigned long long sectors, char *buf, size_t bufsz)
+{
+    unsigned long long bytes, unit;
+    const char *suffix;
+    unsigned long long whole, frac;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+    if (!sectors || bufsz == 0)
+        return;
+
+    bytes = sectors * 512ULL;
+    if (bytes >= (1ULL << 40)) {
+        unit = 1ULL << 40;
+        suffix = "TiB";
+    } else {
+        unit = 1ULL << 30;
+        suffix = "GiB";
+    }
+
+    whole = bytes / unit;
+    frac = ((bytes % unit) * 10ULL + unit / 2ULL) / unit;
+    if (frac >= 10) {
+        whole++;
+        frac = 0;
+    }
+
+    if (frac)
+        snprintf(buf, bufsz, "%llu.%llu%s", whole, frac, suffix);
+    else
+        snprintf(buf, bufsz, "%llu%s", whole, suffix);
+}
+
+static void
+_block_disk_descr(const char *kind, const char *block_name,
+                  char *buf, size_t bufsz)
+{
+    char path[512], val[64], size_str[32];
+    unsigned long long sectors = 0;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+    snprintf(path, sizeof(path), "%s/%s/size", BLOCK_PATH, block_name);
+    _sysfs_read(path, val, sizeof(val));
+    if (val[0])
+        sectors = strtoull(val, NULL, 10);
+
+    _block_size_descr(sectors, size_str, sizeof(size_str));
+    if (size_str[0])
+        snprintf(buf, bufsz, "%s (%s)", kind, size_str);
+    else
+        strlcpy(buf, kind, bufsz);
+}
+
+static void
+_nvme_block_descr(const char *ctrl_name, char *buf, size_t bufsz)
+{
+    DIR *dir;
+    struct dirent *de;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+
+    dir = opendir(BLOCK_PATH);
+    if (!dir) {
+        strlcpy(buf, "NVMe device", bufsz);
+        return;
+    }
+
+    while ((de = readdir(dir))) {
+        size_t len = strlen(ctrl_name);
+
+        if (strncmp(de->d_name, ctrl_name, len) != 0)
+            continue;
+        if (de->d_name[len] != 'n')
+            continue;
+        if (!isdigit((unsigned char)de->d_name[len + 1]))
+            continue;
+
+        _block_disk_descr("NVMe solid-state disk", de->d_name, buf, bufsz);
+        closedir(dir);
+        return;
+    }
+
+    closedir(dir);
+    strlcpy(buf, "NVMe device", bufsz);
 }
 
 static void
@@ -1484,16 +1558,13 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         e->is_fru     = TV_TRUE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
+        strlcpy(e->descr, "Block disk", sizeof(e->descr));
 
         snprintf(path, sizeof(path), "%s/%s/device/model", BLOCK_PATH, de->d_name);
         _sysfs_read(path, val, sizeof(val));
         _trim_trailing(val);
-        if (val[0]) {
+        if (val[0])
             strlcpy(e->model_name, val, sizeof(e->model_name));
-            strlcpy(e->descr, val, sizeof(e->descr));
-        } else {
-            strlcpy(e->descr, de->d_name, sizeof(e->descr));
-        }
 
         snprintf(path, sizeof(path), "%s/%s/device/vendor", BLOCK_PATH, de->d_name);
         _sysfs_read(path, val, sizeof(val));
@@ -1531,24 +1602,8 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 
             /* Size and media type in description */
             {
-                unsigned long long sectors = 0;
                 char rot = '1';
-                const char *model = e->model_name[0] ? e->model_name : de->d_name;
-                char size_str[32] = "";
-
-                snprintf(path, sizeof(path), "%s/%s/size", BLOCK_PATH, de->d_name);
-                _sysfs_read(path, val, sizeof(val));
-                if (val[0])
-                    sectors = strtoull(val, NULL, 10);
-
-                if (sectors) {
-                    unsigned long long bytes = sectors * 512ULL;
-                    unsigned long long tib = bytes >> 40;
-                    if (tib >= 1)
-                        snprintf(size_str, sizeof(size_str), "%lluTiB", tib);
-                    else
-                        snprintf(size_str, sizeof(size_str), "%lluGiB", bytes >> 30);
-                }
+                const char *kind;
 
                 snprintf(path, sizeof(path), "%s/%s/queue/rotational",
                          BLOCK_PATH, de->d_name);
@@ -1556,17 +1611,11 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
                 if (val[0])
                     rot = val[0];
 
-                if (size_str[0])
-                    snprintf(e->descr, sizeof(e->descr), "%s (%s, %s)",
-                             model, rot == '0' ? "SSD" : "HDD", size_str);
-                else
-                    snprintf(e->descr, sizeof(e->descr), "%s (%s)",
-                             model, rot == '0' ? "SSD" : "HDD");
+                kind = rot == '0' ? "Solid-state disk" : "Hard disk";
+                _block_disk_descr(kind, de->d_name, e->descr, sizeof(e->descr));
             }
         } else {
-            /* Optical drive: just use model as description */
-            const char *model = e->model_name[0] ? e->model_name : de->d_name;
-            snprintf(e->descr, sizeof(e->descr), "%s (Optical)", model);
+            strlcpy(e->descr, "Optical drive", sizeof(e->descr));
         }
 
         snprintf(e->uris, sizeof(e->uris), "file:///sys/block/%s", de->d_name);
@@ -1615,7 +1664,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_MODULE;
         e->is_fru     = TV_FALSE;
         strlcpy(e->name,  de->d_name, sizeof(e->name));
-        strlcpy(e->descr, de->d_name, sizeof(e->descr));
+        _nvme_block_descr(de->d_name, e->descr, sizeof(e->descr));
         if (!e->parent_idx)
             e->parent_idx = IDX_BASEBOARD;
 
@@ -1623,8 +1672,6 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, val, sizeof(val));
         _trim_trailing(val);
         _set_if_valid(e->model_name, sizeof(e->model_name), val);
-        if (val[0])
-            strlcpy(e->descr, val, sizeof(e->descr));
 
         snprintf(path, sizeof(path), "%s/%s/serial", NVME_PATH, de->d_name);
         _sysfs_read(path, val, sizeof(val));
@@ -1862,17 +1909,15 @@ _load_power_supply(void)
 
         if (mfg[0])
             strlcpy(e->mfg_name, mfg, sizeof(e->mfg_name));
-        if (model[0]) {
+        if (model[0])
             strlcpy(e->model_name, model, sizeof(e->model_name));
-            strlcpy(e->descr,      model, sizeof(e->descr));
-        }
         if (serial[0])
             strlcpy(e->serial, serial, sizeof(e->serial));
 
-        if (tech[0] && model[0])
-            snprintf(e->descr, sizeof(e->descr), "%s (%s)", model, tech);
-        else if (tech[0])
-            strlcpy(e->descr, tech, sizeof(e->descr));
+        if (tech[0])
+            snprintf(e->descr, sizeof(e->descr), "Battery (%s)", tech);
+        else
+            strlcpy(e->descr, "Battery", sizeof(e->descr));
     }
     closedir(dir);
 }
