@@ -17,6 +17,7 @@ void shutdown_entity(void);
 #define IANA_PHYS_PORT         10
 #define IANA_PHYS_STACK        11
 #define IANA_PHYS_CPU          12
+#define IANA_PHYS_STORAGE      15
 
 /* TruthValue */
 #define TV_TRUE  1

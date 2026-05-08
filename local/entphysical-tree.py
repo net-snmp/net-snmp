@@ -16,7 +16,7 @@ CLASS_NAMES = {
     1: "other", 2: "unknown", 3: "chassis", 4: "backplane",
     5: "container", 6: "powerSupply", 7: "fan", 8: "sensor",
     9: "module", 10: "port", 11: "stack", 12: "cpu",
-    13: "energyObject", 14: "battery",
+    13: "energyObject", 14: "battery", 15: "storageDrive",
 }
 
 
@@ -104,8 +104,9 @@ def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
         descr = e.get('Descr', '')
         header_attrs = set()
 
+        cls_name = class_prefix(e.get('Class', ''))
         connector = '└── ' if is_last else '├── '
-        header = f"{prefix}{connector}[{idx}]"
+        header = f"{prefix}{connector}[{idx}:{cls_name}]"
         if model:
             header += f" {model}"
             header_attrs.add('ModelName')

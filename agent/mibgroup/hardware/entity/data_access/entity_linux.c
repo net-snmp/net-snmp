@@ -42,6 +42,7 @@
 #define IDX_CPU_BASE    200
 #define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
 #define IDX_PCI_BASE   1000
+#define IDX_ATA_BASE   1500
 #define IDX_RTC_BASE   2400
 #define IDX_SENSOR_BASE 4000
 #define IDX_SFP_BASE   10000
@@ -1826,7 +1827,76 @@ free_bdfs:
     free(bdfs);
 }
 
-/* ---- Phase 5: NVMe controllers and namespaces ---------------------------- */
+/* ---- Phase 5: ATA ports -------------------------------------------------- */
+
+static void
+_load_ata_ports(pci_entity_map *pci_map, int pci_map_n)
+{
+    DIR *dir;
+    const struct dirent *de;
+    char path[512], rp[PATH_MAX];
+
+    dir = opendir("/sys/class/ata_port");
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        netsnmp_entity_info *e;
+        int port, pci_idx;
+
+        if (strncmp(de->d_name, "ata", 3) != 0)
+            continue;
+        port = atoi(de->d_name + 3);
+        if (port <= 0)
+            continue;
+
+        e = netsnmp_entity_create(IDX_ATA_BASE + port);
+        if (!e)
+            continue;
+
+        snprintf(path, sizeof(path), "/sys/class/ata_port/%s", de->d_name);
+        pci_idx = realpath(path, rp) ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+
+        e->iana_class = IANA_PHYS_CONTAINER;
+        e->is_fru     = TV_FALSE;
+        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        strlcpy(e->name, de->d_name, sizeof(e->name));
+
+        {
+            char spd[32];
+            const char *type;
+            FILE *fp;
+
+            snprintf(path, sizeof(path),
+                     "/sys/class/ata_link/link%d/sata_spd", port);
+            fp = fopen(path, "r");
+            if (fp) {
+                type = "SATA";
+                if (fgets(spd, sizeof(spd), fp)) {
+                    spd[strcspn(spd, "\n")] = '\0';
+                } else {
+                    spd[0] = '\0';
+                }
+                fclose(fp);
+            } else {
+                type = "ATA";
+                spd[0] = '\0';
+            }
+
+            if (spd[0] && strcmp(spd, "<unknown>") != 0)
+                snprintf(e->descr, sizeof(e->descr),
+                         "%s port %d (%s)", type, port, spd);
+            else
+                snprintf(e->descr, sizeof(e->descr), "%s port %d", type, port);
+        }
+
+        snprintf(path, sizeof(path), "ata:%d", port);
+        _append_uri(e->uris, sizeof(e->uris), path);
+    }
+    closedir(dir);
+}
+
+/* ---- Phase 6: USB devices ------------------------------------------------ */
 
 static void
 _load_usb(pci_entity_map *pci_map, int pci_map_n)
@@ -2016,7 +2086,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int idx, pci_idx;
+        int idx, pci_idx = 0;
         const char *p;
         char key[128];
 
@@ -2057,15 +2127,23 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         if (idx <= 0)
             continue;
 
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
-
         e = netsnmp_entity_create(idx);
         if (!e)
             continue;
 
-        e->iana_class = IANA_PHYS_MODULE;
+        {
+            int ata_port = _sysfs_path_ata_port(rp);
+
+            if (ata_port > 0 && netsnmp_entity_get_byIdx(IDX_ATA_BASE + ata_port))
+                e->parent_idx = IDX_ATA_BASE + ata_port;
+            else {
+                pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+                e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+            }
+        }
+
+        e->iana_class = IANA_PHYS_STORAGE;
         e->is_fru     = TV_TRUE;
-        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
         strlcpy(e->descr, "Block disk", sizeof(e->descr));
 
@@ -2179,7 +2257,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
         if (!e)
             continue;
 
-        e->iana_class = IANA_PHYS_MODULE;
+        e->iana_class = IANA_PHYS_STORAGE;
         e->is_fru     = TV_FALSE;
         strlcpy(e->name,  de->d_name, sizeof(e->name));
         _nvme_block_descr(de->d_name, e->descr, sizeof(e->descr));
@@ -2919,6 +2997,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_caches();
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
+    _load_ata_ports(pci_map, pci_map_n);
     _load_usb(pci_map, pci_map_n);
     _load_scsi_disks(pci_map, pci_map_n);
     _load_nvme(pci_map, pci_map_n);
