@@ -664,62 +664,6 @@ _pci_class_descr(long class_val)
 }
 
 static int
-_contains_ci(const char *s, const char *needle)
-{
-    size_t nlen;
-
-    if (!s || !needle)
-        return 0;
-    nlen = strlen(needle);
-    if (nlen == 0)
-        return 1;
-
-    for (; *s; s++) {
-        size_t i;
-
-        for (i = 0; i < nlen; i++) {
-            unsigned char sc = (unsigned char)s[i];
-            unsigned char nc = (unsigned char)needle[i];
-
-            if (!sc || tolower(sc) != tolower(nc))
-                break;
-        }
-        if (i == nlen)
-            return 1;
-    }
-
-    return 0;
-}
-
-static const char *
-_pci_brief_descr(long class_val, const char *model_name)
-{
-    if (_contains_ci(model_name, "Thunderbolt") &&
-        _contains_ci(model_name, "Bridge"))
-        return "Thunderbolt bridge";
-    if (_contains_ci(model_name, "Thunderbolt") &&
-        _contains_ci(model_name, "NHI"))
-        return "Thunderbolt controller";
-    if (_contains_ci(model_name, "PCI Express Root Port") ||
-        _contains_ci(model_name, "PCIe Root Port"))
-        return "PCIe root port";
-    if ((_contains_ci(model_name, "PCIe") ||
-         _contains_ci(model_name, "PCI Express")) &&
-        _contains_ci(model_name, "Controller"))
-        return "PCIe controller";
-    if (_contains_ci(model_name, "Card Reader"))
-        return "Card reader";
-    if (_contains_ci(model_name, "NVMe") ||
-        _contains_ci(model_name, "NVM Express"))
-        return "NVM Express controller";
-    if (_contains_ci(model_name, "USB") &&
-        _contains_ci(model_name, "Controller"))
-        return "USB controller";
-
-    return _pci_class_descr(class_val);
-}
-
-static int
 _pci_class_to_iana(long class_val)
 {
     int base = (int)((class_val >> 16) & 0xFF);
@@ -1239,9 +1183,24 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                 snprintf(e->model_name, sizeof(e->model_name), "0x%04x", did);
         }
 
-        /* Description: concise type, with full PCI product retained in model_name. */
+        /* Description: PCI class name, with full PCI product retained in model_name. */
         if (class_val) {
-            const char *descr = _pci_brief_descr(class_val, e->model_name);
+            const char *descr = NULL;
+#ifdef HAVE_PCI_LOOKUP_NAME
+            int cls_sub = (int)((class_val >> 8) & 0xFFFF);
+            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                    PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
+                                    cls_sub);
+            if (lname) {
+                /* trim libpci result — some builds return whitespace on miss */
+                while (*lname == ' ' || *lname == '\t')
+                    lname++;
+                if (lname[0])
+                    descr = lname;
+            }
+#endif
+            if (!descr)
+                descr = _pci_class_descr(class_val);
             if (descr)
                 strlcpy(e->descr, descr, sizeof(e->descr));
         }
