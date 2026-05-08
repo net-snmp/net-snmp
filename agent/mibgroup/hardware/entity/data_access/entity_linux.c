@@ -2420,6 +2420,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
         entity_last_change = (u_long)time(NULL);
         _saved_hash        = hash_after;
         _write_entity_state();
+        netsnmp_entity_index_file_write();
     }
 
     return 0;

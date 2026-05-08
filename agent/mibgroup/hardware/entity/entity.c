@@ -5,6 +5,8 @@
 #include <net-snmp/library/snmpv3.h>
 #include "entity.h"
 
+#include <errno.h>
+
 static netsnmp_entity_info             *_ent_head = NULL;
 static netsnmp_cache                   *_ent_cache = NULL;
 static netsnmp_entity_contains_row     *_contains = NULL;
@@ -17,6 +19,9 @@ static netsnmp_entity_logical_row      *_log_head = NULL;
 u_long entity_last_change = 0;
 
 static oid _ent_oid[] = { 1, 3, 6, 1, 2, 1, 47 };
+
+#define ENTITY_INDEX_FILE     "entity_indexes"
+#define ENTITY_INDEX_TMP_FILE "entity_indexes.tmp"
 
 static int _cmp_contains(const void *a, const void *b)
 {
@@ -223,6 +228,88 @@ netsnmp_entity_info *netsnmp_entity_get_byIdx(int idx)
         if (e->idx == idx)
             return e;
     return NULL;
+}
+
+netsnmp_entity_info *netsnmp_entity_get_by_uri(const char *uri)
+{
+    netsnmp_entity_info *e;
+
+    if (!uri || !uri[0])
+        return NULL;
+    if (_ent_cache)
+        netsnmp_cache_check_and_reload(_ent_cache);
+
+    for (e = _ent_head; e; e = e->next)
+        if (strcmp(e->uris, uri) == 0)
+            return e;
+    return NULL;
+}
+
+netsnmp_entity_info *netsnmp_entity_get_byIfIndex(int ifindex)
+{
+    netsnmp_entity_info *e;
+
+    if (ifindex <= 0)
+        return NULL;
+    if (_ent_cache)
+        netsnmp_cache_check_and_reload(_ent_cache);
+
+    for (e = _ent_head; e; e = e->next)
+        if (e->ifindex == ifindex)
+            return e;
+    return NULL;
+}
+
+int netsnmp_entity_get_idx_by_uri(const char *uri)
+{
+    netsnmp_entity_info *e = netsnmp_entity_get_by_uri(uri);
+
+    return e ? e->idx : 0;
+}
+
+int netsnmp_entity_get_idx_byIfIndex(int ifindex)
+{
+    netsnmp_entity_info *e = netsnmp_entity_get_byIfIndex(ifindex);
+
+    return e ? e->idx : 0;
+}
+
+void netsnmp_entity_index_file_write(void)
+{
+    netsnmp_entity_info *e;
+    char path[512], tmp_path[512];
+    FILE *f;
+
+    snprintf(path, sizeof(path), "%s/%s",
+             get_persistent_directory(), ENTITY_INDEX_FILE);
+    snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
+             get_persistent_directory(), ENTITY_INDEX_TMP_FILE);
+
+    f = fopen(tmp_path, "w");
+    if (!f) {
+        snmp_log(LOG_ERR, "entity: cannot write %s: %s\n",
+                 tmp_path, strerror(errno));
+        return;
+    }
+
+    for (e = _ent_head; e; e = e->next) {
+        if (e->uris[0])
+            fprintf(f, "%d\t%s\t%s\t%s\t%s\t%s\n", e->idx, e->uris,
+                    e->name, e->mfg_name, e->model_name, e->descr);
+    }
+
+    if (fclose(f) != 0) {
+        snmp_log(LOG_ERR, "entity: cannot close %s: %s\n",
+                 tmp_path, strerror(errno));
+        remove(tmp_path);
+        return;
+    }
+
+    if (rename(tmp_path, path) != 0) {
+        snmp_log(LOG_ERR, "entity: cannot rename %s to %s: %s\n",
+                 tmp_path, path, strerror(errno));
+        remove(tmp_path);
+    }
 }
 
 netsnmp_entity_info *netsnmp_entity_create(int idx)
