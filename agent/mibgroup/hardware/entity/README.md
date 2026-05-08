@@ -41,17 +41,60 @@ Fixed index ranges are used for broad device classes:
 - `200+`: CPUs
 - `300+`: CPU caches
 - `1000+`: PCI devices
-- `2000+`: SCSI/SATA disks and optical drives
-- `2200+`: USB devices
+- `200000+`: dynamically allocated SCSI/SATA, USB, and standalone NVMe devices
 - `2400+`: RTC devices
-- `3000+`: standalone NVMe devices
 - `4000+`: hwmon chips and sensors
 - `10000+`: SFP modules
 
-SCSI/SATA block devices are not ordered by `/dev/sdX` name. The loader resolves
-`/sys/block/<name>/device`, takes the SCSI HCTL basename such as `0:0:0:0`, and
-hashes that string into the `2000+` range. This keeps indexes more stable across
-Linux block-name changes.
+USB devices, SCSI/SATA block devices, and standalone NVMe devices use a
+persistent dynamic allocator starting at `200000`. The allocator stores a
+stable device key and full entity metadata in:
+
+```text
+<persistentDir>/entity_indexes
+```
+
+The file is tab-separated with seven columns:
+
+```text
+idx  key  uris  name  mfg_name  model_name  descr
+```
+
+- **idx** — `entPhysicalIndex`
+- **key** — stable allocation key for dynamic devices (`eui.0025385b41447ba9`,
+  `wwn-0x5000c5004b3e9e3b`, `usb:1-12`, …). Empty for static and PCI-backed devices.
+- **uris** — space-separated URI list
+- **name**, **mfg_name**, **model_name**, **descr** — entity metadata
+
+Example:
+
+```text
+200000	eui.0025385b41447ba9	nvme:nvme0 file:///dev/nvme0	nvme0	Samsung	990EVO	NVMe Controller
+200001	wwn-0x5000c5004b3e9e3b	file:///dev/sda	sda	WDC	WD10EZEX	Hard disk, 1000 GB
+200002	usb:1-12	usb:1-12 file:///dev/bus/usb/001/012	usb1	Logitech	M100	USB Mouse
+1000		pci:01:00.0	eth0	Intel	82599ES	Intel Ethernet Controller
+```
+
+Lines with a non-empty key are read back on startup to restore dynamic index
+assignments. Lines with an empty key are static/PCI entities included for
+external reference only.
+
+Missing devices stay in the file as ghost entries (key and idx, empty
+metadata) so reinserted devices keep their indexes. Delete the file to reset
+all dynamic indexes, or delete selected lines to free selected mappings.
+
+SCSI/SATA keys prefer the physical ATA port when the sysfs path contains one,
+for example `/ata5/...` becomes `ata:5`. The SCSI HCTL basename, such as
+`scsi:4:0:0:0`, is used as a fallback and is also exposed as an alternate URI.
+
+The agent also writes:
+
+```text
+<persistentDir>/entity_state
+```
+
+which stores the last entity-list hash and `entLastChangeTime` timestamp across
+restarts.
 
 ## Cache Loading
 
@@ -149,6 +192,7 @@ example:
 
 - `file:///dev/sda`
 - `file:///dev/disk/by-id/ata-SAMSUNG_MZ7LH960...`
+- `scsi:0:0:0:0`
 
 NVMe controller rows also include controller and namespace paths when available,
 for example:

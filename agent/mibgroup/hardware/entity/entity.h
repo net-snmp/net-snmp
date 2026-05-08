@@ -75,7 +75,6 @@ int                  netsnmp_entity_get_idx_by_uri(const char *uri);
 int                  netsnmp_entity_get_idx_byIfIndex(int ifindex);
 netsnmp_entity_info *netsnmp_entity_create(int idx);
 void                 netsnmp_entity_free_list(void);
-void                 netsnmp_entity_index_file_write(void);
 
 int                           netsnmp_entity_contains_count(void);
 netsnmp_entity_contains_row  *netsnmp_entity_contains_get(int n);

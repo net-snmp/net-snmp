@@ -21,8 +21,6 @@ u_long entity_last_change = 0;
 
 static oid _ent_oid[] = { 1, 3, 6, 1, 2, 1, 47 };
 
-#define ENTITY_INDEX_FILE     "entity_indexes"
-#define ENTITY_INDEX_TMP_FILE "entity_indexes.tmp"
 
 static int _cmp_contains(const void *a, const void *b)
 {
@@ -296,43 +294,6 @@ int netsnmp_entity_get_idx_byIfIndex(int ifindex)
     return e ? e->idx : 0;
 }
 
-void netsnmp_entity_index_file_write(void)
-{
-    netsnmp_entity_info *e;
-    char path[512], tmp_path[512];
-    FILE *f;
-
-    snprintf(path, sizeof(path), "%s/%s",
-             get_persistent_directory(), ENTITY_INDEX_FILE);
-    snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
-             get_persistent_directory(), ENTITY_INDEX_TMP_FILE);
-
-    f = fopen(tmp_path, "w");
-    if (!f) {
-        snmp_log(LOG_ERR, "entity: cannot write %s: %s\n",
-                 tmp_path, strerror(errno));
-        return;
-    }
-
-    for (e = _ent_head; e; e = e->next) {
-        if (e->uris[0])
-            fprintf(f, "%d\t%s\t%s\t%s\t%s\t%s\n", e->idx, e->uris,
-                    e->name, e->mfg_name, e->model_name, e->descr);
-    }
-
-    if (fclose(f) != 0) {
-        snmp_log(LOG_ERR, "entity: cannot close %s: %s\n",
-                 tmp_path, strerror(errno));
-        remove(tmp_path);
-        return;
-    }
-
-    if (rename(tmp_path, path) != 0) {
-        snmp_log(LOG_ERR, "entity: cannot rename %s to %s: %s\n",
-                 tmp_path, path, strerror(errno));
-        remove(tmp_path);
-    }
-}
 
 netsnmp_entity_info *netsnmp_entity_create(int idx)
 {

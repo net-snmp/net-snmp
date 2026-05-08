@@ -42,18 +42,26 @@
 #define IDX_CPU_BASE    200
 #define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
 #define IDX_PCI_BASE   1000
-#define IDX_SCSI_BASE  2000
-#define IDX_USB_BASE   2200
 #define IDX_RTC_BASE   2400
-#define IDX_NVME_BASE  3000
 #define IDX_SENSOR_BASE 4000
 #define IDX_SFP_BASE   10000
+#define IDX_DYNAMIC_BASE 200000
 
 #define HWMON_BUCKETS   256   /* slots in the hwmon hash table */
 #define HWMON_SLOT_SZ    20   /* index slots per chip (chip + up to 19 sensors) */
-#define NVME_BUCKETS     64   /* slots for standalone NVMe (no PCI parent) */
-#define SCSI_BUCKETS     64   /* slots for SATA/SAS disks */
-#define USB_BUCKETS      64   /* slots for USB devices */
+
+#define ENTITY_INDEXES_FILE     "entity_indexes"
+#define ENTITY_INDEXES_TMP_FILE "entity_indexes.tmp"
+
+typedef struct entity_index_alloc_s {
+    char key[128];
+    int idx;
+    struct entity_index_alloc_s *next;
+} entity_index_alloc;
+
+static entity_index_alloc *_idx_alloc_head  = NULL;
+static int                 _idx_alloc_dirty = 0;
+static int                 _idx_alloc_next  = IDX_DYNAMIC_BASE;
 
 /* FNV-1a 32-bit hash — used for stable index assignment */
 static uint32_t
@@ -108,6 +116,164 @@ _hash_alloc_slot(const char *key, char *used, int buckets)
         return -1;
     used[slot] = 1;
     return slot;
+}
+
+static void
+_entity_index_alloc_free(void)
+{
+    entity_index_alloc *a, *next;
+
+    for (a = _idx_alloc_head; a; a = next) {
+        next = a->next;
+        free(a);
+    }
+    _idx_alloc_head  = NULL;
+    _idx_alloc_dirty = 0;
+    _idx_alloc_next  = IDX_DYNAMIC_BASE;
+}
+
+static entity_index_alloc *
+_entity_index_alloc_find(const char *key)
+{
+    entity_index_alloc *a;
+
+    for (a = _idx_alloc_head; a; a = a->next)
+        if (strcmp(a->key, key) == 0)
+            return a;
+    return NULL;
+}
+
+static void
+_entity_index_alloc_add(const char *key, int idx)
+{
+    entity_index_alloc *a;
+
+    if (!key || !key[0] || idx <= 0)
+        return;
+    if (_entity_index_alloc_find(key))
+        return;
+
+    a = SNMP_MALLOC_TYPEDEF(entity_index_alloc);
+    if (!a)
+        return;
+    strlcpy(a->key, key, sizeof(a->key));
+    a->idx = idx;
+    a->next = _idx_alloc_head;
+    _idx_alloc_head = a;
+    if (idx >= _idx_alloc_next)
+        _idx_alloc_next = idx + 1;
+}
+
+static void
+_entity_index_alloc_load(void)
+{
+    char path[512], line[1024], key[128];
+    int idx;
+    FILE *f;
+
+    _entity_index_alloc_free();
+
+    snprintf(path, sizeof(path), "%s/%s",
+             get_persistent_directory(), ENTITY_INDEXES_FILE);
+    f = fopen(path, "r");
+    if (!f)
+        return;
+
+    while (fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "%d %127[^\t]", &idx, key) == 2 && key[0] &&
+            idx >= IDX_DYNAMIC_BASE && !_entity_index_alloc_find(key))
+            _entity_index_alloc_add(key, idx);
+    }
+
+    fclose(f);
+    _idx_alloc_dirty = 0;
+}
+
+static int
+_entity_index_alloc(const char *key)
+{
+    entity_index_alloc *a;
+    int idx;
+
+    if (!key || !key[0])
+        return 0;
+
+    a = _entity_index_alloc_find(key);
+    if (a)
+        return a->idx;
+
+    idx = _idx_alloc_next;
+    _entity_index_alloc_add(key, idx);
+    _idx_alloc_dirty = 1;
+    return idx;
+}
+
+static int
+_entity_idx_in_alloc(int idx)
+{
+    entity_index_alloc *a;
+
+    for (a = _idx_alloc_head; a; a = a->next)
+        if (a->idx == idx)
+            return 1;
+    return 0;
+}
+
+static void
+_entity_indexes_write(void)
+{
+    entity_index_alloc *a;
+    netsnmp_entity_info *e;
+    char path[512], tmp_path[512];
+    FILE *f;
+
+    snprintf(path, sizeof(path), "%s/%s",
+             get_persistent_directory(), ENTITY_INDEXES_FILE);
+    snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
+             get_persistent_directory(), ENTITY_INDEXES_TMP_FILE);
+
+    f = fopen(tmp_path, "w");
+    if (!f) {
+        snmp_log(LOG_ERR, "entity: cannot write %s: %s\n",
+                 tmp_path, strerror(errno));
+        return;
+    }
+
+    /* Dynamic devices (alloc list) — includes ghosts for absent devices */
+    for (a = _idx_alloc_head; a; a = a->next) {
+        e = netsnmp_entity_get_byIdx(a->idx);
+        if (e)
+            fprintf(f, "%d\t%s\t%s\t%s\t%s\t%s\t%s\n",
+                    a->idx, a->key, e->uris, e->name,
+                    e->mfg_name, e->model_name, e->descr);
+        else
+            fprintf(f, "%d\t%s\t\t\t\t\t\n", a->idx, a->key);
+    }
+
+    /* Static and PCI devices — skip those already written above */
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        if (!e->uris[0] || _entity_idx_in_alloc(e->idx))
+            continue;
+        fprintf(f, "%d\t\t%s\t%s\t%s\t%s\t%s\n",
+                e->idx, e->uris, e->name,
+                e->mfg_name, e->model_name, e->descr);
+    }
+
+    if (fclose(f) != 0) {
+        snmp_log(LOG_ERR, "entity: cannot close %s: %s\n",
+                 tmp_path, strerror(errno));
+        remove(tmp_path);
+        return;
+    }
+
+    if (rename(tmp_path, path) != 0) {
+        snmp_log(LOG_ERR, "entity: cannot rename %s to %s: %s\n",
+                 tmp_path, path, strerror(errno));
+        remove(tmp_path);
+        return;
+    }
+
+    _idx_alloc_dirty = 0;
 }
 
 /* ---- helpers ------------------------------------------------------------- */
@@ -294,6 +460,36 @@ _block_append_by_id_uris(char *uris, size_t urisz, const char *block_name)
     closedir(dir);
 }
 
+/* Find the first block namespace (e.g. "nvme0n1") for an NVMe controller. */
+static void
+_nvme_first_ns(const char *ctrl_name, char *ns_name, size_t ns_len)
+{
+    char path[512];
+    DIR *dir;
+    struct dirent *de;
+    size_t ctrl_len;
+
+    ns_name[0] = '\0';
+    if (!ctrl_name || !ctrl_name[0])
+        return;
+
+    ctrl_len = strlen(ctrl_name);
+    snprintf(path, sizeof(path), "%s/%s", NVME_PATH, ctrl_name);
+    dir = opendir(path);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir))) {
+        if (strncmp(de->d_name, ctrl_name, ctrl_len) == 0 &&
+            de->d_name[ctrl_len] == 'n' &&
+            isdigit((unsigned char)de->d_name[ctrl_len + 1])) {
+            strlcpy(ns_name, de->d_name, ns_len);
+            break;
+        }
+    }
+    closedir(dir);
+}
+
 static void
 _block_append_uris(netsnmp_entity_info *e, const char *block_name)
 {
@@ -311,6 +507,82 @@ _block_append_uris(netsnmp_entity_info *e, const char *block_name)
 }
 
 static void
+_block_append_scsi_hctl_uri(netsnmp_entity_info *e, const char *hctl)
+{
+    char uri[64];
+
+    if (!e || !hctl || !hctl[0])
+        return;
+
+    snprintf(uri, sizeof(uri), "scsi:%s", hctl);
+    _append_uri(e->uris, sizeof(e->uris), uri);
+}
+
+static int
+_sysfs_path_ata_port(const char *path)
+{
+    const char *p;
+
+    if (!path)
+        return 0;
+
+    for (p = path; (p = strstr(p, "/ata")) != NULL; p += 4) {
+        const char *np = p + 4;
+
+        if (isdigit((unsigned char)*np))
+            return atoi(np);
+    }
+
+    return 0;
+}
+
+static void
+_block_stable_key(const char *sysfs_path, const char *hctl,
+                  const char *block_name, char *key, size_t key_len)
+{
+    int ata_port;
+
+    if (key_len > 0)
+        key[0] = '\0';
+
+    ata_port = _sysfs_path_ata_port(sysfs_path);
+    if (ata_port > 0) {
+        snprintf(key, key_len, "ata:%d", ata_port);
+        return;
+    }
+
+    if (hctl && hctl[0]) {
+        snprintf(key, key_len, "scsi:%s", hctl);
+        return;
+    }
+
+    snprintf(key, key_len, "block:%s", block_name);
+}
+
+static void
+_block_append_stable_key_uris(netsnmp_entity_info *e, const char *sysfs_path,
+                              const char *hctl, const char *key)
+{
+    int ata_port;
+    char uri[64];
+
+    if (!e)
+        return;
+
+    ata_port = _sysfs_path_ata_port(sysfs_path);
+    if (ata_port > 0) {
+        snprintf(uri, sizeof(uri), "ata:%d", ata_port);
+        _append_uri(e->uris, sizeof(e->uris), uri);
+    }
+
+    _block_append_scsi_hctl_uri(e, hctl);
+
+    if (key && key[0] && strncmp(key, "ata:", 4) != 0 &&
+        strncmp(key, "scsi:", 5) != 0)
+        _append_uri(e->uris, sizeof(e->uris), key);
+}
+
+static void
 _nvme_append_uris(netsnmp_entity_info *e, const char *ctrl_name)
 {
     DIR *dir;
@@ -322,6 +594,8 @@ _nvme_append_uris(netsnmp_entity_info *e, const char *ctrl_name)
         return;
 
     e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "nvme:%s", ctrl_name);
+    _append_uri(e->uris, sizeof(e->uris), path);
     snprintf(path, sizeof(path), "%s/%s", NVME_PATH, ctrl_name);
     _append_file_uri(e->uris, sizeof(e->uris), path);
     snprintf(path, sizeof(path), "/dev/%s", ctrl_name);
@@ -362,6 +636,8 @@ _usb_append_uris(netsnmp_entity_info *e, const char *name)
         return;
 
     e->uris[0] = '\0';
+    snprintf(path, sizeof(path), "usb:%s", name);
+    _append_uri(e->uris, sizeof(e->uris), path);
     snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
     _append_file_uri(e->uris, sizeof(e->uris), path);
 
@@ -1558,9 +1834,6 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
     DIR *dir;
     const struct dirent *de;
     char path[512], val[256], rp[PATH_MAX];
-    char used[USB_BUCKETS];
-
-    memset(used, 0, sizeof(used));
 
     dir = opendir(USB_PATH);
     if (!dir)
@@ -1568,9 +1841,9 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int slot, pci_idx;
+        int idx, pci_idx;
         const char *name = de->d_name;
-        char devname[128], speed[64], removable[64];
+        char devname[128], speed[64], removable[64], key[128];
 
         if (name[0] == '.')
             continue;
@@ -1585,13 +1858,14 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         if (!realpath(path, rp))
             continue;
 
-        slot = _hash_alloc_slot(name, used, USB_BUCKETS);
-        if (slot < 0)
+        snprintf(key, sizeof(key), "usb:%s", name);
+        idx = _entity_index_alloc(key);
+        if (idx <= 0)
             continue;
 
         pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
 
-        e = netsnmp_entity_create(IDX_USB_BASE + slot);
+        e = netsnmp_entity_create(idx);
         if (!e)
             continue;
 
@@ -1735,9 +2009,6 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
     DIR *dir;
     struct dirent *de;
     char path[512], val[256], rp[PATH_MAX];
-    char used[SCSI_BUCKETS];
-
-    memset(used, 0, sizeof(used));
 
     dir = opendir(BLOCK_PATH);
     if (!dir)
@@ -1745,8 +2016,9 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int slot, pci_idx;
+        int idx, pci_idx;
         const char *p;
+        char key[128];
 
         if (de->d_name[0] == '.')
             continue;
@@ -1771,19 +2043,23 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         if (!realpath(path, rp))
             continue;
 
-        /* Use the HCTL string (basename of realpath) as stable hash key */
+        /* Use the HCTL string (basename of realpath) as a fallback key */
         p = strrchr(rp, '/');
         if (!p)
             continue;
         p++;  /* e.g. "0:0:0:0" */
 
-        slot = _hash_alloc_slot(p, used, SCSI_BUCKETS);
-        if (slot < 0)
+        snprintf(path, sizeof(path), "%s/%s/device/wwid", BLOCK_PATH, de->d_name);
+        _sysfs_read(path, key, sizeof(key));
+        if (!key[0])
+            _block_stable_key(rp, p, de->d_name, key, sizeof(key));
+        idx = _entity_index_alloc(key);
+        if (idx <= 0)
             continue;
 
         pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
 
-        e = netsnmp_entity_create(IDX_SCSI_BASE + slot);
+        e = netsnmp_entity_create(idx);
         if (!e)
             continue;
 
@@ -1852,6 +2128,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         }
 
         _block_append_uris(e, de->d_name);
+        _block_append_stable_key_uris(e, rp, p, key);
     }
     closedir(dir);
 }
@@ -1862,9 +2139,6 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
     DIR *dir;
     struct dirent *de;
     char path[512], val[256];
-    char used[NVME_BUCKETS];
-
-    memset(used, 0, sizeof(used));
 
     dir = opendir(NVME_PATH);
     if (!dir)
@@ -1873,6 +2147,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
         int idx, pci_idx;
+        char key[128];
 
         if (de->d_name[0] == '.')
             continue;
@@ -1885,10 +2160,20 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
             e = netsnmp_entity_get_byIdx(pci_idx);
             idx = pci_idx;
         } else {
-            int slot = _hash_alloc_slot(de->d_name, used, NVME_BUCKETS);
-            if (slot < 0)
+            char ns_name[64];
+
+            _nvme_first_ns(de->d_name, ns_name, sizeof(ns_name));
+            key[0] = '\0';
+            if (ns_name[0]) {
+                snprintf(path, sizeof(path), "%s/%s/%s/wwid",
+                         NVME_PATH, de->d_name, ns_name);
+                _sysfs_read(path, key, sizeof(key));
+            }
+            if (!key[0])
+                snprintf(key, sizeof(key), "nvme:%s", de->d_name);
+            idx = _entity_index_alloc(key);
+            if (idx <= 0)
                 continue;
-            idx = IDX_NVME_BASE + slot;
             e = netsnmp_entity_create(idx);
         }
         if (!e)
@@ -2627,6 +2912,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
         hash_before = _entity_list_hash();
     }
     netsnmp_entity_free_list();
+    _entity_index_alloc_load();
 
     _load_dmi();
     _load_cpus();
@@ -2654,8 +2940,9 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
         entity_last_change = (u_long)time(NULL);
         _saved_hash        = hash_after;
         _write_entity_state();
-        netsnmp_entity_index_file_write();
     }
+    if (hash_after != hash_before || _idx_alloc_dirty)
+        _entity_indexes_write();
 
     return 0;
 }
