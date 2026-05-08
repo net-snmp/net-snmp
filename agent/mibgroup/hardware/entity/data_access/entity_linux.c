@@ -1827,21 +1827,33 @@ free_bdfs:
     free(bdfs);
 }
 
-static int
-_usb_iana_class(const char *name)
+static void
+_usb_class_info(const char *name, int *class_out, int *sub_out, int *prot_out)
 {
     char path[512], val[16];
-    int cls;
+    int cls, sub, prot;
     DIR *dir;
     struct dirent *de;
+
+    cls = -1;
+    sub = 0;
+    prot = 0;
 
     /* Read bDeviceClass; 0x00 means class is defined per-interface */
     snprintf(path, sizeof(path), "%s/%s/bDeviceClass", USB_PATH, name);
     _sysfs_read(path, val, sizeof(val));
     cls = val[0] ? (int)strtol(val, NULL, 16) : -1;
 
+    snprintf(path, sizeof(path), "%s/%s/bDeviceSubClass", USB_PATH, name);
+    _sysfs_read(path, val, sizeof(val));
+    sub = val[0] ? (int)strtol(val, NULL, 16) : 0;
+
+    snprintf(path, sizeof(path), "%s/%s/bDeviceProtocol", USB_PATH, name);
+    _sysfs_read(path, val, sizeof(val));
+    prot = val[0] ? (int)strtol(val, NULL, 16) : 0;
+
     if (cls == 0x00) {
-        /* Scan for the first interface entry and use its bInterfaceClass */
+        /* Scan for the first interface entry and use its class tuple. */
         snprintf(path, sizeof(path), "%s", USB_PATH);
         dir = opendir(path);
         if (dir) {
@@ -1856,8 +1868,18 @@ _usb_iana_class(const char *name)
                     _sysfs_read(path, val, sizeof(val));
                     if (val[0]) {
                         cls = (int)strtol(val, NULL, 16);
+                        snprintf(path, sizeof(path),
+                                 "%s/%s/bInterfaceSubClass", USB_PATH,
+                                 de->d_name);
+                        _sysfs_read(path, val, sizeof(val));
+                        sub = val[0] ? (int)strtol(val, NULL, 16) : 0;
+                        snprintf(path, sizeof(path),
+                                 "%s/%s/bInterfaceProtocol", USB_PATH,
+                                 de->d_name);
+                        _sysfs_read(path, val, sizeof(val));
+                        prot = val[0] ? (int)strtol(val, NULL, 16) : 0;
                         closedir(dir);
-                        goto map;
+                        goto done;
                     }
                 }
             }
@@ -1865,11 +1887,63 @@ _usb_iana_class(const char *name)
         }
     }
 
-map:
+done:
+    if (class_out)
+        *class_out = cls;
+    if (sub_out)
+        *sub_out = sub;
+    if (prot_out)
+        *prot_out = prot;
+}
+
+static int
+_usb_iana_class(const char *name)
+{
+    int cls;
+
+    _usb_class_info(name, &cls, NULL, NULL);
     switch (cls) {
     case 0x08: return IANA_PHYS_STORAGE;    /* Mass Storage */
     case 0x09: return IANA_PHYS_CONTAINER;  /* Hub          */
     default:   return IANA_PHYS_OTHER;
+    }
+}
+
+static const char *
+_usb_class_descr(const char *name)
+{
+    int cls, sub, prot;
+
+    _usb_class_info(name, &cls, &sub, &prot);
+    switch (cls) {
+    case 0x01:
+        return "Audio device";
+    case 0x02:
+        if (sub == 0x02)
+            return "Modem";
+        return "Communication device";
+    case 0x03:
+        if ((sub == 0x00 || sub == 0x01) && prot == 0x01)
+            return "Keyboard";
+        if ((sub == 0x00 || sub == 0x01) && prot == 0x02)
+            return "Mouse";
+        return "Human interface device";
+    case 0x07:
+        return "Printer";
+    case 0x08:
+        return "Mass storage device";
+    case 0x09:
+        return "USB hub";
+    case 0x0b:
+        return "Smart card reader";
+    case 0x0e:
+        return "Video";
+    case 0xe0:
+        if (sub == 0x01 && prot == 0x01)
+            return "Bluetooth wireless interface";
+        return "Wireless interface";
+    default:
+        return "Generic USB device";
     }
 }
 
@@ -1955,19 +2029,81 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
     if (!dir)
         return;
 
+    /* Pass 1: create root hub (usbhost) container entities */
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int idx, pci_idx;
         const char *name = de->d_name;
-        char devname[128], speed[64], removable[64], key[128];
+        char ver[16], spd_s[16], key[128];
+        int spd, idx, pci_idx, i;
 
         if (name[0] == '.')
             continue;
-        /* Skip interface entries (e.g. "1-6:1.0") */
+        if (strncmp(name, "usb", 3) != 0 || !isdigit((unsigned char)name[3]))
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
+        if (!realpath(path, rp))
+            continue;
+
+        snprintf(key, sizeof(key), "usbhost:%s", name + 3);
+        idx = _entity_index_alloc(key);
+        if (idx <= 0)
+            continue;
+
+        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+
+        e = netsnmp_entity_create(idx);
+        if (!e)
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s/version", USB_PATH, name);
+        _sysfs_read(path, ver, sizeof(ver));
+        snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
+        _sysfs_read(path, spd_s, sizeof(spd_s));
+        spd = spd_s[0] ? atoi(spd_s) : 0;
+
+        e->iana_class = IANA_PHYS_CONTAINER;
+        e->is_fru     = TV_FALSE;
+        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        strlcpy(e->name, name, sizeof(e->name));
+
+        if (ver[0] && spd > 0) {
+            if (spd >= 1000)
+                snprintf(e->descr, sizeof(e->descr),
+                         "USB %s host, %d Gbit/s", ver, spd / 1000);
+            else
+                snprintf(e->descr, sizeof(e->descr),
+                         "USB %s host, %d Mbit/s", ver, spd);
+        } else {
+            strlcpy(e->descr, "USB host", sizeof(e->descr));
+        }
+
+        snprintf(path, sizeof(path), "usb:%s", name);
+        _append_uri(e->uris, sizeof(e->uris), path);
+        for (i = 0; i < pci_map_n; i++) {
+            if (pci_map[i].idx != pci_idx)
+                continue;
+            snprintf(path, sizeof(path), "%s/%s/%s", PCI_PATH,
+                     pci_map[i].bdf, name);
+            _append_file_uri(e->uris, sizeof(e->uris), path);
+            break;
+        }
+    }
+    rewinddir(dir);
+
+    /* Pass 2: create USB device entities as children of their root hub */
+    while ((de = readdir(dir))) {
+        netsnmp_entity_info *e;
+        const char *name = de->d_name;
+        const char *class_descr;
+        char devname[128], speed[64], removable[64], key[128], busnum[16];
+        int idx, hub_idx;
+
+        if (name[0] == '.')
+            continue;
         if (strchr(name, ':'))
             continue;
-        /* Skip root hub entries (e.g. "usb1") — already represented by PCI */
-        if (strncmp(name, "usb", 3) == 0)
+        if (strncmp(name, "usb", 3) == 0 && isdigit((unsigned char)name[3]))
             continue;
 
         snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
@@ -1979,7 +2115,14 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         if (idx <= 0)
             continue;
 
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        snprintf(path, sizeof(path), "%s/%s/busnum", USB_PATH, name);
+        _sysfs_read(path, busnum, sizeof(busnum));
+        if (busnum[0]) {
+            snprintf(key, sizeof(key), "usbhost:%s", busnum);
+            hub_idx = _entity_index_alloc(key);
+        } else {
+            hub_idx = 0;
+        }
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -1987,7 +2130,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
 
         e->iana_class = _usb_iana_class(name);
         e->is_fru     = TV_FALSE;
-        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        e->parent_idx = hub_idx ? hub_idx : IDX_BASEBOARD;
 
         snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
         _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
@@ -2000,12 +2143,15 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, removable, sizeof(removable));
         if (strcmp(removable, "removable") == 0)
             e->is_fru = TV_TRUE;
+        class_descr = _usb_class_descr(name);
         if (speed[0])
-            snprintf(e->descr, sizeof(e->descr), "USB %sdevice, %s Mbit/s",
-                     e->is_fru == TV_TRUE ? "removable " : "", speed);
+            snprintf(e->descr, sizeof(e->descr), "%s, %s Mbit/s",
+                     class_descr, speed);
         else
-            snprintf(e->descr, sizeof(e->descr), "USB %sdevice",
-                     e->is_fru == TV_TRUE ? "removable " : "");
+            strlcpy(e->descr, class_descr, sizeof(e->descr));
+        if (e->is_fru == TV_TRUE)
+            strncat(e->descr, ", removable",
+                    sizeof(e->descr) - strlen(e->descr) - 1);
 
         snprintf(path, sizeof(path), "%s/%s/product", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));
