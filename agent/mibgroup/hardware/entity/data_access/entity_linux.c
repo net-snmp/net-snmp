@@ -130,6 +130,49 @@ _sysfs_read(const char *path, char *buf, size_t bufsz)
         *nl = '\0';
 }
 
+static void
+_sysfs_read_key(const char *path, const char *key, char *buf, size_t bufsz)
+{
+    FILE *f;
+    char line[512];
+    size_t key_len;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+    if (!path || !key || bufsz == 0)
+        return;
+
+    f = fopen(path, "r");
+    if (!f)
+        return;
+
+    key_len = strlen(key);
+    while (fgets(line, sizeof(line), f)) {
+        char *nl;
+
+        if (strncmp(line, key, key_len) != 0 || line[key_len] != '=')
+            continue;
+        strlcpy(buf, line + key_len + 1, bufsz);
+        if ((nl = strchr(buf, '\n')))
+            *nl = '\0';
+        break;
+    }
+
+    fclose(f);
+}
+
+static const char *
+_strip_dev_prefix(const char *path)
+{
+    if (!path)
+        return "";
+    if (strncmp(path, "/dev/", 5) == 0)
+        return path + 5;
+    if (strncmp(path, "dev/", 4) == 0)
+        return path + 4;
+    return path;
+}
+
 static int
 _is_placeholder(const char *s)
 {
@@ -311,7 +354,7 @@ static void
 _usb_append_uris(netsnmp_entity_info *e, const char *name)
 {
     char path[PATH_MAX], val[64], vendor[32], product[32], serial[128];
-    char busnum_str[32], devnum_str[32];
+    char busnum_str[32], devnum_str[32], devname[128];
     int busnum, devnum;
     const char *sp;
 
@@ -322,15 +365,24 @@ _usb_append_uris(netsnmp_entity_info *e, const char *name)
     snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
     _append_file_uri(e->uris, sizeof(e->uris), path);
 
+    snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
+    _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
+    if (devname[0]) {
+        snprintf(path, sizeof(path), "/dev/%s", _strip_dev_prefix(devname));
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+
     snprintf(path, sizeof(path), "%s/%s/busnum", USB_PATH, name);
     _sysfs_read(path, busnum_str, sizeof(busnum_str));
     snprintf(path, sizeof(path), "%s/%s/devnum", USB_PATH, name);
     _sysfs_read(path, devnum_str, sizeof(devnum_str));
     busnum = busnum_str[0] ? atoi(busnum_str) : 0;
     devnum = devnum_str[0] ? atoi(devnum_str) : 0;
-    if (busnum > 0 && devnum > 0) {
+    if (!devname[0] && busnum > 0 && devnum > 0) {
         snprintf(path, sizeof(path), "/dev/bus/usb/%03d/%03d", busnum, devnum);
         _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+    if (busnum > 0 && devnum > 0) {
         snprintf(path, sizeof(path), "usb://%03d/%03d", busnum, devnum);
         _append_uri(e->uris, sizeof(e->uris), path);
     }
@@ -1518,6 +1570,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         netsnmp_entity_info *e;
         int slot, pci_idx;
         const char *name = de->d_name;
+        char devname[128], speed[64], removable[64];
 
         if (name[0] == '.')
             continue;
@@ -1545,8 +1598,24 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_MODULE;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
-        strlcpy(e->name, name, sizeof(e->name));
-        strlcpy(e->descr, "USB device", sizeof(e->descr));
+
+        snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
+        _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
+        strlcpy(e->name, devname[0] ? _strip_dev_prefix(devname) : name,
+                sizeof(e->name));
+
+        snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
+        _sysfs_read(path, speed, sizeof(speed));
+        snprintf(path, sizeof(path), "%s/%s/removable", USB_PATH, name);
+        _sysfs_read(path, removable, sizeof(removable));
+        if (strcmp(removable, "removable") == 0)
+            e->is_fru = TV_TRUE;
+        if (speed[0])
+            snprintf(e->descr, sizeof(e->descr), "USB %sdevice, %s Mbit/s",
+                     e->is_fru == TV_TRUE ? "removable " : "", speed);
+        else
+            snprintf(e->descr, sizeof(e->descr), "USB %sdevice",
+                     e->is_fru == TV_TRUE ? "removable " : "");
 
         snprintf(path, sizeof(path), "%s/%s/product", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));

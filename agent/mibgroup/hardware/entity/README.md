@@ -164,5 +164,10 @@ USB rows also include device-node and identity URIs when available, for example:
 - `usb://001/006`
 - `usb:v046dp0825:SERIAL`
 
+USB `entPhysicalName` uses the kernel `DEVNAME` value from the device `uevent`
+file, such as `bus/usb/001/006`, when present. USB descriptions include link
+speed when available, and devices with `removable` set to `removable` are marked
+as FRUs.
+
 External agents should use the same URI string when looking up an
 `entPhysicalIndex`.
