@@ -1827,6 +1827,52 @@ free_bdfs:
     free(bdfs);
 }
 
+static int
+_usb_iana_class(const char *name)
+{
+    char path[512], val[16];
+    int cls;
+    DIR *dir;
+    struct dirent *de;
+
+    /* Read bDeviceClass; 0x00 means class is defined per-interface */
+    snprintf(path, sizeof(path), "%s/%s/bDeviceClass", USB_PATH, name);
+    _sysfs_read(path, val, sizeof(val));
+    cls = val[0] ? (int)strtol(val, NULL, 16) : -1;
+
+    if (cls == 0x00) {
+        /* Scan for the first interface entry and use its bInterfaceClass */
+        snprintf(path, sizeof(path), "%s", USB_PATH);
+        dir = opendir(path);
+        if (dir) {
+            size_t nlen = strlen(name);
+
+            while ((de = readdir(dir))) {
+                /* Interface entries look like "1-2:1.0" */
+                if (strncmp(de->d_name, name, nlen) == 0 &&
+                    de->d_name[nlen] == ':') {
+                    snprintf(path, sizeof(path), "%s/%s/bInterfaceClass",
+                             USB_PATH, de->d_name);
+                    _sysfs_read(path, val, sizeof(val));
+                    if (val[0]) {
+                        cls = (int)strtol(val, NULL, 16);
+                        closedir(dir);
+                        goto map;
+                    }
+                }
+            }
+            closedir(dir);
+        }
+    }
+
+map:
+    switch (cls) {
+    case 0x08: return IANA_PHYS_STORAGE;    /* Mass Storage */
+    case 0x09: return IANA_PHYS_CONTAINER;  /* Hub          */
+    default:   return IANA_PHYS_OTHER;
+    }
+}
+
 /* ---- Phase 5: ATA ports -------------------------------------------------- */
 
 static void
@@ -1939,7 +1985,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         if (!e)
             continue;
 
-        e->iana_class = IANA_PHYS_MODULE;
+        e->iana_class = _usb_iana_class(name);
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
 
