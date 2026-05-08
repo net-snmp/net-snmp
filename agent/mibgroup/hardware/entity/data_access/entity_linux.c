@@ -2190,10 +2190,12 @@ _load_rtc(void)
             *sp = '\0';
 
         if (val[0]) {
-            strlcpy(e->descr,      val, sizeof(e->descr));
+            strlcpy(e->descr,      "System CMOS/Real Time Clock",
+                    sizeof(e->descr));
             strlcpy(e->model_name, val, sizeof(e->model_name));
         } else {
-            strlcpy(e->descr,      de->d_name, sizeof(e->descr));
+            strlcpy(e->descr,      "System CMOS/Real Time Clock",
+                    sizeof(e->descr));
             strlcpy(e->model_name, de->d_name, sizeof(e->model_name));
         }
 
