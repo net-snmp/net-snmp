@@ -151,6 +151,10 @@ def main():
                         help="hide entPhysicalSerialNum values")
     parser.add_argument('--hide-uuid', action='store_true',
                         help="hide entPhysicalUUID values")
+    parser.add_argument('--show-vendor-type', action='store_true',
+                        help="show entPhysicalVendorType values")
+    parser.add_argument('--show-parent-rel-pos', action='store_true',
+                        help="show entPhysicalParentRelPos values")
     args = parser.parse_args()
 
     if args.file:
@@ -159,11 +163,15 @@ def main():
     else:
         lines = sys.stdin.readlines()
 
-    hidden_attrs = set()
+    hidden_attrs = {'VendorType', 'ParentRelPos'}
     if args.hide_serial:
         hidden_attrs.add('SerialNum')
     if args.hide_uuid:
         hidden_attrs.add('UUID')
+    if args.show_vendor_type:
+        hidden_attrs.discard('VendorType')
+    if args.show_parent_rel_pos:
+        hidden_attrs.discard('ParentRelPos')
 
     entities = parse_snmp_file(lines)
     children, roots = build_tree(entities)

@@ -40,6 +40,7 @@
 #define I2C_DEV_PATH "/sys/class/i2c-dev"
 #define GRAPHICS_PATH "/sys/class/graphics"
 #define GPIO_PATH   "/sys/class/gpio"
+#define NODE_PATH   "/sys/devices/system/node"
 
 #define IDX_CHASSIS      1
 #define IDX_BASEBOARD   10
@@ -48,11 +49,14 @@
 #define IDX_DIMM_BASE  110
 #define IDX_CPU_BASE    200
 #define IDX_CACHE_BASE  300   /* 10 slots per CPU package: 300-309, 310-319, … */
+#define IDX_NODE_BASE   500
+#define IDX_NODE_MEMORY_BASE 600
 #define IDX_PCI_BASE   1000
 #define IDX_ATA_BASE   1500
 #define IDX_RTC_BASE   2400
 #define IDX_SENSOR_BASE 4000
 #define IDX_SFP_BASE   10000
+#define IDX_LOGICAL_CPU_BASE 20000
 #define IDX_DYNAMIC_BASE 200000
 
 #define HWMON_BUCKETS   256   /* slots in the hwmon hash table */
@@ -421,12 +425,22 @@ static void
 _append_uri(char *uris, size_t urisz, const char *uri)
 {
     size_t len, uri_len;
+    const char *p;
 
     if (!uri || !uri[0] || urisz == 0)
         return;
 
     uri_len = strlen(uri);
     len = strlen(uris);
+    for (p = uris; p && *p; ) {
+        const char *end = strchr(p, ' ');
+        size_t tok_len = end ? (size_t)(end - p) : strlen(p);
+
+        if (tok_len == uri_len && strncmp(p, uri, uri_len) == 0)
+            return;
+        p = end ? end + 1 : NULL;
+    }
+
     if (len == 0) {
         if (uri_len < urisz)
             strlcpy(uris, uri, urisz);
@@ -759,6 +773,213 @@ _find_first_name_prefix(const char *prefix)
     return NULL;
 }
 
+static int
+_numa_node_count(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    int count, node;
+
+    dir = opendir(NODE_PATH);
+    if (!dir)
+        return 0;
+
+    count = 0;
+    while ((de = readdir(dir)) != NULL) {
+        if (sscanf(de->d_name, "node%d", &node) != 1)
+            continue;
+        if (node >= 0)
+            count++;
+    }
+    closedir(dir);
+    return count;
+}
+
+static int
+_numa_enabled(void)
+{
+    return _numa_node_count() > 1;
+}
+
+static int
+_numa_node_idx(int node)
+{
+    return IDX_NODE_BASE + node;
+}
+
+static int
+_numa_memory_idx(int node)
+{
+    return IDX_NODE_MEMORY_BASE + node;
+}
+
+static int
+_numa_valid_node(int node)
+{
+    char path[PATH_MAX];
+
+    if (node < 0)
+        return 0;
+    snprintf(path, sizeof(path), "%s/node%d", NODE_PATH, node);
+    return access(path, F_OK) == 0;
+}
+
+static int
+_numa_cpu_node(int phys_id)
+{
+    DIR *node_dir, *cpu_dir;
+    struct dirent *node_de, *cpu_de;
+    char path[PATH_MAX], val[64];
+    int node, cpu, pkg;
+
+    if (!_numa_enabled())
+        return -1;
+
+    node_dir = opendir(NODE_PATH);
+    if (!node_dir)
+        return -1;
+
+    while ((node_de = readdir(node_dir)) != NULL) {
+        if (sscanf(node_de->d_name, "node%d", &node) != 1)
+            continue;
+
+        snprintf(path, sizeof(path), "%s/%s", NODE_PATH, node_de->d_name);
+        cpu_dir = opendir(path);
+        if (!cpu_dir)
+            continue;
+
+        while ((cpu_de = readdir(cpu_dir)) != NULL) {
+            if (sscanf(cpu_de->d_name, "cpu%d", &cpu) != 1)
+                continue;
+            snprintf(path, sizeof(path),
+                     "/sys/devices/system/cpu/%s/topology/physical_package_id",
+                     cpu_de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            if (!val[0])
+                continue;
+            pkg = atoi(val);
+            if (pkg == phys_id) {
+                closedir(cpu_dir);
+                closedir(node_dir);
+                return node;
+            }
+        }
+        closedir(cpu_dir);
+    }
+
+    closedir(node_dir);
+    return -1;
+}
+
+static int
+_numa_pci_node(const char *bdf)
+{
+    char path[PATH_MAX], val[64];
+    int node;
+
+    if (!_numa_enabled() || !bdf || !bdf[0])
+        return -1;
+
+    snprintf(path, sizeof(path), "%s/%s/numa_node", PCI_PATH, bdf);
+    _sysfs_read(path, val, sizeof(val));
+    if (!val[0])
+        return -1;
+
+    node = atoi(val);
+    return _numa_valid_node(node) ? node : -1;
+}
+
+static int
+_numa_parent_idx(int node)
+{
+    if (!_numa_enabled() || !_numa_valid_node(node))
+        return IDX_BASEBOARD;
+    return _numa_node_idx(node);
+}
+
+static int
+_numa_memory_parent_idx(int node)
+{
+    if (!_numa_enabled() || !_numa_valid_node(node))
+        return IDX_MEMORY;
+    return _numa_memory_idx(node);
+}
+
+static void
+_memory_kb_descr(unsigned long long kb, const char *prefix,
+                 char *buf, size_t bufsz)
+{
+    unsigned long long mib, gib10;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+    if (bufsz == 0)
+        return;
+
+    if (kb == 0) {
+        strlcpy(buf, prefix, bufsz);
+        return;
+    }
+
+    mib = (kb + 512) / 1024;
+    gib10 = (mib * 10 + 512) / 1024;
+    if (gib10 >= 10)
+        snprintf(buf, bufsz, "%s (%llu.%llu GiB, %llu MiB)", prefix,
+                 gib10 / 10, gib10 % 10, mib);
+    else
+        snprintf(buf, bufsz, "%s (%llu MiB)", prefix, mib);
+}
+
+static int
+_numa_node_from_pci_uri(const char *uris)
+{
+    const char *p;
+    char bdf[16];
+
+    if (!uris || !uris[0])
+        return -1;
+
+    p = strstr(uris, "pci:");
+    if (!p)
+        return -1;
+    if (sscanf(p, "pci:%15[0-9a-fA-F:.]", bdf) != 1)
+        return -1;
+    if (strlen(bdf) != 12)
+        return -1;
+    return _numa_pci_node(bdf);
+}
+
+static void
+_numa_fix_top_level_parents(void)
+{
+    netsnmp_entity_info *e;
+
+    if (!_numa_enabled())
+        return;
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        int node;
+
+        if (e->parent_idx != IDX_BASEBOARD)
+            continue;
+
+        if (e->iana_class == IANA_PHYS_CPU) {
+            int phys_id;
+
+            if (sscanf(e->name, "cpu%d", &phys_id) == 1) {
+                node = _numa_cpu_node(phys_id);
+                if (node >= 0)
+                    e->parent_idx = _numa_node_idx(node);
+            }
+            continue;
+        }
+
+        node = _numa_node_from_pci_uri(e->uris);
+        if (node >= 0)
+            e->parent_idx = _numa_node_idx(node);
+    }
+}
+
 /* ---- Phase 1: DMI chassis / BIOS / baseboard ----------------------------- */
 
 static void
@@ -821,79 +1042,303 @@ _load_dmi(void)
 
 /* ---- Phase 2: CPU packages ----------------------------------------------- */
 
+static int
+_cpu_thread_index_from_list(const char *list, int cpu_num)
+{
+    const char *p;
+    int pos;
+
+    pos = 0;
+    if (!list)
+        return 0;
+
+    p = list;
+    while (*p) {
+        int first, last, cpu;
+
+        if (sscanf(p, "%d-%d", &first, &last) == 2) {
+            for (cpu = first; cpu <= last; cpu++) {
+                if (cpu == cpu_num)
+                    return pos;
+                pos++;
+            }
+        } else if (sscanf(p, "%d", &first) == 1) {
+            if (first == cpu_num)
+                return pos;
+            pos++;
+        }
+
+        while (*p && *p != ',')
+            p++;
+        if (*p == ',')
+            p++;
+        while (*p == ' ' || *p == '\t')
+            p++;
+    }
+    return 0;
+}
+
 static void
-_load_cpus(void)
+_cpuinfo_for_cpu(int cpu_num, char *model, size_t modelsz,
+                 char *family, size_t familysz, char *model_id,
+                 size_t model_idsz, char *stepping, size_t steppingsz,
+                 char *microcode, size_t microcodesz)
 {
     FILE *fp;
-    char buf[512], descr[256], *p;
-    int  phys_id, tmp, seen[64], created;
-    netsnmp_entity_info *e;
+    char buf[512], field[128], value[256];
+    int in_cpu, cur_cpu;
 
-    phys_id = -1;
-    descr[0] = '\0';
-    created = 0;
-    memset(seen, 0, sizeof(seen));
+    if (modelsz > 0)
+        model[0] = '\0';
+    if (familysz > 0)
+        family[0] = '\0';
+    if (model_idsz > 0)
+        model_id[0] = '\0';
+    if (steppingsz > 0)
+        stepping[0] = '\0';
+    if (microcodesz > 0)
+        microcode[0] = '\0';
 
     fp = fopen("/proc/cpuinfo", "r");
     if (!fp)
         return;
 
+    in_cpu = 0;
+    cur_cpu = -1;
     while (fgets(buf, sizeof(buf), fp)) {
-        if (sscanf(buf, "physical id : %d", &tmp) == 1) {
-            phys_id = tmp;
-        } else if (sscanf(buf, "model name : %254[^\n]", descr) == 1) {
-            p = descr;
-            while (*p == ' ' || *p == '\t') p++;
-            if (p != descr) memmove(descr, p, strlen(p) + 1);
-        } else if (buf[0] == '\n' && phys_id >= 0) {
-            if (phys_id < 64 && !seen[phys_id]) {
-                seen[phys_id] = 1;
-                created = 1;
-                e = netsnmp_entity_create(IDX_CPU_BASE + phys_id);
-                if (e) {
-                    e->iana_class     = IANA_PHYS_CPU;
-                    e->parent_idx     = IDX_BASEBOARD;
-                    e->is_fru         = TV_TRUE;
-                    snprintf(e->name, sizeof(e->name), "cpu%d", phys_id);
-                    snprintf(e->uris, sizeof(e->uris),
-                             "file:///sys/devices/system/cpu/cpu%d", phys_id);
-                    if (descr[0])
-                        strlcpy(e->descr, descr, sizeof(e->descr));
-                    else
-                        snprintf(e->descr, sizeof(e->descr),
-                                 "CPU package %d", phys_id);
-                }
-            }
-            phys_id = -1;
+        char *nl;
+        const char *p;
+
+        nl = strchr(buf, '\n');
+        if (nl)
+            *nl = '\0';
+
+        if (buf[0] == '\0') {
+            if (in_cpu)
+                break;
+            continue;
         }
-    }
-    if (phys_id >= 0 && phys_id < 64 && !seen[phys_id]) {
-        created = 1;
-        e = netsnmp_entity_create(IDX_CPU_BASE + phys_id);
-        if (e) {
-            e->iana_class     = IANA_PHYS_CPU;
-            e->parent_idx     = IDX_BASEBOARD;
-            e->is_fru         = TV_TRUE;
-            snprintf(e->name, sizeof(e->name), "cpu%d", phys_id);
-            snprintf(e->uris, sizeof(e->uris),
-                     "file:///sys/devices/system/cpu/cpu%d", phys_id);
-            if (descr[0])
-                strlcpy(e->descr, descr, sizeof(e->descr));
+
+        if (sscanf(buf, "processor : %d", &cur_cpu) == 1 ||
+            sscanf(buf, "processor\t: %d", &cur_cpu) == 1) {
+            in_cpu = cur_cpu == cpu_num;
+            continue;
         }
-    }
-    if (!created && descr[0]) {
-        e = netsnmp_entity_create(IDX_CPU_BASE);
-        if (e) {
-            e->iana_class = IANA_PHYS_CPU;
-            e->parent_idx = IDX_BASEBOARD;
-            e->is_fru     = TV_TRUE;
-            strlcpy(e->name, "cpu0", sizeof(e->name));
-            strlcpy(e->descr, descr, sizeof(e->descr));
-            strlcpy(e->uris, "file:///sys/devices/system/cpu/cpu0",
-                    sizeof(e->uris));
-        }
+        if (!in_cpu)
+            continue;
+
+        p = buf;
+        while (*p == ' ' || *p == '\t')
+            p++;
+        if (sscanf(p, "%127[^:]: %255[^\n]", field, value) != 2)
+            continue;
+        _trim_trailing(field);
+        while (value[0] == ' ' || value[0] == '\t')
+            memmove(value, value + 1, strlen(value));
+        _trim_trailing(value);
+
+        if (strcmp(field, "model name ") == 0 || strcmp(field, "model name") == 0)
+            strlcpy(model, value, modelsz);
+        else if (strcmp(field, "cpu family ") == 0 || strcmp(field, "cpu family") == 0)
+            strlcpy(family, value, familysz);
+        else if (strcmp(field, "model ") == 0 || strcmp(field, "model") == 0)
+            strlcpy(model_id, value, model_idsz);
+        else if (strcmp(field, "stepping ") == 0 || strcmp(field, "stepping") == 0)
+            strlcpy(stepping, value, steppingsz);
+        else if (strcmp(field, "microcode ") == 0 || strcmp(field, "microcode") == 0)
+            strlcpy(microcode, value, microcodesz);
     }
     fclose(fp);
+}
+
+static void
+_load_numa_nodes(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[PATH_MAX], val[128], descr[128];
+    int node;
+    unsigned long long kb;
+
+    if (!_numa_enabled())
+        return;
+
+    dir = opendir(NODE_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        netsnmp_entity_info *e;
+
+        if (sscanf(de->d_name, "node%d", &node) != 1 || node < 0)
+            continue;
+
+        e = netsnmp_entity_create(_numa_node_idx(node));
+        if (!e)
+            continue;
+        e->iana_class = IANA_PHYS_CONTAINER;
+        e->parent_idx = IDX_BASEBOARD;
+        e->is_fru     = TV_FALSE;
+        snprintf(e->name, sizeof(e->name), "node%d", node);
+        snprintf(e->descr, sizeof(e->descr), "NUMA node %d", node);
+        snprintf(path, sizeof(path), "%s/%s", NODE_PATH, de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+
+        e = netsnmp_entity_create(_numa_memory_idx(node));
+        if (!e)
+            continue;
+        e->iana_class = IANA_PHYS_OTHER;
+        e->parent_idx = _numa_node_idx(node);
+        e->is_fru     = TV_FALSE;
+        snprintf(e->name, sizeof(e->name), "memory%d", node);
+        snprintf(path, sizeof(path), "%s/%s/meminfo", NODE_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        kb = 0;
+        if (sscanf(val, "Node %*d MemTotal: %llu kB", &kb) != 1)
+            kb = 0;
+        snprintf(val, sizeof(val), "Node %d memory", node);
+        _memory_kb_descr(kb, val, descr, sizeof(descr));
+        strlcpy(e->descr, descr, sizeof(e->descr));
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+    closedir(dir);
+}
+
+static void
+_load_cpus(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    int seen_pkg[256], cores_seen[256][256];
+    int pkg_threads[256], pkg_cores[256], pkg_first_cpu[256];
+    int cpu_nums[4096], cpu_count, i;
+
+    memset(seen_pkg, 0, sizeof(seen_pkg));
+    memset(cores_seen, 0, sizeof(cores_seen));
+    memset(pkg_threads, 0, sizeof(pkg_threads));
+    memset(pkg_cores, 0, sizeof(pkg_cores));
+    for (i = 0; i < 256; i++)
+        pkg_first_cpu[i] = -1;
+
+    cpu_count = 0;
+    dir = opendir("/sys/devices/system/cpu");
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        char path[PATH_MAX], val[64];
+        int cpu_num, pkg, core;
+
+        if (sscanf(de->d_name, "cpu%d", &cpu_num) != 1)
+            continue;
+        if (cpu_num < 0 || cpu_count >= (int)(sizeof(cpu_nums) / sizeof(cpu_nums[0])))
+            continue;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/physical_package_id",
+                 de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        pkg = val[0] ? atoi(val) : 0;
+        if (pkg < 0 || pkg >= 256)
+            pkg = 0;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/core_id",
+                 de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        core = val[0] ? atoi(val) : cpu_num;
+        if (core < 0 || core >= 256)
+            core = cpu_num % 256;
+
+        cpu_nums[cpu_count++] = cpu_num;
+        seen_pkg[pkg] = 1;
+        pkg_threads[pkg]++;
+        if (pkg_first_cpu[pkg] < 0)
+            pkg_first_cpu[pkg] = cpu_num;
+        if (!cores_seen[pkg][core]) {
+            cores_seen[pkg][core] = 1;
+            pkg_cores[pkg]++;
+        }
+    }
+    closedir(dir);
+
+    for (i = 0; i < 256; i++) {
+        netsnmp_entity_info *e;
+        char model[256], family[32], model_id[32], stepping[32], microcode[64];
+        char path[PATH_MAX];
+        int node;
+
+        if (!seen_pkg[i])
+            continue;
+
+        _cpuinfo_for_cpu(pkg_first_cpu[i], model, sizeof(model),
+                         family, sizeof(family), model_id, sizeof(model_id),
+                         stepping, sizeof(stepping), microcode,
+                         sizeof(microcode));
+
+        e = netsnmp_entity_create(IDX_CPU_BASE + i);
+        if (!e)
+            continue;
+
+        node = _numa_cpu_node(i);
+        e->iana_class = IANA_PHYS_CPU;
+        e->parent_idx = _numa_parent_idx(node);
+        e->is_fru     = TV_TRUE;
+        snprintf(e->name, sizeof(e->name), "cpu-package%d", i);
+        snprintf(e->descr, sizeof(e->descr),
+                 "CPU package %d, %d cores, %d threads", i,
+                 pkg_cores[i], pkg_threads[i]);
+        _set_if_valid(e->model_name, sizeof(e->model_name), model);
+        if (family[0] || model_id[0] || stepping[0])
+            snprintf(e->hw_rev, sizeof(e->hw_rev),
+                     "family %s model %s stepping %s",
+                     family[0] ? family : "?",
+                     model_id[0] ? model_id : "?",
+                     stepping[0] ? stepping : "?");
+        if (microcode[0])
+            snprintf(e->fw_rev, sizeof(e->fw_rev), "microcode %s", microcode);
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu");
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+
+    for (i = 0; i < cpu_count; i++) {
+        netsnmp_entity_info *e;
+        char path[PATH_MAX], val[64], siblings[128];
+        int cpu_num, pkg, core, thread_idx;
+
+        cpu_num = cpu_nums[i];
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/cpu%d/topology/physical_package_id",
+                 cpu_num);
+        _sysfs_read(path, val, sizeof(val));
+        pkg = val[0] ? atoi(val) : 0;
+        if (pkg < 0 || pkg >= 256)
+            pkg = 0;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/cpu%d/topology/core_id", cpu_num);
+        _sysfs_read(path, val, sizeof(val));
+        core = val[0] ? atoi(val) : cpu_num;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/cpu%d/topology/thread_siblings_list",
+                 cpu_num);
+        _sysfs_read(path, siblings, sizeof(siblings));
+        thread_idx = _cpu_thread_index_from_list(siblings, cpu_num);
+
+        e = netsnmp_entity_create(IDX_LOGICAL_CPU_BASE + cpu_num);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_OTHER;
+        e->parent_idx = IDX_CPU_BASE + pkg;
+        e->is_fru     = TV_FALSE;
+        snprintf(e->name, sizeof(e->name), "cpu%d", cpu_num);
+        snprintf(e->descr, sizeof(e->descr), "Logical CPU %d, core %d.%d",
+                 cpu_num, core, thread_idx);
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d", cpu_num);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
 }
 
 /* ---- Phase 3: DIMM slots via dmidecode ----------------------------------- */
@@ -903,7 +1348,7 @@ _load_memory_fallback(int idx)
 {
     FILE *fp;
     char line[256], descr[128];
-    unsigned long long kb, mib;
+    unsigned long long kb;
     netsnmp_entity_info *e;
 
     fp = fopen("/proc/meminfo", "r");
@@ -922,15 +1367,11 @@ _load_memory_fallback(int idx)
         return;
 
     e->iana_class = IANA_PHYS_OTHER;
-    e->parent_idx = IDX_MEMORY;
+    e->parent_idx = _numa_memory_parent_idx(0);
     e->is_fru     = TV_FALSE;
     strlcpy(e->name, "memory0", sizeof(e->name));
-    strlcpy(e->descr, "System Memory", sizeof(e->descr));
-    if (kb > 0) {
-        mib = (kb + 512) / 1024;
-        snprintf(descr, sizeof(descr), "System Memory (%llu MiB)", mib);
-        strlcpy(e->descr, descr, sizeof(e->descr));
-    }
+    _memory_kb_descr(kb, "System Memory", descr, sizeof(descr));
+    strlcpy(e->descr, descr, sizeof(e->descr));
     strlcpy(e->uris, "file:///proc/meminfo", sizeof(e->uris));
 }
 
@@ -947,13 +1388,16 @@ _load_dimms(void)
     installed = 0;
     e = NULL;
 
-    e = netsnmp_entity_create(IDX_MEMORY);
-    if (e) {
-        e->iana_class = IANA_PHYS_OTHER;
-        e->parent_idx = IDX_BASEBOARD;
-        strlcpy(e->name, "memory", sizeof(e->name));
-        strlcpy(e->descr, "System Memory", sizeof(e->descr));
-        snprintf(e->uris, sizeof(e->uris), "file:///sys/devices/system/memory");
+    if (!_numa_enabled()) {
+        e = netsnmp_entity_create(IDX_MEMORY);
+        if (e) {
+            e->iana_class = IANA_PHYS_OTHER;
+            e->parent_idx = IDX_BASEBOARD;
+            strlcpy(e->name, "memory", sizeof(e->name));
+            strlcpy(e->descr, "System Memory", sizeof(e->descr));
+            snprintf(e->uris, sizeof(e->uris),
+                     "file:///sys/devices/system/memory");
+        }
     }
     e = NULL;
 
@@ -976,7 +1420,7 @@ _load_dimms(void)
             slot++;
             if (e) {
                 e->iana_class = IANA_PHYS_OTHER;
-                e->parent_idx = IDX_MEMORY;
+                e->parent_idx = _numa_memory_parent_idx(0);
                 strlcpy(e->descr, "Memory Device", sizeof(e->descr));
                 snprintf(e->name, sizeof(e->name), "dimm%d", slot - 1);
             }
@@ -1245,15 +1689,13 @@ _pci_class_to_iana(long class_val)
     switch (base) {
     case 0x02:                          /* Network controller */
     case 0x0d:                          /* Wireless controller */
-        return IANA_PHYS_PORT;
+        return IANA_PHYS_MODULE;
     case 0x06:                          /* Bridge */
         if (sub == 0x00)
             return IANA_PHYS_BACKPLANE; /* Host bridge / root complex */
         return IANA_PHYS_CONTAINER;     /* PCI-PCI, CardBus, etc. */
     case 0x0b:                          /* Processor */
         return IANA_PHYS_CPU;
-    case 0x11:                          /* Signal processing (thermal, etc.) */
-        return IANA_PHYS_SENSOR;
     default:
         return IANA_PHYS_MODULE;
     }
@@ -1267,27 +1709,9 @@ _pci_class_is_network(long class_val)
     return base == 0x02 || base == 0x0d;
 }
 
-static int
-_pci_same_slot(const char *a, const char *b)
-{
-    return a && b && strlen(a) >= 10 && strlen(b) >= 10 &&
-        strncmp(a, b, 10) == 0;
-}
-
-static int
-_pci_slot_function_count(char **bdfs, int nbdfs, const char *bdf)
-{
-    int i, count;
-
-    count = 0;
-    for (i = 0; i < nbdfs; i++)
-        if (_pci_same_slot(bdfs[i], bdf))
-            count++;
-    return count;
-}
-
 typedef struct pci_entity_map_s {
     char bdf[16];
+    char key[128];
     int idx;
     char real_path[PATH_MAX];
 } pci_entity_map;
@@ -1332,8 +1756,9 @@ _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
     return parent_idx;
 }
 
-/* Find the deepest PCI device whose realpath is a prefix of `path`.
- * Used to attach non-PCI devices (SCSI disks) to their controller. */
+/* Find the deepest PCI node matching or containing `path`.
+ * Class devices can resolve either to the PCI function itself (net) or to a
+ * child below it (PTP, storage, TPM, etc.). */
 static int
 _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
 {
@@ -1342,9 +1767,10 @@ _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
 
     for (i = 0; i < nmap; i++) {
         int mlen = (int)strlen(map[i].real_path);
-        if (mlen <= best_len || (size_t)mlen >= plen)
+        if (mlen <= best_len || (size_t)mlen > plen)
             continue;
-        if (strncmp(path, map[i].real_path, mlen) == 0 && path[mlen] == '/')  {
+        if (strncmp(path, map[i].real_path, mlen) == 0 &&
+            (path[mlen] == '\0' || path[mlen] == '/')) {
             best_len = mlen;
             best_idx = map[i].idx;
         }
@@ -1660,7 +2086,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], val[256], netpath[512];
+    char path[512], val[256];
     char **bdfs = NULL, **tmp;
     int   nbdfs = 0, cap = 0, i;
     pci_entity_map *map;
@@ -1714,8 +2140,6 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         long         class_val;
         unsigned int vid, did;
         int          idx, slot_idx;
-        DIR         *netdir;
-        struct dirent *nde;
 #ifdef HAVE_PCI_LOOKUP_NAME
         char        *lname;
 #endif
@@ -1736,14 +2160,14 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         if (val[0])
             class_val = strtol(val, NULL, 16);
 
-        if (_pci_class_is_network(class_val) &&
-            _pci_slot_function_count(bdfs, nbdfs, bdfs[i]) > 1) {
-            char key[32];
-
-            snprintf(key, sizeof(key), "pcislot:%.*s", 10, bdfs[i]);
-            slot_idx = _entity_index_alloc(key);
+        if (_pci_class_is_network(class_val)) {
+            snprintf(map[i].key, sizeof(map[i].key), "pcislot:%.*s",
+                     10, bdfs[i]);
+            slot_idx = _entity_index_alloc(map[i].key);
             if (slot_idx > 0)
                 idx = slot_idx;
+        } else {
+            snprintf(map[i].key, sizeof(map[i].key), "pci:%s", bdfs[i]);
         }
 
         map[i].idx = idx;
@@ -1767,6 +2191,9 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
         snprintf(path, sizeof(path), "%s/%s", PCI_PATH, bdfs[i]);
         _append_file_uri(e->uris, sizeof(e->uris), path);
+        if (map[i].real_path[0] && strcmp(map[i].real_path, path) != 0)
+            _append_file_uri(e->uris, sizeof(e->uris), map[i].real_path);
+        _append_uri(e->uris, sizeof(e->uris), map[i].key);
 
         snprintf(path, sizeof(path), "%s/%s/vendor", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
@@ -1867,88 +2294,6 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
             }
         }
 
-        snprintf(netpath, sizeof(netpath), "%s/%s/net", PCI_PATH, bdfs[i]);
-        netdir = opendir(netpath);
-        if (netdir) {
-            netsnmp_entity_info *pci_e = e;
-
-            pci_e->iana_class = IANA_PHYS_MODULE;
-            while ((nde = readdir(netdir))) {
-                netsnmp_entity_info *port;
-                char key[128], ifaddr[64];
-                int ifindex, port_idx;
-
-                if (nde->d_name[0] == '.') continue;
-
-                snprintf(path, sizeof(path), "%s/%s/address",
-                         NET_PATH, nde->d_name);
-                _sysfs_read(path, ifaddr, sizeof(ifaddr));
-                if (ifaddr[0] && strcmp(ifaddr, "00:00:00:00:00:00") != 0)
-                    snprintf(key, sizeof(key), "net:%s", ifaddr);
-                else
-                    snprintf(key, sizeof(key), "net:%s", nde->d_name);
-
-                port_idx = _entity_index_alloc(key);
-                if (port_idx <= 0)
-                    continue;
-
-                port = netsnmp_entity_create(port_idx);
-                if (!port)
-                    continue;
-
-                port->iana_class = IANA_PHYS_PORT;
-                port->is_fru     = TV_FALSE;
-                port->parent_idx = pci_e->idx;
-                strlcpy(port->name, nde->d_name, sizeof(port->name));
-                strlcpy(port->serial, ifaddr, sizeof(port->serial));
-
-                {
-                    char typepath[512];
-                    int arphrd;
-                    const char *ifdescr;
-
-                    snprintf(typepath, sizeof(typepath), "%s/%s/type",
-                             NET_PATH, nde->d_name);
-                    arphrd = _sysfs_read_int(typepath);
-                    ifdescr = _arphrd_descr(arphrd);
-                    if (arphrd == 1 /* ARPHRD_ETHER */) {
-                        snprintf(typepath, sizeof(typepath), "%s/%s/wireless",
-                                 NET_PATH, nde->d_name);
-                        if (access(typepath, F_OK) == 0)
-                            ifdescr = "Wireless interface";
-                    }
-                    strlcpy(port->descr, ifdescr ? ifdescr : nde->d_name,
-                            sizeof(port->descr));
-                }
-
-                snprintf(path, sizeof(path), "%s/%s/ifalias",
-                         NET_PATH, nde->d_name);
-                _sysfs_read(path, port->alias, sizeof(port->alias));
-
-                snprintf(path, sizeof(path), "%s/%s/ifindex",
-                         NET_PATH, nde->d_name);
-                ifindex = _sysfs_read_int(path);
-                if (ifindex > 0) {
-                    port->ifindex = ifindex;
-                    if (!port->alias[0])
-                        snprintf(port->alias, sizeof(port->alias),
-                                 "ifIndex.%d", ifindex);
-                }
-
-                snprintf(path, sizeof(path), "%s/%s", NET_PATH, nde->d_name);
-                _append_file_uri(port->uris, sizeof(port->uris), path);
-                snprintf(path, sizeof(path), "%s/%s/net/%s", PCI_PATH,
-                         bdfs[i], nde->d_name);
-                _append_file_uri(port->uris, sizeof(port->uris), path);
-                _append_uri(port->uris, sizeof(port->uris), key);
-
-                _nic_scan_ethtool(port, nde->d_name,
-                                  IDX_SFP_BASE + 1000 +
-                                  (ifindex > 0 ? ifindex : i));
-            }
-            closedir(netdir);
-        }
-
 free_bdf:
         free(bdfs[i]);
     }
@@ -1966,6 +2311,12 @@ free_bdf:
 
             snprintf(root_bdf, sizeof(root_bdf), "%.4s:00:00.0", map[i].bdf);
             parent_idx = _pci_find_idx(map, nbdfs, root_bdf);
+        }
+        if (!parent_idx) {
+            int node = _numa_pci_node(map[i].bdf);
+
+            if (node >= 0)
+                parent_idx = _numa_node_idx(node);
         }
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
     }
@@ -2061,10 +2412,29 @@ _usb_iana_class(const char *name)
 
     _usb_class_info(name, &cls, NULL, NULL);
     switch (cls) {
-    case 0x08: return IANA_PHYS_STORAGE;    /* Mass Storage */
     case 0x09: return IANA_PHYS_CONTAINER;  /* Hub          */
     default:   return IANA_PHYS_OTHER;
     }
+}
+
+static void
+_usb_speed_descr(const char *speed, char *buf, size_t bufsz)
+{
+    int spd;
+
+    if (bufsz > 0)
+        buf[0] = '\0';
+    if (!speed || !speed[0] || bufsz == 0)
+        return;
+
+    spd = atoi(speed);
+    if (spd <= 0)
+        return;
+
+    if (spd >= 1000 && spd % 1000 == 0)
+        snprintf(buf, bufsz, "%d Gbit/s", spd / 1000);
+    else
+        snprintf(buf, bufsz, "%d Mbit/s", spd);
 }
 
 static int
@@ -2241,8 +2611,8 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
         const char *name = de->d_name;
-        char ver[16], spd_s[16], key[128];
-        int spd, idx, pci_idx, i;
+        char ver[16], spd_s[16], spd_descr[32], key[128];
+        int idx, pci_idx, i;
 
         if (name[0] == '.')
             continue;
@@ -2268,20 +2638,16 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         _sysfs_read(path, ver, sizeof(ver));
         snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
         _sysfs_read(path, spd_s, sizeof(spd_s));
-        spd = spd_s[0] ? atoi(spd_s) : 0;
+        _usb_speed_descr(spd_s, spd_descr, sizeof(spd_descr));
 
         e->iana_class = IANA_PHYS_CONTAINER;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, name, sizeof(e->name));
 
-        if (ver[0] && spd > 0) {
-            if (spd >= 1000)
-                snprintf(e->descr, sizeof(e->descr),
-                         "USB %s host, %d Gbit/s", ver, spd / 1000);
-            else
-                snprintf(e->descr, sizeof(e->descr),
-                         "USB %s host, %d Mbit/s", ver, spd);
+        if (ver[0] && spd_descr[0]) {
+            snprintf(e->descr, sizeof(e->descr), "USB %s host, %s",
+                     ver, spd_descr);
         } else {
             strlcpy(e->descr, "USB host", sizeof(e->descr));
         }
@@ -2304,7 +2670,8 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         netsnmp_entity_info *e;
         const char *name = de->d_name;
         const char *class_descr;
-        char devname[128], speed[64], removable[64], key[128], busnum[16];
+        char devname[128], speed[64], speed_descr[32], removable[64];
+        char key[128], busnum[16];
         int idx, hub_idx;
 
         if (name[0] == '.')
@@ -2342,14 +2709,15 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
 
         snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
         _sysfs_read(path, speed, sizeof(speed));
+        _usb_speed_descr(speed, speed_descr, sizeof(speed_descr));
         snprintf(path, sizeof(path), "%s/%s/removable", USB_PATH, name);
         _sysfs_read(path, removable, sizeof(removable));
         if (strcmp(removable, "removable") == 0)
             e->is_fru = TV_TRUE;
         class_descr = _usb_class_descr(name);
-        if (speed[0])
-            snprintf(e->descr, sizeof(e->descr), "%s, %s Mbit/s",
-                     class_descr, speed);
+        if (speed_descr[0])
+            snprintf(e->descr, sizeof(e->descr), "%s, %s",
+                     class_descr, speed_descr);
         else
             strlcpy(e->descr, class_descr, sizeof(e->descr));
         if (e->is_fru == TV_TRUE)
@@ -2424,10 +2792,7 @@ _load_net_devices(pci_entity_map *pci_map, int pci_map_n)
 
         snprintf(path, sizeof(path), "%s/%s/address", NET_PATH, ifname);
         _sysfs_read(path, address, sizeof(address));
-        if (address[0] && strcmp(address, "00:00:00:00:00:00") != 0)
-            snprintf(key, sizeof(key), "net:%s", address);
-        else
-            snprintf(key, sizeof(key), "net:%s", ifname);
+        snprintf(key, sizeof(key), "net:%s", rp[0] ? rp : ifname);
 
         idx = _entity_index_alloc(key);
         if (idx <= 0)
@@ -2580,7 +2945,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        int idx, pci_idx = 0;
+        int idx, pci_idx = 0, usb_idx = 0;
         const char *p;
         char key[128];
 
@@ -2631,8 +2996,13 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
             if (ata_port > 0 && netsnmp_entity_get_byIdx(IDX_ATA_BASE + ata_port))
                 e->parent_idx = IDX_ATA_BASE + ata_port;
             else {
-                pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
-                e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+                usb_idx = _usb_parent_idx_from_path(rp);
+                if (usb_idx && netsnmp_entity_get_byIdx(usb_idx))
+                    e->parent_idx = usb_idx;
+                else {
+                    pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+                    e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+                }
             }
         }
 
@@ -2700,6 +3070,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
         }
 
         _block_append_uris(e, de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), rp);
         _block_append_stable_key_uris(e, rp, p, key);
     }
     closedir(dir);
@@ -2908,12 +3279,17 @@ _i2cdev_parent_idx_from_path(const char *rp)
 }
 
 static int
-_hwmon_parent_idx(const char *name, const char *rp)
+_hwmon_parent_idx(const char *name, const char *rp,
+                  pci_entity_map *pci_map, int pci_map_n)
 {
     netsnmp_entity_info *parent;
     int parent_idx;
 
     parent_idx = _i2cdev_parent_idx_from_path(rp);
+    if (parent_idx)
+        return parent_idx;
+
+    parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
     if (parent_idx)
         return parent_idx;
 
@@ -2943,7 +3319,7 @@ _hwmon_class(const char *name)
 }
 
 static void
-_load_hwmon(void)
+_load_hwmon(pci_entity_map *pci_map, int pci_map_n)
 {
     static const char *prefixes[] = { "temp", "fan", "in", "curr", "power", "energy", "humidity", NULL };
     DIR *dir;
@@ -3012,7 +3388,8 @@ _load_hwmon(void)
             continue;
 
         e->iana_class = _hwmon_class(chips[ci].name);
-        e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp);
+        e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp,
+                                          pci_map, pci_map_n);
         strlcpy(e->name,  chips[ci].dir, sizeof(e->name));
         strlcpy(e->descr, chips[ci].name, sizeof(e->descr));
         strlcpy(e->model_name, chips[ci].name, sizeof(e->model_name));
@@ -3068,11 +3445,11 @@ _load_hwmon(void)
 /* ---- Phase 8: enrich hwmon power-supply entities from /sys/class/power_supply */
 
 static void
-_load_power_supply(void)
+_load_power_supply(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
     const struct dirent *de;
-    char path[512];
+    char path[512], rp[PATH_MAX];
 
     dir = opendir(PSY_PATH);
     if (!dir)
@@ -3081,6 +3458,8 @@ _load_power_supply(void)
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
         char mfg[128], model[128], serial[64], tech[64], type[32];
+        char key[128];
+        int idx, parent_idx;
 
         if (de->d_name[0] == '.')
             continue;
@@ -3095,8 +3474,32 @@ _load_power_supply(void)
             if (strcmp(e->model_name, de->d_name) == 0)
                 break;
         }
-        if (!e)
-            continue;
+        if (!e) {
+            snprintf(key, sizeof(key), "psy:%s", de->d_name);
+            idx = _entity_index_alloc(key);
+            if (idx <= 0)
+                continue;
+
+            parent_idx = 0;
+            snprintf(path, sizeof(path), "%s/%s/device", PSY_PATH, de->d_name);
+            rp[0] = '\0';
+            if (realpath(path, rp))
+                parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+
+            e = netsnmp_entity_create(idx);
+            if (!e)
+                continue;
+
+            e->iana_class = IANA_PHYS_POWERSUPPLY;
+            e->is_fru     = TV_FALSE;
+            e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+            strlcpy(e->name, de->d_name, sizeof(e->name));
+            _append_uri(e->uris, sizeof(e->uris), key);
+            snprintf(path, sizeof(path), "%s/%s", PSY_PATH, de->d_name);
+            _append_file_uri(e->uris, sizeof(e->uris), path);
+            if (rp[0])
+                _append_file_uri(e->uris, sizeof(e->uris), rp);
+        }
 
         snprintf(path, sizeof(path), "%s/%s/manufacturer", PSY_PATH, de->d_name);
         _sysfs_read(path, mfg, sizeof(mfg));
@@ -3128,11 +3531,11 @@ _load_power_supply(void)
 /* ---- Phase 9: RTC devices ------------------------------------------------- */
 
 static void
-_load_rtc(void)
+_load_rtc(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], val[128];
+    char path[512], rp[PATH_MAX], val[128];
     int idx = IDX_RTC_BASE;
 
     dir = opendir(RTC_PATH);
@@ -3142,6 +3545,7 @@ _load_rtc(void)
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
         char *sp;
+        int parent_idx;
 
         if (strncmp(de->d_name, "rtc", 3) != 0 || !isdigit((unsigned char)de->d_name[3]))
             continue;
@@ -3150,8 +3554,15 @@ _load_rtc(void)
         if (!e)
             continue;
 
+        snprintf(path, sizeof(path), "%s/%s", RTC_PATH, de->d_name);
+        rp[0] = '\0';
+        if (realpath(path, rp))
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        else
+            parent_idx = 0;
+
         e->iana_class = IANA_PHYS_MODULE;
-        e->parent_idx = IDX_BASEBOARD;
+        e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
 
         snprintf(path, sizeof(path), "%s/%s/name", RTC_PATH, de->d_name);
@@ -3170,7 +3581,12 @@ _load_rtc(void)
             strlcpy(e->model_name, de->d_name, sizeof(e->model_name));
         }
 
-        snprintf(e->uris, sizeof(e->uris), "file://%s/%s", RTC_PATH, de->d_name);
+        snprintf(path, sizeof(path), "%s/%s", RTC_PATH, de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        if (rp[0])
+            _append_file_uri(e->uris, sizeof(e->uris), rp);
+        snprintf(path, sizeof(path), "rtc:%s", de->d_name);
+        _append_uri(e->uris, sizeof(e->uris), path);
     }
     closedir(dir);
 }
@@ -3502,7 +3918,7 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
         if (!e)
             continue;
 
-        e->iana_class = IANA_PHYS_MODULE;
+        e->iana_class = IANA_PHYS_OTHER;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
@@ -3705,6 +4121,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
         while ((dev_de = readdir(dev_dir)) != NULL) {
             netsnmp_entity_info *ce;
             char child_path[512], child_rp[PATH_MAX];
+            char child_name[128], modalias[128], driver[128];
             int child_idx, child_bus, addr;
 
             if (sscanf(dev_de->d_name, "%d-%x", &child_bus, &addr) != 2)
@@ -3716,6 +4133,17 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
                      I2C_DEV_PATH, de->d_name, dev_de->d_name);
             if (!realpath(child_path, child_rp))
                 strlcpy(child_rp, child_path, sizeof(child_rp));
+
+            snprintf(path, sizeof(path), "%s/name", child_rp);
+            _sysfs_read(path, child_name, sizeof(child_name));
+            snprintf(path, sizeof(path), "%s/modalias", child_rp);
+            _sysfs_read(path, modalias, sizeof(modalias));
+            snprintf(path, sizeof(path), "%s/uevent", child_rp);
+            _sysfs_read_key(path, "DRIVER", driver, sizeof(driver));
+            if (strcmp(child_name, "dummy") == 0 ||
+                strcmp(modalias, "i2c:dummy") == 0 ||
+                strcmp(driver, "dummy") == 0)
+                continue;
 
             snprintf(key, sizeof(key), "i2cdev:%s", dev_de->d_name);
             child_idx = _entity_index_alloc(key);
@@ -3731,11 +4159,9 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
             ce->parent_idx = idx;
             strlcpy(ce->name, dev_de->d_name, sizeof(ce->name));
 
-            snprintf(path, sizeof(path), "%s/name", child_rp);
-            _sysfs_read(path, val, sizeof(val));
-            if (val[0]) {
-                strlcpy(ce->descr, val, sizeof(ce->descr));
-                strlcpy(ce->model_name, val, sizeof(ce->model_name));
+            if (child_name[0]) {
+                strlcpy(ce->descr, child_name, sizeof(ce->descr));
+                strlcpy(ce->model_name, child_name, sizeof(ce->model_name));
             } else {
                 strlcpy(ce->descr, "I2C device", sizeof(ce->descr));
             }
@@ -4175,6 +4601,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _entity_index_alloc_load();
 
     _load_dmi();
+    _load_numa_nodes();
     _load_cpus();
     _load_caches();
     _load_dimms();
@@ -4186,16 +4613,17 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_mmc_disks(pci_map, pci_map_n);
     _load_nvme(pci_map, pci_map_n);
     _load_i2c(pci_map, pci_map_n);
-    _load_hwmon();
-    _load_power_supply();
+    _load_hwmon(pci_map, pci_map_n);
+    _load_power_supply(pci_map, pci_map_n);
     _load_ptp(pci_map, pci_map_n);
     _load_tpm(pci_map, pci_map_n);
     _load_input(pci_map, pci_map_n);
     _load_graphics(pci_map, pci_map_n);
     _load_gpio(pci_map, pci_map_n);
-    _load_rtc();
+    _load_rtc(pci_map, pci_map_n);
 
     free(pci_map);
+    _numa_fix_top_level_parents();
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
     netsnmp_entity_logical_load();

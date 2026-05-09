@@ -107,6 +107,29 @@ rows, logical rows, and alias rows. It also computes a hash of the loaded entity
 data. If the hash changed, it updates `entLastChangeTime` and writes persistent
 state.
 
+## Linux Discovery Model
+
+Linux discovery treats `/sys/devices` realpaths as the hardware topology source.
+Bus and class directories are used as views onto that topology:
+
+- PCI devices are discovered from `/sys/bus/pci/devices` and form the parent map.
+- PCI network functions use a slot-level key, `pcislot:<domain:bus:device>`, so
+  multi-function NICs appear as one adapter/module.
+- Network ports are emitted from `/sys/class/net` and parented to the matching
+  PCI adapter through the class device realpath.
+- PTP clocks, hwmon chips, power supplies, GPIO controllers, I2C buses, graphics
+  devices, TPMs, and RTCs also parent through PCI realpath matching when their
+  sysfs topology exposes a PCI ancestor.
+- USB, block devices, and input devices intentionally keep their existing
+  discovery paths for now.
+
+Useful validation commands while changing Linux discovery:
+
+```sh
+make agent/mibgroup/hardware/entity/data_access/entity_linux.lo
+make -f entity_subagent.mk entity_subagent
+```
+
 Persistent state file:
 
 ```text
