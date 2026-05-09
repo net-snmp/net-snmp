@@ -111,6 +111,97 @@ _entity_list_hash(void)
     return h;
 }
 
+static void
+_entity_list_clone_free(netsnmp_entity_info *head)
+{
+    netsnmp_entity_info *e, *next;
+
+    for (e = head; e; e = next) {
+        next = e->next;
+        SNMP_FREE(e);
+    }
+}
+
+static netsnmp_entity_info *
+_entity_list_clone(void)
+{
+    netsnmp_entity_info *src, *copy, *head = NULL, *tail = NULL;
+
+    for (src = netsnmp_entity_get_first(); src;
+         src = netsnmp_entity_get_next(src)) {
+        copy = SNMP_MALLOC_TYPEDEF(netsnmp_entity_info);
+        if (!copy) {
+            _entity_list_clone_free(head);
+            return NULL;
+        }
+        memcpy(copy, src, sizeof(*copy));
+        copy->next = NULL;
+
+        if (tail)
+            tail->next = copy;
+        else
+            head = copy;
+        tail = copy;
+    }
+
+    return head;
+}
+
+static netsnmp_entity_info *
+_entity_list_find_idx(netsnmp_entity_info *head, int idx)
+{
+    netsnmp_entity_info *e;
+
+    for (e = head; e; e = e->next) {
+        if (e->idx == idx)
+            return e;
+        if (e->idx > idx)
+            return NULL;
+    }
+    return NULL;
+}
+
+static void
+_log_entity_device_change(const char *action, const netsnmp_entity_info *e)
+{
+    snmp_log(LOG_INFO,
+             "entity: %s device index=%d class=%d name=\"%s\" descr=\"%s\"\n",
+             action, e->idx, e->iana_class, e->name, e->descr);
+}
+
+static void
+_log_entity_topology_diff(netsnmp_entity_info *old_entities,
+                          uint32_t hash_before, uint32_t hash_after)
+{
+    netsnmp_entity_info *e;
+    int added = 0, removed = 0;
+
+    if (!old_entities) {
+        snmp_log(LOG_NOTICE,
+                 "entity: hardware topology changed (%08x -> %08x)\n",
+                 (unsigned)hash_before, (unsigned)hash_after);
+        return;
+    }
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e))
+        if (!_entity_list_find_idx(old_entities, e->idx))
+            added++;
+    for (e = old_entities; e; e = e->next)
+        if (!netsnmp_entity_get_byIdx(e->idx))
+            removed++;
+
+    snmp_log(LOG_NOTICE,
+             "entity: hardware topology changed (%08x -> %08x): %d added, %d removed\n",
+             (unsigned)hash_before, (unsigned)hash_after, added, removed);
+
+    for (e = old_entities; e; e = e->next)
+        if (!netsnmp_entity_get_byIdx(e->idx))
+            _log_entity_device_change("removed", e);
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e))
+        if (!_entity_list_find_idx(old_entities, e->idx))
+            _log_entity_device_change("added", e);
+}
+
 /* Map a string key to a free slot in a linear-probe hash table of `buckets`
  * entries.  `used` is a caller-allocated zero-initialised char array of size
  * `buckets`.  Returns the slot index, or -1 when the table is full. */
@@ -4546,8 +4637,71 @@ _alias_lm_sensors(void)
 /* ---- Persistent hash and last-change time -------------------------------- */
 
 #define ENTITY_STATE_FILE "entity_state"
+#define ENTITY_CONFIG_CHANGE_THROTTLE 5
 
 static uint32_t _saved_hash = 0;
+static time_t _last_config_change_notify = 0;
+static unsigned int _config_change_alarm = 0;
+static int _config_change_pending = 0;
+
+static void
+_send_ent_config_change(void)
+{
+    static oid snmptrap_oid[] = { 1,3,6,1,6,3,1,1,4,1,0 };
+    static oid ent_config_change_oid[] = { 1,3,6,1,2,1,47,2,0,1 };
+    netsnmp_variable_list *vars = NULL;
+
+    snmp_varlist_add_variable(&vars,
+                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
+                              ASN_OBJECT_ID,
+                              (u_char *)ent_config_change_oid,
+                              sizeof(ent_config_change_oid));
+    send_v2trap(vars);
+    snmp_free_varbind(vars);
+    _last_config_change_notify = time(NULL);
+}
+
+static void
+_send_pending_ent_config_change(unsigned int clientreg, void *clientarg)
+{
+    (void)clientreg;
+    (void)clientarg;
+
+    _config_change_alarm = 0;
+    if (!_config_change_pending)
+        return;
+
+    _config_change_pending = 0;
+    _send_ent_config_change();
+}
+
+static void
+_notify_ent_config_change(void)
+{
+    time_t now, notify_at;
+    unsigned int wait;
+
+    now = time(NULL);
+    notify_at = _last_config_change_notify + ENTITY_CONFIG_CHANGE_THROTTLE;
+
+    if (_last_config_change_notify == 0 || now >= notify_at) {
+        _config_change_pending = 0;
+        _send_ent_config_change();
+        return;
+    }
+
+    _config_change_pending = 1;
+    if (_config_change_alarm != 0)
+        return;
+
+    wait = (unsigned int)(notify_at - now);
+    if (wait == 0)
+        wait = 1;
+    _config_change_alarm = snmp_alarm_register(
+        wait, 0, _send_pending_ent_config_change, NULL);
+    if (_config_change_alarm == 0)
+        snmp_log(LOG_ERR, "entity: cannot schedule entConfigChange notification\n");
+}
 
 static void
 _read_entity_state(void)
@@ -4594,6 +4748,7 @@ int
 netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
     pci_entity_map *pci_map = NULL;
+    netsnmp_entity_info *old_entities = NULL;
     int pci_map_n = 0;
     uint32_t hash_before, hash_after;
     static int first_load = 1;
@@ -4604,6 +4759,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
         first_load  = 0;
     } else {
         hash_before = _entity_list_hash();
+        old_entities = _entity_list_clone();
     }
     netsnmp_entity_free_list();
     _entity_index_alloc_load();
@@ -4644,10 +4800,14 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     if (hash_after != hash_before) {
         entity_last_change = (u_long)time(NULL);
         _saved_hash        = hash_after;
+        _log_entity_topology_diff(old_entities, hash_before, hash_after);
+        _notify_ent_config_change();
         _write_entity_state();
     }
     if (hash_after != hash_before || _idx_alloc_dirty)
         _entity_indexes_write();
+
+    _entity_list_clone_free(old_entities);
 
     return 0;
 }
