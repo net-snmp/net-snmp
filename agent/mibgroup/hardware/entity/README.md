@@ -11,6 +11,29 @@ It maintains one cached list of physical entities and uses that list to serve:
 - `entAliasMappingTable`
 - `entLastChangeTime`
 
+Current limitations:
+
+- `entPhysicalAlias` and `entPhysicalAssetID` are exposed as read-only values.
+  ENTITY-MIB defines these columns as writable, but SET handling and persistence
+  for operator-provided values are not implemented yet.
+- `entLogicalTAddress` and `entLogicalTDomain` do not try to infer a listening
+  transport endpoint. The module reports an empty address and `zeroDotZero`
+  domain instead of publishing a guessed UDP/161 endpoint that may be wrong for
+  AgentX, random test ports, IPv6, TCP, or multi-homed agents.
+
+## Configuration
+
+The module supports this `snmpd.conf` token:
+
+```text
+entitySensitiveData yes|no
+```
+
+The default is `yes`, preserving the full ENTITY-MIB view. Set it to `no` to
+return empty values for potentially identifying fields exposed through SNMP:
+`entPhysicalSerialNum`, `entPhysicalAlias`, `entPhysicalAssetID`,
+`entPhysicalUris`, and `entPhysicalUUID`.
+
 ## Data Model
 
 Physical rows are represented by `netsnmp_entity_info` in `entity.h`.
@@ -93,8 +116,9 @@ The agent also writes:
 <persistentDir>/entity_state
 ```
 
-which stores the last entity-list hash and `entLastChangeTime` timestamp across
-restarts.
+which stores the last entity-list hash across restarts. `entLastChangeTime` is a
+`sysUpTime` TimeStamp and is not persisted because `sysUpTime` resets when the
+agent restarts.
 
 ## Cache Loading
 
@@ -104,8 +128,8 @@ before walking data.
 
 On Linux, `netsnmp_entity_arch_load()` rebuilds the physical list, contains
 rows, logical rows, and alias rows. It also computes a hash of the loaded entity
-data. If the hash changed, it updates `entLastChangeTime` and writes persistent
-state.
+data. If the hash changed, it updates `entLastChangeTime` to the current
+`sysUpTime` and writes persistent state.
 
 ## Linux Discovery Model
 

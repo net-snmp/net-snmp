@@ -1,7 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/library/system.h>
 #include <net-snmp/library/snmpv3.h>
 #include "entity.h"
 
@@ -18,9 +17,27 @@ static int                              _alias_cap = 0;
 static netsnmp_entity_logical_row      *_log_head = NULL;
 
 u_long entity_last_change = 0;
+int netsnmp_entity_sensitive_data = 1;
 
 static oid _ent_oid[] = { 1, 3, 6, 1, 2, 1, 47 };
 
+static void
+_parse_entity_sensitive_data(const char *token, char *line)
+{
+    if (strcmp(line, "yes") == 0 || strcmp(line, "y") == 0 ||
+        strcmp(line, "true") == 0 || strcmp(line, "1") == 0) {
+        netsnmp_entity_sensitive_data = 1;
+        return;
+    }
+    if (strcmp(line, "no") == 0 || strcmp(line, "n") == 0 ||
+        strcmp(line, "false") == 0 || strcmp(line, "0") == 0) {
+        netsnmp_entity_sensitive_data = 0;
+        return;
+    }
+
+    snmp_log(LOG_ERR, "Invalid value of entitySensitiveData parameter: '%s'\n",
+             line);
+}
 
 static int _cmp_contains(const void *a, const void *b)
 {
@@ -206,6 +223,10 @@ _entity_cache_free(netsnmp_cache *cache, void *magic)
 
 void init_entity(void)
 {
+    snmpd_register_config_handler("entitySensitiveData",
+                                  _parse_entity_sensitive_data, NULL,
+                                  "entitySensitiveData yes|no");
+
     _ent_cache = netsnmp_cache_create(300,
                                       netsnmp_entity_arch_load,
                                       _entity_cache_free,
@@ -217,6 +238,7 @@ void init_entity(void)
 
 void shutdown_entity(void)
 {
+    snmpd_unregister_config_handler("entitySensitiveData");
     netsnmp_entity_free_list();
     netsnmp_entity_logical_free_list();
     SNMP_FREE(_contains);
@@ -423,13 +445,10 @@ void netsnmp_entity_logical_free_list(void)
  */
 void netsnmp_entity_logical_load(void)
 {
-    /* snmpUDPDomain: 1.3.6.1.6.1.1 */
-    static const oid _udp_domain[] = { 1,3,6,1,6,1,1 };
     /* zeroDotZero */
     static const oid _zero_dot_zero[] = { 0,0 };
 
     netsnmp_entity_logical_row *r;
-    in_addr_t myaddr;
 
     netsnmp_entity_logical_free_list();
 
@@ -442,15 +461,9 @@ void netsnmp_entity_logical_load(void)
     memcpy(r->type_oid, _zero_dot_zero, sizeof(_zero_dot_zero));
     r->type_oid_len = OID_LENGTH(_zero_dot_zero);
 
-    memcpy(r->tdomain, _udp_domain, sizeof(_udp_domain));
-    r->tdomain_len = OID_LENGTH(_udp_domain);
-
-    /* TAddress for snmpUDPDomain: 4-byte IPv4 + 2-byte port (big-endian) */
-    myaddr = get_myaddr();  /* returns address in network byte order */
-    memcpy(r->taddress, &myaddr, 4);
-    r->taddress[4] = 0;    /* port 161 high byte */
-    r->taddress[5] = 161;  /* port 161 low byte  */
-    r->taddress_len = 6;
+    memcpy(r->tdomain, _zero_dot_zero, sizeof(_zero_dot_zero));
+    r->tdomain_len = OID_LENGTH(_zero_dot_zero);
+    r->taddress_len = 0;
 
     r->context_engine_id_len =
         snmpv3_get_engineID(r->context_engine_id,

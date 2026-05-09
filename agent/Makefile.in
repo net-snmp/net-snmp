@@ -349,7 +349,9 @@ mibgroup/hardware/entity/entity.lo: mibgroup/hardware/entity/entity.h
 mibgroup/hardware/entity/entPhysicalTable.lo: mibgroup/hardware/entity/entity.h
 mibgroup/hardware/entity/entAliasMappingTable.lo: mibgroup/hardware/entity/entity.h
 mibgroup/hardware/entity/entLastChangeTime.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/entLogicalTable.lo: mibgroup/hardware/entity/entity.h
 mibgroup/hardware/entity/data_access/entity_linux.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/data_access/entity_null.lo: mibgroup/hardware/entity/entity.h
 
 #
 # dependency for snmplib object. it's here because the headers listed

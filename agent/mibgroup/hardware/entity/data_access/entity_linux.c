@@ -2230,7 +2230,8 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
 #ifdef HAVE_PCI_LOOKUP_NAME
     pacc = pci_alloc();
-    pci_init(pacc);
+    if (pacc)
+        pci_init(pacc);
 #endif
 
     for (i = 0; i < nbdfs; i++) {
@@ -2305,9 +2306,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         /* Vendor name */
         if (vid) {
 #ifdef HAVE_PCI_LOOKUP_NAME
-            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
-                                    PCI_LOOKUP_VENDOR | PCI_LOOKUP_NO_NUMBERS,
-                                    vid);
+            lname = pacc ? pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                           PCI_LOOKUP_VENDOR |
+                                           PCI_LOOKUP_NO_NUMBERS,
+                                           vid) : NULL;
             if (lname && lname[0])
                 strlcpy(e->mfg_name, lname, sizeof(e->mfg_name));
             else
@@ -2318,9 +2320,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         /* Device / product name */
         if (vid && did) {
 #ifdef HAVE_PCI_LOOKUP_NAME
-            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
-                                    PCI_LOOKUP_DEVICE | PCI_LOOKUP_NO_NUMBERS,
-                                    vid, did);
+            lname = pacc ? pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                           PCI_LOOKUP_DEVICE |
+                                           PCI_LOOKUP_NO_NUMBERS,
+                                           vid, did) : NULL;
             if (lname && lname[0])
                 strlcpy(e->model_name, lname, sizeof(e->model_name));
             else
@@ -2333,9 +2336,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
             const char *descr = NULL;
 #ifdef HAVE_PCI_LOOKUP_NAME
             int cls_sub = (int)((class_val >> 8) & 0xFFFF);
-            lname = pci_lookup_name(pacc, namebuf, sizeof(namebuf),
-                                    PCI_LOOKUP_CLASS | PCI_LOOKUP_NO_NUMBERS,
-                                    cls_sub);
+            lname = pacc ? pci_lookup_name(pacc, namebuf, sizeof(namebuf),
+                                           PCI_LOOKUP_CLASS |
+                                           PCI_LOOKUP_NO_NUMBERS,
+                                           cls_sub) : NULL;
             if (lname) {
                 /* trim libpci result — some builds return whitespace on miss */
                 while (*lname == ' ' || *lname == '\t')
@@ -2419,7 +2423,8 @@ free_bdf:
     }
 
 #ifdef HAVE_PCI_LOOKUP_NAME
-    pci_cleanup(pacc);
+    if (pacc)
+        pci_cleanup(pacc);
 #endif
 
     *map_out = map;
@@ -4708,7 +4713,6 @@ _read_entity_state(void)
 {
     char path[512];
     unsigned int h = 0;
-    unsigned long t = 0;
     FILE *f;
 
     snprintf(path, sizeof(path), "%s/%s",
@@ -4716,10 +4720,8 @@ _read_entity_state(void)
     f = fopen(path, "r");
     if (!f)
         return;
-    if (fscanf(f, "%x %lu", &h, &t) == 2) {
-        _saved_hash        = (uint32_t)h;
-        entity_last_change = (u_long)t;
-    }
+    if (fscanf(f, "%x", &h) == 1)
+        _saved_hash = (uint32_t)h;
     fclose(f);
 }
 
@@ -4737,8 +4739,7 @@ _write_entity_state(void)
                  path, strerror(errno));
         return;
     }
-    fprintf(f, "%08x %lu\n", (unsigned)_saved_hash,
-            (unsigned long)entity_last_change);
+    fprintf(f, "%08x\n", (unsigned)_saved_hash);
     fclose(f);
 }
 
@@ -4798,7 +4799,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 
     hash_after = _entity_list_hash();
     if (hash_after != hash_before) {
-        entity_last_change = (u_long)time(NULL);
+        entity_last_change = netsnmp_get_agent_uptime();
         _saved_hash        = hash_after;
         _log_entity_topology_diff(old_entities, hash_before, hash_after);
         _notify_ent_config_change();

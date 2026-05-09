@@ -64,6 +64,7 @@ typedef struct {
 } netsnmp_entity_alias_row;
 
 extern u_long entity_last_change;
+extern int    netsnmp_entity_sensitive_data;
 
 netsnmp_cache *netsnmp_entity_get_cache(void);
 

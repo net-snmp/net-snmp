@@ -126,7 +126,10 @@ _phys_handler(netsnmp_mib_handler *handler,
             break;
         case COL_SERIAL:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     (u_char *)e->serial, strlen(e->serial));
+                                     netsnmp_entity_sensitive_data ?
+                                     (u_char *)e->serial : _empty_string,
+                                     netsnmp_entity_sensitive_data ?
+                                     strlen(e->serial) : 0);
             break;
         case COL_MFGNAME:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
@@ -139,12 +142,17 @@ _phys_handler(netsnmp_mib_handler *handler,
             break;
         case COL_ALIAS:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     (u_char *)e->alias, strlen(e->alias));
+                                     netsnmp_entity_sensitive_data ?
+                                     (u_char *)e->alias : _empty_string,
+                                     netsnmp_entity_sensitive_data ?
+                                     strlen(e->alias) : 0);
             break;
         case COL_ASSETID:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     (u_char *)e->asset_id,
-                                     strlen(e->asset_id));
+                                     netsnmp_entity_sensitive_data ?
+                                     (u_char *)e->asset_id : _empty_string,
+                                     netsnmp_entity_sensitive_data ?
+                                     strlen(e->asset_id) : 0);
             break;
         case COL_ISFRU:
             snmp_set_var_typed_integer(req->requestvb, ASN_INTEGER, e->is_fru);
@@ -155,11 +163,17 @@ _phys_handler(netsnmp_mib_handler *handler,
             break;
         case COL_URIS:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     (u_char *)e->uris, strlen(e->uris));
+                                     netsnmp_entity_sensitive_data ?
+                                     (u_char *)e->uris : _empty_string,
+                                     netsnmp_entity_sensitive_data ?
+                                     strlen(e->uris) : 0);
             break;
         case COL_UUID:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     e->uuid, e->uuid_len);
+                                     netsnmp_entity_sensitive_data ? e->uuid :
+                                     _empty_string,
+                                     netsnmp_entity_sensitive_data ?
+                                     e->uuid_len : 0);
             break;
         default:
             netsnmp_set_request_error(reqinfo, req, SNMP_NOSUCHOBJECT);

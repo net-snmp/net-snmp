@@ -5,7 +5,7 @@
 #   With no args, runs all supported modes.
 #   With args, runs only the listed modes.
 # Full output is logged to /tmp/net-snmp-ci/<mode>.log.
-# Only warnings/errors are printed to the terminal.
+# Progress, warnings, errors, and periodic heartbeats are printed to the terminal.
 
 set -euo pipefail
 
@@ -45,11 +45,48 @@ if ${need_build}; then
     touch "${SENTINEL}"
 fi
 
-# Lines that are worth showing even on a passing build
-WARN_RE='warning:|error:|fatal error:|undefined reference|configure: error|Makefile:[0-9].*Error'
+# Lines that are worth showing even on a passing build/test run.
+WARN_RE='warning:|error:|fatal error:|undefined reference|configure: error|Makefile:[0-9].*Error|not ok|Dubious|Failed|Result: FAIL'
+PROGRESS_RE='^(Making |make[[][0-9]+[]]: (Entering|Leaving)|[[:space:]]*(CC|CCLD|CXX|CXXLD|LD|AR|GEN|YACC|LEX|RANLIB)[[:space:]])|^configure: (creating|WARNING|error)|^PASS |^FAIL |^ok |^not ok |^Result:|^Files='
+HEARTBEAT_SECONDS=30
 
 ts() { date '+%H:%M:%S'; }
-log_ts() { while IFS= read -r line; do printf '[%s] %s\n' "$(ts)" "${line}"; done; }
+
+filtered_run() {
+    local log="$1"
+    local rc_file
+
+    shift
+    rc_file=$(mktemp)
+    : > "${log}"
+
+    ( "$@"; printf '%s\n' "$?" > "${rc_file}" ) 2>&1 \
+        | awk -v warn_re="${WARN_RE}" \
+              -v progress_re="${PROGRESS_RE}" \
+              -v heartbeat="${HEARTBEAT_SECONDS}" \
+              -v logfile="${log}" '
+            BEGIN { IGNORECASE = 1; last = systime() }
+            {
+                line = strftime("[%H:%M:%S] ") $0
+                print line >> logfile
+                fflush(logfile)
+
+                if ($0 ~ warn_re || $0 ~ progress_re) {
+                    print line
+                    fflush()
+                    last = systime()
+                } else if (heartbeat > 0 && systime() - last >= heartbeat) {
+                    print strftime("[%H:%M:%S]"), "... still running (log:", logfile ")"
+                    fflush()
+                    last = systime()
+                }
+            }' || true
+
+    local rc
+    rc=$(cat "${rc_file}")
+    rm -f "${rc_file}"
+    return "${rc}"
+}
 
 pass=()
 fail=()
@@ -58,14 +95,13 @@ RUN_START=$(date '+%Y-%m-%dT%H:%M:%S')
 for mode in "${MODES[@]}"; do
     log="${LOG_DIR}/${mode}.log"
     mode_start=$(date +%s)
-    printf "  [%s] %-20s" "$(ts)" "${mode} ..."
+    printf '==> %s  (log: %s)\n' "${mode}" "${log}"
 
-    if docker run --rm \
+    if filtered_run "${log}" docker run --rm \
         -v "${REPO_ROOT}:/src:ro" \
         -e "MODE=${mode}" \
         "${IMAGE}" \
-        bash -c 'rsync -a --filter=":- .gitignore" --exclude=".git/" /src/ /build/ && cd /build && ci/build.sh' \
-        2>&1 | log_ts > "${log}"; then
+        bash -c 'rsync -a --filter=":- .gitignore" --exclude=".git/" /src/ /build/ && cd /build && ci/build.sh && ci/test.sh'; then
 
         elapsed=$(( $(date +%s) - mode_start ))
         # Scan log for warnings even on success
