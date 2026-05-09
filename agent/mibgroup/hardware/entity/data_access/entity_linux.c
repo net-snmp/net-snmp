@@ -909,7 +909,8 @@ static void
 _memory_kb_descr(unsigned long long kb, const char *prefix,
                  char *buf, size_t bufsz)
 {
-    unsigned long long mib, gib10;
+    unsigned long long mib, unit_mib, scaled10;
+    const char *suffix;
 
     if (bufsz > 0)
         buf[0] = '\0';
@@ -922,12 +923,25 @@ _memory_kb_descr(unsigned long long kb, const char *prefix,
     }
 
     mib = (kb + 512) / 1024;
-    gib10 = (mib * 10 + 512) / 1024;
-    if (gib10 >= 10)
-        snprintf(buf, bufsz, "%s (%llu.%llu GiB, %llu MiB)", prefix,
-                 gib10 / 10, gib10 % 10, mib);
-    else
+    if (mib < 1024) {
         snprintf(buf, bufsz, "%s (%llu MiB)", prefix, mib);
+        return;
+    }
+
+    if (mib >= 1024ULL * 1024ULL * 1024ULL) {
+        unit_mib = 1024ULL * 1024ULL * 1024ULL;
+        suffix = "PiB";
+    } else if (mib >= 1024ULL * 1024ULL) {
+        unit_mib = 1024ULL * 1024ULL;
+        suffix = "TiB";
+    } else {
+        unit_mib = 1024ULL;
+        suffix = "GiB";
+    }
+
+    scaled10 = (mib * 10 + unit_mib / 2) / unit_mib;
+    snprintf(buf, bufsz, "%s (%llu.%llu %s)", prefix,
+             scaled10 / 10, scaled10 % 10, suffix);
 }
 
 static int
@@ -1343,17 +1357,16 @@ _load_cpus(void)
 
 /* ---- Phase 3: DIMM slots via dmidecode ----------------------------------- */
 
-static void
-_load_memory_fallback(int idx)
+static unsigned long long
+_proc_memtotal_kb(void)
 {
     FILE *fp;
-    char line[256], descr[128];
+    char line[256];
     unsigned long long kb;
-    netsnmp_entity_info *e;
 
     fp = fopen("/proc/meminfo", "r");
     if (!fp)
-        return;
+        return 0;
 
     kb = 0;
     while (fgets(line, sizeof(line), fp)) {
@@ -1361,18 +1374,7 @@ _load_memory_fallback(int idx)
             break;
     }
     fclose(fp);
-
-    e = netsnmp_entity_create(idx);
-    if (!e)
-        return;
-
-    e->iana_class = IANA_PHYS_OTHER;
-    e->parent_idx = _numa_memory_parent_idx(0);
-    e->is_fru     = TV_FALSE;
-    strlcpy(e->name, "memory0", sizeof(e->name));
-    _memory_kb_descr(kb, "System Memory", descr, sizeof(descr));
-    strlcpy(e->descr, descr, sizeof(e->descr));
-    strlcpy(e->uris, "file:///proc/meminfo", sizeof(e->uris));
+    return kb;
 }
 
 static void
@@ -1391,21 +1393,24 @@ _load_dimms(void)
     if (!_numa_enabled()) {
         e = netsnmp_entity_create(IDX_MEMORY);
         if (e) {
+            char descr[128];
+
             e->iana_class = IANA_PHYS_OTHER;
             e->parent_idx = IDX_BASEBOARD;
             strlcpy(e->name, "memory", sizeof(e->name));
-            strlcpy(e->descr, "System Memory", sizeof(e->descr));
+            _memory_kb_descr(_proc_memtotal_kb(), "System Memory",
+                             descr, sizeof(descr));
+            strlcpy(e->descr, descr, sizeof(e->descr));
             snprintf(e->uris, sizeof(e->uris),
-                     "file:///sys/devices/system/memory");
+                      "file:///sys/devices/system/memory");
+            _append_file_uri(e->uris, sizeof(e->uris), "/proc/meminfo");
         }
     }
     e = NULL;
 
     fp = popen("dmidecode -t memory 2>/dev/null", "r");
-    if (!fp) {
-        _load_memory_fallback(IDX_DIMM_BASE);
+    if (!fp)
         return;
-    }
 
     while (fgets(buf, sizeof(buf), fp)) {
         char *nl;
@@ -1466,8 +1471,6 @@ _load_dimms(void)
         }
     }
     pclose(fp);
-    if (installed == 0)
-        _load_memory_fallback(IDX_DIMM_BASE + slot);
 }
 
 /* ---- Phase 4: CPU caches ------------------------------------------------- */
@@ -1477,7 +1480,7 @@ _load_caches(void)
 {
     DIR *cpu_dir, *cache_dir;
     const struct dirent *cpu_de, *cache_de;
-    char path[512], val[64];
+    char path[512], pkg_id[64], level_s[64];
     int seen_pkg[64];
 
     memset(seen_pkg, 0, sizeof(seen_pkg));
@@ -1496,10 +1499,10 @@ _load_caches(void)
         snprintf(path, sizeof(path),
                  "/sys/devices/system/cpu/%s/topology/physical_package_id",
                  cpu_de->d_name);
-        _sysfs_read(path, val, sizeof(val));
-        if (!val[0])
+        _sysfs_read(path, pkg_id, sizeof(pkg_id));
+        if (!pkg_id[0])
             continue;
-        phys_id = atoi(val);
+        phys_id = atoi(pkg_id);
         if (phys_id < 0 || phys_id >= 64 || seen_pkg[phys_id])
             continue;
         seen_pkg[phys_id] = 1;
@@ -1519,11 +1522,10 @@ _load_caches(void)
                 continue;
 
             snprintf(path, sizeof(path), "%s/%s/level", cache_path, cache_de->d_name);
-            _sysfs_read(path, val, sizeof(val));
-            // cppcheck-suppress identicalConditionAfterEarlyExit
-            if (!val[0])
+            _sysfs_read(path, level_s, sizeof(level_s));
+            if (!level_s[0])
                 continue;
-            level = atoi(val);
+            level = atoi(level_s);
 
             snprintf(path, sizeof(path), "%s/%s/type", cache_path, cache_de->d_name);
             _sysfs_read(path, type, sizeof(type));
@@ -1778,65 +1780,64 @@ _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
     return best_idx;
 }
 
-/* Ordered by bit index (matches ethtool output order).
+/* Ordered highest speed first so truncated descriptions keep the best modes.
  * Sentinel: bit == -1.  Works with both ETHTOOL_GLINKSETTINGS and the
  * legacy ETHTOOL_GSET fallback (bits 0-30 fit in the u32 supported field). */
 static const struct { int bit; const char *name; } _nic_link_modes[] = {
-    { ETHTOOL_LINK_MODE_10baseT_Half_BIT,             "10baseT/Half"          },
-    { ETHTOOL_LINK_MODE_10baseT_Full_BIT,             "10baseT/Full"          },
-    { ETHTOOL_LINK_MODE_100baseT_Half_BIT,            "100baseT/Half"         },
-    { ETHTOOL_LINK_MODE_100baseT_Full_BIT,            "100baseT/Full"         },
-    { ETHTOOL_LINK_MODE_1000baseT_Half_BIT,           "1000baseT/Half"        },
-    { ETHTOOL_LINK_MODE_1000baseT_Full_BIT,           "1000baseT/Full"        },
-    { ETHTOOL_LINK_MODE_10000baseT_Full_BIT,          "10000baseT/Full"       },
-    { ETHTOOL_LINK_MODE_2500baseX_Full_BIT,           "2500baseX/Full"        },
-    { ETHTOOL_LINK_MODE_1000baseKX_Full_BIT,          "1000baseKX/Full"       },
-    { ETHTOOL_LINK_MODE_10000baseKX4_Full_BIT,        "10000baseKX4/Full"     },
-    { ETHTOOL_LINK_MODE_10000baseKR_Full_BIT,         "10000baseKR/Full"      },
-    { ETHTOOL_LINK_MODE_20000baseMLD2_Full_BIT,       "20000baseMLD2/Full"    },
-    { ETHTOOL_LINK_MODE_20000baseKR2_Full_BIT,        "20000baseKR2/Full"     },
-    { ETHTOOL_LINK_MODE_40000baseKR4_Full_BIT,        "40000baseKR4/Full"     },
-    { ETHTOOL_LINK_MODE_40000baseCR4_Full_BIT,        "40000baseCR4/Full"     },
-    { ETHTOOL_LINK_MODE_40000baseSR4_Full_BIT,        "40000baseSR4/Full"     },
-    { ETHTOOL_LINK_MODE_40000baseLR4_Full_BIT,        "40000baseLR4/Full"     },
-    { ETHTOOL_LINK_MODE_56000baseKR4_Full_BIT,        "56000baseKR4/Full"     },
-    { ETHTOOL_LINK_MODE_56000baseCR4_Full_BIT,        "56000baseCR4/Full"     },
-    { ETHTOOL_LINK_MODE_56000baseSR4_Full_BIT,        "56000baseSR4/Full"     },
-    { ETHTOOL_LINK_MODE_56000baseLR4_Full_BIT,        "56000baseLR4/Full"     },
-    /* Extended modes (bits 31+, only visible via ETHTOOL_GLINKSETTINGS) */
-    { ETHTOOL_LINK_MODE_25000baseCR_Full_BIT,         "25000baseCR/Full"      },
-    { ETHTOOL_LINK_MODE_25000baseKR_Full_BIT,         "25000baseKR/Full"      },
-    { ETHTOOL_LINK_MODE_25000baseSR_Full_BIT,         "25000baseSR/Full"      },
-    { ETHTOOL_LINK_MODE_50000baseCR2_Full_BIT,        "50000baseCR2/Full"     },
-    { ETHTOOL_LINK_MODE_50000baseKR2_Full_BIT,        "50000baseKR2/Full"     },
-    { ETHTOOL_LINK_MODE_100000baseKR4_Full_BIT,       "100000baseKR4/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseSR4_Full_BIT,       "100000baseSR4/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseCR4_Full_BIT,       "100000baseCR4/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseLR4_ER4_Full_BIT,   "100000baseLR4_ER4/Full"},
-    { ETHTOOL_LINK_MODE_50000baseSR2_Full_BIT,        "50000baseSR2/Full"     },
-    { ETHTOOL_LINK_MODE_1000baseX_Full_BIT,           "1000baseX/Full"        },
-    { ETHTOOL_LINK_MODE_10000baseCR_Full_BIT,         "10000baseCR/Full"      },
-    { ETHTOOL_LINK_MODE_10000baseSR_Full_BIT,         "10000baseSR/Full"      },
-    { ETHTOOL_LINK_MODE_10000baseLR_Full_BIT,         "10000baseLR/Full"      },
-    { ETHTOOL_LINK_MODE_10000baseLRM_Full_BIT,        "10000baseLRM/Full"     },
-    { ETHTOOL_LINK_MODE_10000baseER_Full_BIT,         "10000baseER/Full"      },
-    { ETHTOOL_LINK_MODE_2500baseT_Full_BIT,           "2500baseT/Full"        },
-    { ETHTOOL_LINK_MODE_5000baseT_Full_BIT,           "5000baseT/Full"        },
-    { ETHTOOL_LINK_MODE_50000baseKR_Full_BIT,         "50000baseKR/Full"      },
-    { ETHTOOL_LINK_MODE_50000baseSR_Full_BIT,         "50000baseSR/Full"      },
-    { ETHTOOL_LINK_MODE_50000baseCR_Full_BIT,         "50000baseCR/Full"      },
-    { ETHTOOL_LINK_MODE_50000baseLR_ER_FR_Full_BIT,   "50000baseLR_ER_FR/Full"},
-    { ETHTOOL_LINK_MODE_50000baseDR_Full_BIT,         "50000baseDR/Full"      },
-    { ETHTOOL_LINK_MODE_100000baseKR2_Full_BIT,       "100000baseKR2/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseSR2_Full_BIT,       "100000baseSR2/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseCR2_Full_BIT,       "100000baseCR2/Full"    },
-    { ETHTOOL_LINK_MODE_100000baseLR2_ER2_FR2_Full_BIT, "100000baseLR2_ER2_FR2/Full" },
-    { ETHTOOL_LINK_MODE_100000baseDR2_Full_BIT,       "100000baseDR2/Full"    },
     { ETHTOOL_LINK_MODE_200000baseKR4_Full_BIT,       "200000baseKR4/Full"    },
     { ETHTOOL_LINK_MODE_200000baseSR4_Full_BIT,       "200000baseSR4/Full"    },
     { ETHTOOL_LINK_MODE_200000baseLR4_ER4_FR4_Full_BIT, "200000baseLR4_ER4_FR4/Full" },
     { ETHTOOL_LINK_MODE_200000baseDR4_Full_BIT,       "200000baseDR4/Full"    },
     { ETHTOOL_LINK_MODE_200000baseCR4_Full_BIT,       "200000baseCR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseKR4_Full_BIT,       "100000baseKR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseSR4_Full_BIT,       "100000baseSR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseCR4_Full_BIT,       "100000baseCR4/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseLR4_ER4_Full_BIT,   "100000baseLR4_ER4/Full"},
+    { ETHTOOL_LINK_MODE_100000baseKR2_Full_BIT,       "100000baseKR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseSR2_Full_BIT,       "100000baseSR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseCR2_Full_BIT,       "100000baseCR2/Full"    },
+    { ETHTOOL_LINK_MODE_100000baseLR2_ER2_FR2_Full_BIT, "100000baseLR2_ER2_FR2/Full" },
+    { ETHTOOL_LINK_MODE_100000baseDR2_Full_BIT,       "100000baseDR2/Full"    },
+    { ETHTOOL_LINK_MODE_56000baseKR4_Full_BIT,        "56000baseKR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseCR4_Full_BIT,        "56000baseCR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseSR4_Full_BIT,        "56000baseSR4/Full"     },
+    { ETHTOOL_LINK_MODE_56000baseLR4_Full_BIT,        "56000baseLR4/Full"     },
+    { ETHTOOL_LINK_MODE_50000baseCR2_Full_BIT,        "50000baseCR2/Full"     },
+    { ETHTOOL_LINK_MODE_50000baseKR2_Full_BIT,        "50000baseKR2/Full"     },
+    { ETHTOOL_LINK_MODE_50000baseSR2_Full_BIT,        "50000baseSR2/Full"     },
+    { ETHTOOL_LINK_MODE_50000baseKR_Full_BIT,         "50000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseSR_Full_BIT,         "50000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseCR_Full_BIT,         "50000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_50000baseLR_ER_FR_Full_BIT,   "50000baseLR_ER_FR/Full"},
+    { ETHTOOL_LINK_MODE_50000baseDR_Full_BIT,         "50000baseDR/Full"      },
+    { ETHTOOL_LINK_MODE_40000baseKR4_Full_BIT,        "40000baseKR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseCR4_Full_BIT,        "40000baseCR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseSR4_Full_BIT,        "40000baseSR4/Full"     },
+    { ETHTOOL_LINK_MODE_40000baseLR4_Full_BIT,        "40000baseLR4/Full"     },
+    { ETHTOOL_LINK_MODE_25000baseCR_Full_BIT,         "25000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_25000baseKR_Full_BIT,         "25000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_25000baseSR_Full_BIT,         "25000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_20000baseMLD2_Full_BIT,       "20000baseMLD2/Full"    },
+    { ETHTOOL_LINK_MODE_20000baseKR2_Full_BIT,        "20000baseKR2/Full"     },
+    { ETHTOOL_LINK_MODE_10000baseT_Full_BIT,          "10000baseT/Full"       },
+    { ETHTOOL_LINK_MODE_10000baseKX4_Full_BIT,        "10000baseKX4/Full"     },
+    { ETHTOOL_LINK_MODE_10000baseKR_Full_BIT,         "10000baseKR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseCR_Full_BIT,         "10000baseCR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseSR_Full_BIT,         "10000baseSR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseLR_Full_BIT,         "10000baseLR/Full"      },
+    { ETHTOOL_LINK_MODE_10000baseLRM_Full_BIT,        "10000baseLRM/Full"     },
+    { ETHTOOL_LINK_MODE_10000baseER_Full_BIT,         "10000baseER/Full"      },
+    { ETHTOOL_LINK_MODE_5000baseT_Full_BIT,           "5000baseT/Full"        },
+    { ETHTOOL_LINK_MODE_2500baseX_Full_BIT,           "2500baseX/Full"        },
+    { ETHTOOL_LINK_MODE_2500baseT_Full_BIT,           "2500baseT/Full"        },
+    { ETHTOOL_LINK_MODE_1000baseT_Full_BIT,           "1000baseT/Full"        },
+    { ETHTOOL_LINK_MODE_1000baseT_Half_BIT,           "1000baseT/Half"        },
+    { ETHTOOL_LINK_MODE_1000baseKX_Full_BIT,          "1000baseKX/Full"       },
+    { ETHTOOL_LINK_MODE_1000baseX_Full_BIT,           "1000baseX/Full"        },
+    { ETHTOOL_LINK_MODE_100baseT_Full_BIT,            "100baseT/Full"         },
+    { ETHTOOL_LINK_MODE_100baseT_Half_BIT,            "100baseT/Half"         },
+    { ETHTOOL_LINK_MODE_10baseT_Full_BIT,             "10baseT/Full"          },
+    { ETHTOOL_LINK_MODE_10baseT_Half_BIT,             "10baseT/Half"          },
     { -1, NULL }
 };
 
@@ -1980,13 +1981,18 @@ _nic_scan_ethtool(netsnmp_entity_info *e, const char *ifname, int sfp_idx)
                 first = 0;
             }
 
+            if (port_s) {
+                if (e->model_name[0]) {
+                    strlcat(e->model_name, " (", sizeof(e->model_name));
+                    strlcat(e->model_name, port_s, sizeof(e->model_name));
+                    strlcat(e->model_name, ")", sizeof(e->model_name));
+                } else {
+                    strlcpy(e->model_name, port_s, sizeof(e->model_name));
+                }
+            }
+
             strlcpy(base, e->descr, sizeof(base));
-            if (port_s && modes_buf[0])
-                snprintf(e->descr, sizeof(e->descr), "%s (%s: %s)",
-                         base, port_s, modes_buf);
-            else if (port_s)
-                snprintf(e->descr, sizeof(e->descr), "%s (%s)", base, port_s);
-            else if (modes_buf[0])
+            if (modes_buf[0])
                 snprintf(e->descr, sizeof(e->descr), "%s (%s)", base, modes_buf);
         }
     }
@@ -3257,7 +3263,8 @@ _i2cdev_parent_idx_from_path(const char *rp)
     bus = -1;
     for (part = strtok_r(path, "/", &saveptr); part;
          part = strtok_r(NULL, "/", &saveptr)) {
-        int part_bus, addr;
+        int part_bus;
+        unsigned int addr;
 
         if (sscanf(part, "i2c-%d", &part_bus) == 1) {
             bus = part_bus;
@@ -4122,7 +4129,8 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
             netsnmp_entity_info *ce;
             char child_path[512], child_rp[PATH_MAX];
             char child_name[128], modalias[128], driver[128];
-            int child_idx, child_bus, addr;
+            int child_idx, child_bus;
+            unsigned int addr;
 
             if (sscanf(dev_de->d_name, "%d-%x", &child_bus, &addr) != 2)
                 continue;
