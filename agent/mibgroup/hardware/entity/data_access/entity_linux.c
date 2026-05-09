@@ -1259,6 +1259,33 @@ _pci_class_to_iana(long class_val)
     }
 }
 
+static int
+_pci_class_is_network(long class_val)
+{
+    int base = (int)((class_val >> 16) & 0xFF);
+
+    return base == 0x02 || base == 0x0d;
+}
+
+static int
+_pci_same_slot(const char *a, const char *b)
+{
+    return a && b && strlen(a) >= 10 && strlen(b) >= 10 &&
+        strncmp(a, b, 10) == 0;
+}
+
+static int
+_pci_slot_function_count(char **bdfs, int nbdfs, const char *bdf)
+{
+    int i, count;
+
+    count = 0;
+    for (i = 0; i < nbdfs; i++)
+        if (_pci_same_slot(bdfs[i], bdf))
+            count++;
+    return count;
+}
+
 typedef struct pci_entity_map_s {
     char bdf[16];
     int idx;
@@ -1686,7 +1713,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
     for (i = 0; i < nbdfs; i++) {
         long         class_val;
         unsigned int vid, did;
-        int          idx;
+        int          idx, slot_idx;
         DIR         *netdir;
         struct dirent *nde;
 #ifdef HAVE_PCI_LOOKUP_NAME
@@ -1695,6 +1722,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
         class_val = 0;
         vid = did = 0;
+        slot_idx = 0;
         idx = IDX_PCI_BASE + i + 1;
 
         strlcpy(map[i].bdf, bdfs[i], sizeof(map[i].bdf));
@@ -1703,22 +1731,42 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         if (!realpath(path, map[i].real_path))
             map[i].real_path[0] = '\0';
 
-        e = netsnmp_entity_create(idx);
-        if (!e) goto free_bdf;
-
-        e->iana_class = IANA_PHYS_MODULE;
-        e->parent_idx = IDX_BASEBOARD;
-        strlcpy(e->name,  bdfs[i], sizeof(e->name));
-        strlcpy(e->descr, bdfs[i], sizeof(e->descr));
-        snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
-                 PCI_PATH, bdfs[i]);
-
         snprintf(path, sizeof(path), "%s/%s/class", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
-        if (val[0]) {
+        if (val[0])
             class_val = strtol(val, NULL, 16);
-            e->iana_class = _pci_class_to_iana(class_val);
+
+        if (_pci_class_is_network(class_val) &&
+            _pci_slot_function_count(bdfs, nbdfs, bdfs[i]) > 1) {
+            char key[32];
+
+            snprintf(key, sizeof(key), "pcislot:%.*s", 10, bdfs[i]);
+            slot_idx = _entity_index_alloc(key);
+            if (slot_idx > 0)
+                idx = slot_idx;
         }
+
+        map[i].idx = idx;
+
+        e = netsnmp_entity_get_byIdx(idx);
+        if (!e) {
+            e = netsnmp_entity_create(idx);
+            if (!e) goto free_bdf;
+
+            e->iana_class = IANA_PHYS_MODULE;
+            e->parent_idx = IDX_BASEBOARD;
+            if (slot_idx > 0)
+                snprintf(e->name, sizeof(e->name), "%.*s", 10, bdfs[i]);
+            else
+                strlcpy(e->name, bdfs[i], sizeof(e->name));
+            strlcpy(e->descr, bdfs[i], sizeof(e->descr));
+        }
+
+        if (slot_idx == 0 && class_val)
+            e->iana_class = _pci_class_to_iana(class_val);
+
+        snprintf(path, sizeof(path), "%s/%s", PCI_PATH, bdfs[i]);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
 
         snprintf(path, sizeof(path), "%s/%s/vendor", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
@@ -1822,14 +1870,37 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         snprintf(netpath, sizeof(netpath), "%s/%s/net", PCI_PATH, bdfs[i]);
         netdir = opendir(netpath);
         if (netdir) {
+            netsnmp_entity_info *pci_e = e;
+
+            pci_e->iana_class = IANA_PHYS_MODULE;
             while ((nde = readdir(netdir))) {
-                int ifindex;
+                netsnmp_entity_info *port;
+                char key[128], ifaddr[64];
+                int ifindex, port_idx;
 
                 if (nde->d_name[0] == '.') continue;
 
-                e->iana_class = IANA_PHYS_PORT;
-                e->is_fru     = TV_FALSE;
-                strlcpy(e->name,  nde->d_name, sizeof(e->name));
+                snprintf(path, sizeof(path), "%s/%s/address",
+                         NET_PATH, nde->d_name);
+                _sysfs_read(path, ifaddr, sizeof(ifaddr));
+                if (ifaddr[0] && strcmp(ifaddr, "00:00:00:00:00:00") != 0)
+                    snprintf(key, sizeof(key), "net:%s", ifaddr);
+                else
+                    snprintf(key, sizeof(key), "net:%s", nde->d_name);
+
+                port_idx = _entity_index_alloc(key);
+                if (port_idx <= 0)
+                    continue;
+
+                port = netsnmp_entity_create(port_idx);
+                if (!port)
+                    continue;
+
+                port->iana_class = IANA_PHYS_PORT;
+                port->is_fru     = TV_FALSE;
+                port->parent_idx = pci_e->idx;
+                strlcpy(port->name, nde->d_name, sizeof(port->name));
+                strlcpy(port->serial, ifaddr, sizeof(port->serial));
 
                 {
                     char typepath[512];
@@ -1846,31 +1917,34 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                         if (access(typepath, F_OK) == 0)
                             ifdescr = "Wireless interface";
                     }
-                    strlcpy(e->descr, ifdescr ? ifdescr : nde->d_name,
-                            sizeof(e->descr));
+                    strlcpy(port->descr, ifdescr ? ifdescr : nde->d_name,
+                            sizeof(port->descr));
                 }
-
-                snprintf(path, sizeof(path), "%s/%s/address",
-                         NET_PATH, nde->d_name);
-                _sysfs_read(path, e->serial, sizeof(e->serial));
 
                 snprintf(path, sizeof(path), "%s/%s/ifalias",
                          NET_PATH, nde->d_name);
-                _sysfs_read(path, e->alias, sizeof(e->alias));
+                _sysfs_read(path, port->alias, sizeof(port->alias));
 
                 snprintf(path, sizeof(path), "%s/%s/ifindex",
                          NET_PATH, nde->d_name);
                 ifindex = _sysfs_read_int(path);
                 if (ifindex > 0) {
-                    e->ifindex = ifindex;
-                    if (!e->alias[0])
-                        snprintf(e->alias, sizeof(e->alias),
+                    port->ifindex = ifindex;
+                    if (!port->alias[0])
+                        snprintf(port->alias, sizeof(port->alias),
                                  "ifIndex.%d", ifindex);
                 }
 
-                _nic_scan_ethtool(e, nde->d_name, IDX_SFP_BASE + i);
+                snprintf(path, sizeof(path), "%s/%s", NET_PATH, nde->d_name);
+                _append_file_uri(port->uris, sizeof(port->uris), path);
+                snprintf(path, sizeof(path), "%s/%s/net/%s", PCI_PATH,
+                         bdfs[i], nde->d_name);
+                _append_file_uri(port->uris, sizeof(port->uris), path);
+                _append_uri(port->uris, sizeof(port->uris), key);
 
-                break;
+                _nic_scan_ethtool(port, nde->d_name,
+                                  IDX_SFP_BASE + 1000 +
+                                  (ifindex > 0 ? ifindex : i));
             }
             closedir(netdir);
         }
@@ -3175,6 +3249,12 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
             continue;
 
         pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        if (pci_idx > 0) {
+            netsnmp_entity_info *parent = netsnmp_entity_get_byIdx(pci_idx);
+            if (parent && parent->iana_class == IANA_PHYS_PORT &&
+                parent->parent_idx > 0)
+                pci_idx = parent->parent_idx;
+        }
 
         e = netsnmp_entity_create(idx);
         if (!e)

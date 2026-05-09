@@ -299,6 +299,10 @@ netsnmp_entity_info *netsnmp_entity_create(int idx)
 {
     netsnmp_entity_info *e, *prev;
 
+    e = netsnmp_entity_get_byIdx(idx);
+    if (e)
+        return e;
+
     e = SNMP_MALLOC_TYPEDEF(netsnmp_entity_info);
     if (!e)
         return NULL;
