@@ -1,0 +1,12 @@
+[Unit]
+Description=ENTITY-MIB AgentX subagent
+After=network.target snmpd.service
+Wants=snmpd.service
+
+[Service]
+ExecStart=/usr/local/lib/snmpd/entity_subagent
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
