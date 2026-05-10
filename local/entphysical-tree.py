@@ -139,7 +139,8 @@ def print_parent_rel_pos_tree(entities, children, parent_idx, prefix=''):
         print_parent_rel_pos_tree(entities, children, idx, prefix + spacer)
 
 
-def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
+def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix='',
+               show_parent_rel_pos=False):
     """Recursively print the entity tree with proper tree structure."""
     hidden_attrs = hidden_attrs or set()
     child_list = sorted(children.get(parent_idx, []))
@@ -153,7 +154,11 @@ def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
 
         cls_name = class_prefix(e.get('Class', ''))
         connector = '└── ' if is_last else '├── '
-        header = f"{prefix}{connector}[{idx}:{cls_name}]"
+        rel_pos = ''
+        if show_parent_rel_pos:
+            rel_pos = f".{attr_int(e, 'ParentRelPos', -1)} "
+            header_attrs.add('ParentRelPos')
+        header = f"{prefix}{connector}{rel_pos}[{idx}:{cls_name}]"
         if model:
             header += f" {model}"
             header_attrs.add('ModelName')
@@ -186,7 +191,8 @@ def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
         else:
             print(attr_indent.rstrip())
 
-        print_tree(entities, children, idx, hidden_attrs, child_prefix)
+        print_tree(entities, children, idx, hidden_attrs, child_prefix,
+                   show_parent_rel_pos)
 
 
 def main():
@@ -227,7 +233,8 @@ def main():
     if args.parent_rel_pos_tree:
         print_parent_rel_pos_tree(entities, children, 0)
     else:
-        print_tree(entities, children, 0, hidden_attrs)
+        print_tree(entities, children, 0, hidden_attrs,
+                   show_parent_rel_pos=args.show_parent_rel_pos)
 
 
 if __name__ == '__main__':

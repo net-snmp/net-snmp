@@ -41,6 +41,8 @@
 #define GRAPHICS_PATH "/sys/class/graphics"
 #define GPIO_PATH   "/sys/class/gpio"
 #define NODE_PATH   "/sys/devices/system/node"
+#define ACPI_PATH   "/sys/bus/acpi/devices"
+#define THERMAL_PATH "/sys/class/thermal"
 
 #define IDX_CHASSIS      1
 #define IDX_BASEBOARD   10
@@ -54,6 +56,9 @@
 #define IDX_PCI_BASE   1000
 #define IDX_ATA_BASE   1500
 #define IDX_RTC_BASE   2400
+#define IDX_ACPI_SYSTEM 2500
+#define IDX_ACPI_BUS_BASE 2510
+#define IDX_THERMAL_ZONE_BASE 2600
 #define IDX_SENSOR_BASE 4000
 #define IDX_SFP_BASE   10000
 #define IDX_CPU_LOGICAL_CONTAINER_BASE 19000
@@ -1715,6 +1720,29 @@ _pci_bdf_parent_rel_pos(const char *bdf)
     return (int)device;
 }
 
+static int
+_pci_path_parent_function_rel_pos(const char *real_path)
+{
+    char path[PATH_MAX], *last, *parent;
+    unsigned int domain, bus, device, function;
+
+    if (!real_path || !real_path[0])
+        return -1;
+
+    strlcpy(path, real_path, sizeof(path));
+    last = strrchr(path, '/');
+    if (!last)
+        return -1;
+    *last = '\0';
+
+    parent = strrchr(path, '/');
+    parent = parent ? parent + 1 : path;
+    if (!_pci_bdf_parts(parent, &domain, &bus, &device, &function))
+        return -1;
+
+    return (int)function;
+}
+
 static const char *
 _pci_class_descr(long class_val)
 {
@@ -2510,7 +2538,9 @@ free_bdf:
                 parent_idx = _numa_node_idx(node);
         }
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
-        e->parent_rel_pos = _pci_bdf_parent_rel_pos(map[i].bdf);
+        e->parent_rel_pos = _pci_path_parent_function_rel_pos(map[i].real_path);
+        if (e->parent_rel_pos < 0)
+            e->parent_rel_pos = _pci_bdf_parent_rel_pos(map[i].bdf);
     }
 
 #ifdef HAVE_PCI_LOOKUP_NAME
@@ -2680,6 +2710,32 @@ _usb_parent_idx_from_name(const char *name, const char *busnum)
     return 0;
 }
 
+static int
+_usb_parent_rel_pos_from_name(const char *name, const char *busnum)
+{
+    char path[512], devnum[32];
+    const char *p;
+
+    if (!name || !name[0])
+        return ENTITY_PARENT_REL_POS_AUTO;
+
+    if (strncmp(name, "usb", 3) == 0 && isdigit((unsigned char)name[3]))
+        return atoi(name + 3);
+
+    snprintf(path, sizeof(path), "%s/%s/devnum", USB_PATH, name);
+    _sysfs_read(path, devnum, sizeof(devnum));
+    if (devnum[0])
+        return atoi(devnum);
+
+    p = strrchr(name, '.');
+    if (!p)
+        p = strrchr(name, '-');
+    if (p && isdigit((unsigned char)p[1]))
+        return atoi(p + 1);
+
+    return busnum && busnum[0] ? atoi(busnum) : ENTITY_PARENT_REL_POS_AUTO;
+}
+
 static const char *
 _usb_class_descr(const char *name)
 {
@@ -2748,7 +2804,7 @@ _load_ata_ports(pci_entity_map *pci_map, int pci_map_n)
         snprintf(path, sizeof(path), "/sys/class/ata_port/%s", de->d_name);
         pci_idx = realpath(path, rp) ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
 
-        e->iana_class = IANA_PHYS_CONTAINER;
+        e->iana_class = IANA_PHYS_OTHER;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
@@ -2836,6 +2892,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_CONTAINER;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = _usb_parent_rel_pos_from_name(name, name + 3);
         strlcpy(e->name, name, sizeof(e->name));
 
         if (ver[0] && spd_descr[0]) {
@@ -2894,6 +2951,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = _usb_iana_class(name);
         e->is_fru     = TV_FALSE;
         e->parent_idx = hub_idx ? hub_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = _usb_parent_rel_pos_from_name(name, busnum);
 
         snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
         _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
@@ -3417,7 +3475,185 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
     closedir(dir);
 }
 
-/* ---- Phase 6: hwmon chips and sensors ------------------------------------ */
+/* ---- Phase 6: ACPI system, buses, and thermal zones ----------------------- */
+
+static int
+_entity_find_deepest_file_uri_prefix(const char *path, int idx_min, int idx_max)
+{
+    netsnmp_entity_info *e;
+    int best_idx = 0, best_len = 0;
+
+    if (!path || !path[0])
+        return 0;
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        const char *p;
+
+        if (e->idx < idx_min || e->idx > idx_max)
+            continue;
+
+        for (p = e->uris; p && *p; ) {
+            const char *end;
+            size_t tok_len;
+            int file_len;
+
+            while (isspace((unsigned char)*p))
+                p++;
+            if (!*p)
+                break;
+
+            end = strchr(p, ' ');
+            tok_len = end ? (size_t)(end - p) : strlen(p);
+            if (tok_len > 7 && strncmp(p, "file://", 7) == 0) {
+                file_len = (int)(tok_len - 7);
+                if (file_len > best_len &&
+                    strncmp(path, p + 7, (size_t)file_len) == 0 &&
+                    (path[file_len] == '\0' || path[file_len] == '/')) {
+                    best_len = file_len;
+                    best_idx = e->idx;
+                }
+            }
+
+            p = end ? end + 1 : NULL;
+        }
+    }
+
+    return best_idx;
+}
+
+static void
+_load_acpi(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], rp[PATH_MAX], val[128];
+
+    snprintf(path, sizeof(path), "%s/LNXSYSTM:00", ACPI_PATH);
+    if (realpath(path, rp)) {
+        netsnmp_entity_info *e = netsnmp_entity_create(IDX_ACPI_SYSTEM);
+
+        if (e) {
+            e->iana_class = IANA_PHYS_CONTAINER;
+            e->parent_idx = IDX_BASEBOARD;
+            e->parent_rel_pos = -1;
+            strlcpy(e->name, "LNXSYSTM:00", sizeof(e->name));
+            strlcpy(e->descr, "ACPI system", sizeof(e->descr));
+            _append_file_uri(e->uris, sizeof(e->uris), path);
+            _append_file_uri(e->uris, sizeof(e->uris), rp);
+            _append_uri(e->uris, sizeof(e->uris), "acpi:LNXSYSTM:00");
+        }
+    }
+
+    dir = opendir(ACPI_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        netsnmp_entity_info *e;
+        int bus_no, idx, parent_idx;
+
+        if (sscanf(de->d_name, "LNXSYBUS:%x", &bus_no) != 1)
+            continue;
+        if (bus_no >= IDX_THERMAL_ZONE_BASE - IDX_ACPI_BUS_BASE)
+            continue;
+
+        idx = IDX_ACPI_BUS_BASE + bus_no;
+        snprintf(path, sizeof(path), "%s/%s", ACPI_PATH, de->d_name);
+        if (!realpath(path, rp))
+            strlcpy(rp, path, sizeof(rp));
+
+        parent_idx = _entity_find_deepest_file_uri_prefix(rp,
+                         IDX_ACPI_SYSTEM, IDX_ACPI_BUS_BASE - 1);
+
+        e = netsnmp_entity_create(idx);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_BACKPLANE;
+        e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = bus_no;
+        strlcpy(e->name, de->d_name, sizeof(e->name));
+        snprintf(path, sizeof(path), "%s/path", rp);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0])
+            snprintf(e->descr, sizeof(e->descr), "ACPI system bus %s", val);
+        else
+            strlcpy(e->descr, "ACPI system bus", sizeof(e->descr));
+        snprintf(path, sizeof(path), "%s/%s", ACPI_PATH, de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        _append_file_uri(e->uris, sizeof(e->uris), rp);
+        snprintf(path, sizeof(path), "acpi:%s", de->d_name);
+        _append_uri(e->uris, sizeof(e->uris), path);
+    }
+
+    closedir(dir);
+}
+
+static void
+_load_thermal_zones(void)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512], rp[PATH_MAX], dev_rp[PATH_MAX], val[128];
+
+    dir = opendir(THERMAL_PATH);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        netsnmp_entity_info *e;
+        int zone_no, idx, parent_idx;
+
+        if (sscanf(de->d_name, "thermal_zone%d", &zone_no) != 1)
+            continue;
+
+        idx = IDX_THERMAL_ZONE_BASE + zone_no;
+        snprintf(path, sizeof(path), "%s/%s", THERMAL_PATH, de->d_name);
+        if (!realpath(path, rp))
+            strlcpy(rp, path, sizeof(rp));
+
+        snprintf(path, sizeof(path), "%s/%s/device", THERMAL_PATH, de->d_name);
+        if (!realpath(path, dev_rp))
+            dev_rp[0] = '\0';
+
+        parent_idx = _entity_find_deepest_file_uri_prefix(dev_rp,
+                         IDX_ACPI_SYSTEM, IDX_THERMAL_ZONE_BASE - 1);
+        if (!parent_idx)
+            continue;
+
+        e = netsnmp_entity_create(idx);
+        if (!e)
+            continue;
+
+        e->iana_class = IANA_PHYS_OTHER;
+        e->parent_idx = parent_idx;
+        e->parent_rel_pos = zone_no;
+        strlcpy(e->name, de->d_name, sizeof(e->name));
+
+        snprintf(path, sizeof(path), "%s/%s/type", THERMAL_PATH, de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        if (val[0]) {
+            snprintf(e->descr, sizeof(e->descr), "ACPI thermal zone %d (%s)",
+                     zone_no, val);
+            strlcpy(e->model_name, val, sizeof(e->model_name));
+        } else {
+            snprintf(e->descr, sizeof(e->descr), "ACPI thermal zone %d",
+                     zone_no);
+        }
+
+        snprintf(path, sizeof(path), "%s/%s", THERMAL_PATH, de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+        _append_file_uri(e->uris, sizeof(e->uris), rp);
+        if (dev_rp[0])
+            _append_file_uri(e->uris, sizeof(e->uris), dev_rp);
+        snprintf(path, sizeof(path), "thermal:%s", de->d_name);
+        _append_uri(e->uris, sizeof(e->uris), path);
+    }
+
+    closedir(dir);
+}
+
+/* ---- Phase 7: hwmon chips and sensors ------------------------------------ */
 
 typedef struct hwmon_entry_s {
     char dir[32];
@@ -3478,6 +3714,11 @@ _hwmon_parent_idx(const char *name, const char *rp,
 {
     netsnmp_entity_info *parent;
     int parent_idx;
+
+    parent_idx = _entity_find_deepest_file_uri_prefix(rp,
+                     IDX_THERMAL_ZONE_BASE, IDX_SENSOR_BASE - 1);
+    if (parent_idx)
+        return parent_idx;
 
     parent_idx = _i2cdev_parent_idx_from_path(rp);
     if (parent_idx)
@@ -4911,6 +5152,8 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_mmc_disks(pci_map, pci_map_n);
     _load_nvme(pci_map, pci_map_n);
     _load_i2c(pci_map, pci_map_n);
+    _load_acpi();
+    _load_thermal_zones();
     _load_hwmon(pci_map, pci_map_n);
     _load_power_supply(pci_map, pci_map_n);
     _load_ptp(pci_map, pci_map_n);

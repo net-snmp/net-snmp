@@ -66,6 +66,7 @@ Fixed index ranges are used for broad device classes:
 - `1000+`: PCI devices
 - `200000+`: dynamically allocated SCSI/SATA, USB, and standalone NVMe devices
 - `2400+`: RTC devices
+- `2500+`: ACPI system, ACPI buses, and ACPI thermal zones
 - `4000+`: hwmon chips and sensors
 - `10000+`: SFP modules
 
