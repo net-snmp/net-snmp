@@ -23,12 +23,15 @@ void shutdown_entity(void);
 #define TV_TRUE  1
 #define TV_FALSE 2
 
+#define ENTITY_PARENT_REL_POS_AUTO -2
+
 typedef struct netsnmp_entity_info_s {
     int     idx;
     int     parent_idx;
     int     parent_rel_pos;
     int     iana_class;
     int     is_fru;
+    int     hidden;
     int     ifindex;        /* >0 for port entities with an if-MIB mapping */
     char    descr[256];
     char    name[64];

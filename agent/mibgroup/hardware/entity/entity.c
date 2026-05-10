@@ -77,9 +77,13 @@ void netsnmp_entity_contains_rebuild(void)
     SNMP_FREE(_contains);
     _contains_n = 0;
 
-    for (e = _ent_head; e; e = e->next)
-        if (e->parent_idx > 0)
+    for (e = _ent_head; e; e = e->next) {
+        netsnmp_entity_info *parent;
+
+        parent = e->parent_idx > 0 ? netsnmp_entity_get_byIdx(e->parent_idx) : NULL;
+        if (!e->hidden && parent && !parent->hidden)
             count++;
+    }
 
     if (!count)
         return;
@@ -91,7 +95,10 @@ void netsnmp_entity_contains_rebuild(void)
 
     _contains_n = 0;
     for (e = _ent_head; e; e = e->next) {
-        if (e->parent_idx > 0) {
+        netsnmp_entity_info *parent;
+
+        parent = e->parent_idx > 0 ? netsnmp_entity_get_byIdx(e->parent_idx) : NULL;
+        if (!e->hidden && parent && !parent->hidden) {
             _contains[_contains_n].parent_idx = e->parent_idx;
             _contains[_contains_n].child_idx  = e->idx;
             _contains_n++;
@@ -136,7 +143,7 @@ void netsnmp_entity_alias_rebuild(void)
     _alias_cap = 0;
 
     for (e = _ent_head; e; e = e->next)
-        if (e->ifindex > 0)
+        if (!e->hidden && e->ifindex > 0)
             count++;
 
     if (!count)
@@ -150,7 +157,7 @@ void netsnmp_entity_alias_rebuild(void)
 
     _alias_n = 0;
     for (e = _ent_head; e; e = e->next) {
-        if (e->ifindex > 0) {
+        if (!e->hidden && e->ifindex > 0) {
             _alias[_alias_n].phys_idx    = e->idx;
             _alias[_alias_n].logical_idx = 0;
             memcpy(_alias[_alias_n].target_oid, _ifentry_ifindex_prefix,
@@ -329,7 +336,7 @@ netsnmp_entity_info *netsnmp_entity_create(int idx)
     if (!e)
         return NULL;
     e->idx = idx;
-    e->parent_rel_pos = -1;
+    e->parent_rel_pos = ENTITY_PARENT_REL_POS_AUTO;
     e->iana_class = IANA_PHYS_UNKNOWN;
     e->is_fru = TV_FALSE;
 
@@ -362,6 +369,9 @@ void netsnmp_entity_parent_rel_pos_rebuild(void)
             e->parent_rel_pos = -1;
             continue;
         }
+
+        if (e->parent_rel_pos != ENTITY_PARENT_REL_POS_AUTO)
+            continue;
 
         pos = 1;
         for (sibling = _ent_head; sibling && sibling != e;

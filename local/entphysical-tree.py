@@ -87,9 +87,56 @@ def class_prefix(cls_val):
         m = re.search(r'\((\d+)\)', str(cls_val))
         if m:
             name = CLASS_NAMES.get(int(m.group(1)), "unknown")
+        elif str(cls_val).isdigit():
+            name = CLASS_NAMES.get(int(cls_val), "unknown")
         else:
             name = str(cls_val)
     return name
+
+
+def attr_int(attrs, name, default=0):
+    """Return an integer attribute value, accepting enum text like name(1)."""
+    value = attrs.get(name)
+    if value is None:
+        return default
+    m = re.search(r'-?\d+', str(value))
+    if not m:
+        return default
+    return int(m.group(0))
+
+
+def entity_label(attrs):
+    """Return the shortest useful label for a compact entity line."""
+    for attr in ('ModelName', 'Descr'):
+        value = attrs.get(attr, '')
+        if value:
+            return value
+    return ''
+
+
+def print_parent_rel_pos_tree(entities, children, parent_idx, prefix=''):
+    """Print a compact tree focused on effective parent-relative positions."""
+    child_list = sorted(
+        children.get(parent_idx, []),
+        key=lambda idx: (attr_int(entities[idx], 'ParentRelPos', -1), idx),
+    )
+    for i, idx in enumerate(child_list):
+        is_last = (i == len(child_list) - 1)
+        e = entities[idx]
+        cls_name = class_prefix(e.get('Class', ''))
+        rel_pos = attr_int(e, 'ParentRelPos', -1)
+        connector = '└── ' if is_last else '├── '
+        label = entity_label(e)
+        line = f"{prefix}{connector}.{rel_pos} [{idx}:{cls_name}]"
+        if label:
+            line += f" {label}"
+        name = e.get('Name', '')
+        if name:
+            line += f" ({name})"
+        print(line)
+
+        spacer = '    ' if is_last else '│   '
+        print_parent_rel_pos_tree(entities, children, idx, prefix + spacer)
 
 
 def print_tree(entities, children, parent_idx, hidden_attrs=None, prefix=''):
@@ -155,6 +202,8 @@ def main():
                         help="show entPhysicalVendorType values")
     parser.add_argument('--show-parent-rel-pos', action='store_true',
                         help="show entPhysicalParentRelPos values")
+    parser.add_argument('--parent-rel-pos-tree', action='store_true',
+                        help="show compact tree as .entPhysicalParentRelPos [id:class]")
     args = parser.parse_args()
 
     if args.file:
@@ -175,7 +224,10 @@ def main():
 
     entities = parse_snmp_file(lines)
     children, roots = build_tree(entities)
-    print_tree(entities, children, 0, hidden_attrs)
+    if args.parent_rel_pos_tree:
+        print_parent_rel_pos_tree(entities, children, 0)
+    else:
+        print_tree(entities, children, 0, hidden_attrs)
 
 
 if __name__ == '__main__':

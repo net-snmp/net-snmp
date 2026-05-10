@@ -41,6 +41,8 @@ _phys_get_first(void **loop_ctx, void **data_ctx,
 
     netsnmp_cache_check_and_reload(netsnmp_entity_get_cache());
     e = netsnmp_entity_get_first();
+    while (e && e->hidden)
+        e = netsnmp_entity_get_next(e);
     if (!e)
         return NULL;
 
@@ -56,6 +58,8 @@ _phys_get_next(void **loop_ctx, void **data_ctx,
                netsnmp_iterator_info *iinfo)
 {
     netsnmp_entity_info *e = netsnmp_entity_get_next((netsnmp_entity_info *)*loop_ctx);
+    while (e && e->hidden)
+        e = netsnmp_entity_get_next(e);
     if (!e)
         return NULL;
 
@@ -106,6 +110,7 @@ _phys_handler(netsnmp_mib_handler *handler,
             break;
         case COL_PARENTRELPOS:
             snmp_set_var_typed_integer(req->requestvb, ASN_INTEGER,
+                                       e->parent_rel_pos < -1 ? -1 :
                                        e->parent_rel_pos);
             break;
         case COL_NAME:

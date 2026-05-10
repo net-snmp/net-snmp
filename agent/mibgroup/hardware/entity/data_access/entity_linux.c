@@ -56,6 +56,8 @@
 #define IDX_RTC_BASE   2400
 #define IDX_SENSOR_BASE 4000
 #define IDX_SFP_BASE   10000
+#define IDX_CPU_LOGICAL_CONTAINER_BASE 19000
+#define IDX_CPU_CACHE_CONTAINER_BASE 19500
 #define IDX_LOGICAL_CPU_BASE 20000
 #define IDX_DYNAMIC_BASE 200000
 
@@ -1115,7 +1117,7 @@ _load_dmi(void)
 
     e = netsnmp_entity_create(IDX_BASEBOARD);
     if (!e) return;
-    e->iana_class = IANA_PHYS_MODULE;
+    e->iana_class = IANA_PHYS_BACKPLANE;
     e->parent_idx = IDX_CHASSIS;
     e->is_fru     = TV_TRUE;
     strlcpy(e->name,  "baseboard", sizeof(e->name));
@@ -1134,6 +1136,7 @@ _load_dmi(void)
     if (!e) return;
     e->iana_class = IANA_PHYS_OTHER;
     e->parent_idx = IDX_BASEBOARD;
+    e->parent_rel_pos = -1;
     strlcpy(e->name,  "bios", sizeof(e->name));
     strlcpy(e->descr, "BIOS", sizeof(e->descr));
     snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
@@ -1388,6 +1391,7 @@ _load_cpus(void)
         node = _numa_cpu_node(i);
         e->iana_class = IANA_PHYS_CPU;
         e->parent_idx = _numa_parent_idx(node);
+        e->parent_rel_pos = -1;
         e->is_fru     = TV_TRUE;
         snprintf(e->name, sizeof(e->name), "cpu-package%d", i);
         snprintf(e->descr, sizeof(e->descr),
@@ -1404,6 +1408,28 @@ _load_cpus(void)
             snprintf(e->fw_rev, sizeof(e->fw_rev), "microcode %s", microcode);
         snprintf(path, sizeof(path), "/sys/devices/system/cpu");
         _append_file_uri(e->uris, sizeof(e->uris), path);
+
+        e = netsnmp_entity_create(IDX_CPU_LOGICAL_CONTAINER_BASE + i);
+        if (e) {
+            e->iana_class = IANA_PHYS_CONTAINER;
+            e->parent_idx = IDX_CPU_BASE + i;
+            e->parent_rel_pos = -1;
+            e->is_fru     = TV_FALSE;
+            snprintf(e->name, sizeof(e->name), "cpu-package%d-logical", i);
+            strlcpy(e->descr, "Logical CPUs", sizeof(e->descr));
+            snprintf(e->uris, sizeof(e->uris), "file://%s", path);
+        }
+
+        e = netsnmp_entity_create(IDX_CPU_CACHE_CONTAINER_BASE + i);
+        if (e) {
+            e->iana_class = IANA_PHYS_CONTAINER;
+            e->parent_idx = IDX_CPU_BASE + i;
+            e->parent_rel_pos = -1;
+            e->is_fru     = TV_FALSE;
+            snprintf(e->name, sizeof(e->name), "cpu-package%d-cache", i);
+            strlcpy(e->descr, "CPU caches", sizeof(e->descr));
+            snprintf(e->uris, sizeof(e->uris), "file://%s", path);
+        }
     }
 
     for (i = 0; i < cpu_count; i++) {
@@ -1436,7 +1462,8 @@ _load_cpus(void)
             continue;
 
         e->iana_class = IANA_PHYS_OTHER;
-        e->parent_idx = IDX_CPU_BASE + pkg;
+        e->parent_idx = IDX_CPU_LOGICAL_CONTAINER_BASE + pkg;
+        e->parent_rel_pos = cpu_num;
         e->is_fru     = TV_FALSE;
         snprintf(e->name, sizeof(e->name), "cpu%d", cpu_num);
         snprintf(e->descr, sizeof(e->descr), "Logical CPU %d, core %d.%d",
@@ -1488,6 +1515,7 @@ _load_dimms(void)
 
             e->iana_class = IANA_PHYS_OTHER;
             e->parent_idx = IDX_BASEBOARD;
+            e->parent_rel_pos = -1;
             strlcpy(e->name, "memory", sizeof(e->name));
             _memory_kb_descr(_proc_memtotal_kb(), "System Memory",
                              descr, sizeof(descr));
@@ -1629,7 +1657,8 @@ _load_caches(void)
                 continue;
 
             e->iana_class = IANA_PHYS_OTHER;
-            e->parent_idx = IDX_CPU_BASE + phys_id;
+            e->parent_idx = IDX_CPU_CACHE_CONTAINER_BASE + phys_id;
+            e->parent_rel_pos = cache_idx;
             e->is_fru     = TV_FALSE;
             snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
                      cache_path, cache_de->d_name);
@@ -1664,6 +1693,26 @@ _cmp_bdf(const void *a, const void *b)
     char * const *sa = (char * const *)a;
     char * const *sb = (char * const *)b;
     return strcmp(*sa, *sb);
+}
+
+static int
+_pci_bdf_parts(const char *bdf, unsigned int *domain, unsigned int *bus,
+               unsigned int *device, unsigned int *function)
+{
+    if (sscanf(bdf, "%x:%x:%x.%x", domain, bus, device, function) != 4)
+        return 0;
+    return *domain <= 0xffff && *bus <= 0xff && *device <= 0x1f &&
+           *function <= 0x7;
+}
+
+static int
+_pci_bdf_parent_rel_pos(const char *bdf)
+{
+    unsigned int domain, bus, device, function;
+
+    if (!_pci_bdf_parts(bdf, &domain, &bus, &device, &function))
+        return -1;
+    return (int)device;
 }
 
 static const char *
@@ -1821,6 +1870,37 @@ _pci_find_idx(pci_entity_map *map, int nmap, const char *bdf)
 }
 
 static int
+_pci_function0_idx(pci_entity_map *map, int nmap, const char *bdf)
+{
+    char func0[16];
+    unsigned int domain, bus, device, function;
+
+    if (!_pci_bdf_parts(bdf, &domain, &bus, &device, &function))
+        return 0;
+    snprintf(func0, sizeof(func0), "%04x:%02x:%02x.0", domain, bus, device);
+    return _pci_find_idx(map, nmap, func0);
+}
+
+static int
+_pci_canonical_idx(pci_entity_map *map, int nmap, int idx)
+{
+    int i, func0_idx;
+    netsnmp_entity_info *e;
+
+    e = netsnmp_entity_get_byIdx(idx);
+    if (!e || !e->hidden)
+        return idx;
+
+    for (i = 0; i < nmap; i++) {
+        if (map[i].idx != idx)
+            continue;
+        func0_idx = _pci_function0_idx(map, nmap, map[i].bdf);
+        return func0_idx ? func0_idx : idx;
+    }
+    return idx;
+}
+
+static int
 _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
 {
     int i, parent_idx, best_len;
@@ -1843,7 +1923,7 @@ _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
         if (strncmp(map[child].real_path, map[i].real_path, len) == 0 &&
             map[child].real_path[len] == '/') {
             best_len = len;
-            parent_idx = map[i].idx;
+            parent_idx = _pci_canonical_idx(map, nmap, map[i].idx);
         }
     }
     return parent_idx;
@@ -1865,7 +1945,7 @@ _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
         if (strncmp(path, map[i].real_path, mlen) == 0 &&
             (path[mlen] == '\0' || path[mlen] == '/')) {
             best_len = mlen;
-            best_idx = map[i].idx;
+            best_idx = _pci_canonical_idx(map, nmap, map[i].idx);
         }
     }
     return best_idx;
@@ -2277,10 +2357,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
             e->iana_class = IANA_PHYS_MODULE;
             e->parent_idx = IDX_BASEBOARD;
-            if (slot_idx > 0)
-                snprintf(e->name, sizeof(e->name), "%.*s", 10, bdfs[i]);
-            else
-                strlcpy(e->name, bdfs[i], sizeof(e->name));
+            strlcpy(e->name, bdfs[i], sizeof(e->name));
             strlcpy(e->descr, bdfs[i], sizeof(e->descr));
         }
 
@@ -2401,10 +2478,23 @@ free_bdf:
 
     for (i = 0; i < nbdfs; i++) {
         int parent_idx;
+        unsigned int domain, bus, device, function;
 
         e = netsnmp_entity_get_byIdx(map[i].idx);
         if (!e)
             continue;
+
+        if (_pci_bdf_parts(map[i].bdf, &domain, &bus, &device, &function) &&
+            function > 0) {
+            parent_idx = _pci_function0_idx(map, nbdfs, map[i].bdf);
+            if (parent_idx > 0 && parent_idx != map[i].idx) {
+                e->hidden = 1;
+                e->parent_idx = parent_idx;
+                e->parent_rel_pos = (int)function;
+                continue;
+            }
+        }
+
         parent_idx = _pci_find_parent_idx(map, nbdfs, i);
         if (!parent_idx && strncmp(map[i].bdf + 5, "00:", 3) == 0 &&
             strcmp(map[i].bdf + 8, "00.0") != 0) {
@@ -2420,6 +2510,7 @@ free_bdf:
                 parent_idx = _numa_node_idx(node);
         }
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = _pci_bdf_parent_rel_pos(map[i].bdf);
     }
 
 #ifdef HAVE_PCI_LOOKUP_NAME
@@ -3415,10 +3506,7 @@ _hwmon_parent_idx(const char *name, const char *rp,
 static int
 _hwmon_class(const char *name)
 {
-    if (strcmp(name, "AC") == 0 || strcmp(name, "BAT0") == 0 ||
-        strncmp(name, "ucsi_source_psy_", 16) == 0)
-        return IANA_PHYS_POWERSUPPLY;
-    return IANA_PHYS_MODULE;
+    return IANA_PHYS_OTHER;
 }
 
 static void
@@ -3493,6 +3581,7 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = _hwmon_class(chips[ci].name);
         e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp,
                                           pci_map, pci_map_n);
+        e->parent_rel_pos = -1;
         strlcpy(e->name,  chips[ci].dir, sizeof(e->name));
         strlcpy(e->descr, chips[ci].name, sizeof(e->descr));
         strlcpy(e->model_name, chips[ci].name, sizeof(e->model_name));
@@ -3666,6 +3755,8 @@ _load_rtc(pci_entity_map *pci_map, int pci_map_n)
 
         e->iana_class = IANA_PHYS_MODULE;
         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+        if (!parent_idx)
+            e->parent_rel_pos = -1;
         strlcpy(e->name, de->d_name, sizeof(e->name));
 
         snprintf(path, sizeof(path), "%s/%s/name", RTC_PATH, de->d_name);
@@ -3738,6 +3829,45 @@ _ptp_clock_name_is_model(const char *name)
     return 1;
 }
 
+static int
+_net_port_idx_by_name(const char *ifname)
+{
+    netsnmp_entity_info *e;
+
+    if (!ifname || !ifname[0])
+        return 0;
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        if (e->iana_class == IANA_PHYS_PORT && strcmp(e->name, ifname) == 0)
+            return e->idx;
+    }
+    return 0;
+}
+
+static int
+_ptp_net_port_idx(const char *ptp_name)
+{
+    DIR *dir;
+    struct dirent *de;
+    char path[512];
+    int idx;
+
+    snprintf(path, sizeof(path), "%s/%s/device/net", PTP_PATH, ptp_name);
+    dir = opendir(path);
+    if (!dir)
+        return 0;
+
+    idx = 0;
+    while ((de = readdir(dir)) != NULL) {
+        if (de->d_name[0] == '.')
+            continue;
+        idx = _net_port_idx_by_name(de->d_name);
+        if (idx > 0)
+            break;
+    }
+    closedir(dir);
+    return idx;
+}
+
 static void
 _load_ptp(pci_entity_map *pci_map, int pci_map_n)
 {
@@ -3752,7 +3882,7 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
         char key[128], clock_name[128], max_adj[64], pps[16], devname[128];
-        int idx, pci_idx;
+        int idx, parent_idx;
 
         if (strncmp(de->d_name, "ptp", 3) != 0 ||
             !isdigit((unsigned char)de->d_name[3]))
@@ -3767,13 +3897,9 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
         if (idx <= 0)
             continue;
 
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
-        if (pci_idx > 0) {
-            netsnmp_entity_info *parent = netsnmp_entity_get_byIdx(pci_idx);
-            if (parent && parent->iana_class == IANA_PHYS_PORT &&
-                parent->parent_idx > 0)
-                pci_idx = parent->parent_idx;
-        }
+        parent_idx = _ptp_net_port_idx(de->d_name);
+        if (!parent_idx)
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -3790,7 +3916,8 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
 
         e->iana_class = IANA_PHYS_OTHER;
         e->is_fru     = TV_FALSE;
-        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = -1;
         strlcpy(e->name, de->d_name, sizeof(e->name));
         strlcpy(e->descr, "Precision Time Protocol clock", sizeof(e->descr));
         if (_ptp_clock_name_is_model(clock_name))
@@ -3863,6 +3990,8 @@ _load_tpm(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_MODULE;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        if (!pci_idx)
+            e->parent_rel_pos = -1;
         strlcpy(e->name, de->d_name, sizeof(e->name));
         strlcpy(e->descr, "Trusted Platform Module", sizeof(e->descr));
 
@@ -4129,6 +4258,8 @@ _load_gpio(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_MODULE;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        if (!pci_idx)
+            e->parent_rel_pos = -1;
         strlcpy(e->name, de->d_name, sizeof(e->name));
         _set_if_valid(e->model_name, sizeof(e->model_name), label);
 
@@ -4198,6 +4329,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
         e->iana_class = IANA_PHYS_BACKPLANE;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        e->parent_rel_pos = bus;
         strlcpy(e->name, de->d_name, sizeof(e->name));
 
         snprintf(path, sizeof(path), "%s/%s/name", I2C_DEV_PATH, de->d_name);
@@ -4261,6 +4393,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
             ce->iana_class = IANA_PHYS_MODULE;
             ce->is_fru     = TV_FALSE;
             ce->parent_idx = idx;
+            ce->parent_rel_pos = (int)addr;
             strlcpy(ce->name, dev_de->d_name, sizeof(ce->name));
 
             if (child_name[0]) {
