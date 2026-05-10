@@ -58,7 +58,6 @@ Fixed index ranges are used for broad device classes:
 
 - `1`: chassis
 - `10`: baseboard
-- `20`: BIOS
 - `100`: memory container
 - `110+`: DIMMs
 - `200+`: CPUs
