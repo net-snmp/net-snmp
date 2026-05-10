@@ -2531,7 +2531,6 @@ free_bdf:
             function > 0) {
             parent_idx = _pci_function0_idx(map, nbdfs, map[i].bdf);
             if (parent_idx > 0 && parent_idx != map[i].idx) {
-                e->hidden = 1;
                 e->parent_idx = parent_idx;
                 e->parent_rel_pos = (int)function;
                 continue;
