@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -2327,7 +2328,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
     netsnmp_entity_info *e;
 #ifdef HAVE_PCI_LOOKUP_NAME
     char namebuf[256];
-    struct pci_access *pacc;
+    struct pci_access *pacc = NULL;
 #endif
 
     *map_out = NULL;
@@ -2366,9 +2367,14 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         goto free_bdfs;
 
 #ifdef HAVE_PCI_LOOKUP_NAME
-    pacc = pci_alloc();
-    if (pacc)
-        pci_init(pacc);
+    {
+        struct stat _st;
+        if (stat("/proc/bus/pci", &_st) == 0) {
+            pacc = pci_alloc();
+            if (pacc)
+                pci_init(pacc);
+        }
+    }
 #endif
 
     for (i = 0; i < nbdfs; i++) {
