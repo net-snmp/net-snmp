@@ -1914,10 +1914,11 @@ _plat_find_idx_by_path(plat_entity_map *map, int nmap, const char *path)
     return best_idx;
 }
 
-/* Virtual sysfs directories: no entity, but still recurse into them. */
+/* Virtual/infrastructure sysfs dirs: skip as entity, skip recursion. */
 static const char * const _plat_skip_names[] = {
-    "mmc_host", "block", "net", "power", "subsystem",
+    "mmc_host", "block", "net", "subsystem",
     "firmware_node", "ieee80211", "wireless",
+    "driver",
     NULL
 };
 
@@ -1925,6 +1926,11 @@ static int
 _plat_name_is_skip(const char *name)
 {
     int i;
+    /* power*, wakeup* */
+    if (strncmp(name, "power", 5) == 0)
+        return 1;
+    if (strncmp(name, "wakeup", 6) == 0)
+        return 1;
     for (i = 0; _plat_skip_names[i]; i++)
         if (strcmp(name, _plat_skip_names[i]) == 0)
             return 1;
@@ -1986,18 +1992,25 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
     DIR *dir;
     const struct dirent *de;
 
-    if (depth > 10)
+    if (depth > 10) {
+        snmp_log(LOG_DEBUG, "entity: platform walk depth limit at %s\n", dir_path);
         return;
+    }
 
     dir = opendir(dir_path);
-    if (!dir)
+    if (!dir) {
+        snmp_log(LOG_DEBUG, "entity: platform walk opendir failed: %s\n", dir_path);
         return;
+    }
+
+    snmp_log(LOG_DEBUG, "entity: platform walk depth=%d %s\n", depth, dir_path);
 
     while ((de = readdir(dir)) != NULL) {
         char entry_path[PATH_MAX];
         char key[512];
         int idx, child_parent;
         netsnmp_entity_info *e;
+        struct stat st;
 
         if (de->d_name[0] == '.')
             continue;
@@ -2005,8 +2018,18 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
         snprintf(entry_path, sizeof(entry_path), "%s/%s",
                  dir_path, de->d_name);
 
-        if (_plat_no_recurse(de->d_name))
+        /* Use lstat so we never follow symlinks — sysfs is full of
+         * back-pointers (driver/, subsystem/, bus/) that loop back up
+         * the tree and would cause infinite recursion. */
+        if (lstat(entry_path, &st) != 0)
+            continue;
+        if (!S_ISDIR(st.st_mode))
+            continue; /* skip symlinks, files, etc. */
+
+        if (_plat_no_recurse(de->d_name)) {
+            snmp_log(LOG_DEBUG, "entity: platform skip (no-recurse) %s\n", entry_path);
             continue; /* handled by another loader — skip entirely */
+        }
 
         if (!_plat_name_is_skip(de->d_name) &&
             _plat_is_real_device(de->d_name, entry_path)) {
@@ -2014,6 +2037,9 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
             snprintf(key, sizeof(key), "plat:%s", de->d_name);
             idx = _entity_index_alloc(key);
             child_parent = (idx > 0) ? idx : parent_idx;
+
+            snmp_log(LOG_DEBUG, "entity: platform device %s idx=%d parent=%d\n",
+                     entry_path, idx, parent_idx);
 
             if (idx > 0) {
                 e = netsnmp_entity_get_byIdx(idx);
@@ -2025,6 +2051,10 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
                         strlcpy(e->name, de->d_name, sizeof(e->name));
                         _append_file_uri(e->uris, sizeof(e->uris), entry_path);
+                    } else {
+                        snmp_log(LOG_WARNING,
+                                 "entity: platform entity_create failed idx=%d %s\n",
+                                 idx, entry_path);
                     }
                 }
 
@@ -2033,6 +2063,11 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                     plat_entity_map *tmp = (plat_entity_map *)realloc(
                         *map, new_cap * sizeof(**map));
                     if (tmp) { *map = tmp; *cap = new_cap; }
+                    else {
+                        snmp_log(LOG_ERR,
+                                 "entity: platform map realloc failed at %d entries\n",
+                                 *nmap);
+                    }
                 }
                 if (*nmap < *cap) {
                     strlcpy((*map)[*nmap].real_path, entry_path,
@@ -2040,8 +2075,13 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                     (*map)[*nmap].idx = idx;
                     (*nmap)++;
                 }
+            } else {
+                snmp_log(LOG_WARNING,
+                         "entity: platform index_alloc failed for %s\n", key);
             }
         } else {
+            snmp_log(LOG_DEBUG, "entity: platform skip (virtual/no-driver) %s\n",
+                     entry_path);
             child_parent = parent_idx; /* virtual dir — pass parent through */
         }
 
@@ -2058,7 +2098,9 @@ _load_platform(plat_entity_map **map_out, int *nmap_out)
     plat_entity_map *map = NULL;
     int nmap = 0, cap = 0;
 
+    snmp_log(LOG_NOTICE, "entity: _load_platform starting\n");
     _load_platform_walk(PLAT_PREFIX, IDX_BASEBOARD, 0, &map, &nmap, &cap);
+    snmp_log(LOG_NOTICE, "entity: _load_platform done, %d entries\n", nmap);
 
     *map_out  = map;
     *nmap_out = nmap;
@@ -3099,7 +3141,8 @@ _load_ata_ports(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 6: USB devices ------------------------------------------------ */
 
 static void
-_load_usb(pci_entity_map *pci_map, int pci_map_n)
+_load_usb(pci_entity_map *pci_map, int pci_map_n,
+          plat_entity_map *plat_map, int plat_map_n)
 {
     DIR *dir;
     const struct dirent *de;
@@ -3254,7 +3297,8 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
 }
 
 static void
-_load_net_devices(pci_entity_map *pci_map, int pci_map_n)
+_load_net_devices(pci_entity_map *pci_map, int pci_map_n,
+                  plat_entity_map *plat_map, int plat_map_n)
 {
     DIR *dir;
     struct dirent *de;
@@ -3583,7 +3627,8 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 }
 
 static void
-_load_mmc_disks(pci_entity_map *pci_map, int pci_map_n)
+_load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
+                plat_entity_map *plat_map, int plat_map_n)
 {
     DIR *dir;
     struct dirent *de;
@@ -5472,9 +5517,10 @@ _write_entity_state(void)
 int
 netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
-    pci_entity_map *pci_map = NULL;
+    pci_entity_map  *pci_map  = NULL;
+    plat_entity_map *plat_map = NULL;
     netsnmp_entity_info *old_entities = NULL;
-    int pci_map_n = 0;
+    int pci_map_n = 0, plat_map_n = 0;
     uint32_t hash_before, hash_after;
     static int first_load = 1;
 
@@ -5495,11 +5541,12 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_caches();
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
+    _load_platform(&plat_map, &plat_map_n);
     _load_ata_ports(pci_map, pci_map_n);
-    _load_usb(pci_map, pci_map_n);
-    _load_net_devices(pci_map, pci_map_n);
+    _load_usb(pci_map, pci_map_n, plat_map, plat_map_n);
+    _load_net_devices(pci_map, pci_map_n, plat_map, plat_map_n);
     _load_scsi_disks(pci_map, pci_map_n);
-    _load_mmc_disks(pci_map, pci_map_n);
+    _load_mmc_disks(pci_map, pci_map_n, plat_map, plat_map_n);
     _load_nvme(pci_map, pci_map_n);
     _load_i2c(pci_map, pci_map_n);
     _load_acpi();
@@ -5514,6 +5561,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_rtc(pci_map, pci_map_n);
 
     free(pci_map);
+    free(plat_map);
     _numa_fix_top_level_parents();
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
