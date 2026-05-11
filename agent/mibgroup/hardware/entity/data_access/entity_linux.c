@@ -3644,9 +3644,9 @@ _load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128];
+        char key[512];
         const char *np;
-        int idx, pci_idx;
+        int idx, plat_idx, pci_idx;
 
         if (strncmp(de->d_name, "mmcblk", 6) != 0)
             continue;
@@ -3664,6 +3664,42 @@ _load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
         snprintf(path, sizeof(path), "%s/%s/device/serial", BLOCK_PATH,
                  de->d_name);
         _sysfs_read(path, val, sizeof(val));
+
+        /*
+         * If the platform walker already created an entity for this card's
+         * sysfs device node (e.g. mmc0:aaaa), enrich it with block-device
+         * details rather than creating a separate entity.
+         */
+        plat_idx = rp[0] ? _plat_find_idx_by_path(plat_map, plat_map_n, rp) : 0;
+        if (plat_idx) {
+            e = netsnmp_entity_get_byIdx(plat_idx);
+            if (!e)
+                e = netsnmp_entity_create(plat_idx);
+            if (!e)
+                continue;
+            e->iana_class = IANA_PHYS_STORAGE;
+            e->is_fru     = TV_TRUE;
+            strlcpy(e->name, de->d_name, sizeof(e->name));
+            strlcpy(e->mfg_name, "MMC", sizeof(e->mfg_name));
+            _set_if_valid(e->serial, sizeof(e->serial), val);
+
+            snprintf(path, sizeof(path), "%s/%s/device/name", BLOCK_PATH,
+                     de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            _set_if_valid(e->model_name, sizeof(e->model_name), val);
+
+            _block_disk_descr("MMC/SD card", de->d_name, e->descr,
+                              sizeof(e->descr));
+            _block_append_uris(e, de->d_name);
+            if (e->serial[0])
+                snprintf(key, sizeof(key), "mmc:%s", e->serial);
+            else
+                snprintf(key, sizeof(key), "block:%s", de->d_name);
+            _append_uri(e->uris, sizeof(e->uris), key);
+            continue;
+        }
+
+        /* No platform entity — PCI-attached reader or no platform walker data */
         if (val[0])
             snprintf(key, sizeof(key), "mmc:%s", val);
         else
