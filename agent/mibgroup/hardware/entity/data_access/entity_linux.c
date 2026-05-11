@@ -759,7 +759,7 @@ _nvme_append_uris(netsnmp_entity_info *e, const char *ctrl_name)
 static void
 _usb_append_uris(netsnmp_entity_info *e, const char *name)
 {
-    char path[PATH_MAX], val[64], vendor[32], product[32], serial[128];
+    char path[PATH_MAX], val[256], vendor[32], product[32], serial[128];
     char busnum_str[32], devnum_str[32], devname[128];
     int busnum, devnum;
     const char *sp;
@@ -1389,14 +1389,19 @@ _load_cpus(void)
                  "CPU package %d, %d cores, %d threads", i,
                  pkg_cores[i], pkg_threads[i]);
         _set_if_valid(e->model_name, sizeof(e->model_name), model);
-        if (family[0] || model_id[0] || stepping[0])
-            snprintf(e->hw_rev, sizeof(e->hw_rev),
-                     "family %s model %s stepping %s",
+        if (family[0] || model_id[0] || stepping[0]) {
+            char _hw[256];
+            snprintf(_hw, sizeof(_hw), "family %s model %s stepping %s",
                      family[0] ? family : "?",
                      model_id[0] ? model_id : "?",
                      stepping[0] ? stepping : "?");
-        if (microcode[0])
-            snprintf(e->fw_rev, sizeof(e->fw_rev), "microcode %s", microcode);
+            strlcpy(e->hw_rev, _hw, sizeof(e->hw_rev));
+        }
+        if (microcode[0]) {
+            char _fw[128];
+            snprintf(_fw, sizeof(_fw), "microcode %s", microcode);
+            strlcpy(e->fw_rev, _fw, sizeof(e->fw_rev));
+        }
         snprintf(path, sizeof(path), "/sys/devices/system/cpu");
         _append_file_uri(e->uris, sizeof(e->uris), path);
 
@@ -1408,7 +1413,8 @@ _load_cpus(void)
             e->is_fru     = TV_FALSE;
             snprintf(e->name, sizeof(e->name), "cpu-package%d-logical", i);
             strlcpy(e->descr, "Logical CPUs", sizeof(e->descr));
-            snprintf(e->uris, sizeof(e->uris), "file://%s", path);
+            strlcpy(e->uris, "file://", sizeof(e->uris));
+            strlcat(e->uris, path, sizeof(e->uris));
         }
 
         e = netsnmp_entity_create(IDX_CPU_CACHE_CONTAINER_BASE + i);
@@ -1419,7 +1425,8 @@ _load_cpus(void)
             e->is_fru     = TV_FALSE;
             snprintf(e->name, sizeof(e->name), "cpu-package%d-cache", i);
             strlcpy(e->descr, "CPU caches", sizeof(e->descr));
-            snprintf(e->uris, sizeof(e->uris), "file://%s", path);
+            strlcpy(e->uris, "file://", sizeof(e->uris));
+            strlcat(e->uris, path, sizeof(e->uris));
         }
     }
 
@@ -1557,8 +1564,9 @@ _load_dimms(void)
             continue;
 
         if (strcmp(field, "Locator") == 0) {
-            snprintf(e->alias, sizeof(e->alias), "dmi-memory:%d:%s",
-                     slot - 1, value);
+            char _al[384];
+            snprintf(_al, sizeof(_al), "dmi-memory:%d:%s", slot - 1, value);
+            strlcpy(e->alias, _al, sizeof(e->alias));
         } else if (strcmp(field, "Size") == 0) {
             if (strcmp(value, "No Module Installed") != 0 &&
                 strcmp(value, "Unknown") != 0) {
@@ -1590,7 +1598,7 @@ _load_caches(void)
 {
     DIR *cpu_dir, *cache_dir;
     const struct dirent *cpu_de, *cache_de;
-    char path[512], pkg_id[64], level_s[64];
+    char path[1024], pkg_id[64], level_s[64];
     int seen_pkg[64];
 
     memset(seen_pkg, 0, sizeof(seen_pkg));
@@ -1651,8 +1659,11 @@ _load_caches(void)
             e->parent_idx = IDX_CPU_CACHE_CONTAINER_BASE + phys_id;
             e->parent_rel_pos = cache_idx;
             e->is_fru     = TV_FALSE;
-            snprintf(e->uris, sizeof(e->uris), "file://%s/%s",
-                     cache_path, cache_de->d_name);
+            {
+                char _t[1024];
+                snprintf(_t, sizeof(_t), "%s/%s", cache_path, cache_de->d_name);
+                _append_file_uri(e->uris, sizeof(e->uris), _t);
+            }
 
             if (strcmp(type, "Unified") == 0)
                 snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
@@ -2206,8 +2217,11 @@ _nic_scan_ethtool(netsnmp_entity_info *e, const char *ifname, int sfp_idx)
             }
 
             strlcpy(base, e->descr, sizeof(base));
-            if (modes_buf[0])
-                snprintf(e->descr, sizeof(e->descr), "%s (%s)", base, modes_buf);
+            if (modes_buf[0]) {
+                char _d[512];
+                snprintf(_d, sizeof(_d), "%s (%s)", base, modes_buf);
+                strlcpy(e->descr, _d, sizeof(e->descr));
+            }
         }
     }
 
@@ -2490,14 +2504,13 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
                      PCI_PATH, bdfs[i]);
             _sysfs_read(path, width, sizeof(width));
             if (speed[0] && width[0]) {
-                char base[sizeof(e->descr)];
+                char base[sizeof(e->descr)], _d[512];
                 strlcpy(base, e->descr, sizeof(base));
                 if (base[0])
-                    snprintf(e->descr, sizeof(e->descr), "%s, x%s %s",
-                             base, width, speed);
+                    snprintf(_d, sizeof(_d), "%s, x%s %s", base, width, speed);
                 else
-                    snprintf(e->descr, sizeof(e->descr), "x%s %s",
-                             width, speed);
+                    snprintf(_d, sizeof(_d), "x%s %s", width, speed);
+                strlcpy(e->descr, _d, sizeof(e->descr));
             }
         }
 
@@ -2688,7 +2701,7 @@ _usb_parent_idx_from_path(const char *rp)
     parent_idx = 0;
     for (part = strtok_r(path, "/", &saveptr); part;
          part = strtok_r(NULL, "/", &saveptr)) {
-        char key[128];
+        char key[512];
 
         if (after_usb_host && strchr(part, '-') && !strchr(part, ':')) {
             snprintf(key, sizeof(key), "usb:%s", part);
@@ -2703,7 +2716,7 @@ _usb_parent_idx_from_path(const char *rp)
 static int
 _usb_parent_idx_from_name(const char *name, const char *busnum)
 {
-    char parent[128], key[128], *dot;
+    char parent[256], key[512], *dot;
 
     if (!name || !name[0])
         return 0;
@@ -2977,7 +2990,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n)
         const char *name = de->d_name;
         const char *class_descr;
         char devname[128], speed[64], speed_descr[32], removable[64];
-        char key[128], busnum[16];
+        char key[512], busnum[16];
         int idx, hub_idx;
 
         if (name[0] == '.')
@@ -3070,7 +3083,7 @@ _load_net_devices(pci_entity_map *pci_map, int pci_map_n)
         netsnmp_entity_info *existing;
         const char *ifname = de->d_name;
         const char *ifdescr;
-        char key[128], address[64];
+        char key[PATH_MAX + 8], address[64];
         int idx, ifindex, arphrd, parent_idx;
 
         if (ifname[0] == '.')
@@ -3465,7 +3478,7 @@ _load_nvme(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
         int idx, pci_idx;
-        char key[128];
+        char key[512];
 
         if (de->d_name[0] == '.')
             continue;
@@ -3630,7 +3643,7 @@ _load_acpi(void)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], rp[PATH_MAX], val[128];
+    char path[PATH_MAX + 8], rp[PATH_MAX], val[128];
 
     snprintf(path, sizeof(path), "%s/LNXSYSTM:00", ACPI_PATH);
     if (realpath(path, rp)) {
@@ -3878,7 +3891,7 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n)
     static const char *prefixes[] = { "temp", "fan", "in", "curr", "power", "energy", "humidity", NULL };
     DIR *dir;
     struct dirent *de;
-    char path[512];
+    char path[PATH_MAX + 64];
     hwmon_entry *chips, *tmp;
     int  pi, chip_count, chip_cap, ci;
     char used[HWMON_BUCKETS];
@@ -3924,7 +3937,7 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n)
     for (ci = 0; ci < chip_count; ci++) {
         netsnmp_entity_info *e;
         int chip_base, slot, sensor_seq, n;
-        char rp[PATH_MAX], key[PATH_MAX + 32];
+        char rp[PATH_MAX], key[PATH_MAX + 160];
 
         /* Build a stable key from the realpath of the hwmon dir */
         snprintf(path, sizeof(path), "%s/%s", HWMON_PATH, chips[ci].dir);
@@ -4013,7 +4026,7 @@ _load_power_supply(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
         char mfg[128], model[128], serial[64], tech[64], type[32];
-        char key[128];
+        char key[512];
         int idx, parent_idx;
 
         if (de->d_name[0] == '.')
@@ -4244,7 +4257,7 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128], clock_name[128], max_adj[64], pps[16], devname[128];
+        char key[512], clock_name[128], max_adj[64], pps[16], devname[128];
         int idx, parent_idx;
 
         if (strncmp(de->d_name, "ptp", 3) != 0 ||
@@ -4323,7 +4336,7 @@ _load_tpm(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128], driver[128], modalias[128], val[128], devname[128];
+        char key[512], driver[128], modalias[128], val[128], devname[128];
         char dev_rp[PATH_MAX];
         char acpi_rp[PATH_MAX];
         int idx, parent_idx;
@@ -4419,7 +4432,7 @@ _load_input(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128], val[128], devname[128];
+        char key[512], val[128], devname[128];
         int idx, parent_idx;
 
         if ((strncmp(de->d_name, "js", 2) != 0 ||
@@ -4503,7 +4516,7 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128], name[128], mode[128], size[64], bpp[32], devname[128];
+        char key[512], name[128], mode[128], size[64], bpp[32], devname[128];
         int idx, pci_idx;
 
         if (strncmp(de->d_name, "fb", 2) != 0 ||
@@ -4542,16 +4555,18 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
                  de->d_name);
         _sysfs_read(path, bpp, sizeof(bpp));
 
-        if (name[0] && mode[0] && bpp[0])
-            snprintf(e->descr, sizeof(e->descr), "%s framebuffer %s, %s bpp",
-                     name, mode, bpp);
-        else if (name[0] && size[0] && bpp[0])
-            snprintf(e->descr, sizeof(e->descr), "%s framebuffer %s, %s bpp",
-                     name, size, bpp);
-        else if (name[0])
-            snprintf(e->descr, sizeof(e->descr), "%s framebuffer", name);
-        else
-            strlcpy(e->descr, "Framebuffer graphics device", sizeof(e->descr));
+        {
+            char _d[512];
+            if (name[0] && mode[0] && bpp[0])
+                snprintf(_d, sizeof(_d), "%s framebuffer %s, %s bpp", name, mode, bpp);
+            else if (name[0] && size[0] && bpp[0])
+                snprintf(_d, sizeof(_d), "%s framebuffer %s, %s bpp", name, size, bpp);
+            else if (name[0])
+                snprintf(_d, sizeof(_d), "%s framebuffer", name);
+            else
+                strlcpy(_d, "Framebuffer graphics device", sizeof(_d));
+            strlcpy(e->descr, _d, sizeof(e->descr));
+        }
 
         snprintf(path, sizeof(path), "%s/%s", GRAPHICS_PATH, de->d_name);
         _append_file_uri(e->uris, sizeof(e->uris), path);
@@ -4596,7 +4611,7 @@ _load_gpio(pci_entity_map *pci_map, int pci_map_n)
 
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        char key[128], label[128], ngpio[32], acpi_rp[PATH_MAX];
+        char key[512], label[256], ngpio[32], acpi_rp[PATH_MAX];
         int idx, parent_idx, pci_idx;
 
         if (de->d_name[0] == '.')
@@ -4650,13 +4665,16 @@ _load_gpio(pci_entity_map *pci_map, int pci_map_n)
 
         snprintf(path, sizeof(path), "%s/%s/ngpio", GPIO_PATH, de->d_name);
         _sysfs_read(path, ngpio, sizeof(ngpio));
-        if (label[0] && ngpio[0])
-            snprintf(e->descr, sizeof(e->descr), "GPIO controller %s, %s lines",
-                     label, ngpio);
-        else if (label[0])
-            snprintf(e->descr, sizeof(e->descr), "GPIO controller %s", label);
-        else
-            strlcpy(e->descr, "GPIO controller", sizeof(e->descr));
+        {
+            char _d[512];
+            if (label[0] && ngpio[0])
+                snprintf(_d, sizeof(_d), "GPIO controller %s, %s lines", label, ngpio);
+            else if (label[0])
+                snprintf(_d, sizeof(_d), "GPIO controller %s", label);
+            else
+                strlcpy(_d, "GPIO controller", sizeof(_d));
+            strlcpy(e->descr, _d, sizeof(e->descr));
+        }
 
         snprintf(path, sizeof(path), "%s/%s", GPIO_PATH, de->d_name);
         _append_file_uri(e->uris, sizeof(e->uris), path);
@@ -4677,7 +4695,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
 {
     DIR *dir;
     struct dirent *de;
-    char path[512], rp[PATH_MAX], adapter_rp[PATH_MAX];
+    char path[PATH_MAX + 64], rp[PATH_MAX], adapter_rp[PATH_MAX];
 
     dir = opendir(I2C_DEV_PATH);
     if (!dir)
@@ -4687,7 +4705,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
         netsnmp_entity_info *e;
         DIR *dev_dir;
         struct dirent *dev_de;
-        char key[128], val[128];
+        char key[512], val[128];
         int bus, idx, pci_idx;
 
         if (sscanf(de->d_name, "i2c-%d", &bus) != 1)
@@ -4742,7 +4760,7 @@ _load_i2c(pci_entity_map *pci_map, int pci_map_n)
 
         while ((dev_de = readdir(dev_dir)) != NULL) {
             netsnmp_entity_info *ce;
-            char child_path[512], child_rp[PATH_MAX];
+            char child_path[1024], child_rp[PATH_MAX];
             char child_name[128], modalias[128], driver[128];
             int child_idx, child_bus;
             unsigned int addr;
