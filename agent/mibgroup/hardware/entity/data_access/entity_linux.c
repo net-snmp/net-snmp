@@ -2910,8 +2910,8 @@ _usb_iana_class(const char *name)
 
     _usb_class_info(name, &cls, NULL, NULL);
     switch (cls) {
-    case 0x09: return IANA_PHYS_CONTAINER;  /* Hub          */
-    default:   return IANA_PHYS_OTHER;
+    case 0x09: return IANA_PHYS_CONTAINER; /* Hub */
+    default:   return IANA_PHYS_MODULE;    /* pluggable functional unit */
     }
 }
 
@@ -3165,6 +3165,82 @@ _load_ata_ports(pci_entity_map *pci_map, int pci_map_n)
 
 /* ---- Phase 6: USB devices ------------------------------------------------ */
 
+/*
+ * Parse usb.ids (the same database lsusb uses) to resolve VID → manufacturer
+ * and VID:PID → product name.  The file format is:
+ *   [0-9a-f]{4}  Vendor Name          (vendor line)
+ *   \t[0-9a-f]{4}  Product Name       (product line, indented one tab)
+ * Class/subclass blocks start with "C " and are ignored.
+ * We scan forward to our VID, collect the vendor name, then scan the
+ * following product lines until we find the PID or reach the next vendor.
+ */
+static void
+_usb_lookup(int vid, int pid, char *out_mfg, size_t mfg_sz,
+            char *out_model, size_t model_sz)
+{
+    static const char *paths[] = {
+        "/usr/share/misc/usb.ids",
+        "/usr/share/hwdata/usb.ids",
+        "/var/lib/usbutils/usb.ids",
+        NULL
+    };
+    FILE *f = NULL;
+    char line[512], *p, *nl;
+    int found_vid = 0, lv, i;
+
+    out_mfg[0] = out_model[0] = '\0';
+
+    for (i = 0; paths[i]; i++) {
+        f = fopen(paths[i], "r");
+        if (f)
+            break;
+    }
+    if (!f)
+        return;
+
+    while (fgets(line, sizeof(line), f)) {
+        if (line[0] == '#' || line[0] == '\n' || line[0] == '\r')
+            continue;
+
+        if (line[0] == '\t' && line[1] != '\t') {
+            /* Single-tab line = product entry under current vendor */
+            if (!found_vid || out_model[0])
+                continue;
+            /* Must be exactly: \t + 4 hex digits + 2 spaces */
+            if (!isxdigit((unsigned char)line[1]) ||
+                !isxdigit((unsigned char)line[2]) ||
+                !isxdigit((unsigned char)line[3]) ||
+                !isxdigit((unsigned char)line[4]) ||
+                line[5] != ' ' || line[6] != ' ')
+                continue;
+            if (sscanf(line + 1, "%4x", &lv) == 1 && lv == pid) {
+                p = line + 7;
+                while (*p == ' ') p++;
+                nl = strchr(p, '\n'); if (nl) *nl = '\0';
+                strlcpy(out_model, p, model_sz);
+            }
+        } else if (line[0] != '\t') {
+            /* Vendor line: must be exactly 4 hex digits + 2 spaces */
+            if (!isxdigit((unsigned char)line[0]) ||
+                !isxdigit((unsigned char)line[1]) ||
+                !isxdigit((unsigned char)line[2]) ||
+                !isxdigit((unsigned char)line[3]) ||
+                line[4] != ' ' || line[5] != ' ')
+                continue;
+            if (found_vid)
+                break; /* past our vendor's section */
+            if (sscanf(line, "%4x", &lv) == 1 && lv == vid) {
+                found_vid = 1;
+                p = line + 6;
+                while (*p == ' ') p++;
+                nl = strchr(p, '\n'); if (nl) *nl = '\0';
+                strlcpy(out_mfg, p, mfg_sz);
+            }
+        }
+    }
+    fclose(f);
+}
+
 static void
 _load_usb(pci_entity_map *pci_map, int pci_map_n,
           plat_entity_map *plat_map, int plat_map_n)
@@ -3325,6 +3401,39 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n,
         snprintf(path, sizeof(path), "%s/%s/bcdDevice", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
+
+        /* Fallback: usb.ids lookup when USB descriptor strings are absent */
+        if (!e->mfg_name[0] || !e->model_name[0]) {
+            char vid_str[16], pid_str[16];
+            char lk_mfg[128], lk_model[128];
+            int vid, pid;
+
+            snprintf(path, sizeof(path), "%s/%s/idVendor",  USB_PATH, name);
+            _sysfs_read(path, vid_str, sizeof(vid_str));
+            snprintf(path, sizeof(path), "%s/%s/idProduct", USB_PATH, name);
+            _sysfs_read(path, pid_str, sizeof(pid_str));
+
+            vid = vid_str[0] ? (int)strtol(vid_str, NULL, 16) : 0;
+            pid = pid_str[0] ? (int)strtol(pid_str, NULL, 16) : 0;
+
+            if (vid) {
+                _usb_lookup(vid, pid, lk_mfg, sizeof(lk_mfg),
+                            lk_model, sizeof(lk_model));
+                if (lk_mfg[0] && !e->mfg_name[0])
+                    strlcpy(e->mfg_name, lk_mfg, sizeof(e->mfg_name));
+                if (lk_model[0] && !e->model_name[0]) {
+                    strlcpy(e->model_name, lk_model, sizeof(e->model_name));
+                    /* Prepend model to description */
+                    if (!strstr(e->descr, lk_model)) {
+                        char tmp[sizeof(e->descr)];
+                        strlcpy(tmp, e->descr, sizeof(tmp));
+                        strlcpy(e->descr, lk_model, sizeof(e->descr));
+                        strlcat(e->descr, " ",       sizeof(e->descr));
+                        strlcat(e->descr, tmp,       sizeof(e->descr));
+                    }
+                }
+            }
+        }
 
         _usb_append_uris(e, name);
     }
@@ -5720,6 +5829,56 @@ _write_entity_state(void)
 
 /* ---- MDIO buses and PHY devices ------------------------------------------ */
 
+/*
+ * Look up the manufacturer name for a PHY OUI using the IEEE OUI database
+ * (ieee-data package).  The 22-bit value extracted from PHY ID registers
+ * encodes IEEE OUI bits [24:3], so ieee_oui_24bit = phy_oui << 2.
+ *
+ * oui.txt format (base-16 record, one per OUI):
+ *   XXXXXX     (base 16)\t\tVendor Name
+ */
+static void
+_oui_lookup(int phy_oui, char *out_mfg, size_t mfg_sz)
+{
+    static const char *paths[] = {
+        "/usr/share/misc/oui.txt",
+        "/usr/share/ieee-data/oui.txt",
+        "/var/lib/ieee-data/oui.txt",
+        NULL
+    };
+    char target[8], line[256], *p, *nl;
+    int ieee_oui = (phy_oui << 2) & 0xFFFFFF;
+    FILE *f = NULL;
+    int i;
+
+    out_mfg[0] = '\0';
+    snprintf(target, sizeof(target), "%06X", ieee_oui);
+
+    for (i = 0; paths[i]; i++) {
+        f = fopen(paths[i], "r");
+        if (f)
+            break;
+    }
+    if (!f)
+        return;
+
+    while (fgets(line, sizeof(line), f)) {
+        /* Match "XXXXXX     (base 16)\t\tVendor Name" */
+        if (strncasecmp(line, target, 6) != 0)
+            continue;
+        p = line + 6;
+        while (*p == ' ') p++;
+        if (strncmp(p, "(base 16)", 9) != 0)
+            continue;
+        p += 9;
+        while (*p == ' ' || *p == '\t') p++;
+        nl = strchr(p, '\n'); if (nl) *nl = '\0';
+        strlcpy(out_mfg, p, mfg_sz);
+        break;
+    }
+    fclose(f);
+}
+
 static void
 _load_mdio(pci_entity_map *pci_map, int pci_map_n,
            plat_entity_map *plat_map, int plat_map_n)
@@ -5782,24 +5941,63 @@ _load_mdio(pci_entity_map *pci_map, int pci_map_n,
             e->parent_idx = parent_idx;
             strlcpy(e->name, phy_de->d_name, sizeof(e->name));
 
-            snprintf(path, sizeof(path), "%s/%s/phy_id",
-                     bus_path, phy_de->d_name);
+            strlcpy(path, bus_path,          sizeof(path));
+            strlcat(path, "/",               sizeof(path));
+            strlcat(path, phy_de->d_name,    sizeof(path));
+            strlcat(path, "/phy_id",         sizeof(path));
             _sysfs_read(path, val, sizeof(val));
             phy_id = val[0] ? strtol(val, NULL, 0) : 0;
 
             if (phy_id) {
+                char mfg[128], driver[64];
                 int oui   = (int)((phy_id >> 10) & 0x3fffff);
-                int model = (int)((phy_id >> 4) & 0x3f);
+                int oui_m = (int)((phy_id >> 4) & 0x3f);
                 int rev   = (int)(phy_id & 0xf);
-                snprintf(e->descr, sizeof(e->descr),
-                         "Ethernet PHY OUI:%06x model:%02x rev:%x",
-                         oui, model, rev);
+                ssize_t lr;
+
+                /* Manufacturer: IEEE OUI database */
+                _oui_lookup(oui, mfg, sizeof(mfg));
+                if (mfg[0])
+                    strlcpy(e->mfg_name, mfg, sizeof(e->mfg_name));
+
+                /* Model: bound kernel driver name via sysfs symlink */
+                driver[0] = '\0';
+                strlcpy(path, bus_path,       sizeof(path));
+                strlcat(path, "/",            sizeof(path));
+                strlcat(path, phy_de->d_name, sizeof(path));
+                strlcat(path, "/driver",      sizeof(path));
+                lr = readlink(path, val, sizeof(val) - 1);
+                if (lr > 0) {
+                    char *sl;
+                    val[lr] = '\0';
+                    sl = strrchr(val, '/');
+                    strlcpy(driver, sl ? sl + 1 : val, sizeof(driver));
+                    strlcpy(e->model_name, driver, sizeof(e->model_name));
+                }
+
+                if (mfg[0] && driver[0])
+                    snprintf(e->descr, sizeof(e->descr),
+                             "%s Ethernet PHY (%s) rev %x",
+                             mfg, driver, rev);
+                else if (mfg[0])
+                    snprintf(e->descr, sizeof(e->descr),
+                             "%s Ethernet PHY model:%02x rev:%x",
+                             mfg, oui_m, rev);
+                else if (driver[0])
+                    snprintf(e->descr, sizeof(e->descr),
+                             "Ethernet PHY (%s) rev %x", driver, rev);
+                else
+                    snprintf(e->descr, sizeof(e->descr),
+                             "Ethernet PHY OUI:%06x model:%02x rev:%x",
+                             oui, oui_m, rev);
                 snprintf(e->hw_rev, sizeof(e->hw_rev), "%x", rev);
             } else {
                 strlcpy(e->descr, "Ethernet PHY", sizeof(e->descr));
             }
 
-            snprintf(path, sizeof(path), "%s/%s", bus_path, phy_de->d_name);
+            strlcpy(path, bus_path,       sizeof(path));
+            strlcat(path, "/",            sizeof(path));
+            strlcat(path, phy_de->d_name, sizeof(path));
             _append_file_uri(e->uris, sizeof(e->uris), path);
         }
         closedir(phy_dir);
