@@ -1884,6 +1884,186 @@ typedef struct pci_entity_map_s {
     char real_path[PATH_MAX];
 } pci_entity_map;
 
+
+/* ---- Platform tree (walk-first) ------------------------------------------ */
+
+#define PLAT_PREFIX     "/sys/devices/platform"
+#define PLAT_PREFIX_LEN (sizeof(PLAT_PREFIX) - 1)
+
+typedef struct {
+    char real_path[PATH_MAX];
+    int  idx;
+} plat_entity_map;
+
+static int
+_plat_find_idx_by_path(plat_entity_map *map, int nmap, const char *path)
+{
+    int i, best_idx = 0, best_len = 0;
+    size_t plen = strlen(path);
+
+    for (i = 0; i < nmap; i++) {
+        int mlen = (int)strlen(map[i].real_path);
+        if (mlen <= best_len || (size_t)mlen > plen)
+            continue;
+        if (strncmp(path, map[i].real_path, mlen) == 0 &&
+            (path[mlen] == '\0' || path[mlen] == '/')) {
+            best_len = mlen;
+            best_idx = map[i].idx;
+        }
+    }
+    return best_idx;
+}
+
+/* Virtual sysfs directories: no entity, but still recurse into them. */
+static const char * const _plat_skip_names[] = {
+    "mmc_host", "block", "net", "power", "subsystem",
+    "firmware_node", "ieee80211", "wireless",
+    NULL
+};
+
+static int
+_plat_name_is_skip(const char *name)
+{
+    int i;
+    for (i = 0; _plat_skip_names[i]; i++)
+        if (strcmp(name, _plat_skip_names[i]) == 0)
+            return 1;
+    return 0;
+}
+
+/* Subsystem directories managed by other loaders: no entity, no recursion. */
+static int
+_plat_no_recurse(const char *name)
+{
+    /* USB bus entries (usb1, usb2, …) are handled by _load_usb */
+    if (strncmp(name, "usb", 3) == 0 && isdigit((unsigned char)name[3]))
+        return 1;
+    return 0;
+}
+
+static int
+_plat_iana_class(const char *name)
+{
+    /* MMC/SDIO card or function: mmc<N>:<addr>[:<func>] */
+    if (strncmp(name, "mmc", 3) == 0 && strchr(name, ':'))
+        return IANA_PHYS_MODULE;
+    return IANA_PHYS_CONTAINER;
+}
+
+/*
+ * Return 1 if path/uevent contains a DRIVER= line (real bound bus device),
+ * or if name matches the mmc<N>:<addr> card/function pattern (which may
+ * not have a driver when it is an unbound SDIO device).
+ */
+static int
+_plat_is_real_device(const char *name, const char *path)
+{
+    char uevent[PATH_MAX];
+    char line[256];
+    FILE *f;
+
+    if (strncmp(name, "mmc", 3) == 0 && strchr(name, ':'))
+        return 1; /* MMC/SDIO cards and functions are always real devices */
+
+    snprintf(uevent, sizeof(uevent), "%s/uevent", path);
+    f = fopen(uevent, "r");
+    if (!f)
+        return 0;
+    while (fgets(line, sizeof(line), f)) {
+        if (strncmp(line, "DRIVER=", 7) == 0) {
+            fclose(f);
+            return 1;
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+static void
+_load_platform_walk(const char *dir_path, int parent_idx, int depth,
+                    plat_entity_map **map, int *nmap, int *cap)
+{
+    DIR *dir;
+    const struct dirent *de;
+
+    if (depth > 10)
+        return;
+
+    dir = opendir(dir_path);
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        char entry_path[PATH_MAX];
+        char key[512];
+        int idx, child_parent;
+        netsnmp_entity_info *e;
+
+        if (de->d_name[0] == '.')
+            continue;
+
+        snprintf(entry_path, sizeof(entry_path), "%s/%s",
+                 dir_path, de->d_name);
+
+        if (_plat_no_recurse(de->d_name))
+            continue; /* handled by another loader — skip entirely */
+
+        if (!_plat_name_is_skip(de->d_name) &&
+            _plat_is_real_device(de->d_name, entry_path)) {
+
+            snprintf(key, sizeof(key), "plat:%s", de->d_name);
+            idx = _entity_index_alloc(key);
+            child_parent = (idx > 0) ? idx : parent_idx;
+
+            if (idx > 0) {
+                e = netsnmp_entity_get_byIdx(idx);
+                if (!e) {
+                    e = netsnmp_entity_create(idx);
+                    if (e) {
+                        e->iana_class = _plat_iana_class(de->d_name);
+                        e->is_fru     = TV_FALSE;
+                        e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
+                        strlcpy(e->name, de->d_name, sizeof(e->name));
+                        _append_file_uri(e->uris, sizeof(e->uris), entry_path);
+                    }
+                }
+
+                if (*nmap >= *cap) {
+                    int new_cap = *cap ? *cap * 2 : 16;
+                    plat_entity_map *tmp = (plat_entity_map *)realloc(
+                        *map, new_cap * sizeof(**map));
+                    if (tmp) { *map = tmp; *cap = new_cap; }
+                }
+                if (*nmap < *cap) {
+                    strlcpy((*map)[*nmap].real_path, entry_path,
+                            sizeof((*map)[*nmap].real_path));
+                    (*map)[*nmap].idx = idx;
+                    (*nmap)++;
+                }
+            }
+        } else {
+            child_parent = parent_idx; /* virtual dir — pass parent through */
+        }
+
+        _load_platform_walk(entry_path, child_parent, depth + 1,
+                            map, nmap, cap);
+    }
+
+    closedir(dir);
+}
+
+static void
+_load_platform(plat_entity_map **map_out, int *nmap_out)
+{
+    plat_entity_map *map = NULL;
+    int nmap = 0, cap = 0;
+
+    _load_platform_walk(PLAT_PREFIX, IDX_BASEBOARD, 0, &map, &nmap, &cap);
+
+    *map_out  = map;
+    *nmap_out = nmap;
+}
+
 static int
 _pci_find_idx(pci_entity_map *map, int nmap, const char *bdf)
 {
