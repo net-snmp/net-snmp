@@ -1107,7 +1107,6 @@ _load_dmi(void)
     e->iana_class = IANA_PHYS_CHASSIS;
     e->parent_idx = 0;
     e->is_fru     = TV_TRUE;
-    strlcpy(e->name,  "chassis",        sizeof(e->name));
     strlcpy(e->descr, "System Chassis", sizeof(e->descr));
     snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
     _dmi_field("sys_vendor",     e->mfg_name,   sizeof(e->mfg_name));
@@ -1127,7 +1126,6 @@ _load_dmi(void)
     e->iana_class = IANA_PHYS_BACKPLANE;
     e->parent_idx = IDX_CHASSIS;
     e->is_fru     = TV_TRUE;
-    strlcpy(e->name,  "baseboard", sizeof(e->name));
     strlcpy(e->descr, "Baseboard", sizeof(e->descr));
     snprintf(e->uris, sizeof(e->uris), "file://%s", DMI_PATH);
     _dmi_field("board_vendor",  e->mfg_name,   sizeof(e->mfg_name));
@@ -2006,9 +2004,58 @@ _plat_is_real_device(const char *name, const char *path)
             fclose(f);
             return 1;
         }
+        /* Pure structural DT bus nodes: transparent like DT address nodes */
+        if (strncmp(line, "OF_COMPATIBLE_0=simple-bus", 26) == 0 ||
+            strncmp(line, "OF_COMPATIBLE_0=simple-mfd", 26) == 0) {
+            fclose(f);
+            return 0;
+        }
     }
     fclose(f);
     return 0;
+}
+
+/*
+ * Read OF_COMPATIBLE_0 and DRIVER from the device uevent to give
+ * platform entities a baseline manufacturer + model name.
+ * OF_COMPATIBLE_0 has the form "vendor,device" — vendor → mfg_name,
+ * device → model_name.  DRIVER fills model_name when compatible is absent.
+ * descr is set to the compatible string if still empty.
+ * Other loaders that enrich the entity further (graphics, gpio, …)
+ * may overwrite these fields.
+ */
+static void
+_plat_enrich_from_uevent(netsnmp_entity_info *e, const char *entry_path)
+{
+    char uevent_path[PATH_MAX + 8];
+    char val[256], *comma;
+
+    strlcpy(uevent_path, entry_path,  sizeof(uevent_path));
+    strlcat(uevent_path, "/uevent",   sizeof(uevent_path));
+
+    val[0] = '\0';
+    _sysfs_read_key(uevent_path, "OF_COMPATIBLE_0", val, sizeof(val));
+    if (val[0]) {
+        if (!e->descr[0])
+            strlcpy(e->descr, val, sizeof(e->descr));
+        comma = strchr(val, ',');
+        if (comma) {
+            *comma = '\0';
+            if (!e->mfg_name[0])
+                strlcpy(e->mfg_name,   val,       sizeof(e->mfg_name));
+            if (!e->model_name[0])
+                strlcpy(e->model_name, comma + 1, sizeof(e->model_name));
+        } else {
+            if (!e->model_name[0])
+                strlcpy(e->model_name, val, sizeof(e->model_name));
+        }
+        return;
+    }
+
+    /* Fallback: DRIVER gives at least a model name */
+    _sysfs_read_key(uevent_path, "DRIVER", val, sizeof(val));
+    if (val[0] && !e->model_name[0])
+        strlcpy(e->model_name, val, sizeof(e->model_name));
 }
 
 static void
@@ -2077,6 +2124,7 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
                         strlcpy(e->name, de->d_name, sizeof(e->name));
                         _append_file_uri(e->uris, sizeof(e->uris), entry_path);
+                        _plat_enrich_from_uevent(e, entry_path);
                     } else {
                         snmp_log(LOG_WARNING,
                                  "entity: platform entity_create failed idx=%d %s\n",
@@ -6026,13 +6074,14 @@ _plat_prune_empty(void)
             netsnmp_entity_info *e = netsnmp_entity_get_byIdx(plat_map[i].idx);
             if (!e || e->hidden)
                 continue;
-            /* Loaders may enrich a platform entry in-place (e.g. mmc disk
-             * enriches mmc0:aaaa rather than creating a child).  Such entries
-             * are no longer bare containers and must not be pruned. */
+            /* Loaders may change the class of a platform entry (e.g. mmc disk
+             * enriches mmc0:aaaa to STORAGE).  Non-containers are never pruned.
+             * Serial number indicates a FRU-worthy device — keep it even without
+             * children.  uevent-derived descr/mfg/model alone are not enough to
+             * keep a structurally empty container visible. */
             if (e->iana_class != IANA_PHYS_CONTAINER)
                 continue;
-            if (e->descr[0] || e->serial[0] ||
-                e->model_name[0] || e->mfg_name[0])
+            if (e->serial[0])
                 continue;
             if (_plat_has_visible_child(plat_map[i].idx))
                 continue;
