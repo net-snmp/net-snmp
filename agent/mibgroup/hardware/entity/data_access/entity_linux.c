@@ -41,6 +41,7 @@
 #define I2C_DEV_PATH "/sys/class/i2c-dev"
 #define GRAPHICS_PATH "/sys/class/graphics"
 #define GPIO_PATH   "/sys/class/gpio"
+#define MDIO_PATH   "/sys/class/mdio_bus"
 #define NODE_PATH   "/sys/devices/system/node"
 #define ACPI_PATH   "/sys/bus/acpi/devices"
 #define THERMAL_PATH "/sys/class/thermal"
@@ -1957,6 +1958,22 @@ _plat_iana_class(const char *name)
 }
 
 /*
+ * Device-tree node addresses: 4+ lowercase hex digits followed by '.'
+ * (e.g. "3f007000.dma-controller", "fe201000.uart").  These are kernel
+ * internal bus registrations with no value as SNMP entities.  The walker
+ * still recurses through them so real children (mmc cards, USB hubs) reach
+ * their nearest named ancestor.
+ */
+static int
+_plat_is_dt_addr(const char *name)
+{
+    const char *p = name;
+    int n = 0;
+    while (isxdigit((unsigned char)*p)) { p++; n++; }
+    return n >= 4 && *p == '.';
+}
+
+/*
  * Return 1 if path/uevent contains a DRIVER= line (real bound bus device),
  * or if name matches the mmc<N>:<addr> card/function pattern (which may
  * not have a driver when it is an unbound SDIO device).
@@ -1967,6 +1984,9 @@ _plat_is_real_device(const char *name, const char *path)
     char uevent[PATH_MAX];
     char line[256];
     FILE *f;
+
+    if (_plat_is_dt_addr(name))
+        return 0; /* transparent — recurse but no entity */
 
     if (strncmp(name, "mmc", 3) == 0 && strchr(name, ':'))
         return 1; /* MMC/SDIO cards and functions are always real devices */
@@ -2919,24 +2939,29 @@ static int
 _usb_parent_idx_from_path(const char *rp)
 {
     char path[PATH_MAX], *saveptr, *part;
-    int after_usb_host, parent_idx;
+    int in_usb_tree, parent_idx;
 
     if (!rp || !rp[0])
         return 0;
 
     strlcpy(path, rp, sizeof(path));
-    after_usb_host = 0;
+    in_usb_tree = 0;
     parent_idx = 0;
     for (part = strtok_r(path, "/", &saveptr); part;
          part = strtok_r(NULL, "/", &saveptr)) {
         char key[512];
 
-        if (after_usb_host && strchr(part, '-') && !strchr(part, ':')) {
+        if (!in_usb_tree) {
+            /* Enter USB tree at the root hub (usb1, usb2, …) */
+            in_usb_tree = strncmp(part, "usb", 3) == 0 &&
+                          isdigit((unsigned char)part[3]);
+            continue;
+        }
+        /* Device path: contains '-' but not ':' (interfaces have ':') */
+        if (strchr(part, '-') && !strchr(part, ':')) {
             snprintf(key, sizeof(key), "usb:%s", part);
             parent_idx = _entity_index_alloc(key);
         }
-        after_usb_host = strncmp(part, "usb", 3) == 0 &&
-            isdigit((unsigned char)part[3]);
     }
     return parent_idx;
 }
@@ -3279,6 +3304,14 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n,
         _sysfs_read(path, val, sizeof(val));
         if (val[0])
             strlcpy(e->model_name, val, sizeof(e->model_name));
+
+        /* Fallback: use Device Tree OF_NAME when no USB product string */
+        if (!e->model_name[0]) {
+            snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
+            _sysfs_read_key(path, "OF_NAME", val, sizeof(val));
+            if (val[0])
+                strlcpy(e->model_name, val, sizeof(e->model_name));
+        }
 
         snprintf(path, sizeof(path), "%s/%s/manufacturer", USB_PATH, name);
         _sysfs_read(path, val, sizeof(val));
@@ -3733,6 +3766,126 @@ _load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
     }
 
     closedir(dir);
+
+    /* Enrich SDIO card platform entities with vendor/device/revision */
+    dir = opendir("/sys/bus/mmc/devices");
+    if (dir) {
+        while ((de = readdir(dir)) != NULL) {
+            char mmc_type[32], vendor[16], device[16], rev[16];
+            char rp[PATH_MAX];
+            netsnmp_entity_info *e;
+            int plat_idx;
+
+            if (de->d_name[0] == '.')
+                continue;
+            /* Only mmc<N>:<addr> card entries, not function entries */
+            if (strncmp(de->d_name, "mmc", 3) != 0 || !strchr(de->d_name, ':'))
+                continue;
+            if (strchr(de->d_name, ':') != strrchr(de->d_name, ':'))
+                continue; /* skip mmc1:0001:1 function entries */
+
+            snprintf(path, sizeof(path), "/sys/bus/mmc/devices/%s/type",
+                     de->d_name);
+            _sysfs_read(path, mmc_type, sizeof(mmc_type));
+            if (strcmp(mmc_type, "SDIO") != 0)
+                continue;
+
+            /* Resolve the device-dir symlink to its real sysfs path */
+            snprintf(path, sizeof(path), "/sys/bus/mmc/devices/%s", de->d_name);
+            if (!realpath(path, rp))
+                continue;
+
+            plat_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
+            if (!plat_idx)
+                continue;
+
+            e = netsnmp_entity_get_byIdx(plat_idx);
+            if (!e)
+                continue;
+
+            snprintf(path, sizeof(path), "/sys/bus/mmc/devices/%s/vendor",
+                     de->d_name);
+            _sysfs_read(path, vendor, sizeof(vendor));
+
+            snprintf(path, sizeof(path), "/sys/bus/mmc/devices/%s/device",
+                     de->d_name);
+            _sysfs_read(path, device, sizeof(device));
+
+            snprintf(path, sizeof(path), "/sys/bus/mmc/devices/%s/revision",
+                     de->d_name);
+            _sysfs_read(path, rev, sizeof(rev));
+
+            if (vendor[0] && device[0])
+                snprintf(e->descr, sizeof(e->descr),
+                         "SDIO device %s:%s%s%s",
+                         vendor + (strncmp(vendor, "0x", 2) == 0 ? 2 : 0),
+                         device + (strncmp(device, "0x", 2) == 0 ? 2 : 0),
+                         rev[0] ? " rev " : "", rev);
+
+            if (vendor[0] && device[0]) {
+                char sdio_uri[64];
+                snprintf(sdio_uri, sizeof(sdio_uri), "sdio:%s:%s",
+                         vendor + (strncmp(vendor, "0x", 2) == 0 ? 2 : 0),
+                         device + (strncmp(device, "0x", 2) == 0 ? 2 : 0));
+                _append_uri(e->uris, sizeof(e->uris), sdio_uri);
+            }
+        }
+        closedir(dir);
+    }
+
+    /* Enrich SDIO function entities (mmc1:0001:1, mmc1:0001:2, …) */
+    {
+        static const struct { long cls; const char *descr; } sdio_classes[] = {
+            { 0x01, "UART/Bluetooth" },
+            { 0x02, "Bluetooth"      },
+            { 0x03, "IEEE 802.11b"   },
+            { 0x07, "WLAN"           },
+            { 0x09, "Bluetooth HS"   },
+            { -1,   NULL             }
+        };
+        int i;
+        for (i = 0; i < plat_map_n; i++) {
+            const char *last_slash = strrchr(plat_map[i].real_path, '/');
+            const char *fname = last_slash ? last_slash + 1 : plat_map[i].real_path;
+            netsnmp_entity_info *e;
+            char cls_str[16], uevent_path[PATH_MAX + 8];
+            long cls_val;
+            const char *cls_descr;
+            int func_num, j;
+
+            if (strncmp(fname, "mmc", 3) != 0)
+                continue;
+            if (strchr(fname, ':') == NULL ||
+                strchr(fname, ':') == strrchr(fname, ':'))
+                continue; /* not a function entry */
+
+            e = netsnmp_entity_get_byIdx(plat_map[i].idx);
+            if (!e || e->descr[0])
+                continue;
+
+            snprintf(uevent_path, sizeof(uevent_path), "%s/uevent",
+                     plat_map[i].real_path);
+            cls_str[0] = '\0';
+            _sysfs_read_key(uevent_path, "SDIO_CLASS", cls_str, sizeof(cls_str));
+
+            func_num = atoi(strrchr(fname, ':') + 1);
+            cls_val  = cls_str[0] ? strtol(cls_str, NULL, 0) : -1;
+
+            cls_descr = NULL;
+            for (j = 0; sdio_classes[j].descr; j++)
+                if (sdio_classes[j].cls == cls_val) {
+                    cls_descr = sdio_classes[j].descr;
+                    break;
+                }
+
+            if (cls_descr)
+                snprintf(e->descr, sizeof(e->descr),
+                         "SDIO function %d: %s", func_num, cls_descr);
+            else
+                snprintf(e->descr, sizeof(e->descr),
+                         "SDIO function %d", func_num);
+        }
+    }
 }
 
 static void
@@ -4098,7 +4251,8 @@ _i2cdev_parent_idx_from_path(const char *rp)
 
 static int
 _hwmon_parent_idx(const char *name, const char *rp,
-                  pci_entity_map *pci_map, int pci_map_n)
+                  pci_entity_map *pci_map, int pci_map_n,
+                  plat_entity_map *plat_map, int plat_map_n)
 {
     netsnmp_entity_info *parent;
     int parent_idx;
@@ -4119,6 +4273,10 @@ _hwmon_parent_idx(const char *name, const char *rp,
         return parent_idx;
 
     parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+    if (parent_idx)
+        return parent_idx;
+
+    parent_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
     if (parent_idx)
         return parent_idx;
 
@@ -4157,7 +4315,8 @@ _hwmon_descr(const char *name)
 }
 
 static void
-_load_hwmon(pci_entity_map *pci_map, int pci_map_n)
+_load_hwmon(pci_entity_map *pci_map, int pci_map_n,
+            plat_entity_map *plat_map, int plat_map_n)
 {
     static const char *prefixes[] = { "temp", "fan", "in", "curr", "power", "energy", "humidity", NULL };
     DIR *dir;
@@ -4227,7 +4386,8 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n)
 
         e->iana_class = _hwmon_class(chips[ci].name);
         e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp,
-                                          pci_map, pci_map_n);
+                                          pci_map, pci_map_n,
+                                          plat_map, plat_map_n);
         e->parent_rel_pos = -1;
         strlcpy(e->name,  chips[ci].dir, sizeof(e->name));
         strlcpy(e->descr, _hwmon_descr(chips[ci].name), sizeof(e->descr));
@@ -4775,7 +4935,8 @@ _load_input(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 13: Framebuffer graphics devices ------------------------------- */
 
 static void
-_load_graphics(pci_entity_map *pci_map, int pci_map_n)
+_load_graphics(pci_entity_map *pci_map, int pci_map_n,
+               plat_entity_map *plat_map, int plat_map_n)
 {
     DIR *dir;
     struct dirent *de;
@@ -4788,7 +4949,7 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
         char key[512], name[128], mode[128], size[64], bpp[32], devname[128];
-        int idx, pci_idx;
+        int idx, parent_idx;
 
         if (strncmp(de->d_name, "fb", 2) != 0 ||
             !isdigit((unsigned char)de->d_name[2]))
@@ -4802,7 +4963,9 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
         snprintf(path, sizeof(path), "%s/%s", GRAPHICS_PATH, de->d_name);
         if (!realpath(path, rp))
             rp[0] = '\0';
-        pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+        parent_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+        if (!parent_idx)
+            parent_idx = rp[0] ? _plat_find_idx_by_path(plat_map, plat_map_n, rp) : 0;
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -4810,7 +4973,7 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
 
         e->iana_class = IANA_PHYS_OTHER;
         e->is_fru     = TV_FALSE;
-        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+        e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
         strlcpy(e->name, de->d_name, sizeof(e->name));
 
         snprintf(path, sizeof(path), "%s/%s/name", GRAPHICS_PATH, de->d_name);
@@ -4859,7 +5022,8 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 14: GPIO controllers ------------------------------------------ */
 
 static void
-_load_gpio(pci_entity_map *pci_map, int pci_map_n)
+_load_gpio(pci_entity_map *pci_map, int pci_map_n,
+           plat_entity_map *plat_map, int plat_map_n)
 {
     DIR *dir;
     struct dirent *de;
@@ -4921,6 +5085,8 @@ _load_gpio(pci_entity_map *pci_map, int pci_map_n)
             pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
             parent_idx = pci_idx;
         }
+        if (!parent_idx)
+            parent_idx = rp[0] ? _plat_find_idx_by_path(plat_map, plat_map_n, rp) : 0;
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -5552,6 +5718,139 @@ _write_entity_state(void)
     fclose(f);
 }
 
+/* ---- MDIO buses and PHY devices ------------------------------------------ */
+
+static void
+_load_mdio(pci_entity_map *pci_map, int pci_map_n,
+           plat_entity_map *plat_map, int plat_map_n)
+{
+    DIR *bus_dir, *phy_dir;
+    struct dirent *bus_de, *phy_de;
+    char path[PATH_MAX], rp[PATH_MAX], val[64];
+
+    bus_dir = opendir(MDIO_PATH);
+    if (!bus_dir)
+        return;
+
+    while ((bus_de = readdir(bus_dir)) != NULL) {
+        int parent_idx;
+        char bus_path[PATH_MAX];
+
+        if (bus_de->d_name[0] == '.')
+            continue;
+
+        /* Resolve bus → parent device */
+        snprintf(path, sizeof(path), "%s/%s/device", MDIO_PATH, bus_de->d_name);
+        if (!realpath(path, rp))
+            continue;
+
+        parent_idx = _usb_parent_idx_from_path(rp);
+        if (!parent_idx)
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        if (!parent_idx)
+            parent_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
+        if (!parent_idx)
+            continue;
+
+        snprintf(bus_path, sizeof(bus_path), "%s/%s", MDIO_PATH, bus_de->d_name);
+        phy_dir = opendir(bus_path);
+        if (!phy_dir)
+            continue;
+
+        while ((phy_de = readdir(phy_dir)) != NULL) {
+            netsnmp_entity_info *e;
+            char key[512];
+            int phy_idx;
+            long phy_id;
+
+            if (phy_de->d_name[0] == '.')
+                continue;
+            if (!strchr(phy_de->d_name, ':'))
+                continue; /* skip 'device', 'statistics', etc. */
+
+            snprintf(key, sizeof(key), "mdio-phy:%s", phy_de->d_name);
+            phy_idx = _entity_index_alloc(key);
+            if (phy_idx <= 0)
+                continue;
+
+            e = netsnmp_entity_create(phy_idx);
+            if (!e)
+                continue;
+
+            e->iana_class = IANA_PHYS_OTHER;
+            e->is_fru     = TV_FALSE;
+            e->parent_idx = parent_idx;
+            strlcpy(e->name, phy_de->d_name, sizeof(e->name));
+
+            snprintf(path, sizeof(path), "%s/%s/phy_id",
+                     bus_path, phy_de->d_name);
+            _sysfs_read(path, val, sizeof(val));
+            phy_id = val[0] ? strtol(val, NULL, 0) : 0;
+
+            if (phy_id) {
+                int oui   = (int)((phy_id >> 10) & 0x3fffff);
+                int model = (int)((phy_id >> 4) & 0x3f);
+                int rev   = (int)(phy_id & 0xf);
+                snprintf(e->descr, sizeof(e->descr),
+                         "Ethernet PHY OUI:%06x model:%02x rev:%x",
+                         oui, model, rev);
+                snprintf(e->hw_rev, sizeof(e->hw_rev), "%x", rev);
+            } else {
+                strlcpy(e->descr, "Ethernet PHY", sizeof(e->descr));
+            }
+
+            snprintf(path, sizeof(path), "%s/%s", bus_path, phy_de->d_name);
+            _append_file_uri(e->uris, sizeof(e->uris), path);
+        }
+        closedir(phy_dir);
+    }
+    closedir(bus_dir);
+}
+
+/* ---- Platform post-load pruning ------------------------------------------ */
+
+/*
+ * Hide platform container entities that have no visible children after all
+ * loaders have run.  Iterates to convergence so that removing a leaf also
+ * exposes its now-childless parent.  Only entities in plat_map are candidates
+ * — other containers (memory, cpu groups, etc.) are not touched.
+ */
+static int
+_plat_has_visible_child(int idx)
+{
+    netsnmp_entity_info *e;
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e))
+        if (!e->hidden && e->parent_idx == idx)
+            return 1;
+    return 0;
+}
+
+static void
+_plat_prune_empty(plat_entity_map *map, int nmap)
+{
+    int i, changed;
+    do {
+        changed = 0;
+        for (i = 0; i < nmap; i++) {
+            netsnmp_entity_info *e = netsnmp_entity_get_byIdx(map[i].idx);
+            if (!e || e->hidden)
+                continue;
+            /* Loaders may enrich a platform entry in-place (e.g. mmc disk
+             * enriches mmc0:aaaa rather than creating a child).  Such entries
+             * are no longer bare containers and must not be pruned. */
+            if (e->iana_class != IANA_PHYS_CONTAINER)
+                continue;
+            if (e->descr[0] || e->serial[0] ||
+                e->model_name[0] || e->mfg_name[0])
+                continue;
+            if (_plat_has_visible_child(map[i].idx))
+                continue;
+            e->hidden = 1;
+            changed = 1;
+        }
+    } while (changed);
+}
+
 /* ---- Top-level load ------------------------------------------------------ */
 
 int
@@ -5591,14 +5890,17 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_i2c(pci_map, pci_map_n);
     _load_acpi();
     _load_thermal_zones();
-    _load_hwmon(pci_map, pci_map_n);
+    _load_hwmon(pci_map, pci_map_n, plat_map, plat_map_n);
     _load_power_supply(pci_map, pci_map_n);
     _load_ptp(pci_map, pci_map_n);
     _load_tpm(pci_map, pci_map_n);
     _load_input(pci_map, pci_map_n);
-    _load_graphics(pci_map, pci_map_n);
-    _load_gpio(pci_map, pci_map_n);
+    _load_graphics(pci_map, pci_map_n, plat_map, plat_map_n);
+    _load_gpio(pci_map, pci_map_n, plat_map, plat_map_n);
     _load_rtc(pci_map, pci_map_n);
+    _load_mdio(pci_map, pci_map_n, plat_map, plat_map_n);
+
+    _plat_prune_empty(plat_map, plat_map_n);
 
     free(pci_map);
     free(plat_map);
