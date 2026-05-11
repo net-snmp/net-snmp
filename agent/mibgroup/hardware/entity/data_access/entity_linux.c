@@ -3174,6 +3174,8 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n,
             continue;
 
         pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        if (!pci_idx)
+            pci_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -3351,6 +3353,8 @@ _load_net_devices(pci_entity_map *pci_map, int pci_map_n,
         parent_idx = _usb_parent_idx_from_path(rp);
         if (!parent_idx && rp[0])
             parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        if (!parent_idx && rp[0])
+            parent_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
 
         e = netsnmp_entity_create(idx);
         if (!e)
