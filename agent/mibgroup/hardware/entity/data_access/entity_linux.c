@@ -5405,10 +5405,10 @@ _alias_lm_sensors(void)
             if (!tmp) { free(arr); return; }
             arr = tmp;
         }
-        arr[n].phys_idx    = e->idx;
-        arr[n].hwmon_num   = hwmon_num;
-        arr[n].sensor_num  = sensor_num;
-        arr[n].sensor_type = sensor_type;
+        arr[n].phys_idx     = e->idx;
+        arr[n].hwmon_num    = hwmon_num;
+        arr[n].sensor_num   = sensor_num;
+        arr[n].sensor_type  = sensor_type;
         n++;
     }
 
