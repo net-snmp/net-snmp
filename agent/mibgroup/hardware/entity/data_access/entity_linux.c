@@ -1896,6 +1896,12 @@ typedef struct {
     int  idx;
 } plat_entity_map;
 
+/* Maps shared across all loaders; set by arch_load, cleared after use. */
+static pci_entity_map  *pci_map   = NULL;
+static int              pci_map_n = 0;
+static plat_entity_map *plat_map  = NULL;
+static int              plat_map_n = 0;
+
 static int
 _plat_find_idx_by_path(plat_entity_map *map, int nmap, const char *path)
 {
@@ -3017,8 +3023,7 @@ _usb_parent_rel_pos_from_name(const char *name, const char *busnum)
 }
 
 static int
-_usb_root_parent_rel_pos(pci_entity_map *pci_map, int pci_map_n,
-                         int parent_idx, int busnum)
+_usb_root_parent_rel_pos(int parent_idx, int busnum)
 {
     DIR *dir;
     struct dirent *de;
@@ -3097,7 +3102,7 @@ _usb_class_descr(const char *name)
 /* ---- Phase 5: ATA ports -------------------------------------------------- */
 
 static void
-_load_ata_ports(pci_entity_map *pci_map, int pci_map_n)
+_load_ata_ports(void)
 {
     DIR *dir;
     const struct dirent *de;
@@ -3242,8 +3247,7 @@ _usb_lookup(int vid, int pid, char *out_mfg, size_t mfg_sz,
 }
 
 static void
-_load_usb(pci_entity_map *pci_map, int pci_map_n,
-          plat_entity_map *plat_map, int plat_map_n)
+_load_usb(void)
 {
     DIR *dir;
     const struct dirent *de;
@@ -3291,8 +3295,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n,
         e->iana_class = IANA_PHYS_CONTAINER;
         e->is_fru     = TV_FALSE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
-        e->parent_rel_pos = _usb_root_parent_rel_pos(pci_map, pci_map_n,
-                                                     e->parent_idx,
+        e->parent_rel_pos = _usb_root_parent_rel_pos(e->parent_idx,
                                                      atoi(name + 3));
         strlcpy(e->name, name, sizeof(e->name));
 
@@ -3441,8 +3444,7 @@ _load_usb(pci_entity_map *pci_map, int pci_map_n,
 }
 
 static void
-_load_net_devices(pci_entity_map *pci_map, int pci_map_n,
-                  plat_entity_map *plat_map, int plat_map_n)
+_load_net_devices(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -3629,7 +3631,7 @@ _nvme_block_descr(const char *ctrl_name, char *buf, size_t bufsz)
 }
 
 static void
-_load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
+_load_scsi_disks(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -3773,8 +3775,7 @@ _load_scsi_disks(pci_entity_map *pci_map, int pci_map_n)
 }
 
 static void
-_load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
-                plat_entity_map *plat_map, int plat_map_n)
+_load_mmc_disks(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -3998,7 +3999,7 @@ _load_mmc_disks(pci_entity_map *pci_map, int pci_map_n,
 }
 
 static void
-_load_nvme(pci_entity_map *pci_map, int pci_map_n)
+_load_nvme(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -4359,9 +4360,7 @@ _i2cdev_parent_idx_from_path(const char *rp)
 }
 
 static int
-_hwmon_parent_idx(const char *name, const char *rp,
-                  pci_entity_map *pci_map, int pci_map_n,
-                  plat_entity_map *plat_map, int plat_map_n)
+_hwmon_parent_idx(const char *name, const char *rp)
 {
     netsnmp_entity_info *parent;
     int parent_idx;
@@ -4424,8 +4423,7 @@ _hwmon_descr(const char *name)
 }
 
 static void
-_load_hwmon(pci_entity_map *pci_map, int pci_map_n,
-            plat_entity_map *plat_map, int plat_map_n)
+_load_hwmon(void)
 {
     static const char *prefixes[] = { "temp", "fan", "in", "curr", "power", "energy", "humidity", NULL };
     DIR *dir;
@@ -4494,9 +4492,7 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n,
             continue;
 
         e->iana_class = _hwmon_class(chips[ci].name);
-        e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp,
-                                          pci_map, pci_map_n,
-                                          plat_map, plat_map_n);
+        e->parent_idx = _hwmon_parent_idx(chips[ci].name, rp);
         e->parent_rel_pos = -1;
         strlcpy(e->name,  chips[ci].dir, sizeof(e->name));
         strlcpy(e->descr, _hwmon_descr(chips[ci].name), sizeof(e->descr));
@@ -4553,7 +4549,7 @@ _load_hwmon(pci_entity_map *pci_map, int pci_map_n,
 /* ---- Phase 8: enrich hwmon power-supply entities from /sys/class/power_supply */
 
 static void
-_load_power_supply(pci_entity_map *pci_map, int pci_map_n)
+_load_power_supply(void)
 {
     DIR *dir;
     const struct dirent *de;
@@ -4639,7 +4635,7 @@ _load_power_supply(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 9: RTC devices ------------------------------------------------- */
 
 static void
-_load_rtc(pci_entity_map *pci_map, int pci_map_n)
+_load_rtc(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -4785,7 +4781,7 @@ _ptp_net_port_idx(const char *ptp_name)
 }
 
 static void
-_load_ptp(pci_entity_map *pci_map, int pci_map_n)
+_load_ptp(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -4864,7 +4860,7 @@ _load_ptp(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 11: Trusted Platform Modules ---------------------------------- */
 
 static void
-_load_tpm(pci_entity_map *pci_map, int pci_map_n)
+_load_tpm(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -4960,7 +4956,7 @@ _load_tpm(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 12: Input devices --------------------------------------------- */
 
 static void
-_load_input(pci_entity_map *pci_map, int pci_map_n)
+_load_input(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -5044,8 +5040,7 @@ _load_input(pci_entity_map *pci_map, int pci_map_n)
 /* ---- Phase 13: Framebuffer graphics devices ------------------------------- */
 
 static void
-_load_graphics(pci_entity_map *pci_map, int pci_map_n,
-               plat_entity_map *plat_map, int plat_map_n)
+_load_graphics(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -5131,8 +5126,7 @@ _load_graphics(pci_entity_map *pci_map, int pci_map_n,
 /* ---- Phase 14: GPIO controllers ------------------------------------------ */
 
 static void
-_load_gpio(pci_entity_map *pci_map, int pci_map_n,
-           plat_entity_map *plat_map, int plat_map_n)
+_load_gpio(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -5237,7 +5231,7 @@ _load_gpio(pci_entity_map *pci_map, int pci_map_n,
 /* ---- Phase 13: I2C adapters and devices ---------------------------------- */
 
 static void
-_load_i2c(pci_entity_map *pci_map, int pci_map_n)
+_load_i2c(void)
 {
     DIR *dir;
     struct dirent *de;
@@ -5880,8 +5874,7 @@ _oui_lookup(int phy_oui, char *out_mfg, size_t mfg_sz)
 }
 
 static void
-_load_mdio(pci_entity_map *pci_map, int pci_map_n,
-           plat_entity_map *plat_map, int plat_map_n)
+_load_mdio(void)
 {
     DIR *bus_dir, *phy_dir;
     struct dirent *bus_de, *phy_de;
@@ -6024,13 +6017,13 @@ _plat_has_visible_child(int idx)
 }
 
 static void
-_plat_prune_empty(plat_entity_map *map, int nmap)
+_plat_prune_empty(void)
 {
     int i, changed;
     do {
         changed = 0;
-        for (i = 0; i < nmap; i++) {
-            netsnmp_entity_info *e = netsnmp_entity_get_byIdx(map[i].idx);
+        for (i = 0; i < plat_map_n; i++) {
+            netsnmp_entity_info *e = netsnmp_entity_get_byIdx(plat_map[i].idx);
             if (!e || e->hidden)
                 continue;
             /* Loaders may enrich a platform entry in-place (e.g. mmc disk
@@ -6041,7 +6034,7 @@ _plat_prune_empty(plat_entity_map *map, int nmap)
             if (e->descr[0] || e->serial[0] ||
                 e->model_name[0] || e->mfg_name[0])
                 continue;
-            if (_plat_has_visible_child(map[i].idx))
+            if (_plat_has_visible_child(plat_map[i].idx))
                 continue;
             e->hidden = 1;
             changed = 1;
@@ -6054,10 +6047,7 @@ _plat_prune_empty(plat_entity_map *map, int nmap)
 int
 netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
 {
-    pci_entity_map  *pci_map  = NULL;
-    plat_entity_map *plat_map = NULL;
     netsnmp_entity_info *old_entities = NULL;
-    int pci_map_n = 0, plat_map_n = 0;
     uint32_t hash_before, hash_after;
     static int first_load = 1;
 
@@ -6079,29 +6069,29 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     _load_dimms();
     _load_pci(&pci_map, &pci_map_n);
     _load_platform(&plat_map, &plat_map_n);
-    _load_ata_ports(pci_map, pci_map_n);
-    _load_usb(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_net_devices(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_scsi_disks(pci_map, pci_map_n);
-    _load_mmc_disks(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_nvme(pci_map, pci_map_n);
-    _load_i2c(pci_map, pci_map_n);
+    _load_ata_ports();
+    _load_usb();
+    _load_net_devices();
+    _load_scsi_disks();
+    _load_mmc_disks();
+    _load_nvme();
+    _load_i2c();
     _load_acpi();
     _load_thermal_zones();
-    _load_hwmon(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_power_supply(pci_map, pci_map_n);
-    _load_ptp(pci_map, pci_map_n);
-    _load_tpm(pci_map, pci_map_n);
-    _load_input(pci_map, pci_map_n);
-    _load_graphics(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_gpio(pci_map, pci_map_n, plat_map, plat_map_n);
-    _load_rtc(pci_map, pci_map_n);
-    _load_mdio(pci_map, pci_map_n, plat_map, plat_map_n);
+    _load_hwmon();
+    _load_power_supply();
+    _load_ptp();
+    _load_tpm();
+    _load_input();
+    _load_graphics();
+    _load_gpio();
+    _load_rtc();
+    _load_mdio();
 
-    _plat_prune_empty(plat_map, plat_map_n);
+    _plat_prune_empty();
 
-    free(pci_map);
-    free(plat_map);
+    free(pci_map);  pci_map  = NULL; pci_map_n  = 0;
+    free(plat_map); plat_map = NULL; plat_map_n = 0;
     _numa_fix_top_level_parents();
     netsnmp_entity_parent_rel_pos_rebuild();
     netsnmp_entity_contains_rebuild();
