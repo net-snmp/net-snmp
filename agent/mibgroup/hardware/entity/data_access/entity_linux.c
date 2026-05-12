@@ -2058,6 +2058,29 @@ _plat_enrich_from_uevent(netsnmp_entity_info *e, const char *entry_path)
         strlcpy(e->model_name, val, sizeof(e->model_name));
 }
 
+/* Override metadata for SoC root platform nodes ("soc" or "soc@ADDR").
+ * These are simple-bus structural nodes with no useful uevent data. */
+static void
+_plat_apply_soc_overrides(netsnmp_entity_info *e, const char *name)
+{
+    const char *p;
+
+    if (strncmp(name, "soc", 3) != 0)
+        return;
+    p = name + 3;
+    if (*p != '\0' && *p != '@')
+        return;
+
+    if (e->model_name[0] &&
+        strcmp(e->model_name, "simple-bus") != 0 &&
+        strcmp(e->model_name, "simple-mfd") != 0)
+        return;
+
+    e->iana_class = IANA_PHYS_BACKPLANE;
+    strlcpy(e->model_name, "System on a chip", sizeof(e->model_name));
+    strlcpy(e->descr, "System on a chip platform fabric", sizeof(e->descr));
+}
+
 static void
 _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                     plat_entity_map **map, int *nmap, int *cap)
@@ -2125,6 +2148,7 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                         strlcpy(e->name, de->d_name, sizeof(e->name));
                         _append_file_uri(e->uris, sizeof(e->uris), entry_path);
                         _plat_enrich_from_uevent(e, entry_path);
+                        _plat_apply_soc_overrides(e, de->d_name);
                     } else {
                         snmp_log(LOG_WARNING,
                                  "entity: platform entity_create failed idx=%d %s\n",
