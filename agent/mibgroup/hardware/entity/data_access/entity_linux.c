@@ -2184,66 +2184,66 @@ _plat_is_dt_addr(const char *name)
 }
 
 /*
- * Return 1 if path/uevent contains a DRIVER= line (real bound bus device),
- * or if name matches the mmc<N>:<addr> card/function pattern (which may
- * not have a driver when it is an unbound SDIO device).
+ * Read DRIVER= and OF_COMPATIBLE_0= from path/uevent in one pass.
+ * Returns 1 if the entry is a real bound device (has DRIVER= and is not a
+ * simple-bus/simple-mfd transparent node), 0 otherwise.
+ * driver and compatible are filled with the values found (empty string if
+ * absent). Callers use these directly for entity enrichment, avoiding a
+ * second fopen of the same file.
  */
 static int
-_plat_is_real_device(const char *name, const char *path)
+_plat_parse_uevent(const char *path,
+                   char *driver,     size_t driversz,
+                   char *compatible, size_t compatsz)
 {
-    char uevent[PATH_MAX];
+    char uevent[PATH_MAX + 8];
     char line[256];
     FILE *f;
+    int has_driver = 0, is_simple = 0;
 
-    if (_plat_is_dt_addr(name))
-        return 0; /* transparent — recurse but no entity */
-
-    if (strncmp(name, "mmc", 3) == 0 && strchr(name, ':'))
-        return 1; /* MMC/SDIO cards and functions are always real devices */
+    if (driversz > 0) driver[0] = '\0';
+    if (compatsz > 0) compatible[0] = '\0';
 
     snprintf(uevent, sizeof(uevent), "%s/uevent", path);
     f = fopen(uevent, "r");
     if (!f)
         return 0;
+
     while (fgets(line, sizeof(line), f)) {
+        char *nl = strchr(line, '\n');
+        if (nl) *nl = '\0';
+
         if (strncmp(line, "DRIVER=", 7) == 0) {
-            fclose(f);
-            return 1;
-        }
-        /* Pure structural DT bus nodes: transparent like DT address nodes */
-        if (strncmp(line, "OF_COMPATIBLE_0=simple-bus", 26) == 0 ||
-            strncmp(line, "OF_COMPATIBLE_0=simple-mfd", 26) == 0) {
-            fclose(f);
-            return 0;
+            strlcpy(driver, line + 7, driversz);
+            has_driver = 1;
+        } else if (strncmp(line, "OF_COMPATIBLE_0=", 16) == 0) {
+            strlcpy(compatible, line + 16, compatsz);
+            if (strcmp(compatible, "simple-bus") == 0 ||
+                strcmp(compatible, "simple-mfd") == 0)
+                is_simple = 1;
         }
     }
     fclose(f);
-    return 0;
+
+    if (is_simple) {
+        driver[0] = '\0';
+        compatible[0] = '\0';
+        return 0;
+    }
+    return has_driver;
 }
 
-/*
- * Read OF_COMPATIBLE_0 and DRIVER from the device uevent to give
- * platform entities a baseline manufacturer + model name.
- * OF_COMPATIBLE_0 has the form "vendor,device" — vendor → mfg_name,
- * device → model_name.  DRIVER fills model_name when compatible is absent.
- * descr is set to the compatible string if still empty.
- * Other loaders that enrich the entity further (graphics, gpio, …)
- * may overwrite these fields.
- */
 static void
-_plat_enrich_from_uevent(netsnmp_entity_info *e, const char *entry_path)
+_plat_apply_uevent_enrichment(netsnmp_entity_info *e,
+                               const char *driver,
+                               const char *compatible)
 {
-    char uevent_path[PATH_MAX + 8];
     char val[256], *comma;
 
-    strlcpy(uevent_path, entry_path,  sizeof(uevent_path));
-    strlcat(uevent_path, "/uevent",   sizeof(uevent_path));
-
-    val[0] = '\0';
-    _sysfs_read_key(uevent_path, "OF_COMPATIBLE_0", val, sizeof(val));
-    if (val[0]) {
+    if (compatible[0]) {
         if (!e->descr[0])
-            strlcpy(e->descr, val, sizeof(e->descr));
+            strlcpy(e->descr, compatible, sizeof(e->descr));
+        strlcpy(val, compatible, sizeof(val));
         comma = strchr(val, ',');
         if (comma) {
             *comma = '\0';
@@ -2258,10 +2258,8 @@ _plat_enrich_from_uevent(netsnmp_entity_info *e, const char *entry_path)
         return;
     }
 
-    /* Fallback: DRIVER gives at least a model name */
-    _sysfs_read_key(uevent_path, "DRIVER", val, sizeof(val));
-    if (val[0] && !e->model_name[0])
-        strlcpy(e->model_name, val, sizeof(e->model_name));
+    if (driver[0] && !e->model_name[0])
+        strlcpy(e->model_name, driver, sizeof(e->model_name));
 }
 
 /* Override metadata for SoC root platform nodes ("soc" or "soc@ADDR").
@@ -2333,9 +2331,23 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
             continue; /* handled by another loader — skip entirely */
         }
 
-        if (!_plat_name_is_skip(de->d_name) &&
-            _plat_is_real_device(de->d_name, entry_path)) {
+        if (!_plat_name_is_skip(de->d_name)) {
+            char driver[128], compatible[256];
+            int is_real;
 
+            if (_plat_is_dt_addr(de->d_name)) {
+                is_real = 0;
+            } else if (strncmp(de->d_name, "mmc", 3) == 0 &&
+                       strchr(de->d_name, ':')) {
+                is_real = 1;
+                driver[0] = compatible[0] = '\0';
+            } else {
+                is_real = _plat_parse_uevent(entry_path,
+                                              driver, sizeof(driver),
+                                              compatible, sizeof(compatible));
+            }
+
+            if (is_real) {
             snprintf(key, sizeof(key), "plat:%s", de->d_name);
             idx = _entity_index_alloc(key);
             child_parent = (idx > 0) ? idx : parent_idx;
@@ -2353,7 +2365,7 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                         e->parent_idx = parent_idx ? parent_idx : IDX_BASEBOARD;
                         strlcpy(e->name, de->d_name, sizeof(e->name));
                         _append_file_uri(e->uris, sizeof(e->uris), entry_path);
-                        _plat_enrich_from_uevent(e, entry_path);
+                        _plat_apply_uevent_enrichment(e, driver, compatible);
                         _plat_apply_soc_overrides(e, de->d_name);
                     } else {
                         snmp_log(LOG_WARNING,
@@ -2384,10 +2396,16 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                 snmp_log(LOG_WARNING,
                          "entity: platform index_alloc failed for %s\n", key);
             }
+            } else {
+                snmp_log(LOG_DEBUG,
+                         "entity: platform skip (virtual/no-driver) %s\n",
+                         entry_path);
+                child_parent = parent_idx; /* virtual dir — pass parent through */
+            }
         } else {
-            snmp_log(LOG_DEBUG, "entity: platform skip (virtual/no-driver) %s\n",
+            snmp_log(LOG_DEBUG, "entity: platform skip (name-filtered) %s\n",
                      entry_path);
-            child_parent = parent_idx; /* virtual dir — pass parent through */
+            child_parent = parent_idx;
         }
 
         _load_platform_walk(entry_path, child_parent, depth + 1,
@@ -5022,21 +5040,40 @@ _load_hwmon(void)
 
 /* ---- Phase 8: enrich hwmon power-supply entities from /sys/class/power_supply */
 
+/* Battery attributes (manufacturer, model, serial, technology) are backed by
+ * ACPI EC calls and take several milliseconds each on first read.  Cache them
+ * in-line on first arch_load so subsequent reloads pay only a string copy. */
+#define PSY_CACHE_MAX 8
+typedef struct {
+    char name[64];
+    char mfg[128];
+    char model[128];
+    char serial[64];
+    char tech[64];
+} psy_cache_entry;
+static psy_cache_entry _psy_cache[PSY_CACHE_MAX];
+static int             _psy_cache_n = -1; /* -1 = not yet populated */
+
 static void
 _load_power_supply(void)
 {
     DIR *dir;
     const struct dirent *de;
     char path[512], rp[PATH_MAX];
+    int first_load, i;
 
     dir = opendir(PSY_PATH);
     if (!dir)
         return;
 
+    first_load = (_psy_cache_n < 0);
+    if (first_load)
+        _psy_cache_n = 0;
+
     while ((de = readdir(dir))) {
         netsnmp_entity_info *e;
-        char mfg[128], model[128], serial[64], tech[64], type[32];
-        char key[512];
+        char type[32], key[512];
+        psy_cache_entry *ce;
         int idx, parent_idx;
 
         if (de->d_name[0] == '.')
@@ -5047,7 +5084,40 @@ _load_power_supply(void)
         if (strcmp(type, "Battery") != 0)
             continue;
 
-        /* Find the hwmon entity whose model_name matches this PSY name */
+        /* locate or create cache entry */
+        ce = NULL;
+        for (i = 0; i < _psy_cache_n; i++) {
+            if (strcmp(_psy_cache[i].name, de->d_name) == 0) {
+                ce = &_psy_cache[i];
+                break;
+            }
+        }
+        if (!ce && _psy_cache_n < PSY_CACHE_MAX) {
+            ce = &_psy_cache[_psy_cache_n++];
+            strlcpy(ce->name, de->d_name, sizeof(ce->name));
+            ce->mfg[0] = ce->model[0] = ce->serial[0] = ce->tech[0] = '\0';
+        }
+
+        /* read ACPI attributes on first load, reuse cache on subsequent loads */
+        if (first_load && ce) {
+            snprintf(path, sizeof(path), "%s/%s/manufacturer",
+                     PSY_PATH, de->d_name);
+            _sysfs_read(path, ce->mfg, sizeof(ce->mfg));
+
+            snprintf(path, sizeof(path), "%s/%s/model_name",
+                     PSY_PATH, de->d_name);
+            _sysfs_read(path, ce->model, sizeof(ce->model));
+
+            snprintf(path, sizeof(path), "%s/%s/serial_number",
+                     PSY_PATH, de->d_name);
+            _sysfs_read(path, ce->serial, sizeof(ce->serial));
+
+            snprintf(path, sizeof(path), "%s/%s/technology",
+                     PSY_PATH, de->d_name);
+            _sysfs_read(path, ce->tech, sizeof(ce->tech));
+        }
+
+        /* find hwmon entity whose model_name matches this PSY name */
         for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
             if (strcmp(e->model_name, de->d_name) == 0)
                 break;
@@ -5079,29 +5149,20 @@ _load_power_supply(void)
                 _append_file_uri(e->uris, sizeof(e->uris), rp);
         }
 
-        snprintf(path, sizeof(path), "%s/%s/manufacturer", PSY_PATH, de->d_name);
-        _sysfs_read(path, mfg, sizeof(mfg));
-
-        snprintf(path, sizeof(path), "%s/%s/model_name", PSY_PATH, de->d_name);
-        _sysfs_read(path, model, sizeof(model));
-
-        snprintf(path, sizeof(path), "%s/%s/serial_number", PSY_PATH, de->d_name);
-        _sysfs_read(path, serial, sizeof(serial));
-
-        snprintf(path, sizeof(path), "%s/%s/technology", PSY_PATH, de->d_name);
-        _sysfs_read(path, tech, sizeof(tech));
-
-        if (mfg[0])
-            strlcpy(e->mfg_name, mfg, sizeof(e->mfg_name));
-        if (model[0])
-            strlcpy(e->model_name, model, sizeof(e->model_name));
-        if (serial[0])
-            strlcpy(e->serial, serial, sizeof(e->serial));
-
-        if (tech[0])
-            snprintf(e->descr, sizeof(e->descr), "Battery (%s)", tech);
-        else
+        if (ce) {
+            if (ce->mfg[0])
+                strlcpy(e->mfg_name, ce->mfg, sizeof(e->mfg_name));
+            if (ce->model[0])
+                strlcpy(e->model_name, ce->model, sizeof(e->model_name));
+            if (ce->serial[0])
+                strlcpy(e->serial, ce->serial, sizeof(e->serial));
+            if (ce->tech[0])
+                snprintf(e->descr, sizeof(e->descr), "Battery (%s)", ce->tech);
+            else
+                strlcpy(e->descr, "Battery", sizeof(e->descr));
+        } else {
             strlcpy(e->descr, "Battery", sizeof(e->descr));
+        }
     }
     closedir(dir);
 }
