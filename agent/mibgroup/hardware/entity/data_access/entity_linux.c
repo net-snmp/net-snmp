@@ -2732,7 +2732,6 @@ _nic_scan_ethtool(netsnmp_entity_info *e, const char *ifname, int sfp_idx)
         }
 
         if (sup_words) {
-            char base[sizeof(e->descr)];
             int mi;
             switch (port) {
             case PORT_TP:    port_s = "twisted pair";  break;
@@ -2767,10 +2766,9 @@ _nic_scan_ethtool(netsnmp_entity_info *e, const char *ifname, int sfp_idx)
                 }
             }
 
-            strlcpy(base, e->descr, sizeof(base));
             if (modes_buf[0]) {
                 char _d[512];
-                snprintf(_d, sizeof(_d), "%s (%s)", base, modes_buf);
+                snprintf(_d, sizeof(_d), "%s (%s)", e->descr, modes_buf);
                 strlcpy(e->descr, _d, sizeof(e->descr));
             }
         }
