@@ -3847,6 +3847,128 @@ _load_scsi_disks(void)
 }
 
 static void
+_mmc_lookup_mfg_by_type(const char *dev_sysfs_path, const char *mmc_type,
+                        char *mfg, size_t mfgsz)
+{
+    char path[PATH_MAX], val[64], line[256];
+    unsigned int manfid;
+    const char *ids_file;
+    static int sd_warned = 0, mmc_warned = 0;
+    FILE *f;
+
+    if (mfgsz > 0)
+        mfg[0] = '\0';
+
+    if (strcmp(mmc_type, "SD") == 0)
+        ids_file = "/usr/share/misc/sdcard.ids";
+    else
+        ids_file = "/usr/share/misc/multimediacard.ids";
+
+    snprintf(path, sizeof(path), "%s/manfid", dev_sysfs_path);
+    val[0] = '\0';
+    _sysfs_read(path, val, sizeof(val));
+    if (!val[0] || sscanf(val, "%x", &manfid) != 1)
+        return;
+
+    f = fopen(ids_file, "r");
+    if (!f) {
+        int *warned = (strcmp(mmc_type, "SD") == 0) ? &sd_warned : &mmc_warned;
+        if (!*warned) {
+            snmp_log(LOG_WARNING,
+                     "entity: MMC manufacturer IDs file not found: %s "
+                     "(install the package providing it to resolve manufacturer names)\n",
+                     ids_file);
+            *warned = 1;
+        }
+        return;
+    }
+
+    while (fgets(line, sizeof(line), f)) {
+        unsigned int id;
+        char name[128];
+        char *nl;
+
+        if (line[0] == '#' || line[0] == '\n')
+            continue;
+        if (sscanf(line, "%x %127[^\n]", &id, name) != 2)
+            continue;
+        nl = strchr(name, '\n');
+        if (nl)
+            *nl = '\0';
+        _trim_trailing(name);
+        if (id == manfid) {
+            strlcpy(mfg, name, mfgsz);
+            break;
+        }
+    }
+    fclose(f);
+}
+
+static void
+_mmc_enrich(netsnmp_entity_info *e, const char *dev_sysfs_path,
+            const char *block_name)
+{
+    char path[PATH_MAX], mmc_type[32], mfg[64];
+    const char *kind;
+
+    if (!e || !dev_sysfs_path || !dev_sysfs_path[0])
+        return;
+
+    snprintf(path, sizeof(path), "%s/uevent", dev_sysfs_path);
+    mmc_type[0] = '\0';
+    _sysfs_read_key(path, "MMC_TYPE", mmc_type, sizeof(mmc_type));
+    DEBUGMSGTL(("entity:mmc", "%s: MMC_TYPE='%s'\n", block_name, mmc_type));
+
+    kind = (strcmp(mmc_type, "SD") == 0)  ? "SD card" :
+           (strcmp(mmc_type, "MMC") == 0) ? "Multi Media Card" : "MMC/SD card";
+    _block_disk_descr(kind, block_name, e->descr, sizeof(e->descr));
+    DEBUGMSGTL(("entity:mmc", "%s: descr='%s'\n", block_name, e->descr));
+
+    mfg[0] = '\0';
+    _mmc_lookup_mfg_by_type(dev_sysfs_path, mmc_type, mfg, sizeof(mfg));
+    DEBUGMSGTL(("entity:mmc", "%s: mfg='%s'\n", block_name, mfg));
+    if (mfg[0])
+        strlcpy(e->mfg_name, mfg, sizeof(e->mfg_name));
+
+    {
+        char val[128];
+        snprintf(path, sizeof(path), "%s/hwrev", dev_sysfs_path);
+        _sysfs_read(path, val, sizeof(val));
+        DEBUGMSGTL(("entity:mmc", "%s: hwrev raw='%s'\n", block_name, val));
+        if (val[0]) {
+            unsigned int hwrev;
+            if (sscanf(val, "%x", &hwrev) == 1)
+                snprintf(e->hw_rev, sizeof(e->hw_rev), "%u", hwrev);
+            else
+                strlcpy(e->hw_rev, val, sizeof(e->hw_rev));
+            DEBUGMSGTL(("entity:mmc", "%s: hw_rev='%s'\n", block_name, e->hw_rev));
+        }
+    }
+
+    {
+        char val[128];
+        snprintf(path, sizeof(path), "%s/date", dev_sysfs_path);
+        _sysfs_read(path, val, sizeof(val));
+        DEBUGMSGTL(("entity:mmc", "%s: date raw='%s'\n", block_name, val));
+        if (val[0]) {
+            unsigned int month, year;
+            if (sscanf(val, "%u/%u", &month, &year) == 2 &&
+                month >= 1 && month <= 12 && year >= 1 && year <= 65535) {
+                size_t bufsz = sizeof(e->mfg_date);
+                if (netsnmp_dateandtime_set_buf_from_vars(
+                        e->mfg_date, &bufsz,
+                        (u_short)year, (u_char)month, 1,
+                        0, 0, 0, 0, 0, 0, 0) == SNMPERR_SUCCESS) {
+                    e->mfg_date_len = bufsz;
+                    DEBUGMSGTL(("entity:mmc", "%s: mfg_date set, len=%zu\n",
+                                block_name, bufsz));
+                }
+            }
+        }
+    }
+}
+
+static void
 _load_mmc_disks(void)
 {
     DIR *dir;
@@ -3903,8 +4025,7 @@ _load_mmc_disks(void)
             _sysfs_read(path, val, sizeof(val));
             _set_if_valid(e->model_name, sizeof(e->model_name), val);
 
-            _block_disk_descr("MMC/SD card", de->d_name, e->descr,
-                              sizeof(e->descr));
+            _mmc_enrich(e, rp, de->d_name);
             _block_append_uris(e, de->d_name);
             if (e->serial[0])
                 snprintf(key, sizeof(key), "mmc:%s", e->serial);
@@ -3941,8 +4062,7 @@ _load_mmc_disks(void)
         _sysfs_read(path, val, sizeof(val));
         _set_if_valid(e->model_name, sizeof(e->model_name), val);
 
-        _block_disk_descr("MMC/SD card", de->d_name, e->descr,
-                          sizeof(e->descr));
+        _mmc_enrich(e, rp, de->d_name);
         _block_append_uris(e, de->d_name);
         _append_uri(e->uris, sizeof(e->uris), key);
     }

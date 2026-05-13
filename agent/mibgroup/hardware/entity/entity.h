@@ -46,6 +46,8 @@ typedef struct netsnmp_entity_info_s {
     char    uris[256];
     u_char  uuid[16];
     size_t  uuid_len;
+    u_char  mfg_date[11]; /* DateAndTime, 8 or 11 bytes; 0 length = not set */
+    size_t  mfg_date_len;
     struct netsnmp_entity_info_s *next;
 } netsnmp_entity_info;
 

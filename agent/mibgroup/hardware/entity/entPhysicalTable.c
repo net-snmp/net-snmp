@@ -164,7 +164,8 @@ _phys_handler(netsnmp_mib_handler *handler,
             break;
         case COL_MFGDATE:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
-                                     _empty_string, 0);
+                                     e->mfg_date_len ? e->mfg_date : _empty_string,
+                                     e->mfg_date_len);
             break;
         case COL_URIS:
             snmp_set_var_typed_value(req->requestvb, ASN_OCTET_STR,
