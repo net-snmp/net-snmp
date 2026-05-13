@@ -1958,6 +1958,7 @@ typedef struct pci_entity_map_s {
     char key[128];
     int idx;
     char real_path[PATH_MAX];
+    int  real_path_len;    /* cached strlen(real_path); array sorted desc on this */
     unsigned int function; /* BDF function number, cached to avoid re-parsing */
 } pci_entity_map;
 
@@ -1969,6 +1970,7 @@ typedef struct pci_entity_map_s {
 
 typedef struct {
     char real_path[PATH_MAX];
+    int  real_path_len; /* cached strlen; array sorted desc on this */
     int  idx;
 } plat_entity_map;
 
@@ -1978,23 +1980,23 @@ static int              pci_map_n = 0;
 static plat_entity_map *plat_map  = NULL;
 static int              plat_map_n = 0;
 
+/* map[] must be sorted by real_path_len descending (_load_platform() does this).
+ * First matching entry is the longest prefix — break immediately. */
 static int
 _plat_find_idx_by_path(plat_entity_map *map, int nmap, const char *path)
 {
-    int i, best_idx = 0, best_len = 0;
+    int i;
     size_t plen = strlen(path);
 
     for (i = 0; i < nmap; i++) {
-        int mlen = (int)strlen(map[i].real_path);
-        if (mlen <= best_len || (size_t)mlen > plen)
+        int mlen = map[i].real_path_len;
+        if (mlen == 0 || (size_t)mlen > plen)
             continue;
         if (strncmp(path, map[i].real_path, mlen) == 0 &&
-            (path[mlen] == '\0' || path[mlen] == '/')) {
-            best_len = mlen;
-            best_idx = map[i].idx;
-        }
+            (path[mlen] == '\0' || path[mlen] == '/'))
+            return map[i].idx;
     }
-    return best_idx;
+    return 0;
 }
 
 /* Virtual/infrastructure sysfs dirs: skip as entity, skip recursion. */
@@ -2248,6 +2250,7 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
                 if (*nmap < *cap) {
                     strlcpy((*map)[*nmap].real_path, entry_path,
                             sizeof((*map)[*nmap].real_path));
+                    (*map)[*nmap].real_path_len = (int)strlen(entry_path);
                     (*map)[*nmap].idx = idx;
                     (*nmap)++;
                 }
@@ -2268,6 +2271,13 @@ _load_platform_walk(const char *dir_path, int parent_idx, int depth,
     closedir(dir);
 }
 
+static int
+_cmp_plat_map_path_len_desc(const void *a, const void *b)
+{
+    return ((const plat_entity_map *)b)->real_path_len
+         - ((const plat_entity_map *)a)->real_path_len;
+}
+
 static void
 _load_platform(plat_entity_map **map_out, int *nmap_out)
 {
@@ -2277,6 +2287,9 @@ _load_platform(plat_entity_map **map_out, int *nmap_out)
     snmp_log(LOG_NOTICE, "entity: _load_platform starting\n");
     _load_platform_walk(PLAT_PREFIX, IDX_BASEBOARD, 0, &map, &nmap, &cap);
     snmp_log(LOG_NOTICE, "entity: _load_platform done, %d entries\n", nmap);
+
+    if (nmap > 1)
+        qsort(map, nmap, sizeof(map[0]), _cmp_plat_map_path_len_desc);
 
     *map_out  = map;
     *nmap_out = nmap;
@@ -2325,32 +2338,35 @@ _pci_canonical_idx(pci_entity_map *map, int nmap, int idx)
 }
 
 static int
+_cmp_pci_map_path_len_desc(const void *a, const void *b)
+{
+    return ((const pci_entity_map *)b)->real_path_len
+         - ((const pci_entity_map *)a)->real_path_len;
+}
+
+/* map[] must be sorted by real_path_len descending (done in _load_pci()).
+ * The first entry shorter than child that is a path prefix is the best match. */
+static int
 _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
 {
-    int i, parent_idx, best_len;
+    int i;
     size_t child_len;
 
-    parent_idx = 0;
-    best_len = 0;
     if (!map[child].real_path[0])
         return 0;
 
-    child_len = strlen(map[child].real_path);
+    child_len = (size_t)map[child].real_path_len;
     for (i = 0; i < nmap; i++) {
-        int len;
+        int len = map[i].real_path_len;
 
-        if (i == child || !map[i].real_path[0])
-            continue;
-        len = strlen(map[i].real_path);
-        if ((size_t)len >= child_len || len <= best_len)
+        if (i == child || len == 0 || (size_t)len >= child_len)
             continue;
         if (strncmp(map[child].real_path, map[i].real_path, len) == 0 &&
             map[child].real_path[len] == '/') {
-            best_len = len;
-            parent_idx = _pci_canonical_idx(map, nmap, map[i].idx);
+            return _pci_canonical_idx(map, nmap, map[i].idx);
         }
     }
-    return parent_idx;
+    return 0;
 }
 
 /* Find the deepest PCI node matching or containing `path`.
@@ -2358,27 +2374,31 @@ _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
  * child below it (PTP, storage, TPM, etc.).
  * If map_i_out is non-NULL, *map_i_out is set to the winning map[] index so
  * the caller can retrieve map[i].bdf without a second scan. */
+/* map[] must be sorted by real_path_len descending (done in _load_pci()).
+ * The first matching entry is therefore the longest prefix match — we break
+ * immediately rather than scanning the whole array. */
 static int
 _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path,
                       int *map_i_out)
 {
-    int i, best_i = -1, best_idx = 0, best_len = 0;
+    int i;
     size_t plen = strlen(path);
 
+    if (map_i_out)
+        *map_i_out = -1;
+
     for (i = 0; i < nmap; i++) {
-        int mlen = (int)strlen(map[i].real_path);
-        if (mlen <= best_len || (size_t)mlen > plen)
+        int mlen = map[i].real_path_len;
+        if (mlen == 0 || (size_t)mlen > plen)
             continue;
         if (strncmp(path, map[i].real_path, mlen) == 0 &&
             (path[mlen] == '\0' || path[mlen] == '/')) {
-            best_len = mlen;
-            best_i   = i;
-            best_idx = _pci_canonical_idx(map, nmap, map[i].idx);
+            if (map_i_out)
+                *map_i_out = i;
+            return _pci_canonical_idx(map, nmap, map[i].idx);
         }
     }
-    if (map_i_out)
-        *map_i_out = best_i;
-    return best_idx;
+    return 0;
 }
 
 static int
@@ -2804,6 +2824,7 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         snprintf(path, sizeof(path), "%s/%s", PCI_PATH, bdfs[i]);
         if (!realpath(path, map[i].real_path))
             map[i].real_path[0] = '\0';
+        map[i].real_path_len = (int)strlen(map[i].real_path);
 
         snprintf(path, sizeof(path), "%s/%s/class", PCI_PATH, bdfs[i]);
         _sysfs_read(path, val, sizeof(val));
@@ -2946,6 +2967,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 free_bdf:
         free(bdfs[i]);
     }
+
+    /* Sort map by real_path_len descending so that _pci_find_idx_by_path()
+     * and _pci_find_parent_idx() can break on first match (longest prefix). */
+    qsort(map, nbdfs, sizeof(map[0]), _cmp_pci_map_path_len_desc);
 
     for (i = 0; i < nbdfs; i++) {
         int parent_idx;
