@@ -3327,7 +3327,15 @@ _load_ata_ports(void)
  * Class/subclass blocks start with "C " and are ignored.
  * We scan forward to our VID, collect the vendor name, then scan the
  * following product lines until we find the PID or reach the next vendor.
+ *
+ * Results are cached in a small static table so the 4 MB file is only opened
+ * once per unique (VID, PID) pair rather than once per USB device per reload.
  */
+#define USB_CACHE_SIZE 64
+typedef struct { int vid, pid; char mfg[64]; char model[64]; } usb_cache_entry;
+static usb_cache_entry _usb_cache[USB_CACHE_SIZE];
+static int             _usb_cache_n = 0;
+
 static void
 _usb_lookup(int vid, int pid, char *out_mfg, size_t mfg_sz,
             char *out_model, size_t model_sz)
@@ -3341,8 +3349,18 @@ _usb_lookup(int vid, int pid, char *out_mfg, size_t mfg_sz,
     FILE *f = NULL;
     char line[512], *p, *nl;
     int found_vid = 0, lv, i;
+    usb_cache_entry *ce;
 
     out_mfg[0] = out_model[0] = '\0';
+
+    /* Check result cache first */
+    for (i = 0; i < _usb_cache_n; i++) {
+        if (_usb_cache[i].vid == vid && _usb_cache[i].pid == pid) {
+            strlcpy(out_mfg,   _usb_cache[i].mfg,   mfg_sz);
+            strlcpy(out_model, _usb_cache[i].model, model_sz);
+            return;
+        }
+    }
 
     for (i = 0; paths[i]; i++) {
         f = fopen(paths[i], "r");
@@ -3393,6 +3411,15 @@ _usb_lookup(int vid, int pid, char *out_mfg, size_t mfg_sz,
         }
     }
     fclose(f);
+
+    /* Store result in cache for future reloads */
+    if (_usb_cache_n < USB_CACHE_SIZE) {
+        ce = &_usb_cache[_usb_cache_n++];
+        ce->vid = vid;
+        ce->pid = pid;
+        strlcpy(ce->mfg,   out_mfg,   sizeof(ce->mfg));
+        strlcpy(ce->model, out_model, sizeof(ce->model));
+    }
 }
 
 static void
@@ -3923,23 +3950,61 @@ _load_scsi_disks(void)
     closedir(dir);
 }
 
+#define MMC_IDS_MAX 256
+typedef struct { unsigned int id; char name[64]; } mmc_id_entry;
+static mmc_id_entry _sd_ids[MMC_IDS_MAX];
+static int          _sd_ids_n  = -1; /* -1 = not yet loaded */
+static mmc_id_entry _mmc_ids[MMC_IDS_MAX];
+static int          _mmc_ids_n = -1;
+
+static void
+_mmc_ids_load(mmc_id_entry *table, int *n, const char *path)
+{
+    FILE *f;
+    char line[256];
+    int warned = 0;
+
+    *n = 0;
+    f = fopen(path, "r");
+    if (!f) {
+        if (!warned) {
+            snmp_log(LOG_WARNING,
+                     "entity: MMC manufacturer IDs file not found: %s "
+                     "(install the package providing it to resolve manufacturer names)\n",
+                     path);
+            warned = 1;
+        }
+        return;
+    }
+    while (fgets(line, sizeof(line), f) && *n < MMC_IDS_MAX) {
+        unsigned int id;
+        char name[128], *nl;
+        if (line[0] == '#' || line[0] == '\n')
+            continue;
+        if (sscanf(line, "%x %127[^\n]", &id, name) != 2)
+            continue;
+        nl = strchr(name, '\n');
+        if (nl) *nl = '\0';
+        _trim_trailing(name);
+        table[*n].id = id;
+        strlcpy(table[*n].name, name, sizeof(table[*n].name));
+        (*n)++;
+    }
+    fclose(f);
+}
+
 static void
 _mmc_lookup_mfg_by_type(const char *dev_sysfs_path, const char *mmc_type,
                         char *mfg, size_t mfgsz)
 {
-    char path[PATH_MAX], val[64], line[256];
+    char path[PATH_MAX], val[64];
     unsigned int manfid;
-    const char *ids_file;
-    static int sd_warned = 0, mmc_warned = 0;
-    FILE *f;
+    int i, is_sd;
+    mmc_id_entry *table;
+    int *n;
 
     if (mfgsz > 0)
         mfg[0] = '\0';
-
-    if (strcmp(mmc_type, "SD") == 0)
-        ids_file = "/usr/share/misc/sdcard.ids";
-    else
-        ids_file = "/usr/share/misc/multimediacard.ids";
 
     snprintf(path, sizeof(path), "%s/manfid", dev_sysfs_path);
     val[0] = '\0';
@@ -3947,38 +4012,21 @@ _mmc_lookup_mfg_by_type(const char *dev_sysfs_path, const char *mmc_type,
     if (!val[0] || sscanf(val, "%x", &manfid) != 1)
         return;
 
-    f = fopen(ids_file, "r");
-    if (!f) {
-        int *warned = (strcmp(mmc_type, "SD") == 0) ? &sd_warned : &mmc_warned;
-        if (!*warned) {
-            snmp_log(LOG_WARNING,
-                     "entity: MMC manufacturer IDs file not found: %s "
-                     "(install the package providing it to resolve manufacturer names)\n",
-                     ids_file);
-            *warned = 1;
-        }
-        return;
-    }
+    is_sd = (strcmp(mmc_type, "SD") == 0);
+    table = is_sd ? _sd_ids  : _mmc_ids;
+    n     = is_sd ? &_sd_ids_n : &_mmc_ids_n;
 
-    while (fgets(line, sizeof(line), f)) {
-        unsigned int id;
-        char name[128];
-        char *nl;
+    if (*n < 0)
+        _mmc_ids_load(table, n,
+                      is_sd ? "/usr/share/misc/sdcard.ids"
+                             : "/usr/share/misc/multimediacard.ids");
 
-        if (line[0] == '#' || line[0] == '\n')
-            continue;
-        if (sscanf(line, "%x %127[^\n]", &id, name) != 2)
-            continue;
-        nl = strchr(name, '\n');
-        if (nl)
-            *nl = '\0';
-        _trim_trailing(name);
-        if (id == manfid) {
-            strlcpy(mfg, name, mfgsz);
-            break;
+    for (i = 0; i < *n; i++) {
+        if (table[i].id == manfid) {
+            strlcpy(mfg, table[i].name, mfgsz);
+            return;
         }
     }
-    fclose(f);
 }
 
 static void
@@ -6100,6 +6148,12 @@ _write_entity_state(void)
  * oui.txt format (base-16 record, one per OUI):
  *   XXXXXX     (base 16)\t\tVendor Name
  */
+/* Result cache for oui.txt lookups (one entry per unique OUI seen) */
+#define OUI_CACHE_SIZE 32
+typedef struct { int oui; char mfg[64]; } oui_cache_entry;
+static oui_cache_entry _oui_cache[OUI_CACHE_SIZE];
+static int             _oui_cache_n = 0;
+
 static void
 _oui_lookup(int phy_oui, char *out_mfg, size_t mfg_sz)
 {
@@ -6115,6 +6169,15 @@ _oui_lookup(int phy_oui, char *out_mfg, size_t mfg_sz)
     int i;
 
     out_mfg[0] = '\0';
+
+    /* Check result cache first */
+    for (i = 0; i < _oui_cache_n; i++) {
+        if (_oui_cache[i].oui == phy_oui) {
+            strlcpy(out_mfg, _oui_cache[i].mfg, mfg_sz);
+            return;
+        }
+    }
+
     snprintf(target, sizeof(target), "%06X", ieee_oui);
 
     for (i = 0; paths[i]; i++) {
@@ -6140,6 +6203,14 @@ _oui_lookup(int phy_oui, char *out_mfg, size_t mfg_sz)
         break;
     }
     fclose(f);
+
+    /* Store result in cache */
+    if (_oui_cache_n < OUI_CACHE_SIZE) {
+        _oui_cache[_oui_cache_n].oui = phy_oui;
+        strlcpy(_oui_cache[_oui_cache_n].mfg, out_mfg,
+                sizeof(_oui_cache[_oui_cache_n].mfg));
+        _oui_cache_n++;
+    }
 }
 
 static void
