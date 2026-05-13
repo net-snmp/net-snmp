@@ -486,6 +486,14 @@ _sysfs_read(const char *path, char *buf, size_t bufsz)
 }
 
 static void
+_sysfs_read2(const char *base, const char *file, char *buf, size_t sz)
+{
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/%s", base, file);
+    _sysfs_read(path, buf, sz);
+}
+
+static void
 _sysfs_read_key(const char *path, const char *key, char *buf, size_t bufsz)
 {
     FILE *f;
@@ -3239,15 +3247,9 @@ done:
 }
 
 static int
-_usb_iana_class(const char *name)
+_usb_iana_class_from(int cls)
 {
-    int cls;
-
-    _usb_class_info(name, &cls, NULL, NULL);
-    switch (cls) {
-    case 0x09: return IANA_PHYS_CONTAINER; /* Hub */
-    default:   return IANA_PHYS_MODULE;    /* pluggable functional unit */
-    }
+    return (cls == 0x09) ? IANA_PHYS_CONTAINER : IANA_PHYS_MODULE;
 }
 
 static void
@@ -3391,11 +3393,8 @@ _usb_root_parent_rel_pos(int parent_idx, int busnum)
 }
 
 static const char *
-_usb_class_descr(const char *name)
+_usb_class_descr_from(int cls, int sub, int prot)
 {
-    int cls, sub, prot;
-
-    _usb_class_info(name, &cls, &sub, &prot);
     switch (cls) {
     case 0x01:
         return "Audio device";
@@ -3613,188 +3612,195 @@ _load_usb(void)
     if (!dir)
         return;
 
-    /* Pass 1: create root hub (usbhost) container entities */
-    while ((de = readdir(dir))) {
-        netsnmp_entity_info *e;
-        const char *name = de->d_name;
-        char ver[16], spd_s[16], spd_descr[32], key[128];
-        int idx, pci_idx, pci_map_i;
+    /*
+     * Single readdir pass: collect root hub names ("usb1", "usb2", ...)
+     * and device names ("1-1", "1-2.3", ...) into separate lists, then
+     * process them without a rewinddir.
+     */
+#define USB_MAX_ENTRIES 64
+    {
+        char *hub_names[USB_MAX_ENTRIES];
+        char *dev_names[USB_MAX_ENTRIES];
+        int n_hubs = 0, n_devs = 0;
+        int i;
 
-        if (name[0] == '.')
-            continue;
-        if (strncmp(name, "usb", 3) != 0 || !isdigit((unsigned char)name[3]))
-            continue;
-
-        snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
-        if (!realpath(path, rp))
-            continue;
-
-        snprintf(key, sizeof(key), "usbhost:%s", name + 3);
-        idx = _entity_index_alloc(key);
-        if (idx <= 0)
-            continue;
-
-        pci_map_i = -1;
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, &pci_map_i);
-        if (!pci_idx)
-            pci_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
-
-        e = netsnmp_entity_create(idx);
-        if (!e)
-            continue;
-
-        snprintf(path, sizeof(path), "%s/%s/version", USB_PATH, name);
-        _sysfs_read(path, ver, sizeof(ver));
-        snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
-        _sysfs_read(path, spd_s, sizeof(spd_s));
-        _usb_speed_descr(spd_s, spd_descr, sizeof(spd_descr));
-
-        e->iana_class = IANA_PHYS_CONTAINER;
-        e->is_fru     = TV_FALSE;
-        e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
-        e->parent_rel_pos = _usb_root_parent_rel_pos(e->parent_idx,
-                                                     atoi(name + 3));
-        strlcpy(e->name, name, sizeof(e->name));
-
-        if (ver[0] && spd_descr[0]) {
-            snprintf(e->descr, sizeof(e->descr), "USB %s host, %s",
-                     ver, spd_descr);
-        } else {
-            strlcpy(e->descr, "USB host", sizeof(e->descr));
+        while ((de = readdir(dir))) {
+            const char *name = de->d_name;
+            if (name[0] == '.')
+                continue;
+            if (strncmp(name, "usb", 3) == 0 && isdigit((unsigned char)name[3])) {
+                if (n_hubs < USB_MAX_ENTRIES)
+                    hub_names[n_hubs++] = strdup(name);
+            } else if (strchr(name, '-') && !strchr(name, ':')) {
+                if (n_devs < USB_MAX_ENTRIES)
+                    dev_names[n_devs++] = strdup(name);
+            }
         }
+        closedir(dir);
+        dir = NULL;
 
-        snprintf(path, sizeof(path), "usb:%s", name);
-        _append_uri(e->uris, sizeof(e->uris), path);
-        if (pci_map_i >= 0) {
-            snprintf(path, sizeof(path), "%s/%s/%s", PCI_PATH,
-                     pci_map[pci_map_i].bdf, name);
-            _append_file_uri(e->uris, sizeof(e->uris), path);
-        }
-    }
-    rewinddir(dir);
+        /* Pass 1: root hub (usbhost) container entities */
+        for (i = 0; i < n_hubs; i++) {
+            netsnmp_entity_info *e;
+            const char *name = hub_names[i];
+            char base[512], ver[16], spd_s[16], spd_descr[32], key[128];
+            int idx, pci_idx, pci_map_i;
 
-    /* Pass 2: create USB device entities as children of their root hub */
-    while ((de = readdir(dir))) {
-        netsnmp_entity_info *e;
-        const char *name = de->d_name;
-        const char *class_descr;
-        char devname[128], speed[64], speed_descr[32], removable[64];
-        char key[512], busnum[16];
-        int idx, hub_idx;
+            snprintf(base, sizeof(base), "%s/%s", USB_PATH, name);
+            if (!realpath(base, rp))
+                continue;
 
-        if (name[0] == '.')
-            continue;
-        if (strchr(name, ':'))
-            continue;
-        if (strncmp(name, "usb", 3) == 0 && isdigit((unsigned char)name[3]))
-            continue;
+            snprintf(key, sizeof(key), "usbhost:%s", name + 3);
+            idx = _entity_index_alloc(key);
+            if (idx <= 0)
+                continue;
 
-        snprintf(path, sizeof(path), "%s/%s", USB_PATH, name);
-        if (!realpath(path, rp))
-            continue;
+            pci_map_i = -1;
+            pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, &pci_map_i);
+            if (!pci_idx)
+                pci_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
 
-        snprintf(key, sizeof(key), "usb:%s", name);
-        idx = _entity_index_alloc(key);
-        if (idx <= 0)
-            continue;
+            e = netsnmp_entity_create(idx);
+            if (!e)
+                continue;
 
-        snprintf(path, sizeof(path), "%s/%s/busnum", USB_PATH, name);
-        _sysfs_read(path, busnum, sizeof(busnum));
-        hub_idx = _usb_parent_idx_from_name(name, busnum);
+            _sysfs_read2(base, "version", ver, sizeof(ver));
+            _sysfs_read2(base, "speed", spd_s, sizeof(spd_s));
+            _usb_speed_descr(spd_s, spd_descr, sizeof(spd_descr));
 
-        e = netsnmp_entity_create(idx);
-        if (!e)
-            continue;
+            e->iana_class = IANA_PHYS_CONTAINER;
+            e->is_fru     = TV_FALSE;
+            e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
+            e->parent_rel_pos = _usb_root_parent_rel_pos(e->parent_idx,
+                                                         atoi(name + 3));
+            strlcpy(e->name, name, sizeof(e->name));
 
-        e->iana_class = _usb_iana_class(name);
-        e->is_fru     = TV_FALSE;
-        e->parent_idx = hub_idx ? hub_idx : IDX_BASEBOARD;
-        e->parent_rel_pos = _usb_parent_rel_pos_from_name(name, busnum);
+            if (ver[0] && spd_descr[0])
+                snprintf(e->descr, sizeof(e->descr), "USB %s host, %s",
+                         ver, spd_descr);
+            else
+                strlcpy(e->descr, "USB host", sizeof(e->descr));
 
-        snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
-        _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
-        strlcpy(e->name, devname[0] ? _strip_dev_prefix(devname) : name,
-                sizeof(e->name));
-
-        snprintf(path, sizeof(path), "%s/%s/speed", USB_PATH, name);
-        _sysfs_read(path, speed, sizeof(speed));
-        _usb_speed_descr(speed, speed_descr, sizeof(speed_descr));
-        snprintf(path, sizeof(path), "%s/%s/removable", USB_PATH, name);
-        _sysfs_read(path, removable, sizeof(removable));
-        if (strcmp(removable, "removable") == 0)
-            e->is_fru = TV_TRUE;
-        class_descr = _usb_class_descr(name);
-        if (speed_descr[0])
-            snprintf(e->descr, sizeof(e->descr), "%s, %s",
-                     class_descr, speed_descr);
-        else
-            strlcpy(e->descr, class_descr, sizeof(e->descr));
-        if (e->is_fru == TV_TRUE)
-            strncat(e->descr, ", removable",
-                    sizeof(e->descr) - strlen(e->descr) - 1);
-
-        snprintf(path, sizeof(path), "%s/%s/product", USB_PATH, name);
-        _sysfs_read(path, val, sizeof(val));
-        if (val[0])
-            strlcpy(e->model_name, val, sizeof(e->model_name));
-
-        /* Fallback: use Device Tree OF_NAME when no USB product string */
-        if (!e->model_name[0]) {
-            snprintf(path, sizeof(path), "%s/%s/uevent", USB_PATH, name);
-            _sysfs_read_key(path, "OF_NAME", val, sizeof(val));
-            if (val[0])
-                strlcpy(e->model_name, val, sizeof(e->model_name));
-        }
-
-        snprintf(path, sizeof(path), "%s/%s/manufacturer", USB_PATH, name);
-        _sysfs_read(path, val, sizeof(val));
-        _set_if_valid(e->mfg_name, sizeof(e->mfg_name), val);
-
-        snprintf(path, sizeof(path), "%s/%s/serial", USB_PATH, name);
-        _sysfs_read(path, val, sizeof(val));
-        _set_if_valid(e->serial, sizeof(e->serial), val);
-
-        /* Device version (BCD, e.g. "02.00") */
-        snprintf(path, sizeof(path), "%s/%s/bcdDevice", USB_PATH, name);
-        _sysfs_read(path, val, sizeof(val));
-        _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
-
-        /* Fallback: usb.ids lookup when USB descriptor strings are absent */
-        if (!e->mfg_name[0] || !e->model_name[0]) {
-            char vid_str[16], pid_str[16];
-            char lk_mfg[128], lk_model[128];
-            int vid, pid;
-
-            snprintf(path, sizeof(path), "%s/%s/idVendor",  USB_PATH, name);
-            _sysfs_read(path, vid_str, sizeof(vid_str));
-            snprintf(path, sizeof(path), "%s/%s/idProduct", USB_PATH, name);
-            _sysfs_read(path, pid_str, sizeof(pid_str));
-
-            vid = vid_str[0] ? (int)strtol(vid_str, NULL, 16) : 0;
-            pid = pid_str[0] ? (int)strtol(pid_str, NULL, 16) : 0;
-
-            if (vid) {
-                _usb_lookup(vid, pid, lk_mfg, sizeof(lk_mfg),
-                            lk_model, sizeof(lk_model));
-                if (lk_mfg[0] && !e->mfg_name[0])
-                    strlcpy(e->mfg_name, lk_mfg, sizeof(e->mfg_name));
-                if (lk_model[0] && !e->model_name[0]) {
-                    strlcpy(e->model_name, lk_model, sizeof(e->model_name));
-                    /* Prepend model to description */
-                    if (!strstr(e->descr, lk_model)) {
-                        char tmp[sizeof(e->descr)];
-                        strlcpy(tmp, e->descr, sizeof(tmp));
-                        strlcpy(e->descr, lk_model, sizeof(e->descr));
-                        strlcat(e->descr, " ",       sizeof(e->descr));
-                        strlcat(e->descr, tmp,       sizeof(e->descr));
-                    }
-                }
+            snprintf(path, sizeof(path), "usb:%s", name);
+            _append_uri(e->uris, sizeof(e->uris), path);
+            if (pci_map_i >= 0) {
+                snprintf(path, sizeof(path), "%s/%s/%s", PCI_PATH,
+                         pci_map[pci_map_i].bdf, name);
+                _append_file_uri(e->uris, sizeof(e->uris), path);
             }
         }
 
-        _usb_append_uris(e, name);
+        /* Pass 2: USB device entities as children of their root hub */
+        for (i = 0; i < n_devs; i++) {
+            netsnmp_entity_info *e;
+            const char *name = dev_names[i];
+            const char *class_descr;
+            char base[512], devname[128], speed[64], speed_descr[32];
+            char removable[64], key[512], busnum[16];
+            int idx, hub_idx, cls, sub, prot;
+
+            snprintf(base, sizeof(base), "%s/%s", USB_PATH, name);
+            if (!realpath(base, rp))
+                continue;
+
+            snprintf(key, sizeof(key), "usb:%s", name);
+            idx = _entity_index_alloc(key);
+            if (idx <= 0)
+                continue;
+
+            _sysfs_read2(base, "busnum", busnum, sizeof(busnum));
+            hub_idx = _usb_parent_idx_from_name(name, busnum);
+
+            e = netsnmp_entity_create(idx);
+            if (!e)
+                continue;
+
+            /* Read class info once; derive both iana_class and description */
+            _usb_class_info(name, &cls, &sub, &prot);
+            e->iana_class = _usb_iana_class_from(cls);
+            e->is_fru     = TV_FALSE;
+            e->parent_idx = hub_idx ? hub_idx : IDX_BASEBOARD;
+            e->parent_rel_pos = _usb_parent_rel_pos_from_name(name, busnum);
+
+            snprintf(path, sizeof(path), "%s/uevent", base);
+            _sysfs_read_key(path, "DEVNAME", devname, sizeof(devname));
+            strlcpy(e->name, devname[0] ? _strip_dev_prefix(devname) : name,
+                    sizeof(e->name));
+
+            _sysfs_read2(base, "speed",    speed,    sizeof(speed));
+            _usb_speed_descr(speed, speed_descr, sizeof(speed_descr));
+            _sysfs_read2(base, "removable", removable, sizeof(removable));
+            if (strcmp(removable, "removable") == 0)
+                e->is_fru = TV_TRUE;
+
+            class_descr = _usb_class_descr_from(cls, sub, prot);
+            if (speed_descr[0])
+                snprintf(e->descr, sizeof(e->descr), "%s, %s",
+                         class_descr, speed_descr);
+            else
+                strlcpy(e->descr, class_descr, sizeof(e->descr));
+            if (e->is_fru == TV_TRUE)
+                strncat(e->descr, ", removable",
+                        sizeof(e->descr) - strlen(e->descr) - 1);
+
+            _sysfs_read2(base, "product", val, sizeof(val));
+            if (val[0])
+                strlcpy(e->model_name, val, sizeof(e->model_name));
+
+            /* Fallback: use Device Tree OF_NAME when no USB product string */
+            if (!e->model_name[0]) {
+                snprintf(path, sizeof(path), "%s/uevent", base);
+                _sysfs_read_key(path, "OF_NAME", val, sizeof(val));
+                if (val[0])
+                    strlcpy(e->model_name, val, sizeof(e->model_name));
+            }
+
+            _sysfs_read2(base, "manufacturer", val, sizeof(val));
+            _set_if_valid(e->mfg_name, sizeof(e->mfg_name), val);
+
+            _sysfs_read2(base, "serial", val, sizeof(val));
+            _set_if_valid(e->serial, sizeof(e->serial), val);
+
+            /* Device version (BCD, e.g. "02.00") */
+            _sysfs_read2(base, "bcdDevice", val, sizeof(val));
+            _set_if_valid(e->hw_rev, sizeof(e->hw_rev), val);
+
+            /* Fallback: usb.ids lookup when USB descriptor strings are absent */
+            if (!e->mfg_name[0] || !e->model_name[0]) {
+                char vid_str[16], pid_str[16], lk_mfg[128], lk_model[128];
+                int vid, pid;
+
+                _sysfs_read2(base, "idVendor",  vid_str, sizeof(vid_str));
+                _sysfs_read2(base, "idProduct", pid_str, sizeof(pid_str));
+
+                vid = vid_str[0] ? (int)strtol(vid_str, NULL, 16) : 0;
+                pid = pid_str[0] ? (int)strtol(pid_str, NULL, 16) : 0;
+
+                if (vid) {
+                    _usb_lookup(vid, pid, lk_mfg, sizeof(lk_mfg),
+                                lk_model, sizeof(lk_model));
+                    if (lk_mfg[0] && !e->mfg_name[0])
+                        strlcpy(e->mfg_name, lk_mfg, sizeof(e->mfg_name));
+                    if (lk_model[0] && !e->model_name[0]) {
+                        strlcpy(e->model_name, lk_model, sizeof(e->model_name));
+                        if (!strstr(e->descr, lk_model)) {
+                            char tmp[sizeof(e->descr)];
+                            strlcpy(tmp, e->descr, sizeof(tmp));
+                            strlcpy(e->descr, lk_model, sizeof(e->descr));
+                            strlcat(e->descr, " ",       sizeof(e->descr));
+                            strlcat(e->descr, tmp,       sizeof(e->descr));
+                        }
+                    }
+                }
+            }
+
+            _usb_append_uris(e, name);
+        }
+
+        for (i = 0; i < n_hubs; i++) free(hub_names[i]);
+        for (i = 0; i < n_devs; i++) free(dev_names[i]);
     }
-    closedir(dir);
+#undef USB_MAX_ENTRIES
 }
 
 static void
@@ -3803,18 +3809,27 @@ _load_net_devices(void)
     DIR *dir;
     struct dirent *de;
     char path[512], rp[PATH_MAX], val[256];
+    int known_ifidx[256], n_known;
+    netsnmp_entity_info *ei;
 
     dir = opendir(NET_PATH);
     if (!dir)
         return;
 
+    /* Snapshot existing ifindexes once to avoid O(E) scan per interface */
+    n_known = 0;
+    for (ei = netsnmp_entity_get_first(); ei && n_known < 256;
+         ei = netsnmp_entity_get_next(ei)) {
+        if (ei->ifindex > 0)
+            known_ifidx[n_known++] = ei->ifindex;
+    }
+
     while ((de = readdir(dir)) != NULL) {
         netsnmp_entity_info *e;
-        netsnmp_entity_info *existing;
         const char *ifname = de->d_name;
         const char *ifdescr;
         char key[PATH_MAX + 8], address[64];
-        int idx, ifindex, arphrd, parent_idx;
+        int idx, ifindex, arphrd, parent_idx, j, dup;
 
         if (ifname[0] == '.')
             continue;
@@ -3824,12 +3839,14 @@ _load_net_devices(void)
         snprintf(path, sizeof(path), "%s/%s/ifindex", NET_PATH, ifname);
         ifindex = _sysfs_read_int(path);
         if (ifindex > 0) {
-            for (existing = netsnmp_entity_get_first(); existing;
-                 existing = netsnmp_entity_get_next(existing)) {
-                if (existing->ifindex == ifindex)
+            dup = 0;
+            for (j = 0; j < n_known; j++) {
+                if (known_ifidx[j] == ifindex) {
+                    dup = 1;
                     break;
+                }
             }
-            if (existing)
+            if (dup)
                 continue;
         }
 
@@ -6567,41 +6584,89 @@ _load_mdio(void)
  * exposes its now-childless parent.  Only entities in plat_map are candidates
  * — other containers (memory, cpu groups, etc.) are not touched.
  */
+/*
+ * _plat_is_prunable: true if this plat entry is a container without a serial
+ * number (i.e. a candidate for pruning when it has no visible children).
+ * Loaders may change the class of a platform entry (e.g. mmc disk enriches
+ * mmc0:aaaa to STORAGE); non-containers and entries with serials are kept.
+ */
 static int
-_plat_has_visible_child(int idx)
+_plat_is_prunable(const netsnmp_entity_info *e)
 {
-    netsnmp_entity_info *e;
-    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e))
-        if (!e->hidden && e->parent_idx == idx)
-            return 1;
-    return 0;
+    return e && !e->hidden &&
+           e->iana_class == IANA_PHYS_CONTAINER && !e->serial[0];
 }
 
 static void
 _plat_prune_empty(void)
 {
-    int i, changed;
-    do {
-        changed = 0;
+    int *child_count;
+    int *queue;
+    int queue_tail, queue_head;
+    int i;
+    netsnmp_entity_info *e;
+
+    if (plat_map_n <= 0)
+        return;
+
+    child_count = (int *)calloc(plat_map_n, sizeof(int));
+    queue       = (int *)malloc(plat_map_n * sizeof(int));
+    if (!child_count || !queue) {
+        free(child_count);
+        free(queue);
+        return;
+    }
+
+    /*
+     * Count visible children per plat entry.  A single pass over all entities
+     * is O(E × P), but done once — vs. the old O(P² × E) do-while.
+     */
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e)) {
+        if (e->hidden)
+            continue;
         for (i = 0; i < plat_map_n; i++) {
-            netsnmp_entity_info *e = netsnmp_entity_get_byIdx(plat_map[i].idx);
-            if (!e || e->hidden)
-                continue;
-            /* Loaders may change the class of a platform entry (e.g. mmc disk
-             * enriches mmc0:aaaa to STORAGE).  Non-containers are never pruned.
-             * Serial number indicates a FRU-worthy device — keep it even without
-             * children.  uevent-derived descr/mfg/model alone are not enough to
-             * keep a structurally empty container visible. */
-            if (e->iana_class != IANA_PHYS_CONTAINER)
-                continue;
-            if (e->serial[0])
-                continue;
-            if (_plat_has_visible_child(plat_map[i].idx))
-                continue;
-            e->hidden = 1;
-            changed = 1;
+            if (plat_map[i].idx == e->parent_idx) {
+                child_count[i]++;
+                break;
+            }
         }
-    } while (changed);
+    }
+
+    /* Seed work queue with zero-child prunable entries */
+    queue_tail = 0;
+    for (i = 0; i < plat_map_n; i++) {
+        e = netsnmp_entity_get_byIdx(plat_map[i].idx);
+        if (_plat_is_prunable(e) && child_count[i] == 0)
+            queue[queue_tail++] = i;
+    }
+
+    /* Process: hiding an entry may make its parent prunable */
+    for (queue_head = 0; queue_head < queue_tail; queue_head++) {
+        int qi = queue[queue_head];
+        int parent_idx;
+
+        e = netsnmp_entity_get_byIdx(plat_map[qi].idx);
+        if (!e || e->hidden)
+            continue;
+        e->hidden  = 1;
+        parent_idx = e->parent_idx;
+
+        for (i = 0; i < plat_map_n; i++) {
+            netsnmp_entity_info *pe;
+            if (plat_map[i].idx != parent_idx)
+                continue;
+            child_count[i]--;
+            if (child_count[i] > 0)
+                break;
+            pe = netsnmp_entity_get_byIdx(plat_map[i].idx);
+            if (_plat_is_prunable(pe))
+                queue[queue_tail++] = i;
+            break;
+        }
+    }
+
+    free(child_count);
+    free(queue);
 }
 
 /* ---- Top-level load ------------------------------------------------------ */
