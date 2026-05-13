@@ -3072,7 +3072,10 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
         if (val[0])
             strlcpy(e->hw_rev, val, sizeof(e->hw_rev));
 
-        /* PCIe link speed and width appended to the concise description. */
+        /* PCIe link speed and width appended to the concise description.
+         * NOTE: current_link_speed/width sysfs reads trigger PCIe config-space
+         * accesses through the kernel; on some platforms bridge devices
+         * (class 0x06) and uncore devices (class 0xff) cost 10-350 ms each. */
         {
             char speed[64] = "", width[16] = "";
             snprintf(path, sizeof(path), "%s/%s/current_link_speed",

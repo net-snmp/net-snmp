@@ -56,7 +56,7 @@ if [ "$MODE" = "performance" ] || [ "$(uname)" = "Linux" ]; then
     _git_subject=$(git log -1 --pretty=%s 2>/dev/null || echo "")
     _run_date=$(date '+%Y-%m-%dT%H:%M:%S')
     _result_dir=".tmp/perf"
-    _result_file="${_result_dir}/perf-${_git_short}-$(date '+%Y%m%d-%H%M%S').txt"
+    _result_file="${_result_dir}/perf-$(date '+%Y%m%d-%H%M%S')-${_git_short}.txt"
 
     printf 'rocommunity %s 127.0.0.1\n' "$ENTITY_COMMUNITY" > "$ENTITY_CONF"
 
@@ -112,6 +112,18 @@ if [ "$MODE" = "performance" ] || [ "$(uname)" = "Linux" ]; then
     _total_us=$(printf '%s' "$_total_line" | sed 's/.*complete: \([0-9]*\) .*/\1/')
     _total_ms=$(( _total_us / 1000 ))
 
+    # Annotate phase lines with percentage of total
+    _phase_lines="$(grep "entity: phase" "$ENTITY_LOG")"
+    if [ -n "$_phase_lines" ]; then
+        _annotated_lines="$(printf '%s\n' "$_phase_lines" | awk -v total_us="$_total_us" '{
+            us = $4
+            pct = 100.0 * us / total_us
+            printf "%s  (%5.1f%%)\n", $0, pct
+        }')"
+    else
+        _annotated_lines=""
+    fi
+
     # Save result file
     mkdir -p "$_result_dir"
     {
@@ -123,14 +135,20 @@ if [ "$MODE" = "performance" ] || [ "$(uname)" = "Linux" ]; then
         printf 'host:    %s\n'   "$(uname -n 2>/dev/null)"
         printf 'kernel:  %s\n'   "$(uname -r 2>/dev/null)"
         printf '\n'
-        grep "entity: phase" "$ENTITY_LOG"
+        if [ -n "$_annotated_lines" ]; then
+            printf '%s\n' "$_annotated_lines"
+        fi
         printf '\n'
         echo "$_total_line"
     } > "$_result_file"
 
     # Report to stdout
     echo "---- Per-phase timing ----"
-    grep "entity: phase" "$ENTITY_LOG" || echo "(no phase lines)"
+    if [ -n "$_annotated_lines" ]; then
+        printf '%s\n' "$_annotated_lines"
+    else
+        echo "(no phase lines)"
+    fi
     echo "---- Summary ----"
     echo "$_total_line"
     echo "Total: ${_total_ms} ms  (limit: ${ENTITY_PERF_LIMIT_MS} ms)"
