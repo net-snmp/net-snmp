@@ -1002,53 +1002,6 @@ _numa_valid_node(int node)
 }
 
 static int
-_numa_cpu_node(int phys_id)
-{
-    DIR *node_dir, *cpu_dir;
-    struct dirent *node_de, *cpu_de;
-    char path[PATH_MAX], val[64];
-    int node, cpu, pkg;
-
-    if (!_numa_enabled())
-        return -1;
-
-    node_dir = opendir(NODE_PATH);
-    if (!node_dir)
-        return -1;
-
-    while ((node_de = readdir(node_dir)) != NULL) {
-        if (sscanf(node_de->d_name, "node%d", &node) != 1)
-            continue;
-
-        snprintf(path, sizeof(path), "%s/%s", NODE_PATH, node_de->d_name);
-        cpu_dir = opendir(path);
-        if (!cpu_dir)
-            continue;
-
-        while ((cpu_de = readdir(cpu_dir)) != NULL) {
-            if (sscanf(cpu_de->d_name, "cpu%d", &cpu) != 1)
-                continue;
-            snprintf(path, sizeof(path),
-                     "/sys/devices/system/cpu/%s/topology/physical_package_id",
-                     cpu_de->d_name);
-            _sysfs_read(path, val, sizeof(val));
-            if (!val[0])
-                continue;
-            pkg = atoi(val);
-            if (pkg == phys_id) {
-                closedir(cpu_dir);
-                closedir(node_dir);
-                return node;
-            }
-        }
-        closedir(cpu_dir);
-    }
-
-    closedir(node_dir);
-    return -1;
-}
-
-static int
 _numa_pci_node(const char *bdf)
 {
     char path[PATH_MAX], val[64];
@@ -1066,21 +1019,6 @@ _numa_pci_node(const char *bdf)
     return _numa_valid_node(node) ? node : -1;
 }
 
-static int
-_numa_parent_idx(int node)
-{
-    if (!_numa_enabled() || !_numa_valid_node(node))
-        return IDX_BASEBOARD;
-    return _numa_node_idx(node);
-}
-
-static int
-_numa_memory_parent_idx(int node)
-{
-    if (!_numa_enabled() || !_numa_valid_node(node))
-        return IDX_MEMORY;
-    return _numa_memory_idx(node);
-}
 
 static void
 _memory_kb_descr(unsigned long long kb, const char *prefix,
@@ -1153,17 +1091,6 @@ _numa_fix_top_level_parents(void)
 
         if (e->parent_idx != IDX_BASEBOARD)
             continue;
-
-        if (e->iana_class == IANA_PHYS_CPU) {
-            int phys_id;
-
-            if (sscanf(e->name, "cpu%d", &phys_id) == 1) {
-                node = _numa_cpu_node(phys_id);
-                if (node >= 0)
-                    e->parent_idx = _numa_node_idx(node);
-            }
-            continue;
-        }
 
         node = _numa_node_from_pci_uri(e->uris);
         if (node >= 0)
@@ -1254,301 +1181,9 @@ _cpu_thread_index_from_list(const char *list, int cpu_num)
     return 0;
 }
 
-static void
-_cpuinfo_for_cpu(int cpu_num, char *model, size_t modelsz,
-                 char *family, size_t familysz, char *model_id,
-                 size_t model_idsz, char *stepping, size_t steppingsz,
-                 char *microcode, size_t microcodesz)
-{
-    FILE *fp;
-    char buf[512], field[128], value[256];
-    int in_cpu, cur_cpu;
 
-    if (modelsz > 0)
-        model[0] = '\0';
-    if (familysz > 0)
-        family[0] = '\0';
-    if (model_idsz > 0)
-        model_id[0] = '\0';
-    if (steppingsz > 0)
-        stepping[0] = '\0';
-    if (microcodesz > 0)
-        microcode[0] = '\0';
 
-    fp = fopen("/proc/cpuinfo", "r");
-    if (!fp)
-        return;
-
-    in_cpu = 0;
-    cur_cpu = -1;
-    while (fgets(buf, sizeof(buf), fp)) {
-        char *nl;
-        const char *p;
-
-        nl = strchr(buf, '\n');
-        if (nl)
-            *nl = '\0';
-
-        if (buf[0] == '\0') {
-            if (in_cpu)
-                break;
-            continue;
-        }
-
-        if (sscanf(buf, "processor : %d", &cur_cpu) == 1 ||
-            sscanf(buf, "processor\t: %d", &cur_cpu) == 1) {
-            in_cpu = cur_cpu == cpu_num;
-            continue;
-        }
-        if (!in_cpu)
-            continue;
-
-        p = buf;
-        while (*p == ' ' || *p == '\t')
-            p++;
-        if (sscanf(p, "%127[^:]: %255[^\n]", field, value) != 2)
-            continue;
-        _trim_trailing(field);
-        while (value[0] == ' ' || value[0] == '\t')
-            memmove(value, value + 1, strlen(value));
-        _trim_trailing(value);
-
-        if (strcmp(field, "model name ") == 0 || strcmp(field, "model name") == 0)
-            strlcpy(model, value, modelsz);
-        else if (strcmp(field, "cpu family ") == 0 || strcmp(field, "cpu family") == 0)
-            strlcpy(family, value, familysz);
-        else if (strcmp(field, "model ") == 0 || strcmp(field, "model") == 0)
-            strlcpy(model_id, value, model_idsz);
-        else if (strcmp(field, "stepping ") == 0 || strcmp(field, "stepping") == 0)
-            strlcpy(stepping, value, steppingsz);
-        else if (strcmp(field, "microcode ") == 0 || strcmp(field, "microcode") == 0)
-            strlcpy(microcode, value, microcodesz);
-    }
-    fclose(fp);
-}
-
-static void
-_load_numa_nodes(void)
-{
-    DIR *dir;
-    struct dirent *de;
-    char path[PATH_MAX], val[128], descr[128];
-    int node;
-    unsigned long long kb;
-
-    if (!_numa_enabled())
-        return;
-
-    dir = opendir(NODE_PATH);
-    if (!dir)
-        return;
-
-    while ((de = readdir(dir)) != NULL) {
-        netsnmp_entity_info *e;
-
-        if (sscanf(de->d_name, "node%d", &node) != 1 || node < 0)
-            continue;
-
-        e = netsnmp_entity_create(_numa_node_idx(node));
-        if (!e)
-            continue;
-        e->iana_class = IANA_PHYS_CONTAINER;
-        e->parent_idx = IDX_BASEBOARD;
-        e->is_fru     = TV_FALSE;
-        snprintf(e->name, sizeof(e->name), "node%d", node);
-        snprintf(e->descr, sizeof(e->descr), "NUMA node %d", node);
-        snprintf(path, sizeof(path), "%s/%s", NODE_PATH, de->d_name);
-        _append_file_uri(e->uris, sizeof(e->uris), path);
-
-        e = netsnmp_entity_create(_numa_memory_idx(node));
-        if (!e)
-            continue;
-        e->iana_class = IANA_PHYS_CONTAINER;
-        e->parent_idx = _numa_node_idx(node);
-        e->is_fru     = TV_FALSE;
-        snprintf(e->name, sizeof(e->name), "memory%d", node);
-        snprintf(path, sizeof(path), "%s/%s/meminfo", NODE_PATH, de->d_name);
-        _sysfs_read(path, val, sizeof(val));
-        kb = 0;
-        if (sscanf(val, "Node %*d MemTotal: %llu kB", &kb) != 1)
-            kb = 0;
-        snprintf(val, sizeof(val), "Node %d memory", node);
-        _memory_kb_descr(kb, val, descr, sizeof(descr));
-        strlcpy(e->descr, descr, sizeof(e->descr));
-        _append_file_uri(e->uris, sizeof(e->uris), path);
-    }
-    closedir(dir);
-}
-
-static void
-_load_cpus(void)
-{
-    DIR *dir;
-    struct dirent *de;
-    int seen_pkg[256], cores_seen[256][256];
-    int pkg_threads[256], pkg_cores[256], pkg_first_cpu[256];
-    int cpu_nums[4096], cpu_count, i;
-
-    memset(seen_pkg, 0, sizeof(seen_pkg));
-    memset(cores_seen, 0, sizeof(cores_seen));
-    memset(pkg_threads, 0, sizeof(pkg_threads));
-    memset(pkg_cores, 0, sizeof(pkg_cores));
-    for (i = 0; i < 256; i++)
-        pkg_first_cpu[i] = -1;
-
-    cpu_count = 0;
-    dir = opendir("/sys/devices/system/cpu");
-    if (!dir)
-        return;
-
-    while ((de = readdir(dir)) != NULL) {
-        char path[PATH_MAX], val[64];
-        int cpu_num, pkg, core;
-
-        if (sscanf(de->d_name, "cpu%d", &cpu_num) != 1)
-            continue;
-        if (cpu_num < 0 || cpu_count >= (int)(sizeof(cpu_nums) / sizeof(cpu_nums[0])))
-            continue;
-
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/%s/topology/physical_package_id",
-                 de->d_name);
-        _sysfs_read(path, val, sizeof(val));
-        pkg = val[0] ? atoi(val) : 0;
-        if (pkg < 0 || pkg >= 256)
-            pkg = 0;
-
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/%s/topology/core_id",
-                 de->d_name);
-        _sysfs_read(path, val, sizeof(val));
-        core = val[0] ? atoi(val) : cpu_num;
-        if (core < 0 || core >= 256)
-            core = cpu_num % 256;
-
-        cpu_nums[cpu_count++] = cpu_num;
-        seen_pkg[pkg] = 1;
-        pkg_threads[pkg]++;
-        if (pkg_first_cpu[pkg] < 0)
-            pkg_first_cpu[pkg] = cpu_num;
-        if (!cores_seen[pkg][core]) {
-            cores_seen[pkg][core] = 1;
-            pkg_cores[pkg]++;
-        }
-    }
-    closedir(dir);
-
-    for (i = 0; i < 256; i++) {
-        netsnmp_entity_info *e;
-        char model[256], family[32], model_id[32], stepping[32], microcode[64];
-        char path[PATH_MAX];
-        int node;
-
-        if (!seen_pkg[i])
-            continue;
-
-        _cpuinfo_for_cpu(pkg_first_cpu[i], model, sizeof(model),
-                         family, sizeof(family), model_id, sizeof(model_id),
-                         stepping, sizeof(stepping), microcode,
-                         sizeof(microcode));
-
-        e = netsnmp_entity_create(IDX_CPU_BASE + i);
-        if (!e)
-            continue;
-
-        node = _numa_cpu_node(i);
-        e->iana_class = IANA_PHYS_CPU;
-        e->parent_idx = _numa_parent_idx(node);
-        e->parent_rel_pos = -1;
-        e->is_fru     = TV_TRUE;
-        snprintf(e->name, sizeof(e->name), "cpu-package%d", i);
-        snprintf(e->descr, sizeof(e->descr),
-                 "CPU package %d, %d cores, %d threads", i,
-                 pkg_cores[i], pkg_threads[i]);
-        _set_if_valid(e->model_name, sizeof(e->model_name), model);
-        if (family[0] || model_id[0] || stepping[0]) {
-            char _hw[256];
-            snprintf(_hw, sizeof(_hw), "family %s model %s stepping %s",
-                     family[0] ? family : "?",
-                     model_id[0] ? model_id : "?",
-                     stepping[0] ? stepping : "?");
-            strlcpy(e->hw_rev, _hw, sizeof(e->hw_rev));
-        }
-        if (microcode[0]) {
-            char _fw[128];
-            snprintf(_fw, sizeof(_fw), "microcode %s", microcode);
-            strlcpy(e->fw_rev, _fw, sizeof(e->fw_rev));
-        }
-        snprintf(path, sizeof(path), "/sys/devices/system/cpu");
-        _append_file_uri(e->uris, sizeof(e->uris), path);
-
-        e = netsnmp_entity_create(IDX_CPU_LOGICAL_CONTAINER_BASE + i);
-        if (e) {
-            e->iana_class = IANA_PHYS_CONTAINER;
-            e->parent_idx = IDX_CPU_BASE + i;
-            e->parent_rel_pos = -1;
-            e->is_fru     = TV_FALSE;
-            snprintf(e->name, sizeof(e->name), "cpu-package%d-logical", i);
-            strlcpy(e->descr, "Logical CPUs", sizeof(e->descr));
-            strlcpy(e->uris, "file://", sizeof(e->uris));
-            strlcat(e->uris, path, sizeof(e->uris));
-        }
-
-        e = netsnmp_entity_create(IDX_CPU_CACHE_CONTAINER_BASE + i);
-        if (e) {
-            e->iana_class = IANA_PHYS_CONTAINER;
-            e->parent_idx = IDX_CPU_BASE + i;
-            e->parent_rel_pos = -1;
-            e->is_fru     = TV_FALSE;
-            snprintf(e->name, sizeof(e->name), "cpu-package%d-cache", i);
-            strlcpy(e->descr, "CPU caches", sizeof(e->descr));
-            strlcpy(e->uris, "file://", sizeof(e->uris));
-            strlcat(e->uris, path, sizeof(e->uris));
-        }
-    }
-
-    for (i = 0; i < cpu_count; i++) {
-        netsnmp_entity_info *e;
-        char path[PATH_MAX], val[64], siblings[128];
-        int cpu_num, pkg, core, thread_idx;
-
-        cpu_num = cpu_nums[i];
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/cpu%d/topology/physical_package_id",
-                 cpu_num);
-        _sysfs_read(path, val, sizeof(val));
-        pkg = val[0] ? atoi(val) : 0;
-        if (pkg < 0 || pkg >= 256)
-            pkg = 0;
-
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/cpu%d/topology/core_id", cpu_num);
-        _sysfs_read(path, val, sizeof(val));
-        core = val[0] ? atoi(val) : cpu_num;
-
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/cpu%d/topology/thread_siblings_list",
-                 cpu_num);
-        _sysfs_read(path, siblings, sizeof(siblings));
-        thread_idx = _cpu_thread_index_from_list(siblings, cpu_num);
-
-        e = netsnmp_entity_create(IDX_LOGICAL_CPU_BASE + cpu_num);
-        if (!e)
-            continue;
-
-        e->iana_class = IANA_PHYS_CPU;
-        e->parent_idx = IDX_CPU_LOGICAL_CONTAINER_BASE + pkg;
-        e->parent_rel_pos = cpu_num;
-        e->is_fru     = TV_FALSE;
-        snprintf(e->name, sizeof(e->name), "cpu%d", cpu_num);
-        snprintf(e->descr, sizeof(e->descr), "Logical CPU %d, core %d.%d",
-                 cpu_num, core, thread_idx);
-        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d", cpu_num);
-        _append_file_uri(e->uris, sizeof(e->uris), path);
-    }
-}
-
-/* ---- Phase 3: DIMM slots via dmidecode ----------------------------------- */
+/* ---- Phase 3: CPU + memory topology -------------------------------------- */
 
 static unsigned long long
 _proc_memtotal_kb(void)
@@ -1570,41 +1205,296 @@ _proc_memtotal_kb(void)
     return kb;
 }
 
+/* per-logical-CPU record filled by _cpu_topo_scan_sysfs() */
+typedef struct {
+    int cpu_num;
+    int pkg;
+    int core;
+    int thread_idx;
+    int numa_node;
+} cpu_thread_t;
+
+/* per-package record filled by scan functions */
+typedef struct {
+    int                present;
+    int                first_cpu;
+    int                n_cores;
+    int                n_threads;
+    int                numa_node;
+    char               model[256];
+    char               family[32];
+    char               model_id[32];
+    char               stepping[32];
+    char               microcode[64];
+} cpu_pkg_t;
+
+/* shared scan context (~263 KB; always declared static) */
+typedef struct {
+    cpu_thread_t       threads[4096];
+    int                n_threads;
+    cpu_pkg_t          pkgs[256];
+    int                cores_seen[256][256];
+    unsigned long long node_mem_kb[256];
+    int                nodes[256];
+    int                n_nodes;
+} cpu_topo_t;
+
+/* one DIMM slot from dmidecode */
+typedef struct {
+    int  slot;
+    int  installed;
+    int  numa_node;
+    char locator[128];
+    char size[64];
+    char speed[64];
+    char mfg[64];
+    char serial_num[64];
+    char part[64];
+} dimm_info_t;
+
+typedef struct {
+    dimm_info_t *slots;
+    int          n;
+} dimm_list_t;
+
+/* ---- Scan phase: gather data, no entity creation ------------------------- */
+
 static void
-_load_dimms(void)
+_cpu_topo_scan_sysfs(cpu_topo_t *t)
+{
+    DIR *dir;
+    struct dirent *de;
+
+    dir = opendir("/sys/devices/system/cpu");
+    if (!dir)
+        return;
+
+    while ((de = readdir(dir)) != NULL) {
+        char path[PATH_MAX], val[64], siblings[128];
+        int cpu_num, pkg, core;
+        cpu_thread_t *th;
+
+        if (sscanf(de->d_name, "cpu%d", &cpu_num) != 1 || cpu_num < 0)
+            continue;
+        if (t->n_threads >= 4096)
+            continue;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/physical_package_id",
+                 de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        pkg = val[0] ? atoi(val) : 0;
+        if (pkg < 0 || pkg >= 256)
+            pkg = 0;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/core_id",
+                 de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        core = val[0] ? atoi(val) : cpu_num;
+        if (core < 0 || core >= 256)
+            core = cpu_num % 256;
+
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/%s/topology/thread_siblings_list",
+                 de->d_name);
+        _sysfs_read(path, siblings, sizeof(siblings));
+
+        th             = &t->threads[t->n_threads++];
+        th->cpu_num    = cpu_num;
+        th->pkg        = pkg;
+        th->core       = core;
+        th->thread_idx = _cpu_thread_index_from_list(siblings, cpu_num);
+        th->numa_node  = -1;
+
+        t->pkgs[pkg].present = 1;
+        t->pkgs[pkg].n_threads++;
+        if (t->pkgs[pkg].first_cpu < 0 || cpu_num < t->pkgs[pkg].first_cpu)
+            t->pkgs[pkg].first_cpu = cpu_num;
+        if (!t->cores_seen[pkg][core]) {
+            t->cores_seen[pkg][core] = 1;
+            t->pkgs[pkg].n_cores++;
+        }
+    }
+    closedir(dir);
+}
+
+static void
+_cpu_topo_scan_cpuinfo(cpu_topo_t *t)
 {
     FILE *fp;
     char buf[512], field[128], value[256];
-    int  in_mem_device, slot, installed;
-    netsnmp_entity_info *e;
+    int cur_pkg, in_target;
+    int done[256];
 
-    in_mem_device = 0;
-    slot = 0;
-    installed = 0;
-    e = NULL;
+    memset(done, 0, sizeof(done));
 
-    if (!_numa_enabled()) {
-        e = netsnmp_entity_create(IDX_MEMORY);
-        if (e) {
-            char descr[128];
+    fp = fopen("/proc/cpuinfo", "r");
+    if (!fp)
+        return;
 
-            e->iana_class = IANA_PHYS_CONTAINER;
-            e->parent_idx = IDX_BASEBOARD;
-            e->parent_rel_pos = -1;
-            strlcpy(e->name, "memory", sizeof(e->name));
-            _memory_kb_descr(_proc_memtotal_kb(), "System Memory",
-                             descr, sizeof(descr));
-            strlcpy(e->descr, descr, sizeof(e->descr));
-            snprintf(e->uris, sizeof(e->uris),
-                      "file:///sys/devices/system/memory");
-            _append_file_uri(e->uris, sizeof(e->uris), "/proc/meminfo");
+    cur_pkg = -1;
+    in_target = 0;
+    while (fgets(buf, sizeof(buf), fp)) {
+        char *nl;
+        const char *p;
+        int cpu_num;
+
+        nl = strchr(buf, '\n');
+        if (nl)
+            *nl = '\0';
+
+        if (buf[0] == '\0') {
+            cur_pkg = -1;
+            in_target = 0;
+            continue;
+        }
+
+        if (sscanf(buf, "processor : %d", &cpu_num) == 1 ||
+            sscanf(buf, "processor\t: %d", &cpu_num) == 1) {
+            int j, pkg;
+            cur_pkg = -1;
+            in_target = 0;
+            for (j = 0; j < t->n_threads; j++) {
+                if (t->threads[j].cpu_num == cpu_num) {
+                    pkg = t->threads[j].pkg;
+                    if (!done[pkg]) {
+                        cur_pkg = pkg;
+                        in_target = 1;
+                    }
+                    break;
+                }
+            }
+            continue;
+        }
+
+        if (!in_target || cur_pkg < 0)
+            continue;
+
+        p = buf;
+        while (*p == ' ' || *p == '\t')
+            p++;
+        if (sscanf(p, "%127[^:]: %255[^\n]", field, value) != 2)
+            continue;
+        _trim_trailing(field);
+        while (value[0] == ' ' || value[0] == '\t')
+            memmove(value, value + 1, strlen(value));
+        _trim_trailing(value);
+
+        if (strcmp(field, "model name") == 0 || strcmp(field, "model name ") == 0)
+            strlcpy(t->pkgs[cur_pkg].model, value,
+                    sizeof(t->pkgs[cur_pkg].model));
+        else if (strcmp(field, "cpu family") == 0 ||
+                 strcmp(field, "cpu family ") == 0)
+            strlcpy(t->pkgs[cur_pkg].family, value,
+                    sizeof(t->pkgs[cur_pkg].family));
+        else if (strcmp(field, "model") == 0 || strcmp(field, "model ") == 0)
+            strlcpy(t->pkgs[cur_pkg].model_id, value,
+                    sizeof(t->pkgs[cur_pkg].model_id));
+        else if (strcmp(field, "stepping") == 0 ||
+                 strcmp(field, "stepping ") == 0)
+            strlcpy(t->pkgs[cur_pkg].stepping, value,
+                    sizeof(t->pkgs[cur_pkg].stepping));
+        else if (strcmp(field, "microcode") == 0 ||
+                 strcmp(field, "microcode ") == 0) {
+            strlcpy(t->pkgs[cur_pkg].microcode, value,
+                    sizeof(t->pkgs[cur_pkg].microcode));
+            done[cur_pkg] = 1;
         }
     }
-    e = NULL;
+    fclose(fp);
+}
+
+static void
+_cpu_topo_scan_numa(cpu_topo_t *t)
+{
+    DIR *node_dir, *cpu_dir;
+    struct dirent *node_de, *cpu_de;
+    char path[PATH_MAX], val[256];
+    int node, cpu_num;
+
+    if (!_numa_enabled())
+        return;
+
+    node_dir = opendir(NODE_PATH);
+    if (!node_dir)
+        return;
+
+    while ((node_de = readdir(node_dir)) != NULL) {
+        int j;
+        unsigned long long kb;
+
+        if (sscanf(node_de->d_name, "node%d", &node) != 1 ||
+            node < 0 || node >= 256)
+            continue;
+
+        {   /* record node in list */
+            int found = 0, k;
+            for (k = 0; k < t->n_nodes; k++) {
+                if (t->nodes[k] == node) { found = 1; break; }
+            }
+            if (!found && t->n_nodes < 256)
+                t->nodes[t->n_nodes++] = node;
+        }
+
+        snprintf(path, sizeof(path), "%s/%s/meminfo",
+                 NODE_PATH, node_de->d_name);
+        _sysfs_read(path, val, sizeof(val));
+        kb = 0;
+        sscanf(val, "Node %*d MemTotal: %llu kB", &kb);
+        t->node_mem_kb[node] = kb;
+
+        snprintf(path, sizeof(path), "%s/%s", NODE_PATH, node_de->d_name);
+        cpu_dir = opendir(path);
+        if (!cpu_dir)
+            continue;
+        while ((cpu_de = readdir(cpu_dir)) != NULL) {
+            if (sscanf(cpu_de->d_name, "cpu%d", &cpu_num) != 1)
+                continue;
+            for (j = 0; j < t->n_threads; j++) {
+                if (t->threads[j].cpu_num == cpu_num) {
+                    t->threads[j].numa_node = node;
+                    if (t->threads[j].pkg >= 0 && t->threads[j].pkg < 256)
+                        t->pkgs[t->threads[j].pkg].numa_node = node;
+                    break;
+                }
+            }
+        }
+        closedir(cpu_dir);
+    }
+    closedir(node_dir);
+
+    {   /* sort nodes ascending (insertion sort, n is small) */
+        int i, j, tmp;
+        for (i = 1; i < t->n_nodes; i++) {
+            tmp = t->nodes[i];
+            for (j = i - 1; j >= 0 && t->nodes[j] > tmp; j--)
+                t->nodes[j + 1] = t->nodes[j];
+            t->nodes[j + 1] = tmp;
+        }
+    }
+}
+
+static dimm_list_t *
+_dimm_scan(void)
+{
+    FILE *fp;
+    char buf[512], field[128], value[256];
+    int in_mem_device, slot;
+    dimm_list_t *list;
+    dimm_info_t *cur;
+
+    list = (dimm_list_t *)calloc(1, sizeof(dimm_list_t));
+    if (!list)
+        return NULL;
 
     fp = popen("dmidecode -t memory 2>/dev/null", "r");
     if (!fp)
-        return;
+        return list;
+
+    in_mem_device = 0;
+    slot = 0;
+    cur = NULL;
 
     while (fgets(buf, sizeof(buf), fp)) {
         char *nl;
@@ -1614,23 +1504,29 @@ _load_dimms(void)
         if (nl) *nl = '\0';
 
         if (strncmp(buf, "Memory Device", 13) == 0 && buf[13] != ':') {
+            dimm_info_t *tmp;
+
             in_mem_device = 1;
-            e = netsnmp_entity_create(IDX_DIMM_BASE + slot);
-            slot++;
-            if (e) {
-                e->iana_class = IANA_PHYS_OTHER;
-                e->parent_idx = _numa_memory_parent_idx(0);
-                strlcpy(e->descr, "Memory Device", sizeof(e->descr));
-                snprintf(e->name, sizeof(e->name), "dimm%d", slot - 1);
-            }
+            tmp = (dimm_info_t *)realloc(list->slots,
+                                         (list->n + 1) * sizeof(dimm_info_t));
+            if (!tmp)
+                break;
+            list->slots = tmp;
+            cur = &list->slots[list->n];
+            memset(cur, 0, sizeof(*cur));
+            cur->slot      = slot++;
+            cur->installed = 0;
+            cur->numa_node = -1;
+            strlcpy(cur->size, "Unknown", sizeof(cur->size));
+            list->n++;
             continue;
         }
 
-        if (!in_mem_device || !e)
+        if (!in_mem_device || !cur)
             continue;
-
         if (buf[0] == '\0') {
             in_mem_device = 0;
+            cur = NULL;
             continue;
         }
 
@@ -1641,128 +1537,358 @@ _load_dimms(void)
             continue;
 
         if (strcmp(field, "Locator") == 0) {
-            char _al[384];
-            snprintf(_al, sizeof(_al), "dmi-memory:%d:%s", slot - 1, value);
-            strlcpy(e->alias, _al, sizeof(e->alias));
+            strlcpy(cur->locator, value, sizeof(cur->locator));
+            if (strstr(value, "CPU1") || strstr(value, "NODE1") ||
+                strstr(value, "P1_") || strncmp(value, "P1", 2) == 0)
+                cur->numa_node = 1;
+            else if (strstr(value, "CPU0") || strstr(value, "NODE0") ||
+                     strstr(value, "P0_") || strncmp(value, "P0", 2) == 0)
+                cur->numa_node = 0;
         } else if (strcmp(field, "Size") == 0) {
+            strlcpy(cur->size, value, sizeof(cur->size));
             if (strcmp(value, "No Module Installed") != 0 &&
-                strcmp(value, "Unknown") != 0) {
-                installed++;
-                strlcat(e->descr, " ", sizeof(e->descr));
-                strlcat(e->descr, value, sizeof(e->descr));
-            }
+                strcmp(value, "Unknown") != 0)
+                cur->installed = 1;
         } else if (strcmp(field, "Manufacturer") == 0) {
-            _set_if_valid(e->mfg_name, sizeof(e->mfg_name), value);
+            strlcpy(cur->mfg, value, sizeof(cur->mfg));
         } else if (strcmp(field, "Serial Number") == 0) {
-            _set_if_valid(e->serial, sizeof(e->serial), value);
+            strlcpy(cur->serial_num, value, sizeof(cur->serial_num));
         } else if (strcmp(field, "Part Number") == 0) {
-            _set_if_valid(e->model_name, sizeof(e->model_name), value);
+            strlcpy(cur->part, value, sizeof(cur->part));
         } else if (strcmp(field, "Speed") == 0) {
-            if (!_is_placeholder(value) &&
-                strcmp(value, "Unknown") != 0) {
-                strlcat(e->descr, " @ ", sizeof(e->descr));
-                strlcat(e->descr, value, sizeof(e->descr));
-            }
+            strlcpy(cur->speed, value, sizeof(cur->speed));
         }
     }
     pclose(fp);
+    return list;
 }
 
-/* ---- Phase 4: CPU caches ------------------------------------------------- */
+/* ---- Create phase: build entity tree top-down --------------------------- */
 
 static void
-_load_caches(void)
+_cpu_create_numa_node(int node)
 {
-    DIR *cpu_dir, *cache_dir;
-    const struct dirent *cpu_de, *cache_de;
-    char path[1024], pkg_id[64], level_s[64];
-    int seen_pkg[64];
+    netsnmp_entity_info *e;
+    char path[PATH_MAX];
 
-    memset(seen_pkg, 0, sizeof(seen_pkg));
+    e = netsnmp_entity_create(_numa_node_idx(node));
+    if (!e)
+        return;
+    e->iana_class = IANA_PHYS_CONTAINER;
+    e->parent_idx = IDX_BASEBOARD;
+    e->is_fru     = TV_FALSE;
+    snprintf(e->name,  sizeof(e->name),  "node%d", node);
+    snprintf(e->descr, sizeof(e->descr), "NUMA node %d", node);
+    snprintf(path, sizeof(path), "%s/node%d", NODE_PATH, node);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+}
 
-    cpu_dir = opendir("/sys/devices/system/cpu");
-    if (!cpu_dir)
+static void
+_cpu_create_numa_memory(int node, unsigned long long mem_kb)
+{
+    netsnmp_entity_info *e;
+    char path[PATH_MAX], label[64], descr[128];
+
+    e = netsnmp_entity_create(_numa_memory_idx(node));
+    if (!e)
+        return;
+    e->iana_class = IANA_PHYS_CONTAINER;
+    e->parent_idx = _numa_node_idx(node);
+    e->is_fru     = TV_FALSE;
+    snprintf(e->name, sizeof(e->name), "memory%d", node);
+    snprintf(label, sizeof(label), "Node %d memory", node);
+    _memory_kb_descr(mem_kb, label, descr, sizeof(descr));
+    strlcpy(e->descr, descr, sizeof(e->descr));
+    snprintf(path, sizeof(path), "%s/node%d/meminfo", NODE_PATH, node);
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+}
+
+static int
+_cpu_create_system_memory_container(void)
+{
+    netsnmp_entity_info *e;
+    char descr[128];
+
+    e = netsnmp_entity_create(IDX_MEMORY);
+    if (!e)
+        return IDX_MEMORY;
+    e->iana_class    = IANA_PHYS_CONTAINER;
+    e->parent_idx    = IDX_BASEBOARD;
+    e->parent_rel_pos = -1;
+    strlcpy(e->name, "memory", sizeof(e->name));
+    _memory_kb_descr(_proc_memtotal_kb(), "System Memory", descr, sizeof(descr));
+    strlcpy(e->descr, descr, sizeof(e->descr));
+    snprintf(e->uris, sizeof(e->uris), "file:///sys/devices/system/memory");
+    _append_file_uri(e->uris, sizeof(e->uris), "/proc/meminfo");
+    return IDX_MEMORY;
+}
+
+static void
+_cpu_create_package(cpu_topo_t *t, int pkg, int parent_idx)
+{
+    netsnmp_entity_info *e;
+    cpu_pkg_t *p;
+    char path[PATH_MAX];
+
+    p = &t->pkgs[pkg];
+
+    e = netsnmp_entity_create(IDX_CPU_BASE + pkg);
+    if (!e)
+        return;
+    e->iana_class    = IANA_PHYS_CPU;
+    e->parent_idx    = parent_idx;
+    e->parent_rel_pos = -1;
+    e->is_fru        = TV_TRUE;
+    snprintf(e->name,  sizeof(e->name),  "cpu-package%d", pkg);
+    snprintf(e->descr, sizeof(e->descr),
+             "CPU package %d, %d cores, %d threads", pkg,
+             p->n_cores, p->n_threads);
+    _set_if_valid(e->model_name, sizeof(e->model_name), p->model);
+    if (p->family[0] || p->model_id[0] || p->stepping[0]) {
+        char hw[256];
+        snprintf(hw, sizeof(hw), "family %s model %s stepping %s",
+                 p->family[0]   ? p->family   : "?",
+                 p->model_id[0] ? p->model_id : "?",
+                 p->stepping[0] ? p->stepping : "?");
+        strlcpy(e->hw_rev, hw, sizeof(e->hw_rev));
+    }
+    if (p->microcode[0]) {
+        char fw[128];
+        snprintf(fw, sizeof(fw), "microcode %s", p->microcode);
+        strlcpy(e->fw_rev, fw, sizeof(e->fw_rev));
+    }
+    strlcpy(path, "/sys/devices/system/cpu", sizeof(path));
+    _append_file_uri(e->uris, sizeof(e->uris), path);
+
+    e = netsnmp_entity_create(IDX_CPU_LOGICAL_CONTAINER_BASE + pkg);
+    if (e) {
+        e->iana_class    = IANA_PHYS_CONTAINER;
+        e->parent_idx    = IDX_CPU_BASE + pkg;
+        e->parent_rel_pos = -1;
+        e->is_fru        = TV_FALSE;
+        snprintf(e->name,  sizeof(e->name),  "cpu-package%d-logical", pkg);
+        strlcpy(e->descr, "Logical CPUs", sizeof(e->descr));
+        strlcpy(e->uris, "file://", sizeof(e->uris));
+        strlcat(e->uris, path, sizeof(e->uris));
+    }
+
+    e = netsnmp_entity_create(IDX_CPU_CACHE_CONTAINER_BASE + pkg);
+    if (e) {
+        e->iana_class    = IANA_PHYS_CONTAINER;
+        e->parent_idx    = IDX_CPU_BASE + pkg;
+        e->parent_rel_pos = -1;
+        e->is_fru        = TV_FALSE;
+        snprintf(e->name,  sizeof(e->name),  "cpu-package%d-cache", pkg);
+        strlcpy(e->descr, "CPU caches", sizeof(e->descr));
+        strlcpy(e->uris, "file://", sizeof(e->uris));
+        strlcat(e->uris, path, sizeof(e->uris));
+    }
+}
+
+static void
+_cpu_create_logical_cpus(cpu_topo_t *t, int pkg)
+{
+    int i;
+
+    for (i = 0; i < t->n_threads; i++) {
+        netsnmp_entity_info *e;
+        char path[PATH_MAX];
+        cpu_thread_t *th = &t->threads[i];
+
+        if (th->pkg != pkg)
+            continue;
+
+        e = netsnmp_entity_create(IDX_LOGICAL_CPU_BASE + th->cpu_num);
+        if (!e)
+            continue;
+        e->iana_class    = IANA_PHYS_CPU;
+        e->parent_idx    = IDX_CPU_LOGICAL_CONTAINER_BASE + pkg;
+        e->parent_rel_pos = th->cpu_num;
+        e->is_fru        = TV_FALSE;
+        snprintf(e->name,  sizeof(e->name),  "cpu%d", th->cpu_num);
+        snprintf(e->descr, sizeof(e->descr), "Logical CPU %d, core %d.%d",
+                 th->cpu_num, th->core, th->thread_idx);
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d",
+                 th->cpu_num);
+        _append_file_uri(e->uris, sizeof(e->uris), path);
+    }
+}
+
+static void
+_cpu_create_caches(cpu_topo_t *t, int pkg)
+{
+    DIR *cache_dir;
+    const struct dirent *cache_de;
+    char cache_path[PATH_MAX], path[PATH_MAX];
+    char level_s[64], type[32], size[32];
+    int cache_idx, level;
+    int first = t->pkgs[pkg].first_cpu;
+
+    snprintf(cache_path, sizeof(cache_path),
+             "/sys/devices/system/cpu/cpu%d/cache", first);
+    cache_dir = opendir(cache_path);
+    if (!cache_dir)
         return;
 
-    while ((cpu_de = readdir(cpu_dir))) {
-        int cpu_num, phys_id, cache_idx;
-        char cache_path[512];
+    while ((cache_de = readdir(cache_dir)) != NULL) {
+        netsnmp_entity_info *e;
+        char uri_path[PATH_MAX];
 
-        if (sscanf(cpu_de->d_name, "cpu%d", &cpu_num) != 1)
+        if (sscanf(cache_de->d_name, "index%d", &cache_idx) != 1)
             continue;
 
-        snprintf(path, sizeof(path),
-                 "/sys/devices/system/cpu/%s/topology/physical_package_id",
-                 cpu_de->d_name);
-        _sysfs_read(path, pkg_id, sizeof(pkg_id));
-        if (!pkg_id[0])
+        snprintf(path, sizeof(path), "%s/%s/level",
+                 cache_path, cache_de->d_name);
+        _sysfs_read(path, level_s, sizeof(level_s));
+        if (!level_s[0])
             continue;
-        phys_id = atoi(pkg_id);
-        if (phys_id < 0 || phys_id >= 64 || seen_pkg[phys_id])
+        level = atoi(level_s);
+
+        snprintf(path, sizeof(path), "%s/%s/type",
+                 cache_path, cache_de->d_name);
+        _sysfs_read(path, type, sizeof(type));
+
+        snprintf(path, sizeof(path), "%s/%s/size",
+                 cache_path, cache_de->d_name);
+        _sysfs_read(path, size, sizeof(size));
+
+        e = netsnmp_entity_create(IDX_CACHE_BASE + pkg * 10 + cache_idx);
+        if (!e)
             continue;
-        seen_pkg[phys_id] = 1;
+        e->iana_class    = IANA_PHYS_OTHER;
+        e->parent_idx    = IDX_CPU_CACHE_CONTAINER_BASE + pkg;
+        e->parent_rel_pos = cache_idx;
+        e->is_fru        = TV_FALSE;
+        snprintf(uri_path, sizeof(uri_path), "%s/%s",
+                 cache_path, cache_de->d_name);
+        _append_file_uri(e->uris, sizeof(e->uris), uri_path);
 
-        snprintf(cache_path, sizeof(cache_path),
-                 "/sys/devices/system/cpu/%s/cache", cpu_de->d_name);
-        cache_dir = opendir(cache_path);
-        if (!cache_dir)
-            continue;
+        if (strcmp(type, "Data") == 0)
+            snprintf(e->name, sizeof(e->name), "L%d-cache-data", level);
+        else if (strcmp(type, "Instruction") == 0)
+            snprintf(e->name, sizeof(e->name), "L%d-cache-instr", level);
+        else
+            snprintf(e->name, sizeof(e->name), "L%d-cache", level);
 
-        while ((cache_de = readdir(cache_dir))) {
-            char type[32], size[32];
-            int level;
-            netsnmp_entity_info *e;
+        if (strcmp(type, "Unified") == 0)
+            snprintf(e->descr, sizeof(e->descr), "L%d cache %s", level, size);
+        else
+            snprintf(e->descr, sizeof(e->descr), "L%d %s cache %s",
+                     level, type, size);
 
-            if (sscanf(cache_de->d_name, "index%d", &cache_idx) != 1)
-                continue;
-
-            snprintf(path, sizeof(path), "%s/%s/level", cache_path, cache_de->d_name);
-            _sysfs_read(path, level_s, sizeof(level_s));
-            if (!level_s[0])
-                continue;
-            level = atoi(level_s);
-
-            snprintf(path, sizeof(path), "%s/%s/type", cache_path, cache_de->d_name);
-            _sysfs_read(path, type, sizeof(type));
-
-            snprintf(path, sizeof(path), "%s/%s/size", cache_path, cache_de->d_name);
-            _sysfs_read(path, size, sizeof(size));
-
-            e = netsnmp_entity_create(IDX_CACHE_BASE + phys_id * 10 + cache_idx);
-            if (!e)
-                continue;
-
-            e->iana_class = IANA_PHYS_OTHER;
-            e->parent_idx = IDX_CPU_CACHE_CONTAINER_BASE + phys_id;
-            e->parent_rel_pos = cache_idx;
-            e->is_fru     = TV_FALSE;
-            {
-                char _t[1024];
-                snprintf(_t, sizeof(_t), "%s/%s", cache_path, cache_de->d_name);
-                _append_file_uri(e->uris, sizeof(e->uris), _t);
-            }
-
-            if (strcmp(type, "Unified") == 0)
-                snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
-            else if (strcmp(type, "Data") == 0)
-                snprintf(e->name,  sizeof(e->name),  "L%d-cache-data", level);
-            else if (strcmp(type, "Instruction") == 0)
-                snprintf(e->name,  sizeof(e->name),  "L%d-cache-instr", level);
-            else
-                snprintf(e->name,  sizeof(e->name),  "L%d-cache", level);
-
-            if (strcmp(type, "Unified") == 0)
-                snprintf(e->descr, sizeof(e->descr), "L%d cache %s", level, size);
-            else
-                snprintf(e->descr, sizeof(e->descr), "L%d %s cache %s",
-                         level, type, size);
-
-            strlcpy(e->model_name, size, sizeof(e->model_name));
-        }
-        closedir(cache_dir);
+        strlcpy(e->model_name, size, sizeof(e->model_name));
     }
-    closedir(cpu_dir);
+    closedir(cache_dir);
 }
+
+static void
+_cpu_create_packages_for_node(cpu_topo_t *t, int node, int parent_idx)
+{
+    int i;
+
+    for (i = 0; i < 256; i++) {
+        if (!t->pkgs[i].present)
+            continue;
+        if (node >= 0 && t->pkgs[i].numa_node != node)
+            continue;
+        _cpu_create_package(t, i, parent_idx);
+        _cpu_create_logical_cpus(t, i);
+        _cpu_create_caches(t, i);
+    }
+}
+
+static void
+_cpu_create_dimms_for_node(dimm_list_t *list, int node, int parent_mem_idx)
+{
+    int i;
+
+    if (!list)
+        return;
+
+    for (i = 0; i < list->n; i++) {
+        netsnmp_entity_info *e;
+        dimm_info_t *s = &list->slots[i];
+        int effective_node;
+
+        effective_node = (s->numa_node >= 0) ? s->numa_node : 0;
+        if (node >= 0 && effective_node != node)
+            continue;
+
+        e = netsnmp_entity_create(IDX_DIMM_BASE + s->slot);
+        if (!e)
+            continue;
+        e->iana_class = IANA_PHYS_OTHER;
+        e->parent_idx = parent_mem_idx;
+        snprintf(e->name, sizeof(e->name), "dimm%d", s->slot);
+
+        strlcpy(e->descr, "Memory Device", sizeof(e->descr));
+        if (s->installed) {
+            strlcat(e->descr, " ", sizeof(e->descr));
+            strlcat(e->descr, s->size, sizeof(e->descr));
+            if (!_is_placeholder(s->speed) &&
+                strcmp(s->speed, "Unknown") != 0) {
+                strlcat(e->descr, " @ ", sizeof(e->descr));
+                strlcat(e->descr, s->speed, sizeof(e->descr));
+            }
+        }
+
+        if (s->locator[0]) {
+            char al[384];
+            snprintf(al, sizeof(al), "dmi-memory:%d:%s", s->slot, s->locator);
+            strlcpy(e->alias, al, sizeof(e->alias));
+        }
+        _set_if_valid(e->mfg_name,   sizeof(e->mfg_name),   s->mfg);
+        _set_if_valid(e->serial,     sizeof(e->serial),      s->serial_num);
+        _set_if_valid(e->model_name, sizeof(e->model_name),  s->part);
+    }
+}
+
+static void
+_load_cpu_memory_topology(void)
+{
+    static cpu_topo_t t;
+    dimm_list_t *dimms;
+    int i, mem_idx;
+
+    memset(&t, 0, sizeof(t));
+    for (i = 0; i < 256; i++) {
+        t.pkgs[i].first_cpu = -1;
+        t.pkgs[i].numa_node = -1;
+    }
+
+    _cpu_topo_scan_sysfs(&t);
+    _cpu_topo_scan_cpuinfo(&t);
+    _cpu_topo_scan_numa(&t);
+    dimms = _dimm_scan();
+
+    if (_numa_enabled() && t.n_nodes > 0) {
+        for (i = 0; i < t.n_nodes; i++) {
+            int node = t.nodes[i];
+            _cpu_create_numa_node(node);
+            _cpu_create_numa_memory(node, t.node_mem_kb[node]);
+            _cpu_create_packages_for_node(&t, node, _numa_node_idx(node));
+            _cpu_create_dimms_for_node(dimms, node, _numa_memory_idx(node));
+        }
+        /* packages not assigned to any NUMA node fall back to baseboard */
+        for (i = 0; i < 256; i++) {
+            if (!t.pkgs[i].present || t.pkgs[i].numa_node >= 0)
+                continue;
+            _cpu_create_package(&t, i, IDX_BASEBOARD);
+            _cpu_create_logical_cpus(&t, i);
+            _cpu_create_caches(&t, i);
+        }
+    } else {
+        mem_idx = _cpu_create_system_memory_container();
+        _cpu_create_packages_for_node(&t, -1, IDX_BASEBOARD);
+        _cpu_create_dimms_for_node(dimms, -1, mem_idx);
+    }
+
+    if (dimms) {
+        free(dimms->slots);
+        free(dimms);
+    }
+}
+
 
 /* ---- Phase 5: PCI devices ------------------------------------------------ */
 
@@ -6445,10 +6571,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     do { _phase_begin(&ps); fn_call; _phase_end(&ps, label); } while (0)
 
     PHASE(_load_dmi(),                            "dmi");
-    PHASE(_load_numa_nodes(),                     "numa_nodes");
-    PHASE(_load_cpus(),                           "cpus");
-    PHASE(_load_caches(),                         "caches");
-    PHASE(_load_dimms(),                          "dimms");
+    PHASE(_load_cpu_memory_topology(),            "cpu_memory_topology");
     PHASE(_load_pci(&pci_map, &pci_map_n),        "pci");
     PHASE(_load_platform(&plat_map, &plat_map_n), "platform");
     PHASE(_load_ata_ports(),                      "ata_ports");
