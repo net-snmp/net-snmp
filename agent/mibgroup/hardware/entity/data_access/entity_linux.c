@@ -18,6 +18,7 @@
 #include <net/if.h>
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
+#include <malloc.h>
 #ifdef HAVE_PCI_PCI_H
 #include <pci/pci.h>
 #endif
@@ -80,7 +81,10 @@ typedef struct entity_index_alloc_s {
     struct entity_index_alloc_s *next;
 } entity_index_alloc;
 
+#define IDX_HASH_SIZE 512   /* must be power of 2; load factor ~60% at 300 devices */
+
 static entity_index_alloc *_idx_alloc_head  = NULL;
+static entity_index_alloc *_idx_hash[IDX_HASH_SIZE]; /* parallel lookup table */
 static int                 _idx_alloc_dirty = 0;
 static int                 _idx_alloc_next  = IDX_DYNAMIC_BASE;
 
@@ -240,6 +244,7 @@ _entity_index_alloc_free(void)
         free(a);
     }
     _idx_alloc_head  = NULL;
+    memset(_idx_hash, 0, sizeof(_idx_hash));
     _idx_alloc_dirty = 0;
     _idx_alloc_next  = IDX_DYNAMIC_BASE;
 }
@@ -247,11 +252,15 @@ _entity_index_alloc_free(void)
 static entity_index_alloc *
 _entity_index_alloc_find(const char *key)
 {
-    entity_index_alloc *a;
+    int slot = (int)(_fnv1a_hash(key) & (IDX_HASH_SIZE - 1));
+    int tries = 0;
 
-    for (a = _idx_alloc_head; a; a = a->next)
-        if (strcmp(a->key, key) == 0)
-            return a;
+    while (_idx_hash[slot] && tries < IDX_HASH_SIZE) {
+        if (strcmp(_idx_hash[slot]->key, key) == 0)
+            return _idx_hash[slot];
+        slot = (slot + 1) & (IDX_HASH_SIZE - 1);
+        tries++;
+    }
     return NULL;
 }
 
@@ -259,6 +268,7 @@ static void
 _entity_index_alloc_add(const char *key, int idx)
 {
     entity_index_alloc *a;
+    int slot, tries;
 
     if (!key || !key[0] || idx <= 0)
         return;
@@ -274,6 +284,16 @@ _entity_index_alloc_add(const char *key, int idx)
     _idx_alloc_head = a;
     if (idx >= _idx_alloc_next)
         _idx_alloc_next = idx + 1;
+
+    /* insert into hash table for O(1) future lookups */
+    slot = (int)(_fnv1a_hash(key) & (IDX_HASH_SIZE - 1));
+    for (tries = 0; tries < IDX_HASH_SIZE; tries++) {
+        if (!_idx_hash[slot]) {
+            _idx_hash[slot] = a;
+            break;
+        }
+        slot = (slot + 1) & (IDX_HASH_SIZE - 1);
+    }
 }
 
 static void
@@ -386,6 +406,63 @@ _entity_indexes_write(void)
     }
 
     _idx_alloc_dirty = 0;
+}
+
+/* ---- phase timing / instrumentation -------------------------------------- */
+
+typedef struct {
+    struct timespec t0;
+    struct mallinfo2 mi0;
+    int n0;
+} _phase_stats;
+
+static int
+_entity_count(void)
+{
+    netsnmp_entity_info *e;
+    int n = 0;
+
+    for (e = netsnmp_entity_get_first(); e; e = netsnmp_entity_get_next(e))
+        n++;
+    return n;
+}
+
+static void
+_phase_begin(_phase_stats *s)
+{
+    if (!snmp_get_do_debugging()) {
+        clock_gettime(CLOCK_MONOTONIC, &s->t0);
+        return;
+    }
+    clock_gettime(CLOCK_MONOTONIC, &s->t0);
+    s->mi0 = mallinfo2();
+    s->n0  = _entity_count();
+}
+
+static void
+_phase_end(const _phase_stats *s, const char *name)
+{
+    struct timespec t1;
+    long long us;
+
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    us = (t1.tv_sec - s->t0.tv_sec) * 1000000LL +
+         (t1.tv_nsec - s->t0.tv_nsec) / 1000;
+
+    if (!snmp_get_do_debugging()) {
+        snmp_log(LOG_DEBUG, "entity: phase %-28s %6lld µs\n", name, us);
+        return;
+    }
+
+    {
+        struct mallinfo2 mi1 = mallinfo2();
+        int n1 = _entity_count();
+        long heap_delta = (long)((long long)mi1.uordblks - (long long)s->mi0.uordblks);
+
+        snmp_log(LOG_DEBUG,
+                 "entity: phase %-28s %6lld µs  +%3d entities  heap %+ld B\n",
+                 name, us, n1 - s->n0, heap_delta);
+    }
 }
 
 /* ---- helpers ------------------------------------------------------------- */
@@ -6243,6 +6320,11 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     netsnmp_entity_info *old_entities = NULL;
     uint32_t hash_before, hash_after;
     static int first_load = 1;
+    struct timespec load_t0, load_t1;
+    long long load_us;
+    _phase_stats ps;
+
+    clock_gettime(CLOCK_MONOTONIC, &load_t0);
 
     if (first_load) {
         _read_entity_state();
@@ -6255,33 +6337,37 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     netsnmp_entity_free_list();
     _entity_index_alloc_load();
 
-    _load_dmi();
-    _load_numa_nodes();
-    _load_cpus();
-    _load_caches();
-    _load_dimms();
-    _load_pci(&pci_map, &pci_map_n);
-    _load_platform(&plat_map, &plat_map_n);
-    _load_ata_ports();
-    _load_usb();
-    _load_net_devices();
-    _load_scsi_disks();
-    _load_mmc_disks();
-    _load_nvme();
-    _load_i2c();
-    _load_acpi();
-    _load_thermal_zones();
-    _load_hwmon();
-    _load_power_supply();
-    _load_ptp();
-    _load_tpm();
-    _load_input();
-    _load_graphics();
-    _load_gpio();
-    _load_rtc();
-    _load_mdio();
+#define PHASE(fn_call, label) \
+    do { _phase_begin(&ps); fn_call; _phase_end(&ps, label); } while (0)
 
-    _plat_prune_empty();
+    PHASE(_load_dmi(),                            "dmi");
+    PHASE(_load_numa_nodes(),                     "numa_nodes");
+    PHASE(_load_cpus(),                           "cpus");
+    PHASE(_load_caches(),                         "caches");
+    PHASE(_load_dimms(),                          "dimms");
+    PHASE(_load_pci(&pci_map, &pci_map_n),        "pci");
+    PHASE(_load_platform(&plat_map, &plat_map_n), "platform");
+    PHASE(_load_ata_ports(),                      "ata_ports");
+    PHASE(_load_usb(),                            "usb");
+    PHASE(_load_net_devices(),                    "net_devices");
+    PHASE(_load_scsi_disks(),                     "scsi_disks");
+    PHASE(_load_mmc_disks(),                      "mmc_disks");
+    PHASE(_load_nvme(),                           "nvme");
+    PHASE(_load_i2c(),                            "i2c");
+    PHASE(_load_acpi(),                           "acpi");
+    PHASE(_load_thermal_zones(),                  "thermal_zones");
+    PHASE(_load_hwmon(),                          "hwmon");
+    PHASE(_load_power_supply(),                   "power_supply");
+    PHASE(_load_ptp(),                            "ptp");
+    PHASE(_load_tpm(),                            "tpm");
+    PHASE(_load_input(),                          "input");
+    PHASE(_load_graphics(),                       "graphics");
+    PHASE(_load_gpio(),                           "gpio");
+    PHASE(_load_rtc(),                            "rtc");
+    PHASE(_load_mdio(),                           "mdio");
+    PHASE(_plat_prune_empty(),                    "plat_prune");
+
+#undef PHASE
 
     free(pci_map);  pci_map  = NULL; pci_map_n  = 0;
     free(plat_map); plat_map = NULL; plat_map_n = 0;
@@ -6306,6 +6392,13 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
         _entity_indexes_write();
 
     _entity_list_clone_free(old_entities);
+
+    clock_gettime(CLOCK_MONOTONIC, &load_t1);
+    load_us = (load_t1.tv_sec - load_t0.tv_sec) * 1000000LL +
+              (load_t1.tv_nsec - load_t0.tv_nsec) / 1000;
+    snmp_log(LOG_NOTICE,
+             "entity: arch_load complete: %lld µs, %d entities\n",
+             load_us, _entity_count());
 
     return 0;
 }
