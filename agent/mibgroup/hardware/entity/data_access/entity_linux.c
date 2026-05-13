@@ -1958,6 +1958,7 @@ typedef struct pci_entity_map_s {
     char key[128];
     int idx;
     char real_path[PATH_MAX];
+    unsigned int function; /* BDF function number, cached to avoid re-parsing */
 } pci_entity_map;
 
 
@@ -2795,6 +2796,11 @@ _load_pci(pci_entity_map **map_out, int *nmap_out)
 
         strlcpy(map[i].bdf, bdfs[i], sizeof(map[i].bdf));
         map[i].idx = idx;
+        {
+            unsigned int dom, bus, dev, fn;
+            map[i].function = (_pci_bdf_parts(bdfs[i], &dom, &bus, &dev, &fn))
+                              ? fn : 0;
+        }
         snprintf(path, sizeof(path), "%s/%s", PCI_PATH, bdfs[i]);
         if (!realpath(path, map[i].real_path))
             map[i].real_path[0] = '\0';
@@ -2943,18 +2949,16 @@ free_bdf:
 
     for (i = 0; i < nbdfs; i++) {
         int parent_idx;
-        unsigned int domain, bus, device, function;
 
         e = netsnmp_entity_get_byIdx(map[i].idx);
         if (!e)
             continue;
 
-        if (_pci_bdf_parts(map[i].bdf, &domain, &bus, &device, &function) &&
-            function > 0) {
+        if (map[i].function > 0) {
             parent_idx = _pci_function0_idx(map, nbdfs, map[i].bdf);
             if (parent_idx > 0 && parent_idx != map[i].idx) {
                 e->parent_idx = parent_idx;
-                e->parent_rel_pos = (int)function;
+                e->parent_rel_pos = (int)map[i].function;
                 continue;
             }
         }
