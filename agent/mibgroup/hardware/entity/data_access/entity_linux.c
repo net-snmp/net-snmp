@@ -2354,11 +2354,14 @@ _pci_find_parent_idx(pci_entity_map *map, int nmap, int child)
 
 /* Find the deepest PCI node matching or containing `path`.
  * Class devices can resolve either to the PCI function itself (net) or to a
- * child below it (PTP, storage, TPM, etc.). */
+ * child below it (PTP, storage, TPM, etc.).
+ * If map_i_out is non-NULL, *map_i_out is set to the winning map[] index so
+ * the caller can retrieve map[i].bdf without a second scan. */
 static int
-_pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
+_pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path,
+                      int *map_i_out)
 {
-    int i, best_idx = 0, best_len = 0;
+    int i, best_i = -1, best_idx = 0, best_len = 0;
     size_t plen = strlen(path);
 
     for (i = 0; i < nmap; i++) {
@@ -2368,9 +2371,12 @@ _pci_find_idx_by_path(pci_entity_map *map, int nmap, const char *path)
         if (strncmp(path, map[i].real_path, mlen) == 0 &&
             (path[mlen] == '\0' || path[mlen] == '/')) {
             best_len = mlen;
+            best_i   = i;
             best_idx = _pci_canonical_idx(map, nmap, map[i].idx);
         }
     }
+    if (map_i_out)
+        *map_i_out = best_i;
     return best_idx;
 }
 
@@ -3199,7 +3205,7 @@ _usb_root_parent_rel_pos(int parent_idx, int busnum)
         if (!realpath(path, rp))
             continue;
 
-        other_parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        other_parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
         if (!other_parent_idx)
             other_parent_idx = IDX_BASEBOARD;
         if (other_parent_idx == parent_idx)
@@ -3276,7 +3282,7 @@ _load_ata_ports(void)
             continue;
 
         snprintf(path, sizeof(path), "/sys/class/ata_port/%s", de->d_name);
-        pci_idx = realpath(path, rp) ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+        pci_idx = realpath(path, rp) ? _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL) : 0;
 
         e->iana_class = IANA_PHYS_CONTAINER;
         e->is_fru     = TV_FALSE;
@@ -3438,7 +3444,7 @@ _load_usb(void)
         netsnmp_entity_info *e;
         const char *name = de->d_name;
         char ver[16], spd_s[16], spd_descr[32], key[128];
-        int idx, pci_idx, i;
+        int idx, pci_idx, pci_map_i;
 
         if (name[0] == '.')
             continue;
@@ -3454,7 +3460,8 @@ _load_usb(void)
         if (idx <= 0)
             continue;
 
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+        pci_map_i = -1;
+        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, &pci_map_i);
         if (!pci_idx)
             pci_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
 
@@ -3484,13 +3491,10 @@ _load_usb(void)
 
         snprintf(path, sizeof(path), "usb:%s", name);
         _append_uri(e->uris, sizeof(e->uris), path);
-        for (i = 0; i < pci_map_n; i++) {
-            if (pci_map[i].idx != pci_idx)
-                continue;
+        if (pci_map_i >= 0) {
             snprintf(path, sizeof(path), "%s/%s/%s", PCI_PATH,
-                     pci_map[i].bdf, name);
+                     pci_map[pci_map_i].bdf, name);
             _append_file_uri(e->uris, sizeof(e->uris), path);
-            break;
         }
     }
     rewinddir(dir);
@@ -3672,7 +3676,7 @@ _load_net_devices(void)
 
         parent_idx = _usb_parent_idx_from_path(rp);
         if (!parent_idx && rp[0])
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
         if (!parent_idx && rp[0])
             parent_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
 
@@ -3874,7 +3878,7 @@ _load_scsi_disks(void)
                 if (usb_idx && netsnmp_entity_get_byIdx(usb_idx))
                     e->parent_idx = usb_idx;
                 else {
-                    pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+                    pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
                     e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
                 }
             }
@@ -4174,7 +4178,7 @@ _load_mmc_disks(void)
         if (!e)
             continue;
 
-        pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+        pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL) : 0;
         e->iana_class = IANA_PHYS_STORAGE;
         e->is_fru     = TV_TRUE;
         e->parent_idx = pci_idx ? pci_idx : IDX_BASEBOARD;
@@ -4697,7 +4701,7 @@ _hwmon_parent_idx(const char *name, const char *rp)
     if (parent_idx)
         return parent_idx;
 
-    parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+    parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
     if (parent_idx)
         return parent_idx;
 
@@ -4905,7 +4909,7 @@ _load_power_supply(void)
             snprintf(path, sizeof(path), "%s/%s/device", PSY_PATH, de->d_name);
             rp[0] = '\0';
             if (realpath(path, rp))
-                parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+                parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
 
             e = netsnmp_entity_create(idx);
             if (!e)
@@ -4978,7 +4982,7 @@ _load_rtc(void)
         snprintf(path, sizeof(path), "%s/%s", RTC_PATH, de->d_name);
         rp[0] = '\0';
         if (realpath(path, rp))
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
         else
             parent_idx = 0;
 
@@ -5128,7 +5132,7 @@ _load_ptp(void)
 
         parent_idx = _ptp_net_port_idx(de->d_name);
         if (!parent_idx)
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -5220,7 +5224,7 @@ _load_tpm(void)
                                                         sizeof(acpi_rp));
         }
         if (!parent_idx)
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -5305,7 +5309,7 @@ _load_input(void)
 
         parent_idx = _usb_parent_idx_from_path(rp);
         if (!parent_idx)
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -5384,7 +5388,7 @@ _load_graphics(void)
         snprintf(path, sizeof(path), "%s/%s", GRAPHICS_PATH, de->d_name);
         if (!realpath(path, rp))
             rp[0] = '\0';
-        parent_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+        parent_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL) : 0;
         if (!parent_idx)
             parent_idx = rp[0] ? _plat_find_idx_by_path(plat_map, plat_map_n, rp) : 0;
 
@@ -5502,7 +5506,7 @@ _load_gpio(void)
                                                     sizeof(acpi_rp));
         pci_idx = 0;
         if (!parent_idx) {
-            pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp) : 0;
+            pci_idx = rp[0] ? _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL) : 0;
             parent_idx = pci_idx;
         }
         if (!parent_idx)
@@ -5582,7 +5586,7 @@ _load_i2c(void)
         if (idx <= 0)
             continue;
 
-        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, adapter_rp);
+        pci_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
 
         e = netsnmp_entity_create(idx);
         if (!e)
@@ -6238,7 +6242,7 @@ _load_mdio(void)
 
         parent_idx = _usb_parent_idx_from_path(rp);
         if (!parent_idx)
-            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp);
+            parent_idx = _pci_find_idx_by_path(pci_map, pci_map_n, rp, NULL);
         if (!parent_idx)
             parent_idx = _plat_find_idx_by_path(plat_map, plat_map_n, rp);
         if (!parent_idx)
