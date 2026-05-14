@@ -6730,6 +6730,7 @@ netsnmp_entity_arch_load(netsnmp_cache *cache, void *magic)
     free(plat_map); plat_map = NULL; plat_map_n = 0;
     _numa_fix_top_level_parents();
     netsnmp_entity_parent_rel_pos_rebuild();
+    netsnmp_entity_apply_overrides();
     netsnmp_entity_contains_rebuild();
     netsnmp_entity_logical_load();
     netsnmp_entity_alias_rebuild();

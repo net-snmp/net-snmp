@@ -23,16 +23,37 @@ Current limitations:
 
 ## Configuration
 
-The module supports this `snmpd.conf` token:
+The module supports these `snmpd.conf` tokens:
 
 ```text
 entitySensitiveData yes|no
+entityAssetID  <index> <value>
+entitySerialNum <index> <value>
 ```
 
-The default is `yes`, preserving the full ENTITY-MIB view. Set it to `no` to
-return empty values for potentially identifying fields exposed through SNMP:
-`entPhysicalSerialNum`, `entPhysicalAlias`, `entPhysicalAssetID`,
-`entPhysicalUris`, and `entPhysicalUUID`.
+**entitySensitiveData** (default `yes`) — set to `no` to return empty values for
+potentially identifying fields: `entPhysicalSerialNum`, `entPhysicalAlias`,
+`entPhysicalAssetID`, `entPhysicalUris`, and `entPhysicalUUID`.
+
+**entityAssetID** and **entitySerialNum** — override the auto-discovered value
+for a specific entity. `<index>` is the `entPhysicalIndex` of the row to patch;
+`<value>` is the replacement string (may contain spaces). Multiple entries are
+supported; later config-file entries for the same index win. The override is
+applied on every cache refresh, so it survives hardware rescans.
+
+Example:
+
+```text
+# Stamp the chassis with a data-centre asset tag and fix a known-bad BIOS serial
+entityAssetID  1  DC-RACK42-U3
+entitySerialNum 1  SN-CORRECT-123456
+```
+
+Find the right index with:
+
+```sh
+snmpwalk -v2c -c public localhost entPhysicalDescr
+```
 
 ## Data Model
 

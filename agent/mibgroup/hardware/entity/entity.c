@@ -19,7 +19,81 @@ static netsnmp_entity_logical_row      *_log_head = NULL;
 u_long entity_last_change = 0;
 int netsnmp_entity_sensitive_data = 1;
 
+typedef struct _entity_override {
+    int  idx;
+    char value[64];
+    struct _entity_override *next;
+} _entity_override;
+
+static _entity_override *_assetid_overrides = NULL;
+static _entity_override *_serial_overrides  = NULL;
+
 static oid _ent_oid[] = { 1, 3, 6, 1, 2, 1, 47 };
+
+static void
+_override_list_free(_entity_override **head)
+{
+    _entity_override *o, *next;
+    for (o = *head; o; o = next) {
+        next = o->next;
+        free(o);
+    }
+    *head = NULL;
+}
+
+static void
+_parse_override(const char *token, char *line, _entity_override **head)
+{
+    char   *sp;
+    int     idx;
+    _entity_override *o;
+
+    idx = (int)strtol(line, &sp, 10);
+    if (sp == line || idx <= 0) {
+        snmp_log(LOG_ERR, "%s: expected positive integer index, got '%s'\n",
+                 token, line);
+        return;
+    }
+    while (*sp == ' ' || *sp == '\t')
+        sp++;
+
+    o = (typeof(o))malloc(sizeof(*o));
+    if (!o)
+        return;
+    o->idx = idx;
+    strlcpy(o->value, sp, sizeof(o->value));
+    o->next = *head;
+    *head = o;
+}
+
+static void
+_parse_entity_asset_id(const char *token, char *line)
+{
+    _parse_override(token, line, &_assetid_overrides);
+}
+
+static void
+_parse_entity_serial_num(const char *token, char *line)
+{
+    _parse_override(token, line, &_serial_overrides);
+}
+
+void netsnmp_entity_apply_overrides(void)
+{
+    _entity_override    *o;
+    netsnmp_entity_info *e;
+
+    for (o = _assetid_overrides; o; o = o->next) {
+        e = netsnmp_entity_get_byIdx(o->idx);
+        if (e)
+            strlcpy(e->asset_id, o->value, sizeof(e->asset_id));
+    }
+    for (o = _serial_overrides; o; o = o->next) {
+        e = netsnmp_entity_get_byIdx(o->idx);
+        if (e)
+            strlcpy(e->serial, o->value, sizeof(e->serial));
+    }
+}
 
 static void
 _parse_entity_sensitive_data(const char *token, char *line)
@@ -233,6 +307,12 @@ void init_entity(void)
     snmpd_register_config_handler("entitySensitiveData",
                                   _parse_entity_sensitive_data, NULL,
                                   "entitySensitiveData yes|no");
+    snmpd_register_config_handler("entityAssetID",
+                                  _parse_entity_asset_id, NULL,
+                                  "entityAssetID <index> <value>");
+    snmpd_register_config_handler("entitySerialNum",
+                                  _parse_entity_serial_num, NULL,
+                                  "entitySerialNum <index> <value>");
 
     _ent_cache = netsnmp_cache_create(300,
                                       netsnmp_entity_arch_load,
@@ -246,6 +326,10 @@ void init_entity(void)
 void shutdown_entity(void)
 {
     snmpd_unregister_config_handler("entitySensitiveData");
+    snmpd_unregister_config_handler("entityAssetID");
+    snmpd_unregister_config_handler("entitySerialNum");
+    _override_list_free(&_assetid_overrides);
+    _override_list_free(&_serial_overrides);
     netsnmp_entity_free_list();
     netsnmp_entity_logical_free_list();
     SNMP_FREE(_contains);
