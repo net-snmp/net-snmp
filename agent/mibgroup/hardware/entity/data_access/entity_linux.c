@@ -450,7 +450,7 @@ _phase_end(const _phase_stats *s, const char *name)
          (t1.tv_nsec - s->t0.tv_nsec) / 1000;
 
     if (!snmp_get_do_debugging()) {
-        snmp_log(LOG_DEBUG, "entity: phase %-28s %6lld µs\n", name, us);
+        snmp_log(LOG_INFO, "entity: phase %-28s %6lld µs\n", name, us);
         return;
     }
 

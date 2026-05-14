@@ -160,6 +160,93 @@ Persistent state file:
 <persistentDir>/entity_state
 ```
 
+## Performance
+
+### Cache lifetime
+
+The entity list is rebuilt by `netsnmp_entity_arch_load()` and held in a cache
+with a 300-second (5-minute) lifetime. `NETSNMP_CACHE_AUTO_RELOAD` keeps the
+cache warm by triggering a background reload before it expires, so SNMP queries
+never block waiting for a cold rebuild.
+
+### Phase timing
+
+Each load phase is timed and logged. At `LOG_INFO` level (normal operation)
+only the elapsed time is shown:
+
+```
+entity: phase dmi                              85 µs
+entity: phase cpu_memory_topology            2167 µs
+entity: phase pci                          488872 µs
+entity: phase platform                      47326 µs
+...
+entity: arch_load complete: 554000 µs, 184 entities
+```
+
+With the entity debug token enabled (`-Dentity`), `LOG_DEBUG` output adds
+entity count delta and heap growth per phase:
+
+```
+entity: phase dmi                              85 µs  +  2 entities  heap +2752 B
+entity: phase cpu_memory_topology            2167 µs  + 16 entities  heap +22320 B
+entity: phase pci                          488872 µs  + 30 entities  heap +176224 B
+entity: phase platform                      47326 µs  + 74 entities  heap +638944 B
+...
+entity: arch_load complete: 554000 µs, 184 entities
+```
+
+### Cost centres
+
+The `pci` phase dominates on most hardware. It reads `current_link_speed` and
+`current_link_width` from sysfs for every PCI device to include link
+information in the entity description. These reads are not simple file reads —
+they trigger PCIe config-space accesses through the kernel. On some platforms
+bridge devices (class `0x06`) and uncore devices (class `0xff`) each cost
+10–350 ms, adding up to several hundred milliseconds for a system with many PCI
+devices. On the example laptop above, the `pci` phase accounts for ~88 % of
+total load time.
+
+The `platform` phase scales with the number of platform devices. Each device
+requires a sysfs uevent read; the phase uses a single-pass scan so every path
+is opened at most once.
+
+All other phases — `cpu_memory_topology`, `usb`, `hwmon`, `i2c`, and the rest
+— are in the low single-digit millisecond range on all tested hardware.
+`cpu_memory_topology` includes a `dmidecode -t memory` call for DIMM detection,
+which typically adds 1–2 ms.
+
+The PCI phase builds a sorted map of all PCI devices that is shared across the
+rest of the load. Subsequent phases (`net_devices`, `hwmon`, `power_supply`,
+etc.) use O(1) path-length lookup into that map to find a PCI parent without
+re-scanning the PCI directory.
+
+## Permissions
+
+On Linux, `snmpd` typically runs as root, and the module assumes that where
+necessary. Some data sources require elevated privileges:
+
+**DIMM information (`entPhysicalTable` rows 110+)** is collected by running
+`dmidecode -t memory`. `dmidecode` reads SMBIOS tables, which are exposed at
+`/sys/firmware/dmi/tables/DMI`. That file is owned by root with mode `400` on
+most distributions and recent kernels. Without read access to it, `dmidecode`
+returns no output, the DIMM scan produces an empty list, and no DIMM rows are
+added to the entity table.
+
+To restore DIMM detection when `snmpd` runs as a non-root user:
+
+```sh
+# Option 1 – grant snmpd the capability to read root-owned files
+sudo setcap cap_dac_read_search+ep /usr/sbin/snmpd
+
+# Option 2 – make the DMI tables readable by all users (reset on reboot)
+sudo chmod a+r /sys/firmware/dmi/tables/DMI /sys/firmware/dmi/tables/smbios_entry_point
+
+# Option 3 – run snmpd as root (standard for production deployments)
+```
+
+All other data sources used by this module (`/sys/bus/pci`, `/sys/class/net`,
+`/proc/cpuinfo`, sysfs hwmon, etc.) are readable without root.
+
 ## Lookup Helpers
 
 Compiled MIB modules can use these helpers from `entity.h`:
