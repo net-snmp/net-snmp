@@ -1,0 +1,214 @@
+#!/bin/bash
+# Entity MIB performance scenario.
+# Runs only on Linux (entity_linux.c is Linux-only).
+# Starts snmpd on a non-privileged port with entity debug logging enabled,
+# triggers one arch_load via snmpwalk, reports per-phase timing, and fails
+# if the total load exceeds ENTITY_PERF_LIMIT_MS (default 30 000 ms).
+# Results are saved to .tmp/perf-<date>-<git-short>.txt alongside the log.
+
+VERBOSE_LOG=${VERBOSE_LOG:-0}
+_date_fmt='date +%Y-%m-%dT%H:%M:%S'
+
+kill_and_verify() {
+    local pid="$1"
+    local timeout="${2:-5}"
+
+    if ! kill -0 "$pid" 2>/dev/null; then
+        log_warn "kill_and_verify: PID $pid not found or no access"
+        return 1
+    fi
+
+    kill -TERM "$pid" 2>/dev/null || {
+        log_error "kill_and_verify: failed to send SIGTERM to $pid"
+        return 1
+    }
+
+    for _ in $(seq 1 "$timeout"); do
+        if ! kill -0 "$pid" 2>/dev/null; then
+            log_verbose "kill_and_verify: PID $pid stopped"
+            return 0
+        fi
+        sleep 1
+    done
+
+    log_error "kill_and_verify: PID $pid still alive after ${timeout}s"
+    return 1
+}
+
+
+log_verbose() {
+    [ "${VERBOSE_LOG}" -eq 1 ] || return 0
+    echo -e "\033[94m VERBOSE: $*\033[0m"
+}
+log_info() {
+    echo "$($_date_fmt): $*"
+}
+log_notice() {
+    echo -e "\033[92m$($_date_fmt): $*\033[0m"
+}
+log_warn() {
+    echo -e "\033[93m$($_date_fmt): $*\033[0m"
+}
+log_error() {
+    echo -e "\033[91m$($_date_fmt): $*\033[0m"
+}
+
+run_cmd() {
+    local -a cmd=("$@")
+    log_verbose "Running command: ${cmd[*]}"
+    "${cmd[@]}"
+}
+
+cleanup() {
+    log_verbose "cleanup: removing $ENTITY_TEMP"
+    [ -n "$ENTITY_PID" ] && kill "$ENTITY_PID" 2>/dev/null
+    [ -n "$ENTITY_TEMP" ] && rm -rf "$ENTITY_TEMP"
+}
+
+quit() {
+    local rc=${1:-1}
+    shift
+    [ $# -gt 0 ] && log_error "exit code: $*"
+    exit "$rc"
+}
+
+trap 'cleanup' EXIT
+trap 'quit 130 "interrupted"' INT TERM
+
+ENTITY_PORT=11610
+ENTITY_COMMUNITY=ci_perf
+ENTITY_PERF_LIMIT_MS=${ENTITY_PERF_LIMIT_MS:-30000}
+ENTITY_TEMP=$(mktemp -d)
+ENTITY_LOG="$ENTITY_TEMP/snmpd.log"
+ENTITY_CONF="$ENTITY_TEMP/snmp.conf"
+
+_git_short=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+_git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+_git_subject=$(git log -1 --pretty=%s 2>/dev/null || echo "")
+_run_date=$(date '+%Y-%m-%dT%H:%M:%S')
+_result_dir=".tmp/perf"
+_result_file="${_result_dir}/perf-$(date '+%Y%m%d-%H%M%S')-${_git_short}.txt"
+
+echo "rocommunity $ENTITY_COMMUNITY 127.0.0.1" > "$ENTITY_CONF"
+
+log_notice "==== Entity MIB performance scenario (port $ENTITY_PORT) ===="
+
+# System environment
+
+log_info "---- Tool versions ----"
+run_cmd snmpget --version 2>&1  || quit 1 "snmpget: not found"
+run_cmd snmpwalk --version 2>&1  || quit 1 "snmpwalk: not found"
+
+log_info "---- Building agent ----"
+run_cmd make -s agent/snmpd 2>/dev/null || true
+
+log_info "---- snmpd binary ----"
+ls -lh agent/snmpd 2>/dev/null || quit 1 "agent/snmpd: not found"
+file agent/snmpd 2>/dev/null || true
+
+log_info "---- Starting snmpd ----"
+log_verbose "Running command: agent/snmpd -f -Lo -Dentity -C -c $ENTITY_CONF $ENTITY_PORT"
+agent/snmpd -f -Lo -Dentity -C -c "$ENTITY_CONF" "$ENTITY_PORT" > "$ENTITY_LOG" 2>&1 &
+ENTITY_PID=$!
+log_verbose "snmpd PID: $ENTITY_PID"
+
+# Wait for agent to accept requests (up to 15 s)
+_ready=0
+_probe_cmd=(snmpget -v2c -c "$ENTITY_COMMUNITY" -m "" -r 1 -t 1
+            "localhost:${ENTITY_PORT}" .1.3.6.1.2.1.1.1.0)
+for _i in $(seq 1 30); do
+    sleep 0.5
+    if run_cmd "${_probe_cmd[@]}" >/dev/null 2>&1; then
+        _ready=1
+        log_verbose "snmpd ready after $(( _i * 5 / 10 )).$(( (_i * 5) % 10 )) s  (probe $_i/30)"
+        break
+    fi
+done
+
+if [ "$_ready" = "0" ]; then
+    log_error "---- snmpd log (full) ----"
+    cat "$ENTITY_LOG"
+    log_error "---- process still running? ----"
+    kill -0 "$ENTITY_PID" 2>/dev/null \
+        && log_warn "yes (PID $ENTITY_PID alive)" \
+        || log_warn "no (already exited)"
+    log_error "---- port in use? ----"
+    ss -ulnp "sport = :$ENTITY_PORT" 2>/dev/null \
+        || netstat -ulnp 2>/dev/null | grep ":$ENTITY_PORT" \
+        || true
+    quit 1 "FAIL: snmpd did not become ready within 15 s"
+fi
+
+log_info "---- Starting snmpwalk (timeout 5 s) ----"
+_walk_cmd=(snmpwalk -v2c -c "$ENTITY_COMMUNITY" -m "" -r 1 -t 5
+           "localhost:${ENTITY_PORT}" .1.3.6.1.2.1.47.1.1.1)
+_walk_start=$(date '+%s%N')
+run_cmd "${_walk_cmd[@]}" > /dev/null 2>&1
+_walk_rc=$?
+_walk_end=$(date '+%s%N')
+if (( $_walk_rc != 0 )) ; then 
+  log_error "snmpwalk exit $_walk_rc, wall time $(( (_walk_end - _walk_start ) / 1000000 )) ms"
+fi
+sleep 0.5
+kill_and_verify "$ENTITY_PID"
+wait "$ENTITY_PID" 2>/dev/null
+ENTITY_PID=""
+
+
+
+# Parse total load time
+_total_line=$(grep "entity: arch_load complete:" "$ENTITY_LOG" | tail -1)
+if [ -z "$_total_line" ]; then
+    log_info "---- snmpd log (full) ----"
+    cat "$ENTITY_LOG"
+    quit 1 "FAIL: arch_load complete line not found in agent output"
+fi
+_total_us=$(printf '%s' "$_total_line" | sed 's/.*complete: \([0-9]*\) .*/\1/')
+_total_ms=$(( _total_us / 1000 ))
+
+# Annotate phase lines with percentage of total
+_phase_lines="$(grep "entity: phase" "$ENTITY_LOG")"
+if [ -n "$_phase_lines" ]; then
+    _annotated_lines="$(echo "$_phase_lines" | awk -v total_us="$_total_us" '{
+        us = $4
+        pct = 100.0 * us / total_us
+        printf "%s  (%5.1f%%)\n", $0, pct
+    }')"
+else
+    _annotated_lines=""
+fi
+
+# Save result file
+mkdir -p "$_result_dir"
+{
+    echo "date:    $_run_date"
+    echo "git:     $_git_short  ($_git_branch)"
+    echo "commit:  $_git_subject"
+    echo "limit:   $ENTITY_PERF_LIMIT_MS ms"
+    echo "total:   $_total_ms ms"
+    echo "host:    $(uname -n 2>/dev/null)"
+    echo "kernel:  $(uname -r 2>/dev/null)"
+    echo ""
+    [ -n "$_annotated_lines" ] && echo "$_annotated_lines"
+    echo ""
+    echo "$_total_line"
+} > "$_result_file"
+
+# Report to stdout
+log_info "---- Per-phase timing ----"
+if [ -n "$_annotated_lines" ]; then
+    echo "$_annotated_lines"
+else
+    log_error "(no phase lines)"
+fi
+log_info "---- Summary ----"
+log_notice "$_total_line"
+log_notice "Total: ${_total_ms} ms  (limit: ${ENTITY_PERF_LIMIT_MS} ms)"
+log_verbose "Result saved: $_result_file"
+
+if [ "$_total_ms" -gt "$ENTITY_PERF_LIMIT_MS" ]; then
+    quit 1 "FAIL: arch_load ${_total_ms} ms exceeds limit ${ENTITY_PERF_LIMIT_MS} ms"
+fi
+
+log_notice "PASS: arch_load completed within limit"
+log_notice "==== End of Entity MIB performance scenario ===="
