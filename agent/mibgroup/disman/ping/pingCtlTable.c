@@ -107,7 +107,7 @@ struct variable2 pingCtlTable_variables[] = {
      var_pingCtlTable, 2, {1, 5}},
     {COLUMN_PINGCTLTIMEOUT,          ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
      var_pingCtlTable, 2, {1, 6}},
-    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+    {COLUMN_PINGCTLPROBECOUNT,       ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
      var_pingCtlTable, 2, {1, 7}},
     {COLUMN_PINGCTLADMINSTATUS,       ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_pingCtlTable, 2, {1, 8}},
@@ -1779,7 +1779,8 @@ run_ping(unsigned int clientreg, void *clientarg)
         maxrtt = malloc(sizeof(unsigned long));
         averagertt = malloc(sizeof(unsigned long));
         host = item->pingCtlTargetAddress;
-        pid = getpid();
+        /* ICMP echo identifiers are 16 bits; system PIDs may be wider. */
+        pid = getpid() & 0xffff;
 
         ai = host_serv(host, NULL, 0, 0);
 
