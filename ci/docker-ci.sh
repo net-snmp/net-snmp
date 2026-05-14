@@ -4,15 +4,16 @@
 # Usage: ci/docker-ci.sh [MODE ...]
 #   With no args, runs all supported modes.
 #   With args, runs only the listed modes.
-# Full output is logged to /tmp/net-snmp-ci/<mode>.log.
+# Full output is logged to /tmp/net-snmp-ci-<branch>/<mode>.log.
 # Progress, warnings, errors, and periodic heartbeats are printed to the terminal.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+_branch=$(git -C "${REPO_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-')
 IMAGE=net-snmp-deps
 DOCKERFILE="${REPO_ROOT}/ci/Dockerfile.deps"
-LOG_DIR=/tmp/net-snmp-ci
+LOG_DIR="/tmp/net-snmp-ci-${_branch}"
 WORK_DIR=
 
 cleanup() {
@@ -40,7 +41,7 @@ else
 fi
 
 mkdir -p "${LOG_DIR}"
-WORK_DIR=$(mktemp -d)
+WORK_DIR=$(mktemp -d "/tmp/net-snmp-ci-${_branch}.XXXXXX")
 
 SENTINEL="${LOG_DIR}/.image-built"
 need_build=false
