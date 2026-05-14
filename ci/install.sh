@@ -47,6 +47,8 @@ case "$(uname)" in
 		    python3-dev
 		    setpriv
 		    util-linux
+			net-stat
+			iproute2
 		"
 		;;
 	esac

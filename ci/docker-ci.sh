@@ -13,6 +13,23 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 IMAGE=net-snmp-deps
 DOCKERFILE="${REPO_ROOT}/ci/Dockerfile.deps"
 LOG_DIR=/tmp/net-snmp-ci
+WORK_DIR=
+
+cleanup() {
+    [ -n "${WORK_DIR}" ] && rm -rf "${WORK_DIR}"
+}
+trap cleanup EXIT
+
+on_interrupt() {
+    local sig=$1
+    echo ""
+    echo "==> Interrupted (${sig})"
+    # EXIT trap will clean up; re-raise so the caller sees a signal exit
+    trap - "${sig}"
+    kill -s "${sig}" "$$"
+}
+trap 'on_interrupt INT'  INT
+trap 'on_interrupt TERM' TERM
 
 SUPPORTED_MODES=(regular developer disable-ipv6 disable-set mini read-only without-nl)
 
@@ -23,6 +40,7 @@ else
 fi
 
 mkdir -p "${LOG_DIR}"
+WORK_DIR=$(mktemp -d)
 
 SENTINEL="${LOG_DIR}/.image-built"
 need_build=false
@@ -57,7 +75,7 @@ filtered_run() {
     local rc_file
 
     shift
-    rc_file=$(mktemp)
+    rc_file=$(mktemp "${WORK_DIR}/rc.XXXXXX")
     : > "${log}"
 
     ( "$@"; printf '%s\n' "$?" > "${rc_file}" ) 2>&1 \
