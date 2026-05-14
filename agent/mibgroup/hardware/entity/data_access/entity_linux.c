@@ -1497,8 +1497,11 @@ _dimm_scan(void)
         return NULL;
 
     fp = popen("dmidecode -t memory 2>/dev/null", "r");
-    if (!fp)
+    if (!fp) {
+        snmp_log(LOG_WARNING, "entity: popen(dmidecode) failed: %s\n",
+                 strerror(errno));
         return list;
+    }
 
     in_mem_device = 0;
     slot = 0;
