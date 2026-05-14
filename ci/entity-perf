@@ -12,6 +12,8 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 VERBOSE_LOG=${VERBOSE_LOG:-0}
 _date_fmt='date +%Y-%m-%dT%H:%M:%S'
+_IS_DIRECT=0
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && _IS_DIRECT=1
 
 kill_and_verify() {
     local pid="$1"
@@ -42,19 +44,39 @@ kill_and_verify() {
 
 log_verbose() {
     [ "${VERBOSE_LOG}" -eq 1 ] || return 0
-    echo -e "\033[94m VERBOSE: $*\033[0m"
+    if [ "$_IS_DIRECT" -eq 1 ]; then
+        echo -e "\033[94m VERBOSE: $*\033[0m"
+    else
+        echo " VERBOSE: $*"
+    fi
 }
 log_info() {
-    echo "$($_date_fmt): $*"
+    if [ "$_IS_DIRECT" -eq 1 ]; then
+        echo "$($_date_fmt): $*"
+    else
+        echo "$*"
+    fi
 }
 log_notice() {
-    echo -e "\033[92m$($_date_fmt): $*\033[0m"
+    if [ "$_IS_DIRECT" -eq 1 ]; then
+        echo -e "\033[92m$($_date_fmt): $*\033[0m"
+    else
+        echo "$*"
+    fi
 }
 log_warn() {
-    echo -e "\033[93m$($_date_fmt): $*\033[0m"
+    if [ "$_IS_DIRECT" -eq 1 ]; then
+        echo -e "\033[93m$($_date_fmt): $*\033[0m"
+    else
+        echo "$*"
+    fi
 }
 log_error() {
-    echo -e "\033[91m$($_date_fmt): $*\033[0m"
+    if [ "$_IS_DIRECT" -eq 1 ]; then
+        echo -e "\033[91m$($_date_fmt): $*\033[0m"
+    else
+        echo "$*"
+    fi
 }
 
 run_cmd() {
