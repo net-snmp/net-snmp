@@ -38,9 +38,9 @@ netsnmp_internal_bin2asc(char *p, size_t n)
     int             i, flag = 0;
     char            buffer[SNMP_MAXBUF];
 
-    /* prevent buffer overflow */
-    if ((int)n > (sizeof(buffer) - 1))
-        n = sizeof(buffer) - 1;
+    /* prevent buffer overflow: hex path writes 3 bytes per input byte */
+    if (n > sizeof(buffer) / 3 - 1)
+        n = sizeof(buffer) / 3 - 1;
 
     for (i = 0; i < (int) n; i++) {
         buffer[i] = p[i];
@@ -245,6 +245,8 @@ netsnmp_internal_pass_set_format(char *buf,
                 (int) ((utmp & 0xff)));
         break;
     case ASN_OCTET_STR:
+        if (var_val_len > sizeof(buf2))
+            var_val_len = sizeof(buf2);
         memcpy(buf2, var_val, var_val_len);
         if (var_val_len == 0)
             sprintf(buf, "string \"\"");
