@@ -428,14 +428,14 @@ ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
         /*
          * allocate space for ifName data
          */
-        (*ifName_val_ptr_ptr) = (char*)malloc(tmp_len);
+        (*ifName_val_ptr_ptr) = (char*)malloc(tmp_len + 1);
         if (NULL == (*ifName_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
         }
     }
     (*ifName_val_ptr_len_ptr) = tmp_len;
-    memcpy((*ifName_val_ptr_ptr), rowreq_ctx->data.ifName, tmp_len);
+    memcpy((*ifName_val_ptr_ptr), rowreq_ctx->data.ifName, tmp_len + 1);
 
     return MFD_SUCCESS;
 }                               /* ifName_get */
