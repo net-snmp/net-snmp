@@ -1104,6 +1104,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
              * unregister the mib 
              */
             unregister_mib(rptr->sr_name, rptr->sr_name_len);
+            rptr->reginfo = NULL;
             /*
              * find a replacement 
              */
