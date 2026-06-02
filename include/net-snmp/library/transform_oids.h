@@ -34,10 +34,14 @@ NETSNMP_IMPORT const oid usmHMACMD5AuthProtocol[10];
 
 NETSNMP_IMPORT const oid usmHMACSHA1AuthProtocol[10];
 
+#ifdef HAVE_EVP_SHA224
 NETSNMP_IMPORT const oid usmHMAC128SHA224AuthProtocol[10];
 NETSNMP_IMPORT const oid usmHMAC192SHA256AuthProtocol[10];
+#endif
+#ifdef HAVE_EVP_SHA384
 NETSNMP_IMPORT const oid usmHMAC256SHA384AuthProtocol[10];
 NETSNMP_IMPORT const oid usmHMAC384SHA512AuthProtocol[10];
+#endif
 
 /** priv */
 NETSNMP_IMPORT const oid usmNoPrivProtocol[10];
