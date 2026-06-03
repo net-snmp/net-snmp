@@ -1171,9 +1171,9 @@ var_mtaEntry(struct variable *vp,
 
 
     static long     long_ret;
-    auto int        i;
-    auto int        result;
-    auto time_t     current_time;
+    int             i;
+    int             result;
+    time_t          current_time;
     int             global_count = 0;
     int             global_size = 0;
 
@@ -1321,9 +1321,9 @@ var_mtaGroupEntry(struct variable *vp,
                   int exact, size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    auto long       row;
-    auto int        result;
-    auto time_t     current_time;
+    long            row;
+    int             result;
+    time_t          current_time;
 
 
     if (exact) {
