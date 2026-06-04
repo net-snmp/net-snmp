@@ -496,13 +496,6 @@ snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
     --_active;
 }
 
-/*
- * XXX: this really needs to be done for the target mib entries too.
- * But we can only trust that we've added stuff here and we don't want
- * to destroy other valid entries in the target tables, so...  Don't
- * do too many kill -HUPs to your agent as re reading the config file
- * will be a slow memory leak in the target mib.
- */
 int
 notifyTable_unregister_all_notifications(int major, int minor,
                                          void *serverarg, void *clientarg)
@@ -513,8 +506,8 @@ notifyTable_unregister_all_notifications(int major, int minor,
         struct snmpNotifyTable_data *nptr = hptr->data;
         nhptr = hptr->next;
         if (nptr->snmpNotifyStorageType == ST_READONLY) {
-            header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
-            snmpNotifyTable_dispose(nptr);
+            snmpNotifyTable_unregister_notification(nptr->snmpNotifyName,
+                                                    nptr->snmpNotifyNameLen);
         }
     }
     snmpNotifyTableStorage = NULL;
