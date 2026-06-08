@@ -3,9 +3,9 @@
 name: Coverity Scan
 
 on:
-  schedule:
+  # schedule:
     # Run daily
-    - cron: '0 0 * * *'
+    # - cron: '0 0 * * *'
   # Support manual execution
   workflow_dispatch:
 jobs:
