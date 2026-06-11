@@ -683,17 +683,17 @@ int
 sec2group_parse_oid(oid * oidIndex, size_t oidLen,
                     int *model, unsigned char **name, size_t * nameLen)
 {
-    int             nameL;
-    int             i;
+    oid             nameL;
+    size_t          i;
 
     /*
      * first check the validity of the oid 
      */
-    if ((oidLen <= 0) || (!oidIndex)) {
+    if (oidLen < 2 || !oidIndex) {
         return 1;
     }
     nameL = oidIndex[1];        /* the initial name length */
-    if ((int) oidLen != nameL + 2) {
+    if (oidLen != nameL + 2) {
         return 1;
     }
 
@@ -987,21 +987,21 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
                  unsigned char **contextPrefix, size_t * contextPrefixLen,
                  int *model, int *level)
 {
-    int             groupNameL, contextPrefixL;
-    int             i;
+    oid             groupNameL, contextPrefixL;
+    size_t          i;
 
     /*
      * first check the validity of the oid 
      */
-    if ((oidLen <= 0) || (!oidIndex)) {
+    if (oidLen < 4 || !oidIndex) {
         return 1;
     }
     groupNameL = oidIndex[0];
-    if ((groupNameL + 1) > (int) oidLen) {
+    if (groupNameL >= oidLen || oidLen - groupNameL < 4) {
         return 1;
     }
     contextPrefixL = oidIndex[groupNameL + 1];  /* the initial name length */
-    if ((int) oidLen != groupNameL + contextPrefixL + 4) {
+    if (oidLen - groupNameL - 4 != contextPrefixL) {
         return 1;
     }
 
@@ -1468,15 +1468,18 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
                unsigned char **viewName, size_t * viewNameLen,
                oid ** subtree, size_t * subtreeLen)
 {
-    int             viewNameL, subtreeL, i;
+    size_t          viewNameL, subtreeL, i;
 
     /*
      * first check the validity of the oid 
      */
-    if ((oidLen <= 0) || (!oidIndex)) {
+    if (oidLen < 1 || !oidIndex) {
         return SNMP_ERR_INCONSISTENTNAME;
     }
     viewNameL = oidIndex[0];
+    if (viewNameL >= oidLen) {
+        return SNMP_ERR_INCONSISTENTNAME;
+    }
     subtreeL = oidLen - viewNameL - 1;  /* the initial name length */
 
     /*
@@ -1484,10 +1487,6 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
      */
     if (viewName == NULL || subtree == NULL) {
         return SNMP_ERR_RESOURCEUNAVAILABLE;
-    }
-
-    if (subtreeL < 0) {
-        return SNMP_ERR_NOCREATION;
     }
 
     *viewName = (unsigned char *) malloc(viewNameL + 1);
