@@ -484,6 +484,14 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
             send_agentx_error(session, pdu, AGENTX_ERR_PROCESSING_ERROR, 0);
             return 1;
         }
+        if (asi->mode != SNMP_MSG_INTERNAL_SET_ACTION) {
+            SNMP_FREE(smagic);
+            snmp_log(LOG_WARNING,
+                     "dropping bad AgentX request (wrong mode %d)\n",
+                     asi->mode);
+            send_agentx_error(session, pdu, AGENTX_ERR_PROCESSING_ERROR, 0);
+            return 1;
+        }
         asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;
         mycallback = handle_subagent_set_response;
         retmagic = asi;
