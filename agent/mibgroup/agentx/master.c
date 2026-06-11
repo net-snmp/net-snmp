@@ -273,11 +273,11 @@ agentx_got_response(int operation,
             DEBUGMSGTL(("agentx/master", "send failed on session %8p\n",
                         session));
         }
-        close_agentx_session(session, -1);
         netsnmp_handler_mark_requests_as_delegated(requests,
                                                    REQUEST_IS_NOT_DELEGATED);
         netsnmp_set_request_error(cache->reqinfo, requests,     /* XXXWWW: should be index=0 */
                                   SNMP_ERR_GENERR);
+        close_agentx_session(session, -1);
         netsnmp_free_delegated_cache(cache);
         return 0;
 
