@@ -1500,6 +1500,10 @@ asn_parse_objid(u_char * data,
     while (length > 0 && (*objidlength)-- > 0) {
         subidentifier = 0;
         do {                    /* shift and add in low order 7 bits */
+            if (subidentifier > (MAX_SUBID >> 7)) {
+                ERROR_MSG("subidentifier too large / overflow");
+                return NULL;
+            }
             subidentifier =
                 (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
             length--;
