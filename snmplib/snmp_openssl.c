@@ -234,6 +234,7 @@ void
 netsnmp_openssl_cert_dump_names(X509 *ocert)
 {
     int              i, onid;
+    int              oname_value_type;
     X509_NAME_ENTRY *oname_entry;
     ASN1_STRING     *oname_value;
     X509_NAME       *osubj_name;
@@ -252,8 +253,9 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
         oname_entry = X509_NAME_get_entry(osubj_name, i);
         netsnmp_assert(NULL != oname_entry);
         oname_value = X509_NAME_ENTRY_get_data(oname_entry);
+        oname_value_type = ASN1_STRING_type(oname_value);
 
-        if (oname_value->type != V_ASN1_PRINTABLESTRING)
+        if (oname_value_type != V_ASN1_PRINTABLESTRING)
             continue;
 
         /** get NID */
@@ -268,7 +270,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 
         DEBUGMSGT(("9:cert:dump:names",
                    "[%02d] NID type %d, ASN type %d\n", i, onid,
-                   oname_value->type));
+                   oname_value_type));
         DEBUGMSGT(("9:cert:dump:names", "%s/%s: '%s'\n", prefix_long,
                    prefix_short, ASN1_STRING_get0_data(oname_value)));
     }
@@ -433,30 +435,33 @@ _extract_oname(const GENERAL_NAME *oname)
                 rtn = strdup(buf);
             break;
 
-        case GEN_IPADD:
-            if (oname->d.iPAddress->length == 4) {
-                sprintf(ipbuf, "%d.%d.%d.%d", oname->d.iPAddress->data[0],
-                        oname->d.iPAddress->data[1],
-                        oname->d.iPAddress->data[2],
-                        oname->d.iPAddress->data[3]);
+        case GEN_IPADD: {
+            const int iplen = ASN1_STRING_length(oname->d.iPAddress);
+            const unsigned char *const ipdata =
+                ASN1_STRING_get0_data(oname->d.iPAddress);
+
+            if (iplen == 4) {
+                sprintf(ipbuf, "%d.%d.%d.%d", ipdata[0],
+                        ipdata[1],
+                        ipdata[2],
+                        ipdata[3]);
                 rtn = strdup(ipbuf);
-            }
-            else if ((oname->d.iPAddress->length == 16) ||
-                     (oname->d.iPAddress->length == 20)) {
+            } else if (iplen == 16 || iplen == 20) {
                 char *pos = ipbuf;
                 int   j;
-                for(j = 0; j < oname->d.iPAddress->length; ++j) {
-                    *pos++ = VAL2HEX(oname->d.iPAddress->data[j]);
+
+                for (j = 0; j < iplen; ++j) {
+                    *pos++ = VAL2HEX(ipdata[j]);
                     *pos++ = ':';
                 }
                 *pos = '\0';
                 rtn = strdup(ipbuf);
-            }
-            else
+            } else {
                 NETSNMP_LOGONCE((LOG_WARNING, "unexpected ip addr length %d\n",
-                       oname->d.iPAddress->length));
-
+                       iplen));
+            }
             break;
+        }
         default:
             DEBUGMSGT(("openssl:cert:san", "unknown/unsupported type %d\n",
                        oname->type));
