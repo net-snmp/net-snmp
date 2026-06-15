@@ -256,7 +256,7 @@ to_time_t(PFILETIME ptr)
 {
     long            rem;
     long long       x =
-        ((long long) ptr->dwHighDateTime << 32) +
+        ((unsigned long long) ptr->dwHighDateTime << 32) +
         ((unsigned) ptr->dwLowDateTime);
     x -= FACTOR;
     rem = x % NSPERSEC;
@@ -270,7 +270,7 @@ static long
 to_msec(PFILETIME ptr)
 {
     long long       x =
-        ((long long) ptr->dwHighDateTime << 32) +
+        ((unsigned long long) ptr->dwHighDateTime << 32) +
         (unsigned) ptr->dwLowDateTime;
     x /= NSPERMSEC;
     return x;
