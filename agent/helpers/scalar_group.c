@@ -106,6 +106,9 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
     int             namelen;
     oid             subid, root_tmp[MAX_OID_LEN], *root_save;
 
+    if (reginfo->rootoid_len > MAX_OID_LEN - 2)
+        return SNMP_ERR_GENERR;
+
     DEBUGMSGTL(("helper:scalar_group", "Got request:\n"));
     namelen = SNMP_MIN(requests->requestvb->name_length,
                        reginfo->rootoid_len);
