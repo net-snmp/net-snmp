@@ -5479,7 +5479,7 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
 static long
 llsqrt(long long a)
 {
-    long long       prev = ~((long long) 1 << 63);
+    long long       prev = LLONG_MAX;
     long long       x = a;
 
     if (x > 0) {
