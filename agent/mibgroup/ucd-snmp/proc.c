@@ -678,7 +678,7 @@ sh_count_procs(char *procname)
                     getword((unsigned int) proc_nl[X_PROC_BITMAP].n_value +
                             ((absolute_proc_number / 32) * 4));
             proc_active =
-                (bitmap & (1 << (absolute_proc_number % 32))) != 0;
+                (bitmap & (1U << (absolute_proc_number % 32))) != 0;
             if (proc_active && aproc->p_stat != SZOMB
                 && !(aproc->p_type & SWEXIT))
                 auser = getuser(aproc);
