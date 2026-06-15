@@ -3063,6 +3063,11 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
     static const char *errpre = "build string";
     size_t          start_offset = *offset;
 
+    if (str == NULL && strlength > 0) {
+        ERROR_MSG("no string passed into asn_realloc_rbuild_string()\n");
+        return 0;
+    }
+
     while ((*pkt_len - *offset) < strlength) {
         if (!(r && asn_realloc(pkt, pkt_len))) {
             return 0;
@@ -3415,6 +3420,11 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
      */
     static const char *errpre = "build bitstring";
     size_t          start_offset = *offset;
+
+    if (str == NULL && strlength > 0) {
+        ERROR_MSG("no string passed into asn_realloc_rbuild_bitstring\n");
+        return 0;
+    }
 
     while ((*pkt_len - *offset) < strlength) {
         if (!(r && asn_realloc(pkt, pkt_len))) {
