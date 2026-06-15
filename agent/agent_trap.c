@@ -632,7 +632,8 @@ netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *t_oid, size_t *t_oid_len)
     if (NULL == pdu || NULL == t_oid || NULL == t_oid_len)
         return SNMPERR_GENERR;
     if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-        if (*t_oid_len < (pdu->enterprise_length + 2))
+        if (pdu->enterprise_length > MAX_OID_LEN ||
+            *t_oid_len < (pdu->enterprise_length + 2))
             return SNMPERR_LONG_OID;
         memcpy(t_oid, pdu->enterprise, pdu->enterprise_length*sizeof(oid));
         *t_oid_len = pdu->enterprise_length;
