@@ -25,7 +25,7 @@ void           *header_complex(struct header_complex_index *datalist,
 
 int             header_complex_generate_varoid(netsnmp_variable_list *
                                                var);
-int             header_complex_parse_oid(oid * oidIndex, size_t oidLen,
+int             header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
                                          netsnmp_variable_list * data);
 void            header_complex_generate_oid(oid * name, size_t * length,
                                             oid * prefix,

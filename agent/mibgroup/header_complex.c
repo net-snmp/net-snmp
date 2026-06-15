@@ -114,7 +114,7 @@ header_complex_generate_varoid(netsnmp_variable_list * var)
  * returns 1 if an error is encountered, or 0 if successful.
  */
 int
-header_complex_parse_oid(oid * oidIndex, size_t oidLen,
+header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
                          netsnmp_variable_list * data)
 {
     netsnmp_variable_list *var = data;
