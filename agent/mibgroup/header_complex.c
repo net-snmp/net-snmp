@@ -118,7 +118,11 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
                          netsnmp_variable_list * data)
 {
     netsnmp_variable_list *var = data;
-    int             i, itmp;
+    oid             itmp;
+    unsigned        i;
+
+    if (oidLen > MAX_OID_LEN)
+        return SNMPERR_GENERR;
 
     while (var && oidLen > 0) {
         switch (var->type) {
@@ -143,9 +147,9 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
             if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
                 itmp = oidLen;
             } else {
-                itmp = (long) *oidIndex++;
+                itmp = *oidIndex++;
                 oidLen--;
-                if (itmp > (int) oidLen)
+                if (itmp > oidLen)
                     return SNMPERR_GENERR;
             }
 
@@ -173,9 +177,9 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
             if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
                 itmp = oidLen;
             } else {
-                itmp = (long) *oidIndex++;
+                itmp = *oidIndex++;
                 oidLen--;
-                if (itmp > (int) oidLen)
+                if (itmp > oidLen)
                     return SNMPERR_GENERR;
             }
 
