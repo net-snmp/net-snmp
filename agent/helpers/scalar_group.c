@@ -101,7 +101,6 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
                                 netsnmp_request_info *requests)
 {
     netsnmp_variable_list *var = requests->requestvb;
-
     netsnmp_scalar_group *sgroup = (netsnmp_scalar_group *)handler->myvoid;
     int             ret, cmp;
     int             namelen;
