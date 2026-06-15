@@ -118,7 +118,7 @@ var_hp(struct variable *vp,
         newname[*length + 2] = 92;
         *length = *length + 3;
         memcpy((char *) name, (char *) newname, *length * sizeof(oid));
-        long_ret = ((((((128 << 8) + 120) << 8) + 57) << 8) + 92);
+        long_ret = ((((((128U << 8) + 120) << 8) + 57) << 8) + 92);
         return (u_char *) & long_ret;
     }
     return NULL;
