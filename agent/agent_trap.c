@@ -457,7 +457,7 @@ create_trap_session(char *sink, u_short sinkport,
     void *ss;
     char buf[sizeof(sinkport) * 3 + 2];
     if (sinkport != 0) {
-	sprintf(buf, ":%hu", sinkport);
+	snprintf(buf, sizeof(buf), ":%hu", sinkport);
 	snmp_log(LOG_NOTICE,
 		 "Using a separate port number is deprecated, please correct "
 		 "the sink specification instead");
