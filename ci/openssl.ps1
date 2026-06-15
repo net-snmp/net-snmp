@@ -25,4 +25,5 @@ if ($null -eq $latest) {
 
 Write-Host "Latest OpenSSL Installer found: $($latest.url)"
 Write-Host "Downloading OpenSSL installer..."
-Invoke-WebRequest -Uri $latest.url -OutFile "openssl.exe"
+#Invoke-WebRequest -Uri $latest.url -OutFile "openssl.exe"
+curl.exe -L $latest.url -o "openssl.exe"
