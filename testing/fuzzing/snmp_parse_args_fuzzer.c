@@ -27,10 +27,28 @@
   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
+#include <sys/stat.h>
+#include <unistd.h>
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_parse_args.h>
 #include "ada_fuzz_header.h"
+
+/*
+ * snmp_parse_args() honours logging options such as "-Lf <file>" that create
+ * files with attacker-controlled, relative names in the current working
+ * directory.
+ */
+int
+LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    const char *scratch = "/tmp/snmp_parse_args_fuzzer_cwd";
+    (void)argc;
+    (void)argv;
+    (void)mkdir(scratch, 0755);
+    (void)chdir(scratch);
+    return 0;
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
