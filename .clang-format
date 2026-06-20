@@ -1,0 +1,117 @@
+Language: Cpp
+BasedOnStyle: GNU
+
+AllowShortFunctionsOnASingleLine: None
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+CommentPragmas: '^[^ ]'
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+UseTab: Never
+
+# Custom Net-SNMP Type Names
+TypeNames:
+  - netsnmp_mib_handler
+  - netsnmp_handler_registration
+  - netsnmp_handler_args
+  - netsnmp_delegated_cache
+  - netsnmp_baby_steps_modes
+  - netsnmp_baby_steps_access_methods
+  - netsnmp_mode_handler_list
+  - netsnmp_mib_handler_methods
+  - netsnmp_monitor_callback_header
+  - netsnmp_monitor_set_request_data
+  - netsnmp_monitor_callback_cooperative
+  - netsnmp_old_api_info
+  - netsnmp_old_api_cache
+  - netsnmp_row_merge_status
+  - netsnmp_scalar_group
+  - netsnmp_set_info
+  - netsnmp_request_info
+  - netsnmp_tree_cache
+  - netsnmp_agent_request_info
+  - netsnmp_cachemap
+  - netsnmp_agent_session
+  - netsnmp_pdu_stats
+  - netsnmp_stash_cache_info
+  - netsnmp_stash_cache_data
+  - netsnmp_request_group_item
+  - netsnmp_request_group
+  - netsnmp_table_array_callbacks
+  - netsnmp_table_row
+  - netsnmp_table_data
+  - netsnmp_table_data_set_storage
+  - netsnmp_table_data_set
+  - netsnmp_column_info
+  - netsnmp_table_registration_info
+  - netsnmp_table_request_info
+  - netsnmp_iterator_info
+  - netsnmp_tdata_row
+  - netsnmp_tdata
+  - netsnmp_subtree
+  - netsnmp_watcher_info
+  - netsnmp_arp_entry
+  - netsnmp_defaultrouter_entry
+  - netsnmp_interface_stats
+  - netsnmp_interface_entry
+  - netsnmp_conf_if_list
+  - netsnmp_include_if_list
+  - netsnmp_ipaddress_entry
+  - netsnmp_ipstats
+  - netsnmp_route_entry
+  - netsnmp_v6scopezone_entry
+  - netsnmp_swinst_entry
+  - netsnmp_swrun_entry
+  - netsnmp_systemstats_entry
+  - netsnmp_tcpconn_entry
+  - netsnmp_udp_endpoint_entry
+  - netsnmp_cert_common
+  - netsnmp_key
+  - netsnmp_cert
+  - netsnmp_cert_map
+  - netsnmp_container
+  - netsnmp_iterator
+  - netsnmp_data_list
+  - netsnmp_data_list_saveinfo
+  - netsnmp_file
+  - netsnmp_oid_stash_node
+  - netsnmp_oid_stash_save_info
+  - netsnmp_auth_alg_info
+  - netsnmp_priv_alg_info
+  - netsnmp_request_list
+  - netsnmp_callback_pass
+  - netsnmp_callback_info
+  - netsnmp_state_machine_step
+  - netsnmp_state_machine_input
+  - netsnmp_token_descr
+  - netsnmp_std_data
+  - netsnmp_sockaddr_storage
+  - netsnmp_addr_pair
+  - netsnmp_indexed_addr_pair
+  - netsnmp_tmStateReference
+  - netsnmp_tdomain_spec
+  - netsnmp_transport
+  - netsnmp_transport_list
+  - netsnmp_tdomain
+  - netsnmp_transport_config
+  - netsnmp_tsmSecurityReference
+  - netsnmp_line_info
+  - netsnmp_line_process_info
+  - netsnmp_token_value_index
