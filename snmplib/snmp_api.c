@@ -6042,9 +6042,11 @@ snmp_read(fd_set * fdset)
 void
 snmp_read2(netsnmp_large_fd_set * fdset)
 {
-    struct session_list *slp;
+    struct session_list *slp, *next;
+
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for (slp = Sessions; slp; slp = slp->next) {
+    for (slp = Sessions; slp; slp = next) {
+        next = slp->next;
         snmp_sess_read2(slp, fdset);
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
