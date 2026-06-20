@@ -6789,9 +6789,11 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
 void
 snmp_timeout(void)
 {
-    struct session_list *slp;
+    struct session_list *slp, *next;
+
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for (slp = Sessions; slp; slp = slp->next) {
+    for (slp = Sessions; slp; slp = next) {
+        next = slp->next;
         snmp_sess_timeout(slp);
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
