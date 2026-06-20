@@ -5682,6 +5682,14 @@ _sess_process_packet_parse_pdu(struct session_list *slp, netsnmp_session * sp,
   if (dump || filter) {
       int filtered = 0;
       char *addrtxt = netsnmp_transport_peer_string(transport, opaque, olength);
+
+      if (!addrtxt) {
+          DEBUGMSGTL(("sess_process_packet",
+                      "Failed to resolve peer address\n"));
+          SNMP_FREE(opaque);
+          return NULL;
+      }
+
       snmp_log(LOG_DEBUG, "\nReceived %d byte packet from %s\n",
                length, addrtxt);
 
