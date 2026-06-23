@@ -4278,6 +4278,19 @@ unload_all_mibs(void)
     current_module = 0;
     module_map_head = NULL;
     SNMP_FREE(last_err_module);
+
+    {
+        struct node *np = orphan_nodes;
+
+        while (np) {
+            struct node *nnp = np->next;
+            free_node(np);
+            np = nnp;
+        }
+        orphan_nodes = NULL;
+    }
+    erroneousMibs = 0;
+    first_err_module = 1;
 }
 
 static void
