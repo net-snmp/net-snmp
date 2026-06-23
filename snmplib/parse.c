@@ -2311,6 +2311,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
     char           *descr = NULL;
     struct tc      *tcp;
     int             level;
+    int             is_duplicate = 0;
 
     type = get_token(fp, token, MAXTOKEN);
     if (type == SEQUENCE || type == CHOICE) {
@@ -2446,6 +2447,7 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
          * textual convention 
          */
         tcp = NULL;
+        is_duplicate = 0;
         for (i = 0; i < tc_alloc; i++) {
             if (tclist[i].type == 0) {
                 if (tcp == NULL)
@@ -2456,7 +2458,28 @@ parse_asntype(FILE * fp, char *name, int *ntype, char *ntoken)
                          "Duplicate TEXTUAL-CONVENTION '%s' at line %d in %s. First at line %d\n",
                          name, mibLine, File, tclist[i].lineno);
                 erroneousMibs++;
+                is_duplicate = 1;
+                break;
             }
+        }
+
+        if (is_duplicate) {
+            struct range_list *dummy_ranges = NULL;
+            struct enum_list *dummy_enums = NULL;
+
+            free(hint);
+            free(descr);
+            *ntype = get_token(fp, ntoken, MAXTOKEN);
+            if (*ntype == LEFTPAREN) {
+                dummy_ranges = parse_ranges(fp, &dummy_ranges);
+                free_ranges(&dummy_ranges);
+                *ntype = get_token(fp, ntoken, MAXTOKEN);
+            } else if (*ntype == LEFTBRACKET) {
+                dummy_enums = parse_enumlist(fp, &dummy_enums);
+                free_enums(&dummy_enums);
+                *ntype = get_token(fp, ntoken, MAXTOKEN);
+            }
+            return NULL;
         }
 
         if (tcp == NULL) {
@@ -4662,24 +4685,37 @@ parse(FILE * fp)
             goto free_mib;
         }
         if (nnp) {
-            struct node *op;
-            if (np)
-                np->next = nnp;
-            else
-                np = root = nnp;
-            while (np->next)
-                np = np->next;
-            if (np->type == TYPE_OTHER)
-                np->type = type;
-            op = root;
-            while (op != nnp) {
+            struct node *op = root;
+            int is_duplicate = 0;
+
+            while (op) {
                 if (strcmp(nnp->label, op->label) == 0 && nnp->subid != op->subid) {
                     snmp_log(LOG_ERR, 
                         "Duplicate Object '%s' at line %d in %s. First at line %d\n",
                         op->label, mibLine, File, op->lineno);
 		    erroneousMibs++;
+                    is_duplicate = 1;
+                    break;
 		}
                 op = op->next;
+            }
+            if (is_duplicate) {
+                struct node *next_node;
+
+                while (nnp) {
+                    next_node = nnp->next;
+                    free_node(nnp);
+                    nnp = next_node;
+                }
+            } else {
+                if (np)
+                    np->next = nnp;
+                else
+                    np = root = nnp;
+                while (np->next)
+                    np = np->next;
+                if (np->type == TYPE_OTHER)
+                    np->type = type;
             }
         }
     }
