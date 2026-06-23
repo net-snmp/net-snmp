@@ -73,6 +73,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // Read the file
     read_mib(filename);
 
+    shutdown_mib();
+
     unlink(filename);
     free(filename);
     return 0;
