@@ -102,6 +102,28 @@ extern          "C" {
 
 
     /*
+     * int snmp_async_send_cp(session, pdu, callback, cb_data, cp_inc)
+     *     netsnmp_session *session;
+     *     netsnmp_pdu      *pdu;
+     *     netsnmp_callback callback;
+     *     void             *cb_data;
+     *     int              cp_inc;
+     *
+     * Sends the input pdu on the session after calling snmp_build to create
+     * a serialized packet.  If necessary, set some of the pdu data from the
+     * session defaults.  Add a request corresponding to this pdu to the list
+     * of outstanding requests on this session and store callback and data,
+     * then send the pdu.
+     * Returns the request id of the generated packet if applicable, otherwise 1.
+     * On any error, 0 is returned.
+     * The pdu is freed by snmp_send() unless a failure occured.
+     */
+    NETSNMP_IMPORT
+    int             snmp_async_send_cp(netsnmp_session *, netsnmp_pdu *,
+                                       netsnmp_callback, void *, int);
+
+
+    /*
      * void snmp_read(fdset)
      *     fd_set  *fdset;
      *
@@ -248,6 +270,9 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_sess_async_send(struct session_list *, netsnmp_pdu *,
                                          netsnmp_callback, void *);
+    NETSNMP_IMPORT
+    int             snmp_sess_async_send_cp(struct session_list *, netsnmp_pdu *,
+                                            netsnmp_callback, void *, int); 
     NETSNMP_IMPORT
     int             snmp_sess_select_info(struct session_list *, int *, fd_set *,
                                           struct timeval *, int *);

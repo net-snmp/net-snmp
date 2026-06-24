@@ -445,6 +445,11 @@ typedef struct netsnmp_ref_void_s {
     void           *val;
 } netsnmp_ref_void;
 
+typedef struct netsnmp_refcnt_void {
+    size_t         refcnt;
+    void           *val;
+} netsnmp_refcnt_void;
+
 typedef union {
     u_long          ul;
     u_int           ui;
