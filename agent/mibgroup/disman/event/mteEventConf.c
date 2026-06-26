@@ -196,6 +196,10 @@ parse_notificationEvent( const char *token, char *line )
             idx++;
             object = mteObjects_addOID( "snmpd.conf", ename, idx,
                                          var->vblabel, wild );
+            if (!object) {
+                 config_perror("unable to add OID");
+                 return;
+             }
             idx    = object->mteOIndex;
         }
 #endif
@@ -226,6 +230,10 @@ parse_notificationEvent( const char *token, char *line )
         idx++;
         cp     = copy_nword(cp, buf,  SPRINT_MAX_LEN);
         object = mteObjects_addOID( "snmpd.conf", ename, idx, buf, wild );
+        if (!object) {
+            config_perror("unable to add OID");
+            return;
+        }
         idx    = object->mteOIndex;
         wild   = 1;    /* default to wildcarded objects */
     }
