@@ -828,6 +828,7 @@ vacm_create_simple(const char *token, char *confline,
     char            context[SPRINT_MAX_LEN];
     int             ctxprefix = 1;  /* Default to matching all contexts */
     static int      commcount = 0;
+	size_t          ctxlen;
 
     /*
      * init 
@@ -928,7 +929,12 @@ vacm_create_simple(const char *token, char *confline,
      */
     if (cp && *cp) {
         cp = copy_nword(cp, context, sizeof(context));
-        tmp = (context + strlen(context)-1);
+		ctxlen = strlen(context);
+		if (ctxlen == 0) {
+            config_perror("illegal line - context cannot be empty");
+            return;
+        }
+        tmp = (context + ctxlen-1);
         if (tmp && *tmp == '*') {
             *tmp = '\0';
             ctxprefix = 1;
