@@ -366,7 +366,7 @@ parse_mteMonitor(const char *token, const char *line)
                          *       (c.f. notificationEvent config)
                          */
             case 'i':
-                if ( *cp == '-' ) {
+                if ( cp && *cp == '-' ) {
                     /* Backwards compatibility - now '-I' */
                     flags &= ~MTE_TRIGGER_FLAG_VWILD;
                     continue;
