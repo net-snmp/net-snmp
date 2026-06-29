@@ -12,7 +12,18 @@ SKIPIF NETSNMP_DISABLE_SNMPV1
 active=1
 createAndWait=5
 destroy=6
-# DISMAN-PING-MIB
+# DISMAN-PING-MIB numeric OIDs used by this test.  These translations are
+# equivalent to running `snmptranslate -On -IR <object>` with DISMAN-PING-MIB
+# loaded:
+#   pingCtlTargetAddressType  -> .1.3.6.1.2.1.80.1.2.1.3
+#   pingCtlTargetAddress      -> .1.3.6.1.2.1.80.1.2.1.4
+#   pingCtlProbeCount         -> .1.3.6.1.2.1.80.1.2.1.7
+#   pingCtlAdminStatus        -> .1.3.6.1.2.1.80.1.2.1.8
+#   pingCtlFrequency          -> .1.3.6.1.2.1.80.1.2.1.10
+#   pingCtlDescr              -> .1.3.6.1.2.1.80.1.2.1.17
+#   pingCtlRowStatus          -> .1.3.6.1.2.1.80.1.2.1.23
+#   pingResultsProbeResponses -> .1.3.6.1.2.1.80.1.3.1.7
+#   pingResultsSentProbes     -> .1.3.6.1.2.1.80.1.3.1.8
 DISMAN_PING_MIB=.1.3.6.1.2.1.80.1
 pingCtlEntry=${DISMAN_PING_MIB}.2.1
 pingCtlTargetAddressType=${pingCtlEntry}.3
@@ -27,7 +38,9 @@ pingCtlRowStatus=${pingCtlEntry}.23
 pingResultsEntry=${DISMAN_PING_MIB}.3.1
 pingResultsProbeResponses=${pingResultsEntry}.7
 pingResultsSentProbes=${pingResultsEntry}.8
-# Test configuration
+# Test configuration.  The row index is two OCTET STRING indexes encoded as
+# OID subidentifiers: "Net-SNMP"."T154_1", "Net-SNMP"."T154_2", and
+# "Net-SNMP"."T154_3".
 TARGET_ADDRESS=127.0.0.1
 IDXPFX=8.78.101.116.45.83.78.77.80.6.84.49.53.52 # "Net-SNMP"."T154"
 IDXS="${IDXPFX}.95.49 ${IDXPFX}.95.50 ${IDXPFX}.95.51"
@@ -46,18 +59,29 @@ STARTAGENT
 
 for IDX in $IDXS; do
 
+# Start each iteration from a clean state.  Destroying a non-existent row is
+# valid RowStatus behavior, so this also works for the first run.
 CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
          $pingCtlRowStatus.$IDX i $destroy"
 
 CHECK "^$pingCtlRowStatus.$IDX = INTEGER: $destroy"
 
+# Create an inactive pingCtlEntry row.  createAndWait should leave the row in
+# notInService so that writable control objects can be configured next.
 CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
          $pingCtlRowStatus.$IDX i $createAndWait"
 
 CHECK "^$pingCtlRowStatus.$IDX = INTEGER: $createAndWait"
 
+# Configure the control row before activation:
+#   pingCtlTargetAddressType = ipv4(1)
+#   pingCtlTargetAddress     = 127.0.0.1
+#   pingCtlFrequency         = 1 second
+#   pingCtlDescr             = ScriptGenerated
+#   pingCtlProbeCount        = 5 probes
+#   pingCtlAdminStatus       = enabled(1)
 CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1                   \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT           \
          $pingCtlTargetAddressType.$IDX i $pingCtlTargetAddresTypeIpv4  \
@@ -69,6 +93,8 @@ CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1                   \
 
 CHECK "^$pingCtlAdminStatus.$IDX = INTEGER: $pingCtlAdminStatusEnabled"
 
+# Activate the row.  A successful transition to active starts the ping test and
+# creates the matching pingResultsEntry row.
 CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v1          \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
          $pingCtlRowStatus.$IDX i $active"
@@ -82,12 +108,14 @@ sleep 2
 
 for IDX in $IDXS; do
 
+# Verify that the results table recorded all configured probes as sent.
 CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v1           \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
          $pingResultsSentProbes.$IDX"
 
 CHECK "^$pingResultsSentProbes.$IDX = Gauge32: ${PROBE_COUNT}"
 
+# Verify that all probes to the loopback target produced responses.
 CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v1           \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT   \
          $pingResultsProbeResponses.$IDX"
@@ -96,7 +124,8 @@ CHECK "^$pingResultsProbeResponses.$IDX = Gauge32: ${PROBE_COUNT}"
 
 done
 
-# Delete first row and leave the remaining rows in the table.
+# Delete the first control row and leave the remaining rows in the table.  This
+# verifies RowStatus destroy handling without depending on table cleanup order.
 
 for IDX in $IDXS; do
 
