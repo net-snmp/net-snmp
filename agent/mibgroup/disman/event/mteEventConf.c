@@ -197,7 +197,6 @@ parse_notificationEvent( const char *token, char *line )
             object = mteObjects_addOID( "snmpd.conf", ename, idx,
                                          var->vblabel, wild );
             if (!object) {
-                 config_perror("unable to add OID");
                  return;
              }
             idx    = object->mteOIndex;
