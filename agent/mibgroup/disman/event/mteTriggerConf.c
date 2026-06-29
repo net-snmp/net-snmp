@@ -694,6 +694,11 @@ parse_mteMonitor(const char *token, const char *line)
             value = strtol(cp, NULL, 0);
             entry->mteTThDFallValue  = value;
             cp = skip_token_const(cp);
+            if ( !cp || *cp == '\0' ) {
+                config_perror("missing delta rise threshold");
+                mteObjects_removeEntries( "snmpd.conf", tname );
+                return;
+            }
             value = strtol(cp, NULL, 0);
             entry->mteTThDRiseValue  = value;
             /*
