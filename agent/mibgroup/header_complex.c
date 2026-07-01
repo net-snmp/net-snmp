@@ -156,6 +156,8 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
             if (itmp == 0)
                 break;          /* zero length strings shouldn't malloc */
 
+            if (itmp > INT_MAX / sizeof(oid))
+                return SNMPERR_GENERR;
             var->val_len = itmp * sizeof(oid);
             var->val.objid = calloc(1, var->val_len);
             if (var->val.objid == NULL)
