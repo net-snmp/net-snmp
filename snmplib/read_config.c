@@ -138,6 +138,7 @@ netsnmp_feature_child_of(unregister_app_config_handler, read_config_all);
 netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused);
 
 static int      config_errors;
+static int      config_warnings;
 
 struct config_files *config_files = NULL;
 
@@ -784,8 +785,11 @@ read_config(const char *filename,
     netsnmp_assert(line_handler->config_token);
 
     /* reset file counter when recursion depth is 0 */
-    if (depth == 0)
+    if (depth == 0) {
         files = 0;
+        config_errors = 0;
+        config_warnings = 0;
+    }
 
     if ((ifile = fopen(filename, "r")) == NULL) {
 #ifdef ENOENT
@@ -834,6 +838,13 @@ read_config(const char *filename,
         size_t              linelen = 0; /* strlen of the current line */
         char               *cptr;
         struct config_line *lptr = line_handler;
+
+        if (config_errors + config_warnings > 500) {
+            snmp_log(LOG_ERR, "Too many config errors/warnings. Aborting parsing of %s.\n", filename);
+            fclose(ifile);
+            ifile = NULL;
+            break;
+        }
 
         for (;;) {
             if (linesize <= linelen + 1) {
@@ -1779,6 +1790,7 @@ netsnmp_config_warn(const char *str, ...)
     va_start(args, str);
     config_vlog(LOG_WARNING, "Warning", str, args);
     va_end(args);
+    config_warnings++;
 }
 
 void
