@@ -130,6 +130,8 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
         case ASN_COUNTER:
         case ASN_GAUGE:
         case ASN_TIMETICKS:
+            if (oidLen == 0)
+                return SNMPERR_GENERR;
             var->val.integer = calloc(1, sizeof(long));
             if (var->val.integer == NULL)
                 return SNMPERR_GENERR;
@@ -147,6 +149,8 @@ header_complex_parse_oid(const oid *oidIndex, size_t oidLen,
             if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
                 itmp = oidLen;
             } else {
+                if (oidLen == 0)
+                    return SNMPERR_GENERR;
                 itmp = *oidIndex++;
                 oidLen--;
                 if (itmp > oidLen)
