@@ -931,7 +931,7 @@ vacm_create_simple(const char *token, char *confline,
         cp = copy_nword(cp, context, sizeof(context));
 		ctxlen = strlen(context);
 		if (ctxlen == 0) {
-            config_perror("illegal line - if context is specified, it cannot be blank");
+            config_perror("Improper configuration line - if context is specified, it cannot be blank. For an empty context, simply do not specify one instead.");
             return;
         }
         tmp = (context + ctxlen-1);
