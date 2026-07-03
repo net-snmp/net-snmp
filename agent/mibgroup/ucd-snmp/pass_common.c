@@ -33,30 +33,37 @@ netsnmp_internal_asc2bin(char *p)
 }
 
 static int
-netsnmp_internal_bin2asc(char *p, size_t n)
+netsnmp_internal_bin2asc(const unsigned char *in_buf, size_t in_len, char *out_buf, size_t out_len)
 {
-    int             i, flag = 0;
-    char            buffer[SNMP_MAXBUF];
+    const char     *end = out_buf + out_len;
+    int             i, flag = 0, res;
+    char           *p = out_buf;
 
-    /* prevent buffer overflow */
-    if ((int)n > (sizeof(buffer) - 1))
-        n = sizeof(buffer) - 1;
+    if (out_len == 0)
+        return 0;
 
-    for (i = 0; i < (int) n; i++) {
-        buffer[i] = p[i];
-        if (!isprint((unsigned char) (p[i])))
+    for (i = 0; i < in_len; i++) {
+        if (!isprint(in_buf[i])) {
             flag = 1;
+            break;
+        }
     }
     if (flag == 0) {
-        p[n] = 0;
-        return n;
+        snprintf(out_buf, out_len, "%.*s", (int)in_len, (const char *)in_buf);
+        return SNMP_MIN(out_len - 1, in_len);
     }
-    for (i = 0; i < (int) n; i++) {
-        sprintf(p, "%02x ", (unsigned char) (buffer[i] & 0xff));
-        p += 3;
+    for (i = 0; i < in_len; i++) {
+        res = snprintf(p, end - p, "%02x ", in_buf[i]);
+        if (res < 0)
+            break;
+        if (res >= end - p)
+            break;
+        p += res;
     }
-    *--p = 0;
-    return 3 * n - 1;
+    /* Remove the trailing space. */
+    if (p > out_buf && p[-1] == ' ')
+        *--p = '\0';
+    return p - out_buf;
 }
 
 int
@@ -245,11 +252,10 @@ netsnmp_internal_pass_set_format(char *buf,
                 (int) ((utmp & 0xff)));
         break;
     case ASN_OCTET_STR:
-        memcpy(buf2, var_val, var_val_len);
         if (var_val_len == 0)
             sprintf(buf, "string \"\"");
-        else if (netsnmp_internal_bin2asc(buf2, var_val_len) ==
-                 (int) var_val_len)
+        else if (netsnmp_internal_bin2asc(var_val, var_val_len, buf2, sizeof(buf2)) ==
+                 var_val_len)
             snprintf(buf, SNMP_MAXBUF, "string \"%s\"", buf2);
         else
             snprintf(buf, SNMP_MAXBUF, "octet \"%s\"", buf2);
