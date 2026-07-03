@@ -310,11 +310,30 @@ SnmpdShutDown(int a)
 }
 
 #ifdef SIGHUP
+/*
+ * snmpd and snmptrapd expect that select() is interrupted upon SIGHUP.
+ * Installing a signal handler with signal() does not guarantee this.
+ * Hence call sigaction() without setting SA_RESTART if sigaction() is
+ * supported.
+ */
+static void netsnmp_signal(int signum, RETSIGTYPE (*handler)(int))
+{
+#ifdef HAVE_SIGACTION
+    struct sigaction action;
+
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = handler;
+    sigaction(signum, &action, NULL);
+#else
+    signal(signum, handler);
+#endif
+}
+
 RETSIGTYPE
 SnmpdReconfig(int a)
 {
     reconfig = 1;
-    signal(SIGHUP, SnmpdReconfig);
+    netsnmp_signal(SIGHUP, SnmpdReconfig);
 }
 #endif
 
@@ -772,7 +791,7 @@ main(int argc, char *argv[])
     signal(SIGINT, SnmpdShutDown);
 #endif
 #ifdef SIGHUP
-    signal(SIGHUP, SIG_IGN);   /* do not terminate on early SIGHUP */
+    netsnmp_signal(SIGHUP, SIG_IGN);   /* do not terminate on early SIGHUP */
 #endif
 #ifdef SIGUSR1
     DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
@@ -1077,7 +1096,7 @@ main(int argc, char *argv[])
 
 #ifdef SIGHUP
     DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
-    signal(SIGHUP, SnmpdReconfig);
+    netsnmp_signal(SIGHUP, SnmpdReconfig);
 #endif
 
     /*
