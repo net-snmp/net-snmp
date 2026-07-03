@@ -212,9 +212,10 @@ var_extensible_pass(struct variable *vp,
              * setup args 
              */
             if (passthru->miblen >= *length || rtest < 0)
-                sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
+                snprint_mib_oid(buf, sizeof(buf), passthru->miboid,
+                                passthru->miblen);
             else
-                sprint_mib_oid(buf, name, *length);
+                snprint_mib_oid(buf, sizeof(buf), name, *length);
             free(passthru->command);
             passthru->command = NULL;
             if (asprintf(&passthru->command, "%s %s %s", passthru->name,
@@ -297,9 +298,10 @@ setPass(int action, u_char * var_val, u_char var_val_type,
             free(passthru->command);
             passthru->command = NULL;
             if (passthru->miblen >= name_len || rtest < 0)
-                sprint_mib_oid(buf, passthru->miboid, passthru->miblen);
+                snprint_mib_oid(buf, sizeof(buf), passthru->miboid,
+                                passthru->miblen);
             else
-                sprint_mib_oid(buf, name, name_len);
+                snprint_mib_oid(buf, sizeof(buf), name, name_len);
             netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
                                              var_val_len);
             if (asprintf(&passthru->command, "%s -s %s %s", passthru->name, buf,
@@ -314,7 +316,7 @@ setPass(int action, u_char * var_val, u_char var_val_type,
         }
     }
     if (snmp_get_do_debugging()) {
-        sprint_mib_oid(buf2, name, name_len);
+        snprint_mib_oid(buf2, sizeof(buf2), name, name_len);
         DEBUGMSGTL(("ucd-snmp/pass", "pass-notfound:  %s\n", buf2));
     }
     return SNMP_ERR_NOSUCHNAME;

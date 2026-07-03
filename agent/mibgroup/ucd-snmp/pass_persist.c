@@ -314,10 +314,10 @@ var_extensible_pass_persist(struct variable *vp,
              * setup args 
              */
             if (persistpassthru->miblen >= *length || rtest < 0)
-                sprint_mib_oid(buf, persistpassthru->miboid,
+                snprint_mib_oid(buf, sizeof(buf), persistpassthru->miboid,
                                persistpassthru->miblen);
             else
-                sprint_mib_oid(buf, name, *length);
+                snprint_mib_oid(buf, sizeof(buf), name, *length);
 
             pipe_idx = i;
 #ifdef USING_SINGLE_COMMON_PASSPERSIST_INSTANCE
@@ -445,10 +445,10 @@ setPassPersist(int action,
              * setup args 
              */
             if (persistpassthru->miblen >= name_len || rtest < 0)
-                sprint_mib_oid(buf, persistpassthru->miboid,
+                snprint_mib_oid(buf, sizeof(buf), persistpassthru->miboid,
                                persistpassthru->miblen);
             else
-                sprint_mib_oid(buf, name, name_len);
+                snprint_mib_oid(buf, sizeof(buf), name, name_len);
             netsnmp_internal_pass_set_format(buf2, var_val, var_val_type,
                                              var_val_len);
             free(persistpassthru->command);
@@ -479,7 +479,7 @@ setPassPersist(int action,
         }
     }
     if (snmp_get_do_debugging()) {
-        sprint_mib_oid(buf2, name, name_len);
+        snprint_mib_oid(buf2, sizeof(buf2), name, name_len);
         DEBUGMSGTL(("ucd-snmp/pass_persist", "persistpass-notfound:  %s\n",
                     buf2));
     }

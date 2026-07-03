@@ -256,7 +256,8 @@ netsnmp_internal_pass_set_format(char *buf,
         buf[ SNMP_MAXBUF-1 ] = 0;
         break;
     case ASN_OBJECT_ID:
-        sprint_mib_oid(buf2, (const oid *) var_val, var_val_len/sizeof(oid));
+        snprint_mib_oid(buf2, sizeof(buf2), (const oid *) var_val,
+                       var_val_len/sizeof(oid));
         snprintf(buf, SNMP_MAXBUF, "objectid \"%s\"", buf2);
         buf[ SNMP_MAXBUF-1 ] = 0;
         break;

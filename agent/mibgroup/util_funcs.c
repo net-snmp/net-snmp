@@ -782,23 +782,38 @@ void
 print_mib_oid(oid name[], size_t len)
 {
     char           *buffer;
-    buffer = (char *) malloc(11 * len); /* maximum digit lengths for int32 + a '.' */
+    size_t          buf_len = 11 * len + 1; /* maximum digit lengths for int32 + a '.' */
+
+    buffer = malloc(buf_len);
     if (!buffer) {
         snmp_log(LOG_ERR, "Malloc failed - out of memory?");
         return;
     }
-    sprint_mib_oid(buffer, name, len);
+    snprint_mib_oid(buffer, buf_len, name, len);
     snmp_log(LOG_NOTICE, "Mib: %s\n", buffer);
     free(buffer);
 }
 
 void
-sprint_mib_oid(char *buf, const oid *name, size_t len)
+snprint_mib_oid(char *buf, size_t buf_len, const oid *name, size_t len)
 {
-    int             i;
+    const char     *end = buf + buf_len;
+    int             res, i;
 
-    for (i = 0; i < (int) len; i++)
-        buf += sprintf(buf, ".%" NETSNMP_PRIo "u", name[i]);
+    netsnmp_assert(buf_len > 0);
+    if (len == 0) {
+        if (buf_len > 0)
+            buf[0] = '\0';
+        return;
+    }
+    for (i = 0; i < len; i++) {
+        res = snprintf(buf, end - buf, ".%" NETSNMP_PRIo "u", name[i]);
+        if (res < 0)
+            break;
+        if (res >= end - buf)
+            break;
+        buf += res;
+    }
 }
 
 /*

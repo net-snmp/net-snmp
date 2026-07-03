@@ -45,7 +45,7 @@ int             get_exec_pipes(const char *cmd, int *fdIn, int *fdOut,
 #endif
 WriteMethod     clear_cache;
 void            print_mib_oid(oid *, size_t);
-void            sprint_mib_oid(char *, const oid *, size_t);
+void            snprint_mib_oid(char *, size_t, const oid *, size_t);
 int             checkmib(struct variable *, oid *, size_t *, int, size_t *,
                          WriteMethod ** write_method, int);
 char           *find_field(char *, int);
