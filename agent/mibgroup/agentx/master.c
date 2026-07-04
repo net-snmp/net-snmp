@@ -218,7 +218,7 @@ netsnmp_create_delegated_box(void *val_ptr)
     return box;
 }
 
-static
+static void
 netsnmp_delete_delegated_box(netsnmp_refcnt_void * box)
 {
     if (box) {
@@ -227,7 +227,6 @@ netsnmp_delete_delegated_box(netsnmp_refcnt_void * box)
         if (box->refcnt <= 0)
 	    SNMP_FREE(box);
     }
-    return;
 }
 
 
