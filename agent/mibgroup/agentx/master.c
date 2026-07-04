@@ -239,8 +239,8 @@ agentx_got_response(int operation,
                     netsnmp_session * session,
                     int reqid, netsnmp_pdu *pdu, void *magic)
 {
-    netsnmp_refcnt_void *cache_box = (netsnmp_refcnt_void *) magic;
-    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) cache_box->val;
+    netsnmp_refcnt_void *cache_box = magic;
+    netsnmp_delegated_cache *cache = cache_box ? cache_box->val : NULL;
     int             i, ret;
     netsnmp_request_info *requests, *request;
     netsnmp_variable_list *var;
