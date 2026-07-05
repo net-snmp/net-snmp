@@ -278,28 +278,33 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
 
     /* read the packet from openssl */
     do {
+        int err;
         rc = SSL_read(tlsdata->ssl, buf, size);
         MAKE_MEM_DEFINED(&rc, sizeof(rc));
         if (rc > 0)
             MAKE_MEM_DEFINED(buf, rc);
-        if (rc == 0) {
+        err = SSL_get_error(tlsdata->ssl, rc);
+        if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE ||
+            (err == SSL_ERROR_SYSCALL && (errno == EAGAIN || errno == EWOULDBLOCK || errno == 0))) {
+            t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
+            return 0;
+        }
+        if (rc == 0 || err == SSL_ERROR_ZERO_RETURN) {
             /* XXX closed connection */
             DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
             /* XXX: openssl cleanup */
             SNMP_FREE(tmStateRef);
             return -1;
         }
-        if (rc == -1) {
-            int err = SSL_get_error(tlsdata->ssl, rc);
-            if (err != SSL_ERROR_WANT_READ && err != SSL_ERROR_WANT_WRITE) {
-                /* error detected */
-                _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
-                SNMP_FREE(tmStateRef);
-                return rc;
-            }
+        if (rc < 0) {
+            if (errno == EINTR)
+                continue;
+            /* error detected */
+            _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
+            SNMP_FREE(tmStateRef);
+            return rc;
         }
-        /* retry read for SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE */
-    } while (rc <= 0); 
+    } while (rc < 0 && errno == EINTR); 
 
     DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
 
@@ -659,7 +664,12 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
 
     /* XXX: check that it returns something so we can free stuff? */
-    return BIO_get_fd(tlsdata->accepted_bio, NULL);
+    {
+        int accepted_fd = BIO_get_fd(tlsdata->accepted_bio, NULL);
+        if (accepted_fd >= 0)
+            netsnmp_set_non_blocking_mode(accepted_fd, TRUE);
+        return accepted_fd;
+    }
 }
 
 static netsnmp_transport *
@@ -880,6 +890,8 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     */
 
     t->sock = BIO_get_fd(bio, NULL);
+    if (t->sock >= 0)
+        netsnmp_set_non_blocking_mode(t->sock, TRUE);
 
     return t;
 }
@@ -917,6 +929,8 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     tlsdata->ssl_context = sslctx_server_setup(TLS_method());
 
     t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
+    if (t->sock >= 0)
+        netsnmp_set_non_blocking_mode(t->sock, TRUE);
     t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
     return NULL;
