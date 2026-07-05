@@ -1482,6 +1482,16 @@ do_subtree(struct tree *root, struct node **nodes)
     struct node    *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int             hash;
     int            *int_p;
+    int             depth = 0;
+    struct tree    *p;
+
+    for (p = root; p; p = p->parent) {
+        depth++;
+        if (depth >= MAX_OID_LEN) {
+            snmp_log(LOG_ERR, "MIB tree depth exceeds MAX_OID_LEN (%d); aborting subtree parsing\n", MAX_OID_LEN);
+            return;
+        }
+    }
 
     while (xroot->next_peer && xroot->next_peer->subid == root->subid) {
 #if 0
