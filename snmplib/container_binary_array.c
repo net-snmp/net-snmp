@@ -59,6 +59,16 @@ typedef struct binary_array_iterator_s {
 
 static netsnmp_iterator *_ba_iterator_get(netsnmp_container *c);
 
+static netsnmp_container *_ba_current_sort_container = NULL;
+
+static int
+_ba_qsort_wrapper(const void *p, const void *q)
+{
+    const void *lhs = *(const void * const *)p;
+    const void *rhs = *(const void * const *)q;
+    return _ba_current_sort_container->compare(lhs, rhs);
+}
+
 static int
 Sort_Array(netsnmp_container *c)
 {
@@ -73,7 +83,9 @@ Sort_Array(netsnmp_container *c)
         /*
          * Sort the table 
          */
-        qsort(t->data, t->count, sizeof(t->data[0]), c->compare);
+        _ba_current_sort_container = c;
+        qsort(t->data, t->count, sizeof(t->data[0]), _ba_qsort_wrapper);
+        _ba_current_sort_container = NULL;
         t->dirty = 0;
 
         /*
