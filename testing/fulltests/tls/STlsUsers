@@ -117,9 +117,9 @@ CONFIGAGENT certSecName 22 $DNSUSERFP    --dns
 CONFIGAGENT certSecName 23 $IPUSERFP     --ip
 CONFIGAGENT certSecName 24 afile         --cn
 
+CONFIGAGENT certSecName 30 $CADIRECTFP  --sn causerdirectmap
+CONFIGAGENT certSecName 31 $CADIRECT9CFP  --sn causerdirect9cmap
 CONFIGAGENT certSecName 100 $CAFP        --rfc822
-CONFIGAGENT certSecName 101 $CADIRECTFP  --sn causerdirectmap
-CONFIGAGENT certSecName 102 $CADIRECT9CFP  --sn causerdirect9cmap
 # intentionally not mapped:
 #CONFIGAGENT certSecName 1001 $CADIRECT9DFP  --sn causerdirect9dmap
 
