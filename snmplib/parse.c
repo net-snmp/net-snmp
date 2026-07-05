@@ -1562,7 +1562,7 @@ do_subtree(struct tree *root, struct node **nodes)
                  */
                 int_p = malloc((tp->number_modules + 1) * sizeof(int));
                 if (int_p == NULL)
-                    return;
+                    goto cleanup;
                 memcpy(int_p, tp->module_list,
                        tp->number_modules * sizeof(int));
                 int_p[tp->number_modules] = np->modid;
@@ -1598,15 +1598,15 @@ do_subtree(struct tree *root, struct node **nodes)
 
         tp = calloc(1, sizeof(struct tree));
         if (tp == NULL)
-            return;
+            goto cleanup;
         tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
         if (!otp && !xxroot) {
-          free(tp);
-          return;
+          free_tree(tp);
+          goto cleanup;
         }
         tp->next_peer = otp ? otp->next_peer : xxroot->child_list;
         if (otp)
@@ -1708,6 +1708,7 @@ do_subtree(struct tree *root, struct node **nodes)
             anon_tp = NULL;
         }
     }
+cleanup:
     /*
      * free all nodes that were copied into tree 
      */
