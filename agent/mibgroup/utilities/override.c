@@ -101,14 +101,13 @@ override_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-#define MALLOC_OR_DIE(x) \
-  thedata->value = malloc(x); \
-  thedata->value_len = x; \
-  if (!thedata->value) { \
-      free(thedata); \
-      config_perror("memory allocation failure"); \
-      return; \
-  }
+#define MALLOC_OR_DIE(x)                                \
+    thedata->value = malloc(x);                         \
+    thedata->value_len = x;                             \
+    if (!thedata->value) {                              \
+        config_perror("memory allocation failure");     \
+        goto free_the_data;                             \
+    }
 
 void
 netsnmp_parse_override(const char *token, char *line)
@@ -228,24 +227,19 @@ netsnmp_parse_override(const char *token, char *line)
         break;
 
     default:
-        SNMP_FREE(thedata);
         config_perror("illegal/unsupported type specified");
-        return;
+        goto free_the_data;
     }
 
     if (!thedata->value && thedata->type != ASN_NULL) {
         config_perror("memory allocation failure");
-        free(thedata);
-        return;
+        goto free_the_data;
     }
 
     the_reg = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
     if (!the_reg) {
         config_perror("memory allocation failure");
-        if (thedata->type != ASN_NULL)
-            free(thedata->value);
-        free(thedata);
-        return;
+        goto free_the_data;
     }
 
     the_reg->handlerName = strdup(namebuf);
@@ -263,19 +257,18 @@ netsnmp_parse_override(const char *token, char *line)
         SNMP_FREE(the_reg->handlerName);
         SNMP_FREE(the_reg);
         config_perror("memory allocation failure");
-        if (thedata->type != ASN_NULL)
-            free(thedata->value);
-        free(thedata);
-        return;
+        goto free_the_data;
     }
     the_reg->handler->myvoid = thedata;
 
-    if (netsnmp_register_instance(the_reg)) {
-        config_perror("oid registration failed within the agent");
-        SNMP_FREE(thedata->value);
-        free(thedata);
+    if (netsnmp_register_instance(the_reg) == MIB_REGISTERED_OK)
         return;
-    }
+
+    config_perror("oid registration failed within the agent");
+
+free_the_data:
+    SNMP_FREE(thedata->value);
+    free(thedata);
 }
 
 
