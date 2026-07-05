@@ -320,6 +320,7 @@ netsnmp_variable_list *
 _expValue_evalFunction(netsnmp_variable_list *func) {
     netsnmp_variable_list *params = func->next_variable;
     /* XXX */
+	func->next_variable = params->next_variable;
     params->next_variable = NULL;
     snmp_free_var(params);
     snmp_set_var_typed_integer( func, ASN_INTEGER, 99 );
