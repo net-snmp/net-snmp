@@ -1508,11 +1508,9 @@ _transport_common(netsnmp_transport *t, int local)
     t->f_close         = netsnmp_dtlsudp_close;
     t->f_config        = netsnmp_tlsbase_config;
     t->f_setup_session = netsnmp_tlsbase_session_init;
-    t->f_accept        = NULL;
     t->f_fmtaddr       = netsnmp_dtlsudp4_fmtaddr;
     t->f_get_taddr     = netsnmp_ipv4_get_taddr;
-
-    t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
+    t->flags |= NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     return t;
 }
