@@ -119,8 +119,9 @@ xdump(const void * data, size_t length, const char *prefix)
         }
         strcat(buffer, "  ");
         for (col = 0; count + col < length && col < 16; col++) {
-            buffer[col + 60] =
-                isprint(cp[count + col]) ? cp[count + col] : '.';
+            unsigned char byte = cp[count + col];
+
+            buffer[col + 60] = isprint(byte) ? byte : '.';
         }
         buffer[col + 60] = '\n';
         buffer[col + 60 + 1] = 0;
