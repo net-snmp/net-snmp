@@ -315,6 +315,7 @@ extensible_free_config(void)
     for (etmp = extens; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
+        free(etmp2->command);
         free(etmp2);
     }
 
@@ -337,6 +338,7 @@ extensible_free_config(void)
             tname[etmp2->miblen] = i;
             unregister_mib(tname, etmp2->miblen+1);
         }
+        free(etmp2->command);
         free(etmp2);
     }
 
