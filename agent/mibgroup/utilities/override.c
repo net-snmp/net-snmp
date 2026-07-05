@@ -144,7 +144,7 @@ netsnmp_parse_override(const char *token, char *line)
     }
 
     {
-        struct { const char* key; int value; } const strings[] = {
+        static struct { const char* key; int value; } const strings[] = {
             { "counter", ASN_COUNTER },
             { "counter64", ASN_COUNTER64 },
             { "integer", ASN_INTEGER },
@@ -166,10 +166,11 @@ netsnmp_parse_override(const char *token, char *line)
             { "unsigned", ASN_UNSIGNED },
             { NULL, 0 }
         }, * run;
-        for(run = strings; run->key && strcasecmp(run->key, buf) < 0; ++run);
-        if(run->key && strcasecmp(run->key, buf) == 0)
+        for (run = strings; run->key && strcasecmp(run->key, buf) < 0; ++run)
+            ;
+        if (run->key && strcasecmp(run->key, buf) == 0) {
             type = run->value;
-        else {
+        } else {
             config_perror("unknown type specified");
             return;
         }
