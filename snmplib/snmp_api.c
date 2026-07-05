@@ -1353,11 +1353,6 @@ _sess_copy(netsnmp_session * in_session)
     }
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
-    /* Anything below this point should only be done if the transport
-       had no say in the matter */
-    if (session->securityLevel == 0)
-        session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-
     return (slp);
 }
 
@@ -1917,6 +1912,15 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         slp->session->sndMsgMaxSize = transport->msgMaxSize;
     }
 
+    if (transport->f_setup_session &&
+        transport->f_setup_session(transport, slp->session) != SNMPERR_SUCCESS)
+        goto close_session;
+
+    /* Anything below this point should only be done if the transport
+       had no say in the matter */
+    if (slp->session->securityLevel == 0)
+        slp->session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+
     if (slp->session->version == SNMP_VERSION_3) {
         DEBUGMSGTL(("snmp_sess_add",
                     "adding v3 session -- maybe engineID probe now\n"));
@@ -1927,10 +1931,6 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     }
 
     slp->session->flags &= ~SNMP_FLAGS_DONT_PROBE;
-
-    if (transport->f_setup_session &&
-        transport->f_setup_session(transport, slp->session) != SNMPERR_SUCCESS)
-        goto close_session;
 
     return slp;
 
