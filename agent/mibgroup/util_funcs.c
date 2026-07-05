@@ -137,6 +137,8 @@ netsnmp_feature_child_of(create_prefix_info, prefix_info_all);
 
 #if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
 static long     cachetime;
+static char     lastcmd[STRMAX];
+static int      lastresult;
 #endif
 
 /** deprecated, use netsnmp_mktemp instead */
@@ -265,8 +267,6 @@ get_exec_output(struct extensible *ex)
     int             cfd;
 #ifdef NETSNMP_EXCACHETIME
     long            curtime;
-    static char     lastcmd[STRMAX];
-    static int      lastresult;
 #endif
 
     DEBUGMSGTL(("exec:get_exec_output","calling %s\n", ex->command));
@@ -770,13 +770,23 @@ clear_cache(int action,
         long            tmp = 0;
         tmp = *((long *) var_val);
         if (tmp == 1 && action == COMMIT) {
-            cachetime = 0;          /* reset the cache next read */
+            clear_exec_cache();     /* reset the cache next read */
         }
     }
 #endif
     return SNMP_ERR_NOERROR;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CLEAR_CACHE */
+
+void
+clear_exec_cache(void)
+{
+#if defined(NETSNMP_EXCACHETIME) && defined(USING_UTILITIES_EXECUTE_MODULE) && defined(HAVE_EXECV)
+    cachetime = 0;
+    lastcmd[0] = '\0';
+    lastresult = 0;
+#endif
+}
 
 void
 print_mib_oid(oid name[], size_t len)

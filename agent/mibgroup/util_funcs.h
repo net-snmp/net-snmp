@@ -36,6 +36,7 @@ int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
 struct extensible *get_exten_instance(struct extensible *, size_t);
 int             get_exec_output(struct extensible *);
+void            clear_exec_cache(void);
 #if defined(WIN32) && !defined(cygwin)
 int             get_exec_pipes(const char *cmd, int *fdIn, int *fdOut,
                                HANDLE *pid);

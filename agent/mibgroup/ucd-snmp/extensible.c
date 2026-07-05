@@ -312,6 +312,8 @@ extensible_free_config(void)
     oid    tname[MAX_OID_LEN];
     int    i;
 
+    clear_exec_cache();
+
     for (etmp = extens; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
