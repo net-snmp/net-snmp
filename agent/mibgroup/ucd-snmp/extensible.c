@@ -442,25 +442,11 @@ var_extensible_shell(struct variable * vp,
             *var_len = strlen(exten->command);
             return ((u_char *) (exten->command));
         case ERRORFLAG:        /* return code from the process */
-            len = sizeof(exten->output);
-            if (exten->type == EXECPROC) {
-                exten->result = run_exec_command( exten->command, NULL,
-                                                  exten->output, &len);
-	    } else {
-                exten->result = run_shell_command(exten->command, NULL,
-                                                  exten->output, &len);
-	    }
+            exec_command(exten);
             long_ret = exten->result;
             return ((u_char *) (&long_ret));
         case ERRORMSG:         /* first line of text returned from the process */
-            len = sizeof(exten->output);
-            if (exten->type == EXECPROC) {
-                exten->result = run_exec_command( exten->command, NULL,
-                                                  exten->output, &len);
-	    } else {
-                exten->result = run_shell_command(exten->command, NULL,
-                                                  exten->output, &len);
-	    }
+            exec_command(exten);
             *var_len = strlen(exten->output);
             if (*var_len && exten->output[*var_len - 1] == '\n')
                 exten->output[--(*var_len)] = '\0';
@@ -573,13 +559,7 @@ var_extensible_relocatable(struct variable *vp,
         *var_len = strlen(exten->command);
         return ((u_char *) (exten->command));
     case ERRORFLAG:            /* return code from the process */
-        len = sizeof(exten->output);
-        if (exten->type == EXECPROC)
-            exten->result = run_exec_command( exten->command, NULL,
-                                              exten->output, &len);
-	else
-            exten->result = run_shell_command(exten->command, NULL,
-                                              exten->output, &len);
+        exec_command(exten);
         long_ret = exten->result;
         return ((u_char *) (&long_ret));
     case ERRORMSG:             /* first line of text returned from the process */

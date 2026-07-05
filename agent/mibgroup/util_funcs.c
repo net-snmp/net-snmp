@@ -281,7 +281,10 @@ get_exec_output(struct extensible *ex)
 #endif
 
         cachebytes = NETSNMP_MAXCACHESIZE;
-        ex->result = run_exec_command( ex->command, NULL, cache, &cachebytes );
+        if (ex->type == SHPROC)
+            ex->result = run_shell_command( ex->command, NULL, cache, &cachebytes );
+        else
+            ex->result = run_exec_command( ex->command, NULL, cache, &cachebytes );
 
         unlink(cachefile);
             /*
