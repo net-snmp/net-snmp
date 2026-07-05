@@ -88,7 +88,7 @@ xdump(const void * data, size_t length, const char *prefix)
 {
     const u_char * const cp = data;
     unsigned int         col, count;
-    char                *buffer;
+    char                *buffer, *p;
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     int      debug_log_level = netsnmp_get_debug_log_level();
 #else
@@ -104,27 +104,26 @@ xdump(const void * data, size_t length, const char *prefix)
 
     count = 0;
     while (count < length) {
-        strcpy(buffer, prefix);
-        sprintf(buffer + strlen(buffer), "%.4d: ", count);
+        p = buffer + sprintf(buffer, "%s%.4d: ", prefix, count);
 
         for (col = 0; count + col < length && col < 16; col++) {
-            sprintf(buffer + strlen(buffer), "%02X ", cp[count + col]);
+            p += sprintf(p, "%02X ", cp[count + col]);
             if (col % 4 == 3)
-                strcat(buffer, " ");
+                p += sprintf(p, " ");
         }
         for (; col < 16; col++) {       /* pad end of buffer with zeros */
-            strcat(buffer, "   ");
+            p += sprintf(p, "   ");
             if (col % 4 == 3)
-                strcat(buffer, " ");
+                p += sprintf(p, " ");
         }
-        strcat(buffer, "  ");
+        p += sprintf(p, "  ");
         for (col = 0; count + col < length && col < 16; col++) {
             unsigned char byte = cp[count + col];
 
-            buffer[col + 60] = isprint(byte) ? byte : '.';
+            *p++ = isprint(byte) ? byte : '.';
         }
-        buffer[col + 60] = '\n';
-        buffer[col + 60 + 1] = 0;
+        *p++ = '\n';
+        *p++ = 0;
         snmp_log(debug_log_level, "%s", buffer);
         count += col;
     }
