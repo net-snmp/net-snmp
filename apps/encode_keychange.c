@@ -124,16 +124,11 @@ main(int argc, char **argv)
     int             arg = 1;
 
     local_progname = argv[0];
-    local_passphrase_filename = (char *) malloc(sizeof(PASSPHRASE_DIR) +
-                                                sizeof(PASSPHRASE_FILE) +
-                                                4);
-    if (!local_passphrase_filename) {
+    if (asprintf(&local_passphrase_filename, "%s/%s",
+                 PASSPHRASE_DIR, PASSPHRASE_FILE) < 0) {
         fprintf(stderr, "%s: out of memory!", local_progname);
         exit(-1);
     }
-    snprintf(local_passphrase_filename, sizeof(PASSPHRASE_DIR) +
-                                        sizeof(PASSPHRASE_FILE) + 4,
-             "%s/%s", PASSPHRASE_DIR, PASSPHRASE_FILE);
 
 
 

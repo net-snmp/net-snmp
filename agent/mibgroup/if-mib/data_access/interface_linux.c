@@ -47,14 +47,12 @@ netsnmp_pci_error(char *msg, ...)
 {
     va_list args;
     char *buf;
-    int buflen;
 
     va_start(args, msg);
-    buflen = strlen("pcilib: ")+strlen(msg)+2;
-    buf = malloc(buflen);
-    snprintf(buf, buflen, "pcilib: %s\n", msg);
-    snmp_vlog(LOG_ERR, buf, args);
-    free(buf);
+    if (asprintf(&buf, "pcilib: %s\n", msg) >= 0) {
+        snmp_vlog(LOG_ERR, buf, args);
+        free(buf);
+    }
     va_end(args);
     if (do_longjmp)
 	longjmp(err_buf, 1);

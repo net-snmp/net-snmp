@@ -2561,15 +2561,17 @@ netsnmp_set_mib_directory(const char *dir)
     if (olddir) {
         if ((*dir == '+') || (*dir == '-')) {
             /** New dir starts with '+', thus we add it. */
-            tmpdir = (char *)malloc(strlen(dir) + strlen(olddir) + 2);
+            if (*dir++ == '+') {
+                if (asprintf(&tmpdir, "%s%c%s", olddir, ENV_SEPARATOR_CHAR, dir) < 0)
+                    tmpdir = NULL;
+            } else {
+                if (asprintf(&tmpdir, "%s%c%s", dir, ENV_SEPARATOR_CHAR, olddir) < 0)
+                    tmpdir = NULL;
+            }
             if (!tmpdir) {
                 DEBUGMSGTL(("read_config:initmib", "set mibdir malloc failed"));
                 return;
             }
-            if (*dir++ == '+')
-                sprintf(tmpdir, "%s%c%s", olddir, ENV_SEPARATOR_CHAR, dir);
-            else
-                sprintf(tmpdir, "%s%c%s", dir, ENV_SEPARATOR_CHAR, olddir);
             newdir = tmpdir;
         } else {
             newdir = dir;

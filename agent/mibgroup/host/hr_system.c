@@ -480,19 +480,12 @@ set_solaris_bootcommand_parameter(int action,
 static int set_solaris_eeprom_parameter(const char *key, const char *value,
                                         size_t var_val_len) {
 
-    int status=0;
-    char buffer[1024],*pbuffer=buffer;
+    int status;
     
-    if( strlen(key)+strlen(value)+16 > sizeof(buffer) ) {
-        pbuffer=(char *)malloc(strlen(key)+strlen(value)+16);
-    } 
-
-    
-    sprintf(pbuffer, "eeprom %s=\"%.*s\"\n", key, var_val_len, value);
-
-    status=system(pbuffer);
-
-    if(pbuffer!=buffer) free(pbuffer);
+    if (asprintf(&pbuffer, "eeprom %s=\"%.*s\"\n", key, var_val_len, value) < 0)
+        return 1;
+    status = system(pbuffer);
+    free(pbuffer);
     return status;
 }
 

@@ -560,10 +560,9 @@ write_expExpression(int action,
          */
         tmpvar = StorageTmp->expExpression;
         tmplen = StorageTmp->expExpressionLen;
-        StorageTmp->expExpression = malloc(var_val_len + 1);
-        if (StorageTmp->expExpression)
-            snprintf(StorageTmp->expExpression, var_val_len + 1, "%.*s",
-                     (int)var_val_len, var_val);
+        if (asprintf(&StorageTmp->expExpression, "%.*s",
+                     (int)var_val_len, var_val) < 0)
+            StorageTmp->expExpression = NULL;
         StorageTmp->expExpressionLen = var_val_len;
         break;
 

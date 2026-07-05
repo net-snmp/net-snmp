@@ -1759,18 +1759,13 @@ snmp_clean_persistent(const char *type)
 static void
 config_vlog(int level, const char *levelmsg, const char *str, va_list args)
 {
-    char tmpbuf[256];
-    char* buf = tmpbuf;
-    int len = snprintf(tmpbuf, sizeof(tmpbuf), "%s: line %d: %s: %s\n",
-		       curfilename, linecount, levelmsg, str);
-    if (len >= (int)sizeof(tmpbuf)) {
-	buf = (char*)malloc(len + 1);
-	sprintf(buf, "%s: line %d: %s: %s\n",
-		curfilename, linecount, levelmsg, str);
-    }
+    char *buf;
+
+    if (asprintf(&buf, "%s: line %d: %s: %s\n",
+                 curfilename, linecount, levelmsg, str) < 0)
+        return;
     snmp_vlog(level, buf, args);
-    if (buf != tmpbuf)
-	free(buf);
+    free(buf);
 }
 
 void

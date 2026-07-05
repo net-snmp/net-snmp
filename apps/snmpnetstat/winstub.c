@@ -81,23 +81,15 @@ pre_env(void)
 #endif
 
     cproot = ROOT_BASE;
-    p_fn =
-        (char *) malloc(3 + strlen(cp) + strlen(cproot) + strlen(PROT_FN));
-    if (p_fn)
-        sprintf(p_fn, "%s%s%s", cp, cproot, PROT_FN);
+    if (asprintf(&p_fn, "%s%s%s", cp, cproot, PROT_FN) < 0)
+        p_fn = NULL;
 #ifdef notused
-    h_fn =
-        (char *) malloc(3 + strlen(cp) + strlen(cproot) + strlen(HOST_FN));
-    if (h_fn)
-        sprintf(h_fn, "%s%s%s", cp, cproot, HOST_FN);
-    s_fn =
-        (char *) malloc(3 + strlen(cp) + strlen(cproot) + strlen(SERV_FN));
-    if (s_fn)
-        sprintf(s_fn, "%s%s%s", cp, cproot, SERV_FN);
-    n_fn =
-        (char *) malloc(3 + strlen(cp) + strlen(cproot) + strlen(NETW_FN));
-    if (n_fn)
-        sprintf(n_fn, "%s%s%s", cp, cproot, NETW_FN);
+    if (asprintf(&h_fn, "%s%s%s", cp, cproot, HOST_FN) < 0)
+        h_fn = NULL;
+    if (asprintf(&s_fn, "%s%s%s", cp, cproot, SERV_FN) < 0)
+        s_fn = NULL;
+    if (asprintf(&n_fn, "%s%s%s", cp, cproot, NETW_FN) < 0)
+        n_fn = NULL;
 #endif
 }
 

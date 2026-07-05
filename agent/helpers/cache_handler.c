@@ -508,10 +508,10 @@ netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
 static char *
 _build_cache_name(const char *name)
 {
-    char *dup = (char*)malloc(strlen(name) + strlen(CACHE_NAME) + 2);
-    if (NULL == dup)
+    char *dup;
+
+    if (asprintf(&dup, "%s:%s", CACHE_NAME, name) < 0)
         return NULL;
-    sprintf(dup, "%s:%s", CACHE_NAME, name);
     return dup;
 }
 

@@ -1096,9 +1096,8 @@ _dlpi_open(const char *devname)
     if (devname == NULL)
         return (-1);
 
-    if ((devstr = malloc(5 + strlen(devname) + 1)) == NULL)
+    if (asprintf(&devstr, "/dev/%s", devname) < 0)
         return (-1);
-    (void) sprintf(devstr, "/dev/%s", devname);
     DEBUGMSGTL(("kernel_sunos5:dlpi", "devstr(%s)\n", devstr));
     /*
      * First try opening the device using style 1, if the device does not

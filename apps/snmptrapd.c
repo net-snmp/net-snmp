@@ -776,8 +776,8 @@ main(int argc, char *argv[])
                         *cp = ' ';
                 } else {
                     /* Old style: implicitly "print=format" */
-                    trap1_fmt_str_remember = malloc(strlen(optarg) + 7);
-                    snprintf( trap1_fmt_str_remember, strlen(optarg) + 7, "print %s", optarg );
+                    if (asprintf(&trap1_fmt_str_remember, "print %s", optarg) < 0)
+                        trap1_fmt_str_remember = NULL;
                 }
             } else {
                 usage();
