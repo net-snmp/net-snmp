@@ -95,6 +95,13 @@ xdump(const void * data, size_t length, const char *prefix)
 #define debug_log_level LOG_DEBUG
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
+    /* If the length limit is increased, also increase buffer size. */
+    if (length > 10000) {
+        snmp_log(LOG_NOTICE,
+                 "xdump: count = %" NETSNMP_PRIz "u > 10,000\n", length);
+        return;
+    }
+
     buffer = malloc(strlen(prefix) + 80);
     if (!buffer) {
         snmp_log(LOG_NOTICE,
