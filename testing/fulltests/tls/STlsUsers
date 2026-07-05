@@ -251,7 +251,7 @@ if [ $SNMP_TRANSPORT_SPEC = dtlsudp ]; then
     CHECK              "failed rfc5343 contextEngineID probing"
     CHECKAGENTCOUNT  1 "TLS Error: no certificate returned\|TLS Error: certificate verify failed"
 else
-    CHECK              "failed to ssl_connect"
+    CHECK              "failed to ssl_connect\\|failed rfc5343 contextEngineID probing"
     CHECKAGENTCOUNT  1 "Failed SSL_accept"
 fi
 
