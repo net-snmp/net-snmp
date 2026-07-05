@@ -86,8 +86,8 @@ SOFTWARE.
 void
 xdump(const void * data, size_t length, const char *prefix)
 {
-    const u_char * const cp = (const u_char*)data;
-    int                  col, count;
+    const u_char * const cp = data;
+    unsigned int         col, count;
     char                *buffer;
 #ifndef NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL
     int      debug_log_level = netsnmp_get_debug_log_level();
@@ -95,7 +95,7 @@ xdump(const void * data, size_t length, const char *prefix)
 #define debug_log_level LOG_DEBUG
 #endif /* NETSNMP_DISABLE_DYNAMIC_LOG_LEVEL */
 
-    buffer = (char *) malloc(strlen(prefix) + 80);
+    buffer = malloc(strlen(prefix) + 80);
     if (!buffer) {
         snmp_log(LOG_NOTICE,
                  "xdump: malloc failed. packet-dump skipped\n");
@@ -103,11 +103,11 @@ xdump(const void * data, size_t length, const char *prefix)
     }
 
     count = 0;
-    while (count < (int) length) {
+    while (count < length) {
         strcpy(buffer, prefix);
         sprintf(buffer + strlen(buffer), "%.4d: ", count);
 
-        for (col = 0; ((count + col) < (int) length) && col < 16; col++) {
+        for (col = 0; count + col < length && col < 16; col++) {
             sprintf(buffer + strlen(buffer), "%02X ", cp[count + col]);
             if (col % 4 == 3)
                 strcat(buffer, " ");
@@ -118,7 +118,7 @@ xdump(const void * data, size_t length, const char *prefix)
                 strcat(buffer, " ");
         }
         strcat(buffer, "  ");
-        for (col = 0; ((count + col) < (int) length) && col < 16; col++) {
+        for (col = 0; count + col < length && col < 16; col++) {
             buffer[col + 60] =
                 isprint(cp[count + col]) ? cp[count + col] : '.';
         }
