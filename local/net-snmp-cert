@@ -1123,6 +1123,14 @@ basicConstraints = CA:FALSE
 # Import the email address and/or specified SANs.
 %[subjectAltName = $ENV::SAN]
 
+[ v3_ca_req ]
+
+# Extensions to add to a CA certificate request
+basicConstraints = CA:TRUE
+
+# Import the email address and/or specified SANs.
+%[subjectAltName = $ENV::SAN]
+
 [ v3_user_create ]
 
 # Extensions to add to a certificate request
@@ -1958,7 +1966,8 @@ sub genCa {
 				   $config->inherit('interactive'),
 				   $config->inherit('force'));
 
-  my $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout '$outKey'";
+  my $exts = (defined $ca ? "v3_ca_req" : "v3_ca_create");
+  my $cmd = "$env openssl req -extensions $exts -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout '$outKey'";
   $cmd .= " -nodes";
 
   if (defined $ca) {
@@ -2020,7 +2029,8 @@ sub genCert {
 				   $config->inherit('interactive'),
 				   $config->inherit('force'));
 
-  $cmd = "$env openssl req -extensions v3_user_create -new -days $days -keyout '$outKey' -batch -config $NetSNMP::Cert::SSLCFG";
+  my $exts = (defined $ca ? "v3_req" : "v3_user_create");
+  $cmd = "$env openssl req -extensions $exts -new -days $days -keyout '$outKey' -batch -config $NetSNMP::Cert::SSLCFG";
   $cmd .= " -nodes";
 
   if (defined $ca) {
@@ -2097,7 +2107,7 @@ sub genCsr {
   "$env openssl x509 -x509toreq -in $inCrt -out '$outCsr' -signkey '$csrKey' -nodes -days $days -batch -config $NetSNMP::Cert::SSLCFG" :
   "$env openssl req -new -nodes -days $days -batch -keyout '$csrKey' -out '$outCsr' -config $NetSNMP::Cert::SSLCFG");
 
-  $cmd .= ($isCa ? " -extensions v3_ca_create" : " -extensions v3_user_create");
+  $cmd .= ($isCa ? " -extensions v3_ca_req" : " -extensions v3_req");
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
 
