@@ -703,7 +703,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     char                  *fingerprint;
     netsnmp_container     *chain_map;
     netsnmp_cert_map      *cert_map;
-    int                    i, sk_num_res;
+    int                    i, sk_num_res, rc;
 
     netsnmp_assert_or_return(ssl != NULL, NULL);
 
@@ -741,6 +741,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         netsnmp_cert_map_free(cert_map);
         return NULL;
     }
+    CONTAINER_SET_OPTIONS(chain_map, CONTAINER_KEY_UNSORTED, rc);
     
     CONTAINER_INSERT(chain_map, cert_map);
 
