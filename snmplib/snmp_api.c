@@ -6269,6 +6269,10 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
 
     if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
         snmp_rcv_packet rcvp;
+        u_char *pptr;
+        size_t len_remaining, pdulen;
+        void *ocopy = NULL;
+
         memset(&rcvp, 0x0, sizeof(rcvp));
 
         /** read the packet */
@@ -6278,11 +6282,43 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
         else if (-2 == rc) /* no packet to process */
             return 0;
 
-        rc = _sess_process_packet(slp, sp, isp, transport,
-                                  rcvp.opaque, rcvp.olength,
-                                  rcvp.packet, rcvp.packet_len);
+        pptr = rcvp.packet;
+        len_remaining = rcvp.packet_len;
+        rc = 0;
+
+        while (len_remaining > 0) {
+            if (isp->check_packet) {
+                pdulen = isp->check_packet(pptr, len_remaining);
+            } else {
+                pdulen = asn_check_packet(pptr, len_remaining);
+            }
+            if (pdulen == 0 || pdulen > len_remaining || pdulen > SNMP_MAX_PACKET_LEN) {
+                /* Not a valid packet or incomplete in datagram mode */
+                if (pptr == rcvp.packet) {
+                    SNMP_FREE(rcvp.opaque);
+                }
+                break;
+            }
+            if (pdulen < len_remaining) {
+                if (rcvp.olength > 0 && rcvp.opaque != NULL) {
+                    ocopy = malloc(rcvp.olength);
+                    if (ocopy != NULL) {
+                        memcpy(ocopy, rcvp.opaque, rcvp.olength);
+                    }
+                }
+            } else {
+                ocopy = rcvp.opaque;
+                rcvp.opaque = NULL;
+            }
+            rc = _sess_process_packet(slp, sp, isp, transport,
+                                      ocopy, ocopy ? rcvp.olength : 0,
+                                      pptr, pdulen);
+            ocopy = NULL;
+            pptr += pdulen;
+            len_remaining -= pdulen;
+        }
         SNMP_FREE(rcvp.packet);
-        /** opaque is freed in _sess_process_packet */
+        SNMP_FREE(rcvp.opaque);
         return rc;
     }
 

@@ -111,6 +111,7 @@ typedef struct bio_cache_s {
    char *write_cache;
    size_t write_cache_len;
    _netsnmpTLSBaseData *tlsdata;
+   netsnmp_transport *t;
 } bio_cache;
 
 /** bio_cache flags */
@@ -136,11 +137,14 @@ static int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
 /* XXX: handle state issues for new connections to reduce DOS issues */
 /*      (TLS should do this, but openssl can't do more than one ctx per sock */
 /* XXX: put a timer on the cache for expirary purposes */
-static bio_cache *find_bio_cache(const netsnmp_sockaddr_storage *from_addr)
+static bio_cache *find_bio_cache(netsnmp_transport *t, const netsnmp_sockaddr_storage *from_addr)
 {
     bio_cache *cachep = NULL;
     
     for (cachep = biocache; cachep; cachep = cachep->next) {
+
+        if (t != NULL && cachep->t != NULL && cachep->t != t)
+            continue;
 
         if (cachep->sas.sa.sa_family != from_addr->sa.sa_family)
             continue;
@@ -247,6 +251,7 @@ start_new_cached_connection(netsnmp_transport *t,
         return NULL;
     }
     cachep->tlsdata = tlsdata;
+    cachep->t = t;
 
     /* RFC5953: section 5.3.1, step 1:
        2)  The client selects the appropriate certificate and cipher_suites
@@ -423,7 +428,7 @@ find_or_create_bio_cache(netsnmp_transport *t,
                          const netsnmp_sockaddr_storage *from_addr,
                          int we_are_client)
 {
-    bio_cache *cachep = find_bio_cache(from_addr);
+    bio_cache *cachep = find_bio_cache(t, from_addr);
 
     if (NULL == cachep) {
         /* none found; need to start a new context */
@@ -1310,7 +1315,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         tlsbase = t->data;
 
         if (tlsbase->addr)
-            cachep = find_bio_cache(&tlsbase->addr->remote_addr);
+            cachep = find_bio_cache(t, &tlsbase->addr->remote_addr);
     }
 
     /* RFC5953: section 5.4, step 3:
