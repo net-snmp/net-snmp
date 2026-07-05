@@ -409,17 +409,17 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     netsnmp_tmStateReference *tmStateRef;
     netsnmp_tsmSecurityReference *tsmSecRef;
     u_char          ourEngineID[SNMP_MAX_ENG_SIZE];
-    static size_t   ourEngineID_len = sizeof(ourEngineID);
+    size_t          ourEngineID_len = sizeof(ourEngineID);
     
     /* Section 5.2, step 1: Set the securityEngineID to the local
        snmpEngineID. */
     ourEngineID_len =
         snmpv3_get_engineID((u_char*) ourEngineID, ourEngineID_len);
     netsnmp_assert_or_return(ourEngineID_len != 0 &&
-                             ourEngineID_len <= *parms->secEngineIDLen &&
-                             *parms->secEngineIDLen <= sizeof(ourEngineID),
+                             ourEngineID_len <= *parms->secEngineIDLen,
                              SNMPERR_GENERR);
-    memcpy(parms->secEngineID, ourEngineID, *parms->secEngineIDLen);
+    memcpy(parms->secEngineID, ourEngineID, ourEngineID_len);
+    *parms->secEngineIDLen = ourEngineID_len;
 
     /* Section 5.2, step 2: If tmStateReference does not refer to a
        cache containing values for tmTransportDomain,
