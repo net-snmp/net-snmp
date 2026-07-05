@@ -31,6 +31,9 @@ extern          "C" {
 
     int netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert);
 
+    NETSNMP_IMPORT
+    int netsnmp_openssl_cert_check_host(X509 *ocert, const char *hostname);
+
     char *netsnmp_openssl_extract_secname(struct netsnmp_cert_map_s *cert_map,
                                           struct netsnmp_cert_map_s *peer_cert);
 

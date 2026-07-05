@@ -116,9 +116,18 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
          X509_V_ERR_CERT_UNTRUSTED == err ||
          X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE == err ||
          X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {
-
+        X509 *leaf_cert = X509_STORE_CTX_get0_cert(ctx);
+        char *leaf_fp = netsnmp_openssl_cert_get_fingerprint(leaf_cert ? leaf_cert : thecert, NS_HASH_SHA1);
         cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
-                                 (void*)fingerprint);
+                                 (void*)leaf_fp);
+        SNMP_FREE(leaf_fp);
+        if (cert && ssl && !SSL_is_server(ssl)) {
+            X509_STORE *certstore = X509_STORE_CTX_get0_store(ctx);
+            int store_num = certstore ? sk_X509_OBJECT_num(X509_STORE_get0_objects(certstore)) : 0;
+            if (store_num == 0) {
+                cert = NULL;
+            }
+        }
         if (cert)
             DEBUGMSGTL(("tls_x509:verify", " Found locally: %s/%s\n",
                         cert->info.dir, cert->info.filename));
@@ -281,6 +290,12 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                                    X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS,
                                    NULL)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
+                free(lower_hostname);
+                return SNMPERR_SUCCESS;
+            }
+            if (strchr(lower_hostname, '*') != NULL &&
+                1 == netsnmp_openssl_cert_check_host(remote_cert, lower_hostname)) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a wildcard hostname: %s\n", lower_hostname));
                 free(lower_hostname);
                 return SNMPERR_SUCCESS;
             }

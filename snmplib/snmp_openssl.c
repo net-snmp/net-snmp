@@ -756,9 +756,10 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          * loop over chain, adding fingerprint / cert for each
          */
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
-        sk_num_res = sk_X509_num(ochain);
         for(i = 0; i < sk_num_res; ++i) {
             ocert_tmp = sk_X509_value(ochain, i);
+            if (ocert_tmp == ocert || X509_cmp(ocert_tmp, ocert) == 0)
+                continue;
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
@@ -885,6 +886,58 @@ _cert_get_san_type(X509 *ocert, int mapType)
                oname ? oname->type : -1, buf ? buf : "NULL"));
 
     return buf;
+}
+
+int
+netsnmp_openssl_cert_check_host(X509 *ocert, const char *hostname)
+{
+    GENERAL_NAMES      *onames;
+    const GENERAL_NAME *oname = NULL;
+    char               *buf = NULL;
+    int                 count, i, match = 0;
+    const char         *dot;
+
+    if (!ocert || !hostname)
+        return 0;
+
+    /* We only support wildcard patterns like *.example.com */
+    if (hostname[0] != '*' || hostname[1] != '.')
+        return 0;
+
+    onames = (GENERAL_NAMES *)X509_get_ext_d2i(ocert, NID_subject_alt_name,
+                                               NULL, NULL);
+    if (onames) {
+        count = sk_GENERAL_NAME_num(onames);
+        for (i = 0; i < count; ++i) {
+            oname = sk_GENERAL_NAME_value(onames, i);
+            if (GEN_DNS == oname->type) {
+                buf = _extract_oname(oname);
+                if (buf) {
+                    dot = strchr(buf, '.');
+                    if (dot && strcasecmp(dot, hostname + 1) == 0) {
+                        match = 1;
+                    }
+                    free(buf);
+                    if (match)
+                        break;
+                }
+            }
+        }
+        GENERAL_NAMES_free(onames);
+    }
+
+    if (!match) {
+        buf = netsnmp_openssl_cert_get_commonName(ocert, NULL, NULL);
+        if (buf) {
+            dot = strchr(buf, '.');
+            if (dot && strcasecmp(dot, hostname + 1) == 0) {
+                match = 1;
+            }
+            free(buf);
+        }
+    }
+
+    return match;
 }
 
 char *
