@@ -41,6 +41,8 @@ $opts{'builddir'} = abs_path($opts{'builddir'});
 # Set exeext.
 $opts{'exeext'} = join(readpipe($opts{'builddir'} . '/net-snmp-config --exeext'));
 
+$ENV{'RES_OPTIONS'} = 'timeout:1 attempts:1';
+
 usage() if ($opts{'help'});
 
 # Build the harness object
