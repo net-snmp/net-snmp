@@ -24,7 +24,7 @@ $test->config_agent("rwuser -s tsm perl");
 $test->config_agent("certSecName 100 snmpapp --cn");
 $test->config_agent("certSecName 101 $fp --cn");
 
-$test->DIE("failed to start the agent") if (!$test->start_agent(" -Dtls,ssl,tsm,cert:map"));
+$test->DIE("failed to start the agent") if (!$test->start_agent(" -f -Dtls,ssl,tsm,cert:map"));
 
 # now create a session to test things with
 my $session = new SNMP::Session(DestHost => $test->{'agentaddress'},
@@ -42,4 +42,5 @@ if (ref($session) eq 'SNMP::Session') {
 
 ######################################################################
 # cleanup
+undef $session;
 $test->stop_agent();

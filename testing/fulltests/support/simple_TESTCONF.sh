@@ -258,6 +258,19 @@ fi
 if [ "x$SNMP_TEST_DEST" = "x" -a $SNMP_TRANSPORT_SPEC != "unix" ];then
 	SNMP_TEST_DEST="127.0.0.1:"
 fi
+if [ -f "$builddir/Makefile" ]; then
+    MAKEFILE_CC=$(grep "^CC\s*=" "$builddir/Makefile" | sed 's/^CC\s*=\s*//')
+    MAKEFILE_CFLAGS=$(grep "^CFLAGS\s*=" "$builddir/Makefile" | sed 's/^CFLAGS\s*=\s*//')
+    MAKEFILE_LDFLAGS=$(grep "^LDFLAGS\s*=" "$builddir/Makefile" | sed 's/^LDFLAGS\s*=\s*//')
+    if echo "$MAKEFILE_CFLAGS $MAKEFILE_LDFLAGS" | grep -q -- "-fsanitize=address"; then
+        compiler="${MAKEFILE_CC:-gcc}"
+        asan_lib=$($compiler -print-file-name=libasan.so 2>/dev/null)
+        if [ -f "$asan_lib" ]; then
+            SNMP_PERLPROG="env LD_PRELOAD=$asan_lib LSAN_OPTIONS=exitcode=0 $SNMP_PERLPROG"
+        fi
+    fi
+fi
+
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
 # Make sure the agent doesn't parse any config file but what we give it.  

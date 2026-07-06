@@ -2,6 +2,13 @@ package NetSNMP::agent;
 
 use strict;
 use warnings;
+
+BEGIN {
+    if ($ENV{'LD_PRELOAD'} && $ENV{'LD_PRELOAD'} =~ /libasan/) {
+        delete $ENV{'LD_PRELOAD'};
+    }
+}
+
 use Carp;
 
 require Exporter;

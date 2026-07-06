@@ -185,6 +185,28 @@ exit($results->all_passed() ? 0 : 1);
 sub decide_exec {
     my ( $harness, $testfile ) = @_;
 
+    if ($testfile =~ /\.t$/) {
+        my $cflags = `$opts{'builddir'}/net-snmp-config --cflags 2>/dev/null`;
+        if ($cflags && $cflags =~ /-fsanitize=address/) {
+            my $cc = "gcc";
+            if (open(M, "<$opts{'builddir'}/Makefile")) {
+                while (<M>) {
+                    if (/^CC\s*=\s*(.+)$/) {
+                        $cc = $1;
+                        $cc =~ s/\s+$//;
+                        last;
+                    }
+                }
+                close(M);
+            }
+            my $asan_lib = `$cc -print-file-name=libasan.so 2>/dev/null`;
+            chomp($asan_lib);
+            if (-f $asan_lib) {
+                return [ "env", "LD_PRELOAD=$asan_lib", "LSAN_OPTIONS=exitcode=0", $^X, $testfile ];
+            }
+        }
+    }
+
     # 1) Parse the $testfile argument.
     my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
       ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^\/_]+)\.*([^\/\.]*)$/);
