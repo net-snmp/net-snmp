@@ -306,10 +306,8 @@ RETSIGTYPE
 SnmpdShutDown(int a)
 {
     netsnmp_running = 0;
-    snmp_close(main_session);
 }
 
-#ifdef SIGHUP
 /*
  * snmpd and snmptrapd expect that select() is interrupted upon SIGHUP.
  * Installing a signal handler with signal() does not guarantee this.
@@ -329,6 +327,7 @@ static void netsnmp_signal(int signum, RETSIGTYPE (*handler)(int))
 #endif
 }
 
+#ifdef SIGHUP
 RETSIGTYPE
 SnmpdReconfig(int a)
 {
@@ -784,11 +783,11 @@ main(int argc, char *argv[])
      */
 #ifdef SIGTERM
     DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
-    signal(SIGTERM, SnmpdShutDown);
+    netsnmp_signal(SIGTERM, SnmpdShutDown);
 #endif
 #ifdef SIGINT
     DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
-    signal(SIGINT, SnmpdShutDown);
+    netsnmp_signal(SIGINT, SnmpdShutDown);
 #endif
 #ifdef SIGHUP
     netsnmp_signal(SIGHUP, SIG_IGN);   /* do not terminate on early SIGHUP */
