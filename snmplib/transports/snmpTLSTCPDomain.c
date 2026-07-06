@@ -290,6 +290,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
               (EAGAIN != EWOULDBLOCK && errno == EWOULDBLOCK) ||
               errno == 0))) {
             t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
+            SNMP_FREE(tmStateRef);
             return 0;
         }
         if (rc == 0 || err == SSL_ERROR_ZERO_RETURN) {
@@ -669,8 +670,12 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     /* XXX: check that it returns something so we can free stuff? */
     {
         int accepted_fd = BIO_get_fd(tlsdata->accepted_bio, NULL);
-        if (accepted_fd >= 0)
-            netsnmp_set_non_blocking_mode(accepted_fd, TRUE);
+        if (accepted_fd >= 0) {
+            if (netsnmp_set_non_blocking_mode(accepted_fd, TRUE) < 0) {
+                DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on accepted fd %d\n",
+                            accepted_fd));
+            }
+        }
         return accepted_fd;
     }
 }
@@ -893,8 +898,12 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     */
 
     t->sock = BIO_get_fd(bio, NULL);
-    if (t->sock >= 0)
-        netsnmp_set_non_blocking_mode(t->sock, TRUE);
+    if (t->sock >= 0) {
+        if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
+            DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on client fd %d\n",
+                        t->sock));
+        }
+    }
 
     return t;
 }
@@ -932,8 +941,12 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     tlsdata->ssl_context = sslctx_server_setup(TLS_method());
 
     t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
-    if (t->sock >= 0)
-        netsnmp_set_non_blocking_mode(t->sock, TRUE);
+    if (t->sock >= 0) {
+        if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
+            DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on server fd %d\n",
+                        t->sock));
+        }
+    }
     t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
     return NULL;
