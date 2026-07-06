@@ -240,11 +240,13 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
-    X509            *remote_cert;
+    X509            *remote_cert = NULL;
     char            *their_hostname;
     size_t           their_hostname_len;
     int              ret;
     size_t           i;
+    int              rv = SNMPERR_GENERR;
+
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
 
@@ -260,10 +262,12 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     ret = _netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata, 1);
     switch(ret) {
     case VERIFIED_FINGERPRINT:
-        return SNMPERR_SUCCESS;
+        rv = SNMPERR_SUCCESS;
+        goto out;
 
     case FAILED_FINGERPRINT_VERIFY:
-        return SNMPERR_GENERR;
+        rv = SNMPERR_GENERR;
+        goto out;
 
     case NO_FINGERPRINT_AVAILABLE:
         if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
@@ -291,30 +295,39 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                                    NULL)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
                 free(lower_hostname);
-                return SNMPERR_SUCCESS;
+                rv = SNMPERR_SUCCESS;
+                goto out;
             }
             if (strchr(lower_hostname, '*') != NULL &&
                 1 == netsnmp_openssl_cert_check_host(remote_cert, lower_hostname)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a wildcard hostname: %s\n", lower_hostname));
                 free(lower_hostname);
-                return SNMPERR_SUCCESS;
+                rv = SNMPERR_SUCCESS;
+                goto out;
             }
             free(lower_hostname);
             if (1 == X509_check_ip_asc(remote_cert,
                                       their_hostname,
                                       0)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of IP: %s\n", their_hostname));
-                return SNMPERR_SUCCESS;
+                rv = SNMPERR_SUCCESS;
+                goto out;
             }
             snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", their_hostname);
-            return SNMPERR_GENERR;
+            rv = SNMPERR_GENERR;
+            goto out;
         }
         /* XXX: check for hostname match instead */
         snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");
-        return SNMPERR_GENERR;
+        rv = SNMPERR_GENERR;
+        goto out;
     }
     DEBUGMSGTL(("tls_x509:verify", "shouldn't get here\n"));
-    return SNMPERR_GENERR;
+    rv = SNMPERR_GENERR;
+
+out:
+    X509_free(remote_cert);
+    return rv;
 }
 
 /* this is called after the connection on the server side by us to check
@@ -322,8 +335,9 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 int
 netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
-    X509            *remote_cert;
+    X509            *remote_cert = NULL;
     int ret;
+    int rv = SNMPERR_GENERR;
 
     /* RFC5953: section 5.3.2, paragraph 1:
        A (D)TLS server should accept new session connections from any client
@@ -333,13 +347,13 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
        certificate fingerprint verification using fingerprints configured in
        the snmpTlstmCertToTSNTable.  Afterward the server will determine the
        identity of the remote entity using the following procedures.
-    */
+     */
     /* Implementation notes:
        + path validation is taken care of during the openssl verify
          routines, our part of which is handled in verify_callback
          above.
        + fingerprint verification happens below.
-    */
+     */
     remote_cert = SSL_get_peer_certificate(ssl);
     if (!remote_cert) {
         /* no peer cert */
@@ -355,20 +369,27 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     switch(ret) {
     case FAILED_FINGERPRINT_VERIFY:
         DEBUGMSGTL(("tls_x509:verify", "failed to verify a client fingerprint\n"));
-        return SNMPERR_GENERR;
+        rv = SNMPERR_GENERR;
+        goto out;
 
     case NO_FINGERPRINT_AVAILABLE:
         DEBUGMSGTL(("tls_x509:verify", "no known fingerprint available (not a failure case)\n"));
-        return SNMPERR_SUCCESS;
+        rv = SNMPERR_SUCCESS;
+        goto out;
 
     case VERIFIED_FINGERPRINT:
         DEBUGMSGTL(("tls_x509:verify", "Verified client fingerprint\n"));
         tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
-        return SNMPERR_SUCCESS;
+        rv = SNMPERR_SUCCESS;
+        goto out;
     }
 
     DEBUGMSGTL(("tls_x509:verify", "shouldn't get here\n"));
-    return SNMPERR_GENERR;
+    rv = SNMPERR_GENERR;
+
+out:
+    X509_free(remote_cert);
+    return rv;
 }
 
 /* this is called after the connection on the server side by us to
@@ -591,6 +612,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         else
             snmp_log(LOG_INFO,"set SSL cipher list to '%s'\n", cipherList);
     }
+    SSL_CTX_set_session_cache_mode(the_ctx, SSL_SESS_CACHE_OFF);
     return the_ctx;
 }
 
@@ -863,6 +885,12 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
 
 static int have_done_bootstrap = 0;
 
+static void verify_info_free(void *parent, void *ptr, CRYPTO_EX_DATA *ad,
+                             int idx, long argl, void *argp)
+{
+    free(ptr);
+}
+
 static int
 tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     char indexname[] = "_netsnmp_verify_info";
@@ -875,7 +903,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     netsnmp_certs_load();
 
     openssl_local_index =
-        SSL_get_ex_new_index(0, indexname, NULL, NULL, NULL);
+        SSL_get_ex_new_index(0, indexname, NULL, NULL, verify_info_free);
 
     return 0;
 }
@@ -1027,6 +1055,7 @@ void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
     SNMP_FREE(tlsbase->their_fingerprint);
     SNMP_FREE(tlsbase->their_hostname);
     SNMP_FREE(tlsbase->trust_cert);
+    SNMP_FREE(tlsbase->addr);
 
     /* free the base itself */
     SNMP_FREE(tlsbase);
