@@ -107,10 +107,8 @@ tsm_free_state_ref(void *ptr)
     if (!tsmRef)
         return;
 
-    /* the tmStateRef is always taken care of by the normal PDU, since this
-       is just a reference to that one */
-    /* DON'T DO: SNMP_FREE(tsmRef->tmStateRef); */
-    /* SNMP_FREE(tsmRef);  ? */
+    SNMP_FREE(tsmRef->tmStateRef);
+    SNMP_FREE(tsmRef);
 }
 
 static int
@@ -225,7 +223,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
         /* 4.2 step 1: The cachedSecurityData for this message can
            now be discarded. */
-        SNMP_FREE(parms->secStateRef);
+        SNMP_FREE(parms->pdu->securityStateRef);
     } else {
         /* 4.2, step 2: If there is no securityStateReference (e.g., a
            Request-type or Notification message), then create a
