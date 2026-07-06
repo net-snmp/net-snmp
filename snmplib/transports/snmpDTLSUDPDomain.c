@@ -123,6 +123,12 @@ static bio_cache *biocache = NULL;
 
 static int openssl_addr_index = 0;
 
+static char *netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
+                        const char *pfx,
+                        char *(*fmt_base_addr)(const char *pfx,
+                                               netsnmp_transport *t,
+                                               const void *data, int len));
+
 #ifdef HAVE_SSL_CTX_SET_COOKIE_GENERATE_CB
 static int netsnmp_dtls_verify_cookie(SSL *ssl,
                                       SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER
@@ -140,20 +146,41 @@ static int netsnmp_dtls_gen_cookie(SSL *ssl, unsigned char *cookie,
 static bio_cache *find_bio_cache(netsnmp_transport *t, const netsnmp_sockaddr_storage *from_addr)
 {
     bio_cache *cachep = NULL;
+    char *addr_str = NULL;
+    
+    if (from_addr) {
+        addr_str = netsnmp_dtlsudp_fmtaddr(NULL, from_addr, sizeof(*from_addr), NULL, NULL);
+        DEBUGMSGTL(("dtlsudp:cache", "find_bio_cache: searching for %s, t=%p\n", addr_str ? addr_str : "unknown", t));
+        free(addr_str);
+    }
     
     for (cachep = biocache; cachep; cachep = cachep->next) {
+        if (cachep->sas.sa.sa_family == AF_INET || cachep->sas.sa.sa_family == AF_INET6) {
+            addr_str = netsnmp_dtlsudp_fmtaddr(NULL, &cachep->sas, sizeof(cachep->sas), NULL, NULL);
+            DEBUGMSGTL(("dtlsudp:cache", "  checking cachep=%p, t=%p, addr=%s\n", cachep, cachep->t, addr_str ? addr_str : "unknown"));
+            free(addr_str);
+        }
 
-        if (t != NULL && cachep->t != NULL && cachep->t != t)
+        if (t != NULL && cachep->t != NULL && cachep->t != t) {
+            DEBUGMSGTL(("dtlsudp:cache", "    transport mismatch: %p != %p\n", cachep->t, t));
             continue;
+        }
 
-        if (cachep->sas.sa.sa_family != from_addr->sa.sa_family)
+        if (cachep->sas.sa.sa_family != from_addr->sa.sa_family) {
+            DEBUGMSGTL(("dtlsudp:cache", "    family mismatch: %d != %d\n", cachep->sas.sa.sa_family, from_addr->sa.sa_family));
             continue;
+        }
 
-        if ((from_addr->sa.sa_family == AF_INET) &&
-            ((cachep->sas.sin.sin_addr.s_addr !=
-              from_addr->sin.sin_addr.s_addr) ||
-             (cachep->sas.sin.sin_port != from_addr->sin.sin_port)))
+        if (from_addr->sa.sa_family == AF_INET) {
+            if (cachep->sas.sin.sin_addr.s_addr != from_addr->sin.sin_addr.s_addr) {
+                DEBUGMSGTL(("dtlsudp:cache", "    IP mismatch\n"));
                 continue;
+            }
+            if (cachep->sas.sin.sin_port != from_addr->sin.sin_port) {
+                DEBUGMSGTL(("dtlsudp:cache", "    port mismatch: %d != %d\n", ntohs(cachep->sas.sin.sin_port), ntohs(from_addr->sin.sin_port)));
+                continue;
+            }
+        }
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
         else if ((from_addr->sa.sa_family == AF_INET6) &&
                  ((cachep->sas.sin6.sin6_port != from_addr->sin6.sin6_port) ||
@@ -165,6 +192,7 @@ static bio_cache *find_bio_cache(netsnmp_transport *t, const netsnmp_sockaddr_st
             continue;
 #endif
         /* found an existing connection */
+        DEBUGMSGTL(("dtlsudp:cache", "    FOUND MATCH!\n"));
         break;
     }
     return cachep;
@@ -204,14 +232,15 @@ static void free_bio_cache(bio_cache *cachep)
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
 */
-    DEBUGMSGTL(("9:dtlsudp:bio_cache", "releasing %p\n", cachep));
+    DEBUGMSGTL(("dtlsudp:bio_cache", "releasing bio_cache %p\n", cachep));
     SNMP_FREE(cachep->write_cache);
     netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
+    SNMP_FREE(cachep);
 }
 
 static void remove_and_free_bio_cache(bio_cache *cachep)
 {
-    /** no debug, remove_bio_cache does it */
+    DEBUGMSGTL(("9:dtlsudp:bio_cache", "remove_and_free_bio_cache %p\n", cachep));
     remove_bio_cache(cachep);
     free_bio_cache(cachep);
 }
@@ -227,6 +256,7 @@ start_new_cached_connection(netsnmp_transport *t,
 {
     bio_cache *cachep = NULL;
     _netsnmpTLSBaseData *tlsdata;
+    SSL_CTX *ctx = NULL;
 
     DEBUGTRACETOK("9:dtlsudp");
 
@@ -331,12 +361,21 @@ start_new_cached_connection(netsnmp_transport *t,
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     t->sock));
-        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLS_method(), tlsdata));
+        ctx = sslctx_client_setup(DTLS_method(), tlsdata);
+        if (!ctx) {
+            BIO_free(cachep->read_bio);
+            BIO_free(cachep->write_bio);
+            cachep->read_bio = NULL;
+            cachep->write_bio = NULL;
+            DIEHERE("failed to create the SSL Context");
+        }
+        tlsdata->ssl_context = ctx;
+        tlsdata->ssl = SSL_new(ctx);
 
         /* XXX: session setting 735 */
     } else {
         /* we're the server */
-        SSL_CTX *ctx = sslctx_server_setup(DTLS_method());
+        ctx = sslctx_server_setup(DTLS_method());
         if (!ctx) {
             BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
@@ -352,6 +391,7 @@ start_new_cached_connection(netsnmp_transport *t,
         SSL_CTX_set_cookie_verify_cb(ctx, netsnmp_dtls_verify_cookie);
 #endif
 
+        tlsdata->ssl_context = ctx;
         tlsdata->ssl = SSL_new(ctx);
     }
 
@@ -1314,8 +1354,12 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
         tlsbase = t->data;
 
-        if (tlsbase->addr)
+        if (tlsbase->addr) {
+            char *addr_str = netsnmp_dtlsudp_fmtaddr(NULL, &tlsbase->addr->remote_addr, sizeof(tlsbase->addr->remote_addr), NULL, NULL);
+            DEBUGMSGTL(("dtlsudp:close", "netsnmp_dtlsudp_close: searching cache for %s\n", addr_str ? addr_str : "unknown"));
+            free(addr_str);
             cachep = find_bio_cache(t, &tlsbase->addr->remote_addr);
+        }
     }
 
     /* RFC5953: section 5.4, step 3:
@@ -1400,7 +1444,10 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     }
 
     remove_and_free_bio_cache(cachep);
-
+    if (tlsbase) {
+        netsnmp_tlsbase_free_tlsdata(tlsbase);
+        t->data = NULL;
+    }
     return netsnmp_socketbase_close(t);
 }
 
