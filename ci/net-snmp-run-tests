@@ -27,7 +27,7 @@ make -s &&
 		  done
 		  ;;
               *)
-		  ./RUNFULLTESTS -g all -e dtls -e tls
+		  ./RUNFULLTESTS -g all
 		  ;;
           esac
       else
