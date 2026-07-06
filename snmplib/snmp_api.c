@@ -1145,6 +1145,10 @@ _sess_copy(netsnmp_session * in_session)
     session->securityPrivProto = NULL;
     session->securityPrivLocalKey = NULL;
     session->sessUser = NULL;
+    session->paramName = NULL;
+#ifndef NETSNMP_NO_TRAP_STATS
+    session->trap_stats = NULL;
+#endif
     /*
      * session now points to the new structure that still contains pointers to
      * data allocated elsewhere.  Some of this data is copied to space malloc'd
@@ -1352,6 +1356,24 @@ _sess_copy(netsnmp_session * in_session)
         session->sessUser = usm_cloneFrom_user(in_session->sessUser, user);
     }
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+    if (in_session->paramName) {
+        session->paramName = strdup(in_session->paramName);
+        if (session->paramName == NULL) {
+            snmp_sess_close(slp);
+            return NULL;
+        }
+    }
+#ifndef NETSNMP_NO_TRAP_STATS
+    if (in_session->trap_stats) {
+        session->trap_stats = netsnmp_memdup(in_session->trap_stats,
+                                             sizeof(*in_session->trap_stats));
+        if (session->trap_stats == NULL) {
+            snmp_sess_close(slp);
+            return NULL;
+        }
+    }
+#endif
 
     return (slp);
 }

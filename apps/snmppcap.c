@@ -301,6 +301,7 @@ int main(int argc, char **argv)
 
     pcap_close(p);
 
+    netsnmp_cleanup_session(ss);
     SNMP_FREE(ss);
 
     return 0;

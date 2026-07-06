@@ -384,6 +384,7 @@ close_session:
 
 out:
     free(posix_env);
+    netsnmp_cleanup_session(&session);
     SOCK_CLEANUP;
     return exitval;
 }
