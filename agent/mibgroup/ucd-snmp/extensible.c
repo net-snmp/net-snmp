@@ -424,7 +424,6 @@ var_extensible_shell(struct variable * vp,
 
     static struct extensible *exten = NULL;
     static long     long_ret;
-    int len;
 
     if (header_simple_table
         (vp, name, length, exact, var_len, write_method, numextens))

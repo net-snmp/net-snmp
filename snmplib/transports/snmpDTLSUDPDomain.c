@@ -1605,7 +1605,8 @@ netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
     struct netsnmp_ep ep;
     netsnmp_transport *t;
     _netsnmpTLSBaseData *tlsdata;
-    char buf[SPRINT_MAX_LEN], *cp;
+    char buf[SPRINT_MAX_LEN];
+    const char *cp;
 
     if (netsnmp_sockaddr_in3(&ep, str, default_target))
         t = netsnmp_dtlsudp_transport(&ep, isserver);

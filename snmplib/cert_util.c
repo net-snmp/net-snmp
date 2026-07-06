@@ -689,7 +689,7 @@ _cert_ext_type(const char *ext)
 static int
 _type_from_filename(const char *filename)
 {
-    char     *pos;
+    const char *pos;
     int       type;
 
     if (NULL == filename)

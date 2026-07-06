@@ -285,7 +285,10 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             MAKE_MEM_DEFINED(buf, rc);
         err = SSL_get_error(tlsdata->ssl, rc);
         if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE ||
-            (err == SSL_ERROR_SYSCALL && (errno == EAGAIN || errno == EWOULDBLOCK || errno == 0))) {
+            (err == SSL_ERROR_SYSCALL &&
+             (errno == EAGAIN ||
+              (EAGAIN != EWOULDBLOCK && errno == EWOULDBLOCK) ||
+              errno == 0))) {
             t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
             return 0;
         }
@@ -968,7 +971,7 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
 {
     netsnmp_transport *t = NULL;
     _netsnmpTLSBaseData *tlsdata;
-    char *cp;
+    const char *cp;
     char buf[SPRINT_MAX_LEN];
     
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
