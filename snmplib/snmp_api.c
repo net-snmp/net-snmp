@@ -1466,6 +1466,8 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
 
     if ((response == NULL) || (status != STAT_SUCCESS)) {
         snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing\n");
+        if (response)
+            snmp_free_pdu(response);
         return SNMP_ERR_GENERR;
     }
 
@@ -1509,6 +1511,8 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
             DEBUGMSG(("snmp_sess_open", "\n"));
         }
     }
+    if (response)
+        snmp_free_pdu(response);
     return SNMPERR_SUCCESS;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMPV3_PROBE_CONTEXTENGINEID_RFC5343 */
@@ -1771,6 +1775,7 @@ _sess_open(netsnmp_session * in_session)
        final call to actually open the transport */
     if ((rc = netsnmp_sess_config_and_open_transport(in_session, transport))
         != SNMPERR_SUCCESS) {
+        netsnmp_transport_free(transport);
         transport = NULL;
         return NULL;
     }
