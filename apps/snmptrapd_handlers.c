@@ -1040,6 +1040,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
                                NETSNMP_DS_LIB_ADD_FORWARDER_INFO) &&
         !add_forwarder_info(pdu, pdu2)) {
         snmp_close(ss);
+        snmp_free_pdu(pdu2);
         return NETSNMPTRAPD_HANDLER_FAIL;
     }
 
@@ -1050,9 +1051,10 @@ int   forward_handler( netsnmp_pdu           *pdu,
     }
 
     ss->s_snmp_errno = SNMPERR_SUCCESS;
-    if (!snmp_send( ss, pdu2 ) &&
-            ss->s_snmp_errno != SNMPERR_SUCCESS) {
-        snmp_sess_perror("Forward failed", ss);
+    if (!snmp_send( ss, pdu2 )) {
+        if (ss->s_snmp_errno != SNMPERR_SUCCESS) {
+            snmp_sess_perror("Forward failed", ss);
+        }
         snmp_free_pdu(pdu2);
     }
     snmp_close( ss );
