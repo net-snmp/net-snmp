@@ -10,6 +10,7 @@ typedef int (Netsnmp_Trap_Handler)(netsnmp_pdu           *pdu,
 
 #define NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE     0x1
 #define NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE 0x2
+#define NETSNMP_TRAPHANDLER_FLAG_BUILTIN        0x4
 
 struct netsnmp_trapd_handler_s {
      oid  *trapoid;
@@ -60,6 +61,7 @@ netsnmp_trapd_handler *netsnmp_add_default_traphandler(Netsnmp_Trap_Handler* han
 netsnmp_trapd_handler *netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
                         oid *trapOid, int trapOidLen);
 netsnmp_trapd_handler *netsnmp_get_traphandler(oid *trapOid, int trapOidLen);
+void snmptrapd_free_all_traphandlers(void);
 
 const char *trap_description(int trap);
 int snmp_input(int op, netsnmp_session *session,

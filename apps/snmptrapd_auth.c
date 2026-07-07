@@ -44,6 +44,8 @@ init_netsnmp_trapd_auth(void)
     netsnmp_trapd_handler *traph;
     traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_AUTH_HANDLER,
                                            netsnmp_trapd_auth);
+    if (traph)
+        traph->flags |= NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
     traph->authtypes = TRAP_AUTH_NONE;
 
 #ifdef USING_MIBII_VACM_CONF_MODULE

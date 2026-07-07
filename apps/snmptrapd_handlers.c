@@ -517,6 +517,32 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
     return traph;
 }
 
+static void
+free_non_builtin_handlers(netsnmp_trapd_handler **list_head)
+{
+    netsnmp_trapd_handler *traph = *list_head;
+    netsnmp_trapd_handler *prev = NULL;
+    netsnmp_trapd_handler *next;
+
+    while (traph) {
+        next = traph->nexth;
+        if (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_BUILTIN)) {
+            /* Unlink */
+            if (prev)
+                prev->nexth = next;
+            else
+                *list_head = next;
+
+            /* Free */
+            SNMP_FREE(traph->token);
+            SNMP_FREE(traph);
+        } else {
+            prev = traph;
+        }
+        traph = next;
+    }
+}
+
 void
 snmptrapd_free_traphandle(void)
 {
@@ -524,19 +550,10 @@ snmptrapd_free_traphandle(void)
 
     DEBUGMSGTL(("snmptrapd", "Freeing trap handler lists\n"));
 
-    /*
-     * Free default trap handlers
-     */
-    traph = netsnmp_default_traphandlers;
-   /* loop over handlers */
-    while (traph) {
-       DEBUGMSG(("snmptrapd", "Freeing default trap handler\n"));
-	nexth = traph->nexth;
-	SNMP_FREE(traph->token);
-	SNMP_FREE(traph);
-	traph = nexth;
-    }
-    netsnmp_default_traphandlers = NULL;
+    free_non_builtin_handlers(&netsnmp_auth_global_traphandlers);
+    free_non_builtin_handlers(&netsnmp_pre_global_traphandlers);
+    free_non_builtin_handlers(&netsnmp_post_global_traphandlers);
+    free_non_builtin_handlers(&netsnmp_default_traphandlers);
 
     /* 
      * Free specific trap handlers
@@ -557,6 +574,23 @@ snmptrapd_free_traphandle(void)
 	traph = nextt;
     }
     netsnmp_specific_traphandlers = NULL;
+}
+
+void
+snmptrapd_free_all_traphandlers(void)
+{
+    netsnmp_trapd_handler *traph;
+
+    for (traph = netsnmp_auth_global_traphandlers; traph; traph = traph->nexth)
+        traph->flags &= ~NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
+    for (traph = netsnmp_pre_global_traphandlers; traph; traph = traph->nexth)
+        traph->flags &= ~NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
+    for (traph = netsnmp_post_global_traphandlers; traph; traph = traph->nexth)
+        traph->flags &= ~NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
+    for (traph = netsnmp_default_traphandlers; traph; traph = traph->nexth)
+        traph->flags &= ~NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
+
+    snmptrapd_free_traphandle();
 }
 
 /*
