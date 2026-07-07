@@ -33,6 +33,25 @@ typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
 
+static void *
+perl_handler_cb_data_clone(void *myvoid)
+{
+    handler_cb_data *cb_data = (handler_cb_data *) myvoid;
+    handler_cb_data *new_cb_data = (handler_cb_data *) malloc(sizeof(handler_cb_data));
+    if (new_cb_data) {
+        new_cb_data->perl_cb = newSVsv(cb_data->perl_cb);
+    }
+    return new_cb_data;
+}
+
+static void
+perl_handler_cb_data_free(void *myvoid)
+{
+    handler_cb_data *cb_data = (handler_cb_data *) myvoid;
+    SvREFCNT_dec(cb_data->perl_cb);
+    free(cb_data);
+}
+
 typedef struct netsnmp_oid_s {
     oid                 *name;
     size_t               len;
@@ -332,6 +351,8 @@ nsahr_new(name, regoid, perlcallback)
                                                  HANDLER_CAN_RWRITE);
             cb_data->perl_cb = newSVsv(perlcallback);
             RETVAL->handler->myvoid = cb_data;
+            RETVAL->handler->data_clone = perl_handler_cb_data_clone;
+            RETVAL->handler->data_free = perl_handler_cb_data_free;
         }
     OUTPUT:
         RETVAL
@@ -339,14 +360,7 @@ nsahr_new(name, regoid, perlcallback)
 void
 nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration *reginfo
-    PREINIT:
-        handler_cb_data *cb_data;
     CODE:
-        if (reginfo && reginfo->handler && reginfo->handler->myvoid) {
-	    cb_data = (handler_cb_data *) (reginfo->handler->myvoid);
-	    SvREFCNT_dec(cb_data->perl_cb);
-	    free(cb_data);
-        }
 	netsnmp_handler_registration_free(reginfo);
 
 int
@@ -370,11 +384,6 @@ nsahr_register(me)
                      * don't touch it in nsahr_DESTROY!
                      */
                     sv_setiv(SvRV(me), 0);
-                    if (cb_data) {
-                        /* And just free the callback. */
-                        SvREFCNT_dec(cb_data->perl_cb);
-                        free(cb_data);
-                    }
                 }
             }
     OUTPUT:
