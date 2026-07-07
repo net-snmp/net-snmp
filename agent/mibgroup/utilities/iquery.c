@@ -114,6 +114,7 @@ _tweak_default_iquery_session( int majorID, int minorID,
 
     if ( s && s->securityEngineIDLen == 0 ) {
         elen = snmpv3_get_engineID(eID, sizeof(eID));
+        free(s->securityEngineID);
         s->securityEngineID = netsnmp_memdup(eID, elen);
         s->securityEngineIDLen = elen;
     }
