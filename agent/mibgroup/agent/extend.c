@@ -449,10 +449,16 @@ _free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
     }
 
     SNMP_FREE( extension->token );
-    SNMP_FREE( extension->cache );
+    if (extension->cache) {
+        netsnmp_cache_remove(extension->cache);
+        netsnmp_cache_free(extension->cache);
+    }
     SNMP_FREE( extension->command );
     SNMP_FREE( extension->args  );
     SNMP_FREE( extension->input );
+    SNMP_FREE( extension->old_command );
+    SNMP_FREE( extension->old_args  );
+    SNMP_FREE( extension->old_input );
     SNMP_FREE( extension );
     return;
 }
