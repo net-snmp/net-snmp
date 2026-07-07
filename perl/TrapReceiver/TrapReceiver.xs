@@ -22,6 +22,18 @@ typedef struct trapd_cb_data_s {
    SV *perl_cb;
 } trapd_cb_data;
 
+static void free_trap_cb_data(void *ptr)
+{
+    trapd_cb_data *cb_data = (trapd_cb_data *)ptr;
+    dTHX;
+    if (cb_data) {
+        if (cb_data->perl_cb) {
+            SvREFCNT_dec(cb_data->perl_cb);
+        }
+        free(cb_data);
+    }
+}
+
 typedef struct netsnmp_oid_s {
     oid                 *name;
     size_t               len;
@@ -361,6 +373,7 @@ trapd_register(regoid, perlcallback)
                 cb_data = malloc(sizeof(trapd_cb_data));
                 cb_data->perl_cb = newSVsv(perlcallback);
                 handler->handler_data = cb_data;
+                handler->free_handler_data = free_trap_cb_data;
                 handler->authtypes = (1 << VACM_VIEW_EXECUTE);
                 RETVAL = 1;
             } else {

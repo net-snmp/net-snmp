@@ -1363,12 +1363,12 @@ main(int argc, char *argv[])
     }
     snmp_log(LOG_INFO, "Stopping snmptrapd\n");
     
-#ifdef NETSNMP_EMBEDDED_PERL
-    shutdown_perl();
-#endif
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
     snmptrapd_free_all_traphandlers();
+#ifdef NETSNMP_EMBEDDED_PERL
+    shutdown_perl();
+#endif
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_STOPPED;
 #endif

@@ -534,6 +534,8 @@ free_non_builtin_handlers(netsnmp_trapd_handler **list_head)
                 *list_head = next;
 
             /* Free */
+            if (traph->free_handler_data)
+                traph->free_handler_data(traph->handler_data);
             SNMP_FREE(traph->token);
             SNMP_FREE(traph);
         } else {
@@ -566,6 +568,8 @@ snmptrapd_free_traphandle(void)
 	while (traph) {
 	    DEBUGMSG(("snmptrapd", "Freeing specific trap handler\n"));
 	    nexth = traph->nexth;
+            if (traph->free_handler_data)
+                traph->free_handler_data(traph->handler_data);
 	    SNMP_FREE(traph->token);
 	    SNMP_FREE(traph->trapoid);
 	    SNMP_FREE(traph);

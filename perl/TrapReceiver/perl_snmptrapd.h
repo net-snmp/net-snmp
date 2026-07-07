@@ -19,6 +19,7 @@ struct netsnmp_trapd_handler_s {
      int   flags;
      Netsnmp_Trap_Handler *handler;
      void *handler_data;
+     void (*free_handler_data)(void *);
 
      netsnmp_trapd_handler *nexth;	/* Next handler for this trap */
              /* Doubly-linked list of traps with registered handlers */
