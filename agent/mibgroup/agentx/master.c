@@ -483,6 +483,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     netsnmp_pdu    *pdu;
     void           *cb_data;
     void           *cb_data_box;
+    snmp_callback  callback;
     int            result;
 
     DEBUGMSGTL(("agentx/master",
@@ -634,23 +635,25 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     /*
      * When the master sends a CleanupSet PDU, it will never get a response
      * back from the subagent. So we shouldn't allocate the
-     * netsnmp_delegated_cache structure in this case.
+     * netsnmp_delegated_cache structure in this case, nor register a callback.
      */
-    if (pdu->command != AGENTX_MSG_CLEANUPSET)
+    if (pdu->command != AGENTX_MSG_CLEANUPSET) {
         cb_data = netsnmp_create_delegated_cache(handler, reginfo,
                                                  reqinfo, requests,
                                                  (void *) ax_session);
-    else
-        cb_data = NULL;
-
-    cb_data_box  = netsnmp_create_delegated_box(cb_data);
+        cb_data_box = netsnmp_create_delegated_box(cb_data);
+        callback = agentx_got_response;
+    } else {
+        cb_data_box = NULL;
+        callback = NULL;
+    }
 
     /*
      * send the requests out.
      */
     DEBUGMSGTL(("agentx/master", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 (unsigned)pdu->reqid, (unsigned)pdu->transid, (unsigned)pdu->sessid));
-    result = snmp_async_send_cp(ax_session, pdu, agentx_got_response, cb_data_box, 1);
+    result = snmp_async_send_cp(ax_session, pdu, callback, cb_data_box, 1);
     if (result == 0) {
         snmp_free_pdu(pdu);
     }

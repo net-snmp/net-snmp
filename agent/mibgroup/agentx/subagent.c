@@ -767,6 +767,7 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
 	main_session = NULL;
 	return 0;
     }
+    agentx_unregister_callbacks(thesession);
     agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
     if (main_session != NULL) {
         remove_trap_session(main_session);
