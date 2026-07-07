@@ -68,8 +68,22 @@ init_expExpressionTable(void)
 void
 shutdown_expExpressionTable(void)
 {
+    netsnmp_tdata_row *row;
+
+    if (expr_table_data) {
+        while ((row = netsnmp_tdata_row_first(expr_table_data))) {
+            expExpression_removeEntry(row);
+        }
+    }
+
     netsnmp_tdata_unregister(expr_table_reg);
     netsnmp_table_registration_info_free(expr_table_info);
+
+    if (expr_table_data) {
+        expr_table_data->container = NULL;
+        netsnmp_tdata_delete_table(expr_table_data);
+        expr_table_data = NULL;
+    }
 }
 
 /** handles requests for the expExpressionTable table */

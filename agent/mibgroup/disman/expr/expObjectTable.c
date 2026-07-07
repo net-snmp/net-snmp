@@ -66,8 +66,22 @@ init_expObjectTable(void)
 void
 shutdown_expObjectTable(void)
 {
+    netsnmp_tdata_row *row;
+
+    if (expObject_table_data) {
+        while ((row = netsnmp_tdata_row_first(expObject_table_data))) {
+            expObject_removeEntry(row);
+        }
+    }
+
     netsnmp_tdata_unregister(object_table_reg);
     netsnmp_table_registration_info_free(object_table_info);
+
+    if (expObject_table_data) {
+        expObject_table_data->container = NULL;
+        netsnmp_tdata_delete_table(expObject_table_data);
+        expObject_table_data = NULL;
+    }
 }
 
 /** handles requests for the expObjectTable table */
