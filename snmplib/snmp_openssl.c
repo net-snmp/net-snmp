@@ -885,6 +885,7 @@ _cert_get_san_type(X509 *ocert, int mapType)
     DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
                oname ? oname->type : -1, buf ? buf : "NULL"));
 
+    GENERAL_NAMES_free(onames);
     return buf;
 }
 
