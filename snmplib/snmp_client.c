@@ -381,6 +381,7 @@ _clone_pdu_header(netsnmp_pdu *pdu)
     newpdu->contextEngineID = NULL;
     newpdu->contextName = NULL;
     newpdu->transport_data = NULL;
+    newpdu->securityStateRef = NULL;
 
     /*
      * copy buffers individually. If any copy fails, all are freed. 

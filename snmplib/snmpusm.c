@@ -309,7 +309,7 @@ usm_clone(netsnmp_pdu *pdu, netsnmp_pdu *new_pdu)
     if (pdu->command == SNMP_MSG_TRAP2) {
         ret = usm_clone_usmStateReference(ref, new_ref);
     } else {
-        netsnmp_assert(ref == *new_ref);
+        *new_ref = ref;
         ref->refcnt++;
     }
 
