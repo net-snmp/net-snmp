@@ -421,7 +421,6 @@ notifyTable_register_notifications(int major, int minor,
     nptr = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
     if (nptr == NULL)
         goto bail;
-    ++_active;
     nptr->snmpNotifyName = netsnmp_memdup_nt(name, nameLen,
                                              &nptr->snmpNotifyNameLen);
     /** selects target addr */
@@ -435,7 +434,7 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
     if (snmpNotifyTable_add(nptr) == SNMPERR_GENERR) {
-        snmpNotifyTable_dispose(nptr);
+        snmpNotifyTable_free(nptr);
         nptr = NULL;
         goto bail;
     }
@@ -485,7 +484,7 @@ notifyTable_register_notifications(int major, int minor,
 }
 
 void
-snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
+snmpNotifyTable_free(struct snmpNotifyTable_data *thedata)
 {
     if (NULL == thedata)
         return;
@@ -493,6 +492,15 @@ snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
     SNMP_FREE(thedata->snmpNotifyName);
     SNMP_FREE(thedata->snmpNotifyTag);
     free(thedata);
+}
+
+void
+snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
+{
+    if (NULL == thedata)
+        return;
+
+    snmpNotifyTable_free(thedata);
     --_active;
 }
 
@@ -510,7 +518,6 @@ notifyTable_unregister_all_notifications(int major, int minor,
                                                     nptr->snmpNotifyNameLen);
         }
     }
-    snmpNotifyTableStorage = NULL;
     return (0);
 }
 
@@ -588,6 +595,10 @@ shutdown_snmpNotifyTable_data(void)
                              SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
                              NULL, FALSE);
 #endif
+    header_complex_free_all(snmpNotifyTableStorage,
+                            (HeaderComplexCleaner *) snmpNotifyTable_dispose);
+    snmpNotifyTableStorage = NULL;
+
     DEBUGMSGTL(("trap:notify:shutdown", "active count %d\n", _active));
     if (_active != 0) {
         DEBUGMSGTL(("trap:notify:shutdown",
@@ -622,6 +633,7 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata)
     if (header_complex_maybe_add_data(&snmpNotifyTableStorage, vars, thedata, 1)
         != NULL){
         DEBUGMSGTL(("snmpNotifyTable", "registered an entry\n"));
+        _active++;
         retVal = SNMPERR_SUCCESS;
     }else{
         retVal = SNMPERR_GENERR;
