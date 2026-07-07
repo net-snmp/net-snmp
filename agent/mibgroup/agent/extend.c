@@ -35,6 +35,8 @@ typedef struct extend_registration_block_s {
 } extend_registration_block;
 extend_registration_block *ereg_head = NULL;
 
+void _free_extension(netsnmp_extend *extension, extend_registration_block *ereg);
+
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
 typedef struct netsnmp_old_extend_s {
@@ -241,6 +243,7 @@ static void
 _unregister_extend(extend_registration_block *eptr)
 {
     extend_registration_block *prev;
+    netsnmp_extend *eptr2, *enext2;
 
     netsnmp_assert(eptr);
     for (prev = ereg_head; prev && prev->next != eptr; prev = prev->next)
@@ -252,6 +255,12 @@ _unregister_extend(extend_registration_block *eptr)
         netsnmp_assert(eptr == ereg_head);
 	ereg_head = eptr->next;
     }
+
+    for (eptr2 = eptr->ehead; eptr2; eptr2 = enext2) {
+        enext2 = eptr2->next;
+        _free_extension(eptr2, NULL);
+    }
+    eptr->ehead = NULL;
 
     netsnmp_table_data_delete_table(eptr->dinfo);
     netsnmp_unregister_handler( eptr->reg[0] );
@@ -267,9 +276,16 @@ extend_clear_callback(int majorID, int minorID,
                     void *serverarg, void *clientarg)
 {
     extend_registration_block *eptr, *enext = NULL;
+    netsnmp_extend *eptr2, *enext2;
 
     for ( eptr=ereg_head; eptr; eptr=enext ) {
         enext=eptr->next;
+        for (eptr2 = eptr->ehead; eptr2; eptr2 = enext2) {
+            enext2 = eptr2->next;
+            _free_extension(eptr2, NULL);
+        }
+        eptr->ehead = NULL;
+
         netsnmp_table_data_delete_table(eptr->dinfo);
         netsnmp_unregister_handler( eptr->reg[0] );
         netsnmp_unregister_handler( eptr->reg[1] );
