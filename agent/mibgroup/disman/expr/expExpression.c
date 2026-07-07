@@ -142,6 +142,14 @@ expExpression_removeEntry(netsnmp_tdata_row *row)
         netsnmp_tdata_remove_and_delete_row(expr_table_data, row);
     if (entry) {
         /* expExpression_disable( entry ) */
+        if (entry->session) {
+            snmp_close(entry->session);
+            entry->session = NULL;
+        }
+        if (entry->pvars) {
+            snmp_free_varbind(entry->pvars);
+            entry->pvars = NULL;
+        }
         SNMP_FREE(entry);
     }
 }
