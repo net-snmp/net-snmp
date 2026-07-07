@@ -568,7 +568,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         }
     }
     if (1 == SSL_CTX_set_min_proto_version(the_ctx, tlsVersion)) {
-        snmp_log(LOG_INFO,"Set tlsMinVersion to '%s'\n", tlsMinVersion);
+        DEBUGMSGTL(("sslctx", "Set tlsMinVersion to '%s'\n", tlsMinVersion));
     }
     else {
         LOGANDDIE("Set tlsMinVersion failed");
@@ -597,7 +597,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     }
 
     if (1 == SSL_CTX_set_max_proto_version(the_ctx, tlsVersion)) {
-        snmp_log(LOG_INFO,"Set tlsMaxVersion to '%s'\n", tlsMaxVersion);
+        DEBUGMSGTL(("sslctx", "Set tlsMaxVersion to '%s'\n", tlsMaxVersion));
     }
     else {
         LOGANDDIE("Set tlsMaxVersion failed");
