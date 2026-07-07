@@ -145,6 +145,7 @@ netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
     oldtlsdata->accepted_bio = NULL;
     oldtlsdata->ssl = NULL;
     newtlsdata->ssl_context = NULL;
+    newtlsdata->accept_bio = NULL;
     
     if (oldtlsdata->addr_string)
         newtlsdata->addr_string = strdup(oldtlsdata->addr_string);
