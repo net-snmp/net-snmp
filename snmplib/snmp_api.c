@@ -196,6 +196,7 @@ typedef struct request_list {
     long            message_id;     /* message id */
     netsnmp_callback callback;      /* user callback per request (NULL if unused) */
     void           *cb_data;        /* user callback data per request (NULL if unused) */
+    char            cb_data_refcounted;
     int             retries;        /* Number of retries */
     u_long          timeout;        /* length to wait for timeout */
     struct timeval  timeM;   /* Time this request was made [monotonic clock] */
@@ -234,6 +235,10 @@ struct snmp_internal_session {
     u_char       *opacket;      /* send packet data (within obuf) */
     size_t        opacket_len;  /* length of data */
 };
+
+static void
+remove_request(struct snmp_internal_session *isp,
+               netsnmp_request_list *orp, netsnmp_request_list *rp);
 
 /*
  * information about received packet
@@ -2127,7 +2132,7 @@ snmp_sess_close(struct session_list *slp)
                               slp->session, orp->pdu->reqid,
                               orp->pdu, orp->cb_data);
             }
-            snmp_free_pdu(orp->pdu);
+            remove_request(isp, NULL, orp);
             free(orp);
         }
 
@@ -5540,6 +5545,7 @@ _sess_async_send(struct session_list *slp,
         if (cp_inc) {
             netsnmp_refcnt_void *aux_cb_data = (netsnmp_refcnt_void*) cb_data;
             aux_cb_data->refcnt++;
+            rp->cb_data_refcounted = 1;
 	}
         rp->cb_data = cb_data;
         rp->retries = 0;
@@ -5868,6 +5874,15 @@ remove_request(struct snmp_internal_session *isp,
         isp->requests = rp->next_request;
     if (isp->requestsEnd == rp)
         isp->requestsEnd = orp;
+    if (rp->cb_data_refcounted) {
+        netsnmp_refcnt_void *aux = (netsnmp_refcnt_void*) rp->cb_data;
+        if (aux) {
+            aux->refcnt--;
+            if (aux->refcnt <= 0) {
+                free(aux);
+            }
+        }
+    }
     snmp_free_pdu(rp->pdu);
 }
 
@@ -6975,6 +6990,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
             rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
                          rp->pdu->reqid, rp->pdu, rp->cb_data);
             remove_request(isp, orp, rp);
+            free(rp);
 	}
         return -1;
     } else {
