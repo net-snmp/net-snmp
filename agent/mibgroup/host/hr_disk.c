@@ -565,21 +565,20 @@ Get_Next_HR_Disk(void)
              * Construct the full device name in "string" 
              */
             if (disk_devices[HRD_type_index].disk_controller != -1) {
-                snprintf(string, sizeof(string)-1,
+                snprintf(string, sizeof(string),
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_controller,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
 	    } else if (disk_devices[HRD_type_index].disk_device_first == disk_devices[HRD_type_index].disk_device_last) {
 		/* exact device name */
-		snprintf(string, sizeof(string)-1, "%s", disk_devices[HRD_type_index].disk_devfull_string);
+		snprintf(string, sizeof(string), "%s", disk_devices[HRD_type_index].disk_devfull_string);
             } else {
-                snprintf(string, sizeof(string)-1,
+                snprintf(string, sizeof(string),
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
             }
-            string[ sizeof(string)-1 ] = 0;
 
             DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
                         string, HRD_type_index, HRD_index));

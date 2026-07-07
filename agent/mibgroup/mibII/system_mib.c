@@ -246,7 +246,6 @@ init_system_mib(void)
             "%s %s %s %s %s", utsName.sysname,
             utsName.nodename, utsName.release, utsName.version,
             utsName.machine);
-    version_descr[ sizeof(version_descr)-1 ] = 0;
 #else
 #ifdef HAVE_EXECV
     struct extensible extmp;

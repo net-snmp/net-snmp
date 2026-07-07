@@ -232,7 +232,6 @@ init_hr_swinst(void)
         /* check for SQLite DB backend */
         if (stat(path, &stat_buf) == -1)
             snprintf(path, sizeof(path), "%s/rpmdb.sqlite", swi->swi_dbpath);
-        path[ sizeof(path)-1 ] = 0;
         swi->swi_directory = strdup(path);
 #ifdef HAVE_RPMGETPATH
         rpmFreeRpmrc();
@@ -515,7 +514,6 @@ var_hrswinst(struct variable * vp,
             if (swi->swi_directory != NULL) {
                 snprintf(string, sizeof(string), "%s/%s",
                          swi->swi_directory, swi->swi_name);
-                string[ sizeof(string)-1 ] = 0;
                 if (stat(string, &stat_buf) >= 0)
                     ret = date_n_time(&stat_buf.st_mtime, var_len);
                 else
@@ -697,7 +695,6 @@ Save_HR_SW_info(int ix)
         headerGetEntry(swi->swi_h, RPMTAG_RELEASE, NULL, (void **) &r,
                        NULL);
         snprintf(swi->swi_name, sizeof(swi->swi_name), "%s-%s-%s", n, v, r);
-        swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
     }
 #else
     snprintf(swi->swi_name, sizeof(swi->swi_name), "%s", swi->swi_dep->d_name);

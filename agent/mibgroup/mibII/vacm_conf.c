@@ -733,7 +733,6 @@ vacm_gen_com2sec(int commcount, const char *community, const char *addressname,
     else
        snprintf(line, sizeof(line), "%s %s '%s'",
              secname, addressname, community);
-    line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((publishtoken, "passing: %s %s\n", publishtoken, line));
     (*parser)(publishtoken, line);
 
@@ -976,7 +975,6 @@ vacm_create_simple(const char *token, char *confline,
         else
             snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
-        line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
         netsnmp_unix_parse_security("com2secunix", line);
     }
@@ -1015,7 +1013,6 @@ vacm_create_simple(const char *token, char *confline,
                     *tmp = '_';
             snprintf(line, sizeof(line),
                      "%s %s \"%s\"", grpname, model, secname);
-            line[ sizeof(line)-1 ] = 0;
             DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
             vacm_parse_group("group", line);
         }
@@ -1034,7 +1031,6 @@ vacm_create_simple(const char *token, char *confline,
      */
     if (view_ptr) {
         snprintf(line, sizeof(line), "%s included %s", viewname, theoid);
-        line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "view", line));
         vacm_parse_view("view", line);
     }
@@ -1054,7 +1050,6 @@ vacm_create_simple(const char *token, char *confline,
                  model, authlevel,
                 (ctxprefix ? "prefix" : "exact"),
                  viewname, rw, rw);
-        line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
         vacm_parse_access("access", line);
     } else {
@@ -1073,7 +1068,6 @@ vacm_create_simple(const char *token, char *confline,
                         (ctxprefix ? "prefix" : "exact"),
                          se_find_label_in_slist(VACM_VIEW_ENUM_NAME, i),
                          viewname);
-                line[ sizeof(line)-1 ] = 0;
                 DEBUGMSGTL((token, "passing: %s %s\n", "setaccess", line));
                 vacm_parse_setaccess("setaccess", line);
             }

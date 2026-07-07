@@ -4765,7 +4765,6 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
                     subtree = subtree->next_peer;
                 if (strncmp(subtree->label, ANON, ANON_LEN)) {
                     snprintf(tmpbuf, sizeof(tmpbuf), " %s(%lu)", subtree->label, subtree->subid);
-                    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
                 } else
                     sprintf(tmpbuf, " %lu", subtree->subid);
                 len = strlen(tmpbuf);
@@ -4982,7 +4981,6 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                                       ", "))
                         return 0;
                 snprintf(str, sizeof(str), "%s(%d)", ep->label, ep->value);
-                str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_cstrcat(buf, buf_len, out_len,
@@ -5106,7 +5104,6 @@ print_tree_node(u_char ** buf, size_t * buf_len,
                 snprintf(str, sizeof(str), "%s%s",
                         ip->isimplied ? "IMPLIED " : "",
                         ip->ilabel);
-                str[ sizeof(str)-1 ] = 0;
                 len = strlen(str);
                 if (pos + len + 2 > width) {
                     if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
@@ -5711,7 +5708,6 @@ _add_strings_to_oid(void *tp, char *cp,
         else
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
             snprintf(buf, sizeof(buf), "%s", fcp);
-        buf[ sizeof(buf)-1 ] = 0;
 
         snmp_set_detail(buf);
     }

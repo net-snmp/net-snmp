@@ -127,7 +127,6 @@ setPerrorstatus(const char *to)
     char            buf[STRMAX];
 
     snprintf(buf, sizeof(buf), "%s:  %s", to, strerror(errno));
-    buf[ sizeof(buf)-1 ] = 0;
     snmp_log_perror(to);
     seterrorstatus(buf, 5);
 }

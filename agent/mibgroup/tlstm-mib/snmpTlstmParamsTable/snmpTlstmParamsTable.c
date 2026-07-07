@@ -1255,7 +1255,6 @@ _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
              entry->snmpTargetParamsName, hashType,
              entry->snmpTlstmParamsClientFingerprint,
              entry->snmpTlstmParamsRowStatus);
-    buf[sizeof(buf)-1] = 0;
 
     read_config_store(type, buf);
     DEBUGMSGTL(("tlstmParamsTable:row:save", "saving entry '%s'\n", buf));

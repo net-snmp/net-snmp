@@ -5668,7 +5668,6 @@ print_mib_leaves(FILE * f, struct tree *tp, int width)
                 if (ep != tp->enums)
                     fprintf(f, ", ");
                 snprintf(buf, sizeof(buf), "%s(%d)", ep->label, ep->value);
-                buf[ sizeof(buf)-1 ] = 0;
                 cpos += (bufw = strlen(buf) + 2);
                 if (cpos >= cmax) {
                     fprintf(f, "\n%s                ", leave_indent);

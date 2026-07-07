@@ -637,8 +637,7 @@ int main(int argc, char **argv)
         usernameLen = strlen(username);
     }
     if (1 /* !have-testname-arg */) {
-        snprintf(testname, sizeof(testname) - 1, "snmpping-%ld", (long)getpid());
-        testname[32] = '\0';
+        snprintf(testname, sizeof(testname), "snmpping-%ld", (long)getpid());
         testnameLen = strlen(testname);
     }
     idx = index;

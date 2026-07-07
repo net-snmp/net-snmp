@@ -482,7 +482,6 @@ get_user_passphrases(void)
      */
     s = netsnmp_gethomedir();
     snprintf(path, sizeof(path), "%s/%s", s, PASSPHRASE_DIR);
-    path[ sizeof(path)-1 ] = 0;
 
     /*
      * Test directory. 
@@ -503,7 +502,6 @@ get_user_passphrases(void)
      * Test file. 
      */
     snprintf(path, sizeof(path), "%s/%s", s, local_passphrase_filename);
-    path[ sizeof(path)-1 ] = 0;
     if (stat(path, &statbuf) < 0) {
         fprintf(stderr, "Cannot access file \"%s\".\n", path);
         QUITFUN(SNMPERR_GENERR, get_user_passphrases_quit);

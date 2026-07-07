@@ -787,9 +787,8 @@ _certindexes_load( void )
     /*
      * Open the CERT index directory, or create it (empty)
      */
-    snprintf( filename, sizeof(filename), "%s/cert_indexes",
-              get_persistent_directory());
-    filename[sizeof(filename)-1] = 0;
+    snprintf(filename, sizeof(filename), "%s/cert_indexes",
+             get_persistent_directory());
     dir = opendir( filename );
     if ( dir == NULL ) {
         DEBUGMSGT(("cert:index:load",
@@ -806,9 +805,8 @@ _certindexes_load( void )
             continue;
         i = atoi( file->d_name );
 
-        snprintf( filename, sizeof(filename), "%s/cert_indexes/%d",
-              get_persistent_directory(), i );
-        filename[sizeof(filename)-1] = 0;
+        snprintf(filename, sizeof(filename), "%s/cert_indexes/%d",
+                 get_persistent_directory(), i );
         fp = fopen( filename, "r" );
         if ( !fp ) {
             DEBUGMSGT(("cert:index:load", "error opening index (%d)\n", i));
@@ -850,7 +848,6 @@ _certindex_lookup( const char *dirname )
 
     snprintf(filename, sizeof(filename), "%s/cert_indexes/%d",
              get_persistent_directory(), i);
-    filename[sizeof(filename)-1] = 0;
     DEBUGMSGT(("cert:index:lookup", "%s (%d) %s\n", dirname, i, filename ));
     return strdup(filename);
 }
@@ -869,7 +866,6 @@ _certindex_new( const char *dirname )
             return NULL; /* msg already logged */
         snprintf( filename, sizeof(filename), "%s/cert_indexes/%d",
                   get_persistent_directory(), i );
-        filename[sizeof(filename)-1] = 0;
         cp = filename;
     }
     DEBUGMSGT(("9:cert:index:new", "%s (%s)\n", dirname, cp ));

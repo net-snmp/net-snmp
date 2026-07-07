@@ -655,7 +655,6 @@ snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
                      newEntry->retryCount, newEntry->tagListData,
                      newEntry->paramsData, newEntry->storageType,
                      newEntry->rowStatus);
-    buff[ sizeof(buff) - 1 ] = 0;
     DEBUGMSGTL(("snmpTargetAddrEntry", "%s", buff));
 
     snmpTargetAddrTable_addToList(newEntry, &aAddrTable);

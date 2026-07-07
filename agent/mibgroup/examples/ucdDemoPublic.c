@@ -132,7 +132,6 @@ var_ucdDemoPublic(struct variable *vp,
         cp = string;
         for (i = 0; i < num; i++) {
             snprintf(cp, sizeof(string)-strlen(string), " %s", demoUsers[i]);
-            string[MYMAX] = 0;
             cp = cp + strlen(cp);
         }
         *var_len = strlen(string);
