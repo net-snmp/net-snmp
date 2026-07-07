@@ -4655,6 +4655,7 @@ _snmp_parse(struct session_list *slp,
                     }
                 } else {
                     snmp_log(LOG_ERR, "failed to get our own engineID!\n");
+                    snmp_free_pdu(pdu2);
                 }
             } else {
                 snmp_log(LOG_WARNING,
