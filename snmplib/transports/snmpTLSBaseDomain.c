@@ -401,6 +401,8 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     netsnmp_cert_map   *cert_map, *peer_cert;
     netsnmp_iterator  *itr;
     int                 rc;
+    X509               *client_cert;
+    char               *client_fp;
 
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
@@ -416,6 +418,34 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         return SNMPERR_GENERR;
     }
 
+    client_cert = SSL_get_peer_certificate(ssl);
+    client_fp = netsnmp_openssl_cert_get_fingerprint(client_cert, NS_HASH_SHA1);
+    X509_free(client_cert);
+
+    peer_cert = NULL;
+    itr = CONTAINER_ITERATOR(chain_maps);
+    if (NULL == itr) {
+        snmp_log(LOG_ERR, "could not get iterator for secname fingerprints\n");
+        free(client_fp);
+        netsnmp_cert_map_container_free(chain_maps);
+        return SNMPERR_GENERR;
+    }
+    for (cert_map = ITERATOR_FIRST(itr); cert_map; cert_map = ITERATOR_NEXT(itr)) {
+        if (client_fp && cert_map->fingerprint &&
+            strcmp(cert_map->fingerprint, client_fp) == 0) {
+            peer_cert = cert_map;
+            break;
+        }
+    }
+    ITERATOR_RELEASE(itr);
+    free(client_fp);
+
+    if (NULL == peer_cert) {
+        snmp_log(LOG_ERR, "could not find peer certificate in chain maps\n");
+        netsnmp_cert_map_container_free(chain_maps);
+        return SNMPERR_GENERR;
+    }
+
     /*
      * change container to sorted (by clearing unsorted option), then
      * iterate over it until we find a map that returns a secname.
@@ -427,7 +457,7 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         netsnmp_cert_map_container_free(chain_maps);
         return SNMPERR_GENERR;
     }
-    peer_cert = cert_map = ITERATOR_FIRST(itr);
+    cert_map = ITERATOR_FIRST(itr);
     for( ; !tlsdata->securityName && cert_map; cert_map = ITERATOR_NEXT(itr))
         tlsdata->securityName =
             netsnmp_openssl_extract_secname(cert_map, peer_cert);

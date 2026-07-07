@@ -976,7 +976,12 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
             break;
 
         case TSNM_tlstmCertCommonName:
-            rtn = netsnmp_openssl_cert_get_commonName(cert_map->ocert, NULL,
+            if (NULL == peer_cert) {
+                DEBUGMSGT(("openssl:secname:extract", "no peer cert for %s\n",
+                           cert_map->fingerprint));
+                break;
+            }
+            rtn = netsnmp_openssl_cert_get_commonName(peer_cert->ocert, NULL,
                                                        NULL);
             break;
         default:
