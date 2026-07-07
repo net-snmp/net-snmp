@@ -164,6 +164,22 @@ _callback_unlock(int major, int minor)
     
     CALLBACK_UNLOCK(major,minor);
 
+    if (CALLBACK_LOCK_COUNT(major,minor) == 0) {
+        struct snmp_gen_callback *scp, **prevNext;
+        scp = thecallbacks[major][minor];
+        prevNext = &(thecallbacks[major][minor]);
+        while (scp != NULL) {
+            if (scp->sc_callback == NULL) {
+                *prevNext = scp->next;
+                SNMP_FREE(scp);
+                scp = *prevNext;
+            } else {
+                prevNext = &(scp->next);
+                scp = scp->next;
+            }
+        }
+    }
+
 #ifdef CALLBACK_NAME_LOGGING
     DEBUGMSGTL(("9:callback:lock", "unlocked (%s,%s)\n",
                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
@@ -446,6 +462,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     struct snmp_gen_callback *scp;
     struct snmp_gen_callback **prevNext;
     int             count = 0;
+    int             lock_failed;
 
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS)
         return SNMPERR_GENERR;
@@ -455,15 +472,14 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
 
     if (_callback_need_init)
         init_callbacks();
-
 #ifdef LOCK_PER_CALLBACK_SUBID
-    _callback_lock(major,minor,"snmp_unregister_callback", 1);
+    lock_failed = _callback_lock(major,minor,"snmp_unregister_callback", 1);
 #else
     /*
      * Notes;
      * - this gets hit at shutdown, during cleanup. No easy fix.
      */
-    _callback_lock(major,minor,"snmp_unregister_callback", 0);
+    lock_failed = _callback_lock(major,minor,"snmp_unregister_callback", 0);
 #endif
 
     while (scp != NULL) {
@@ -471,7 +487,7 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
             (!matchargs || (scp->sc_client_arg == arg))) {
             DEBUGMSGTL(("callback", "unregistering (%d,%d) at %p\n", major,
                         minor, scp));
-            if(1 == CALLBACK_LOCK_COUNT(major,minor)) {
+            if(!lock_failed && 1 == CALLBACK_LOCK_COUNT(major,minor)) {
                 *prevNext = scp->next;
                 SNMP_FREE(scp);
                 scp = *prevNext;
@@ -487,7 +503,8 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
         }
     }
 
-    _callback_unlock(major,minor);
+    if (!lock_failed)
+        _callback_unlock(major,minor);
     return count;
 }
 
