@@ -106,7 +106,6 @@ SOFTWARE.
 #include <locale.h>
 #endif
 
-#define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
@@ -187,6 +186,24 @@ static const oid default_enterprise[] = { 1, 3, 6, 1, 4, 1, 3, 1, 1 };
 #define DEFAULT_REMPORT	    SNMP_PORT
 #define DEFAULT_ENTERPRISE  default_enterprise
 #define DEFAULT_TIME	    0
+
+/*
+ * A list of all the outstanding requests for a particular session.
+ */
+typedef struct request_list {
+    struct request_list *next_request;
+    long            request_id;     /* request id */
+    long            message_id;     /* message id */
+    netsnmp_callback callback;      /* user callback per request (NULL if unused) */
+    void           *cb_data;        /* user callback data per request (NULL if unused) */
+    int             retries;        /* Number of retries */
+    u_long          timeout;        /* length to wait for timeout */
+    struct timeval  timeM;   /* Time this request was made [monotonic clock] */
+    struct timeval  expireM; /* Time this request is due to expire [monotonic clock]. */
+    struct snmp_session *session;
+    netsnmp_pdu    *pdu;    /* The pdu for this request
+			     * (saved so it can be retransmitted */
+} netsnmp_request_list;
 
 /*
  * Internal information about the state of the snmp session.

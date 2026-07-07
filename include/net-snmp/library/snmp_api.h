@@ -37,20 +37,7 @@
 
 #include <net-snmp/net-snmp-features.h>
 
-#ifdef SNMP_NEED_REQUEST_LIST
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h> /* struct timeval */
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#else
 struct timeval;
-#endif
 
 #ifndef DONT_SHARE_ERROR_WITH_OTHER_THREADS
 #define SET_SNMP_ERROR(x) snmp_errno=(x)
@@ -84,26 +71,6 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-
-/*
- * A list of all the outstanding requests for a particular session.
- */
-#ifdef SNMP_NEED_REQUEST_LIST
-typedef struct request_list {
-    struct request_list *next_request;
-    long            request_id;     /* request id */
-    long            message_id;     /* message id */
-    netsnmp_callback callback;      /* user callback per request (NULL if unused) */
-    void           *cb_data;        /* user callback data per request (NULL if unused) */
-    int             retries;        /* Number of retries */
-    u_long          timeout;        /* length to wait for timeout */
-    struct timeval  timeM;   /* Time this request was made [monotonic clock] */
-    struct timeval  expireM; /* Time this request is due to expire [monotonic clock]. */
-    struct snmp_session *session;
-    netsnmp_pdu    *pdu;    /* The pdu for this request
-			     * (saved so it can be retransmitted */
-} netsnmp_request_list;
-#endif                          /* SNMP_NEED_REQUEST_LIST */
 
     /*
      * Set fields in session and pdu to the following to get a default or unconfigured value.
