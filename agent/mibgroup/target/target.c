@@ -296,6 +296,11 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                                        NULL, NULL);
                             thissess.flags &= ~SNMP_FLAGS_DONT_PROBE;
                             targaddrs->sessionCreationTime = time(NULL);
+                            SNMP_FREE(thissess.paramName);
+                            SNMP_FREE(thissess.securityName);
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+                            SNMP_FREE(thissess.community);
+#endif
                         }
                         if (targaddrs->sess) {
                             if (NULL == targaddrs->sess->paramName)
