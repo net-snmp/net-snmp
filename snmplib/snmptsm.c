@@ -223,7 +223,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
         /* 4.2 step 1: The cachedSecurityData for this message can
            now be discarded. */
-        SNMP_FREE(parms->pdu->securityStateRef);
+        parms->pdu->securityStateRef = NULL;
     } else {
         /* 4.2, step 2: If there is no securityStateReference (e.g., a
            Request-type or Notification message), then create a
@@ -321,6 +321,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         DEBUGMSGTL(("tsm", "building msgSecurityParameters failed.\n"));
         if (tmStateRefLocal)
             SNMP_FREE(tmStateRef);
+        if (tsmSecRef)
+            tsm_free_state_ref(tsmSecRef);
         return SNMPERR_TOO_LONG;
     }
     
@@ -332,6 +334,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             DEBUGMSGTL(("tsm", "building global data failed.\n"));
             if (tmStateRefLocal)
                 SNMP_FREE(tmStateRef);
+            if (tsmSecRef)
+                tsm_free_state_ref(tsmSecRef);
             return SNMPERR_TOO_LONG;
         }
     }
@@ -357,6 +361,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         DEBUGMSGTL(("tsm", "building master packet sequence failed.\n"));
         if (tmStateRefLocal)
             SNMP_FREE(tmStateRef);
+        if (tsmSecRef)
+            tsm_free_state_ref(tsmSecRef);
         return SNMPERR_TOO_LONG;
     }
 
@@ -373,9 +379,14 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     if (!parms->pdu->transport_data) {
         snmp_log(LOG_ERR, "tsm: malloc failure\n");
+        if (tsmSecRef)
+            tsm_free_state_ref(tsmSecRef);
         return SNMPERR_GENERR;
     }
     parms->pdu->transport_data_length = sizeof(*tmStateRef);
+
+    if (tsmSecRef)
+        tsm_free_state_ref(tsmSecRef);
 
     DEBUGMSGTL(("tsm", "TSM processing completed.\n"));
     return SNMPERR_SUCCESS;
