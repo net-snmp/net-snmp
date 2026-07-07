@@ -91,6 +91,8 @@ extern          "C" {
 NETSNMP_IMPORT
 void              netsnmp_query_set_default_session(netsnmp_session *);
 NETSNMP_IMPORT
+void              netsnmp_query_shutdown(void);
+NETSNMP_IMPORT
 netsnmp_session * netsnmp_query_get_default_session_unchecked( void );
 NETSNMP_IMPORT
 netsnmp_session * netsnmp_query_get_default_session( void );

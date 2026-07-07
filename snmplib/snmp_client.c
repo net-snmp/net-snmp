@@ -1249,6 +1249,14 @@ netsnmp_query_set_default_session( netsnmp_session *sess) {
 }
 #endif /* NETSNMP_FEATURE_REMOVE_QUERY_SET_DEFAULT_SESSION */
 
+void
+netsnmp_query_shutdown(void) {
+    if (_def_query_session) {
+        snmp_close(_def_query_session);
+        _def_query_session = NULL;
+    }
+}
+
 /**
  * Return a pointer to the default internal query session.
  */
