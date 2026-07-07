@@ -2733,6 +2733,7 @@ netsnmp_cert_map_alloc(char *fingerprint, X509 *ocert)
     }
     if (ocert) {
         cert_map->hashType = netsnmp_openssl_cert_get_hash_type(ocert);
+        X509_up_ref(ocert);
         cert_map->ocert = ocert;
     }
 
@@ -2747,7 +2748,8 @@ netsnmp_cert_map_free(netsnmp_cert_map *cert_map)
 
     SNMP_FREE(cert_map->fingerprint);
     SNMP_FREE(cert_map->data);
-    /** x509 cert isn't ours */
+    if (cert_map->ocert)
+        X509_free(cert_map->ocert);
     free(cert_map); /* SNMP_FREE wasted on param */
 }
 
@@ -3156,8 +3158,6 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
         if (NULL == results) {
             DEBUGMSGT(("cert:map:secname", "no match for %s\n",
                        cert_map->fingerprint));
-            if (CONTAINER_REMOVE(cert_maps, cert_map) != 0)
-                goto fail;
             continue;
         }
         DEBUGMSGT(("cert:map:secname", "%" NETSNMP_PRIz "d matches for %s\n",
@@ -3187,6 +3187,8 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
                     goto fail;
                 }
                 new_cert_map->ocert = cert_map->ocert;
+                if (new_cert_map->ocert)
+                    X509_up_ref(new_cert_map->ocert);
                 if (CONTAINER_INSERT(cert_maps,new_cert_map) != 0) {
                     netsnmp_cert_map_free(new_cert_map);
                     goto fail;

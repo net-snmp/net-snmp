@@ -721,8 +721,10 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
      * get fingerprint and save it
      */
     fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, NS_HASH_SHA1);
-    if (NULL == fingerprint)
+    if (NULL == fingerprint) {
+        X509_free(ocert);
         return NULL;
+    }
 
     /*
      * allocate cert map. Don't pass in fingerprint, since it would strdup
@@ -731,6 +733,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     cert_map = netsnmp_cert_map_alloc(NULL, ocert);
     if (NULL == cert_map) {
         free(fingerprint);
+        X509_free(ocert);
         return NULL;
     }
     cert_map->fingerprint = fingerprint;
@@ -739,6 +742,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     chain_map = netsnmp_cert_map_container_create(0); /* no fp subcontainer */
     if (NULL == chain_map) {
         netsnmp_cert_map_free(cert_map);
+        X509_free(ocert);
         return NULL;
     }
     CONTAINER_SET_OPTIONS(chain_map, CONTAINER_KEY_UNSORTED, rc);
@@ -763,7 +767,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
-            cert_map = netsnmp_cert_map_alloc(NULL, ocert);
+            cert_map = netsnmp_cert_map_alloc(NULL, ocert_tmp);
             if (NULL == cert_map) {
                 free(fingerprint);
                 break;
@@ -787,6 +791,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         chain_map = NULL;
     }
 
+    X509_free(ocert);
     return chain_map;
 }
 
