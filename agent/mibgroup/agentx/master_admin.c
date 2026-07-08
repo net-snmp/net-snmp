@@ -38,6 +38,7 @@
 #include "agentx/client.h"
 #include "agentx/subagent.h"
 #include "agentx/master_admin.h"
+#include "agentx/master.h"
 
 #include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/agent_trap.h>
@@ -482,10 +483,12 @@ handle_master_agentx_packet(int operation,
          * Shut this session down gracefully.  
          */
         close_agentx_session(session, -1);
+        agentx_unregister_session(session);
         return 1;
     } else if (operation == NETSNMP_CALLBACK_OP_CONNECT) {
         DEBUGMSGTL(("agentx/master",
                     "transport connect on session %8p\n", session));
+        agentx_register_session(session);
         return 1;
     } else if (operation != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
         DEBUGMSGTL(("agentx/master", "unexpected callback op %d\n",

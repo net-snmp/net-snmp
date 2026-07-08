@@ -54,15 +54,76 @@ netsnmp_feature_require(handler_mark_requests_as_delegated);
 netsnmp_feature_require(unix_socket_paths);
 netsnmp_feature_require(free_agent_snmp_session_by_session);
 
+struct agentx_master_session_el {
+    netsnmp_session *session;
+    struct agentx_master_session_el *next;
+};
+static struct agentx_master_session_el *master_sessions = NULL;
+
+void agentx_register_session(netsnmp_session *session)
+{
+    struct agentx_master_session_el *el = master_sessions;
+    while (el) {
+        if (el->session == session)
+            return;
+        el = el->next;
+    }
+    el = malloc(sizeof(*el));
+    if (el) {
+        el->session = session;
+        el->next = master_sessions;
+        master_sessions = el;
+    }
+}
+
+void agentx_unregister_session(netsnmp_session *session)
+{
+    struct agentx_master_session_el *el = master_sessions, *prev = NULL;
+    while (el) {
+        if (el->session == session) {
+            if (prev)
+                prev->next = el->next;
+            else
+                master_sessions = el->next;
+            free(el);
+            return;
+        }
+        prev = el;
+        el = el->next;
+    }
+}
+
+static int
+shutdown_master_callback(int majorID, int minorID, void *serve, void *client)
+{
+    struct agentx_master_session_el *el = master_sessions, *next;
+    while (el) {
+        next = el->next;
+        close_agentx_session(el->session, -1);
+        snmp_close(el->session);
+        free(el);
+        el = next;
+    }
+    master_sessions = NULL;
+    return SNMPERR_SUCCESS;
+}
+
 void
 real_init_master(void)
 {
     netsnmp_session sess, *session = NULL;
     char *agentx_sockets;
     char *cp1;
+    static int once = 0;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
+
+    if (once == 0) {
+        once = 1;
+        snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                               shutdown_master_callback, NULL);
+    }
 
     if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
                               NETSNMP_DS_AGENT_X_SOCKET)) {
@@ -186,8 +247,11 @@ real_init_master(void)
                 snmp_add_full(&sess, t, NULL, agentx_parse, NULL, NULL,
                               agentx_realloc_build, agentx_check_packet, NULL);
             /* snmp_add_full() frees 't' upon failure. */
-            if (!session)
+            if (!session) {
                 t = NULL;
+            } else {
+                agentx_register_session(session);
+            }
         }
         if (session == NULL) {
             netsnmp_transport_free(t);
