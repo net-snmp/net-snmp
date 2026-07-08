@@ -1232,7 +1232,7 @@ _sess_copy(netsnmp_session * in_session)
             return (NULL);
         }
         session->securityEngineID = ucp;
-
+        session->securityEngineIDLen = in_session->securityEngineIDLen;
     }
 
     if (in_session->contextEngineIDLen > 0) {
@@ -1244,6 +1244,7 @@ _sess_copy(netsnmp_session * in_session)
             return (NULL);
         }
         session->contextEngineID = ucp;
+        session->contextEngineIDLen = in_session->contextEngineIDLen;
     } else if (in_session->securityEngineIDLen > 0) {
         /*
          * default contextEngineID to securityEngineIDLen if defined 
