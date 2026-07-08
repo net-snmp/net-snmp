@@ -2124,7 +2124,6 @@ netsnmp_set(PyObject *self, PyObject *args)
   oid *oid_arr;
   size_t oid_arr_len = MAX_OID_LEN;
   int type;
-  char* tmp_val_str = NULL;
   int use_enums;
   struct enum_list *ep;
   int verbose = py_netsnmp_verbose();
@@ -2161,6 +2160,8 @@ netsnmp_set(PyObject *self, PyObject *args)
       PyObject *varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
+        char* tmp_val_str = NULL;
+
         if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
           py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
         {
@@ -2209,6 +2210,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 	len = (int)tmplen;
 	status = __add_var_val_str(pdu, oid_arr, oid_arr_len, tmp_val_str, len,
                                    type);
+        free(tmp_val_str);
 
 	if (verbose && status == FAILURE)
 	  printf("error: set: adding variable/value to PDU");
