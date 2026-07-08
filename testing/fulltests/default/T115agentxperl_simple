@@ -75,6 +75,7 @@ sub shut_it_down { \$running = 0; }
 
     \$SIG{'INT'} = \&shut_it_down;
     \$SIG{'QUIT'} = \&shut_it_down;
+    \$SIG{'TERM'} = \&shut_it_down;
     \$running = 1;
     while(\$running) {
       \$agent->agent_check_and_process(1);
