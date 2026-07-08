@@ -2205,7 +2205,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 	    }
 	  }
 	} else {
-            tmp_val_str = netsnmp_memdup(val, tmplen);
+            tmp_val_str = netsnmp_memdup_nt(val, tmplen, NULL);
         }
 	len = (int)tmplen;
 	status = __add_var_val_str(pdu, oid_arr, oid_arr_len, tmp_val_str, len,
