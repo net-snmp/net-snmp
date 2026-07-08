@@ -1504,6 +1504,7 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
         ASN_OCTET_STR == response->variables->type  &&
         NULL != response->variables->val.string &&
         response->variables->val_len > 0) {
+        free(session->contextEngineID);
         session->contextEngineID =
             netsnmp_memdup(response->variables->val.string,
                            response->variables->val_len);
@@ -1514,6 +1515,7 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
         
         /* technically there likely isn't a securityEngineID but just
            in case anyone goes looking we might as well have one */
+        free(session->securityEngineID);
         session->securityEngineID =
             netsnmp_memdup(response->variables->val.string,
                            response->variables->val_len);
