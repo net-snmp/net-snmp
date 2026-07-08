@@ -720,7 +720,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        tmStateReference cache as tmSecurityLevel.  For (D)TLS to provide
        strong authentication, each principal acting as a command
        generator SHOULD have its own certificate.
-    */
+     */
     /*
       Implementation notes: we do most of this in the
       sslctx_client_setup The transport should have been
@@ -735,17 +735,17 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     tlsdata->ssl_context = ctx = sslctx_client_setup(TLS_method(), tlsdata);
     if (!ctx) {
         snmp_log(LOG_ERR, "failed to create TLS context\n");
-        return NULL;
+        goto err_free_tlsdata;
     }
 
     /* RFC5953 Section 5.3.1:  Establishing a Session as a Client
        3)  Using the destTransportDomain and destTransportAddress values,
        the client will initiate the (D)TLS handshake protocol to
        establish session keys for message integrity and encryption.
-    */
+     */
     /* Implementation note:
        The transport domain and address are pre-processed by this point
-    */
+     */
 
     /* Create a BIO connection for it */
     DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n",
@@ -760,13 +760,13 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        If the attempt to establish a session is unsuccessful, then
        snmpTlstmSessionOpenErrors is incremented, an error indication is
        returned, and processing stops.
-    */
+     */
 
     if (NULL == bio) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         snmp_log(LOG_ERR, "tlstcp: failed to create bio\n");
         _openssl_log_error(rc, NULL, "BIO creation");
-        return NULL;
+        goto err_free_tlsdata;
     }
 
     /* Tell the BIO to actually do the connection */
@@ -776,8 +776,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
         snmp_log(LOG_ERR, "tlstcp: failed to connect to %s\n",
                  tlsdata->addr_string);
         _openssl_log_error(rc, NULL, "BIO_do_connect");
-        BIO_free(bio);
-        return NULL;
+        goto err_free_bio;
     }
 
     /* Create the SSL layer on top of the socket bio */
@@ -785,8 +784,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     if (NULL == ssl) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
-        BIO_free(bio);
-        return NULL;
+        goto err_free_bio;
     }
 
     /* Bind the SSL layer to the BIO */
@@ -797,9 +795,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     if (NULL == verify_info) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
-        SSL_shutdown(ssl);
-        BIO_free(bio);
-        return NULL;
+        goto err_free_tlsdata;
     }
 
     SSL_set_ex_data(ssl, tls_get_verify_info_index(), verify_info);
@@ -809,8 +805,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     if (rc <= 0) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
-        BIO_free(bio);
-        return NULL;
+        goto err_free_tlsdata;
     }
 
     /* RFC5953 Section 5.3.1: Establishing a Session as a Client
@@ -825,7 +820,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        invalidation includes, but is not limited to,
        cryptographic validation failures and an unexpected
        presented certificate identity.
-    */
+     */
 
     /* RFC5953 Section 5.3.1: Establishing a Session as a Client
        4)  The (D)TLS client MUST then verify that the (D)TLS server's
@@ -850,21 +845,19 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        tool for generating SNMP GETs might support specifying either the
        server's certificate fingerprint or the expected host name as a
        command line argument.
-    */
+     */
 
     /* Implementation notes:
        - All remote certificate fingerprints are expected to be
        stored in the transport's config information.  This is
        true both for CLI clients and TARGET-MIB sessions.
        - netsnmp_tlsbase_verify_server_cert implements these checks
-    */
+     */
     if (netsnmp_tlsbase_verify_server_cert(ssl, tlsdata) != SNMPERR_SUCCESS) {
         /* XXX: unknown vs invalid; two counters */
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
         snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
-        SSL_shutdown(ssl);
-        BIO_free(bio);
-        return NULL;
+        goto err_free_tlsdata;
     }
 
     /* RFC5953 Section 5.3.1: Establishing a Session as a Client
@@ -880,7 +873,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        snmpTlstmSessionOpenErrors counter is incremented and processing
        stops.
 
-    */
+     */
     /* XXX: add snmpTlstmSessionInvalidServerCertificates on
        crypto failure */
 
@@ -892,11 +885,11 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
        future use.  The tlstmSessionID is also stored in the LCD for
        later lookup during processing of incoming messages
        (Section 5.1.2).
-    */
+     */
     /* Implementation notes:
        - the tlsdata pointer is used as our session identifier, as
        noted in the netsnmp_tlstcp_recv() function comments.
-    */
+     */
 
     t->sock = BIO_get_fd(bio, NULL);
     if (t->sock >= 0) {
@@ -907,6 +900,13 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     }
 
     return t;
+
+err_free_bio:
+    BIO_free(bio);
+err_free_tlsdata:
+    netsnmp_tlsbase_free_tlsdata(tlsdata);
+    t->data = NULL;
+    return NULL;
 }
 
 static netsnmp_transport *
