@@ -19,8 +19,9 @@ rpm_version() {
 }
 
 dpkg_version() {
-    type -p dpkg-query >/dev/null 2>&1 &&
+    if type -p dpkg-query >/dev/null 2>&1; then
 	dpkg-query --show -f '${Version}\n' "$1" 2>/dev/null | grep -v '^$'
+    fi
 }
 
 pacman_version() {
@@ -74,7 +75,9 @@ case "$MODE" in
 	echo "libmysqlver=$libmysqlver"
 
 	libsensorsver="$(rpm_version libsensors4-devel;
-		 dpkg_version libsensors-dev libsensors4-dev)"
+                         for p in libsensors4-dev libsensors-dev; do
+			     dpkg_version "$p";
+			 done)"
 	echo "libsensorsver=$libsensorsver"
 
 	if echo "$*" | grep -q wolfssl; then
@@ -413,7 +416,12 @@ case "$MODE" in
         exit 1;;
 esac
 
-[ "${libssh2ver#2}" != "${libssh2ver}" ] && transports+=(SSH)
+[ "${libssh2ver#2}" != "${libssh2ver}" ] &&
+    transports+=(SSH)
+
+# Do not fail configure tests if memory leaks are detected.
+export ASAN_OPTIONS=detect_leaks=0
+
 set -x
 ./configure "${options[@]}" --with-transports="${transports[*]}" \
             --with-security-modules="${security_modules[*]}"	 \
