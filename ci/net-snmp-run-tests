@@ -1,15 +1,19 @@
 #!/bin/sh
 
-scriptdir="$(dirname "$0")"
+set -eu
 
-killall snmpd snmptrapd >/dev/null 2>&1
+scriptdir=$(dirname "$0")
 
-export SNMP_VERBOSE=1 &&
-export SNMP_SAVE_TMPDIR=1 &&
-make -s &&
+if killall snmpd snmptrapd >/dev/null 2>&1; then :; fi
+
+rm -rf /tmp/snmp*
+
+export SNMP_SAVE_TMPDIR=yes
+export SNMP_VERBOSE=1
+make -s -j"$(nproc)"
 (
-      cd testing &&
-      if [ -e RUNFULLTESTS ] &&
+      cd testing
+      if [ -e RUNFULLTESTS ]
 	     perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
           case "$(uname)" in
 	      Darwin)
@@ -32,12 +36,12 @@ make -s &&
           esac
       else
 	  make -s test
-      fi &&
-      cd .. &&
+      fi
+      cd ..
       if grep -q "PERLTARGS='perlmodules'" config.log; then
           "$scriptdir/net-snmp-run-perl-tests"
       fi
-) &&
+)
 # Disable the Python tests because these fail sporadically.
 if false && grep -q with-python-modules config.log; then
     "$scriptdir/net-snmp-run-python-tests"
