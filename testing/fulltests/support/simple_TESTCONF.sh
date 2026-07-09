@@ -266,7 +266,7 @@ if [ -f "$builddir/Makefile" ]; then
         compiler="${MAKEFILE_CC:-gcc}"
         asan_lib=$($compiler -print-file-name=libasan.so 2>/dev/null)
         if [ -f "$asan_lib" ]; then
-            SNMP_PERLPROG="env LD_PRELOAD=$asan_lib LSAN_OPTIONS=exitcode=0 $SNMP_PERLPROG"
+            SNMP_PERLPROG="env LD_PRELOAD=$asan_lib LSAN_OPTIONS=detect_leaks=0:exitcode=0 $SNMP_PERLPROG"
         fi
     fi
 fi
