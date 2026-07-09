@@ -1,0 +1,23 @@
+name: Build and test on FreeBSD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  freebsd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@main
+      - name: Run Net-SNMP tests on FreeBSD
+        uses: vmactions/freebsd-vm@main
+        with:
+          release: "15.1"  # See also https://github.com/anyvm-org/anyvm.
+          usesh: true
+          prepare: |
+            pkg update
+            pkg install -y bash
+            bash -c "export MODE=regular && ci/install.sh"
+
+          run: bash -c "export MODE=regular && ci/build.sh && ci/test.sh"
