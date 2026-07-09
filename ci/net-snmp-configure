@@ -121,6 +121,22 @@ case "$MODE" in
 	;;
 esac
 
+case "$MODE" in
+    asan)
+	SANITIZE_FLAGS=(
+	    -fsanitize=address
+	    -fsanitize=leak
+	    -fsanitize=pointer-compare
+	    -fsanitize=pointer-subtract
+	    -fsanitize=undefined
+	)
+	CFLAGS="$CFLAGS ${SANITIZE_FLAGS[*]}"
+	LDFLAGS="$LDFLAGS ${SANITIZE_FLAGS[*]}"
+	;;
+    *)
+	;;
+esac
+
 options=()
 options+=(--enable-developer)
 options+=("--prefix=/usr/local/net-snmp-${branch_name}")
@@ -409,7 +425,7 @@ case "$MODE" in
         options+=(--enable-read-only);;
     without-nl)
 	options+=(--without-nl);;
-    regular|wolfssl|Android|"")
+    asan|regular|wolfssl|Android|"")
         ;;
     *)
         echo "Error: unknown build type $MODE"

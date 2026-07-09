@@ -15,6 +15,8 @@ jobs:
           - os: ubuntu-latest
             mode: regular
           - os: ubuntu-latest
+            mode: asan
+          - os: ubuntu-latest
             mode: developer
           - os: ubuntu-latest
             mode: disable-ipv6

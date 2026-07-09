@@ -2,14 +2,34 @@
 
 set -eu
 
+compiler_name() {
+    sed -n "s/^CC='//p" config.status | sed "s/'$//"
+}
+
+preload_sanitizers() {
+    cc=$(compiler_name)
+    if grep -q 'configure.*-fsanitize=address' config.log; then
+	LD_PRELOAD="$("${cc}" -print-file-name=libasan.so):$("${cc}" -print-file-name=libubsan.so)"
+	export LD_PRELOAD
+	export ASAN_OPTIONS="detect_leaks=0"
+    fi
+}
+
 scriptdir=$(dirname "$0")
 
 if killall snmpd snmptrapd >/dev/null 2>&1; then :; fi
 
 rm -rf /tmp/snmp*
 
+export NETSNMP_SRC_DIR=$PWD
 export SNMP_SAVE_TMPDIR=yes
 export SNMP_VERBOSE=1
+cat <<EOF >lsan.supp
+leak:/usr/bin/
+leak:/usr/libexec/
+EOF
+export ASAN_OPTIONS=malloc_context_size=100:symbolize=1:external_symbolizer_path=/usr/bin/llvm-symbolizer
+export LSAN_OPTIONS="suppressions=${NETSNMP_SRC_DIR}/lsan.supp"
 make -s -j"$(nproc)"
 (
       cd testing
@@ -39,9 +59,17 @@ make -s -j"$(nproc)"
       fi
       cd ..
       if grep -q "PERLTARGS='perlmodules'" config.log; then
+	  preload_sanitizers
           "$scriptdir/net-snmp-run-perl-tests"
       fi
 )
 if grep -q with-python-modules config.log; then
+    preload_sanitizers
     "$scriptdir/net-snmp-run-python-tests"
 fi
+
+echo ""
+echo "Sanitizer error statistics:"
+grep -nHrE '==ERROR: |^SUMMARY: UndefinedBehavior' /tmp/snmp* 2>/dev/null |
+    sed 's/==[0-9]*==//' |
+    sort
