@@ -124,6 +124,14 @@ sub Debug {
 
 sub System {
     my ($cmd) = @_;
+    my $prefix = "";
+    if ($ENV{'DYLD_LIBRARY_PATH'}) {
+        $prefix .= "DYLD_LIBRARY_PATH='$ENV{'DYLD_LIBRARY_PATH'}' ";
+    }
+    if ($ENV{'LD_LIBRARY_PATH'}) {
+        $prefix .= "LD_LIBRARY_PATH='$ENV{'LD_LIBRARY_PATH'}' ";
+    }
+    $cmd = $prefix . $cmd;
     Debug("running: ", $cmd, "\n");
     system($cmd);
 }
