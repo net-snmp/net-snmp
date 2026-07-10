@@ -148,11 +148,12 @@ static bio_cache *find_bio_cache(netsnmp_transport *t, const netsnmp_sockaddr_st
     bio_cache *cachep = NULL;
     char *addr_str = NULL;
     
-    if (from_addr) {
-        addr_str = netsnmp_dtlsudp_fmtaddr(NULL, from_addr, sizeof(*from_addr), NULL, NULL);
-        DEBUGMSGTL(("dtlsudp:cache", "find_bio_cache: searching for %s, t=%p\n", addr_str ? addr_str : "unknown", t));
-        free(addr_str);
-    }
+    if (from_addr == NULL)
+        return NULL;
+
+    addr_str = netsnmp_dtlsudp_fmtaddr(NULL, from_addr, sizeof(*from_addr), NULL, NULL);
+    DEBUGMSGTL(("dtlsudp:cache", "find_bio_cache: searching for %s, t=%p\n", addr_str ? addr_str : "unknown", t));
+    free(addr_str);
     
     for (cachep = biocache; cachep; cachep = cachep->next) {
         if (cachep->sas.sa.sa_family == AF_INET || cachep->sas.sa.sa_family == AF_INET6) {
