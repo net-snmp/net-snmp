@@ -546,9 +546,20 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
                     addr_pair ? &(addr_pair->local_addr.sin.sin_addr) : NULL,
                     addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
-            rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+            {
+                struct sockaddr_storage peer;
+                socklen_t peer_len = sizeof(peer);
+
+                if (getpeername(t->sock, (struct sockaddr *)&peer, &peer_len) == 0) {
+                    rc = sendto(t->sock, buf, size, 0, NULL, 0);
+                } else {
+                    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
+                }
+            }
 #endif /* netsnmp_udpbase_recvfrom_sendto_defined */
 	    if (rc < 0 && errno != EINTR) {
+                snmp_log(LOG_ERR, "udpbase:send: sendto fd %d err %d (\"%s\")\n",
+                         t->sock, errno, strerror(errno));
                 DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
                             rc, errno));
 		break;
