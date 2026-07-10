@@ -5547,7 +5547,7 @@ _sess_async_send(struct session_list *slp,
         rp->request_id = pdu->reqid;
         rp->message_id = pdu->msgid;
         rp->callback = callback;
-        if (cp_inc) {
+        if (cp_inc && cb_data) {
             netsnmp_refcnt_void *aux_cb_data = (netsnmp_refcnt_void*) cb_data;
             aux_cb_data->refcnt++;
             rp->cb_data_refcounted = 1;
