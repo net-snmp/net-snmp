@@ -1015,26 +1015,29 @@ main(int argc, char *argv[])
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                syslog_handler);
-        if (traph)
+        if (traph) {
             traph->flags |= NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
-        traph->authtypes = TRAP_AUTH_LOG;
+            traph->authtypes = TRAP_AUTH_LOG;
+        }
         snmp_enable_syslog();
 #else /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 #ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                print_handler);
-        if (traph)
+        if (traph) {
             traph->flags |= NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
-        traph->authtypes = TRAP_AUTH_LOG;
+            traph->authtypes = TRAP_AUTH_LOG;
+        }
         snmp_enable_stderr();
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
 #endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     } else {
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                print_handler);
-        if (traph)
+        if (traph) {
             traph->flags |= NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
-        traph->authtypes = TRAP_AUTH_LOG;
+            traph->authtypes = TRAP_AUTH_LOG;
+        }
     }
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
@@ -1083,9 +1086,10 @@ main(int argc, char *argv[])
                               "snmptrapd");
             traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER,
                                                    notification_handler);
-            if (traph)
+            if (traph) {
                 traph->flags |= NETSNMP_TRAPHANDLER_FLAG_BUILTIN;
-            traph->authtypes = TRAP_AUTH_LOG;
+                traph->authtypes = TRAP_AUTH_LOG;
+            }
             init_notification_log();
         }
 #endif
