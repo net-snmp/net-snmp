@@ -614,6 +614,7 @@ int _sslctx_set_tls_version(SSL_CTX *the_ctx)
 SSL_CTX *
 _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
+    const SSL_METHOD *method;
     char         *cipherList;
     X509_LOOKUP  *lookup;
     X509_STORE   *cert_store = NULL;
@@ -638,7 +639,10 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
     }
 
-    if (_sslctx_set_tls_version(the_ctx) == 0)
+    method = SSL_CTX_get_ssl_method(the_ctx);
+    if ((method == TLS_method() || method == TLS_client_method() ||
+         method == TLS_server_method()) &&
+        _sslctx_set_tls_version(the_ctx) == 0)
         return NULL;
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
