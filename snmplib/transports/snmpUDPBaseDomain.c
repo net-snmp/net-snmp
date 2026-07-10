@@ -253,8 +253,18 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
     iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
     iov.iov_len  = len;
 
-    m.msg_name		= NETSNMP_REMOVE_CONST(void *, remote);
-    m.msg_namelen	= sizeof(struct sockaddr_in);
+    {
+        struct sockaddr_storage peer;
+        socklen_t peer_len = sizeof(peer);
+
+        if (getpeername(fd, (struct sockaddr *)&peer, &peer_len) == 0) {
+            m.msg_name = NULL;
+            m.msg_namelen = 0;
+        } else {
+            m.msg_name = NETSNMP_REMOVE_CONST(void *, remote);
+            m.msg_namelen = sizeof(struct sockaddr_in);
+        }
+    }
     m.msg_iov		= &iov;
     m.msg_iovlen	= 1;
     m.msg_flags		= 0;
