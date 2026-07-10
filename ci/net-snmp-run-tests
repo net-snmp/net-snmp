@@ -43,13 +43,6 @@ make -s -j"$(nproc)"
                       echo "==== End of test group $g ===="
 		  done
 		  ;;
-	      FreeBSD)
-		  for g in default snmpv3 transports unit-tests; do
-                      echo "==== Test group $g ===="
-	              ./RUNFULLTESTS -g $g -e T360dtlsudp_simple || exit $?
-                      echo "==== End of test group $g ===="
-		  done
-		  ;;
               *)
 		  ./RUNFULLTESTS -g all
 		  ;;
