@@ -543,39 +543,13 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
 #define TLS1_3_VERSION 0x304
 #endif
 
-SSL_CTX *
-_sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
-    char         *crlFile;
-    char         *cipherList;
+int _sslctx_set_tls_version(SSL_CTX *the_ctx)
+{
 #ifdef SSL_CTX_set_min_proto_version
     const char   *tlsMinVersion;
     const char   *tlsMaxVersion;
     int          tlsVersion;
-#endif
-    X509_LOOKUP  *lookup;
-    X509_STORE   *cert_store = NULL;
 
-    _load_trusted_certs(the_ctx);
-
-    /* add in the CRLs if available */
-
-    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_X509_CRL_FILE);
-    if (NULL != crlFile) {
-        cert_store = SSL_CTX_get_cert_store(the_ctx);
-        DEBUGMSGTL(("sslctx_common", "loading CRL: %s\n", crlFile));
-        if (!cert_store)
-            LOGANDDIE("failed to find certificate store");
-        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
-            LOGANDDIE("failed to create a lookup function for the CRL file");
-        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
-            LOGANDDIE("failed to load the CRL file");
-        /* tell openssl to check CRLs */
-        X509_STORE_set_flags(cert_store,
-                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-    }
-
-#ifdef SSL_CTX_set_min_proto_version
     tlsVersion = TLS1_2_VERSION;
     tlsMinVersion = "tls1_2";
     tlsMinVersion = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -633,6 +607,39 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         LOGANDDIE("Set tlsMaxVersion failed");
     }
 #endif
+
+    return 1;
+}
+
+SSL_CTX *
+_sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
+    char         *crlFile;
+    char         *cipherList;
+    X509_LOOKUP  *lookup;
+    X509_STORE   *cert_store = NULL;
+
+    _load_trusted_certs(the_ctx);
+
+    /* add in the CRLs if available */
+
+    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_X509_CRL_FILE);
+    if (NULL != crlFile) {
+        cert_store = SSL_CTX_get_cert_store(the_ctx);
+        DEBUGMSGTL(("sslctx_common", "loading CRL: %s\n", crlFile));
+        if (!cert_store)
+            LOGANDDIE("failed to find certificate store");
+        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
+            LOGANDDIE("failed to create a lookup function for the CRL file");
+        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
+            LOGANDDIE("failed to load the CRL file");
+        /* tell openssl to check CRLs */
+        X509_STORE_set_flags(cert_store,
+                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+    }
+
+    if (_sslctx_set_tls_version(the_ctx) == 0)
+        return NULL;
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
