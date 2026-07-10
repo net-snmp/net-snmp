@@ -2,7 +2,13 @@
 
 use NetSNMPTest;
 use Test;
-use SNMP;
+BEGIN {
+    eval "use SNMP;";
+    if ($@) {
+        print "1..0 # Skip SNMP perl module not available\n";
+        exit 0;
+    }
+}
 
 my $test = new NetSNMPTest(agentaddress => $agentaddress);
 
