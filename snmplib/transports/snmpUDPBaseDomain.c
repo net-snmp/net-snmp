@@ -263,6 +263,10 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         } else {
             m.msg_name = NETSNMP_REMOVE_CONST(void *, remote);
             m.msg_namelen = sizeof(struct sockaddr_in);
+            if (errno != ENOTCONN) {
+                snmp_log(LOG_ERR, "udpbase:sendto: fd %d getpeername failed: %d (%s)\n",
+                         fd, errno, strerror(errno));
+            }
         }
     }
     m.msg_iov		= &iov;
@@ -364,7 +368,12 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         m.msg_controllen = 0;
     }
 
-    return sendmsg(fd, &m, MSG_DONTWAIT);
+    rc = sendmsg(fd, &m, MSG_DONTWAIT);
+    if (rc < 0) {
+        snmp_log(LOG_ERR, "udpbase:sendto: sendmsg fd %d err %d (\"%s\") msg_name=%p\n",
+                 fd, errno, strerror(errno), m.msg_name);
+    }
+    return rc;
 }
 #else /* !defined(WIN32) */
 int netsnmp_udpbase_sendto_win32(int fd, const struct in_addr *srcip,
