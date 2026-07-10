@@ -489,29 +489,34 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
     const netsnmp_indexed_addr_pair *addr_pair = NULL;
     const struct sockaddr *to = NULL;
 
-    if (opaque != NULL && *opaque != NULL && NULL != olength &&
-        ((*olength == sizeof(netsnmp_indexed_addr_pair) ||
-          (*olength == sizeof(struct sockaddr_in))))) {
-        addr_pair = (const netsnmp_indexed_addr_pair *) (*opaque);
-    } else if (t != NULL && t->data != NULL &&
-                t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
-        addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
+    if (opaque && *opaque && olength) {
+        if (*olength == sizeof(netsnmp_indexed_addr_pair)) {
+            addr_pair = *opaque;
+            to = &addr_pair->remote_addr.sa;
+        } else if (*olength == sizeof(struct sockaddr_in)) {
+            to = *opaque;
+        } else {
+            snmp_log(LOG_ERR, "unknown addr type of size %d\n", *olength);
+            return SNMPERR_GENERR;
+        }
+    } else if (t && t->data &&
+               t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
+        addr_pair = t->data;
+        to = &addr_pair->remote_addr.sa;
     } else {
         int len = -1;
-        if (opaque != NULL && *opaque != NULL && NULL != olength)
-            len = *olength;
-        else if (t != NULL && t->data != NULL)
+
+        if (t != NULL && t->data != NULL)
             len = t->data_length;
         snmp_log(LOG_ERR, "unknown addr type of size %d\n", len);
         return SNMPERR_GENERR;
     }
 
-    to = &addr_pair->remote_addr.sa;
-
     if (to != NULL && t != NULL && t->sock >= 0) {
         DEBUGIF("netsnmp_udp") {
-            char *str = netsnmp_udp_fmtaddr(NULL, addr_pair,
-                                            sizeof(netsnmp_indexed_addr_pair));
+            char *str = netsnmp_udp_fmtaddr(NULL,
+                                            addr_pair ? (const void *)addr_pair : (const void *)to,
+                                            addr_pair ? sizeof(netsnmp_indexed_addr_pair) : sizeof(struct sockaddr_in));
             DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
                         size, buf, str, t->sock));
             free(str);
