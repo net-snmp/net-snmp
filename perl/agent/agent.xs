@@ -368,12 +368,9 @@ nsahr_register(me)
         SV *me;
         PREINIT:
         netsnmp_handler_registration *reginfo;
-        handler_cb_data *cb_data = NULL;
         CODE:
             {
                 reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
-                if (reginfo && reginfo->handler && reginfo->handler->myvoid)
-                    cb_data = (handler_cb_data *) (reginfo->handler->myvoid);
                 RETVAL = netsnmp_register_handler(reginfo);
                 if (!RETVAL) {
                     /* the agent now has a "reference" to this reg pointer */
