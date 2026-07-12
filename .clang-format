@@ -2,6 +2,7 @@ Language: Cpp
 BasedOnStyle: GNU
 
 AllowShortFunctionsOnASingleLine: None
+AlignConsecutiveDeclarations: Consecutive
 BraceWrapping:
   AfterClass: false
   AfterControlStatement: false
@@ -25,6 +26,18 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: false
 UseTab: Never
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterForeachMacros: true
+  AfterIfMacros: true
+  AfterOverloadedOperator: false
+  AfterPlacementOperator: false
+  AfterRequiresInClause: false
+  AfterRequiresInExpression: false
+  BeforeNonEmptyParentheses: false
 
 # Custom Net-SNMP Type Names
 TypeNames:
