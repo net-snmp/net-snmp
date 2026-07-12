@@ -143,9 +143,8 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, const void *buf, int size,
         DEBUGIF("netsnmp_aal5pvc") {
             char *str = netsnmp_aal5pvc_fmtaddr(NULL, to,
                                                 sizeof(struct sockaddr_atmpvc));
-            DEBUGMSGTL(("netsnmp_aal5pvc",
-                        "send %d bytes from %p to %s on fd %d\n",
-                        size, buf, str, t->sock));
+            DEBUGMSGTL(("netsnmp_aal5pvc", "send %d bytes to %s on fd %d\n",
+                        size, str, t->sock));
             free(str);
         }
 	while (rc < 0) {

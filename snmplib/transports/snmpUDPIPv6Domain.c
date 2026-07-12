@@ -159,13 +159,12 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
         DEBUGIF("netsnmp_udp6") {
             char *str = netsnmp_udp6_fmtaddr(NULL, to,
                                              sizeof(struct sockaddr_in6));
-            DEBUGMSGTL(("netsnmp_udp6",
-                        "send %d bytes from %p to %s on fd %d\n",
-                        size, buf, str, t->sock));
+            DEBUGMSGTL(("netsnmp_udp6", "send %d bytes to %s on fd %d\n", size,
+                        str, t->sock));
             free(str);
         }
 	while (rc < 0) {
-	    rc = sendto(t->sock, buf, size, 0, to,sizeof(struct sockaddr_in6));
+	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr_in6));
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }

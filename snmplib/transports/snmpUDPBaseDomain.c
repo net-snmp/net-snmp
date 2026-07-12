@@ -536,8 +536,8 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
             char *str = netsnmp_udp_fmtaddr(NULL,
                                             addr_pair ? (const void *)addr_pair : (const void *)to,
                                             addr_pair ? sizeof(netsnmp_indexed_addr_pair) : sizeof(struct sockaddr_in));
-            DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
-                        size, buf, str, t->sock));
+            DEBUGMSGTL(("netsnmp_udp", "send %d bytes to %s on fd %d\n", size,
+                        str, t->sock));
             free(str);
         }
 	while (rc < 0) {

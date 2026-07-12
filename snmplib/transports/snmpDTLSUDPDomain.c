@@ -1246,8 +1246,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     DEBUGIF ("9:dtlsudp") {
         char *str = t->base_transport->f_fmtaddr(t, addr_pair,
                                         sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("9:dtlsudp", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
+        DEBUGMSGTL(("9:dtlsudp", "send %d bytes to %s on fd %d\n", size, str,
+                    t->sock));
         free(str);
     }
 
