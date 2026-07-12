@@ -1,10 +1,11 @@
 #!/usr/bin/env perl
 #
-# Use the "connect" trick to find out my IP address.
-# Note that the destination address here does not
-# actually matter, we will never send any data to it.
-# We use Google's public DNS server, since, it doesn't
-# matter.
+# Obtain a local IP address that differs from the localhost IP address. Tests
+# like T180 to T185 verify the clientaddr configuration directive. These tests
+# make snmpd to send its outgoing traps from the localhost address to the
+# address returned by this script. These tests can only verify the effect of the
+# "clientaddr" configuration directive if this script returns another address
+# than the localhost address.
 
 use strict;
 use warnings;
