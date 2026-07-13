@@ -5123,6 +5123,7 @@ int
 add_mibdir(const char *dirname)
 {
     const char     *oldFile = File;
+    int             oldLine = mibLine;
     char          **filenames;
     int             count = 0;
     int             filename_count, i;
@@ -5138,6 +5139,7 @@ add_mibdir(const char *dirname)
 	    free(filenames[i]);
         }
         File = oldFile;
+        mibLine = oldLine;
         free(filenames);
         return (count);
     }
@@ -5157,6 +5159,8 @@ read_mib(const char *filename)
 {
     FILE           *fp;
     char            token[MAXTOKEN];
+    const char     *oldFile = File;
+    int             oldLine = mibLine;
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -5169,12 +5173,16 @@ read_mib(const char *filename)
     if (get_token(fp, token, MAXTOKEN) != LABEL) {
 	    snmp_log(LOG_ERR, "Failed to parse MIB file %s\n", filename);
 	    fclose(fp);
+	    File = oldFile;
+	    mibLine = oldLine;
 	    return NULL;
     }
     fclose(fp);
     new_module(token, filename);
     (void) netsnmp_read_module(token);
 
+    File = oldFile;
+    mibLine = oldLine;
     return tree_head;
 }
 

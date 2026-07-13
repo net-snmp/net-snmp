@@ -1,0 +1,23 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER snmpwalk heap-use-after-free reproducer
+
+# Set MIBS env var to trigger the bug.
+# We set it to / which is a 2-byte string (including null terminator) when duplicated.
+export MIBS=/
+
+# Run snmpwalk. We expect it to fail because OID ':' is invalid, but it should not crash.
+CAPTURE "snmpwalk -v 3 -u fake localhost :"
+
+# Check that it did not crash with ASan or signal
+CHECKANDDIE "AddressSanitizer"
+CHECKANDDIE "Segmentation fault"
+CHECKANDDIE "Bus error"
+
+# If it is fixed, it should print "Cannot find module: At line 0 in (none)"
+# because it tries to load empty module "" (from OID ':') and fails, and File should be "(none)".
+CHECKORDIE "Cannot find module: At line 0 in (none)"
+
+FINISHED
