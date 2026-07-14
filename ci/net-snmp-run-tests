@@ -21,7 +21,7 @@ if killall snmpd snmptrapd >/dev/null 2>&1; then :; fi
 
 rm -rf /tmp/snmp*
 
-export NETSNMP_SRC_DIR=$PWD
+export NETSNMP_SRC_DIR="$PWD"
 export SNMP_SAVE_TMPDIR=yes
 export SNMP_VERBOSE=1
 cat <<EOF >lsan.supp
@@ -30,28 +30,43 @@ leak:/usr/libexec/
 EOF
 export ASAN_OPTIONS=malloc_context_size=100:symbolize=1:external_symbolizer_path=/usr/bin/llvm-symbolizer
 export LSAN_OPTIONS="suppressions=${NETSNMP_SRC_DIR}/lsan.supp"
-make -s -j"$(nproc)"
-(
-      cd testing
-      if [ -e RUNFULLTESTS ]
-	     perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
-          case "$(uname)" in
-              *)
-		  ./RUNFULLTESTS -g all
-		  ;;
-          esac
-      else
-	  make -s test
-      fi
-      cd ..
-      if grep -q "PERLTARGS='perlmodules'" config.log; then
-	  preload_sanitizers
-          "$scriptdir/net-snmp-run-perl-tests"
-      fi
-)
-if grep -q with-python-modules config.log; then
-    preload_sanitizers
-    "$scriptdir/net-snmp-run-python-tests"
+if command -v nproc >/dev/null 2>&1; then
+    nproc=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+    nproc=$(sysctl -n hw.ncpu)
+else
+    nproc=1
+fi
+make -s -j"${nproc}"
+
+export PATH="/usr/local/bin:$PATH"
+
+rc=0
+
+# Run TLS tests
+cd testing
+if [ -e RUNFULLTESTS ] &&
+   perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
+    ./RUNFULLTESTS -v -g tls,transports || rc=$?
+else
+    make -s test || rc=$?
+fi
+cd ..
+
+# Run Perl tests if TLS tests passed
+if [ $rc -eq 0 ]; then
+    if grep -q "PERLTARGS='perlmodules'" config.log; then
+        preload_sanitizers
+        "$scriptdir/net-snmp-run-perl-tests" || rc=$?
+    fi
+fi
+
+# Run Python tests if previous tests passed
+if [ $rc -eq 0 ]; then
+    if grep -q with-python-modules config.log; then
+        preload_sanitizers
+        "$scriptdir/net-snmp-run-python-tests" || rc=$?
+    fi
 fi
 
 echo ""
@@ -59,3 +74,21 @@ echo "Sanitizer error statistics:"
 grep -nHrE '==ERROR: |^SUMMARY: UndefinedBehavior' /tmp/snmp* 2>/dev/null |
     sed 's/==[0-9]*==//' |
     sort
+
+if [ $rc -ne 0 ]; then
+    echo "=== Dumping logs for failed tests ==="
+    for d in /tmp/snmp-test-*; do
+        if [ -d "$d" ]; then
+            echo "--- Directory: $d ---"
+            ls -la "$d"
+            for f in "$d"/*; do
+                if [ -f "$f" ]; then
+                    echo "  File: $f"
+                    cat "$f" | sed 's/^/    /'
+                fi
+            done
+        fi
+    done
+fi
+
+exit $rc
