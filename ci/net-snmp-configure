@@ -354,7 +354,7 @@ if [ -z "$have_ssl" ]; then
     options+=("--with-openssl=internal")
     with_openssl="internal"
 else
-    if grep -rq 'BIO_dgram_get_peer(void)\|define BIO_dgram_get_peer' "${ssl_include_path}" 2>/dev/null; then
+    if grep -Erq 'BIO_dgram_get_peer\(void\)|define BIO_dgram_get_peer' "${ssl_include_path}" 2>/dev/null; then
 	transports+=(DTLSUDP TLSTCP)
     else
 	echo "BIO_dgram_get_peer() not found:"
