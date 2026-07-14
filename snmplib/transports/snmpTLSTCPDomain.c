@@ -567,6 +567,13 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     }
         
     SSL_set_bio(ssl, accepted_bio, accepted_bio);
+
+    {
+        int fd = BIO_get_fd(accepted_bio, NULL);
+
+        if (fd >= 0 && netsnmp_set_non_blocking_mode(fd, FALSE) < 0)
+            DEBUGMSGTL(("tlstcp", "couldn't set blocking mode on accepted fd %d\n", fd));
+    }
         
     if ((rc = SSL_accept(ssl)) <= 0) {
         snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
