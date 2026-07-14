@@ -72,6 +72,9 @@ case "$(uname)" in
 	    ln -s /usr/local/bin/perl /usr/bin/perl
 	fi
 	;;
+    OpenBSD)
+	pkg_add bash gawk libssh2
+	;;
 esac
 
 case "$MODE" in

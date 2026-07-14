@@ -47,6 +47,15 @@ freebsd_pkg_version() {
     return 1
 }
 
+openbsd_pkg_version() {
+    local pkg ver
+    for pkg in "$@"; do
+	ver=$(pkg_info -e "$pkg" 2>/dev/null | sed -e "s/^$pkg-//") &&
+	    [ -n "$ver" ] && echo "$ver" && return
+    done
+    return 1
+}
+
 # Given the name of a compiler executable ($1), derive the compiler type (gcc,
 # clang, xlc, ...).
 compiler_type() {
@@ -90,6 +99,8 @@ case "$MODE" in
 	case "$(uname)" in
 	    FreeBSD*)
 		libssh2ver="$(freebsd_pkg_version libssh2 2>/dev/null)";;
+	    OpenBSD*)
+		libssh2ver="$(openbsd_pkg_version libssh2 2>/dev/null)";;
 	    Linux*)
 		libssh2ver="$(for p in openssh-devel libssh2-devel libssh-devel
 			do
@@ -107,6 +118,11 @@ case "$MODE" in
 	case "$(uname)" in
 	    FreeBSD*)
 		perldevver="$(freebsd_pkg_version perl5 2>/dev/null)";;
+	    OpenBSD*)
+		if type perl >/dev/null 2>&1; then
+		    perldevver="$(perl -e 'print $^V')"
+		fi
+		;;
 	    Linux*)
 		perldevver="$(rpm_version perl;
 			      dpkg_version libperl-dev;
@@ -287,6 +303,26 @@ case "$(uname):${MODE}" in
               mibs+=(mibII/mta_sendmail)
               mibs+=(misc/ipfwacc)
               mibs+=(sctp-mib)
+              mibs+=(snmp-notification-mib)
+              mibs+=(tcp-mib)
+              mibs+=(ucd-snmp/diskio)
+              mibs+=(ucd-snmp/extensible)
+              mibs+=(udp-mib)
+              mibs+=(Rmon)
+              ;;
+      esac
+      options+=(--disable-embedded-perl --without-perl-modules)
+    ;;
+  OpenBSD*)
+      case "$MODE" in
+          mini*|read-only)
+              ;;
+          *)
+              mibs+=(disman/nslookup-mib)
+              mibs+=(host)
+              mibs+=(if-mib)
+              mibs+=(mibII/mta_sendmail)
+              mibs+=(misc/ipfwacc)
               mibs+=(snmp-notification-mib)
               mibs+=(tcp-mib)
               mibs+=(ucd-snmp/diskio)
