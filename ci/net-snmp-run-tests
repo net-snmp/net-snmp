@@ -47,7 +47,15 @@ rc=0
 cd testing
 if [ -e RUNFULLTESTS ] &&
    perl -e 'require TAP::Harness;' >/dev/null 2>&1; then
-    ./RUNFULLTESTS -v -g tls,transports || rc=$?
+    echo "uname = $(uname)"
+    case "$(uname)" in
+	OpenBSD)
+	    ./RUNFULLTESTS -g all -e 'dtls|tls'
+	    ;;
+	*)
+	    ./RUNFULLTESTS -g all
+	    ;;
+    esac || rc=$?
 else
     make -s test || rc=$?
 fi
