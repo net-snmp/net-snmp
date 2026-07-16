@@ -38,7 +38,7 @@
 #include <netinet/tcpip.h>
 #endif
 #ifdef HAVE_NETINET_TCP_TIMER_H
-#if __FreeBSD_version >= 1500048
+#if defined(__FreeBSD_version) && __FreeBSD_version -0 >= 1500048
 #define PR_SLOWHZ	2	/* 2 slow timeouts per second */
 #define _KERNEL
 #define max(x, y) (((x) > (y)) ? (x) : (y))
@@ -46,7 +46,7 @@
 	(m) : ((uint64_t)(m) * (uint64_t)hz)/(uint64_t)1000)) 
 #endif
 #include <netinet/tcp_timer.h>
-#if __FreeBSD_version >= 1500048
+#if defined(__FreeBSD_version) && __FreeBSD_version -0 >= 1500048
 #undef _KERNEL
 #endif
 #endif

@@ -495,7 +495,7 @@ snmpNotifyTable_free(struct snmpNotifyTable_data *thedata)
 }
 
 void
-snmpNotifyTable_dispose(struct snmpNotifyTable_data *thedata)
+snmpNotifyTable_dispose(void *thedata)
 {
     if (NULL == thedata)
         return;
@@ -595,8 +595,7 @@ shutdown_snmpNotifyTable_data(void)
                              SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
                              NULL, FALSE);
 #endif
-    header_complex_free_all(snmpNotifyTableStorage,
-                            (HeaderComplexCleaner *) snmpNotifyTable_dispose);
+    header_complex_free_all(snmpNotifyTableStorage, snmpNotifyTable_dispose);
     snmpNotifyTableStorage = NULL;
 
     DEBUGMSGTL(("trap:notify:shutdown", "active count %d\n", _active));

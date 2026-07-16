@@ -172,8 +172,6 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
     struct msghdr m = { NULL };
     char          cmsg[CMSG_SPACE(cmsg_data_size)];
     int           rc;
-    char          iface[IFNAMSIZ];
-    socklen_t     ifacelen = IFNAMSIZ;
 
     iov.iov_base = NETSNMP_REMOVE_CONST(void *, data);
     iov.iov_len = len;
@@ -204,6 +202,10 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
         memset(&ipi, 0, sizeof(ipi));
 
 #ifdef HAVE_SO_BINDTODEVICE
+        {
+        char          iface[IFNAMSIZ];
+        socklen_t     ifacelen = IFNAMSIZ;
+
         /*
          * For asymmetric multihomed users, we only set ifindex to 0 to
          * let kernel handle return if there was no iface bound to the
@@ -221,6 +223,7 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
                         "sendto: SO_BINDTODEVICE dev=%s using ifindex=%d\n",
                         iface, if_index));
             use_sendto = TRUE;
+        }
         }
 #endif /* HAVE_SO_BINDTODEVICE */
 

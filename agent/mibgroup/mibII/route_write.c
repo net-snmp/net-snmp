@@ -150,9 +150,6 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 
        shutdown(s, SHUT_RD);
 
-       /* possible panic otherwise */
-       flags |= (RTF_UP | RTF_GATEWAY);
-
        bzero(&rtmsg, sizeof(rtmsg));
 
        rtmsg.hdr.rtm_type = RTM_ADD;
@@ -237,9 +234,6 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
        }
 
        shutdown(s, SHUT_RD);
-
-       /* possible panic otherwise */
-       flags |= (RTF_UP | RTF_GATEWAY);
 
        bzero(&rtmsg, sizeof(rtmsg));
 
