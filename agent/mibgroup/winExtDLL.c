@@ -2,7 +2,7 @@
  * @brief winExtDLL Net-SNMP agent extension module.
  *
  * Copyright (c) 2006-2009 Alex Burger.
- * Copyright (c) 2009-2021 Bart Van Assche <bart.vanassche@gmail.com>.
+ * Copyright (c) 2009-2024 Bart Van Assche <bvanassche@acm.org>.
  *
  * This Net-SNMP agent extension module loads Windows SNMP Extension Agent
  * DLLs in the Net-SNMP agent. Not only extension DLLs provided with Windows
