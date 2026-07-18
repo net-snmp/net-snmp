@@ -154,7 +154,7 @@ netsnmp_row_merge_status_first(netsnmp_handler_registration *reginfo,
     if (NULL == rm_status)
         return 0;
 
-    return (rm_status->count == 1) ? 1 : (rm_status->current == 1);
+    return rm_status->count == 1 || rm_status->current == 1;
 }
 
 /** Determine if this is the last row
@@ -174,8 +174,7 @@ netsnmp_row_merge_status_last(netsnmp_handler_registration *reginfo,
     if (NULL == rm_status)
         return 0;
 
-    return (rm_status->count == 1) ? 1 :
-        (rm_status->current == rm_status->rows);
+    return rm_status->count == 1 || rm_status->current == rm_status->rows;
 }
 
 
