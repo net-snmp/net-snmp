@@ -211,6 +211,10 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
      */
     rm_status = netsnmp_row_merge_status_get(reginfo, reqinfo, 1);
 
+    if (!rm_status) {
+        return SNMP_ERR_GENERR;
+    }
+
     /*
      * Count the requests, and set up an array to keep
      *  track of the original order.
@@ -271,6 +275,13 @@ netsnmp_row_merge_helper_handler(netsnmp_mib_handler *handler,
         rm_status->saved_requests = calloc(count+1,
                                            sizeof(netsnmp_request_info*));
         rm_status->saved_status = calloc(count, sizeof(char));
+    }
+
+    if (!rm_status->saved_requests || !rm_status->saved_status) {
+        free(rm_status->saved_requests);
+        free(rm_status->saved_status);
+        free(rm_status);
+        return SNMP_ERR_GENERR;
     }
 
     saved_status = rm_status->saved_status;
