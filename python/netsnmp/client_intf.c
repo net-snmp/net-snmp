@@ -1384,8 +1384,6 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
   size_t oid_arr_len = MAX_OID_LEN;
   int type;
   char *str_buf = NULL;
-  const char *tag;
-  const char *iid;
   int getlabel_flag = NO_FLAGS;
   int sprintval_flag = USE_BASIC;
   int verbose = py_netsnmp_verbose();
@@ -1436,6 +1434,8 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
       PyObject *varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
+	const char *tag = NULL;
+	const char *iid = NULL;
 	if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
 	    py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
 	{
@@ -1445,7 +1445,8 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 	}
 
 	if (_debug_level)
-            printf("%s: filling request: %s:%s:%zd:%d\n", func_name, tag, iid,
+            printf("%s: filling request: %s:%s:%zd:%d\n", func_name,
+                   tag ? tag : "(null)", iid ? iid : "(null)",
                    oid_arr_len, best_guess);
 
 	if (oid_arr_len) {
