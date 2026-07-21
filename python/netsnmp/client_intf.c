@@ -1112,14 +1112,14 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
     goto end;
   }
 
-  session.peername = peer;
+  session.peername = netsnmp_strdup(peer);
   session.retries = retries; /* 5 */
   session.timeout = timeout; /* 1000000L */
   session.authenticator = NULL;
   session.contextNameLen = STRLEN(context);
-  session.contextName = context;
+  session.contextName = netsnmp_strdup(context);
   session.securityNameLen = STRLEN(sec_name);
-  session.securityName = sec_name;
+  session.securityName = netsnmp_strdup(sec_name);
   session.securityLevel = sec_level;
   session.securityModel = USM_SEC_MODEL_NUMBER;
   session.securityEngineIDLen =
@@ -1201,8 +1201,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
       printf("error:v3_session: couldn't open SNMP session(%s).\n",
 	     snmp_api_errstring(snmp_errno));
   }
-  free (session.securityEngineID);
-  free (session.contextEngineID);
+  netsnmp_cleanup_session(&session);
 
   return PyLong_FromVoidPtr(ss);
 }
