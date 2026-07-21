@@ -1688,7 +1688,7 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
          * XXX  Hardwired to seek into a 1DES private key!
          */
         if (USM_CREATE_USER_PRIV_DES == (priv_type & USM_PRIV_MASK_ALG)) {
-            if (!thePrivKey ||
+            if (!thePrivKey || thePrivKeyLength < 16 ||
                 (usm_set_salt(salt, &salt_length,
                               thePrivKey + 8, thePrivKeyLength - 8,
                               &ptr[privParamsOffset])
@@ -2166,10 +2166,11 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         if (USM_CREATE_USER_PRIV_DES == (priv_type & USM_PRIV_MASK_ALG)) {
             salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
             save_salt_length = BYTESIZE(USM_DES_SALT_LENGTH);
-            if (!thePrivKey || (usm_set_salt(salt, &salt_length,
-                                             thePrivKey + 8,
-                                             thePrivKeyLength - 8,
-                                             iv) == -1)) {
+            if (!thePrivKey || thePrivKeyLength < 16 ||
+                (usm_set_salt(salt, &salt_length,
+                              thePrivKey + 8,
+                              thePrivKeyLength - 8,
+                              iv) == -1)) {
                 DEBUGMSGTL(("usm", "Can't set DES-CBC salt.\n"));
                 SNMP_FREE(ciphertext);
                 return SNMPERR_USM_GENERICERROR;
