@@ -1,0 +1,19 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER "SNMPv3 short private key"
+
+# Run snmpbulkget with a 1-byte localized private key (-3K30) and authPriv (-l3).
+# It should not crash.
+# We set timeout to 1 and retries to 0 to make it fail fast.
+# We use a dummy address '00' which is invalid.
+
+CAPTURE "snmpbulkget -v 3 -t 1 -r 0 00 -eE000000001 -3K30 -u0 -l3 .1.3.6.1.2.1.1.1.0"
+
+# Verify that it didn't crash
+CHECKANDDIE "AddressSanitizer"
+CHECKANDDIE "Segmentation fault"
+CHECKANDDIE "core dumped"
+
+FINISHED
