@@ -1,0 +1,6 @@
+FROM ubuntu:24.04
+
+COPY ci/install.sh ci/
+RUN ci/install.sh
+
+WORKDIR /src

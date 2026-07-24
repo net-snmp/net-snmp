@@ -1,0 +1,87 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER ENTITY-MIB entPhysicalTable and related tables
+
+SKIPIFNOT USING_HARDWARE_ENTITY_ENTPHYSICALTABLE_MODULE
+
+#
+# Begin test
+#
+
+. ./Sv2cconfig
+
+# ---- Section 1: per-entity field overrides (entitySensitiveData defaults yes) ----
+
+CONFIGAGENT entityAssetID 1 TEST-ASSET-TAG
+CONFIGAGENT entitySerialNum 1 TEST-SERIAL-NUM
+
+STARTAGENT
+
+# entPhysicalSerialNum.1 must return the configured override.
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.11.1"
+CHECKORDIE "TEST-SERIAL-NUM"
+
+# entPhysicalAssetID.1 must return the configured override.
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.15.1"
+CHECKORDIE "TEST-ASSET-TAG"
+
+STOPAGENT
+
+# ---- Section 2: sensitive data suppression + structural checks ----
+
+CONFIGAGENT entitySensitiveData no
+
+STARTAGENT
+
+# entPhysicalDescr (column 2): at least one string-typed varbind must exist.
+# On any real Linux system there is always at least a chassis entry.
+CAPTURE "snmpwalk -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.2"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.1\.1\.1\.2\."
+
+# entPhysicalClass (column 5): at least one integer class value must exist.
+CAPTURE "snmpwalk -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.5"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.1\.1\.1\.5\."
+CHECKCOUNT atleastone " = INTEGER:"
+
+# entPhysicalIsFRU (column 16): must return TruthValue (INTEGER 1 or 2).
+CAPTURE "snmpwalk -Oen $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.16"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.1\.1\.1\.16\."
+CHECKANDDIE " = INTEGER: [03-9]"
+
+# entitySensitiveData no must suppress serial numbers (override value must not appear).
+CAPTURE "snmpwalk -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.11"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.1\.1\.1\.11\."
+CHECKANDDIE " = STRING: \"[^\"]"
+
+# entitySensitiveData no must suppress asset IDs (override value must not appear).
+CAPTURE "snmpwalk -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.1.1.1.15"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.1\.1\.1\.15\."
+CHECKANDDIE " = STRING: \"[^\"]"
+
+# entPhysicalContainsTable (.47.1.3.3): at least one child relationship exists.
+CAPTURE "snmpwalk -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.3.3"
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.3\.3\."
+CHECKCOUNT atleastone "\.1\.3\.6\.1\.2\.1\.47\.1\.3\.3\.1\.1\.[0-9][0-9]*\.[0-9][0-9]* = INTEGER: [0-9]"
+
+# entLogicalTDomain is unknown rather than a guessed UDP/161 endpoint.
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.47.1.2.1.1.6.1"
+CHECKORDIE ".1.3.6.1.2.1.47.1.2.1.1.6.1 = OID: .0.0"
+
+# entLastChangeTime (.47.1.4.1.0) must be a Timeticks scalar.
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0 .1.3.6.1.2.1.47.1.4.1.0"
+CHECKCOUNT 2 " = Timeticks: ("
+CHECKORDIE ".1.3.6.1.2.1.47.1.4.1.0 = Timeticks:"
+
+sys_ticks=`sed -n 's/^\.1\.3\.6\.1\.2\.1\.1\.3\.0 = Timeticks: (\([0-9][0-9]*\)).*/\1/p' "$junkoutputfile"`
+ent_ticks=`sed -n 's/^\.1\.3\.6\.1\.2\.1\.47\.1\.4\.1\.0 = Timeticks: (\([0-9][0-9]*\)).*/\1/p' "$junkoutputfile"`
+if [ -n "$sys_ticks" ] && [ -n "$ent_ticks" ] && [ "$ent_ticks" -le "$sys_ticks" ]; then
+    GOOD "entLastChangeTime is not greater than sysUpTime"
+else
+    BAD "entLastChangeTime must be a sysUpTime TimeStamp"
+fi
+
+STOPAGENT
+
+FINISHED

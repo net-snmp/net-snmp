@@ -668,7 +668,41 @@ this calculation and the agent reports real hrStorageAllocationUnits, but it
 might report wrong hrStorageSize for big drives because the value won't fit into
 Integer32. In this case, hrStorageAllocationUnits x hrStorageSize won't give
 real size of the storage.
-.SS Process Monitoring 
+.SS Entity MIB
+The following directives configure the ENTITY-MIB hardware module
+(\fCentPhysicalTable\fR and related tables).
+.IP "entitySensitiveData yes|no"
+Controls whether potentially identifying fields are included in SNMP responses.
+The default is \fByes\fR.
+When set to \fBno\fR the following columns are returned as empty strings:
+\fCentPhysicalSerialNum\fR,
+\fCentPhysicalAlias\fR,
+\fCentPhysicalAssetID\fR,
+\fCentPhysicalUris\fR, and
+\fCentPhysicalUUID\fR.
+.IP "entityAssetID INDEX VALUE"
+Override the \fCentPhysicalAssetID\fR value for the row with
+\fCentPhysicalIndex\fR equal to \fIINDEX\fR.
+The override is applied on every cache refresh so it survives hardware rescans.
+Multiple directives for different indexes are supported.
+.IP "entitySerialNum INDEX VALUE"
+Override the \fCentPhysicalSerialNum\fR value for the row with
+\fCentPhysicalIndex\fR equal to \fIINDEX\fR.
+Useful for correcting BIOS-reported serial numbers or for systems where the
+serial number is not exposed through hardware interfaces.
+.RS
+.IP "Example:"
+.nf
+entityAssetID   1  DC-RACK42-U3
+entitySerialNum 1  SN-CORRECT-123456
+.fi
+.PP
+To find the right index:
+.nf
+snmpwalk -v2c -c public localhost entPhysicalDescr
+.fi
+.RE
+.SS Process Monitoring
 The \fChrSWRun\fR group of the Host Resources MIB provides
 information about individual processes running on the local system.
 The \fCprTable\fR of the UCD\-SNMP\-MIB complements this by reporting
