@@ -280,7 +280,7 @@ int             proc_v4(char *, ssize_t, struct timeval *, time_t,
                         struct pingCtlTable_data *, struct addrinfo *, int,
                         unsigned long *, unsigned long *, unsigned long *,
                         unsigned long *, unsigned long, int, int, int,
-                        struct pingProbeHistoryTable_data *, pid_t);
+                        struct pingProbeHistoryTable_data **, pid_t);
 void            send_v4(int, pid_t, int, int, char *);
 void            readloop(struct pingCtlTable_data *, struct addrinfo *,
                          int, unsigned long *, unsigned long *,
@@ -393,7 +393,7 @@ int             gather_statistics(int *, struct pingCtlTable_data *,
                                   int *, __u16 *, long *, long *, long *,
                                   long *, long *, long *, long long *,
                                   long long *, int *, int *, int *,
-                                  struct pingProbeHistoryTable_data *);
+                                  struct pingProbeHistoryTable_data **);
 void            finish(int, char *, int, int, int *, struct timeval *,
                        int *, long *, long *, long *, long *, long *,
                        long *, long *, long *, long long *, long long *,
@@ -414,7 +414,7 @@ int             parse_reply(int *, struct pingCtlTable_data *,
                             __u16 *, long *, long *, long *, long *,
                             long *, long *, long *, long long *,
                             long long *, int *, int *, int *,
-                            struct pingProbeHistoryTable_data *);
+                            struct pingProbeHistoryTable_data **);
 void            install_filter(int, int *);
 
 #endif

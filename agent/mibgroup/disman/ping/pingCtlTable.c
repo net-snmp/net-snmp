@@ -66,7 +66,7 @@ static struct proto {
                               struct addrinfo *, int, unsigned long *,
                               unsigned long *, unsigned long *,
                               unsigned long *, unsigned long, int, int,
-                              int, struct pingProbeHistoryTable_data *,
+                              int, struct pingProbeHistoryTable_data **,
                               pid_t);
     void            (*fsend) (int, pid_t, int, int, char *);
     struct sockaddr *sasend;    /* sockaddr{} for send, from getaddrinfo */
@@ -370,8 +370,11 @@ pingProbeHistoryTable_add(struct pingProbeHistoryTable_data *thedata)
          * used by header_complex to index the data 
          */
 
-        header_complex_add_data(&pingProbeHistoryTableStorage, vars_list,
-                                thedata);
+        if (header_complex_add_data(&pingProbeHistoryTableStorage, vars_list,
+                                thedata) == NULL) {
+            DEBUGMSGTL(("pingProbeHistoryTable", "failed\n"));
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
         DEBUGMSGTL(("pingProbeHistoryTable", "out finished\n"));
     }
     
@@ -1350,7 +1353,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
     struct timeval  tval;
     /* static int                    loop_num; */
     /* struct pingProbeHistoryTable_data * current=NULL; */
-    struct pingProbeHistoryTable_data current_var;
+    struct pingProbeHistoryTable_data *current_temp = NULL;
     int             sockfd;
     int             select_result;
     int             current_probe_temp;
@@ -1401,7 +1404,7 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
 
             (*pr->fproc) (recvbuf, n, &tval, timep, item, ai, datalen, minrtt,
                           maxrtt, &sumrtt, averagertt, current_probe_temp,
-                          success_probe, fail_probe, flag, &current_var, pid);
+                          success_probe, fail_probe, flag, &current_temp, pid);
             select_result = readable_timeo(sockfd, 0);
         } while (select_result > 0);
     }
@@ -1425,7 +1428,7 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
         unsigned long *minrtt, unsigned long *maxrtt,
         unsigned long *sumrtt, unsigned long *averagertt,
         unsigned long current_probe, int success_probe, int fail_probe,
-        int flag, struct pingProbeHistoryTable_data *current_temp,
+        int flag, struct pingProbeHistoryTable_data **current_temp,
         pid_t pid)
 {
     int             hlen1 = 0, icmplen = 0;
@@ -1563,23 +1566,29 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
                                            &temp->pingProbeHistoryTimeLen),
                                11);
 
-            if (StorageNew->pingResultsSendProbes == 1)
-                item->pingProbeHis = temp;
-            else
-                (current_temp)->next = temp;
-
-            current_temp = temp;
-
-            if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount)
-                current_temp->next = NULL;
-
             if (item->pingProbeHis != NULL) {
                 if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows)
                     pingProbeHistoryTable_delLast(item);
-                if (pingProbeHistoryTable_add(current_temp) != SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("pingProbeHistoryTable",
-                                "failed to add a row\n"));
-	    }
+            }
+
+            if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
+                DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
+                free(temp->pingCtlOwnerIndex);
+                free(temp->pingCtlTestName);
+                free(temp->pingProbeHistoryTime);
+                free(temp);
+            } else {
+                if (item->pingProbeHis == NULL)
+                    item->pingProbeHis = temp;
+                else if (current_temp && *current_temp)
+                    (*current_temp)->next = temp;
+
+                if (current_temp)
+                    *current_temp = temp;
+
+                if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount)
+                    temp->next = NULL;
+            }
         }
     } else if (flag == 1) {
         if (series == 0)
@@ -1645,34 +1654,31 @@ proc_v4(char *ptr, ssize_t len, struct timeval *tvrecv, time_t timep,
             netsnmp_memdup(date_n_time(&timep, &temp->pingProbeHistoryTimeLen),
                            11);
 
-        if (StorageNew->pingResultsSendProbes == 1)
-            item->pingProbeHis = temp;
-        else {
-            (current_temp)->next = temp;
-        }
-
-        current_temp = temp;
-
-        if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount) {
-            current_temp->next = NULL;
-        }
-
         if (item->pingProbeHis != NULL) {
-            if (pingProbeHistoryTable_count(item) < item->pingCtlMaxRows) {
-                if (pingProbeHistoryTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("pingProbeHistoryTable",
-                                "registered an entry error\n"));
-            } else {
-
+            if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows) {
                 pingProbeHistoryTable_delLast(item);
-                if (pingProbeHistoryTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("pingProbeHistoryTable",
-                                "registered an entry error\n"));
-
             }
-	}
+        }
+
+        if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
+            DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
+            free(temp->pingCtlOwnerIndex);
+            free(temp->pingCtlTestName);
+            free(temp->pingProbeHistoryTime);
+            free(temp);
+        } else {
+            if (item->pingProbeHis == NULL)
+                item->pingProbeHis = temp;
+            else if (current_temp && *current_temp)
+                (*current_temp)->next = temp;
+
+            if (current_temp)
+                *current_temp = temp;
+
+            if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount) {
+                temp->next = NULL;
+            }
+        }
 
         if ((item->
              pingCtlTrapGeneration[0] & PINGTRAPGENERATION_PROBEFAILED) !=
@@ -4909,7 +4915,7 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
     cur_time.tv_usec = 0;
 
     {
-    struct pingProbeHistoryTable_data current_temp;
+    struct pingProbeHistoryTable_data *current_temp = NULL;
     static int      probeFailed = 0;
     static int      testFailed = 0;
     static int      series = 0;
@@ -5109,35 +5115,31 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                                                &temp->pingProbeHistoryTimeLen),
                                        11);
 
-                    if (StorageNew->pingResultsSendProbes == 1)
-                        item->pingProbeHis = temp;
-                    else {
-                        (current_temp).next = temp;
-                    }
-
-                    current_temp = (*temp);
-
-                    if (StorageNew->pingResultsSendProbes >=
-                        item->pingCtlProbeCount) {
-                        current_temp.next = NULL;
-                    }
-
                     if (item->pingProbeHis != NULL) {
-                        if (pingProbeHistoryTable_count(item) <
-                            item->pingCtlMaxRows) {
-                            if (pingProbeHistoryTable_add(&current_temp) !=
-                                SNMPERR_SUCCESS)
-                                DEBUGMSGTL(("pingProbeHistoryTable",
-                                            "registered an entry error\n"));
-                        } else {
+                        if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows) {
                             pingProbeHistoryTable_delLast(item);
-                            if (pingProbeHistoryTable_add(&current_temp) !=
-                                SNMPERR_SUCCESS)
-                                DEBUGMSGTL(("pingProbeHistoryTable",
-                                            "registered an entry error\n"));
-
                         }
-		    }
+                    }
+
+                    if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
+                        DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
+                        free(temp->pingCtlOwnerIndex);
+                        free(temp->pingCtlTestName);
+                        free(temp->pingProbeHistoryTime);
+                        free(temp);
+                    } else {
+                        if (item->pingProbeHis == NULL)
+                            item->pingProbeHis = temp;
+                        else if (current_temp)
+                            (current_temp)->next = temp;
+
+                        current_temp = temp;
+
+                        if (StorageNew->pingResultsSendProbes >=
+                            item->pingCtlProbeCount) {
+                            current_temp->next = NULL;
+                        }
+                    }
                     if ((item->
                          pingCtlTrapGeneration[0] &
                          PINGTRAPGENERATION_PROBEFAILED) != 0) {
@@ -5257,7 +5259,7 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
                   long *ntransmitted, long *nchecksum, long *tmin,
                   long *tmax, long long *tsum, long long *tsum2,
                   int *confirm_flag, int *confirm, int *pipesize,
-                  struct pingProbeHistoryTable_data *current_temp)
+                  struct pingProbeHistoryTable_data **current_temp)
 {
     int             dupflag = 0;
     long            triptime = 0;
@@ -5443,36 +5445,32 @@ gather_statistics(int *series, struct pingCtlTable_data *item, __u8 * ptr,
             netsnmp_memdup(date_n_time(&timep, &temp->pingProbeHistoryTimeLen),
                            11);
 
-        if (StorageNew->pingResultsSendProbes == 1)
-            item->pingProbeHis = temp;
-        else {
-            (current_temp)->next = temp;
-        }
-
-        current_temp = temp;
-
-        if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount) {
-            current_temp->next = NULL;
-        }
-
         if (item->pingProbeHis != NULL) {
-
-            if (pingProbeHistoryTable_count(item) < item->pingCtlMaxRows) {
-                if (pingProbeHistoryTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("pingProbeHistoryTable",
-                                "registered an entry error\n"));
-            } else {
+            if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows) {
                 pingProbeHistoryTable_delLast(item);
-
-                if (pingProbeHistoryTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("pingProbeHistoryTable",
-                                "registered an entry error\n"));
-
             }
-
         }
+
+        if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
+            DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
+            free(temp->pingCtlOwnerIndex);
+            free(temp->pingCtlTestName);
+            free(temp->pingProbeHistoryTime);
+            free(temp);
+        } else {
+            if (item->pingProbeHis == NULL)
+                item->pingProbeHis = temp;
+            else if (current_temp && *current_temp)
+                (*current_temp)->next = temp;
+
+            if (current_temp)
+                *current_temp = temp;
+
+            if (StorageNew->pingResultsSendProbes >= item->pingCtlProbeCount) {
+                temp->next = NULL;
+            }
+        }
+
     }
     return 0;
 }
@@ -5746,7 +5744,7 @@ parse_reply(int *series, struct pingCtlTable_data *item,
             long *ntransmitted, long *nchecksum, long *nerrors, long *tmin,
             long *tmax, long long *tsum, long long *tsum2,
             int *confirm_flag, int *confirm, int *pipesize,
-            struct pingProbeHistoryTable_data *current_temp)
+            struct pingProbeHistoryTable_data **current_temp)
 {
     struct sockaddr_in6 *from = addr;
     __u8           *buf = msg->msg_iov->iov_base;
