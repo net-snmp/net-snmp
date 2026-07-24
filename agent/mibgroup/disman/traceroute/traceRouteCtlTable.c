@@ -1376,8 +1376,12 @@ traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
         nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            header_complex_extract_entry(&traceRouteResultsTableStorage,
-                                         hciptr2);
+            struct traceRouteResultsTable_data *extracted =
+                header_complex_extract_entry(&traceRouteResultsTableStorage,
+                                             hciptr2);
+            if (extracted) {
+                free_traceRouteResultsTable_data(extracted);
+            }
             DEBUGMSGTL(("traceRouteResultsTable", "delete  success!\n"));
 
         }
@@ -1409,8 +1413,12 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
         nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            header_complex_extract_entry(&traceRouteProbeHistoryTableStorage,
-                                         hciptr2);
+            struct traceRouteProbeHistoryTable_data *extracted =
+                header_complex_extract_entry(&traceRouteProbeHistoryTableStorage,
+                                             hciptr2);
+            if (extracted) {
+                free_traceRouteProbeHistoryTable_data(extracted);
+            }
             DEBUGMSGTL(("traceRouteProbeHistoryTable",
                         "delete  success!\n"));
 
@@ -1440,7 +1448,11 @@ traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
         nhciptr2 = hciptr2->next;
         if (snmp_oid_compare(newoid, newoid_len, hciptr2->name, newoid_len)
             == 0) {
-            header_complex_extract_entry(&traceRouteHopsTableStorage, hciptr2);
+            struct traceRouteHopsTable_data *extracted =
+                header_complex_extract_entry(&traceRouteHopsTableStorage, hciptr2);
+            if (extracted) {
+                free_traceRouteHopsTable_data(extracted);
+            }
             DEBUGMSGTL(("traceRouteHopsTable", "delete  success!\n"));
         }
     }
@@ -4540,24 +4552,25 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
             temp->traceRouteHopsProbeResponses = 0;
 
             temp->traceRouteHopsLastGoodProbeLen = 0;
-            if (index == 1)
-                item->traceRouteHops = temp;
-            else {
-                (current_temp)->next = temp;
+            if (traceRouteHopsTable_add(temp) != SNMPERR_SUCCESS) {
+                DEBUGMSGTL(("traceRouteHopsTable", "registered an entry error\n"));
+                free(temp->traceRouteCtlOwnerIndex);
+                free(temp->traceRouteCtlTestName);
+                free(temp->traceRouteHopsIpTgtAddress);
+                free(temp->traceRouteHopsLastGoodProbe);
+                free(temp);
+            } else {
+                if (item->traceRouteHops == NULL)
+                    item->traceRouteHops = temp;
+                else if (current_temp)
+                    current_temp->next = temp;
+
+                current_temp = temp;
+
+                if (index + 1 >= item->traceRouteCtlMaxTtl) {
+                    current_temp->next = NULL;
+                }
             }
-
-            current_temp = temp;
-
-            if (index + 1 >= item->traceRouteCtlMaxTtl) {
-                current_temp->next = NULL;
-            }
-
-            if (item->traceRouteHops != NULL)
-
-                if (traceRouteHopsTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("traceRouteHopsTable",
-                                "registered an entry error\n"));
 
         }
         
@@ -5253,24 +5266,25 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
             temp->traceRouteHopsProbeResponses = 0;
 
             temp->traceRouteHopsLastGoodProbeLen = 0;
-            if (index == 1)
-                item->traceRouteHops = temp;
-            else {
-                (current_temp)->next = temp;
+            if (traceRouteHopsTable_add(temp) != SNMPERR_SUCCESS) {
+                DEBUGMSGTL(("traceRouteHopsTable", "registered an entry error\n"));
+                free(temp->traceRouteCtlOwnerIndex);
+                free(temp->traceRouteCtlTestName);
+                free(temp->traceRouteHopsIpTgtAddress);
+                free(temp->traceRouteHopsLastGoodProbe);
+                free(temp);
+            } else {
+                if (item->traceRouteHops == NULL)
+                    item->traceRouteHops = temp;
+                else if (current_temp)
+                    current_temp->next = temp;
+
+                current_temp = temp;
+
+                if (index >= item->traceRouteCtlMaxTtl) {
+                    current_temp->next = NULL;
+                }
             }
-
-            current_temp = temp;
-
-            if (index >= item->traceRouteCtlMaxTtl) {
-                current_temp->next = NULL;
-            }
-
-            if (item->traceRouteHops != NULL)
-
-                if (traceRouteHopsTable_add(current_temp) !=
-                    SNMPERR_SUCCESS)
-                    DEBUGMSGTL(("traceRouteHopsTable",
-                                "registered an entry error\n"));
 
         }
 
