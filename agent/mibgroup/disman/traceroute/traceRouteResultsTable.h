@@ -42,4 +42,6 @@ SNMPCallback    store_traceRouteResultsTable;
 #define COLUMN_TRACEROUTERESULTSTESTATTEMPTS		6
 #define COLUMN_TRACEROUTERESULTSTESTSUCCESSES		7
 #define COLUMN_TRACEROUTERESULTSLASTGOODPATH		8
+struct traceRouteResultsTable_data;
+void            free_traceRouteResultsTable_data(struct traceRouteResultsTable_data *data);
 #endif                          /* TRACEROUTERESULTSTABLE_H */

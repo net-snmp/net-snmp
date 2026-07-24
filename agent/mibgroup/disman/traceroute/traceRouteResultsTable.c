@@ -75,6 +75,18 @@ void
 traceRouteResultsTable_inadd(struct traceRouteResultsTable_data *thedata);
 
 void
+free_traceRouteResultsTable_data(struct traceRouteResultsTable_data *data)
+{
+    if (data) {
+        free(data->traceRouteCtlOwnerIndex);
+        free(data->traceRouteCtlTestName);
+        free(data->traceRouteResultsIpTgtAddr);
+        free(data->traceRouteResultsLastGoodPath);
+        free(data);
+    }
+}
+
+void
 traceRouteResultsTable_cleaner(struct header_complex_index *thestuff)
 {
     struct header_complex_index *hciptr, *nhciptr;
@@ -87,11 +99,7 @@ traceRouteResultsTable_cleaner(struct header_complex_index *thestuff)
             header_complex_extract_entry(&traceRouteResultsTableStorage,
                                          hciptr);
         if (StorageDel != NULL) {
-            free(StorageDel->traceRouteCtlOwnerIndex);
-            free(StorageDel->traceRouteCtlTestName);
-            free(StorageDel->traceRouteResultsIpTgtAddr);
-            free(StorageDel->traceRouteResultsLastGoodPath);
-            free(StorageDel);
+            free_traceRouteResultsTable_data(StorageDel);
         }
         DEBUGMSGTL(("traceRouteResultsTable", "cleaner  "));
     }

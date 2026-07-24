@@ -38,4 +38,6 @@ SNMPCallback    store_traceRouteHopsTable;
 #define COLUMN_TRACEROUTEHOPSSENTPROBES		8
 #define COLUMN_TRACEROUTEHOPSPROBERESPONSES		9
 #define COLUMN_TRACEROUTEHOPSLASTGOODPROBE		10
+struct traceRouteHopsTable_data;
+void            free_traceRouteHopsTable_data(struct traceRouteHopsTable_data *data);
 #endif                          /* TRACEROUTEHOPSTABLE_H */

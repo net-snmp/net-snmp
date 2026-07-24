@@ -36,4 +36,6 @@ SNMPCallback    store_traceRouteProbeHistoryTable;
 #define COLUMN_TRACEROUTEPROBEHISTORYSTATUS		7
 #define COLUMN_TRACEROUTEPROBEHISTORYLASTRC		8
 #define COLUMN_TRACEROUTEPROBEHISTORYTIME		9
+struct traceRouteProbeHistoryTable_data;
+void            free_traceRouteProbeHistoryTable_data(struct traceRouteProbeHistoryTable_data *data);
 #endif                          /* TRACEROUTEPROBEHISTORYTABLE_H */
