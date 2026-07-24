@@ -3028,6 +3028,7 @@ netsnmp_check_delegated_requests(void)
     for (asp = agent_delegated_list; asp; asp = next_asp) {
         next_asp = asp->next;   /* save in case we clean up asp */
         if (!netsnmp_check_for_delegated(asp)) {
+            netsnmp_agent_session *old_head;
 
             /*
              * we're done with this one, remove from queue 
@@ -3043,6 +3044,8 @@ netsnmp_check_delegated_requests(void)
              */
             netsnmp_check_all_requests_status(asp, 0);
             
+            old_head = agent_delegated_list;
+
             /*
              * continue processing or finish up 
              */
@@ -3052,8 +3055,8 @@ netsnmp_check_delegated_requests(void)
              * if head was removed, don't drop it if it
              * was it re-queued
              */
-            if ((prev_asp == NULL) && (agent_delegated_list == asp)) {
-                prev_asp = asp;
+            if ((prev_asp == NULL) && (agent_delegated_list != old_head)) {
+                prev_asp = agent_delegated_list;
             }
         } else {
 
