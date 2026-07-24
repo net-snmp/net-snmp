@@ -3,6 +3,11 @@
 use strict;
 use warnings;
 use Exporter;
+use Cwd qw(abs_path);
+
+my $t_dir = abs_path("t");
+my $snmpd_pid = "$t_dir/snmpd.pid";
+my $snmptrapd_pid = "$t_dir/snmptrapd.pid";
 
 #Open the snmptest.cmd file and get the info
 require "t/readsnmptest.pl";
@@ -56,6 +61,35 @@ sub delay {
   select(undef, undef, undef, $timeout);
 }
 
+sub wait_for_log {
+  my ($filename, $regexp) = @_;
+  # Wait at most 3 seconds for file to appear
+  my $fh;
+  for (my $i = 0; $i < 30; ++$i) {
+    if (open($fh, "<$filename")) {
+      last;
+    }
+    delay 0.1;
+  }
+  return 0 if (!$fh);
+  my $timecount = 0;
+  while ($timecount < 50) { # Max 5 seconds
+    my $line = <$fh>;
+    if (!defined($line) || $line eq "") {
+      seek($fh, 0, 1);
+      delay 0.1;
+      $timecount++;
+    } else {
+      if ($line =~ /$regexp/) {
+        close($fh);
+        return 1;
+      }
+    }
+  }
+  close($fh);
+  return 0;
+}
+
 sub run_async {
   my ($pidfile, $cmd, @args) = @_;
   if (-r "$cmd" and -x "$cmd") {
@@ -77,10 +111,10 @@ sub run_async {
 sub snmptest_cleanup {
   my $ignore_failures = shift;
 
-  kill_by_pid_file("t/snmpd.pid", $ignore_failures);
-  unlink("t/snmpd.pid");
-  kill_by_pid_file("t/snmptrapd.pid", $ignore_failures);
-  unlink("t/snmptrapd.pid");
+  kill_by_pid_file($snmpd_pid, $ignore_failures);
+  unlink($snmpd_pid);
+  kill_by_pid_file($snmptrapd_pid, $ignore_failures);
+  unlink($snmptrapd_pid);
 }
 
 sub kill_by_pid_file {
@@ -96,9 +130,23 @@ sub kill_by_pid_file {
     defined($ignore_failures) or die "Reading $pidfile failed\n";
     return;
   }
+  chomp($pid);
   if ($^O !~ /win32/i) {
     # Unix or Windows + Cygwin.
-    system "kill $pid > /dev/null 2>&1";
+    if (kill 0, $pid) {
+      system "kill $pid > /dev/null 2>&1";
+      for (my $i = 0; $i < 50; ++$i) {
+        last if !kill 0, $pid;
+        delay 0.1;
+      }
+      if (kill 0, $pid) {
+        system "kill -9 $pid > /dev/null 2>&1";
+        for (my $i = 0; $i < 50; ++$i) {
+          last if !kill 0, $pid;
+          delay 0.1;
+        }
+      }
+    }
   } else {
     # Windows + MSVC or Windows + MinGW.
     Win32::Process::KillProcess($pid, 0);
@@ -119,11 +167,19 @@ if ($0 =~ /^t[\/\\](.*)\.t$/) {
   $scriptname = $1;
 }
 
+my $snmpd_log = "t/snmpd-$scriptname.log";
+my $snmptrapd_log = "t/snmptrapd-$scriptname.log";
+
+unlink($snmpd_log);
+unlink($snmptrapd_log);
+
 if ($snmpd_cmd) {
-  run_async("t/snmpd.pid", "$snmpd_cmd", "-r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
+  run_async($snmpd_pid, "$snmpd_cmd", "-r -d -Lf $snmpd_log -M+$mibdir -C -c t/snmptest.conf -p $snmpd_pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
+  wait_for_log($snmpd_log, qr/NET-SNMP version/);
 }
 if ($snmptrapd_cmd) {
-  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
+  run_async($snmptrapd_pid, "$snmptrapd_cmd", "-d -Lf $snmptrapd_log -p $snmptrapd_pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
+  wait_for_log($snmptrapd_log, qr/NET-SNMP version/);
 }
 
 1;
