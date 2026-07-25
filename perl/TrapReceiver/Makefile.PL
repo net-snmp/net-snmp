@@ -43,8 +43,7 @@ sub TrapReceiverInitMakeParams {
 		  'NAME'		=> 'NetSNMP::TrapReceiver',
 		  'VERSION_FROM'	=> 'TrapReceiver.pm', # finds $VERSION
 		  'XSPROTOARG'          => '-prototypes',
-		  'PREREQ_PM'		=> { 'NetSNMP::OID' => 5.02 },
-		  ($] >= 5.005 ? ## Add these new keywords supported since 5.005
+($] >= 5.005 ? ## Add these new keywords supported since 5.005
 		   (ABSTRACT_FROM => 'TrapReceiver.pm',
 		    AUTHOR        =>
 		    'W. Hardaker <hardaker@users.sourceforge.net>') : ()),

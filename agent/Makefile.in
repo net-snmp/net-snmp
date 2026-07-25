@@ -342,6 +342,17 @@ installmibgroupheaders:
 @mib_module_list_deps@
 
 mib_modules.lo: mibgroup/mib_module_inits.h
+
+# entity module: all files that include entity.h must be listed explicitly
+# because configure's @mib_module_list_deps@ only covers read_config.lo
+mibgroup/hardware/entity/entity.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/entPhysicalTable.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/entAliasMappingTable.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/entLastChangeTime.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/entLogicalTable.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/data_access/entity_linux.lo: mibgroup/hardware/entity/entity.h
+mibgroup/hardware/entity/data_access/entity_null.lo: mibgroup/hardware/entity/entity.h
+
 #
 # dependency for snmplib object. it's here because the headers listed
 # are relative to the agent directory.

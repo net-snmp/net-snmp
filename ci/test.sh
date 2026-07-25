@@ -20,6 +20,8 @@ case "$MODE" in
 	;;
     disable-ipv6|regular)
         ;;
+    performance)
+        ;;
     *)
 	exit 0
         ;;
@@ -29,6 +31,15 @@ case $(uname) in
     MinGW)
 	;;
     *)
-	"${scriptdir}"/net-snmp-run-tests
+	if [ "$MODE" != "performance" ]; then
+            "${scriptdir}"/net-snmp-run-tests
+        fi
 	;;
 esac
+
+# ---- Entity MIB performance scenario ---------------------------------------
+# Runs only on Linux (entity_linux.c is Linux-only).
+# Set MODE=performance to run this scenario exclusively.
+if [ "$MODE" = "performance" ] || [ "$(uname)" = "Linux" ]; then
+    "${scriptdir}/entity-perf"
+fi

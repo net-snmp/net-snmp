@@ -250,3 +250,13 @@ if test "x$ac_cv_header_sensors_sensors_h" = "xyes"; then
             [Define this if you have lm_sensors v3 or later])],,
         [[#include <sensors/sensors.h>]])
 fi
+
+#
+# Opportunistically link libsensors v3 when available.
+# Used by hardware/entity for accurate entAliasMappingTable index ordering.
+# This is separate from --with-lm-sensors (which enables the sensor MIB modules).
+#
+if test "x$ac_cv_header_sensors_sensors_h" = "xyes" && \
+   test "x$ac_cv_have_decl_sensors_get_all_subfeatures" = "xyes"; then
+    NETSNMP_SEARCH_LIBS(sensors_get_detected_chips, sensors,,,,LMIBLIBS)
+fi

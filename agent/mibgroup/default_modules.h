@@ -37,6 +37,7 @@ config_require(disman/event);
 config_require(disman/schedule);
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
 config_require(utilities);
+config_require(hardware/entity);
 
 /* default MIBs to auto-include for parsing */
 /* NOTE: we consider these MIBs users will likely want to load by
@@ -45,6 +46,9 @@ config_require(utilities);
 config_add_mib(HOST-RESOURCES-MIB);
 config_add_mib(NOTIFICATION-LOG-MIB);
 config_add_mib(DISMAN-EVENT-MIB);
+config_add_mib(UUID-TC-MIB);
+config_add_mib(IANA-ENTITY-MIB);
+config_add_mib(ENTITY-MIB);
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 config_add_mib(DISMAN-SCHEDULE-MIB);
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */

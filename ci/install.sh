@@ -21,8 +21,13 @@ case "$(uname)" in
 		;;
 	    *)
 		packages="
+		    autoconf
+		    build-essential
+		    file
 		    libatm1-dev
 		    libkrb5-dev
+		    libpci-dev
+		    rsync
 		    libmariadb-client-lgpl-dev
 		    libmariadb-dev
 		    libmariadb-dev-compat
@@ -42,6 +47,8 @@ case "$(uname)" in
 		    python3-dev
 		    setpriv
 		    util-linux
+			net-stat
+			iproute2
 		"
 		;;
 	esac

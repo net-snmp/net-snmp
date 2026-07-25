@@ -37,7 +37,10 @@
      */
 void init_cpu_linux( void ) {
     FILE *fp;
-    char buf[1024], *cp;
+    char buf[1024];
+#if defined(DESCR_FIELD) || defined(DESCR2_FIELD)
+    char *cp;
+#endif
     int  i, n = 0;
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 1 );
 
