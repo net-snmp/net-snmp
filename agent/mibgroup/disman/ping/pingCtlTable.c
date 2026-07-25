@@ -2088,6 +2088,7 @@ run_ping(unsigned int clientreg, void *clientarg)
                   &deadline);
 
         close(icmp_sock);
+        free(packet);
     }
     return;
 }
@@ -4875,6 +4876,71 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
     }
 }
 
+static struct pingProbeHistoryTable_data *
+add_history_row(struct pingCtlTable_data *item, time_t timep)
+{
+    struct pingProbeHistoryTable_data *temp;
+
+    temp = SNMP_MALLOC_STRUCT(pingProbeHistoryTable_data);
+    if (!temp)
+        return NULL;
+
+    temp->pingCtlOwnerIndex = malloc(item->pingCtlOwnerIndexLen + 1);
+    temp->pingCtlTestName = malloc(item->pingCtlTestNameLen + 1);
+
+    if (!temp->pingCtlOwnerIndex || !temp->pingCtlTestName)
+        goto fail;
+
+    memcpy(temp->pingCtlOwnerIndex, item->pingCtlOwnerIndex,
+           item->pingCtlOwnerIndexLen + 1);
+    temp->pingCtlOwnerIndex[item->pingCtlOwnerIndexLen] = '\0';
+    temp->pingCtlOwnerIndexLen = item->pingCtlOwnerIndexLen;
+
+    memcpy(temp->pingCtlTestName, item->pingCtlTestName,
+           item->pingCtlTestNameLen + 1);
+    temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
+    temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
+
+    {
+        /* add lock to protect */
+        pthread_mutex_t counter_mutex =
+            PTHREAD_MUTEX_INITIALIZER;
+        pthread_mutex_lock(&counter_mutex);
+        temp->pingProbeHistoryIndex =
+            ++(item->pingProbeHistoryMaxIndex);
+        pthread_mutex_unlock(&counter_mutex);
+        /* end */
+    }
+
+    temp->pingProbeHistoryResponse = item->pingCtlTimeOut * 1000;
+    temp->pingProbeHistoryStatus = 4;
+    temp->pingProbeHistoryLastRC = 1;
+    temp->pingProbeHistoryTime_time = timep;
+    temp->pingProbeHistoryTime =
+        netsnmp_memdup(date_n_time(&timep,
+                                   &temp->pingProbeHistoryTimeLen),
+                       11);
+
+    if (item->pingProbeHis &&
+        pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows) {
+        pingProbeHistoryTable_delLast(item);
+    }
+
+    if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
+        goto fail;
+    }
+
+    return temp;
+
+fail:
+    free(temp->pingCtlOwnerIndex);
+    free(temp->pingCtlTestName);
+    free(temp->pingProbeHistoryTime);
+    free(temp);
+    return NULL;
+}
+
 void
 main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
           __u8 * packet, int packlen, int cmsglen, char *cmsgbuf,
@@ -5093,70 +5159,20 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                     StorageNew->pingResultsSendProbes =
                         StorageNew->pingResultsSendProbes + 1;
 
-                    temp = SNMP_MALLOC_STRUCT(pingProbeHistoryTable_data);
+                    if (item->pingCtlMaxRows != 0) {
+                        temp = add_history_row(item, timep);
+                        if (temp) {
+                            if (item->pingProbeHis == NULL)
+                                item->pingProbeHis = temp;
+                            else if (current_temp)
+                                current_temp->next = temp;
 
-                    temp->pingCtlOwnerIndex =
-                        (char *) malloc(item->pingCtlOwnerIndexLen + 1);
-                    memcpy(temp->pingCtlOwnerIndex,
-                           item->pingCtlOwnerIndex,
-                           item->pingCtlOwnerIndexLen + 1);
-                    temp->pingCtlOwnerIndex[item->pingCtlOwnerIndexLen] =
-                        '\0';
-                    temp->pingCtlOwnerIndexLen =
-                        item->pingCtlOwnerIndexLen;
+                            current_temp = temp;
 
-                    temp->pingCtlTestName =
-                        (char *) malloc(item->pingCtlTestNameLen + 1);
-                    memcpy(temp->pingCtlTestName, item->pingCtlTestName,
-                           item->pingCtlTestNameLen + 1);
-                    temp->pingCtlTestName[item->pingCtlTestNameLen] = '\0';
-                    temp->pingCtlTestNameLen = item->pingCtlTestNameLen;
-
-                    {
-                    /* add lock to protect */
-                    pthread_mutex_t counter_mutex =
-                        PTHREAD_MUTEX_INITIALIZER;
-                    pthread_mutex_lock(&counter_mutex);
-                    temp->pingProbeHistoryIndex =
-                        ++(item->pingProbeHistoryMaxIndex);
-                    pthread_mutex_unlock(&counter_mutex);
-                    /* end */
-                    }
-
-                    temp->pingProbeHistoryResponse =
-                        item->pingCtlTimeOut * 1000;
-                    temp->pingProbeHistoryStatus = 4;
-                    temp->pingProbeHistoryLastRC = 1;
-
-		    temp->pingProbeHistoryTime_time = timep;
-                    temp->pingProbeHistoryTime =
-                        netsnmp_memdup(date_n_time(&timep,
-                                               &temp->pingProbeHistoryTimeLen),
-                                       11);
-
-                    if (item->pingProbeHis != NULL) {
-                        if (pingProbeHistoryTable_count(item) >= item->pingCtlMaxRows) {
-                            pingProbeHistoryTable_delLast(item);
-                        }
-                    }
-
-                    if (pingProbeHistoryTable_add(temp) != SNMPERR_SUCCESS) {
-                        DEBUGMSGTL(("pingProbeHistoryTable", "failed to add a row\n"));
-                        free(temp->pingCtlOwnerIndex);
-                        free(temp->pingCtlTestName);
-                        free(temp->pingProbeHistoryTime);
-                        free(temp);
-                    } else {
-                        if (item->pingProbeHis == NULL)
-                            item->pingProbeHis = temp;
-                        else if (current_temp)
-                            (current_temp)->next = temp;
-
-                        current_temp = temp;
-
-                        if (StorageNew->pingResultsSendProbes >=
-                            item->pingCtlProbeCount) {
-                            current_temp->next = NULL;
+                            if (StorageNew->pingResultsSendProbes >=
+                                item->pingCtlProbeCount) {
+                                current_temp->next = NULL;
+                            }
                         }
                     }
                     if ((item->
