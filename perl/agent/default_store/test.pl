@@ -46,7 +46,7 @@ BEGIN { $| = 1;
                   "NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES"  => 14,
 		  );
 
-	print "1.." . (scalar(keys(%tests)) + 2) . "\n"; 
+	print "1.." . (scalar(keys(%tests)) + 1) . "\n"; 
     }
 END {print "not ok 1\n" unless $loaded;}
 use NetSNMP::agent::default_store (':all');
@@ -59,7 +59,7 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
-$c = 2;
+$c = 1;
 foreach my $i (keys(%tests)) {
     my $str = "NetSNMP::agent::default_store::$i";
     my $val = eval $str;
