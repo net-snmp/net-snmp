@@ -4940,6 +4940,18 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
             DEBUGMSGTL(("pingCtlTable", "npackets,nreceived=%ld\n", nreceived));
             break;
         }
+        if (npackets && ntransmitted >= npackets) {
+            struct timeval now;
+            long elapsed_ms;
+
+            netsnmp_get_monotonic_clock(&now);
+            elapsed_ms = (now.tv_sec - cur_time.tv_sec) * 1000 +
+                (now.tv_usec - cur_time.tv_usec) / 1000;
+            if (elapsed_ms >= item->pingCtlTimeOut * 1000) {
+                DEBUGMSGTL(("pingCtlTable", "timeout after all packets sent\n"));
+                break;
+            }
+        }
         if (deadline && nerrors) {
             DEBUGMSGTL(("pingCtlTable", "deadline\n"));
             break;
