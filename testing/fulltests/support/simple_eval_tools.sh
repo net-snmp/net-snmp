@@ -719,4 +719,14 @@ VERBOSE_OUT() {
     fi
 }
 
+CAP_NET_RAW() {
+    if which python3 >/dev/null 2>&1; then
+        python3 -c "import socket; socket.socket(socket.AF_INET, socket.SOCK_RAW, 1)" >/dev/null 2>&1
+    elif which perl >/dev/null 2>&1; then
+        perl -MSocket -e 'socket(S, AF_INET, SOCK_RAW, 1) or die' >/dev/null 2>&1
+    else
+	[ "$(id -ru)" = 0 ]
+    fi
+}
+
 fi # Only allow ourselves to be eval'ed once
