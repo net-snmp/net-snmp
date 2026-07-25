@@ -2050,9 +2050,16 @@ run_ping(unsigned int clientreg, void *clientarg)
         }
 
         if (1) {
-            int             on = 1;
-            if (setsockopt(icmp_sock, IPPROTO_IPV6, IPV6_HOPLIMIT,
-                           &on, sizeof(on)) == -1) {
+            int             on = 1, res;
+
+#ifdef IPV6_RECVHOPLIMIT
+            res = setsockopt(icmp_sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
+                             &on, sizeof(on));
+#else
+            res = setsockopt(icmp_sock, IPPROTO_IPV6, IPV6_HOPLIMIT,
+                             &on, sizeof(on));
+#endif
+            if (res < 0) {
                 perror("can't receive hop limit");
                 free(packet);
                 return;
