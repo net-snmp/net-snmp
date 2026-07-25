@@ -39,23 +39,12 @@ constant_22 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      NETSNMP_DS_LIB_APPTYPE NETSNMP_DS_LIB_CONTEXT NETSNMP_DS_LIB_MIBDIRS
-     NETSNMP_DS_LIB_SECNAME */
-  /* Offset 16 gives the best switch position.  */
-  switch (name[16]) {
-  case 'E':
-    if (memEQ(name, "NETSNMP_DS_LIB_SECNAME", 22)) {
-    /*                               ^            */
-#ifdef NETSNMP_DS_LIB_SECNAME
-      *iv_return = NETSNMP_DS_LIB_SECNAME;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'I':
+     NETSNMP_DS_LIB_RETRIES NETSNMP_DS_LIB_SECNAME NETSNMP_DS_LIB_TIMEOUT */
+  /* Offset 17 gives the best switch position.  */
+  switch (name[17]) {
+  case 'B':
     if (memEQ(name, "NETSNMP_DS_LIB_MIBDIRS", 22)) {
-    /*                               ^            */
+    /*                                ^           */
 #ifdef NETSNMP_DS_LIB_MIBDIRS
       *iv_return = NETSNMP_DS_LIB_MIBDIRS;
       return PERL_constant_ISIV;
@@ -64,9 +53,31 @@ constant_22 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'O':
+  case 'C':
+    if (memEQ(name, "NETSNMP_DS_LIB_SECNAME", 22)) {
+    /*                                ^           */
+#ifdef NETSNMP_DS_LIB_SECNAME
+      *iv_return = NETSNMP_DS_LIB_SECNAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'M':
+    if (memEQ(name, "NETSNMP_DS_LIB_TIMEOUT", 22)) {
+    /*                                ^           */
+#ifdef NETSNMP_DS_LIB_TIMEOUT
+      *iv_return = NETSNMP_DS_LIB_TIMEOUT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
     if (memEQ(name, "NETSNMP_DS_LIB_CONTEXT", 22)) {
-    /*                               ^            */
+    /*                                ^           */
 #ifdef NETSNMP_DS_LIB_CONTEXT
       *iv_return = NETSNMP_DS_LIB_CONTEXT;
       return PERL_constant_ISIV;
@@ -77,9 +88,20 @@ constant_22 (pTHX_ const char *name, IV *iv_return) {
     break;
   case 'P':
     if (memEQ(name, "NETSNMP_DS_LIB_APPTYPE", 22)) {
-    /*                               ^            */
+    /*                                ^           */
 #ifdef NETSNMP_DS_LIB_APPTYPE
       *iv_return = NETSNMP_DS_LIB_APPTYPE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'T':
+    if (memEQ(name, "NETSNMP_DS_LIB_RETRIES", 22)) {
+    /*                                ^           */
+#ifdef NETSNMP_DS_LIB_RETRIES
+      *iv_return = NETSNMP_DS_LIB_RETRIES;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -94,12 +116,13 @@ static int
 constant_23 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_LIB_APPTYPES NETSNMP_DS_LIB_SECLEVEL NETSNMP_DS_LIB_SECMODEL */
-  /* Offset 18 gives the best switch position.  */
-  switch (name[18]) {
-  case 'L':
+     NETSNMP_DS_LIB_APPTYPES NETSNMP_DS_LIB_HOSTNAME NETSNMP_DS_LIB_SECLEVEL
+     NETSNMP_DS_LIB_SECMODEL */
+  /* Offset 19 gives the best switch position.  */
+  switch (name[19]) {
+  case 'E':
     if (memEQ(name, "NETSNMP_DS_LIB_SECLEVEL", 23)) {
-    /*                                 ^           */
+    /*                                  ^          */
 #ifdef NETSNMP_DS_LIB_SECLEVEL
       *iv_return = NETSNMP_DS_LIB_SECLEVEL;
       return PERL_constant_ISIV;
@@ -108,9 +131,20 @@ constant_23 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'M':
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_HOSTNAME", 23)) {
+    /*                                  ^          */
+#ifdef NETSNMP_DS_LIB_HOSTNAME
+      *iv_return = NETSNMP_DS_LIB_HOSTNAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
     if (memEQ(name, "NETSNMP_DS_LIB_SECMODEL", 23)) {
-    /*                                 ^           */
+    /*                                  ^          */
 #ifdef NETSNMP_DS_LIB_SECMODEL
       *iv_return = NETSNMP_DS_LIB_SECMODEL;
       return PERL_constant_ISIV;
@@ -119,9 +153,9 @@ constant_23 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'T':
+  case 'Y':
     if (memEQ(name, "NETSNMP_DS_LIB_APPTYPES", 23)) {
-    /*                                 ^           */
+    /*                                  ^          */
 #ifdef NETSNMP_DS_LIB_APPTYPES
       *iv_return = NETSNMP_DS_LIB_APPTYPES;
       return PERL_constant_ISIV;
@@ -139,7 +173,7 @@ constant_24 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      NETSNMP_DS_LIB_16BIT_IDS NETSNMP_DS_LIB_COMMUNITY NETSNMP_DS_LIB_OIDPREFIX
-     NETSNMP_DS_LIB_OIDSUFFIX */
+     NETSNMP_DS_LIB_OIDSUFFIX NETSNMP_DS_LIB_SSH_AGENT */
   /* Offset 18 gives the best switch position.  */
   switch (name[18]) {
   case 'I':
@@ -186,6 +220,17 @@ constant_24 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case '_':
+    if (memEQ(name, "NETSNMP_DS_LIB_SSH_AGENT", 24)) {
+    /*                                 ^            */
+#ifdef NETSNMP_DS_LIB_SSH_AGENT
+      *iv_return = NETSNMP_DS_LIB_SSH_AGENT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   }
   return PERL_constant_NOTFOUND;
 }
@@ -194,36 +239,17 @@ static int
 constant_25 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_APPLICATION_ID NETSNMP_DS_LIB_KSM_KEYTAB
+     NETSNMP_DS_APPLICATION_ID NETSNMP_DS_LIB_DISABLE_V1
+     NETSNMP_DS_LIB_DISABLE_V3 NETSNMP_DS_LIB_KSM_KEYTAB
+     NETSNMP_DS_LIB_MAX_INT_ID NETSNMP_DS_LIB_MAX_STR_ID
      NETSNMP_DS_LIB_MIB_ERRORS NETSNMP_DS_LIB_PASSPHRASE
-     NETSNMP_DS_SNMP_VERSION_1 NETSNMP_DS_SNMP_VERSION_3 */
-  /* Offset 24 gives the best switch position.  */
-  switch (name[24]) {
-  case '1':
-    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_", 24)) {
-    /*                                       1      */
-#ifdef NETSNMP_DS_SNMP_VERSION_1
-      *iv_return = NETSNMP_DS_SNMP_VERSION_1;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case '3':
-    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_", 24)) {
-    /*                                       3      */
-#ifdef NETSNMP_DS_SNMP_VERSION_3
-      *iv_return = NETSNMP_DS_SNMP_VERSION_3;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'B':
-    if (memEQ(name, "NETSNMP_DS_LIB_KSM_KEYTA", 24)) {
-    /*                                       B      */
+     NETSNMP_DS_LIB_SSH_PUBKEY NETSNMP_DS_SNMP_VERSION_1
+     NETSNMP_DS_SNMP_VERSION_3 */
+  /* Offset 20 gives the best switch position.  */
+  switch (name[20]) {
+  case 'E':
+    if (memEQ(name, "NETSNMP_DS_LIB_KSM_KEYTAB", 25)) {
+    /*                                   ^           */
 #ifdef NETSNMP_DS_LIB_KSM_KEYTAB
       *iv_return = NETSNMP_DS_LIB_KSM_KEYTAB;
       return PERL_constant_ISIV;
@@ -232,20 +258,9 @@ constant_25 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'D':
-    if (memEQ(name, "NETSNMP_DS_APPLICATION_I", 24)) {
-    /*                                       D      */
-#ifdef NETSNMP_DS_APPLICATION_ID
-      *iv_return = NETSNMP_DS_APPLICATION_ID;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'E':
-    if (memEQ(name, "NETSNMP_DS_LIB_PASSPHRAS", 24)) {
-    /*                                       E      */
+  case 'H':
+    if (memEQ(name, "NETSNMP_DS_LIB_PASSPHRASE", 25)) {
+    /*                                   ^           */
 #ifdef NETSNMP_DS_LIB_PASSPHRASE
       *iv_return = NETSNMP_DS_LIB_PASSPHRASE;
       return PERL_constant_ISIV;
@@ -254,11 +269,95 @@ constant_25 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'S':
-    if (memEQ(name, "NETSNMP_DS_LIB_MIB_ERROR", 24)) {
-    /*                                       S      */
+  case 'I':
+    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_1", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_SNMP_VERSION_1
+      *iv_return = NETSNMP_DS_SNMP_VERSION_1;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_3", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_SNMP_VERSION_3
+      *iv_return = NETSNMP_DS_SNMP_VERSION_3;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'L':
+    if (memEQ(name, "NETSNMP_DS_LIB_DISABLE_V1", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_LIB_DISABLE_V1
+      *iv_return = NETSNMP_DS_LIB_DISABLE_V1;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_LIB_DISABLE_V3", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_LIB_DISABLE_V3
+      *iv_return = NETSNMP_DS_LIB_DISABLE_V3;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_MAX_INT_ID", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_LIB_MAX_INT_ID
+      *iv_return = NETSNMP_DS_LIB_MAX_INT_ID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "NETSNMP_DS_APPLICATION_ID", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_APPLICATION_ID
+      *iv_return = NETSNMP_DS_APPLICATION_ID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_MIB_ERRORS", 25)) {
+    /*                                   ^           */
 #ifdef NETSNMP_DS_LIB_MIB_ERRORS
       *iv_return = NETSNMP_DS_LIB_MIB_ERRORS;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'T':
+    if (memEQ(name, "NETSNMP_DS_LIB_MAX_STR_ID", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_LIB_MAX_STR_ID
+      *iv_return = NETSNMP_DS_LIB_MAX_STR_ID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'U':
+    if (memEQ(name, "NETSNMP_DS_LIB_SSH_PUBKEY", 25)) {
+    /*                                   ^           */
+#ifdef NETSNMP_DS_LIB_SSH_PUBKEY
+      *iv_return = NETSNMP_DS_LIB_SSH_PUBKEY;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -273,58 +372,47 @@ static int
 constant_26 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_LIB_CLIENT_ADDR NETSNMP_DS_LIB_DUMP_PACKET
-     NETSNMP_DS_LIB_MIB_REPLACE NETSNMP_DS_LIB_QUICK_PRINT
-     NETSNMP_DS_LIB_SNMPVERSION NETSNMP_DS_SNMP_VERSION_2c */
-  /* Offset 22 gives the best switch position.  */
-  switch (name[22]) {
-  case 'A':
-    if (memEQ(name, "NETSNMP_DS_LIB_CLIENT_ADDR", 26)) {
-    /*                                     ^          */
-#ifdef NETSNMP_DS_LIB_CLIENT_ADDR
-      *iv_return = NETSNMP_DS_LIB_CLIENT_ADDR;
+     NETSNMP_DS_LIB_CLIENT_ADDR NETSNMP_DS_LIB_DISABLE_V2c
+     NETSNMP_DS_LIB_DUMP_PACKET NETSNMP_DS_LIB_FILTER_TYPE
+     NETSNMP_DS_LIB_MAX_BOOL_ID NETSNMP_DS_LIB_MIB_REPLACE
+     NETSNMP_DS_LIB_QUICK_PRINT NETSNMP_DS_LIB_SNMPVERSION
+     NETSNMP_DS_LIB_SSH_PRIVKEY NETSNMP_DS_SNMP_VERSION_2c */
+  /* Offset 19 gives the best switch position.  */
+  switch (name[19]) {
+  case 'B':
+    if (memEQ(name, "NETSNMP_DS_LIB_DISABLE_V2c", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_DISABLE_V2c
+      *iv_return = NETSNMP_DS_LIB_DISABLE_V2c;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_LIB_MAX_BOOL_ID", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_MAX_BOOL_ID
+      *iv_return = NETSNMP_DS_LIB_MAX_BOOL_ID;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'C':
-    if (memEQ(name, "NETSNMP_DS_LIB_DUMP_PACKET", 26)) {
-    /*                                     ^          */
-#ifdef NETSNMP_DS_LIB_DUMP_PACKET
-      *iv_return = NETSNMP_DS_LIB_DUMP_PACKET;
+  case 'E':
+    if (memEQ(name, "NETSNMP_DS_LIB_FILTER_TYPE", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_FILTER_TYPE
+      *iv_return = NETSNMP_DS_LIB_FILTER_TYPE;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'L':
-    if (memEQ(name, "NETSNMP_DS_LIB_MIB_REPLACE", 26)) {
-    /*                                     ^          */
-#ifdef NETSNMP_DS_LIB_MIB_REPLACE
-      *iv_return = NETSNMP_DS_LIB_MIB_REPLACE;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'N':
-    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_2c", 26)) {
-    /*                                     ^          */
-#ifdef NETSNMP_DS_SNMP_VERSION_2c
-      *iv_return = NETSNMP_DS_SNMP_VERSION_2c;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'R':
+  case 'K':
     if (memEQ(name, "NETSNMP_DS_LIB_QUICK_PRINT", 26)) {
-    /*                                     ^          */
+    /*                                  ^             */
 #ifdef NETSNMP_DS_LIB_QUICK_PRINT
       *iv_return = NETSNMP_DS_LIB_QUICK_PRINT;
       return PERL_constant_ISIV;
@@ -333,11 +421,66 @@ constant_26 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_CLIENT_ADDR", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_CLIENT_ADDR
+      *iv_return = NETSNMP_DS_LIB_CLIENT_ADDR;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'P':
+    if (memEQ(name, "NETSNMP_DS_LIB_SSH_PRIVKEY", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_SSH_PRIVKEY
+      *iv_return = NETSNMP_DS_LIB_SSH_PRIVKEY;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_MIB_REPLACE", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_MIB_REPLACE
+      *iv_return = NETSNMP_DS_LIB_MIB_REPLACE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   case 'S':
+    if (memEQ(name, "NETSNMP_DS_SNMP_VERSION_2c", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_SNMP_VERSION_2c
+      *iv_return = NETSNMP_DS_SNMP_VERSION_2c;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'V':
     if (memEQ(name, "NETSNMP_DS_LIB_SNMPVERSION", 26)) {
-    /*                                     ^          */
+    /*                                  ^             */
 #ifdef NETSNMP_DS_LIB_SNMPVERSION
       *iv_return = NETSNMP_DS_LIB_SNMPVERSION;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case '_':
+    if (memEQ(name, "NETSNMP_DS_LIB_DUMP_PACKET", 26)) {
+    /*                                  ^             */
+#ifdef NETSNMP_DS_LIB_DUMP_PACKET
+      *iv_return = NETSNMP_DS_LIB_DUMP_PACKET;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -353,34 +496,14 @@ constant_27 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      NETSNMP_DS_LIB_DEFAULT_PORT NETSNMP_DS_LIB_MIB_WARNINGS
-     NETSNMP_DS_LIB_QUICKE_PRINT NETSNMP_DS_LIB_REGEX_ACCESS */
-  /* Offset 17 gives the best switch position.  */
-  switch (name[17]) {
-  case 'B':
-    if (memEQ(name, "NETSNMP_DS_LIB_MIB_WARNINGS", 27)) {
-    /*                                ^                */
-#ifdef NETSNMP_DS_LIB_MIB_WARNINGS
-      *iv_return = NETSNMP_DS_LIB_MIB_WARNINGS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'F':
-    if (memEQ(name, "NETSNMP_DS_LIB_DEFAULT_PORT", 27)) {
-    /*                                ^                */
-#ifdef NETSNMP_DS_LIB_DEFAULT_PORT
-      *iv_return = NETSNMP_DS_LIB_DEFAULT_PORT;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'G':
+     NETSNMP_DS_LIB_MSG_SEND_MAX NETSNMP_DS_LIB_NO_DISCOVERY
+     NETSNMP_DS_LIB_QUICKE_PRINT NETSNMP_DS_LIB_REGEX_ACCESS
+     NETSNMP_DS_LIB_SSH_USERNAME */
+  /* Offset 22 gives the best switch position.  */
+  switch (name[22]) {
+  case 'C':
     if (memEQ(name, "NETSNMP_DS_LIB_REGEX_ACCESS", 27)) {
-    /*                                ^                */
+    /*                                     ^           */
 #ifdef NETSNMP_DS_LIB_REGEX_ACCESS
       *iv_return = NETSNMP_DS_LIB_REGEX_ACCESS;
       return PERL_constant_ISIV;
@@ -389,11 +512,66 @@ constant_27 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'I':
+  case 'D':
+    if (memEQ(name, "NETSNMP_DS_LIB_MSG_SEND_MAX", 27)) {
+    /*                                     ^           */
+#ifdef NETSNMP_DS_LIB_MSG_SEND_MAX
+      *iv_return = NETSNMP_DS_LIB_MSG_SEND_MAX;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_MIB_WARNINGS", 27)) {
+    /*                                     ^           */
+#ifdef NETSNMP_DS_LIB_MIB_WARNINGS
+      *iv_return = NETSNMP_DS_LIB_MIB_WARNINGS;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "NETSNMP_DS_LIB_NO_DISCOVERY", 27)) {
+    /*                                     ^           */
+#ifdef NETSNMP_DS_LIB_NO_DISCOVERY
+      *iv_return = NETSNMP_DS_LIB_NO_DISCOVERY;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'P':
     if (memEQ(name, "NETSNMP_DS_LIB_QUICKE_PRINT", 27)) {
-    /*                                ^                */
+    /*                                     ^           */
 #ifdef NETSNMP_DS_LIB_QUICKE_PRINT
       *iv_return = NETSNMP_DS_LIB_QUICKE_PRINT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_SSH_USERNAME", 27)) {
+    /*                                     ^           */
+#ifdef NETSNMP_DS_LIB_SSH_USERNAME
+      *iv_return = NETSNMP_DS_LIB_SSH_USERNAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case '_':
+    if (memEQ(name, "NETSNMP_DS_LIB_DEFAULT_PORT", 27)) {
+    /*                                     ^           */
+#ifdef NETSNMP_DS_LIB_DEFAULT_PORT
+      *iv_return = NETSNMP_DS_LIB_DEFAULT_PORT;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -410,9 +588,11 @@ constant_28 (pTHX_ const char *name, IV *iv_return) {
      here.  However, subsequent manual editing may have added or removed some.
      NETSNMP_DS_LIB_AUTHMASTERKEY NETSNMP_DS_LIB_CLIENTRECVBUF
      NETSNMP_DS_LIB_CLIENTSENDBUF NETSNMP_DS_LIB_ESCAPE_QUOTES
-     NETSNMP_DS_LIB_LOG_TIMESTAMP NETSNMP_DS_LIB_PRIVMASTERKEY
-     NETSNMP_DS_LIB_RANDOM_ACCESS NETSNMP_DS_LIB_SERVERRECVBUF
-     NETSNMP_DS_LIB_SERVERSENDBUF */
+     NETSNMP_DS_LIB_FILTER_SOURCE NETSNMP_DS_LIB_LOG_TIMESTAMP
+     NETSNMP_DS_LIB_PRIVMASTERKEY NETSNMP_DS_LIB_RANDOM_ACCESS
+     NETSNMP_DS_LIB_SERVERRECVBUF NETSNMP_DS_LIB_SERVERSENDBUF
+     NETSNMP_DS_LIB_TLS_ALGORITMS NETSNMP_DS_LIB_TLS_PEER_CERT
+     NETSNMP_DS_LIB_X509_CRL_FILE */
   /* Offset 15 gives the best switch position.  */
   switch (name[15]) {
   case 'A':
@@ -451,6 +631,17 @@ constant_28 (pTHX_ const char *name, IV *iv_return) {
     /*                              ^                   */
 #ifdef NETSNMP_DS_LIB_ESCAPE_QUOTES
       *iv_return = NETSNMP_DS_LIB_ESCAPE_QUOTES;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'F':
+    if (memEQ(name, "NETSNMP_DS_LIB_FILTER_SOURCE", 28)) {
+    /*                              ^                   */
+#ifdef NETSNMP_DS_LIB_FILTER_SOURCE
+      *iv_return = NETSNMP_DS_LIB_FILTER_SOURCE;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -510,6 +701,37 @@ constant_28 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case 'T':
+    if (memEQ(name, "NETSNMP_DS_LIB_TLS_ALGORITMS", 28)) {
+    /*                              ^                   */
+#ifdef NETSNMP_DS_LIB_TLS_ALGORITMS
+      *iv_return = NETSNMP_DS_LIB_TLS_ALGORITMS;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_LIB_TLS_PEER_CERT", 28)) {
+    /*                              ^                   */
+#ifdef NETSNMP_DS_LIB_TLS_PEER_CERT
+      *iv_return = NETSNMP_DS_LIB_TLS_PEER_CERT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'X':
+    if (memEQ(name, "NETSNMP_DS_LIB_X509_CRL_FILE", 28)) {
+    /*                              ^                   */
+#ifdef NETSNMP_DS_LIB_X509_CRL_FILE
+      *iv_return = NETSNMP_DS_LIB_X509_CRL_FILE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   }
   return PERL_constant_NOTFOUND;
 }
@@ -522,56 +744,13 @@ constant_29 (pTHX_ const char *name, IV *iv_return) {
      NETSNMP_DS_LIB_OPTIONALCONFIG NETSNMP_DS_LIB_PERSISTENT_DIR
      NETSNMP_DS_LIB_PRINT_FULL_OID NETSNMP_DS_LIB_PRINT_HEX_TEXT
      NETSNMP_DS_LIB_PRIVPASSPHRASE NETSNMP_DS_LIB_REVERSE_ENCODE
-     NETSNMP_DS_LIB_SBSM_LOCAL_PWD */
-  /* Offset 23 gives the best switch position.  */
-  switch (name[23]) {
-  case 'A':
-    if (memEQ(name, "NETSNMP_DS_LIB_SBSM_LOCAL_PWD", 29)) {
-    /*                                      ^            */
-#ifdef NETSNMP_DS_LIB_SBSM_LOCAL_PWD
-      *iv_return = NETSNMP_DS_LIB_SBSM_LOCAL_PWD;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'C':
-    if (memEQ(name, "NETSNMP_DS_LIB_OPTIONALCONFIG", 29)) {
-    /*                                      ^            */
-#ifdef NETSNMP_DS_LIB_OPTIONALCONFIG
-      *iv_return = NETSNMP_DS_LIB_OPTIONALCONFIG;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'E':
-    if (memEQ(name, "NETSNMP_DS_LIB_REVERSE_ENCODE", 29)) {
-    /*                                      ^            */
-#ifdef NETSNMP_DS_LIB_REVERSE_ENCODE
-      *iv_return = NETSNMP_DS_LIB_REVERSE_ENCODE;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'L':
-    if (memEQ(name, "NETSNMP_DS_LIB_PRINT_FULL_OID", 29)) {
-    /*                                      ^            */
-#ifdef NETSNMP_DS_LIB_PRINT_FULL_OID
-      *iv_return = NETSNMP_DS_LIB_PRINT_FULL_OID;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'N':
+     NETSNMP_DS_LIB_TLS_LOCAL_CERT NETSNMP_DS_LIB_TSM_USE_PREFIX
+     NETSNMP_DS_SSHDOMAIN_DIR_PERM */
+  /* Offset 19 gives the best switch position.  */
+  switch (name[19]) {
+  case 'I':
     if (memEQ(name, "NETSNMP_DS_LIB_PERSISTENT_DIR", 29)) {
-    /*                                      ^            */
+    /*                                  ^                */
 #ifdef NETSNMP_DS_LIB_PERSISTENT_DIR
       *iv_return = NETSNMP_DS_LIB_PERSISTENT_DIR;
       return PERL_constant_ISIV;
@@ -580,9 +759,51 @@ constant_29 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case 'L':
+    if (memEQ(name, "NETSNMP_DS_LIB_TLS_LOCAL_CERT", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_TLS_LOCAL_CERT
+      *iv_return = NETSNMP_DS_LIB_TLS_LOCAL_CERT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_EXTENDED_INDEX", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_EXTENDED_INDEX
+      *iv_return = NETSNMP_DS_LIB_EXTENDED_INDEX;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_SSHDOMAIN_DIR_PERM", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_SSHDOMAIN_DIR_PERM
+      *iv_return = NETSNMP_DS_SSHDOMAIN_DIR_PERM;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "NETSNMP_DS_LIB_OPTIONALCONFIG", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_OPTIONALCONFIG
+      *iv_return = NETSNMP_DS_LIB_OPTIONALCONFIG;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   case 'P':
     if (memEQ(name, "NETSNMP_DS_LIB_AUTHPASSPHRASE", 29)) {
-    /*                                      ^            */
+    /*                                  ^                */
 #ifdef NETSNMP_DS_LIB_AUTHPASSPHRASE
       *iv_return = NETSNMP_DS_LIB_AUTHPASSPHRASE;
       return PERL_constant_ISIV;
@@ -591,7 +812,7 @@ constant_29 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     if (memEQ(name, "NETSNMP_DS_LIB_PRIVPASSPHRASE", 29)) {
-    /*                                      ^            */
+    /*                                  ^                */
 #ifdef NETSNMP_DS_LIB_PRIVPASSPHRASE
       *iv_return = NETSNMP_DS_LIB_PRIVPASSPHRASE;
       return PERL_constant_ISIV;
@@ -600,9 +821,29 @@ constant_29 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'X':
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_REVERSE_ENCODE", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_REVERSE_ENCODE
+      *iv_return = NETSNMP_DS_LIB_REVERSE_ENCODE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'T':
+    if (memEQ(name, "NETSNMP_DS_LIB_PRINT_FULL_OID", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_PRINT_FULL_OID
+      *iv_return = NETSNMP_DS_LIB_PRINT_FULL_OID;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
     if (memEQ(name, "NETSNMP_DS_LIB_PRINT_HEX_TEXT", 29)) {
-    /*                                      ^            */
+    /*                                  ^                */
 #ifdef NETSNMP_DS_LIB_PRINT_HEX_TEXT
       *iv_return = NETSNMP_DS_LIB_PRINT_HEX_TEXT;
       return PERL_constant_ISIV;
@@ -611,11 +852,11 @@ constant_29 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case '_':
-    if (memEQ(name, "NETSNMP_DS_LIB_EXTENDED_INDEX", 29)) {
-    /*                                      ^            */
-#ifdef NETSNMP_DS_LIB_EXTENDED_INDEX
-      *iv_return = NETSNMP_DS_LIB_EXTENDED_INDEX;
+  case 'U':
+    if (memEQ(name, "NETSNMP_DS_LIB_TSM_USE_PREFIX", 29)) {
+    /*                                  ^                */
+#ifdef NETSNMP_DS_LIB_TSM_USE_PREFIX
+      *iv_return = NETSNMP_DS_LIB_TSM_USE_PREFIX;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -631,23 +872,26 @@ constant_30 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      NETSNMP_DS_LIB_APPEND_LOGFILES NETSNMP_DS_LIB_MIB_PARSE_LABEL
-     NETSNMP_DS_LIB_NO_DISPLAY_HINT NETSNMP_DS_LIB_SAVE_MIB_DESCRS */
-  /* Offset 27 gives the best switch position.  */
-  switch (name[27]) {
-  case 'B':
-    if (memEQ(name, "NETSNMP_DS_LIB_MIB_PARSE_LABEL", 30)) {
-    /*                                          ^         */
-#ifdef NETSNMP_DS_LIB_MIB_PARSE_LABEL
-      *iv_return = NETSNMP_DS_LIB_MIB_PARSE_LABEL;
+     NETSNMP_DS_LIB_NO_DISPLAY_HINT NETSNMP_DS_LIB_SAVE_MIB_DESCRS
+     NETSNMP_DS_LIB_TLS_MAX_VERSION NETSNMP_DS_LIB_TLS_MIN_VERSION
+     NETSNMP_DS_LIB_X509_CLIENT_PUB NETSNMP_DS_LIB_X509_SERVER_PUB
+     NETSNMP_DS_SSHDOMAIN_SOCK_PERM NETSNMP_DS_SSHDOMAIN_SOCK_USER */
+  /* Offset 21 gives the best switch position.  */
+  switch (name[21]) {
+  case 'E':
+    if (memEQ(name, "NETSNMP_DS_LIB_X509_SERVER_PUB", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_LIB_X509_SERVER_PUB
+      *iv_return = NETSNMP_DS_LIB_X509_SERVER_PUB;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'C':
+  case 'I':
     if (memEQ(name, "NETSNMP_DS_LIB_SAVE_MIB_DESCRS", 30)) {
-    /*                                          ^         */
+    /*                                    ^               */
 #ifdef NETSNMP_DS_LIB_SAVE_MIB_DESCRS
       *iv_return = NETSNMP_DS_LIB_SAVE_MIB_DESCRS;
       return PERL_constant_ISIV;
@@ -656,9 +900,31 @@ constant_30 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'I':
+  case 'L':
+    if (memEQ(name, "NETSNMP_DS_LIB_X509_CLIENT_PUB", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_LIB_X509_CLIENT_PUB
+      *iv_return = NETSNMP_DS_LIB_X509_CLIENT_PUB;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_TLS_MIN_VERSION", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_LIB_TLS_MIN_VERSION
+      *iv_return = NETSNMP_DS_LIB_TLS_MIN_VERSION;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'P':
     if (memEQ(name, "NETSNMP_DS_LIB_NO_DISPLAY_HINT", 30)) {
-    /*                                          ^         */
+    /*                                    ^               */
 #ifdef NETSNMP_DS_LIB_NO_DISPLAY_HINT
       *iv_return = NETSNMP_DS_LIB_NO_DISPLAY_HINT;
       return PERL_constant_ISIV;
@@ -667,9 +933,51 @@ constant_30 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'L':
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_MIB_PARSE_LABEL", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_LIB_MIB_PARSE_LABEL
+      *iv_return = NETSNMP_DS_LIB_MIB_PARSE_LABEL;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'S':
+    if (memEQ(name, "NETSNMP_DS_SSHDOMAIN_SOCK_PERM", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_SSHDOMAIN_SOCK_PERM
+      *iv_return = NETSNMP_DS_SSHDOMAIN_SOCK_PERM;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_SSHDOMAIN_SOCK_USER", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_SSHDOMAIN_SOCK_USER
+      *iv_return = NETSNMP_DS_SSHDOMAIN_SOCK_USER;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'X':
+    if (memEQ(name, "NETSNMP_DS_LIB_TLS_MAX_VERSION", 30)) {
+    /*                                    ^               */
+#ifdef NETSNMP_DS_LIB_TLS_MAX_VERSION
+      *iv_return = NETSNMP_DS_LIB_TLS_MAX_VERSION;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case '_':
     if (memEQ(name, "NETSNMP_DS_LIB_APPEND_LOGFILES", 30)) {
-    /*                                          ^         */
+    /*                                    ^               */
 #ifdef NETSNMP_DS_LIB_APPEND_LOGFILES
       *iv_return = NETSNMP_DS_LIB_APPEND_LOGFILES;
       return PERL_constant_ISIV;
@@ -686,37 +994,48 @@ static int
 constant_31 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_LIB_AUTHLOCALIZEDKEY NETSNMP_DS_LIB_DONT_CHECK_RANGE
-     NETSNMP_DS_LIB_DONT_PRINT_UNITS NETSNMP_DS_LIB_HAVE_READ_CONFIG
-     NETSNMP_DS_LIB_KSM_SERVICE_NAME NETSNMP_DS_LIB_MIB_COMMENT_TERM
-     NETSNMP_DS_LIB_PRINT_BARE_VALUE NETSNMP_DS_LIB_PRIVLOCALIZEDKEY */
-  /* Offset 28 gives the best switch position.  */
-  switch (name[28]) {
+     NETSNMP_DS_LIB_AUTHLOCALIZEDKEY NETSNMP_DS_LIB_DNSSEC_WARN_ONLY
+     NETSNMP_DS_LIB_DONT_CHECK_RANGE NETSNMP_DS_LIB_DONT_PRINT_UNITS
+     NETSNMP_DS_LIB_HAVE_READ_CONFIG NETSNMP_DS_LIB_KSM_SERVICE_NAME
+     NETSNMP_DS_LIB_MIB_COMMENT_TERM NETSNMP_DS_LIB_OUTPUT_PRECISION
+     NETSNMP_DS_LIB_PRINT_BARE_VALUE NETSNMP_DS_LIB_PRIVLOCALIZEDKEY
+     NETSNMP_DS_LIB_SSHTOSNMP_SOCKET NETSNMP_DS_SSHDOMAIN_SOCK_GROUP */
+  /* Offset 23 gives the best switch position.  */
+  switch (name[23]) {
   case 'A':
-    if (memEQ(name, "NETSNMP_DS_LIB_KSM_SERVICE_NAME", 31)) {
-    /*                                           ^         */
-#ifdef NETSNMP_DS_LIB_KSM_SERVICE_NAME
-      *iv_return = NETSNMP_DS_LIB_KSM_SERVICE_NAME;
+    if (memEQ(name, "NETSNMP_DS_LIB_DNSSEC_WARN_ONLY", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_DNSSEC_WARN_ONLY
+      *iv_return = NETSNMP_DS_LIB_DNSSEC_WARN_ONLY;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'E':
-    if (memEQ(name, "NETSNMP_DS_LIB_MIB_COMMENT_TERM", 31)) {
-    /*                                           ^         */
-#ifdef NETSNMP_DS_LIB_MIB_COMMENT_TERM
-      *iv_return = NETSNMP_DS_LIB_MIB_COMMENT_TERM;
+  case 'C':
+    if (memEQ(name, "NETSNMP_DS_LIB_DONT_CHECK_RANGE", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_DONT_CHECK_RANGE
+      *iv_return = NETSNMP_DS_LIB_DONT_CHECK_RANGE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_SSHDOMAIN_SOCK_GROUP", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_SSHDOMAIN_SOCK_GROUP
+      *iv_return = NETSNMP_DS_SSHDOMAIN_SOCK_GROUP;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'F':
+  case 'D':
     if (memEQ(name, "NETSNMP_DS_LIB_HAVE_READ_CONFIG", 31)) {
-    /*                                           ^         */
+    /*                                      ^              */
 #ifdef NETSNMP_DS_LIB_HAVE_READ_CONFIG
       *iv_return = NETSNMP_DS_LIB_HAVE_READ_CONFIG;
       return PERL_constant_ISIV;
@@ -725,20 +1044,31 @@ constant_31 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'I':
-    if (memEQ(name, "NETSNMP_DS_LIB_DONT_PRINT_UNITS", 31)) {
-    /*                                           ^         */
-#ifdef NETSNMP_DS_LIB_DONT_PRINT_UNITS
-      *iv_return = NETSNMP_DS_LIB_DONT_PRINT_UNITS;
+  case 'E':
+    if (memEQ(name, "NETSNMP_DS_LIB_MIB_COMMENT_TERM", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_MIB_COMMENT_TERM
+      *iv_return = NETSNMP_DS_LIB_MIB_COMMENT_TERM;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'K':
+  case 'I':
+    if (memEQ(name, "NETSNMP_DS_LIB_KSM_SERVICE_NAME", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_KSM_SERVICE_NAME
+      *iv_return = NETSNMP_DS_LIB_KSM_SERVICE_NAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'L':
     if (memEQ(name, "NETSNMP_DS_LIB_AUTHLOCALIZEDKEY", 31)) {
-    /*                                           ^         */
+    /*                                      ^              */
 #ifdef NETSNMP_DS_LIB_AUTHLOCALIZEDKEY
       *iv_return = NETSNMP_DS_LIB_AUTHLOCALIZEDKEY;
       return PERL_constant_ISIV;
@@ -747,7 +1077,7 @@ constant_31 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     if (memEQ(name, "NETSNMP_DS_LIB_PRIVLOCALIZEDKEY", 31)) {
-    /*                                           ^         */
+    /*                                      ^              */
 #ifdef NETSNMP_DS_LIB_PRIVLOCALIZEDKEY
       *iv_return = NETSNMP_DS_LIB_PRIVLOCALIZEDKEY;
       return PERL_constant_ISIV;
@@ -756,22 +1086,42 @@ constant_31 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'L':
-    if (memEQ(name, "NETSNMP_DS_LIB_PRINT_BARE_VALUE", 31)) {
-    /*                                           ^         */
-#ifdef NETSNMP_DS_LIB_PRINT_BARE_VALUE
-      *iv_return = NETSNMP_DS_LIB_PRINT_BARE_VALUE;
+  case 'N':
+    if (memEQ(name, "NETSNMP_DS_LIB_DONT_PRINT_UNITS", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_DONT_PRINT_UNITS
+      *iv_return = NETSNMP_DS_LIB_DONT_PRINT_UNITS;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'N':
-    if (memEQ(name, "NETSNMP_DS_LIB_DONT_CHECK_RANGE", 31)) {
-    /*                                           ^         */
-#ifdef NETSNMP_DS_LIB_DONT_CHECK_RANGE
-      *iv_return = NETSNMP_DS_LIB_DONT_CHECK_RANGE;
+  case 'P':
+    if (memEQ(name, "NETSNMP_DS_LIB_SSHTOSNMP_SOCKET", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_SSHTOSNMP_SOCKET
+      *iv_return = NETSNMP_DS_LIB_SSHTOSNMP_SOCKET;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
+    if (memEQ(name, "NETSNMP_DS_LIB_OUTPUT_PRECISION", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_OUTPUT_PRECISION
+      *iv_return = NETSNMP_DS_LIB_OUTPUT_PRECISION;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "NETSNMP_DS_LIB_PRINT_BARE_VALUE", 31)) {
+    /*                                      ^              */
+#ifdef NETSNMP_DS_LIB_PRINT_BARE_VALUE
+      *iv_return = NETSNMP_DS_LIB_PRINT_BARE_VALUE;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -786,38 +1136,27 @@ static int
 constant_32 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT NETSNMP_DS_LIB_CONFIGURATION_DIR
-     NETSNMP_DS_LIB_DONT_READ_CONFIGS NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH
-     NETSNMP_DS_LIB_NO_TOKEN_WARNINGS NETSNMP_DS_LIB_NUMERIC_TIMETICKS
-     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY
-     NETSNMP_DS_LIB_TEMP_FILE_PATTERN */
-  /* Offset 29 gives the best switch position.  */
-  switch (name[29]) {
-  case 'C':
-    if (memEQ(name, "NETSNMP_DS_LIB_NUMERIC_TIMETICKS", 32)) {
-    /*                                            ^         */
-#ifdef NETSNMP_DS_LIB_NUMERIC_TIMETICKS
-      *iv_return = NETSNMP_DS_LIB_NUMERIC_TIMETICKS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'D':
-    if (memEQ(name, "NETSNMP_DS_LIB_CONFIGURATION_DIR", 32)) {
-    /*                                            ^         */
-#ifdef NETSNMP_DS_LIB_CONFIGURATION_DIR
-      *iv_return = NETSNMP_DS_LIB_CONFIGURATION_DIR;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
+     NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR
+     NETSNMP_DS_LIB_CONFIGURATION_DIR NETSNMP_DS_LIB_DONT_READ_CONFIGS
+     NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
+     NETSNMP_DS_LIB_NUMERIC_TIMETICKS NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
+     NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY NETSNMP_DS_LIB_TEMP_FILE_PATTERN */
+  /* Offset 20 gives the best switch position.  */
+  switch (name[20]) {
   case 'E':
+    if (memEQ(name, "NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR
+      *iv_return = NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'F':
     if (memEQ(name, "NETSNMP_DS_LIB_TEMP_FILE_PATTERN", 32)) {
-    /*                                            ^         */
+    /*                                   ^                  */
 #ifdef NETSNMP_DS_LIB_TEMP_FILE_PATTERN
       *iv_return = NETSNMP_DS_LIB_TEMP_FILE_PATTERN;
       return PERL_constant_ISIV;
@@ -827,10 +1166,10 @@ constant_32 (pTHX_ const char *name, IV *iv_return) {
     }
     break;
   case 'G':
-    if (memEQ(name, "NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH", 32)) {
-    /*                                            ^         */
-#ifdef NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH
-      *iv_return = NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH;
+    if (memEQ(name, "NETSNMP_DS_LIB_CONFIGURATION_DIR", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_CONFIGURATION_DIR
+      *iv_return = NETSNMP_DS_LIB_CONFIGURATION_DIR;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -838,8 +1177,30 @@ constant_32 (pTHX_ const char *name, IV *iv_return) {
     }
     break;
   case 'I':
+    if (memEQ(name, "NETSNMP_DS_LIB_NUMERIC_TIMETICKS", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_NUMERIC_TIMETICKS
+      *iv_return = NETSNMP_DS_LIB_NUMERIC_TIMETICKS;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'K':
+    if (memEQ(name, "NETSNMP_DS_LIB_NO_TOKEN_WARNINGS", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
+      *iv_return = NETSNMP_DS_LIB_NO_TOKEN_WARNINGS;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'R':
     if (memEQ(name, "NETSNMP_DS_LIB_DONT_READ_CONFIGS", 32)) {
-    /*                                            ^         */
+    /*                                   ^                  */
 #ifdef NETSNMP_DS_LIB_DONT_READ_CONFIGS
       *iv_return = NETSNMP_DS_LIB_DONT_READ_CONFIGS;
       return PERL_constant_ISIV;
@@ -848,9 +1209,29 @@ constant_32 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'M':
+  case 'T':
+    if (memEQ(name, "NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT
+      *iv_return = NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'U':
+    if (memEQ(name, "NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH", 32)) {
+    /*                                   ^                  */
+#ifdef NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH
+      *iv_return = NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
     if (memEQ(name, "NETSNMP_DS_LIB_OID_OUTPUT_FORMAT", 32)) {
-    /*                                            ^         */
+    /*                                   ^                  */
 #ifdef NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
       *iv_return = NETSNMP_DS_LIB_OID_OUTPUT_FORMAT;
       return PERL_constant_ISIV;
@@ -859,31 +1240,11 @@ constant_32 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'N':
-    if (memEQ(name, "NETSNMP_DS_LIB_NO_TOKEN_WARNINGS", 32)) {
-    /*                                            ^         */
-#ifdef NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
-      *iv_return = NETSNMP_DS_LIB_NO_TOKEN_WARNINGS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
+  case '_':
     if (memEQ(name, "NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY", 32)) {
-    /*                                            ^         */
+    /*                                   ^                  */
 #ifdef NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY
       *iv_return = NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'P':
-    if (memEQ(name, "NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT", 32)) {
-    /*                                            ^         */
-#ifdef NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT
-      *iv_return = NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -898,9 +1259,9 @@ static int
 constant_33 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     NETSNMP_DS_LIB_ALARM_DONT_USE_SIG NETSNMP_DS_LIB_DONT_PERSIST_STATE
-     NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS
-     NETSNMP_DS_LIB_READ_UCD_STYLE_OID */
+     NETSNMP_DS_LIB_ADD_FORWARDER_INFO NETSNMP_DS_LIB_ALARM_DONT_USE_SIG
+     NETSNMP_DS_LIB_DONT_PERSIST_STATE NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
+     NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS NETSNMP_DS_LIB_READ_UCD_STYLE_OID */
   /* Offset 32 gives the best switch position.  */
   switch (name[32]) {
   case 'D':
@@ -941,6 +1302,17 @@ constant_33 (pTHX_ const char *name, IV *iv_return) {
     /*                                               M      */
 #ifdef NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
       *iv_return = NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "NETSNMP_DS_LIB_ADD_FORWARDER_INF", 32)) {
+    /*                                               O      */
+#ifdef NETSNMP_DS_LIB_ADD_FORWARDER_INFO
+      *iv_return = NETSNMP_DS_LIB_ADD_FORWARDER_INFO;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -1083,36 +1455,45 @@ use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 my $types = {map {($_, 1)} qw(IV)};
 my @names = (qw(NETSNMP_DS_APPLICATION_ID NETSNMP_DS_LIBRARY_ID
 	       NETSNMP_DS_LIB_16BIT_IDS NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT
+	       NETSNMP_DS_LIB_ADD_FORWARDER_INFO
 	       NETSNMP_DS_LIB_ALARM_DONT_USE_SIG NETSNMP_DS_LIB_APPEND_LOGFILES
 	       NETSNMP_DS_LIB_APPTYPE NETSNMP_DS_LIB_APPTYPES
 	       NETSNMP_DS_LIB_AUTHLOCALIZEDKEY NETSNMP_DS_LIB_AUTHMASTERKEY
-	       NETSNMP_DS_LIB_AUTHPASSPHRASE NETSNMP_DS_LIB_CLIENTRECVBUF
-	       NETSNMP_DS_LIB_CLIENTSENDBUF NETSNMP_DS_LIB_CLIENT_ADDR
+	       NETSNMP_DS_LIB_AUTHPASSPHRASE NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR
+	       NETSNMP_DS_LIB_CLIENTRECVBUF NETSNMP_DS_LIB_CLIENTSENDBUF
+	       NETSNMP_DS_LIB_CLIENT_ADDR NETSNMP_DS_LIB_CLIENT_ADDR_USES_PORT
 	       NETSNMP_DS_LIB_COMMUNITY NETSNMP_DS_LIB_CONFIGURATION_DIR
 	       NETSNMP_DS_LIB_CONTEXT NETSNMP_DS_LIB_DEFAULT_PORT
 	       NETSNMP_DS_LIB_DISABLE_CONFIG_LOAD
 	       NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD
-	       NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE
+	       NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE NETSNMP_DS_LIB_DISABLE_V1
+	       NETSNMP_DS_LIB_DISABLE_V2c NETSNMP_DS_LIB_DISABLE_V3
+	       NETSNMP_DS_LIB_DNSSEC_WARN_ONLY
 	       NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS
 	       NETSNMP_DS_LIB_DONT_CHECK_RANGE
+	       NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES
 	       NETSNMP_DS_LIB_DONT_PERSIST_STATE
 	       NETSNMP_DS_LIB_DONT_PRINT_UNITS NETSNMP_DS_LIB_DONT_READ_CONFIGS
 	       NETSNMP_DS_LIB_DUMP_PACKET NETSNMP_DS_LIB_ESCAPE_QUOTES
-	       NETSNMP_DS_LIB_EXTENDED_INDEX NETSNMP_DS_LIB_HAVE_READ_CONFIG
+	       NETSNMP_DS_LIB_EXTENDED_INDEX NETSNMP_DS_LIB_FILTER_SOURCE
+	       NETSNMP_DS_LIB_FILTER_TYPE NETSNMP_DS_LIB_HAVE_READ_CONFIG
 	       NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG
-	       NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH
+	       NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH NETSNMP_DS_LIB_HOSTNAME
 	       NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY NETSNMP_DS_LIB_KSM_KEYTAB
 	       NETSNMP_DS_LIB_KSM_SERVICE_NAME NETSNMP_DS_LIB_LOG_TIMESTAMP
-	       NETSNMP_DS_LIB_MIBDIRS NETSNMP_DS_LIB_MIB_COMMENT_TERM
-	       NETSNMP_DS_LIB_MIB_ERRORS NETSNMP_DS_LIB_MIB_PARSE_LABEL
-	       NETSNMP_DS_LIB_MIB_REPLACE NETSNMP_DS_LIB_MIB_WARNINGS
-	       NETSNMP_DS_LIB_NO_DISPLAY_HINT NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
+	       NETSNMP_DS_LIB_MAX_BOOL_ID NETSNMP_DS_LIB_MAX_INT_ID
+	       NETSNMP_DS_LIB_MAX_STR_ID NETSNMP_DS_LIB_MIBDIRS
+	       NETSNMP_DS_LIB_MIB_COMMENT_TERM NETSNMP_DS_LIB_MIB_ERRORS
+	       NETSNMP_DS_LIB_MIB_PARSE_LABEL NETSNMP_DS_LIB_MIB_REPLACE
+	       NETSNMP_DS_LIB_MIB_WARNINGS NETSNMP_DS_LIB_MSG_SEND_MAX
+	       NETSNMP_DS_LIB_NO_DISCOVERY NETSNMP_DS_LIB_NO_DISPLAY_HINT
+	       NETSNMP_DS_LIB_NO_TOKEN_WARNINGS
 	       NETSNMP_DS_LIB_NUMERIC_TIMETICKS NETSNMP_DS_LIB_OIDPREFIX
 	       NETSNMP_DS_LIB_OIDSUFFIX NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
-	       NETSNMP_DS_LIB_OPTIONALCONFIG NETSNMP_DS_LIB_PASSPHRASE
-	       NETSNMP_DS_LIB_PERSISTENT_DIR NETSNMP_DS_LIB_PRINT_BARE_VALUE
-	       NETSNMP_DS_LIB_PRINT_FULL_OID NETSNMP_DS_LIB_PRINT_HEX_TEXT
-	       NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
+	       NETSNMP_DS_LIB_OPTIONALCONFIG NETSNMP_DS_LIB_OUTPUT_PRECISION
+	       NETSNMP_DS_LIB_PASSPHRASE NETSNMP_DS_LIB_PERSISTENT_DIR
+	       NETSNMP_DS_LIB_PRINT_BARE_VALUE NETSNMP_DS_LIB_PRINT_FULL_OID
+	       NETSNMP_DS_LIB_PRINT_HEX_TEXT NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
 	       NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS
 	       NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY
 	       NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID
@@ -1120,21 +1501,31 @@ my @names = (qw(NETSNMP_DS_APPLICATION_ID NETSNMP_DS_LIBRARY_ID
 	       NETSNMP_DS_LIB_PRIVPASSPHRASE NETSNMP_DS_LIB_QUICKE_PRINT
 	       NETSNMP_DS_LIB_QUICK_PRINT NETSNMP_DS_LIB_RANDOM_ACCESS
 	       NETSNMP_DS_LIB_READ_UCD_STYLE_OID NETSNMP_DS_LIB_REGEX_ACCESS
-	       NETSNMP_DS_LIB_REVERSE_ENCODE NETSNMP_DS_LIB_SAVE_MIB_DESCRS
-	       NETSNMP_DS_LIB_SBSM_LOCAL_PWD NETSNMP_DS_LIB_SECLEVEL
+	       NETSNMP_DS_LIB_RETRIES NETSNMP_DS_LIB_REVERSE_ENCODE
+	       NETSNMP_DS_LIB_SAVE_MIB_DESCRS NETSNMP_DS_LIB_SECLEVEL
 	       NETSNMP_DS_LIB_SECMODEL NETSNMP_DS_LIB_SECNAME
 	       NETSNMP_DS_LIB_SERVERRECVBUF NETSNMP_DS_LIB_SERVERSENDBUF
-	       NETSNMP_DS_LIB_SNMPVERSION NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT
-	       NETSNMP_DS_LIB_TEMP_FILE_PATTERN NETSNMP_DS_MAX_IDS
+	       NETSNMP_DS_LIB_SNMPVERSION NETSNMP_DS_LIB_SSHTOSNMP_SOCKET
+	       NETSNMP_DS_LIB_SSH_AGENT NETSNMP_DS_LIB_SSH_PRIVKEY
+	       NETSNMP_DS_LIB_SSH_PUBKEY NETSNMP_DS_LIB_SSH_USERNAME
+	       NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT
+	       NETSNMP_DS_LIB_TEMP_FILE_PATTERN NETSNMP_DS_LIB_TIMEOUT
+	       NETSNMP_DS_LIB_TLS_ALGORITMS NETSNMP_DS_LIB_TLS_LOCAL_CERT
+	       NETSNMP_DS_LIB_TLS_MAX_VERSION NETSNMP_DS_LIB_TLS_MIN_VERSION
+	       NETSNMP_DS_LIB_TLS_PEER_CERT NETSNMP_DS_LIB_TSM_USE_PREFIX
+	       NETSNMP_DS_LIB_X509_CLIENT_PUB NETSNMP_DS_LIB_X509_CRL_FILE
+	       NETSNMP_DS_LIB_X509_SERVER_PUB NETSNMP_DS_MAX_IDS
 	       NETSNMP_DS_MAX_SUBIDS NETSNMP_DS_SNMP_VERSION_1
 	       NETSNMP_DS_SNMP_VERSION_2c NETSNMP_DS_SNMP_VERSION_3
+	       NETSNMP_DS_SSHDOMAIN_DIR_PERM NETSNMP_DS_SSHDOMAIN_SOCK_GROUP
+	       NETSNMP_DS_SSHDOMAIN_SOCK_PERM NETSNMP_DS_SSHDOMAIN_SOCK_USER
 	       NETSNMP_DS_TOKEN_ID));
 
-print constant_types(); # macro defs
+print constant_types(), "\n"; # macro defs
 foreach (C_constant ("NetSNMP::default_store", 'constant', 'IV', $types, undef, 3, @names) ) {
     print $_, "\n"; # C constant subs
 }
-print "#### XS Section:\n";
+print "\n#### XS Section:\n";
 print XS_constant ("NetSNMP::default_store", $types);
 __END__
    */
@@ -1229,13 +1620,33 @@ __END__
     return constant_34 (aTHX_ name, iv_return);
     break;
   case 35:
-    if (memEQ(name, "NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT", 35)) {
-#ifdef NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT
-      *iv_return = NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT;
-      return PERL_constant_ISIV;
+    /* Names all of length 35.  */
+    /* NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT
+       */
+    /* Offset 34 gives the best switch position.  */
+    switch (name[34]) {
+    case 'S':
+      if (memEQ(name, "NETSNMP_DS_LIB_DONT_LOAD_HOST_FILE", 34)) {
+      /*                                                 S      */
+#ifdef NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES
+        *iv_return = NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES;
+        return PERL_constant_ISIV;
 #else
-      return PERL_constant_NOTDEF;
+        return PERL_constant_NOTDEF;
 #endif
+      }
+      break;
+    case 'T':
+      if (memEQ(name, "NETSNMP_DS_LIB_STRING_OUTPUT_FORMA", 34)) {
+      /*                                                 T      */
+#ifdef NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT
+        *iv_return = NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
     }
     break;
   case 36:
@@ -1248,13 +1659,14 @@ __END__
 #endif
     }
     break;
-
   case 38:
     return constant_38 (aTHX_ name, iv_return);
     break;
   }
   return PERL_constant_NOTFOUND;
 }
+
+
 
 /* autogenerated by "gen" from const-xs.inc */
 
@@ -1270,7 +1682,7 @@ constant(sv)
 #endif
 	STRLEN		len;
         int		type;
-	IV		iv = 0;
+	IV		iv = 0; /* avoid uninit var warning */
 	/* NV		nv;	Uncomment this if you need to return NVs */
 	/* const char	*pv;	Uncomment this if you need to return PVs */
     INPUT:
@@ -1284,46 +1696,48 @@ constant(sv)
            Second, if present, is found value */
         switch (type) {
         case PERL_constant_NOTFOUND:
-          sv = sv_2mortal(newSVpvf("%s is not a valid NetSNMP::default_store macro", s));
+          sv =
+	    sv_2mortal(newSVpvf("%s is not a valid NetSNMP::default_store macro", s));
           PUSHs(sv);
           break;
         case PERL_constant_NOTDEF:
           sv = sv_2mortal(newSVpvf(
-	    "Your vendor has not defined NetSNMP::default_store macro %s, used", s));
+	    "Your vendor has not defined NetSNMP::default_store macro %s, used",
+				   s));
           PUSHs(sv);
           break;
         case PERL_constant_ISIV:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHi(iv);
           break;
 	/* Uncomment this if you need to return NOs
         case PERL_constant_ISNO:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHs(&PL_sv_no);
           break; */
 	/* Uncomment this if you need to return NVs
         case PERL_constant_ISNV:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHn(nv);
           break; */
 	/* Uncomment this if you need to return PVs
         case PERL_constant_ISPV:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHp(pv, strlen(pv));
           break; */
 	/* Uncomment this if you need to return PVNs
         case PERL_constant_ISPVN:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHp(pv, iv);
           break; */
 	/* Uncomment this if you need to return SVs
         case PERL_constant_ISSV:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHs(sv);
           break; */
@@ -1332,13 +1746,13 @@ constant(sv)
           break; */
 	/* Uncomment this if you need to return UVs
         case PERL_constant_ISUV:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHu((UV)iv);
           break; */
 	/* Uncomment this if you need to return YESs
         case PERL_constant_ISYES:
-          EXTEND(SP, 1);
+          EXTEND(SP, 2);
           PUSHs(&PL_sv_undef);
           PUSHs(&PL_sv_yes);
           break; */
