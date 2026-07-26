@@ -15,6 +15,7 @@ preload_libasan() {
 if killall snmpd; then :; fi
 export NOAUTODEPS=1
 export LD_LIBRARY_PATH="$PWD/snmplib/.libs:$PWD/agent/.libs:$PWD/agent/helpers/.libs:"
+export DYLD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 export MIBDIRS="$PWD/mibs"
 export SNMP_PERSISTENT_DIR=/tmp/net-snmp
 export SNMP_SNMPD_PORT=1161
