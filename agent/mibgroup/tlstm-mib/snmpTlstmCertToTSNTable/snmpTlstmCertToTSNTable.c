@@ -1364,8 +1364,22 @@ init_snmpTlstmCertToTSNTable(void)
 void
 shutdown_snmpTlstmCertToTSNTable(void)
 {
+    netsnmp_tdata_row *row;
+
+    if (_table) {
+        while ((row = netsnmp_tdata_row_first(_table))) {
+            tlstmCertToTSNTable_removeEntry(_table, row);
+        }
+    }
+
     netsnmp_tdata_unregister(to_tsn_last_changed_reg);
     netsnmp_tdata_unregister(to_tsn_count_reg);
     netsnmp_tdata_unregister(to_tsn_reg);
     netsnmp_table_registration_info_free(to_tsn_table);
+
+    if (_table) {
+        _table->container = NULL;
+        netsnmp_tdata_delete_table(_table);
+        _table = NULL;
+    }
 }
