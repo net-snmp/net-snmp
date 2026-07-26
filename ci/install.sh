@@ -15,7 +15,6 @@ case "$(uname)" in
 		install_android_ndk
 		packages="
 		    make
-		    setpriv
 		    util-linux
 		"
 		;;
@@ -40,7 +39,6 @@ case "$(uname)" in
 		    make
 		    pkg-config
 		    python3-dev
-		    setpriv
 		    util-linux
 		"
 		;;
