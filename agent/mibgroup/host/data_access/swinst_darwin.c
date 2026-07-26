@@ -181,6 +181,9 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
     LSItemInfoRecord    itemInfoRecord;
     CFStringRef         prodName = NULL;
     CFStringRef         version = NULL;
+    CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
+    char                prodNameBuf[256];
+    char                versionBuf[256];
     
     DEBUGMSGTL(("swinst:arch:darwin", " adding files from %s\n", path));
     files = netsnmp_directory_container_read(NULL, path, 0);
@@ -264,10 +267,19 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
             break;
         }
 
+        prodNameBuf[0] = '\0';
+        versionBuf[0] = '\0';
+        
+        if (prodName) {
+            CFStringGetCString(prodName, prodNameBuf, sizeof(prodNameBuf), sys_encoding);
+        }
+        if (version) {
+            CFStringGetCString(version, versionBuf, sizeof(versionBuf), sys_encoding);
+        }
+
         entry->swName_len =
             snprintf(entry->swName, sizeof(entry->swName),
-                     "%s %s", CFStringGetCStringPtr(prodName,0),
-                     CFStringGetCStringPtr(version,0));
+                     "%s %s", prodNameBuf, versionBuf);
 	if (entry->swName_len >= sizeof(entry->swName))
 	    entry->swName_len = sizeof(entry->swName)-1;
 
