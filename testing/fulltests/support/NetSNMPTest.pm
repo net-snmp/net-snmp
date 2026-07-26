@@ -17,7 +17,11 @@ sub new {
 
 sub init {
     my ($self) = @_;
-    $self->{'dir'} = tempdir();
+    my $cleanup = 1;
+    if (defined($ENV{'SNMP_SAVE_TMPDIR'}) && ($ENV{'SNMP_SAVE_TMPDIR'} eq 'yes' || $ENV{'SNMP_SAVE_TMPDIR'} eq '1')) {
+        $cleanup = 0;
+    }
+    $self->{'dir'} = tempdir('snmp-test-perl-XXXXXX', DIR => '/tmp', CLEANUP => $cleanup);
     print "# using tempdir $self->{dir}\n";
 
     foreach my $suffix (qw(conf pid log out)) {
