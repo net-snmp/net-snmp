@@ -98,6 +98,10 @@ static netsnmp_table_registration_info *params_table;
 static uint32_t                _last_changed = 0;
 static netsnmp_tdata          *_table_data = NULL;
 
+void            snmpTlstmParamsTable_removeEntry(netsnmp_tdata *table_data,
+                                                 netsnmp_tdata_row *row);
+
+
 /*
  * Initialize the snmpTlstmParamsTable table by defining its contents
  * and how it's structured
@@ -238,12 +242,26 @@ unregister_params_table:
 void
 shutdown_snmpTlstmParamsTable(void)
 {
+    netsnmp_tdata_row *row;
+
+    if (_table_data) {
+        while ((row = netsnmp_tdata_row_first(_table_data))) {
+            snmpTlstmParamsTable_removeEntry(_table_data, row);
+        }
+    }
+
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                             _tlstmParamsTable_save, _table_data->container, 1);
+                             _tlstmParamsTable_save, _table_data ? _table_data->container : NULL, 1);
     netsnmp_tdata_unregister(last_changed_reg);
     netsnmp_tdata_unregister(params_count_reg);
     netsnmp_tdata_unregister(params_table_reg);
     netsnmp_table_registration_info_free(params_table);
+
+    if (_table_data) {
+        _table_data->container = NULL;
+        netsnmp_tdata_delete_table(_table_data);
+        _table_data = NULL;
+    }
 }
 
 /** **************************************************************************
