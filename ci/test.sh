@@ -9,20 +9,12 @@ case "$(uname)" in
 	;;
 esac
 
-head -n 999 /etc/hosts
-
 scriptdir="$(dirname "$0")"
 
-# To do: fix the tests for the disable-set, mini and read-only modes and delete
-# the case statement below.
 case "$MODE" in
-    "")
-	;;
-    asan|debug|disable-ipv6|regular)
-        ;;
-    *)
+    Android)
 	exit 0
-        ;;
+	;;
 esac
 
 case $(uname) in
