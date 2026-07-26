@@ -6,6 +6,9 @@ HEADER snmpv2c traps are sent by snmpd without notification mib support
 
 SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+
 #
 # Begin test
 #

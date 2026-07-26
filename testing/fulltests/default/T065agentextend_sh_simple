@@ -11,6 +11,9 @@ HEADER "extending agent functionality with extend and an external shell script"
 [ "x$OSTYPE" = xmsys -a "x$MSYS_SH" = x ] && SKIP "\$MSYS_SH has not been set"
 SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_AGENT_EXTEND_MODULE
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
 SKIPIFNOT USING_UTILITIES_EXECUTE_MODULE
 
 # make sure snmpget can be executed

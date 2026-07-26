@@ -2,6 +2,9 @@
 
 . STlsVars
 
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+
 # this file contains tests common to both tls and dtls usages
 
 export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"

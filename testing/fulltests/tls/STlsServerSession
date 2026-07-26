@@ -2,6 +2,9 @@
 
 . STlsVars
 
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+
 # this is usually something like "localhost:", so we need to strip the :
 OURHOST=`echo $SNMP_TEST_DEST | sed 's/:.*//'`
 
