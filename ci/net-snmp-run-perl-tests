@@ -1,5 +1,17 @@
 #!/bin/sh
 
+set -eu
+
+preload_libasan() {
+    cc=$(sed -n "s/^CC='//p" config.status | sed "s/'$//")
+    if nm ./snmplib/.libs/libnetsnmp.so 2>/dev/null | grep -q __asan; then
+	libasan_path=$(${cc} -print-file-name=libasan.so 2>/dev/null)
+	if [ -n "$libasan_path" ] && [ -f "$libasan_path" ]; then
+            export ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD="$libasan_path"
+	fi
+    fi
+}
+
 lib_dirs() {
     find . \( -name '*.dylib' -o -name '*.so' \) |
 	grep -v NetSNMP/agent/default_store |
@@ -8,6 +20,14 @@ lib_dirs() {
 	tr '\n' :
 }
 
+export NOAUTODEPS=1
+make -s perlmakefiles
+(
+    cd perl
+    make -s
+)
+preload_libasan
+# DYLD_LIBRARY_PATH and LD_LIBRARY_PATH must be set before "cd perl" happens.
 case "$(uname)" in
     Darwin)
         DYLD_LIBRARY_PATH="$(lib_dirs)"
@@ -18,7 +38,5 @@ case "$(uname)" in
         export LD_LIBRARY_PATH
         ;;
 esac
-make perlmakefiles &&
-cd perl &&
-make &&
+cd perl
 make test

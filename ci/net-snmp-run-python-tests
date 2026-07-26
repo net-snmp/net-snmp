@@ -1,7 +1,19 @@
 #!/bin/sh
 
 set -eux
+
+preload_libasan() {
+    cc=$(sed -n "s/^CC='//p" config.status | sed "s/'$//")
+    if nm ./snmplib/.libs/libnetsnmp.so 2>/dev/null | grep -q __asan; then
+	libasan_path=$(${cc} -print-file-name=libasan.so 2>/dev/null)
+	if [ -n "$libasan_path" ] && [ -f "$libasan_path" ]; then
+            export ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD="$libasan_path"
+	fi
+    fi
+}
+
 if killall snmpd; then :; fi
+export NOAUTODEPS=1
 export LD_LIBRARY_PATH="$PWD/snmplib/.libs:$PWD/agent/.libs:$PWD/agent/helpers/.libs:"
 export MIBDIRS="$PWD/mibs"
 export SNMP_PERSISTENT_DIR=/tmp/net-snmp
@@ -12,9 +24,10 @@ for dir in "$PWD"/python/build/lib.*; do
 done
 mkdir -p "$SNMP_PERSISTENT_DIR"
 agent/snmpd -I-smux -r -f -Lo -c python/netsnmp/tests/snmpd.conf localhost:${SNMP_SNMPD_PORT} &
-pid=$!
+snmpd_pid=$!
 PYTHONPROG=$(sed -n 's/^S\["PYTHONPROG"\]="\(.*\)"$/\1/p' config.status)
 [ -n "$PYTHONPROG" ]
+preload_libasan
 $PYTHONPROG -m unittest python/netsnmp/tests/test.py
-kill $pid
+kill $snmpd_pid
 wait
