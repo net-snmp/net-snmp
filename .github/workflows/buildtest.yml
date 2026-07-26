@@ -48,4 +48,4 @@ jobs:
       run: ci/build.sh
 
     - name: test
-      run: ci/test.sh
+      run: sudo -E ci/test.sh
