@@ -5,6 +5,26 @@ import os
 import unittest
 import netsnmp
 
+def set_support_disabled():
+    srcdir = os.environ.get("NETSNMP_SRC_DIR")
+    paths_to_try = []
+    if srcdir:
+        paths_to_try.append(os.path.join(srcdir, "include/net-snmp/net-snmp-config.h"))
+    paths_to_try.extend([
+        "include/net-snmp/net-snmp-config.h",
+        "../include/net-snmp/net-snmp-config.h",
+        "../../include/net-snmp/net-snmp-config.h",
+        "../../../include/net-snmp/net-snmp-config.h"
+    ])
+    for config_h in paths_to_try:
+        if os.path.exists(config_h):
+            with open(config_h, "r") as f:
+                for line in f:
+                    if "#define NETSNMP_DISABLE_SET_SUPPORT 1" in line or "#define NETSNMP_NO_WRITE_SUPPORT 1" in line:
+                        return True
+            break
+    return False
+
 def snmp_dest(**kwargs):
     """Return information about how to communicate with snmpd"""
     dest = {
@@ -117,6 +137,7 @@ class BasicTests(unittest.TestCase):
         self.assertTrue(var.val is not None)
         self.assertTrue(var.type is not None)
 
+    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
     def test_v1_set(self):
         print("\n")
         print("---v1 SET tests-------------------------------------\n")
@@ -228,6 +249,7 @@ class BasicTests(unittest.TestCase):
             self.assertIsNone(var.val)
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
+    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
     def test_v1_set_2(self):
         print("\n")
         print("---v1 set2-------------------------------------\n")
@@ -333,6 +355,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
+    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
     def test_v2c_set(self):
         print("\n")
         print("---v2c set-------------------------------------\n")
@@ -424,6 +447,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
+    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
     def test_v3_set(self):
         print("\n")
         print("---v3 set-------------------------------------\n")
@@ -454,6 +478,7 @@ class BasicTests(unittest.TestCase):
             print("  ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
 
+@unittest.skipIf(set_support_disabled(), "SET support is disabled")
 class SetTests(unittest.TestCase):
     """SNMP set tests for the Net-SNMP Python interface"""
     def testFuncs(self):
@@ -580,6 +605,7 @@ class HexStringGetNext(unittest.TestCase):
             print(var)
         self.assertEqual(varlist[0].iid, '0');
 
+@unittest.skipIf(set_support_disabled(), "SET support is disabled")
 class HexStringSet(unittest.TestCase):
     """SNMP hex string tests for the Net-SNMP Python interface"""
     def testFunc(self):
