@@ -50,8 +50,9 @@ int Get_HR_Disk_Label(char *string, size_t str_len, const char *devfull)
     str_ref = (CFStringRef)
         CFDictionaryGetValue(desc, kDADiskDescriptionMediaNameKey);
     if (str_ref) {
-        strlcpy(string, CFStringGetCStringPtr(str_ref, sys_encoding),
-                str_len);
+        if (!CFStringGetCString(str_ref, string, str_len, sys_encoding)) {
+            strlcpy(string, devfull, str_len);
+        }
         DEBUGMSGTL(("verbose:diskmgr:darwin", " name %s\n", string));
     }
     else {
