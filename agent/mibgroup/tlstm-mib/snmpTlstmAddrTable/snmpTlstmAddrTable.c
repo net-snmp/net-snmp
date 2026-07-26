@@ -109,6 +109,10 @@ static void _addrs_remove(tlstmAddrTable_entry *entry);
 static void _addr_tweak_storage(tlstmAddrTable_entry *entry);
 static netsnmp_tdata  *_table_data = NULL;
 
+void            tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
+                                           netsnmp_tdata_row * row);
+
+
 /***********************************************************************
  *
  * PERSISTENCE
@@ -253,13 +257,27 @@ unreg_addr_table:
 void
 shutdown_snmpTlstmAddrTable(void)
 {
+    netsnmp_tdata_row *row;
+
+    if (_table_data) {
+        while ((row = netsnmp_tdata_row_first(_table_data))) {
+            tlstmAddrTable_removeEntry(_table_data, row);
+        }
+    }
+
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                             _tlstmAddrTable_save_rows, _table_data->container,
+                             _tlstmAddrTable_save_rows, _table_data ? _table_data->container : NULL,
                              1);
     netsnmp_tdata_unregister(last_changed_reg);
     netsnmp_tdata_unregister(addr_count_reg);
     netsnmp_tdata_unregister(addr_table_reg);
     netsnmp_table_registration_info_free(addr_table_info);
+
+    if (_table_data) {
+        _table_data->container = NULL;
+        netsnmp_tdata_delete_table(_table_data);
+        _table_data = NULL;
+    }
 }
 
 /***********************************************************************
