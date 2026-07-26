@@ -4,6 +4,20 @@ use strict;
 use warnings;
 
 BEGIN {
+    my $srcdir = $ENV{'NETSNMP_SRC_DIR'} || "../..";
+    my $config_h = "$srcdir/include/net-snmp/net-snmp-config.h";
+    if (open(my $fh, '<', $config_h)) {
+        while (<$fh>) {
+            if (/#define NETSNMP_DISABLE_SET_SUPPORT 1/ || /#define NETSNMP_NO_WRITE_SUPPORT 1/) {
+                print "1..0 # SKIP SET support is disabled\n";
+                exit 0;
+            }
+        }
+        close($fh);
+    }
+}
+
+BEGIN {
     eval "use Cwd qw(abs_path)";
 }
 use Test;
