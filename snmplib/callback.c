@@ -472,15 +472,11 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
 
     if (_callback_need_init)
         init_callbacks();
-#ifdef LOCK_PER_CALLBACK_SUBID
-    lock_failed = _callback_lock(major,minor,"snmp_unregister_callback", 1);
-#else
     /*
      * Notes;
      * - this gets hit at shutdown, during cleanup. No easy fix.
      */
     lock_failed = _callback_lock(major,minor,"snmp_unregister_callback", 0);
-#endif
 
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
