@@ -342,6 +342,9 @@ installmibgroupheaders:
 @mib_module_list_deps@
 
 mib_modules.lo: mibgroup/mib_module_inits.h
+
+$(LOBJS) $(OBJS) $(FTMIBOBJS): ../include/net-snmp/net-snmp-config.h
+
 #
 # dependency for snmplib object. it's here because the headers listed
 # are relative to the agent directory.
