@@ -149,21 +149,24 @@ int Query_Disk(int fd, const char *devfull)
     str_ref = (CFStringRef)
         CFDictionaryGetValue(desc, kDADiskDescriptionMediaTypeKey);
     if (str_ref) {
-        HRD_type = _get_type_value(CFStringGetCStringPtr(str_ref,
-                                                         sys_encoding));
-        DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
-                    CFStringGetCStringPtr(str_ref, sys_encoding),
-                    HRD_type));
+        char buf[256];
+        if (CFStringGetCString(str_ref, buf, sizeof(buf), sys_encoding)) {
+            HRD_type = _get_type_value(buf);
+            DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n", buf, HRD_type));
+        } else {
+            HRD_type = HRDISKSTORAGEMEDIA_UNKNOWN;
+        }
     } else {
         str_ref = (CFStringRef)
             CFDictionaryGetValue(desc, kDADiskDescriptionDeviceProtocolKey);
         if (str_ref) {
-            HRD_type =
-                _get_type_from_protocol(CFStringGetCStringPtr(str_ref,
-                                                              sys_encoding));
-            DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n",
-                        CFStringGetCStringPtr(str_ref, sys_encoding),
-                        HRD_type));
+            char buf[256];
+            if (CFStringGetCString(str_ref, buf, sizeof(buf), sys_encoding)) {
+                HRD_type = _get_type_from_protocol(buf);
+                DEBUGMSGTL(("verbose:diskmgr:darwin", " type %s / %d\n", buf, HRD_type));
+            } else {
+                HRD_type = HRDISKSTORAGEMEDIA_UNKNOWN;
+            }
         }
         else
             HRD_type = HRDISKSTORAGEMEDIA_UNKNOWN;
@@ -173,8 +176,9 @@ int Query_Disk(int fd, const char *devfull)
     str_ref = (CFStringRef)
         CFDictionaryGetValue(desc, kDADiskDescriptionDeviceModelKey);
     if (str_ref) {
-        strlcpy(HRD_model, CFStringGetCStringPtr(str_ref, sys_encoding),
-                sizeof(HRD_model));
+        if (!CFStringGetCString(str_ref, HRD_model, sizeof(HRD_model), sys_encoding)) {
+            HRD_model[0] = 0;
+        }
         DEBUGMSGTL(("verbose:diskmgr:darwin", " model %s\n", HRD_model));
     } else {
         HRD_model[0] = 0;
