@@ -73,6 +73,9 @@ SOFTWARE.
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -1391,6 +1394,24 @@ netsnmp_deregister_agent_nsap(int handle)
     }
 }
 
+static void
+log_agent_address(netsnmp_transport *transport)
+{
+    struct sockaddr_storage sa;
+    socklen_t len = sizeof(sa);
+    char name[256], serv[16];
+
+    if (getsockname(transport->sock, (void *)&sa, &len) < 0)
+        return;
+
+    if (getnameinfo((void *)&sa, len, name, sizeof(name), serv,
+                    sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV) < 0)
+
+        return;
+
+    snmp_log(LOG_INFO, "Listening on address %s:%s\n", name, serv);
+}
+
 int
 netsnmp_agent_listen_on(const char *port)
 {
@@ -1416,6 +1437,8 @@ netsnmp_agent_listen_on(const char *port)
                     "init_master_agent; \"%s\" registered as an agent NSAP\n",
                     port));
     }
+
+    log_agent_address(transport);
 
     return handle;
 }
