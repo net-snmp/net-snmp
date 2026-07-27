@@ -593,6 +593,24 @@ snmptrapd_main_loop(void)
     }
 }
 
+static void
+log_listening_address(netsnmp_transport *transport)
+{
+    struct sockaddr_storage sa;
+    socklen_t len = sizeof(sa);
+    char name[256], serv[16];
+
+    if (getsockname(transport->sock, (void *)&sa, &len) < 0)
+        return;
+
+    if (getnameinfo((void *)&sa, len, name, sizeof(name), serv,
+                    sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV) < 0)
+
+        return;
+
+    snmp_log(LOG_INFO, "Listening on address %s:%s\n", name, serv);
+}
+
 /*******************************************************************-o-******
  * main - Non Windows
  * SnmpTrapdMain - Windows to support windows service
@@ -1201,6 +1219,7 @@ main(int argc, char *argv[])
                 snmp_log(LOG_ERR, "couldn't open snmp - %s", strerror(errno));
                 goto sock_cleanup;
             } else {
+                log_listening_address(transport);
                 ss->next = sess_list;
                 sess_list = ss;
             }
