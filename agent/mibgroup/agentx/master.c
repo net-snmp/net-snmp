@@ -35,6 +35,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #include <errno.h>
 
 #ifdef HAVE_UNISTD_H
@@ -106,6 +109,24 @@ shutdown_master_callback(int majorID, int minorID, void *serve, void *client)
     }
     master_sessions = NULL;
     return SNMPERR_SUCCESS;
+}
+
+static void
+log_agentx_listening_address(netsnmp_transport *t)
+{
+    struct sockaddr_storage sa;
+    socklen_t len = sizeof(sa);
+    char name[256], serv[16];
+
+    if (getsockname(t->sock, (void *)&sa, &len) < 0)
+        return;
+
+    if (getnameinfo((void *)&sa, len, name, sizeof(name), serv,
+                    sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV) < 0)
+
+        return;
+
+    snmp_log(LOG_INFO, "AgentX master listening on %s:%s\n", name, serv);
 }
 
 void
@@ -206,6 +227,7 @@ real_init_master(void)
                 netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             }
         } else {
+            log_agentx_listening_address(t);
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
             if (t->domain == netsnmp_UnixDomain && t->local != NULL) {
                 /*
