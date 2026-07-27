@@ -17,6 +17,7 @@ export NOAUTODEPS=1
 export LD_LIBRARY_PATH="$PWD/snmplib/.libs:$PWD/agent/.libs:$PWD/agent/helpers/.libs:"
 export DYLD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 export MIBDIRS="$PWD/mibs"
+export MIBS=ALL
 export SNMP_PERSISTENT_DIR=/tmp/net-snmp
 for dir in "$PWD"/python/build/lib.*; do
     export PYTHONPATH="${dir}"

@@ -25,6 +25,26 @@ def set_support_disabled():
             break
     return False
 
+def target_support_disabled():
+    srcdir = os.environ.get("NETSNMP_SRC_DIR")
+    paths_to_try = []
+    if srcdir:
+        paths_to_try.append(os.path.join(srcdir, "include/net-snmp/agent/mib_module_config.h"))
+    paths_to_try.extend([
+        "include/net-snmp/agent/mib_module_config.h",
+        "../include/net-snmp/agent/mib_module_config.h",
+        "../../include/net-snmp/agent/mib_module_config.h",
+        "../../../include/net-snmp/agent/mib_module_config.h"
+    ])
+    for config_h in paths_to_try:
+        if os.path.exists(config_h):
+            with open(config_h, "r") as f:
+                for line in f:
+                    if "#define USING_TARGET_MODULE 1" in line:
+                        return False
+            break
+    return True
+
 def snmp_dest(**kwargs):
     """Return information about how to communicate with snmpd"""
     dest = {
@@ -515,66 +535,67 @@ class SetTests(unittest.TestCase):
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0], '65');
 
-        sess = setup_v1()
+        if not target_support_disabled():
+            sess = setup_v1()
 
-        varlist = netsnmp.VarList(
-            netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116', '', '.1.3.6.1.6.1.1'),
-            netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.3.116.101.115.116', '', '1234'),
-            netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 4))
-        res = sess.set(varlist)
+            varlist = netsnmp.VarList(
+                netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.2.116.101.115.116', '', '.1.3.6.1.6.1.1'),
+                netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.3.116.101.115.116', '', '1234'),
+                netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 4))
+            res = sess.set(varlist)
 
-        print("res = ", res)
-        self.assertEqual(res, 1)
+            print("res = ", res)
+            self.assertEqual(res, 1)
 
-        varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
-                                  netsnmp.Varbind('snmpTargetAddrTAddress'),
-                                  netsnmp.Varbind('snmpTargetAddrRowStatus'))
+            varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                                      netsnmp.Varbind('snmpTargetAddrTAddress'),
+                                      netsnmp.Varbind('snmpTargetAddrRowStatus'))
 
-        res = sess.getnext(varlist)
-        self.assertEqual(len(res), 3)
-        self.assertEqual(varlist[0].tag, 'snmpTargetAddrTDomain')
-        self.assertEqual(varlist[0].iid, '116.101.115.116')
-        self.assertEqual(varlist[0].val, '.1.3.6.1.6.1.1')
-        self.assertEqual(varlist[1].tag, 'snmpTargetAddrTAddress')
-        self.assertEqual(varlist[1].iid, '116.101.115.116')
-        self.assertEqual(varlist[1].val, '1234')
-        self.assertEqual(varlist[2].tag, 'snmpTargetAddrRowStatus')
-        self.assertEqual(varlist[2].iid, '116.101.115.116')
-        self.assertEqual(varlist[2].val, '3')
+            res = sess.getnext(varlist)
+            self.assertEqual(len(res), 3)
+            self.assertEqual(varlist[0].tag, 'snmpTargetAddrTDomain')
+            self.assertEqual(varlist[0].iid, '116.101.115.116')
+            self.assertEqual(varlist[0].val, '.1.3.6.1.6.1.1')
+            self.assertEqual(varlist[1].tag, 'snmpTargetAddrTAddress')
+            self.assertEqual(varlist[1].iid, '116.101.115.116')
+            self.assertEqual(varlist[1].val, '1234')
+            self.assertEqual(varlist[2].tag, 'snmpTargetAddrRowStatus')
+            self.assertEqual(varlist[2].iid, '116.101.115.116')
+            self.assertEqual(varlist[2].val, '3')
 
-        for var in varlist:
-            self.assertIsNotNone(var.tag)
-            self.assertIsNotNone(var.iid)
-            self.assertIsNotNone(var.type)
-            self.assertIsNotNone(var.val)
-            print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
-        print("\n")
+            for var in varlist:
+                self.assertIsNotNone(var.tag)
+                self.assertIsNotNone(var.iid)
+                self.assertIsNotNone(var.type)
+                self.assertIsNotNone(var.val)
+                print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
+            print("\n")
 
-        varlist = netsnmp.VarList(
-            netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 6))
+            varlist = netsnmp.VarList(
+                netsnmp.Varbind('.1.3.6.1.6.3.12.1.2.1.9.116.101.115.116', '', 6))
 
-        res = sess.set(varlist)
+            res = sess.set(varlist)
 
-        print("res = ", res)
-        self.assertEqual(res, 1)
+            print("res = ", res)
+            self.assertEqual(res, 1)
 
-        varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
-                                  netsnmp.Varbind('snmpTargetAddrTAddress'),
-                                  netsnmp.Varbind('snmpTargetAddrRowStatus'))
+            varlist = netsnmp.VarList(netsnmp.Varbind('snmpTargetAddrTDomain'),
+                                      netsnmp.Varbind('snmpTargetAddrTAddress'),
+                                      netsnmp.Varbind('snmpTargetAddrRowStatus'))
 
-        res = sess.getnext(varlist)
-        self.assertEqual(len(res), 3)
-        self.assertNotEqual(varlist[0].tag, 'snmpTargetAddrTDomain')
-        self.assertNotEqual(varlist[1].tag, 'snmpTargetAddrTAddress')
-        self.assertNotEqual(varlist[2].tag, 'snmpTargetAddrRowStatus')
+            res = sess.getnext(varlist)
+            self.assertEqual(len(res), 3)
+            self.assertNotEqual(varlist[0].tag, 'snmpTargetAddrTDomain')
+            self.assertNotEqual(varlist[1].tag, 'snmpTargetAddrTAddress')
+            self.assertNotEqual(varlist[2].tag, 'snmpTargetAddrRowStatus')
 
-        for var in varlist:
-            self.assertIsNotNone(var.tag)
-            self.assertIsNotNone(var.iid)
-            self.assertIsNotNone(var.type)
-            self.assertIsNotNone(var.val)
-            print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
-        print("\n")
+            for var in varlist:
+                self.assertIsNotNone(var.tag)
+                self.assertIsNotNone(var.iid)
+                self.assertIsNotNone(var.type)
+                self.assertIsNotNone(var.val)
+                print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
+            print("\n")
 
         print("\n-------------- SET Test End ----------------------------\n")
 
