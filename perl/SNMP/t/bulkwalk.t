@@ -5,6 +5,22 @@
 use strict;
 use warnings;
 use Cwd qw(abs_path);
+BEGIN {
+    my $has_if_mib = 0;
+    if (open(F, "<../../include/net-snmp/agent/mib_module_config.h")) {
+        while(<F>) {
+            if (/\#define USING_IF_MIB_MODULE/) {
+                $has_if_mib = 1;
+                last;
+            }
+        }
+        close(F);
+    }
+    if (!$has_if_mib) {
+        print "1..0 # Skip bulkwalk test: IF-MIB not supported by agent\n";
+        exit 0;
+    }
+}
 use Test;
 
 BEGIN { plan test => 64; }
