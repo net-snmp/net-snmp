@@ -5,6 +5,11 @@
  * https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=14502.
  */
 
+#ifndef USING_AGENTX_PROTOCOL_MODULE
+printf("1..0 # skip AgentX not enabled\n");
+__did_plan = 1;
+return 0;
+#else
 netsnmp_session session;
 netsnmp_pdu pdu;
 int rc;
@@ -30,3 +35,4 @@ fflush(stderr);
 OKF(rc != 0, ("Parsing of AgentX data failed"));
 
 netsnmp_cleanup_session(&session);
+#endif
