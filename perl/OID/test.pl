@@ -9,6 +9,7 @@ use Cwd qw(abs_path);
 use Test;
 
 BEGIN {
+    $ENV{MIBS} = '+SNMP-NOTIFICATION-MIB';
     plan tests => 38;
 }
 
