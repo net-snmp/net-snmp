@@ -27,57 +27,50 @@ ORIG_AGENT_FLAGS="$AGENT_FLAGS"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL -Dproxy"
 STARTAGENT
 
-# test to see that the current agent doesn't support the system mib
-#CAPTURE "snmpget -On -t 3 $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+# test the proxy subagent by first running it...
 
-#CHECK ".1.3.6.1.2.1.1.3.0 = No Such Object"
+SNMP_SNMPD_PID_FILE_ORIG=$SNMP_SNMPD_PID_FILE
+SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
+SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
+echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
+if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then
+  echo "rwcommunity6 testcommunity" >> $SNMP_CONFIG_FILE
+fi
+echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
+ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
+SNMP_SNMPD_PORT="${SNMP_AGENTX_PORT}"
+STARTAGENT
+SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
 
-#if test "$snmp_last_test_result" = 1; then
-  # test the proxy subagent by first running it...
+# test to see that the agent now supports the system mib
+CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
 
-  SNMP_SNMPD_PID_FILE_ORIG=$SNMP_SNMPD_PID_FILE
-  SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
-  SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
-  SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
-  SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
-  echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
-  if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then
-    echo "rwcommunity6 testcommunity" >> $SNMP_CONFIG_FILE
-  fi
-  echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
-  AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
-  ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
-  SNMP_SNMPD_PORT="${SNMP_AGENTX_PORT}"
-  STARTAGENT
-  SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
+CHECK ".1.3.6.1.2.1.1.4.0 = STRING: \"*testcontact"
+
+if test "$snmp_last_test_result" = 1; then
 
   # test to see that the agent now supports the system mib
-  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
+  CAPTURE "snmpset -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0 s testnewcontact"
 
-  CHECK ".1.3.6.1.2.1.1.4.0 = STRING: \"*testcontact"
+  CHECK ".1.3.6.1.2.1.1.4.0 = STRING: \"*testnewcontact"
 
   if test "$snmp_last_test_result" = 1; then
 
     # test to see that the agent now supports the system mib
-    CAPTURE "snmpset -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0 s testnewcontact"
+    CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
 
     CHECK ".1.3.6.1.2.1.1.4.0 = STRING: \"*testnewcontact"
-
-    if test "$snmp_last_test_result" = 1; then
-
-	# test to see that the agent now supports the system mib
-	CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
-	
-	CHECK ".1.3.6.1.2.1.1.4.0 = STRING: \"*testnewcontact"
-    fi
   fi
+fi
 
-  # stop the subagent
-  STOPAGENT
+# stop the subagent
+STOPAGENT
 
-  SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
-  SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
-#fi
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
 
 # stop the master agent
 STOPAGENT
