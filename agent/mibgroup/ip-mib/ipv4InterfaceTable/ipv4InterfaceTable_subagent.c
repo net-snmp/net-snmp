@@ -100,16 +100,17 @@ main(int argc, char **argv)
          */
         DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
         for (i = optind; i < argc; i++) {
-            char           *c, *astring;
+            char           *c;
+
             if ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
                                            NETSNMP_DS_AGENT_PORTS))) {
-                astring = malloc(strlen(c) + 2 + strlen(argv[i]));
-                if (astring == NULL) {
+                char           *astring;
+
+                if (asprintf(&astring, "%s,%s", c, argv[i]) < 0) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n",
                             i);
                     exit(1);
                 }
-                sprintf(astring, "%s,%s", c, argv[i]);
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_PORTS, astring);
                 SNMP_FREE(astring);

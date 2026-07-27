@@ -865,16 +865,15 @@ main(int argc, char *argv[])
         DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
         for (i = optind; i < argc; i++) {
             char *c;
+
             if ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					   NETSNMP_DS_AGENT_PORTS))) {
                 char *astring;
-                size_t alen = strlen(c) + 2 + strlen(argv[i]);
-                astring = (char*)malloc(alen);
-                if (astring == NULL) {
+
+                if (asprintf(&astring, "%s,%s", c, argv[i]) < 0) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     goto out;
                 }
-                snprintf(astring, alen, "%s,%s", c, argv[i]);
                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
 				      NETSNMP_DS_AGENT_PORTS, astring);
                 SNMP_FREE(astring);

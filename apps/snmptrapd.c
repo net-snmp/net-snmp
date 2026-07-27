@@ -983,15 +983,13 @@ main(int argc, char *argv[])
          * There are optional transport addresses on the command line.  
          */
         for (i = optind; i < argc; i++) {
-            char *astring;
             if (listen_ports != NULL) {
-                size_t len = strlen(listen_ports) + 2 + strlen(argv[i]);
-                astring = malloc(len);
-                if (astring == NULL) {
+                char *astring;
+
+                if (asprintf(&astring, "%s,%s", listen_ports, argv[i]) < 0) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     goto out;
                 }
-                snprintf(astring, len, "%s,%s", listen_ports, argv[i]);
                 free(listen_ports);
                 listen_ports = astring;
             } else {
