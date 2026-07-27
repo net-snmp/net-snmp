@@ -22,8 +22,8 @@ $bad_auth_pass $bad_priv_pass $bad_sec_name $bad_version);
 
 # common parameters used in SNMP::Session creation and tests
 $agent_host = '127.0.0.1' if (!defined($agent_host));
-$agent_port = 8765 if (!defined($agent_port));
-our $trap_port = 8764;
+$agent_port = 0 if (!defined($agent_port));
+our $trap_port = 0;
 $mibdir = '/usr/local/share/snmp/mibs' if (!defined($mibdir));
 our $comm = 'v1_private';
 our $comm2 = 'v2c_private';
@@ -175,11 +175,31 @@ unlink($snmptrapd_log);
 
 if ($snmpd_cmd) {
   run_async($snmpd_pid, "$snmpd_cmd", "-r -d -Lf $snmpd_log -M+$mibdir -C -c t/snmptest.conf -p $snmpd_pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
-  wait_for_log($snmpd_log, qr/NET-SNMP version/);
+  if (wait_for_log($snmpd_log, qr/NET-SNMP version/)) {
+    if (open(my $fh, "<$snmpd_log")) {
+      while (my $line = <$fh>) {
+        if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
+          $agent_port = $1;
+          last;
+        }
+      }
+      close($fh);
+    }
+  }
 }
 if ($snmptrapd_cmd) {
   run_async($snmptrapd_pid, "$snmptrapd_cmd", "-d -Lf $snmptrapd_log -p $snmptrapd_pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
-  wait_for_log($snmptrapd_log, qr/NET-SNMP version/);
+  if (wait_for_log($snmptrapd_log, qr/NET-SNMP version/)) {
+    if (open(my $fh, "<$snmptrapd_log")) {
+      while (my $line = <$fh>) {
+        if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
+          $trap_port = $1;
+          last;
+        }
+      }
+      close($fh);
+    }
+  }
 }
 
 1;
