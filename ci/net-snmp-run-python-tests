@@ -18,17 +18,40 @@ export LD_LIBRARY_PATH="$PWD/snmplib/.libs:$PWD/agent/.libs:$PWD/agent/helpers/.
 export DYLD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 export MIBDIRS="$PWD/mibs"
 export SNMP_PERSISTENT_DIR=/tmp/net-snmp
-export SNMP_SNMPD_PORT=1161
 for dir in "$PWD"/python/build/lib.*; do
     export PYTHONPATH="${dir}"
     break
 done
 mkdir -p "$SNMP_PERSISTENT_DIR"
-agent/snmpd -I-smux -r -f -Lo -c python/netsnmp/tests/snmpd.conf localhost:${SNMP_SNMPD_PORT} &
+snmpd_log="/tmp/snmpd-pytests-$$.log"
+rm -f "${snmpd_log}"
+agent/snmpd -I-smux -r -f -Lo -Lf "${snmpd_log}" \
+	    -c python/netsnmp/tests/snmpd.conf localhost:0 &
 snmpd_pid=$!
+
+# Wait for snmpd to start and listen
+for i in $(seq 1 30); do
+    if grep -q "NET-SNMP version" "$snmpd_log" 2>/dev/null; then
+        break
+    fi
+    sleep 0.1
+done
+
+# Extract the allocated port
+allocated_port=$(sed -n 's/.*Listening on address .*:\([0-9][0-9]*\)$/\1/p' \
+		     "${snmpd_log}" | head -n 1)
+if [ -z "$allocated_port" ]; then
+    echo "Failed to find allocated port in $snmpd_log"
+    cat "$snmpd_log"
+    kill $snmpd_pid
+    exit 1
+fi
+export SNMP_SNMPD_PORT="$allocated_port"
+
 PYTHONPROG=$(sed -n 's/^S\["PYTHONPROG"\]="\(.*\)"$/\1/p' config.status)
 [ -n "$PYTHONPROG" ]
 preload_libasan
 $PYTHONPROG -m unittest python/netsnmp/tests/test.py
 kill $snmpd_pid
 wait
+rm -f "$snmpd_log"
