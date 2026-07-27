@@ -51,6 +51,8 @@ INITV6() {
 RUNTEST() {
     STARTTRAPD
 
+    CONFIG_TEST_AGENT
+
     STARTAGENT
 
     # We just rely on the coldstart trap, so there is no active test here.

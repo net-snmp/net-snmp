@@ -13,14 +13,17 @@ SKIPIFNOT HAVE_SIGHUP
 
 # standard V1 configuration: testcomunnity
 . ./Sv3config
-CONFIGAGENT trapsink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
 
 CONFIGTRAPD authcommunity log,execute,net public
 CONFIGTRAPD agentxsocket /dev/null
-CONFIGTRAPD forward default 127.0.0.1:${SNMP_SNMPTRAPD_PORT}
 CONFIGTRAPD addForwarderInfo yes
 
 STARTTRAPD
+
+CONFIGTRAPD forward default 127.0.0.1:${SNMP_SNMPTRAPD_PORT}
+HUPPROG $SNMP_SNMPTRAPD_PID_FILE
+
+CONFIGAGENT trapsink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
 
 AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap"
 STARTAGENT

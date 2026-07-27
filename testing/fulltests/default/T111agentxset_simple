@@ -18,12 +18,13 @@ SKIPIF    NETSNMP_NO_WRITE_SUPPORT
 . ./Sv3config
 
 # Start the agent without initializing the system mib.
+SAVE_AGENT_FLAGS="$AGENT_FLAGS"
 if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ];then
-ORIG_AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
+AGENTX_FLAGS="-x $SNMP_TMPDIR/agentx_socket"
 else
-ORIG_AGENT_FLAGS="$AGENT_FLAGS -x tcp:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT}"
+AGENTX_FLAGS="-x tcp:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT}"
 fi
-AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL -DAgentX"
+AGENT_FLAGS="$SAVE_AGENT_FLAGS $AGENTX_FLAGS -I -system_mib,winExtDLL -DAgentX"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
@@ -38,7 +39,11 @@ if test "$snmp_last_test_result" = 1; then
   SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
   SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
-  AGENT_FLAGS="$ORIG_AGENT_FLAGS -X -I system_mib"
+  if [ "x$SNMP_TRANSPORT_SPEC" != "xunix" ]; then
+    ALLOCATED_AGENTX_PORT=$(SNMP_AGENTX_PORT_FROM_LOG_FILE "$SNMP_SNMPD_LOG_FILE_ORIG")
+    AGENTX_FLAGS="-x tcp:${SNMP_TEST_DEST}${ALLOCATED_AGENTX_PORT}"
+  fi
+  AGENT_FLAGS="$SAVE_AGENT_FLAGS $AGENTX_FLAGS -X -I system_mib"
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/bogus.conf"
   echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
   STARTAGENT

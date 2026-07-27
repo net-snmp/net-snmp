@@ -19,18 +19,11 @@ SKIPIF    NETSNMP_NO_WRITE_SUPPORT
 
 # standard V3 configuration for initial user
 . ./Sv3config
-# config the proxy
-CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} .1.3.6.1.2.1.1
-
-# Start the agent without initializing the system mib.
-ORIG_AGENT_FLAGS="$AGENT_FLAGS"
-AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL -Dproxy"
-STARTAGENT
-
-# test the proxy subagent by first running it...
-
+# Start the backend agent first (it has the system mib)
 SNMP_SNMPD_PID_FILE_ORIG=$SNMP_SNMPD_PID_FILE
 SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
+SNMP_CONFIG_FILE_ORIG=$SNMP_CONFIG_FILE
+
 SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
 SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
@@ -39,11 +32,26 @@ if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then
   echo "rwcommunity6 testcommunity" >> $SNMP_CONFIG_FILE
 fi
 echo "psyscontact testcontact" >> $SNMP_CONFIG_FILE
+
+ORIG_AGENT_FLAGS="$AGENT_FLAGS"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dmib_init"
 ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
-SNMP_SNMPD_PORT="${SNMP_AGENTX_PORT}"
+SNMP_SNMPD_PORT=0
 STARTAGENT
+BACKEND_PORT=$SNMP_SNMPD_PORT
+
+# Restore variables for master agent
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
+SNMP_CONFIG_FILE=$SNMP_CONFIG_FILE_ORIG
 SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
+
+# Config the proxy to talk to backend
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${BACKEND_PORT} .1.3.6.1.2.1.1
+
+# Start the proxy agent (without system mib)
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL -Dproxy"
+STARTAGENT
 
 # test to see that the agent now supports the system mib
 CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
@@ -69,11 +77,11 @@ fi
 # stop the subagent
 STOPAGENT
 
-SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
-SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
-
 # stop the master agent
+SNMP_SNMPD_PID_FILE_SAVE=$SNMP_SNMPD_PID_FILE
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_SAVE.num2
 STOPAGENT
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_SAVE
 
 # all done (whew)
 FINISHED

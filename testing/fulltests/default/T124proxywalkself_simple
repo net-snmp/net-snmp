@@ -19,13 +19,15 @@ OID=.1.3.6.1.4.1.8072.42
 
 # standard v2c configuration
 . ./Sv2cconfig
-# config the proxy to proxy to itself
-CONFIGAGENT proxy -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $OID .1.3.6.1.2.1.1
 
 # Start the agent with proxy debugging
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
 AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dproxy"
 STARTAGENT
+
+# config the proxy to proxy to itself
+CONFIGAGENT proxy -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $OID .1.3.6.1.2.1.1
+HUPPROG $SNMP_SNMPD_PID_FILE
 
 # Check that we get a string from the proxied sysObjectID
 CAPTURE "snmpgetnext -On $SNMP_FLAGS -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $OID"

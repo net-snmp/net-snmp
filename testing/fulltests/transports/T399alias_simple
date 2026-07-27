@@ -14,11 +14,27 @@ SKIPIFNOT NETSNMP_TRANSPORT_ALIAS_DOMAIN
 # configure the agent to accept user initial with noAuthNoPriv
 . ../default/Sv3config
 
-CONFIGAPP alias aliastest udp:localhost:$SNMP_SNMPD_PORT
-CONFIGAGENT '[snmp]' alias aliastest udp:localhost:$SNMP_SNMPD_PORT
+# Configure agent to listen on alias which resolves to udp:127.0.0.1:0 (dynamic port)
+CONFIGAGENT '[snmp]' alias aliastest udp:127.0.0.1:0
 
 SNMP_TRANSPORT_SPEC=alias
 SNMP_TEST_DEST="aliastest"
 SNMP_SNMPD_PORT=""
 
-. ./Stransport
+export SNMP_TRANSPORT_SPEC
+export SNMP_SNMPD_PORT
+export SNMP_TEST_DEST
+
+STARTAGENT
+
+# Configure client to use alias pointing to the actual port
+CONFIGAPP alias aliastest udp:127.0.0.1:$SNMP_SNMPD_PORT
+
+# Run client. We must NOT append port to alias name.
+CAPTURE "snmpget -On $SNMP_FLAGS $NOAUTHTESTARGS alias:aliastest .1.3.6.1.2.1.1.3.0"
+
+STOPAGENT
+
+CHECK ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+FINISHED

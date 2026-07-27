@@ -64,12 +64,12 @@ CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
 # Run the actual list of tests
 #
 
-# app flags
-FLAGS="-Dtls -v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
-
 # start the agent up
 AGENT_FLAGS="-Dtls"
 STARTAGENT
+
+# app flags
+FLAGS="-Dtls -v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 # using user 1 - a common name mapped certificate
 # (using the default "snmpapp" certificate because we don't specify another)

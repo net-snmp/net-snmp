@@ -33,11 +33,11 @@ CONFIGAGENT  rwuser -s tsm testuser authpriv
 # Run the actual list of tests
 #
 
-# app flags
-FLAGS="-v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
-
 # start the agent up
 STARTAGENT
+
+# app flags
+FLAGS="-v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 # using user 1 - a common name mapped certificate
 # (using the default "snmpapp" certificate because we don't specify another)

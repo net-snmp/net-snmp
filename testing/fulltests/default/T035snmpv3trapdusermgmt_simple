@@ -19,6 +19,7 @@ SKIPIFNOT NETSNMP_ENABLE_SCAPI_AUTHPRIV
 #
 
 # configure AgentX socket
+ORIG_TRAPD_FLAGS="$TRAPD_FLAGS"
 if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ]; then
   AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
   TRAPD_FLAGS="$TRAPD_FLAGS -x $SNMP_TMPDIR/agentx_socket"
@@ -52,6 +53,11 @@ NEWAUTHPASS=newauthpass
 NEWPRIVPASS=newprivpass
 NEWUSER2=newtestuser_vanilla
 CONFIGTRAPD authuser log $NEWUSER auth
+
+if [ "x$SNMP_TRANSPORT_SPEC" != "xunix" ]; then
+  ALLOCATED_AGENTX_PORT=$(SNMP_AGENTX_PORT_FROM_LOG_FILE "$SNMP_SNMPD_LOG_FILE")
+  TRAPD_FLAGS="$ORIG_TRAPD_FLAGS -x tcp:${SNMP_TEST_DEST}${ALLOCATED_AGENTX_PORT}"
+fi
 
 # start snmptrapd
 STARTTRAPD

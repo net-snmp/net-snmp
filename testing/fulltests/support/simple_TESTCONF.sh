@@ -179,31 +179,6 @@ export SNMP_PERSISTENT_DIR
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
 fi
-if test -x /bin/netstat ; then
-    NETSTAT=/bin/netstat
-elif test -x /usr/bin/netstat ; then
-    NETSTAT=/usr/bin/netstat
-elif test -x /usr/sbin/netstat ; then
-    # e.g. Tru64 Unix
-    NETSTAT=/usr/sbin/netstat
-elif test -x /usr/etc/netstat ; then
-    # e.g. IRIX
-    NETSTAT=/usr/etc/netstat
-elif test -x /cygdrive/c/windows/system32/netstat ; then
-    # Cygwin
-    NETSTAT=/cygdrive/c/windows/system32/netstat
-elif test -x /c/Windows/System32/netstat ; then
-    # MinGW + MSYS
-    NETSTAT=/c/Windows/System32/netstat
-elif test -x /usr/sbin/ss ; then
-    # Fedora24, RHEL7 does not install netstat as standard
-    NETSTAT=/usr/sbin/ss
-elif test -x /usr/bin/ss ; then
-    # Debian 10 (buster) put ss in /usr/bin/ss
-    NETSTAT=/usr/bin/ss
-else
-    NETSTAT=""
-fi
 
 if [ "x$OSTYPE" = "xmsys" ]; then
     # Obtain the MSYS installation path from the !C: environment variable,
@@ -214,43 +189,14 @@ if [ "x$OSTYPE" = "xmsys" ]; then
     MSYS_SH="$MSYS_PATH/sh.exe"
 fi
 
-PROBE_FOR_PORT() {
-    BASE_PORT=$1
-    MAX_RETRIES=30
-    if test -x "$NETSTAT" ; then
-        if test -z "$RANDOM"; then
-            RANDOM=2
-        fi
-        while :
-        do
-            BASE_PORT=`expr $BASE_PORT + \( $RANDOM % 100 \)`
-            IN_USE=`$NETSTAT -a -n 2>/dev/null | grep "[\.:]$BASE_PORT "`
-            if [ $? -ne 0 ]; then
-                echo "$BASE_PORT"
-                break
-            fi
-            MAX_RETRIES=`expr $MAX_RETRIES - 1`
-            if [ $MAX_RETRIES -eq 0 ]; then
-                echo "ERROR: Could not find available port." >&2
-                echo "NOPORT"
-                exit 255
-            fi
-        done
-    else
-	echo "ERROR: Cannot probe for port - netstat not found." >&2
-	echo "NOPORT"
-	exit 255
-    fi
-}
-
 if [ "x$SNMP_SNMPD_PORT" = "x" ]; then
-    SNMP_SNMPD_PORT=`PROBE_FOR_PORT 8765`
+    SNMP_SNMPD_PORT=0
 fi
 if [ "x$SNMP_SNMPTRAPD_PORT" = "x" ]; then
-    SNMP_SNMPTRAPD_PORT=`PROBE_FOR_PORT 5678`
+    SNMP_SNMPTRAPD_PORT=0
 fi
 if [ "x$SNMP_AGENTX_PORT" = "x" ]; then
-    SNMP_AGENTX_PORT=`PROBE_FOR_PORT 7676`
+    SNMP_AGENTX_PORT=0
 fi
 if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
 	SNMP_TRANSPORT_SPEC="udp"

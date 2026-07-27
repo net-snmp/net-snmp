@@ -12,11 +12,13 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
 # standard V1 configuration: testcommunity
 . ./Sv3config
-CONFIGAGENT trapsink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
+
 CONFIGTRAPD authcommunity log public
 CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
+
+CONFIGAGENT trapsink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
 
 # initialize only the example mib, and not the notification mib stuff
 AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,add_trap,mib_init,callback -I example,usmUser,usmConf,vacm_vars"

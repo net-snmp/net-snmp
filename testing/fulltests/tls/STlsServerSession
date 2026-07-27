@@ -27,11 +27,11 @@ CONFIGAGENT  rwuser -s tsm testuser authpriv
 
 CONFIGAPP   clientCert		  $TESTUSERFP
 
-# app flags
-FLAGS="-v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
-
 # start up the agent
 STARTAGENT
+
+# app flags
+FLAGS="-v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 ########################################
 # Positive tests
