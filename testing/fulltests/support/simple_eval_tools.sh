@@ -399,7 +399,7 @@ WAITFORCOND() {
         sleeptime=`expr $SNMP_SLEEP '*' 5`
     fi
     while [ $sleeptime -gt 0 ]; do
-	if eval "$*"; then
+	if eval "$@"; then
 	    break
 	fi
         if [ $SNMP_CAN_USLEEP = 1 ]; then
@@ -431,7 +431,7 @@ WAITFORTRAPD() {
 
 # Wait until pattern "$1" appears in file "$2".
 WAITFOR() {
-    WAITFORCOND "grep $1 $2 >/dev/null 2>&1"
+    WAITFORCOND "grep '$1' $2 >/dev/null 2>&1"
 }
 
 GOOD() {
@@ -553,7 +553,7 @@ STARTAGENT() {
     fi
     STARTPROG
     WAITFORCOND test -f $SNMP_SNMPD_PID_FILE
-    WAITFORAGENT "NET-SNMP.version"
+    WAITFORAGENT "^NET-SNMP version [^ ]*[ ]*$"
 }
 
 #------------------------------------ -o-
@@ -568,7 +568,7 @@ STARTTRAPD() {
     fi
     STARTPROG
     WAITFORCOND test -f $SNMP_SNMPTRAPD_PID_FILE
-    WAITFORTRAPD "NET-SNMP.version"
+    WAITFORTRAPD "^NET-SNMP version "
 }
 
 ## sending SIGHUP for reconfiguration
