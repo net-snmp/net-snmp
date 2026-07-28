@@ -6,15 +6,9 @@ use Test;
 
 BEGIN {
     eval "use Cwd qw(abs_path)";
-    plan tests => ($^O =~ /win32/i) ? 0 : 11;
+    plan tests => 11;
 }
 use SNMP;
-
-if ($^O =~ /win32/i) {
-  warn "Win32/Win64 detected - skipping notification tests\n";
-  exit;
-}
-
 require 't/startagent.pl';
 use vars qw($agent_host $agent_port $auth_pass $bad_name $comm $comm2
             $priv_pass $sec_name $trap_port);

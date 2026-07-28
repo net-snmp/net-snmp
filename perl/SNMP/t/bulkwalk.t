@@ -7,7 +7,7 @@ use warnings;
 use Cwd qw(abs_path);
 use Test;
 
-BEGIN { plan test => ($^O =~ /win32/i) ? 43 : 64; }
+BEGIN { plan test => 64; }
 
 use SNMP;
 
@@ -296,14 +296,9 @@ sub async_cb1 {
 $vars = new SNMP::VarList ( ['sysUpTime'], ['ifNumber'], # NON-repeaters
 			    ['ifSpeed'], ['ifDescr']);	 # Repeated variables.
 
-if ($^O =~ /win32/i) {
-  warn "Win32/Win64 detected - skipping async calls\n";
-}
-else {
-  @list = $s1->bulkwalk(2, 256, $vars, [ \&async_cb1, $vars ] );
-  ok($s1->{ErrorNum} == 0);
-  SNMP::MainLoop();
-}
+@list = $s1->bulkwalk(2, 256, $vars, [ \&async_cb1, $vars ] );
+ok($s1->{ErrorNum} == 0);
+SNMP::MainLoop();
 ok(1);
 
 snmptest_cleanup();

@@ -10,13 +10,8 @@ BEGIN {
 }
 
 use Test;
-BEGIN {plan tests => ($^O =~ /win32/i) ? 0 : 20}
+BEGIN {plan tests => 20}
 use SNMP;
-
-if ($^O =~ /win32/i) {
-  warn "Win32/Win64 detected - skipping async calls\n";
-  exit;
-}
 
 require "t/startagent.pl";
 use vars qw($agent_host $agent_port $comm);
