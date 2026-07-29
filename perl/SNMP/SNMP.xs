@@ -5065,13 +5065,23 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
                  LEAVE;
                  break;
               case -1:
+#ifdef WIN32
+                 if (WSAGetLastError() == WSAEINTR) {
+                    continue;
+                 } else {
+                    char err_msg[256];
+                    snprintf(err_msg, sizeof(err_msg), "select failed with Winsock error %d", WSAGetLastError());
+                    warn("%s", err_msg);
+                    goto done;
+                 }
+#else
                  if (errno == EINTR) {
                     continue;
                  } else {
-                    /* snmp_set_detail(strerror(errno)); */
-                    /* snmp_errno = SNMPERR_GENERR; */
+                    warn("select failed: %s", strerror(errno));
+                    goto done;
                  }
-              default:;
+#endif
            }
 
 	   /* A call to snmp_mainloop_finish() in the callback sets the
