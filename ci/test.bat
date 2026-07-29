@@ -4,6 +4,13 @@ echo "Error: unknown build type %BUILD%"
 goto eof
 
 :MSVCDYNAMIC64
+call %~dp0find_vc.bat
+call "%VCVARSPATH%\vcvars64.bat"
+set PATH=c:\perl-msvc\bin;%PATH%
+cd win32
+nmake /nologo perl_test
+if %errorlevel% neq 0 exit /b %errorlevel%
+cd ..
 goto eof
 
 :MSVCSTATIC64

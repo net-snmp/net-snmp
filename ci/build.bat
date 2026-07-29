@@ -19,8 +19,6 @@ nmake /nologo
 if %errorlevel% neq 0 exit /b %errorlevel%
 nmake /nologo perl
 if %errorlevel% neq 0 exit /b %errorlevel%
-nmake /nologo perl_test
-if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
 goto eof
 
