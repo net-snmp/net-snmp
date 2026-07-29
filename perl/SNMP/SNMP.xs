@@ -8,6 +8,29 @@
      modify it under the same terms as Perl itself.
 */
 
+#ifdef WIN32
+    /* 1. Prevent windows.h from automatically pulling in the legacy winsock.h */
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+
+    /* 2. Tell Perl NOT to define its POSIX emulation wrapper socket macros */
+    #define PERLIO_NOT_HAPPENING
+    #define HAS_SOCKET
+
+    /* 3. Include native Windows Winsock headers FIRST */
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+
+    /* 4. Save Winsock macro definitions before Perl headers modify them */
+    #pragma push_macro("fd_set")
+    #pragma push_macro("FD_SET")
+    #pragma push_macro("FD_CLR")
+    #pragma push_macro("FD_ISSET")
+    #pragma push_macro("FD_ZERO")
+    #pragma push_macro("select")
+#endif
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
@@ -15,6 +38,16 @@
 #include "perl.h"
 #include "XSUB.h"
 #pragma GCC diagnostic pop
+
+#ifdef WIN32
+    /* 5. Restore Winsock macro definitions, overriding Perl's redefinitions */
+    #pragma pop_macro("select")
+    #pragma pop_macro("FD_ZERO")
+    #pragma pop_macro("FD_ISSET")
+    #pragma pop_macro("FD_CLR")
+    #pragma pop_macro("FD_SET")
+    #pragma pop_macro("fd_set")
+#endif
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
