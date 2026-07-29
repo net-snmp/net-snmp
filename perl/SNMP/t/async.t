@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+$| = 1;
+
 BEGIN {
     eval "use Cwd qw(abs_path)";
 }
