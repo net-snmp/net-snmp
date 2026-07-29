@@ -39,4 +39,23 @@ case "$(uname)" in
         ;;
 esac
 cd perl
-make test
+rc=0
+make test || rc=$?
+
+if [ $rc -eq 0 ]; then
+    exit 0
+fi
+
+echo "Perl tests failed (exit code $rc). Dumping log files..."
+find . -name '*.log' -o -name '*.stderr' |
+    while read -r logfile; do
+	[ -s "$logfile" ] || continue
+        echo "======================================================================"
+        echo "FILE: $logfile"
+        echo "======================================================================"
+        cat "$logfile"
+        echo "======================================================================"
+    done
+
+exit $rc
+
