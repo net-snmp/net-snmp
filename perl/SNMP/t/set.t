@@ -194,7 +194,7 @@ ok($s1->{ErrorStr} =~ /^Bad/ );
 # OID test
 my $oldoid = $s1->get("sysORID.1");
 #print("OID is : $oldoid\n");
-my $junk_OID = ".6.6.6.6.6.6";
+my $junk_OID = ".1.6.6.6.6.6";
 $s1->set('sysORID.1', $junk_OID);
 my $newOID = $s1->get("sysORID.1");
 #print("new oid is $newOID\n");
