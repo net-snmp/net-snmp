@@ -1,3 +1,7 @@
+param(
+    [string]$OutFile = "openssl.exe"
+)
+
 # Set TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -25,5 +29,9 @@ if ($null -eq $latest) {
 
 Write-Host "Latest OpenSSL Installer found: $($latest.url)"
 Write-Host "Downloading OpenSSL installer..."
-#Invoke-WebRequest -Uri $latest.url -OutFile "openssl.exe"
-curl.exe -s -S -L $latest.url -o "openssl.exe"
+#Invoke-WebRequest -Uri $latest.url -OutFile $OutFile
+curl.exe -s -S -L $latest.url -o $OutFile
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Download failed with exit code $LASTEXITCODE"
+    exit $LASTEXITCODE
+}

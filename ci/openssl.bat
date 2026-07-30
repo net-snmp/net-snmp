@@ -5,7 +5,9 @@ for %%D in (%FOLDERS%) do (
         rmdir /s /q "%%D" 2>nul
     )
 )
-powershell -ExecutionPolicy Bypass -File "%~dp0openssl.ps1"
+powershell -ExecutionPolicy Bypass -File "%~dp0openssl.ps1" "%~dp0openssl.exe"
 if %errorlevel% neq 0 exit /b %errorlevel%
-.\openssl.exe /suppressmsgboxes /silent /norestart /nocloseapplications /log=openssl-installation-log.txt /dir=C:\OpenSSL-Win64
-rem type openssl-installation-log.txt
+"%~dp0openssl.exe" /suppressmsgboxes /silent /norestart /nocloseapplications /log=openssl-installation-log.txt /dir=C:\OpenSSL-Win64
+set EXIT_CODE=%errorlevel%
+if exist "%~dp0openssl.exe" del "%~dp0openssl.exe"
+if %EXIT_CODE% neq 0 exit /b %EXIT_CODE%
