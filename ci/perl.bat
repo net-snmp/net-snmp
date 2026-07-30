@@ -6,7 +6,7 @@ set PERL_VERSION=5.40.0
 set INST_DRV=c:
 set INST_TOP=c:\perl-msvc
 rd /q /s %INST_TOP%
-curl https://www.cpan.org/src/5.0/perl-%PERL_VERSION%.tar.gz -o perl-%PERL_VERSION%.tar.gz
+curl -s -S https://www.cpan.org/src/5.0/perl-%PERL_VERSION%.tar.gz -o perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
 tar xzf perl-%PERL_VERSION%.tar.gz
 if %errorlevel% neq 0 goto build_error
@@ -24,9 +24,9 @@ findstr /r "^INST_TOP" Makefile
 @rem For mt.exe
 @rem dir /b /s "C:\Program Files (x86)" | findstr /i /e "\mt.exe"
 set "PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-nmake "BUILDOPTEXTRA=/wd4244 /wd4267 /wd4018"
+nmake /nologo /s "BUILDOPTEXTRA=/wd4244 /wd4267 /wd4018"
 if %errorlevel% neq 0 goto build_error
-nmake install
+nmake /nologo /s install
 if %errorlevel% neq 0 goto build_error
 set PATH=%INST_TOP%\bin;%PATH%
 where perl
