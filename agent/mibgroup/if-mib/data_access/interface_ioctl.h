@@ -22,7 +22,7 @@ int
 netsnmp_convert_arphrd_type(int arphrd_type, const char *link_type);
 
 int
-netsnmp_access_interface_ioctl_physaddr_get(int fd,
+netsnmp_access_interface_ioctl_physaddr_get(int sock,
                                             netsnmp_interface_entry *ifentry);
 
 void
@@ -30,21 +30,21 @@ netsnmp_process_link_flags(netsnmp_interface_entry *ifentry,
                            unsigned int os_flags);
 
 int
-netsnmp_access_interface_ioctl_flags_get(int fd,
+netsnmp_access_interface_ioctl_flags_get(int sock,
                                          netsnmp_interface_entry *ifentry);
 
 int
-netsnmp_access_interface_ioctl_flags_set(int fd,
+netsnmp_access_interface_ioctl_flags_set(int sock,
                                          netsnmp_interface_entry *ifentry,
                                          unsigned int flags,
                                          int and_complement);
 
 int
-netsnmp_access_interface_ioctl_mtu_get(int fd,
+netsnmp_access_interface_ioctl_mtu_get(int sock,
                                        netsnmp_interface_entry *ifentry);
 
 oid
-netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name);
+netsnmp_access_interface_ioctl_ifindex_get(int sock, const char *name);
 
 int
 netsnmp_access_interface_ioctl_has_ipv4(int sd, const char *if_name,

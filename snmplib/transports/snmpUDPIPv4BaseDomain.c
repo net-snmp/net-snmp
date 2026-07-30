@@ -56,19 +56,19 @@
 #endif
 
 #if defined(HAVE_IP_PKTINFO) || (defined(HAVE_IP_RECVDSTADDR) && defined(HAVE_IP_SENDSRCADDR))
-int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
+int netsnmp_udpipv4_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
                              socklen_t *fromlen, struct sockaddr *dstip,
                              socklen_t *dstlen, int *if_index)
 {
-    return netsnmp_udpbase_recvfrom(s, buf, len, from, fromlen, dstip, dstlen,
+    return netsnmp_udpbase_recvfrom(sock, buf, len, from, fromlen, dstip, dstlen,
                                     if_index);
 }
 
-int netsnmp_udpipv4_sendto(int fd, const struct in_addr *srcip, int if_index,
+int netsnmp_udpipv4_sendto(int sock, const struct in_addr *srcip, int if_index,
                            const struct sockaddr *remote, const void *data,
                            int len)
 {
-    return netsnmp_udpbase_sendto(fd, srcip, if_index, remote, data, len);
+    return netsnmp_udpbase_sendto(sock, srcip, if_index, remote, data, len);
 }
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */
 

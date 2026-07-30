@@ -101,7 +101,7 @@ err:
     return 0;
 }
 
-int netsnmp_bindtodevice(int fd, const char *iface)
+int netsnmp_bindtodevice(int sock, const char *iface)
 {
     /* If no interface name has been specified, report success. */
     if (!iface || iface[0] == '\0')
@@ -116,7 +116,7 @@ int netsnmp_bindtodevice(int fd, const char *iface)
         int ifacelen = strlen(iface) + 1;
         int ret;
 
-        ret = setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, ifacelen);
+        ret = setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface, ifacelen);
         if (ret < 0)
             snmp_log(LOG_ERR, "Binding socket to interface %s failed: %s\n",
                      iface, strerror(errno));

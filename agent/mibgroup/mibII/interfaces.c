@@ -1470,10 +1470,10 @@ static int      saveIndex = 0;
 * Determines network interface speed. It is system specific. Only linux
 * realization is made. 
 */
-unsigned int getIfSpeed(int fd, struct ifreq ifr, unsigned int defaultspeed)
+unsigned int getIfSpeed(int sock, struct ifreq ifr, unsigned int defaultspeed)
 {
 #ifdef linux
-    return netsnmp_linux_interface_get_if_speed(fd, ifr.ifr_name, defaultspeed);
+    return netsnmp_linux_interface_get_if_speed(sock, ifr.ifr_name, defaultspeed);
 #else /*!linux*/			   
     return defaultspeed;
 #endif 

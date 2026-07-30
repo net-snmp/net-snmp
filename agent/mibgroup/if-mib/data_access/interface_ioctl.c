@@ -32,7 +32,7 @@ netsnmp_feature_child_of(interface_ioctl_flags_set, interface_all);
 /**
  * ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param  sock  : socket fd to use w/ioctl, or -1 to open/close one
  * @param  which
  * @param ifrq
  * param ifentry : ifentry to update
@@ -44,7 +44,7 @@ netsnmp_feature_child_of(interface_ioctl_flags_set, interface_all);
  * @retval -3 : ioctl call failed
  */
 static int
-_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
+_ioctl_get(int sock, int which, struct ifreq *ifrq, const char* name)
 {
     int ourfd = -1, rc = 0;
 
@@ -62,8 +62,8 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
     /*
      * create socket for ioctls
      */
-    if(fd < 0) {
-        fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        sock = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
         if(ourfd < 0) {
             snmp_log(LOG_ERR,"couldn't create socket\n");
             return -2;
@@ -71,7 +71,7 @@ _ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
     }
 
     strlcpy(ifrq->ifr_name, name, sizeof(ifrq->ifr_name));
-    rc = ioctl(fd, which, ifrq);
+    rc = ioctl(sock, which, ifrq);
     if (rc < 0)
         rc = -3;
 
@@ -160,7 +160,7 @@ int netsnmp_convert_arphrd_type(int arphrd_type, const char *link_type)
 /**
  * interface entry physaddr ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param sock    : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
@@ -170,7 +170,7 @@ int netsnmp_convert_arphrd_type(int arphrd_type, const char *link_type)
  * @retval -4 : malloc error
  */
 int
-netsnmp_access_interface_ioctl_physaddr_get(int fd,
+netsnmp_access_interface_ioctl_physaddr_get(int sock,
                                             netsnmp_interface_entry *ifentry)
 {
     struct ifreq    ifrq;
@@ -199,7 +199,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
          */
         memset(ifrq.ifr_hwaddr.sa_data, (0), IFHWADDRLEN);
         ifentry->paddr_len = IFHWADDRLEN;
-        rc = _ioctl_get(fd, SIOCGIFHWADDR, &ifrq, ifentry->name);
+        rc = _ioctl_get(sock, SIOCGIFHWADDR, &ifrq, ifentry->name);
         if (rc < 0) {
             memset(ifentry->paddr, (0), IFHWADDRLEN);
             rc = -3;
@@ -253,7 +253,7 @@ netsnmp_process_link_flags(netsnmp_interface_entry *ifentry,
 /**
  * interface entry flags ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param sock    : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
@@ -262,7 +262,7 @@ netsnmp_process_link_flags(netsnmp_interface_entry *ifentry,
  * @retval -3 : ioctl call failed
  */
 int
-netsnmp_access_interface_ioctl_flags_get(int fd,
+netsnmp_access_interface_ioctl_flags_get(int sock,
                                          netsnmp_interface_entry *ifentry)
 {
     struct ifreq    ifrq;
@@ -270,7 +270,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
 
     DEBUGMSGTL(("access:interface:ioctl", "flags_get\n"));
 
-    rc = _ioctl_get(fd, SIOCGIFFLAGS, &ifrq, ifentry->name);
+    rc = _ioctl_get(sock, SIOCGIFFLAGS, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->ns_flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IF_FLAGS;
         return rc;
@@ -285,7 +285,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
 /**
  * interface entry flags ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param sock    : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
@@ -295,7 +295,7 @@ netsnmp_access_interface_ioctl_flags_get(int fd,
  * @retval -4 : ioctl set call failed
  */
 int
-netsnmp_access_interface_ioctl_flags_set(int fd,
+netsnmp_access_interface_ioctl_flags_set(int sock,
                                          netsnmp_interface_entry *ifentry,
                                          unsigned int flags, int and_complement)
 {
@@ -315,8 +315,8 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
     /*
      * create socket for ioctls
      */
-    if(fd < 0) {
-        fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        sock = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
         if(ourfd < 0) {
             snmp_log(LOG_ERR,"couldn't create socket\n");
             return -2;
@@ -324,19 +324,19 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
     }
 
     strlcpy(ifrq.ifr_name, ifentry->name, sizeof(ifrq.ifr_name));
-    rc = ioctl(fd, SIOCGIFFLAGS, &ifrq);
+    rc = ioctl(sock, SIOCGIFFLAGS, &ifrq);
     if(rc < 0) {
         snmp_log(LOG_ERR,"error getting flags\n");
-        close(fd);
+        close(sock);
         return -3;
     }
     if(0 == and_complement)
         ifrq.ifr_flags |= flags;
     else
         ifrq.ifr_flags &= ~flags;
-    rc = ioctl(fd, SIOCSIFFLAGS, &ifrq);
+    rc = ioctl(sock, SIOCSIFFLAGS, &ifrq);
     if(rc < 0) {
-        close(fd);
+        close(sock);
         snmp_log(LOG_ERR,"error setting flags\n");
         ifentry->os_flags = 0;
         return -4;
@@ -356,7 +356,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
 /**
  * interface entry mtu ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param sock    : socket fd to use w/ioctl, or -1 to open/close one
  * @param ifentry : ifentry to update
  *
  * @retval  0 : success
@@ -365,7 +365,7 @@ netsnmp_access_interface_ioctl_flags_set(int fd,
  * @retval -3 : ioctl call failed
  */
 int
-netsnmp_access_interface_ioctl_mtu_get(int fd,
+netsnmp_access_interface_ioctl_mtu_get(int sock,
                                        netsnmp_interface_entry *ifentry)
 {
     struct ifreq    ifrq;
@@ -373,7 +373,7 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 
     DEBUGMSGTL(("access:interface:ioctl", "mtu_get\n"));
 
-    rc = _ioctl_get(fd, SIOCGIFMTU, &ifrq, ifentry->name);
+    rc = _ioctl_get(sock, SIOCGIFMTU, &ifrq, ifentry->name);
     if (rc < 0) {
         ifentry->mtu = 0;
         return rc;
@@ -388,14 +388,14 @@ netsnmp_access_interface_ioctl_mtu_get(int fd,
 /**
  * interface entry ifIndex ioctl wrapper
  *
- * @param      fd : socket fd to use w/ioctl, or -1 to open/close one
+ * @param sock   : socket fd to use w/ioctl, or -1 to open/close one
  * @param name   : ifentry to update
  *
  * @retval  0 : not found
  * @retval !0 : ifIndex
  */
 oid
-netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
+netsnmp_access_interface_ioctl_ifindex_get(int sock, const char *name)
 {
 #ifndef SIOCGIFINDEX
     return 0;
@@ -405,7 +405,7 @@ netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
 
     DEBUGMSGTL(("access:interface:ioctl", "ifindex_get\n"));
 
-    rc = _ioctl_get(fd, SIOCGIFINDEX, &ifrq, name);
+    rc = _ioctl_get(sock, SIOCGIFINDEX, &ifrq, name);
     if (rc < 0) {
         DEBUGMSGTL(("access:interface:ioctl",
                    "ifindex_get error on interface '%s'\n", name));

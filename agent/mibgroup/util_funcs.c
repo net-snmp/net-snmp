@@ -1260,7 +1260,7 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
  * @returns -2 HAVE_LINUX_ETHTOOL_H is not defined
  */
 int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
-                              int fd, const char *name)
+                              int sock, const char *name)
 {
     int err = -2;
 
@@ -1287,7 +1287,7 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
         memset(&data, 0, sizeof(data));
         data.elinkset.cmd = ETHTOOL_GLINKSETTINGS;
         ifr.ifr_data = &data.elinkset;
-        err = ioctl(fd, SIOCETHTOOL, &ifr, name);
+        err = ioctl(sock, SIOCETHTOOL, &ifr, name);
         /*
          * See also the struct ethtool_link_settings documentation in
          * Linux kernel header file include/uapi/linux/ethtool.h.
@@ -1296,7 +1296,7 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
             -data.elinkset.link_mode_masks_nwords <= mask_nwords) {
             data.elinkset.link_mode_masks_nwords =
                 -data.elinkset.link_mode_masks_nwords;
-            err = ioctl(fd, SIOCETHTOOL, &ifr);
+            err = ioctl(sock, SIOCETHTOOL, &ifr);
         }
         if (err >= 0) {
             nlls->duplex = data.elinkset.duplex;
@@ -1311,7 +1311,7 @@ int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
         memset(&edata, 0, sizeof(edata));
         edata.cmd = ETHTOOL_GSET;
         ifr.ifr_data = (char *)&edata;
-        err = ioctl(fd, SIOCETHTOOL, &ifr, name);
+        err = ioctl(sock, SIOCETHTOOL, &ifr, name);
         if (err >= 0) {
             nlls->duplex = edata.duplex;
             nlls->speed = edata.speed;

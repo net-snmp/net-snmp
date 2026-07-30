@@ -15,7 +15,7 @@ extern          "C" {
  * Prototypes
  */
     int netsnmp_socketbase_close(netsnmp_transport *t);
-    int netsnmp_sock_buffer_set(int s, int optname, int local, int size);
+    int netsnmp_sock_buffer_set(int sock, int optname, int local, int size);
     int netsnmp_set_non_blocking_mode(int sock, int non_blocking_mode);
 
 #ifdef __cplusplus

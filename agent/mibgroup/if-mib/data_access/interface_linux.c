@@ -119,11 +119,11 @@ typedef __u8 u8;           /* ditto */
 #endif  /* HAVE_LINUX_RTNETLINK_H */
 #endif  /* NETSNMP_ENABLE_IPV6 */
 unsigned long long
-netsnmp_linux_interface_get_if_speed(int fd, const char *name,
+netsnmp_linux_interface_get_if_speed(int sock, const char *name,
         unsigned long long defaultspeed);
 #ifdef HAVE_LINUX_ETHTOOL_H
 unsigned long long
-netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name,
+netsnmp_linux_interface_get_if_speed_mii(int sock, const char *name,
         unsigned long long defaultspeed);
 #endif
 
@@ -938,18 +938,18 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
  * In case of failure revert to obsolete ETHTOOL_GSET
  */
 unsigned long long
-netsnmp_linux_interface_get_if_speed(int fd, const char *name,
+netsnmp_linux_interface_get_if_speed(int sock, const char *name,
             unsigned long long defaultspeed)
 {
     int ret;
     struct netsnmp_linux_link_settings nlls;
     uint32_t speed = -1;
 
-    ret = netsnmp_get_link_settings(&nlls, fd, name);
+    ret = netsnmp_get_link_settings(&nlls, sock, name);
     if (ret < 0) {
         DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s failed (%d / %d)\n",
                     name, ret, speed));
-        return netsnmp_linux_interface_get_if_speed_mii(fd, name, defaultspeed);
+        return netsnmp_linux_interface_get_if_speed_mii(sock, name, defaultspeed);
     }
     speed = nlls.speed;
     if (speed == 0xffff || speed == 0xffffffffUL /*SPEED_UNKNOWN*/)
@@ -966,10 +966,10 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
  */
 unsigned long long
 #ifdef HAVE_LINUX_ETHTOOL_H
-netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name,
+netsnmp_linux_interface_get_if_speed_mii(int sock, const char *name,
         unsigned long long  defaultspeed)
 #else
-netsnmp_linux_interface_get_if_speed(int fd, const char *name,
+netsnmp_linux_interface_get_if_speed(int sock, const char *name,
         unsigned long long defaultspeed)
 #endif
 {
@@ -994,7 +994,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
      * SIOCGMIIPHY has been defined since at least kernel 2.4.10 (Sept 2001).
      * It's probably safe to drop the interim SIOCDEVPRIVATE handling now!
      */
-    if (ioctl(fd, SIOCGMIIPHY, &ifr) < 0) {
+    if (ioctl(sock, SIOCGMIIPHY, &ifr) < 0) {
         DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIPHY on %s failed\n",
                     ifr.ifr_name));
         return retspeed;
@@ -1005,7 +1005,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     for (mii_reg = 0; mii_reg < 8; mii_reg++){
         data[0] = phy_id;
         data[1] = mii_reg;
-        if(ioctl(fd, SIOCGMIIREG, &ifr) <0){
+        if (ioctl(sock, SIOCGMIIREG, &ifr) < 0){
             DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIREG on %s failed\n", ifr.ifr_name));
         }
         mii_val[mii_reg] = data[3];		
@@ -1057,7 +1057,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     return retspeed;
 }
 #ifdef SUPPORT_PREFIX_FLAGS
-void netsnmp_prefix_process(int fd, void *data);
+void netsnmp_prefix_process(int sock, void *data);
 
 /* Open netlink socket to watch new ipv6 addresses and prefixes. */
 int netsnmp_prefix_listen(void)
@@ -1120,7 +1120,7 @@ int netsnmp_prefix_listen(void)
  * -> information from these packets must be stored locally and
  * new prefix is added when information from both packets is complete.
  */
-void netsnmp_prefix_process(int fd, void *data)
+void netsnmp_prefix_process(int sock, void *data)
 {
     int                status;
     char               buf[16384];
@@ -1139,7 +1139,7 @@ void netsnmp_prefix_process(int fd, void *data)
     prefix_cbx         *new;
     int                len, req_len, length; 
 
-    status = recv(fd, buf, sizeof(buf), 0);
+    status = recv(sock, buf, sizeof(buf), 0);
     if (status < 0) {
         if (errno == EINTR)
             return;

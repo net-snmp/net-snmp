@@ -65,7 +65,7 @@
 #endif
 
 void
-_netsnmp_udp_sockopt_set(int fd, int local)
+_netsnmp_udp_sockopt_set(int sock, int local)
 {
 #ifdef  SO_BSDCOMPAT
     /*
@@ -77,8 +77,7 @@ _netsnmp_udp_sockopt_set(int fd, int local)
     {
         int             one = 1;
         DEBUGMSGTL(("socket:option", "setting socket option SO_BSDCOMPAT\n"));
-        setsockopt(fd, SOL_SOCKET, SO_BSDCOMPAT, (void *) &one,
-                   sizeof(one));
+        setsockopt(sock, SOL_SOCKET, SO_BSDCOMPAT, (void *) &one, sizeof(one));
     }
 #endif                          /*SO_BSDCOMPAT */
     /*
@@ -96,8 +95,7 @@ _netsnmp_udp_sockopt_set(int fd, int local)
     {
         int             one = 1;
         DEBUGMSGTL(("socket:option", "setting socket option SO_REUSEADDR\n"));
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void *) &one,
-                   sizeof(one));
+        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *) &one, sizeof(one));
     }
 #endif                          /*SO_REUSEADDR */
 #endif
@@ -108,8 +106,8 @@ _netsnmp_udp_sockopt_set(int fd, int local)
      * Solaris, for instance).  Don't worry too much about errors -- just
      * plough on regardless.  
      */
-    netsnmp_sock_buffer_set(fd, SO_SNDBUF, local, 0);
-    netsnmp_sock_buffer_set(fd, SO_RCVBUF, local, 0);
+    netsnmp_sock_buffer_set(sock, SO_SNDBUF, local, 0);
+    netsnmp_sock_buffer_set(sock, SO_RCVBUF, local, 0);
 }
 
 #if defined(HAVE_IP_PKTINFO) || (defined(HAVE_IP_RECVDSTADDR) && defined(HAVE_IP_SENDSRCADDR))
@@ -138,7 +136,7 @@ static LPFN_WSASENDMSG pfWSASendMsg;
 #endif
 
 int
-netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
+netsnmp_udpbase_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
                          socklen_t *fromlen, struct sockaddr *dstip,
                          socklen_t *dstlen, int *if_index)
 {
@@ -160,7 +158,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    r = recvmsg(s, &msg, MSG_DONTWAIT);
+    r = recvmsg(sock, &msg, MSG_DONTWAIT);
 #else /* !defined(WIN32) */
     WSABUF wsabuf;
     char cmsg[WSA_CMSG_SPACE(sizeof(struct in_pktinfo))];
@@ -180,11 +178,11 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     msg.dwFlags = 0;
 
     if (pfWSARecvMsg) {
-        r = pfWSARecvMsg(s, &msg, &bytes_received, NULL, NULL) == 0 ?
+        r = pfWSARecvMsg(sock, &msg, &bytes_received, NULL, NULL) == 0 ?
             bytes_received : -1;
         *fromlen = msg.namelen;
     } else {
-        r = recvfrom(s, buf, len, MSG_DONTWAIT, from, fromlen);
+        r = recvfrom(sock, buf, len, MSG_DONTWAIT, from, fromlen);
     }
 #endif /* !defined(WIN32) */
 
@@ -197,7 +195,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 
     {
         /* Get the local port number for use in diagnostic messages */
-        int r2 = getsockname(s, dstip, dstlen);
+        int r2 = getsockname(sock, dstip, dstlen);
         netsnmp_assert(r2 == 0);
     }
 
@@ -239,7 +237,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 }
 
 #if !defined(WIN32)
-int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
+int netsnmp_udpbase_sendto_unix(int sock, const struct in_addr *srcip,
                                 int if_index, const struct sockaddr *remote,
                                 const void *data, int len)
 {
@@ -257,7 +255,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         struct sockaddr_storage peer;
         socklen_t peer_len = sizeof(peer);
 
-        if (getpeername(fd, (struct sockaddr *)&peer, &peer_len) == 0) {
+        if (getpeername(sock, (struct sockaddr *)&peer, &peer_len) == 0) {
             m.msg_name = NULL;
             m.msg_namelen = 0;
         } else {
@@ -265,7 +263,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
             m.msg_namelen = sizeof(struct sockaddr_in);
             if (errno != ENOTCONN) {
                 snmp_log(LOG_ERR, "udpbase:sendto: fd %d getpeername failed: %d (%s)\n",
-                         fd, errno, strerror(errno));
+                         sock, errno, strerror(errno));
             }
         }
     }
@@ -297,7 +295,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
          * let kernel handle return if there was no iface bound to the
          * socket.
          */
-        if (getsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface,
+        if (getsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface,
                        &ifacelen) != 0)  {
             DEBUGMSGTL(("udpbase:sendto",
                         "getsockopt SO_BINDTODEVICE failed: %s\n",
@@ -329,10 +327,10 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
          * VRF which is set by 'vrf exec' command. That would break VRF.
          */
         if (use_sendto)
-            rc = sendto(fd, data, len, MSG_DONTWAIT, remote,
+            rc = sendto(sock, data, len, MSG_DONTWAIT, remote,
                         sizeof(struct sockaddr));
         else
-            rc = sendmsg(fd, &m, MSG_DONTWAIT);
+            rc = sendmsg(sock, &m, MSG_DONTWAIT);
         if (rc >= 0 || (errno != EINVAL && errno != ENETUNREACH))
             return rc;
 
@@ -359,7 +357,7 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         cm->cmsg_type = IP_SENDSRCADDR;
         memcpy((struct in_addr *)CMSG_DATA(cm), srcip, sizeof(struct in_addr));
 #endif
-        rc = sendmsg(fd, &m, MSG_DONTWAIT);
+        rc = sendmsg(sock, &m, MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -368,15 +366,15 @@ int netsnmp_udpbase_sendto_unix(int fd, const struct in_addr *srcip,
         m.msg_controllen = 0;
     }
 
-    rc = sendmsg(fd, &m, MSG_DONTWAIT);
+    rc = sendmsg(sock, &m, MSG_DONTWAIT);
     if (rc < 0) {
         snmp_log(LOG_ERR, "udpbase:sendto: sendmsg fd %d err %d (\"%s\") msg_name=%p\n",
-                 fd, errno, strerror(errno), m.msg_name);
+                 sock, errno, strerror(errno), m.msg_name);
     }
     return rc;
 }
 #else /* !defined(WIN32) */
-int netsnmp_udpbase_sendto_win32(int fd, const struct in_addr *srcip,
+int netsnmp_udpbase_sendto_win32(int sock, const struct in_addr *srcip,
                                  int if_index, const struct sockaddr *remote,
                                  const void *data, int len)
 {
@@ -418,25 +416,25 @@ int netsnmp_udpbase_sendto_win32(int fd, const struct in_addr *srcip,
             memcpy(WSA_CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
-        rc = pfWSASendMsg(fd, &m, 0, &bytes_sent, NULL, NULL);
+        rc = pfWSASendMsg(sock, &m, 0, &bytes_sent, NULL, NULL);
         if (rc == 0)
             return bytes_sent;
         DEBUGMSGTL(("udpbase:sendto", "sending from [%d] %s failed: %d\n",
                     if_index, inet_ntoa(*srcip), WSAGetLastError()));
     }
-    rc = sendto(fd, data, len, 0, remote, sizeof(struct sockaddr));
+    rc = sendto(sock, data, len, 0, remote, sizeof(struct sockaddr));
     return rc;
 }
 #endif /* !defined(WIN32) */
 
-int netsnmp_udpbase_sendto(int fd, const struct in_addr *srcip, int if_index,
+int netsnmp_udpbase_sendto(int sock, const struct in_addr *srcip, int if_index,
                            const struct sockaddr *remote, const void *data,
                            int len)
 {
 #if !defined(WIN32)
-    return netsnmp_udpbase_sendto_unix(fd, srcip, if_index, remote, data, len);
+    return netsnmp_udpbase_sendto_unix(sock, srcip, if_index, remote, data, len);
 #else /* !defined(WIN32) */
-    return netsnmp_udpbase_sendto_win32(fd, srcip, if_index, remote, data, len);
+    return netsnmp_udpbase_sendto_win32(sock, srcip, if_index, remote, data, len);
 #endif /* !defined(WIN32) */
 }
 #endif /* HAVE_IP_PKTINFO || HAVE_IP_RECVDSTADDR */

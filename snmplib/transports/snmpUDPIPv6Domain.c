@@ -101,7 +101,7 @@ netsnmp_udp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 enum { cmsg_data_size = sizeof(struct in6_pktinfo) };
 
 int
-netsnmp_udp6_recvfrom(int s, void *buf, int len, struct sockaddr *from,
+netsnmp_udp6_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
                       socklen_t *fromlen, struct sockaddr *dstip,
                       socklen_t *dstlen, int *if_index)
 {
@@ -122,7 +122,7 @@ netsnmp_udp6_recvfrom(int s, void *buf, int len, struct sockaddr *from,
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    r = recvmsg(s, &msg, MSG_DONTWAIT);
+    r = recvmsg(sock, &msg, MSG_DONTWAIT);
     if (r == -1)
         return -1;
 
@@ -136,7 +136,7 @@ netsnmp_udp6_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 
     {
         /* Get the local port number for use in diagnostic messages */
-        int r2 = getsockname(s, dstip, dstlen);
+        int r2 = getsockname(sock, dstip, dstlen);
 
         netsnmp_assert(r2 == 0);
     }
@@ -165,7 +165,7 @@ netsnmp_udp6_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 }
 
 int
-netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
+netsnmp_udp6_sendto(int sock, const struct in6_addr *srcip, int if_index,
                     const struct sockaddr *remote, const void *data, int len)
 {
     struct iovec  iov;
@@ -211,7 +211,7 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
          * let kernel handle return if there was no iface bound to the
          * socket.
          */
-        if (getsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, &ifacelen) !=
+        if (getsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface, &ifacelen) !=
             0) {
             DEBUGMSGTL(("udp6:sendto",
                         "getsockopt SO_BINDTODEVICE failed: %s\n",
@@ -242,10 +242,10 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
          * VRF which is set by 'vrf exec' command. That would break VRF.
          */
         if (use_sendto) {
-            rc = sendto(fd, data, len, MSG_DONTWAIT, remote,
+            rc = sendto(sock, data, len, MSG_DONTWAIT, remote,
                         sizeof(struct sockaddr));
         } else {
-            rc = sendmsg(fd, &m, MSG_DONTWAIT);
+            rc = sendmsg(sock, &m, MSG_DONTWAIT);
         }
         if (rc >= 0 || errno != EINVAL)
             return rc;
@@ -266,7 +266,7 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
             memcpy(CMSG_DATA(cm), &ipi, sizeof(ipi));
         }
 
-        rc = sendmsg(fd, &m, MSG_DONTWAIT);
+        rc = sendmsg(sock, &m, MSG_DONTWAIT);
         if (rc >= 0 || errno != EINVAL)
             return rc;
 
@@ -275,7 +275,7 @@ netsnmp_udp6_sendto(int fd, const struct in6_addr *srcip, int if_index,
         m.msg_controllen = 0;
     }
 
-    return sendmsg(fd, &m, MSG_DONTWAIT);
+    return sendmsg(sock, &m, MSG_DONTWAIT);
 }
 
 #endif /* HAVE_IPV6_RECVPKTINFO || !WIN32 */

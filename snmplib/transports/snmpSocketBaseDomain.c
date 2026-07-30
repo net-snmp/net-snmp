@@ -61,7 +61,7 @@ int netsnmp_socketbase_close(netsnmp_transport *t) {
  * size as possible)
  */
 static int
-_sock_buffer_maximize(int s, int optname, const char *buftype, int size)
+_sock_buffer_maximize(int sock, int optname, const char *buftype, int size)
 {
     int            curbuf = 0;
     socklen_t      curbuflen = sizeof(int);
@@ -70,7 +70,7 @@ _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
     /*
      * First we need to determine our current buffer
      */
-    if ((getsockopt(s, SOL_SOCKET, optname, (void *) &curbuf,
+    if ((getsockopt(sock, SOL_SOCKET, optname, (void *) &curbuf,
                     &curbuflen) == 0) 
             && (curbuflen == sizeof(int))) {
 
@@ -96,7 +96,7 @@ _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
 
         while (hi - lo > 1024) {
             mid = (lo + hi) / 2;
-            if (setsockopt(s, SOL_SOCKET, optname, (void *) &mid,
+            if (setsockopt(sock, SOL_SOCKET, optname, (void *) &mid,
                         sizeof(int)) == 0) {
                 lo = mid; /* Success: search between mid and hi */
             } else {
@@ -107,7 +107,7 @@ _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
         /*
          * Now print if this optimization helped or not
          */
-        if (getsockopt(s,SOL_SOCKET, optname, (void *) &curbuf,
+        if (getsockopt(sock, SOL_SOCKET, optname, (void *) &curbuf,
                     &curbuflen) == 0) {
             DEBUGMSGTL(("socket:buffer:max", 
                         "Maximized %s: %d\n",buftype, curbuf));
@@ -207,7 +207,7 @@ _sock_buffer_size_get(int optname, int local, const char **buftype)
 /*
  * set socket buffer size
  *
- * @param ss     : socket
+ * @param sock   : socket descriptor
  * @param optname: SO_SNDBUF or SO_RCVBUF
  * @param local  : 1 for server, 0 for client
  * @param reqbuf : requested size, or 0 for default
@@ -216,7 +216,7 @@ _sock_buffer_size_get(int optname, int local, const char **buftype)
  * @retval    >0 : new buffer size
  */
 int
-netsnmp_sock_buffer_set(int s, int optname, int local, int size)
+netsnmp_sock_buffer_set(int sock, int optname, int local, int size)
 {
 #if ! defined(SO_SNDBUF) && ! defined(SO_RCVBUF)
     DEBUGMSGTL(("socket:buffer", "Changing socket buffer is not supported\n"));
@@ -252,7 +252,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
                    buftype, size));
     }
 
-    if ((getsockopt(s, SOL_SOCKET, optname, (void *) &curbuf,
+    if ((getsockopt(sock, SOL_SOCKET, optname, (void *) &curbuf,
                     &curbuflen) == 0) 
         && (curbuflen == sizeof(int))) {
         
@@ -278,7 +278,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
     /*
      * Try to set the requested send buffer
      */
-    if (setsockopt(s, SOL_SOCKET, optname, (void *) &size, sizeof(int)) == 0) {
+    if (setsockopt(sock, SOL_SOCKET, optname, (void *) &size, sizeof(int)) == 0) {
         /*
          * Because some platforms lie about the actual buffer that has been 
          * set (Linux will always say it worked ...), we print some 
@@ -287,7 +287,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
         DEBUGIF("socket:buffer") {
             DEBUGMSGT(("socket:buffer", "Set %s to %d\n",
                        buftype, size));
-            if ((getsockopt(s, SOL_SOCKET, optname, (void *) &curbuf,
+            if ((getsockopt(sock, SOL_SOCKET, optname, (void *) &curbuf,
                             &curbuflen) == 0) 
                     && (curbuflen == sizeof(int))) {
 
@@ -303,7 +303,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
          *   request 110k, you end up with the default 8k :-(
          */
         if (curbuf < size) {
-            curbuf = _sock_buffer_maximize(s, optname, buftype, size);
+            curbuf = _sock_buffer_maximize(sock, optname, buftype, size);
             if(-1 != curbuf)
                 size = curbuf;
         }
@@ -322,7 +322,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
         DEBUGMSGTL(("socket:buffer", "couldn't set %s to %d\n",
                     buftype, size));
 
-        curbuf = _sock_buffer_maximize(s, optname, buftype, size);
+        curbuf = _sock_buffer_maximize(sock, optname, buftype, size);
         if(-1 != curbuf)
             size = curbuf;
     }

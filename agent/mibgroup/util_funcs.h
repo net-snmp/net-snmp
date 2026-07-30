@@ -77,7 +77,7 @@ struct netsnmp_linux_link_settings {
 };
 
 int netsnmp_get_link_settings(struct netsnmp_linux_link_settings *nlls,
-                              int fd, const char *name);
+                              int sock, const char *name);
 
 #define NIP6(addr) \
         ntohs((addr).s6_addr16[0]), \

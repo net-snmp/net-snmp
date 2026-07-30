@@ -20,7 +20,7 @@
 
 
 static int fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *h);
-static void netsnmp_access_arp_read_netlink(int fd, void *data);
+static void netsnmp_access_arp_read_netlink(int sock, void *data);
 
 /**
  */
@@ -141,7 +141,7 @@ int netsnmp_access_arp_unload(netsnmp_arp_access *access)
     return 0;
 }
 
-static void netsnmp_access_arp_read_netlink(int fd, void *data)
+static void netsnmp_access_arp_read_netlink(int sock, void *data)
 {
     netsnmp_arp_access *access = (netsnmp_arp_access *) data;
     netsnmp_arp_entry *entry;
@@ -150,7 +150,7 @@ static void netsnmp_access_arp_read_netlink(int fd, void *data)
     int r, len;
 
     do {
-        r = recv(fd, buf, sizeof(buf), MSG_DONTWAIT);
+        r = recv(sock, buf, sizeof(buf), MSG_DONTWAIT);
         if (r < 0) {
             if (errno == EINTR)
                 continue;
