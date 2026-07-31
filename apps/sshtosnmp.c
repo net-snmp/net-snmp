@@ -68,7 +68,7 @@ deb(const char *string) { }
 int
 main(int argc, char **argv) {
 
-    int sock;
+    NETSNMP_SOCKET sock;
     struct sockaddr_un addr;
     u_char buf[4096];
     size_t buf_len = sizeof(buf);
@@ -86,7 +86,7 @@ main(int argc, char **argv) {
 
     sock = socket(PF_UNIX, SOCK_STREAM, 0);
     DEBUG("created socket");
-    if (sock <= 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(sock)) {
         exit(1);
     }
 

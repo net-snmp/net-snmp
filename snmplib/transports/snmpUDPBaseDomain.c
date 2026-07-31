@@ -65,7 +65,7 @@
 #endif
 
 void
-_netsnmp_udp_sockopt_set(int sock, int local)
+_netsnmp_udp_sockopt_set(NETSNMP_SOCKET sock, int local)
 {
 #ifdef  SO_BSDCOMPAT
     /*
@@ -136,9 +136,10 @@ static LPFN_WSASENDMSG pfWSASendMsg;
 #endif
 
 int
-netsnmp_udpbase_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
-                         socklen_t *fromlen, struct sockaddr *dstip,
-                         socklen_t *dstlen, int *if_index)
+netsnmp_udpbase_recvfrom(NETSNMP_SOCKET sock, void *buf, int len,
+                         struct sockaddr *from, socklen_t *fromlen,
+                         struct sockaddr *dstip, socklen_t *dstlen,
+                         int *if_index)
 {
     int r;
 #if !defined(WIN32)
@@ -237,9 +238,10 @@ netsnmp_udpbase_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
 }
 
 #if !defined(WIN32)
-int netsnmp_udpbase_sendto_unix(int sock, const struct in_addr *srcip,
-                                int if_index, const struct sockaddr *remote,
-                                const void *data, int len)
+int netsnmp_udpbase_sendto_unix(NETSNMP_SOCKET sock,
+                                const struct in_addr *srcip, int if_index,
+                                const struct sockaddr *remote, const void *data,
+                                int len)
 {
     struct iovec iov;
     struct msghdr m = { NULL };
@@ -374,8 +376,9 @@ int netsnmp_udpbase_sendto_unix(int sock, const struct in_addr *srcip,
     return rc;
 }
 #else /* !defined(WIN32) */
-int netsnmp_udpbase_sendto_win32(int sock, const struct in_addr *srcip,
-                                 int if_index, const struct sockaddr *remote,
+int netsnmp_udpbase_sendto_win32(NETSNMP_SOCKET sock,
+                                 const struct in_addr *srcip, int if_index,
+                                 const struct sockaddr *remote,
                                  const void *data, int len)
 {
     WSABUF        wsabuf;
@@ -427,9 +430,9 @@ int netsnmp_udpbase_sendto_win32(int sock, const struct in_addr *srcip,
 }
 #endif /* !defined(WIN32) */
 
-int netsnmp_udpbase_sendto(int sock, const struct in_addr *srcip, int if_index,
-                           const struct sockaddr *remote, const void *data,
-                           int len)
+int netsnmp_udpbase_sendto(NETSNMP_SOCKET sock, const struct in_addr *srcip,
+                           int if_index, const struct sockaddr *remote,
+                           const void *data, int len)
 {
 #if !defined(WIN32)
     return netsnmp_udpbase_sendto_unix(sock, srcip, if_index, remote, data, len);
@@ -454,7 +457,7 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         addr_pair = SNMP_MALLOC_TYPEDEF(netsnmp_indexed_addr_pair);
         if (addr_pair == NULL) {
             *opaque = NULL;
@@ -482,12 +485,12 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
                 char *str = netsnmp_udp_fmtaddr(
                     NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
                 DEBUGMSGTL(("netsnmp_udp",
-                            "recvfrom fd %d got %d bytes (from %s)\n",
+                            "recvfrom fd %" NETSNMP_FMT_SKT " got %d bytes (from %s)\n",
                             t->sock, rc, str));
                 free(str);
             }
         } else {
-            DEBUGMSGTL(("netsnmp_udp", "recvfrom fd %d err %d (\"%s\")\n",
+            DEBUGMSGTL(("netsnmp_udp", "recvfrom fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
         }
         *opaque = (void *)addr_pair;
@@ -529,13 +532,14 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
         return SNMPERR_GENERR;
     }
 
-    if (to != NULL && t != NULL && t->sock >= 0) {
+    if (to && t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         DEBUGIF("netsnmp_udp") {
             char *str = netsnmp_udp_fmtaddr(NULL,
                                             addr_pair ? (const void *)addr_pair : (const void *)to,
                                             addr_pair ? sizeof(netsnmp_indexed_addr_pair) : sizeof(struct sockaddr_in));
-            DEBUGMSGTL(("netsnmp_udp", "send %d bytes to %s on fd %d\n", size,
-                        str, t->sock));
+            DEBUGMSGTL(("netsnmp_udp",
+                        "send %d bytes to %s on fd %" NETSNMP_FMT_SKT "\n",
+                        size, str, t->sock));
             free(str);
         }
 	while (rc < 0) {
@@ -556,7 +560,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, const void *buf, int size,
             }
 #endif /* netsnmp_udpbase_recvfrom_sendto_defined */
 	    if (rc < 0 && errno != EINTR) {
-                snmp_log(LOG_ERR, "udpbase:send: sendto fd %d err %d (\"%s\")\n",
+                snmp_log(LOG_ERR, "udpbase:send: sendto fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
                          t->sock, errno, strerror(errno));
                 DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
                             rc, errno));

@@ -148,7 +148,7 @@ static void
 _tlstcp_sync_socks(netsnmp_transport *t)
 {
     if (t && t->base_transport && t->base_transport->sock != t->sock) {
-        DEBUGMSGTL(("tlstcp", "Syncing sockets: base %d -> main %d\n",
+        DEBUGMSGTL(("tlstcp", "Syncing sockets: base %" NETSNMP_FMT_SKT " -> main %" NETSNMP_FMT_SKT "\n",
                     t->base_transport->sock, t->sock));
         t->base_transport->sock = t->sock;
     }
@@ -265,7 +265,7 @@ netsnmp_tlstcp_run_handshake(netsnmp_transport *t)
 }
 
 static int
-netsnmp_tlstcp_run_handshake_server(SSL *ssl, int newsock)
+netsnmp_tlstcp_run_handshake_server(SSL *ssl, NETSNMP_SOCKET newsock)
 {
     BIO *read_bio = SSL_get_rbio(ssl);
     BIO *write_bio = SSL_get_wbio(ssl);
@@ -341,7 +341,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     SSL *ssl;
     int err;
 
-    if (NULL == t || t->sock < 0 || NULL == t->data) {
+    if (!t || !NETSNMP_IS_VALID_SOCKET(t->sock) || !t->data) {
         snmp_log(LOG_ERR,
                  "tlstcp received an invalid invocation with missing data\n");
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
@@ -604,7 +604,7 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
                 if (t->base_transport) {
                     t->base_transport->f_send(t->base_transport, out_buf,
                                               out_bytes, NULL, NULL);
-                } else if (t->sock >= 0) {
+                } else if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
                     send(t->sock, out_buf, out_bytes, 0);
                 }
             }
@@ -618,20 +618,20 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
         rc = t->base_transport->f_close(t->base_transport);
         netsnmp_transport_free(t->base_transport);
         t->base_transport = NULL;
-        t->sock = -1;
-    } else if (t->sock >= 0) {
+        t->sock = NETSNMP_INVALID_SOCKET;
+    } else if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
         rc = netsnmp_socketbase_close(t);
     }
 
     return rc;
 }
 
-static int
+static NETSNMP_SOCKET
 netsnmp_tlstcp_accept(netsnmp_transport *t)
 {
     _netsnmpTLSBaseData *tlsdata = t->data;
     BIO *read_bio, *write_bio;
-    int newsock;
+    NETSNMP_SOCKET newsock;
     SSL *ssl;
     int rc;
 
@@ -639,12 +639,12 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
 
     if (!t->base_transport) {
         snmp_log(LOG_ERR, "TLSTCP: missing base transport in accept\n");
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
 
     newsock = t->base_transport->f_accept(t->base_transport);
-    if (newsock < 0)
-        return -1;
+    if (!NETSNMP_IS_VALID_SOCKET(newsock))
+        return NETSNMP_INVALID_SOCKET;
 
     if (t->base_transport->data) {
         if (!tlsdata->addr) {
@@ -689,7 +689,8 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         goto free_ssl;
     }
 
-    DEBUGMSGTL(("tlstcp", "accept succeeded on sock %d\n", newsock));
+    DEBUGMSGTL(("tlstcp", "accept succeeded on sock %" NETSNMP_FMT_SKT "\n",
+                newsock));
 
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
 
@@ -709,7 +710,7 @@ close_newsock:
 #else
     close(newsock);
 #endif
-    return -1;
+    return NETSNMP_INVALID_SOCKET;
 }
 
 static netsnmp_transport *
@@ -788,7 +789,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     }
 
     t->sock = t->base_transport->sock;
-    if (t->sock >= 0) {
+    if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
         if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
             DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on client fd %d\n",
                         t->sock));
@@ -828,9 +829,10 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     }
 
     t->sock = t->base_transport->sock;
-    if (t->sock >= 0) {
+    if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
         if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
-            DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on server fd %d\n",
+            DEBUGMSGTL(("tlstcp",
+                        "couldn't set non-blocking mode on server fd %" NETSNMP_FMT_SKT "\n",
                         t->sock));
         }
     }

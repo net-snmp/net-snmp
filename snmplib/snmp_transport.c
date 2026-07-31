@@ -226,8 +226,6 @@ netsnmp_transport_copy(const netsnmp_transport *t)
     return n;
 }
 
-
-
 netsnmp_transport *
 netsnmp_transport_alloc(void)
 {
@@ -236,7 +234,7 @@ netsnmp_transport_alloc(void)
     transport = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (!transport)
         return NULL;
-    transport->sock = -1;
+    transport->sock = NETSNMP_INVALID_SOCKET;
     return transport;
 }
 

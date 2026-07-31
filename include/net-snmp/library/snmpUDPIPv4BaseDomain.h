@@ -45,7 +45,7 @@ extern          "C" {
     netsnmp_udpipv4base_transport_init(const struct netsnmp_ep *ep,
                                        int local);
 
-    int
+    NETSNMP_SOCKET
     netsnmp_udpipv4base_transport_socket(int flags);
 
     int
@@ -57,11 +57,11 @@ extern          "C" {
     netsnmp_udpipv4base_transport_get_bound_addr(netsnmp_transport *t);
 
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
-    int netsnmp_udpipv4_recvfrom(int sock, void *buf, int len,
+    int netsnmp_udpipv4_recvfrom(NETSNMP_SOCKET sock, void *buf, int len,
                                  struct sockaddr *from, socklen_t *fromlen,
                                  struct sockaddr *dstip, socklen_t *dstlen,
                                  int *if_index);
-    int netsnmp_udpipv4_sendto(int sock, const struct in_addr *srcip,
+    int netsnmp_udpipv4_sendto(NETSNMP_SOCKET sock, const struct in_addr *srcip,
                                int if_index, const struct sockaddr *remote,
                                const void *data, int len);
 #endif

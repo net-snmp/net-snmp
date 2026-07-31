@@ -25,7 +25,7 @@ typedef struct netsnmp_callback_info_s {
     void           *parent_data;
     netsnmp_callback_pass *data;
     int             callback_num;
-    int             pipefds[2];
+    NETSNMP_SOCKET  pipefds[2];
 } netsnmp_callback_info;
 
 netsnmp_transport *netsnmp_callback_transport(int);

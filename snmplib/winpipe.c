@@ -39,10 +39,10 @@
 #include <io.h>
 
 static int
-InitUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress)
+InitUDPSocket(NETSNMP_SOCKET *sock, struct sockaddr_in *socketaddress)
 {
     *sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (*sock == SOCKET_ERROR) {
+    if (!NETSNMP_IS_VALID_SOCKET(*sock)) {
         netsnmp_assert(GetLastError() != WSANOTINITIALISED);
         return -1;
     }
@@ -54,7 +54,7 @@ InitUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress)
     if (bind(*sock, (struct sockaddr *) socketaddress,
              sizeof(struct sockaddr)) == SOCKET_ERROR) {
         closesocket(*sock);
-        *sock = INVALID_SOCKET;
+        *sock = NETSNMP_INVALID_SOCKET;
         return -1;
     }
 
@@ -62,8 +62,8 @@ InitUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress)
 }
 
 static int
-ConnectUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress,
-                 SOCKET *remotesocket)
+ConnectUDPSocket(NETSNMP_SOCKET *sock, struct sockaddr_in *socketaddress,
+                 NETSNMP_SOCKET *remotesocket)
 {
     int size = sizeof(struct sockaddr);
 
@@ -78,7 +78,7 @@ ConnectUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress,
 }
 
 static int
-TestUDPSend(SOCKET *sock, struct sockaddr_in *socketaddress)
+TestUDPSend(NETSNMP_SOCKET *sock, struct sockaddr_in *socketaddress)
 {
     unsigned short port = socketaddress->sin_port;
     int bytessent;
@@ -91,7 +91,7 @@ TestUDPSend(SOCKET *sock, struct sockaddr_in *socketaddress)
 }
 
 static int
-TestUDPReceive(SOCKET *sock, SOCKET *remotesocket,
+TestUDPReceive(NETSNMP_SOCKET *sock, NETSNMP_SOCKET *remotesocket,
                struct sockaddr_in *remotesocketaddress)
 {
     struct sockaddr_in recvfromaddress;
@@ -99,8 +99,9 @@ TestUDPReceive(SOCKET *sock, SOCKET *remotesocket,
     int size = sizeof(struct sockaddr);
     int bytesreceived;
 
-    bytesreceived = recvfrom(*sock, (char *) &readbuffer, sizeof(readbuffer), 0,
-                             (struct sockaddr *) &recvfromaddress, &size);
+    bytesreceived =
+        recvfrom(*sock, (char *) &readbuffer, sizeof(readbuffer), 0,
+                 (struct sockaddr *) &recvfromaddress, &size);
     if (bytesreceived != sizeof(unsigned short) ||
         size != sizeof(struct sockaddr) ||
         readbuffer[0] != remotesocketaddress->sin_port ||
@@ -114,11 +115,11 @@ TestUDPReceive(SOCKET *sock, SOCKET *remotesocket,
     return 0;
 }
 
-static void CloseUDPSocketPair(SOCKET *socketpair)
+static void CloseUDPSocketPair(NETSNMP_SOCKET *socketpair)
 {
-    if (socketpair[0] != INVALID_SOCKET)
+    if (NETSNMP_IS_VALID_SOCKET(socketpair[0]))
         closesocket(socketpair[0]);
-    if (socketpair[1] != INVALID_SOCKET)
+    if (NETSNMP_IS_VALID_SOCKET(socketpair[1]))
         closesocket(socketpair[1]);
 }
 
@@ -127,9 +128,12 @@ static void CloseUDPSocketPair(SOCKET *socketpair)
  * on a Windows machine for the CALLBACK (pipe-based) transport domain.
  */
 int
-create_winpipe_transport(int *pipefds)
+create_winpipe_transport(NETSNMP_SOCKET *pipefds)
 {
-    SOCKET socketpair[2] = { INVALID_SOCKET, INVALID_SOCKET };
+    NETSNMP_SOCKET socketpair[2] = {
+        NETSNMP_INVALID_SOCKET,
+        NETSNMP_INVALID_SOCKET,
+    };
     struct sockaddr_in socketaddress[2];
     NETSNMP_SELECT_TIMEVAL waittime = {0, 200000};
     fd_set readset;
@@ -185,8 +189,8 @@ create_winpipe_transport(int *pipefds)
         goto close_socketpair;
 
     /* All sanity checks passed, I can return a "UDP pipe". */
-    pipefds[0] = (int) socketpair[0];
-    pipefds[1] = (int) socketpair[1];
+    pipefds[0] = socketpair[0];
+    pipefds[1] = socketpair[1];
 
     return 0;
 

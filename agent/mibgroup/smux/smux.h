@@ -48,7 +48,7 @@ typedef struct _smux_peer_auth {
     oid             sa_oid[MAX_OID_LEN];        /* name of peer                 */
     size_t          sa_oid_len; /* length of peer name          */
     char            sa_passwd[SMUXMAXSTRLEN];   /* configured passwd            */
-    int             sa_active_fd;       /* the peer using this auth     */
+    NETSNMP_SOCKET  sa_active_fd;       /* the peer using this auth     */
 } smux_peer_auth;
 
 /*
@@ -58,29 +58,29 @@ typedef struct _smux_reg {
     oid             sr_name[MAX_OID_LEN];       /* name of subtree              */
     size_t          sr_name_len;        /* length of subtree name       */
     int             sr_priority;        /* priority of registration     */
-    int             sr_fd;      /* descriptor of owner          */
+    NETSNMP_SOCKET  sr_fd;      /* descriptor of owner          */
     struct _smux_reg *sr_next;  /* next one                     */
     netsnmp_handler_registration *reginfo;
 } smux_reg;
 
 extern void     init_smux(void);
 extern void     real_init_smux(void);
-extern int      smux_accept(int);
+extern NETSNMP_SOCKET smux_accept(NETSNMP_SOCKET);
 extern u_char  *smux_snmp_process(int, oid *, size_t *, size_t *, u_char *,
-                                  int);
-extern int      smux_process(int);
+                                  NETSNMP_SOCKET);
+extern int      smux_process(NETSNMP_SOCKET);
 extern void     smux_parse_peer_auth(const char *, char *);
 extern void     smux_free_peer_auth(void);
 
 /* Add socket-fd to list */
-int smux_snmp_select_list_add(int sd);
+int smux_snmp_select_list_add(NETSNMP_SOCKET sd);
 
 /* Remove socket-fd from list */
-int smux_snmp_select_list_del(int sd);
+int smux_snmp_select_list_del(NETSNMP_SOCKET sd);
 
 /* Returns the count of added socket-fd's in the list */
 int smux_snmp_select_list_get_length(void);
 
 /* Returns the socket-fd number from the position of the list */
-int smux_snmp_select_list_get_SD_from_List(int pos);
+NETSNMP_SOCKET smux_snmp_select_list_get_SD_from_List(int pos);
 

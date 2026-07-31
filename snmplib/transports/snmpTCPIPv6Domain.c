@@ -73,12 +73,12 @@ netsnmp_tcp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
     return netsnmp_ipv6_fmtaddr("TCP/IPv6", t, data, len);
 }
 
-static int
+static NETSNMP_SOCKET
 netsnmp_tcp6_accept(netsnmp_transport *t)
 {
     netsnmp_udp_addr_pair *addr_pair;
     struct sockaddr       *farend;
-    int             newsock = -1;
+    NETSNMP_SOCKET         newsock = NETSNMP_INVALID_SOCKET;
     socklen_t              farendlen;
 
     addr_pair = calloc(1, sizeof(*addr_pair));
@@ -87,18 +87,17 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
          * Indicate that the acceptance of this socket failed.  
          */
         DEBUGMSGTL(("netsnmp_tcp6", "accept: malloc failed\n"));
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
 
     farend = &addr_pair->remote_addr.sa;
     farendlen = sizeof(addr_pair->remote_addr.sa);
 
-    if (t && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         newsock = accept(t->sock, farend, &farendlen);
 
-        if (newsock < 0) {
-            DEBUGMSGTL(("netsnmp_tcp6",
-                        "accept failed rc %d errno %d \"%s\"\n", newsock,
+        if (!NETSNMP_IS_VALID_SOCKET(newsock)) {
+            DEBUGMSGTL(("netsnmp_tcp6", "accept failed errno %d \"%s\"\n",
                         errno, strerror(errno)));
             free(addr_pair);
             return newsock;
@@ -121,7 +120,8 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
 
         if (netsnmp_set_non_blocking_mode(newsock, FALSE) < 0)
             DEBUGMSGTL(("netsnmp_tcp6",
-                        "accept: couldn't f_getfl of fd %d\n", newsock));
+                        "accept: couldn't f_getfl of fd %" NETSNMP_FMT_SKT "\n",
+                        newsock));
 
         /*
          * Allow user to override the send and receive buffers. Default is
@@ -134,7 +134,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
         return newsock;
     } else {
         free(farend);
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
 }
 
@@ -199,7 +199,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
 #endif
     if (!socket_initialized)
         t->sock = socket(PF_INET6, SOCK_STREAM, 0);
-    if (t->sock < 0)
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
         goto err;
 
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
@@ -208,11 +208,13 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
     if (local == 0 && ep) {
         rc = netsnmp_bindtodevice(t->sock, ep->iface);
         if (rc)
-            DEBUGMSGTL(("netsnmp_tcp", "VRF: Could not bind socket %d to %s\n",
-                t->sock, ep->iface));
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "VRF: Could not bind socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
         else
-            DEBUGMSGTL(("netsnmp_tcp", "VRF: Bound socket %d to %s\n",
-                t->sock, ep->iface));
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
     }
 
     if (local) {
@@ -229,8 +231,11 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
         /* Try to restrict PF_INET6 socket to IPv6 communications only. */
         {
 	  int one=1;
-	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
-	    DEBUGMSGTL(("netsnmp_tcp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one,
+                         sizeof(one)) != 0) {
+	    DEBUGMSGTL(("netsnmp_tcp6",
+                        "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one,
+                        strerror(errno)));
 	  } 
 	}
 #endif
@@ -245,7 +250,8 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
          * We should set SO_REUSEADDR too.  
          */
 
-        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof(opt));
+        setsockopt(t->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt,
+                   sizeof(opt));
 
         if (!socket_initialized) {
             rc = netsnmp_bindtodevice(t->sock, ep->iface);

@@ -66,7 +66,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     netsnmp_session *session = NULL;
     const unsigned short pkt_len = size;
     const void *const pkt = data;
-    int skt = -1;
+    NETSNMP_SOCKET skt = NETSNMP_INVALID_SOCKET;
     int ret = 1;
 
     if (pkt_len == 0)
@@ -92,7 +92,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
 
     skt = socket(AF_INET, SOCK_DGRAM, 0);
-    if (skt < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(skt)) {
         perror("socket()");
         goto shutdown;
     }

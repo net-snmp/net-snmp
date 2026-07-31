@@ -82,12 +82,13 @@ void            netsnmp_udp_ctor(void);
  */
 char *netsnmp_udp_fmtaddr(netsnmp_transport *t, const void *data, int len);
 #if defined(HAVE_IP_PKTINFO) || defined(HAVE_IP_RECVDSTADDR)
-int netsnmp_udp_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
-                         socklen_t *fromlen, struct sockaddr *dstip,
-                         socklen_t *dstlen, int *if_index);
-int netsnmp_udp_sendto(int sock, const struct in_addr *srcip, int if_index,
-                       const struct sockaddr *remote, const void *data,
-                       int len);
+int netsnmp_udp_recvfrom(NETSNMP_SOCKET sock, void *buf, int len,
+                         struct sockaddr *from, socklen_t *fromlen,
+                         struct sockaddr *dstip, socklen_t *dstlen,
+                         int *if_index);
+int netsnmp_udp_sendto(NETSNMP_SOCKET sock, const struct in_addr *srcip,
+                       int if_index, const struct sockaddr *remote,
+                       const void *data, int len);
 #endif
 
 #ifdef __cplusplus

@@ -28,9 +28,22 @@
 #endif
 
 #if defined(WIN32) && !defined(cygwin)
+
+#define NETSNMP_SOCKET         SOCKET
+#define NETSNMP_INVALID_SOCKET INVALID_SOCKET
+#define NETSNMP_IS_VALID_SOCKET(_sock) ((_sock) != INVALID_SOCKET)
+#define NETSNMP_FMT_SKT        "llu"
+
 typedef HANDLE netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS INVALID_HANDLE_VALUE
+
 #else
+
+#define NETSNMP_SOCKET         int
+#define NETSNMP_INVALID_SOCKET -1
+#define NETSNMP_IS_VALID_SOCKET(_sock) ((_sock) != -1)
+#define NETSNMP_FMT_SKT        "d"
+
 /*
  * Note: on POSIX-compliant systems, pid_t is defined in <sys/types.h>.
  * And if pid_t has not been defined in <sys/types.h>, AC_TYPE_PID_T ensures
@@ -38,6 +51,7 @@ typedef HANDLE netsnmp_pid_t;
  */
 typedef pid_t netsnmp_pid_t;
 #define NETSNMP_NO_SUCH_PROCESS -1
+
 #endif
 
 #include <net-snmp/library/oid.h>

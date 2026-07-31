@@ -65,12 +65,12 @@ netsnmp_tcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
     return netsnmp_ipv4_fmtaddr("TCP", t, data, len);
 }
 
-static int
+static NETSNMP_SOCKET
 netsnmp_tcp_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
-    int             newsock = -1;
+    NETSNMP_SOCKET  newsock = NETSNMP_INVALID_SOCKET;
     socklen_t       farendlen;
 
     addr_pair = malloc(sizeof(*addr_pair));
@@ -79,18 +79,18 @@ netsnmp_tcp_accept(netsnmp_transport *t)
          * Indicate that the acceptance of this socket failed.  
          */
         DEBUGMSGTL(("netsnmp_tcp", "accept: malloc failed\n"));
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
     memset(addr_pair, 0, sizeof *addr_pair);
     farend = &addr_pair->remote_addr.sa;
     farendlen = sizeof(addr_pair->remote_addr.sa);
 
-    if (t != NULL && t->sock >= 0) {
-        newsock = (int) accept(t->sock, farend, &farendlen);
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
+        newsock = accept(t->sock, farend, &farendlen);
 
-        if (newsock < 0) {
-            DEBUGMSGTL(("netsnmp_tcp", "accept failed rc %d errno %d \"%s\"\n",
-			newsock, errno, strerror(errno)));
+        if (!NETSNMP_IS_VALID_SOCKET(newsock)) {
+            DEBUGMSGTL(("netsnmp_tcp", "accept failed with errno %d \"%s\"\n",
+			errno, strerror(errno)));
             free(addr_pair);
             return newsock;
         }
@@ -112,7 +112,8 @@ netsnmp_tcp_accept(netsnmp_transport *t)
          */
 
         if (netsnmp_set_non_blocking_mode(newsock, FALSE) < 0)
-            DEBUGMSGTL(("netsnmp_tcp", "couldn't f_getfl of fd %d\n",
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "couldn't f_getfl of fd %" NETSNMP_FMT_SKT "\n",
                         newsock));
 
         /*
@@ -126,7 +127,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
         return newsock;
     } else {
         free(addr_pair);
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
 }
 
@@ -185,8 +186,8 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
     }
 #endif
     if (!socket_initialized)
-        t->sock = (int) socket(PF_INET, SOCK_STREAM, 0);
-    if (t->sock < 0)
+        t->sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
         goto err;
 
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
@@ -195,11 +196,13 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
     if (local == 0 && ep) {
         rc = netsnmp_bindtodevice(t->sock, ep->iface);
         if (rc)
-            DEBUGMSGTL(("netsnmp_tcp", "VRF: Could not bind socket %d to %s\n",
-                t->sock, ep->iface));
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "VRF: Could not bind socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
         else
-            DEBUGMSGTL(("netsnmp_tcp", "VRF: Bound socket %d to %s\n",
-                t->sock, ep->iface));
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
     }
 
     if (local) {

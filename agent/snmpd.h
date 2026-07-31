@@ -13,7 +13,7 @@ extern int      agent_role;
 extern int      snmp_dump_packet;
 extern int      verbose;
 extern int      (*sd_handlers[]) (int);
-extern int      smux_listen_sd;
+extern NETSNMP_SOCKET smux_listen_sd;
 
 extern int      snmp_read_packet(int);
 

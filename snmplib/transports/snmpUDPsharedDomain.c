@@ -66,7 +66,7 @@ _udpshared_close(netsnmp_transport *t)
         return -1;
 
     t->base_transport = NULL;
-    t->sock = -1; /* we just had a copy of base's fd */
+    t->sock = NETSNMP_INVALID_SOCKET; /* we just had a copy of base's fd */
 
     /** remove base transport. if it is still in use, return. */
     if (netsnmp_transport_cache_remove(b) == 1)

@@ -76,30 +76,31 @@ struct sockaddr_in smux_sa;
 struct counter64 smux_counter64;
 oid             smux_objid[MAX_OID_LEN];
 u_char          smux_str[SMUXMAXSTRLEN];
-int             smux_listen_sd = -1;
+NETSNMP_SOCKET  smux_listen_sd = NETSNMP_INVALID_SOCKET;
 
 static struct timeval smux_rcv_timeout;
 static long   smux_reqid;
 
-static u_char  *smux_open_process(int, u_char *, size_t *, int *);
-static u_char  *smux_rreq_process(int, u_char *, size_t *);
-static u_char  *smux_close_process(int, u_char *, size_t *);
+static u_char  *smux_open_process(NETSNMP_SOCKET, u_char *, size_t *, int *);
+static u_char  *smux_rreq_process(NETSNMP_SOCKET, u_char *, size_t *);
+static u_char  *smux_close_process(NETSNMP_SOCKET, u_char *, size_t *);
 static u_char  *smux_trap_process(u_char *, size_t *);
 static u_char  *smux_parse(u_char *, oid *, size_t *, size_t *, u_char *);
 static u_char  *smux_parse_var(u_char *, size_t *, oid *, size_t *,
                                size_t *, u_char *);
-static void     smux_send_close(int, int);
+static void     smux_send_close(NETSNMP_SOCKET, int);
 static void     smux_list_detach(smux_reg **, smux_reg *);
 static void     smux_replace_active(smux_reg *, smux_reg *);
-static void     smux_peer_cleanup(int);
-static int      smux_auth_peer(oid *, size_t, char *, int);
+static void     smux_peer_cleanup(NETSNMP_SOCKET);
+static int      smux_auth_peer(oid *, size_t, char *, NETSNMP_SOCKET);
 static int      smux_build(u_char, long, oid *,
                            size_t *, u_char, u_char *, size_t, u_char *,
                            size_t *);
 static int      smux_list_add(smux_reg **, smux_reg *);
-static int      smux_pdu_process(int, u_char *, size_t);
-static int      smux_send_rrsp(int, int);
-static smux_reg *smux_find_match(smux_reg *, int, oid *, size_t, long);
+static int      smux_pdu_process(NETSNMP_SOCKET, u_char *, size_t);
+static int      smux_send_rrsp(NETSNMP_SOCKET, int);
+static smux_reg *smux_find_match(smux_reg *, NETSNMP_SOCKET, oid *, size_t,
+                                 long);
 static smux_reg *smux_find_replacement(oid *, size_t);
 u_char         *var_smux_get(oid *, size_t, oid *, size_t *, int, size_t *,
                                u_char *);
@@ -144,7 +145,7 @@ smux_parse_peer_auth(const char *token, char *cptr)
     /*
      * oid 
      */
-    aptr->sa_active_fd = -1;
+    aptr->sa_active_fd = NETSNMP_INVALID_SOCKET;
     aptr->sa_oid_len = MAX_OID_LEN;
     rv = read_objid( cptr, aptr->sa_oid, &aptr->sa_oid_len );
     DEBUGMSGTL(("smux_conf", "parsing registration for: %s\n", cptr));
@@ -202,7 +203,7 @@ real_init_smux(void)
     int             one = 1;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
-        smux_listen_sd = -1;
+        smux_listen_sd = NETSNMP_INVALID_SOCKET;
         return;
     }
 
@@ -210,7 +211,7 @@ real_init_smux(void)
      * Reqid 
      */
     smux_reqid = 0;
-    smux_listen_sd = -1;
+    smux_listen_sd = NETSNMP_INVALID_SOCKET;
 
     /*
      * Receive timeout 
@@ -232,7 +233,8 @@ real_init_smux(void)
 #endif
     netsnmp_sockaddr_in( &lo_socket, smux_socket, SMUXPORT );
 
-    if ((smux_listen_sd = (int) socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    smux_listen_sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (!NETSNMP_IS_VALID_SOCKET(smux_listen_sd)) {
         snmp_log_perror("[init_smux] socket failed");
         return;
     }
@@ -253,30 +255,29 @@ real_init_smux(void)
     if (bind(smux_listen_sd, (struct sockaddr *) &lo_socket,
              sizeof(lo_socket)) < 0) {
         snmp_log_perror("[init_smux] bind failed");
-        close(smux_listen_sd);
-        smux_listen_sd = -1;
-        return;
+        goto close_listen_fd;
     }
 #ifdef	SO_KEEPALIVE
     if (setsockopt(smux_listen_sd, SOL_SOCKET, SO_KEEPALIVE, (char *) &one,
                    sizeof(one)) < 0) {
         snmp_log_perror("[init_smux] setsockopt(SO_KEEPALIVE) failed");
-        close(smux_listen_sd);
-        smux_listen_sd = -1;
-        return;
+        goto close_listen_fd;
     }
 #endif                          /* SO_KEEPALIVE */
 
     if (listen(smux_listen_sd, SOMAXCONN) == -1) {
         snmp_log_perror("[init_smux] listen failed");
-        close(smux_listen_sd);
-        smux_listen_sd = -1;
-        return;
+        goto close_listen_fd;
     }
 
     DEBUGMSGTL(("smux_init",
-                "[smux_init] done; smux listen sd is %d, smux port is %d\n",
+                "[smux_init] done; smux listen sd is %" NETSNMP_FMT_SKT ", smux port is %d\n",
                 smux_listen_sd, ntohs(lo_socket.sin_port)));
+    return;
+
+close_listen_fd:
+    close(smux_listen_sd);
+    smux_listen_sd = NETSNMP_INVALID_SOCKET;
 }
 
 static int
@@ -537,7 +538,7 @@ var_smux_write(int action,
 
             if (buf[0] == SMUX_TRAP) {
                 DEBUGMSGTL(("smux", "[var_smux_write] Received trap\n"));
-                DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n",
+                DEBUGMSGTL(("smux", "Got trap from peer on fd %" NETSNMP_FMT_SKT "\n",
                          rptr->sr_fd));
                 ptr = asn_parse_header(buf, &len, &type);
                 if (ptr == NULL)
@@ -621,14 +622,14 @@ var_smux_write(int action,
     return reterr;
 }
 
-
-int
-smux_accept(int sd)
+NETSNMP_SOCKET
+smux_accept(NETSNMP_SOCKET sd)
 {
     u_char          data[SMUXMAXPKTSIZE], *ptr, type;
     struct sockaddr_in in_socket;
     struct timeval  tv;
-    int             fail, fd;
+    int             fail;
+    NETSNMP_SOCKET  fd;
     socklen_t       alen;
     int             length;
     size_t          len;
@@ -645,19 +646,20 @@ smux_accept(int sd)
      */
     DEBUGMSGTL(("smux", "[smux_accept] Calling accept()\n"));
     errno = 0;
-    if ((fd = (int) accept(sd, (struct sockaddr *) &in_socket, &alen)) < 0) {
+    fd = accept(sd, (struct sockaddr *) &in_socket, &alen);
+    if (!NETSNMP_IS_VALID_SOCKET(fd)) {
         snmp_log_perror("[smux_accept] accept failed");
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     } else {
-        DEBUGMSGTL(("smux", "[smux_accept] accepted fd %d from %s:%d\n",
+        DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
                  fd, inet_ntoa(in_socket.sin_addr),
                  ntohs(in_socket.sin_port)));
         if (npeers + 1 == SMUXMAXPEERS) {
             snmp_log(LOG_ERR,
-                     "[smux_accept] denied peer on fd %d, limit %d reached",
+                     "[smux_accept] denied peer on fd %" NETSNMP_FMT_SKT ", limit %d reached",
                      fd, SMUXMAXPEERS);
             close(fd);
-            return -1;
+            return NETSNMP_INVALID_SOCKET;
         }
 
         /*
@@ -671,10 +673,10 @@ smux_accept(int sd)
 
         if (length <= 0) {
             DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on fd %d died or timed out\n",
+                        "[smux_accept] peer on fd %" NETSNMP_FMT_SKT " died or timed out\n",
                         fd));
             close(fd);
-            return -1;
+            return NETSNMP_INVALID_SOCKET;
         }
         /*
          * try to authorize him 
@@ -684,40 +686,42 @@ smux_accept(int sd)
         if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
             smux_send_close(fd, SMUXC_PACKETFORMAT);
             close(fd);
-            DEBUGMSGTL(("smux", "[smux_accept] peer on %d sent bad open", fd));
-            return -1;
+            DEBUGMSGTL(("smux",
+                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " sent bad open",
+                        fd));
+            return NETSNMP_INVALID_SOCKET;
         } else if (type != (u_char) SMUX_OPEN) {
             smux_send_close(fd, SMUXC_PROTOCOLERROR);
             close(fd);
             DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on %d did not send open: (%d)\n",
+                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " did not send open: (%d)\n",
                         fd, type));
-            return -1;
+            return NETSNMP_INVALID_SOCKET;
         }
         ptr = smux_open_process(fd, ptr, &len, &fail);
         if (fail) {
             smux_send_close(fd, SMUXC_AUTHENTICATIONFAILURE);
             close(fd);
             DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on %d failed authentication\n",
+                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " failed authentication\n",
                         fd));
-            return -1;
+            return NETSNMP_INVALID_SOCKET;
         }
 
         /*
          * he's OK 
          */
 #ifdef SO_RCVTIMEO
-        if (setsockopt
-            (fd, SOL_SOCKET, SO_RCVTIMEO, (void *) &tv, sizeof(tv)) < 0) {
+        if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *) &tv, sizeof(tv)) <
+            0) {
             DEBUGMSGTL(("smux",
-                        "[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %d\n",
+                        "[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %" NETSNMP_FMT_SKT "\n",
                         fd));
             snmp_log_perror("smux_accept: setsockopt SO_RCVTIMEO");
         }
 #endif
         npeers++;
-        DEBUGMSGTL(("smux", "[smux_accept] fd %d\n", fd));
+        DEBUGMSGTL(("smux", "[smux_accept] fd %" NETSNMP_FMT_SKT "\n", fd));
 
         /*
          * Process other PDUs already read, e.g. a registerRequest. 
@@ -727,14 +731,14 @@ smux_accept(int sd)
             /*
              * Easy come, easy go.  Clean-up is already done. 
              */
-            return -1;
+            return NETSNMP_INVALID_SOCKET;
         }
     }
     return fd;
 }
 
 int
-smux_process(int sock)
+smux_process(NETSNMP_SOCKET sock)
 {
     int             length, tmp_length;
     u_char          data[SMUXMAXPKTSIZE];
@@ -785,7 +789,7 @@ smux_process(int sock)
          * * and delete it from the list
          */
         DEBUGMSGTL(("smux",
-                    "[smux_process] peer on fd %d died or timed out\n",
+                    "[smux_process] peer on fd %" NETSNMP_FMT_SKT " died or timed out\n",
                     sock));
         smux_peer_cleanup(sock);
         return -1;
@@ -795,7 +799,7 @@ smux_process(int sock)
 }
 
 static int
-smux_pdu_process(int sock, u_char * data, size_t length)
+smux_pdu_process(NETSNMP_SOCKET sock, u_char * data, size_t length)
 {
     int             error;
     size_t          len;
@@ -819,7 +823,7 @@ smux_pdu_process(int sock, u_char * data, size_t length)
         case SMUX_OPEN:
             smux_send_close(sock, SMUXC_PROTOCOLERROR);
             DEBUGMSGTL(("smux",
-                        "[smux_pdu_process] peer on fd %d sent duplicate open?\n",
+                        "[smux_pdu_process] peer on fd %" NETSNMP_FMT_SKT " sent duplicate open?\n",
                         sock));
             smux_peer_cleanup(sock);
             error = -1;
@@ -837,7 +841,7 @@ smux_pdu_process(int sock, u_char * data, size_t length)
             smux_send_close(sock, SMUXC_PROTOCOLERROR);
             smux_peer_cleanup(sock);
             DEBUGMSGTL(("smux",
-                        "[smux_pdu_process] peer on fd %d sent RRSP!\n",
+                        "[smux_pdu_process] peer on fd %" NETSNMP_FMT_SKT " sent RRSP!\n",
                         sock));
             break;
         case SMUX_SOUT:
@@ -847,7 +851,9 @@ smux_pdu_process(int sock, u_char * data, size_t length)
             DEBUGMSGTL(("smux", "This shouldn't have happened!\n"));
             break;
         case SMUX_TRAP:
-            DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", sock));
+            DEBUGMSGTL(("smux",
+                        "Got trap from peer on fd %" NETSNMP_FMT_SKT "\n",
+                        sock));
             if (ptr)
             {
                DEBUGMSGTL(("smux", "[smux_pdu_process] call smux_trap_process.\n"));
@@ -875,7 +881,7 @@ smux_pdu_process(int sock, u_char * data, size_t length)
 }
 
 static u_char  *
-smux_open_process(int sock, u_char * ptr, size_t * len, int *fail)
+smux_open_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len, int *fail)
 {
     u_char          type;
     long            version;
@@ -961,7 +967,7 @@ smux_open_process(int sock, u_char * ptr, size_t * len, int *fail)
 }
 
 static void
-smux_send_close(int sock, int reason)
+smux_send_close(NETSNMP_SOCKET sock, int reason)
 {
     u_char          outpacket[3], *ptr;
 
@@ -973,8 +979,8 @@ smux_send_close(int sock, int reason)
 
     if (snmp_get_do_debugging())
         DEBUGMSGTL(("smux",
-                    "[smux_close] sending close to fd %d, reason %d\n", sock,
-                    reason));
+                    "[smux_close] sending close to fd %" NETSNMP_FMT_SKT ", reason %d\n",
+                    sock, reason));
 
     /*
      * send a response back 
@@ -986,7 +992,7 @@ smux_send_close(int sock, int reason)
 
 
 static int
-smux_auth_peer(oid * name, size_t namelen, char *passwd, int sock)
+smux_auth_peer(oid * name, size_t namelen, char *passwd, NETSNMP_SOCKET sock)
 {
     int             i;
     char            oid_print[SMUXMAXSTRLEN];
@@ -1007,11 +1013,11 @@ smux_auth_peer(oid * name, size_t namelen, char *passwd, int sock)
         if (snmp_oid_compare(Auths[i]->sa_oid, Auths[i]->sa_oid_len,
                              name, namelen) == 0) {
             if (snmp_get_do_debugging()) {
-                DEBUGMSGTL(("smux:auth", "[smux_auth_peer] Checking P/W: %s (%d)\n",
+                DEBUGMSGTL(("smux:auth", "[smux_auth_peer] Checking P/W: %s (%" NETSNMP_FMT_SKT ")\n",
                         Auths[i]->sa_passwd, Auths[i]->sa_active_fd));
             }
             if (!(strcmp(Auths[i]->sa_passwd, passwd)) &&
-                (Auths[i]->sa_active_fd == -1)) {
+                !NETSNMP_IS_VALID_SOCKET(Auths[i]->sa_active_fd)) {
                 /*
                  * matched, mark the auth 
                  */
@@ -1032,7 +1038,7 @@ smux_auth_peer(oid * name, size_t namelen, char *passwd, int sock)
  * Need to catch signal when snmpd goes down and send close pdu to gated 
  */
 static u_char  *
-smux_close_process(int sock, u_char * ptr, size_t * len)
+smux_close_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len)
 {
     long            down = 0;
     int             length = *len;
@@ -1046,7 +1052,7 @@ smux_close_process(int sock, u_char * ptr, size_t * len)
     }
 
     DEBUGMSGTL(("smux",
-                "[smux_close_process] close from peer on fd %d reason %ld\n",
+                "[smux_close_process] close from peer on fd %" NETSNMP_FMT_SKT " reason %ld\n",
                 sock, down));
     smux_peer_cleanup(sock);
 
@@ -1054,7 +1060,7 @@ smux_close_process(int sock, u_char * ptr, size_t * len)
 }
 
 static u_char  *
-smux_rreq_process(int sd, u_char * ptr, size_t * len)
+smux_rreq_process(NETSNMP_SOCKET sd, u_char * ptr, size_t * len)
 {
     long            priority, rpriority;
     long            operation;
@@ -1148,7 +1154,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                (operation == SMUX_REGOP_REGISTER_RW)) {
         if (priority < -1) {
             DEBUGMSGTL(("smux",
-                        "[smux_rreq_process] peer fd %d invalid priority %ld",
+                        "[smux_rreq_process] peer fd %" NETSNMP_FMT_SKT " invalid priority %ld",
                         sd, priority));
             smux_send_rrsp(sd, -1);
             return NULL;
@@ -1260,7 +1266,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
  * a matching OID, and the highest priority.
  */
 static smux_reg *
-smux_find_match(smux_reg * regs, int sd, oid * oid_name,
+smux_find_match(smux_reg * regs, NETSNMP_SOCKET sd, oid * oid_name,
                 size_t oid_name_len, long priority)
 {
     smux_reg       *rptr, *bestrptr;
@@ -1456,7 +1462,7 @@ u_char         *
 smux_snmp_process(int exact,
                   oid * objid,
                   size_t * len,
-                  size_t * return_len, u_char * return_type, int sd)
+                  size_t * return_len, u_char * return_type, NETSNMP_SOCKET sd)
 {
     u_char          packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
     ssize_t         length = SMUXMAXPKTSIZE;
@@ -1551,7 +1557,9 @@ smux_snmp_process(int exact,
 
         if (result[0] == SMUX_TRAP) {
             DEBUGMSGTL(("smux", "[smux_snmp_process] Received trap\n"));
-            DEBUGMSGTL(("smux", "Got trap from peer on fd %d\n", sd));
+            DEBUGMSGTL(("smux",
+                        "Got trap from peer on fd %" NETSNMP_FMT_SKT "\n",
+                        sd));
             ptr = asn_parse_header(result, (size_t *) &length, &type);
             if (ptr == NULL)
                 return NULL;
@@ -1849,7 +1857,7 @@ smux_build(u_char type,
 }
 
 static void
-smux_peer_cleanup(int sd)
+smux_peer_cleanup(NETSNMP_SOCKET sd)
 {
     smux_reg       *nrptr, *rptr, *rptr2;
     int             i;
@@ -1918,7 +1926,7 @@ smux_peer_cleanup(int sd)
     for (i = 0; i < nauths; i++) {
         if (Auths[i]->sa_active_fd == sd) {
             char            oid_name[128];
-            Auths[i]->sa_active_fd = -1;
+            Auths[i]->sa_active_fd = NETSNMP_INVALID_SOCKET;
             snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid,
                           Auths[i]->sa_oid_len);
             DEBUGMSGTL(("smux", "peer disconnected: %s\n", oid_name));
@@ -1927,7 +1935,7 @@ smux_peer_cleanup(int sd)
 }
 
 int
-smux_send_rrsp(int sd, int pri)
+smux_send_rrsp(NETSNMP_SOCKET sd, int pri)
 {
     u_char          outdata[2 + sizeof(int)];
     u_char         *ptr = outdata;
@@ -2173,9 +2181,10 @@ err:
 }
 
 #define NUM_SOCKETS	32
-static int      sdlist[NUM_SOCKETS], sdlen = 0;
+static NETSNMP_SOCKET sdlist[NUM_SOCKETS];
+static int sdlen;
 
-int smux_snmp_select_list_add(int sd)
+int smux_snmp_select_list_add(NETSNMP_SOCKET sd)
 {
    if (sdlen < NUM_SOCKETS)
    {
@@ -2185,14 +2194,14 @@ int smux_snmp_select_list_add(int sd)
    return(0);
 }
 
-int smux_snmp_select_list_del(int sd)
+int smux_snmp_select_list_del(NETSNMP_SOCKET sd)
 {
    int i, found=0;
 
    for (i = 0; i < (sdlen); i++) {
       if (sdlist[i] == sd)
       {
-         sdlist[i] = 0;
+         sdlist[i] = NETSNMP_INVALID_SOCKET;
          found = 1;
       }
       if ((found) &&(i < (sdlen - 1)))
@@ -2211,11 +2220,11 @@ int smux_snmp_select_list_get_length(void)
    return(sdlen);
 }
 
-int smux_snmp_select_list_get_SD_from_List(int pos)
+NETSNMP_SOCKET smux_snmp_select_list_get_SD_from_List(int pos)
 {
    if (pos < NUM_SOCKETS)
    {
       return(sdlist[pos]);
    }
-   return(0);
+   return NETSNMP_INVALID_SOCKET;
 }

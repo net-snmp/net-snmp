@@ -42,13 +42,13 @@
 /* all sockets pretty much close the same way */
 int netsnmp_socketbase_close(netsnmp_transport *t) {
     int rc = -1;
-    if (t->sock >= 0) {
+    if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
 #ifndef HAVE_CLOSESOCKET
         rc = close(t->sock);
 #else
         rc = closesocket(t->sock);
 #endif
-        t->sock = -1;
+        t->sock = NETSNMP_INVALID_SOCKET;
     }
     return rc;
 }
@@ -61,7 +61,8 @@ int netsnmp_socketbase_close(netsnmp_transport *t) {
  * size as possible)
  */
 static int
-_sock_buffer_maximize(int sock, int optname, const char *buftype, int size)
+_sock_buffer_maximize(NETSNMP_SOCKET sock, int optname, const char *buftype,
+                      int size)
 {
     int            curbuf = 0;
     socklen_t      curbuflen = sizeof(int);
@@ -216,7 +217,7 @@ _sock_buffer_size_get(int optname, int local, const char **buftype)
  * @retval    >0 : new buffer size
  */
 int
-netsnmp_sock_buffer_set(int sock, int optname, int local, int size)
+netsnmp_sock_buffer_set(NETSNMP_SOCKET sock, int optname, int local, int size)
 {
 #if ! defined(SO_SNDBUF) && ! defined(SO_RCVBUF)
     DEBUGMSGTL(("socket:buffer", "Changing socket buffer is not supported\n"));
@@ -342,7 +343,7 @@ netsnmp_sock_buffer_set(int sock, int optname, int local, int size)
  * @return zero upon success and a negative value upon error.
  */
 int
-netsnmp_set_non_blocking_mode(int sock, int non_blocking_mode)
+netsnmp_set_non_blocking_mode(NETSNMP_SOCKET sock, int non_blocking_mode)
 {
 #ifdef WIN32
     NETSNMP_IOCTLSOCKET_ARG arg;

@@ -10,7 +10,7 @@ SOCK_STARTUP;
     struct hostent *h, *h2 = NULL;
     struct in_addr  v4loop;
     struct sockaddr_in sin_addr;
-    int             s;
+    NETSNMP_SOCKET  s;
 
     v4loop.s_addr = htonl(INADDR_LOOPBACK);
     memset(&sin_addr, 0, sizeof(sin_addr));
@@ -47,7 +47,8 @@ SOCK_STARTUP;
     struct sockaddr_in6 sin6_addr;
     struct addrinfo hints, *addr = NULL, *ap;
     char            buf[64];
-    int             s, res, ran_test = 0;
+    NETSNMP_SOCKET  s;
+    int             res, ran_test = 0;
 
     memset(&sin6_addr, 0, sizeof(sin6_addr));
     sin6_addr.sin6_family = AF_INET6;

@@ -56,17 +56,18 @@
 #endif
 
 #if defined(HAVE_IP_PKTINFO) || (defined(HAVE_IP_RECVDSTADDR) && defined(HAVE_IP_SENDSRCADDR))
-int netsnmp_udpipv4_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
-                             socklen_t *fromlen, struct sockaddr *dstip,
-                             socklen_t *dstlen, int *if_index)
+int netsnmp_udpipv4_recvfrom(NETSNMP_SOCKET sock, void *buf, int len,
+                             struct sockaddr *from, socklen_t *fromlen,
+                             struct sockaddr *dstip, socklen_t *dstlen,
+                             int *if_index)
 {
     return netsnmp_udpbase_recvfrom(sock, buf, len, from, fromlen, dstip, dstlen,
                                     if_index);
 }
 
-int netsnmp_udpipv4_sendto(int sock, const struct in_addr *srcip, int if_index,
-                           const struct sockaddr *remote, const void *data,
-                           int len)
+int netsnmp_udpipv4_sendto(NETSNMP_SOCKET sock, const struct in_addr *srcip,
+                           int if_index, const struct sockaddr *remote,
+                           const void *data, int len)
 {
     return netsnmp_udpbase_sendto(sock, srcip, if_index, remote, data, len);
 }
@@ -135,15 +136,17 @@ netsnmp_udpipv4base_transport_init(const struct netsnmp_ep *ep, int local)
     return t;
 }
 
-int
+NETSNMP_SOCKET
 netsnmp_udpipv4base_transport_socket(int flags)
 {
     int local = flags & NETSNMP_TSPEC_LOCAL;
-    int sock = socket(PF_INET, SOCK_DGRAM, 0);
+    NETSNMP_SOCKET sock;
 
-    DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
-    if (sock < 0)
-        return -1;
+    sock = socket(PF_INET, SOCK_DGRAM, 0);
+    DEBUGMSGTL(("UDPBase", "opened socket %" NETSNMP_FMT_SKT " as local=%d\n",
+                sock, local));
+    if (!NETSNMP_IS_VALID_SOCKET(sock))
+        return NETSNMP_INVALID_SOCKET;
 
     _netsnmp_udp_sockopt_set(sock, local);
 
@@ -196,12 +199,14 @@ netsnmp_udpipv4base_transport_bind(netsnmp_transport *t,
         memcpy(&(addr_pair.local_addr), addr, sizeof(*addr));
         str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
                                   sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d to %s\n",
+        DEBUGMSGTL(("netsnmp_udpbase",
+                    "binding socket: %" NETSNMP_FMT_SKT " to %s\n",
                     t->sock, str));
         free(str);
     }
     if (flags & NETSNMP_TSPEC_PREBOUND) {
-        DEBUGMSGTL(("netsnmp_udpbase", "socket %d is prebound, nothing to do\n",
+        DEBUGMSGTL(("netsnmp_udpbase",
+                    "socket %" NETSNMP_FMT_SKT " is prebound, nothing to do\n",
                     t->sock));
         return 0;
     }
@@ -250,7 +255,8 @@ netsnmp_udpipv4base_transport_get_bound_addr(netsnmp_transport *t)
         char *str;
         str = netsnmp_udp_fmtaddr(NULL, (void *)addr_pair,
                                   sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("netsnmp_udpbase", "socket %d bound to %s\n",
+        DEBUGMSGTL(("netsnmp_udpbase",
+                    "socket %" NETSNMP_FMT_SKT " bound to %s\n",
                     t->sock, str));
         free(str);
     }
@@ -286,9 +292,9 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
     else
         bind_addr = src_addr;
 
-    if (-1 == t->sock)
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
         t->sock = netsnmp_udpipv4base_transport_socket(flags);
-    if (t->sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
         netsnmp_transport_free(t);
         return NULL;
     }
@@ -304,10 +310,12 @@ netsnmp_udpipv4base_transport_with_source(const struct netsnmp_ep *ep,
     if (ep && ep->iface[0]) {
         rc = netsnmp_bindtodevice(t->sock, ep->iface);
         if (rc)
-            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Could not bind socket %d to %s\n",
+            DEBUGMSGTL(("netsnmp_udpbase",
+                        "VRF: Could not bind socket %" NETSNMP_FMT_SKT " to %s\n",
                         t->sock, ep->iface));
         else
-            DEBUGMSGTL(("netsnmp_udpbase", "VRF: Bound socket %d to %s\n",
+            DEBUGMSGTL(("netsnmp_udpbase",
+                        "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
                         t->sock, ep->iface));
     }
 

@@ -1934,7 +1934,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         return NULL;
     }
 
-    DEBUGMSGTL(("snmp_sess_add", "fd %d\n", transport->sock));
+    DEBUGMSGTL(("snmp_sess_add", "fd %" NETSNMP_FMT_SKT "\n",
+                transport->sock));
 
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
         transport->f_close(transport);
@@ -5748,7 +5749,7 @@ _sess_process_packet_parse_pdu(struct session_list *slp, netsnmp_session * sp,
   debug_indent_reset();
 
   DEBUGMSGTL(("sess_process_packet",
-	      "session %p fd %d pkt %p length %d\n", slp,
+	      "session %p fd %" NETSNMP_FMT_SKT " pkt %p length %d\n", slp,
 	      transport->sock, packetptr, length));
 
   dump = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -6151,14 +6152,14 @@ _sess_read_accept(struct session_list *slp)
     netsnmp_transport *transport = slp ? slp->transport : NULL;
     netsnmp_transport *new_transport;
     struct session_list *nslp;
-    int               data_sock;
+    NETSNMP_SOCKET    data_sock;
 
     if (NULL == slp || NULL == sp || NULL == transport || NULL == isp ||
         !(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN))
         return -1;
 
     data_sock = transport->f_accept(transport);
-    if (data_sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(data_sock)) {
         sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
@@ -6300,10 +6301,9 @@ __sess_read(struct session_list *slp)
         return SNMPERR_GENERR;
     }
 
-    /* to avoid subagent crash */ 
-    if (transport->sock < 0) { 
-        snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n",
-                  transport->sock);
+    /* to avoid subagent crash */
+    if (!NETSNMP_IS_VALID_SOCKET(transport->sock)) {
+        snmp_log(LOG_INFO, "transport->sock is invalid\n");
         return 0; 
     }
 
@@ -6440,7 +6440,8 @@ __sess_read(struct session_list *slp)
         /*
          * Close socket and mark session for deletion.  
          */
-        DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
+        DEBUGMSGTL(("sess_read", "fd %" NETSNMP_FMT_SKT " closed\n",
+                    transport->sock));
         transport->f_close(transport);
         SNMP_FREE(isp->packet);
         SNMP_FREE(opaque);
@@ -6481,7 +6482,8 @@ __sess_read(struct session_list *slp)
 		  (void)sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT,
 				     sp, 0, NULL, sp->callback_magic);
 		}
-		DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
+		DEBUGMSGTL(("sess_read", "fd %" NETSNMP_FMT_SKT " closed\n",
+                            transport->sock));
                 transport->f_close(transport);
                 SNMP_FREE(opaque);
                 /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
@@ -6560,7 +6562,7 @@ __sess_read(struct session_list *slp)
              */
             snmp_log(LOG_ERR,
                      "too large packet_len = %" NETSNMP_PRIz
-                     "u, dropping connection %d\n",
+                     "u, dropping connection %" NETSNMP_FMT_SKT "\n",
                      isp->packet_len, transport->sock);
             transport->f_close(transport);
             /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
@@ -6625,8 +6627,7 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
     transport = slp->transport;
 
     if (!transport || !NETSNMP_LARGE_FD_ISSET(transport->sock, fdset)) {
-        DEBUGMSGTL(("sess_read", "not reading %d\n", transport ?
-                    transport->sock : -1));
+        DEBUGMSGTL(("sess_read", "not reading transport socket\n"));
         return 0;
     }
 
@@ -6833,7 +6834,7 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
             continue;
         }
 
-        if (slp->transport->sock == -1) {
+        if (!NETSNMP_IS_VALID_SOCKET(slp->transport->sock)) {
             /*
              * This session was marked for deletion.  
              */
@@ -6848,7 +6849,8 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
             continue;
         }
 
-        DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
+        DEBUGMSG(("sess_select", "%" NETSNMP_FMT_SKT " ",
+                  slp->transport->sock));
         if ((slp->transport->sock + 1) > *numfds) {
             *numfds = (slp->transport->sock + 1);
         }

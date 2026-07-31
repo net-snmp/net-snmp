@@ -1254,7 +1254,8 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
         return -1;
     }
 
-    DEBUGMSGTL(("netsnmp_register_agent_nsap", "fd %d\n", t->sock));
+    DEBUGMSGTL(("netsnmp_register_agent_nsap", "fd %" NETSNMP_FMT_SKT "\n",
+                t->sock));
 
     n = (agent_nsap *) malloc(sizeof(agent_nsap));
     if (n == NULL) {

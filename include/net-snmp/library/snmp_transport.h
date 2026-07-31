@@ -150,7 +150,7 @@ typedef struct netsnmp_transport_s {
 
     /*  The actual socket.  */
     
-    int             sock;
+    NETSNMP_SOCKET  sock;
 
     /*  Flags (see #definitions above).  */
 
@@ -190,7 +190,7 @@ typedef struct netsnmp_transport_s {
 
     /*  This callback is only necessary for stream-oriented transports.  */
 
-    int             (*f_accept) (struct netsnmp_transport_s *);
+    NETSNMP_SOCKET  (*f_accept) (struct netsnmp_transport_s *);
 
     /*  Optional callback to format a transport address.  */
 

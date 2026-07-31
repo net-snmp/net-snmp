@@ -101,7 +101,7 @@ err:
     return 0;
 }
 
-int netsnmp_bindtodevice(int sock, const char *iface)
+int netsnmp_bindtodevice(NETSNMP_SOCKET sock, const char *iface)
 {
     /* If no interface name has been specified, report success. */
     if (!iface || iface[0] == '\0')

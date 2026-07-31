@@ -47,15 +47,17 @@ int netsnmp_tcpbase_recv(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
 	while (rc < 0) {
 	    rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
 	    if (rc < 0 && errno != EINTR) {
-		DEBUGMSGTL(("netsnmp_tcpbase", "recv fd %d err %d (\"%s\")\n",
+		DEBUGMSGTL(("netsnmp_tcpbase",
+                            "recv fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
 			    t->sock, errno, strerror(errno)));
 		break;
 	    }
-	    DEBUGMSGTL(("netsnmp_tcpbase", "recv fd %d got %d bytes\n",
+	    DEBUGMSGTL(("netsnmp_tcpbase",
+                        "recv fd %" NETSNMP_FMT_SKT " got %d bytes\n",
 			t->sock, rc));
 	}
     } else {
@@ -83,7 +85,7 @@ int netsnmp_tcpbase_send(netsnmp_transport *t, const void *buf, int size,
                          void **opaque, int *olength) {
     int rc = -1;
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, NULL, 0);
 	    if (rc < 0 && errno != EINTR) {

@@ -126,7 +126,7 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
     struct sockaddr *to;
 
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         to = (struct sockaddr *) malloc(sizeof(struct sockaddr_un));
         if (to == NULL) {
             *opaque = NULL;
@@ -135,7 +135,7 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
         } else {
             memset(to, 0, tolen);
         }
-        if(getsockname(t->sock, to, &tolen) != 0){
+        if (getsockname(t->sock, to, &tolen) != 0){
             free(to);
             *opaque = NULL;
             *olength = 0;
@@ -148,7 +148,8 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
 #endif
             if (rc < 0 && errno != EINTR) {
-                DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
+                DEBUGMSGTL(("netsnmp_unix",
+                            "recv fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
                             t->sock, errno, strerror(errno)));
                 free(to);
                 return rc;
@@ -156,7 +157,9 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             *opaque = (void*)to;
             *olength = sizeof(struct sockaddr_un);
         }
-        DEBUGMSGTL(("netsnmp_unix", "recv fd %d got %d bytes\n", t->sock, rc));
+        DEBUGMSGTL(("netsnmp_unix",
+                    "recv fd %" NETSNMP_FMT_SKT " got %d bytes\n",
+                    t->sock, rc));
     }
     return rc;
 }
@@ -169,8 +172,9 @@ netsnmp_unix_send(netsnmp_transport *t, const void *buf, int size,
 {
     int rc = -1;
 
-    if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_unix", "send %d bytes to %p on fd %d\n",
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
+        DEBUGMSGTL(("netsnmp_unix",
+                    "send %d bytes to %p on fd %" NETSNMP_FMT_SKT "\n",
                     size, buf, t->sock));
         while (rc < 0) {
             rc = sendto(t->sock, buf, size, 0, NULL, 0);
@@ -190,13 +194,13 @@ netsnmp_unix_close(netsnmp_transport *t)
     int rc = 0;
     sockaddr_un_pair *sup = (sockaddr_un_pair *) t->data;
 
-    if (t->sock >= 0) {
+    if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
 #ifndef HAVE_CLOSESOCKET
         rc = close(t->sock);
 #else
         rc = closesocket(t->sock);
 #endif
-        t->sock = -1;
+        t->sock = NETSNMP_INVALID_SOCKET;
         if (sup != NULL) {
             if (sup->local) {
                 if (sup->server.sun_path[0] != 0) {
@@ -218,13 +222,11 @@ netsnmp_unix_close(netsnmp_transport *t)
     }
 }
 
-
-
-static int
+static NETSNMP_SOCKET
 netsnmp_unix_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
-    int             newsock = -1;
+    NETSNMP_SOCKET  newsock = NETSNMP_INVALID_SOCKET;
     socklen_t       farendlen = sizeof(struct sockaddr_un);
 
     farend = (struct sockaddr *) malloc(farendlen);
@@ -234,16 +236,17 @@ netsnmp_unix_accept(netsnmp_transport *t)
          * Indicate that the acceptance of this socket failed.
          */
         DEBUGMSGTL(("netsnmp_unix", "accept: malloc failed\n"));
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
     memset(farend, 0, farendlen);
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         newsock = accept(t->sock, farend, &farendlen);
 
-        if (newsock < 0) {
-            DEBUGMSGTL(("netsnmp_unix","accept failed rc %d errno %d \"%s\"\n",
-                        newsock, errno, strerror(errno)));
+        if (!NETSNMP_IS_VALID_SOCKET(newsock)) {
+            DEBUGMSGTL(("netsnmp_unix",
+                        "accept failed errno %d \"%s\"\n",
+                        errno, strerror(errno)));
             free(farend);
             return newsock;
         }
@@ -261,7 +264,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
         return newsock;
     } else {
         free(farend);
-        return -1;
+        return NETSNMP_INVALID_SOCKET;
     }
 }
 
@@ -351,7 +354,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
 #endif
     if (!socket_initialized)
         t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
-    if (t->sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
         netsnmp_transport_free(t);
         return NULL;
     }

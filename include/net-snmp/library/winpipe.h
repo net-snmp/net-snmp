@@ -36,7 +36,7 @@
 #define WINPIPE_H
 
 NETSNMP_IMPORT
-int create_winpipe_transport(int *pipefds);
+int create_winpipe_transport(NETSNMP_SOCKET *pipefds);
 
 #endif
 

@@ -96,7 +96,7 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
 	while (rc < 0) {
 	    rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
 	    if (rc < 0 && errno != EINTR) {
@@ -108,12 +108,13 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
             DEBUGIF("netsnmp_aal5pvc") {
                 char *str = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
                 DEBUGMSGTL(("netsnmp_aal5pvc",
-                            "recv on fd %d got %d bytes (from %s)\n", t->sock,
-                            rc, str));
+                            "recv on fd %" NETSNMP_FMT_SKT " got %d bytes (from %s)\n",
+                            t->sock, rc, str));
                 free(str);
             }
         } else {
-            DEBUGMSGTL(("netsnmp_aal5pvc", "recv on fd %d err %d (\"%s\")\n", 
+            DEBUGMSGTL(("netsnmp_aal5pvc",
+                        "recv on fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n", 
 			t->sock, errno, strerror(errno)));
         }
         *opaque = NULL;
@@ -139,11 +140,12 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, const void *buf, int size,
         to = (const struct sockaddr *) (t->data);
     }
 
-    if (to != NULL && t != NULL && t->sock >= 0) {
+    if (to && t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         DEBUGIF("netsnmp_aal5pvc") {
             char *str = netsnmp_aal5pvc_fmtaddr(NULL, to,
                                                 sizeof(struct sockaddr_atmpvc));
-            DEBUGMSGTL(("netsnmp_aal5pvc", "send %d bytes to %s on fd %d\n",
+            DEBUGMSGTL(("netsnmp_aal5pvc",
+                        "send %d bytes to %s on fd %" NETSNMP_FMT_SKT "\n",
                         size, str, t->sock));
             free(str);
         }
@@ -162,17 +164,18 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, const void *buf, int size,
 static int
 netsnmp_aal5pvc_close(netsnmp_transport *t)
 {
-    int rc = -1;
+    int rc;
 
-    if (t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_aal5pvc", "close fd %d\n", t->sock));
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
+        return -1;
+
 #ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
+    rc = close(t->sock);
 #else
-        rc = closesocket(t->sock);
+    rc = closesocket(t->sock);
 #endif
-        t->sock = -1;
-    }
+    t->sock = NETSNMP_INVALID_SOCKET;
+
     return rc;
 }
 
@@ -216,12 +219,13 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
         sizeof(netsnmp_AAL5PVCDomain) / sizeof(netsnmp_AAL5PVCDomain[0]);
 
     t->sock = socket(PF_ATMPVC, SOCK_DGRAM, 0);
-    if (t->sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
         DEBUGMSGTL(("netsnmp_aal5pvc","socket failed (%s)\n",strerror(errno)));
         netsnmp_transport_free(t);
         return NULL;
     }
-    DEBUGMSGTL(("netsnmp_aal5pvc", "fd %d opened\n", t->sock));
+    DEBUGMSGTL(("netsnmp_aal5pvc", "fd %" NETSNMP_FMT_SKT " opened\n",
+                t->sock));
 
     {
         /*

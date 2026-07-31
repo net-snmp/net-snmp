@@ -1339,7 +1339,7 @@ getHwAddress(const char *networkDevice, /* e.g. "eth0", "eth1" */
      * *
      * *  Caveats:    This has only been tested on Ethernet networking cards.
      */
-    int             sock;       /* our socket */
+    NETSNMP_SOCKET  sock;       /* our socket */
     struct ifreq    request;    /* struct which will have HW address */
 
     if ((NULL == networkDevice) || (NULL == addressOut)) {
@@ -1352,7 +1352,7 @@ getHwAddress(const char *networkDevice, /* e.g. "eth0", "eth1" */
      * * 2.  Do an ioctl(...) call with the SIOCGIFHWADDRLEN operation.
      */
     sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(sock)) {
         return -1;
     }
     /*

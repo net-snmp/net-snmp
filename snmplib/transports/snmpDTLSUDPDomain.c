@@ -268,7 +268,7 @@ start_new_cached_connection(netsnmp_transport *t,
     if (we_are_client)
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENS);
 
-    if (!t->sock)
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
         DIEHERE("no socket passed in to start_new_cached_connection\n");
     if (!remote_addr)
         DIEHERE("no remote_addr passed in to start_new_cached_connection\n");
@@ -361,7 +361,7 @@ start_new_cached_connection(netsnmp_transport *t,
     if (we_are_client) {
         /* we're the client */
         DEBUGMSGTL(("dtlsudp",
-                    "starting a new connection as a client to sock: %d\n",
+                    "starting a new connection as a client to sock: %" NETSNMP_FMT_SKT "\n",
                     t->sock));
         ctx = sslctx_client_setup(DTLS_method(), tlsdata);
         if (!ctx) {
@@ -691,7 +691,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGTRACETOK("9:dtlsudp");
 
-    if (!t || t->sock == 0)
+    if (!t || !NETSNMP_IS_VALID_SOCKET(t->sock))
         return -1;
 
     /* create a tmStateRef cache for slow fill-in */
@@ -730,7 +730,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGMSGTL(("dtlsudp", "received %d raw bytes on way to dtls\n", rc));
     if (rc < 0) {
-        DEBUGMSGTL(("dtlsudp", "recvfrom fd %d err %d (\"%s\")\n",
+        DEBUGMSGTL(("dtlsudp",
+                    "recvfrom fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
         SNMP_FREE(tmStateRef);
         return -1;
@@ -1061,7 +1062,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             t->base_transport->f_fmtaddr(t, addr_pair,
                                         sizeof(netsnmp_indexed_addr_pair));
         DEBUGMSGTL(("9:dtlsudp",
-                    "recvfrom fd %d got %d bytes (from %s)\n",
+                    "recvfrom fd %" NETSNMP_FMT_SKT " got %d bytes (from %s)\n",
                     t->sock, rc, str));
         free(str);
     }
@@ -1117,7 +1118,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     DEBUGTRACETOK("9:dtlsudp");
     DEBUGMSGTL(("dtlsudp", "sending %d bytes\n", size));
 
-    if (NULL == t || t->sock < 0) {
+    if (!t || !NETSNMP_IS_VALID_SOCKET(t->sock)) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
         snmp_log(LOG_ERR, "invalid netsnmp_dtlsudp_send usage\n");
         return -1;
@@ -1230,7 +1231,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
             DEBUGIF ("9:dtlsudp") {
                 char *str = t->base_transport->f_fmtaddr(t, addr_pair,
                                             sizeof(netsnmp_indexed_addr_pair));
-                DEBUGMSGTL(("9:dtlsudp", "cached %d bytes for %s on fd %d\n",
+                DEBUGMSGTL(("9:dtlsudp",
+                            "cached %d bytes for %s on fd %" NETSNMP_FMT_SKT "\n",
                             size, str, t->sock));
                 free(str);
             }
@@ -1247,8 +1249,9 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     DEBUGIF ("9:dtlsudp") {
         char *str = t->base_transport->f_fmtaddr(t, addr_pair,
                                         sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("9:dtlsudp", "send %d bytes to %s on fd %d\n", size, str,
-                    t->sock));
+        DEBUGMSGTL(("9:dtlsudp",
+                    "send %d bytes to %s on fd %" NETSNMP_FMT_SKT "\n",
+                    size, str, t->sock));
         free(str);
     }
 
@@ -1285,7 +1288,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
                socket is ready again; unfortunately this means we need
                to buffer the SNMP data temporarily in the mean time */
 
-            DEBUGMSGTL(("9:dtlsudp", "cached %d bytes for fd %d\n", size,
+            DEBUGMSGTL(("9:dtlsudp",
+                        "cached %d bytes for fd %" NETSNMP_FMT_SKT "\n", size,
                         t->sock));
 
             /* remember the packet */
@@ -1407,7 +1411,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                 FD_SET(t->sock, &readfs);
                 tv.tv_sec = 0;
                 tv.tv_usec = 50000;
-                rc = select(t->sock+1, &readfs, NULL, NULL, &tv);
+                rc = select(t->sock + 1, &readfs, NULL, NULL, &tv);
                 if (rc > 0) {
                     /* junk recv for catching negotiations still in play */
                     opaque_len = 0;
@@ -1589,7 +1593,8 @@ netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local)
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
-	if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) < 0)
+	if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) <
+            0)
             snmp_log(LOG_ERR, "dtls: failed to connect\n");
     }
 
@@ -1632,7 +1637,8 @@ netsnmp_dtlsudp6_transport(const struct netsnmp_ep *ep, int local)
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
-        if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) < 0)
+        if (connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr)) <
+            0)
             snmp_log(LOG_ERR, "dtls: failed to connect\n");
     }
 

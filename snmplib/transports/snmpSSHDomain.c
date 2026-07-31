@@ -508,7 +508,7 @@ netsnmp_ssh_close(netsnmp_transport *t)
 #else
         rc = closesocket(t->sock);
 #endif
-        t->sock = -1;
+        t->sock = NETSNMP_INVALID_SOCKET;
 
 #ifdef SNMPSSHDOMAIN_USE_EXTERNAL_PIPE
 
@@ -546,7 +546,7 @@ netsnmp_ssh_accept(netsnmp_transport *t)
     /* much of this is duplicated from snmpUnixDomain.c */
 
     netsnmp_ssh_addr_pair *addr_pair;    
-    int                    newsock   = -1;
+    SOCKET                 newsock   = NETSNMP_INVALID_SOCKET;
     struct sockaddr       *farend    = NULL;
     socklen_t              farendlen = sizeof(struct sockaddr_un);
 
@@ -566,7 +566,7 @@ netsnmp_ssh_accept(netsnmp_transport *t)
 
         newsock = accept(t->sock, farend, &farendlen);
 
-        if (newsock < 0) {
+        if (!NETSNMP_IS_VALID_SOCKET(newsock)) {
             DEBUGMSGTL(("ssh","accept failed rc %d errno %d \"%s\"\n",
                         newsock, errno, strerror(errno)));
             free(addr_pair);
@@ -688,7 +688,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
                  sockpath);
 
         t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
-        if (t->sock < 0) {
+        if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -843,7 +843,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
          */
 
 	t->sock = socket(domain, SOCK_STREAM, 0);
-        if (t->sock < 0) {
+        if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
             snmp_log(LOG_ERR,"Could not allocate socket for ssh: %s\n",
                      strerror(errno));
             netsnmp_transport_free(t);

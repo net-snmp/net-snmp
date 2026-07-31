@@ -41,7 +41,7 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep, int local,
     netsnmp_transport *
     netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int local);
 
-    int
+    NETSNMP_SOCKET
     netsnmp_udp6_transport_socket(int flags);
 
     int

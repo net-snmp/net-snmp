@@ -101,7 +101,7 @@ netsnmp_udp6_fmtaddr(netsnmp_transport *t, const void *data, int len)
 enum { cmsg_data_size = sizeof(struct in6_pktinfo) };
 
 int
-netsnmp_udp6_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
+netsnmp_udp6_recvfrom(NETSNMP_SOCKET sock, void *buf, int len, struct sockaddr *from,
                       socklen_t *fromlen, struct sockaddr *dstip,
                       socklen_t *dstlen, int *if_index)
 {
@@ -165,8 +165,9 @@ netsnmp_udp6_recvfrom(int sock, void *buf, int len, struct sockaddr *from,
 }
 
 int
-netsnmp_udp6_sendto(int sock, const struct in6_addr *srcip, int if_index,
-                    const struct sockaddr *remote, const void *data, int len)
+netsnmp_udp6_sendto(NETSNMP_SOCKET sock, const struct in6_addr *srcip,
+                    int if_index, const struct sockaddr *remote,
+                    const void *data, int len)
 {
     struct iovec  iov;
     struct msghdr m = { NULL };
@@ -211,8 +212,7 @@ netsnmp_udp6_sendto(int sock, const struct in6_addr *srcip, int if_index,
          * let kernel handle return if there was no iface bound to the
          * socket.
          */
-        if (getsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface, &ifacelen) !=
-            0) {
+        if (getsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface, &ifacelen)) {
             DEBUGMSGTL(("udp6:sendto",
                         "getsockopt SO_BINDTODEVICE failed: %s\n",
                         strerror(errno)));
@@ -294,7 +294,7 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
 
-    if (t != NULL && t->sock >= 0) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         addr_pair = SNMP_MALLOC_TYPEDEF(netsnmp_indexed_addr_pair);
         if (addr_pair == NULL) {
             *opaque = NULL;
@@ -322,12 +322,13 @@ netsnmp_udp6_recv(netsnmp_transport *t, void *buf, int size,
             DEBUGIF("netsnmp_udp6") {
                 char *str = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
                 DEBUGMSGTL(("netsnmp_udp6",
-                            "recvfrom fd %d got %d bytes (from %s)\n", t->sock,
-                            rc, str));
+                            "recvfrom fd %" NETSNMP_FMT_SKT " got %d bytes (from %s)\n",
+                            t->sock, rc, str));
                 free(str);
             }
         } else {
-            DEBUGMSGTL(("netsnmp_udp6", "recvfrom fd %d err %d (\"%s\")\n",
+            DEBUGMSGTL(("netsnmp_udp6",
+                        "recvfrom fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
 			t->sock, errno, strerror(errno)));
         }
         *opaque = addr_pair;
@@ -366,13 +367,13 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
 
     to = &addr_pair->remote_addr.sa;
 
-    if (to && t && t->sock >= 0) {
+    if (to && t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         DEBUGIF("netsnmp_udp6") {
             char *str = netsnmp_udp6_fmtaddr(
                 NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
             DEBUGMSGTL(("netsnmp_udp6",
-                        "send %d bytes from %p to %s on fd %d\n", size, buf,
-                        str, t->sock));
+                        "send %d bytes from %p to %s on fd %" NETSNMP_FMT_SKT "\n",
+                        size, buf, str, t->sock));
             free(str);
         }
 
@@ -485,7 +486,8 @@ netsnmp_udp6_transport_init(const struct netsnmp_ep *ep, int flags)
     return t;
 }
 
-static void set_ipv6_v6only_sockopt(int sd)
+static void
+set_ipv6_v6only_sockopt(NETSNMP_SOCKET sd)
 {
 #ifdef IPV6_V6ONLY
     /* Try to restrict PF_INET6 socket to IPv6 communications only. */
@@ -500,7 +502,7 @@ static void set_ipv6_v6only_sockopt(int sd)
 }
 
 static void
-set_ipv6_recvpktinfo_sockopt(int sd)
+set_ipv6_recvpktinfo_sockopt(NETSNMP_SOCKET sd)
 {
 #if defined(HAVE_IPV6_RECVPKTINFO) && !defined(WIN32)
     int sockopt = 1;
@@ -542,12 +544,14 @@ netsnmp_udp6_transport_bind(netsnmp_transport *t,
     DEBUGIF("netsnmp_udp6") {
         char *str;
         str = netsnmp_udp6_fmtaddr(NULL, addr, sizeof(*addr));
-        DEBUGMSGTL(("netsnmp_udp6", "binding socket: %d to %s\n",
+        DEBUGMSGTL(("netsnmp_udp6",
+                    "binding socket: %" NETSNMP_FMT_SKT " to %s\n",
                     t->sock, str));
         free(str);
     }
     if (flags & NETSNMP_TSPEC_PREBOUND) {
-        DEBUGMSGTL(("netsnmp_udp6", "socket %d is prebound, nothing to do\n",
+        DEBUGMSGTL(("netsnmp_udp6",
+                    "socket %" NETSNMP_FMT_SKT " is prebound, nothing to do\n",
                     t->sock));
         return 0;
     }
@@ -571,15 +575,17 @@ err:
     return -1;
 }
 
-int
+NETSNMP_SOCKET
 netsnmp_udp6_transport_socket(int flags)
 {
     int local = flags & NETSNMP_TSPEC_LOCAL;
-    int sock = socket(PF_INET6, SOCK_DGRAM, 0);
+    NETSNMP_SOCKET sock;
 
-    DEBUGMSGTL(("UDPBase", "opened socket %d as local=%d\n", sock, local));
-    if (sock < 0)
-        return -1;
+    sock = socket(PF_INET6, SOCK_DGRAM, 0);
+    DEBUGMSGTL(("UDPBase", "opened socket %" NETSNMP_FMT_SKT " as local=%d\n",
+                sock, local));
+    if (!NETSNMP_IS_VALID_SOCKET(sock))
+        return NETSNMP_INVALID_SOCKET;
 
     _netsnmp_udp_sockopt_set(sock, local);
 
@@ -610,7 +616,8 @@ netsnmp_udp6_transport_get_bound_addr(netsnmp_transport *t)
     DEBUGIF("netsnmp_udpbase") {
         char *str = netsnmp_udp6_fmtaddr(NULL, (void *)&addr_pair->local_addr,
                                          sizeof(addr_pair->local_addr));
-        DEBUGMSGTL(("netsnmp_udpbase", "socket %d bound to %s\n",
+        DEBUGMSGTL(("netsnmp_udpbase",
+                    "socket %" NETSNMP_FMT_SKT " bound to %s\n",
                     t->sock, str));
         free(str);
     }
@@ -673,9 +680,9 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
     else
         bind_addr = src_addr;
 
-    if (-1 == t->sock)
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock))
         t->sock = netsnmp_udp6_transport_socket(flags);
-    if (t->sock < 0) {
+    if (!NETSNMP_IS_VALID_SOCKET(t->sock)) {
         netsnmp_transport_free(t);
         return NULL;
     }

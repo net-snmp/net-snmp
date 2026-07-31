@@ -1293,16 +1293,16 @@ receive(void)
 	}
 
 #ifdef	USING_SMUX_MODULE
-        if (smux_listen_sd >= 0) {
+        if (NETSNMP_IS_VALID_SOCKET(smux_listen_sd)) {
             NETSNMP_LARGE_FD_SET(smux_listen_sd, &readfds);
             numfds =
                 smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
 
             for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
-                int sd;
+                NETSNMP_SOCKET sd;
 
                 sd = smux_snmp_select_list_get_SD_from_List(i);
-                if (sd != 0) {
+                if (NETSNMP_IS_VALID_SOCKET(sd)) {
                    NETSNMP_LARGE_FD_SET(sd, &readfds);
                    numfds = sd >= numfds ? sd + 1 : numfds;
                 }
@@ -1339,9 +1339,9 @@ receive(void)
             /*
              * handle the SMUX sd's 
              */
-            if (smux_listen_sd >= 0) {
+            if (NETSNMP_IS_VALID_SOCKET(smux_listen_sd)) {
                 for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
-                    int sd;
+                    NETSNMP_SOCKET sd;
 
                     sd = smux_snmp_select_list_get_SD_from_List(i);
                     if (NETSNMP_LARGE_FD_ISSET(sd, &readfds)) {
@@ -1354,10 +1354,10 @@ receive(void)
                  * new connection 
                  */
                 if (NETSNMP_LARGE_FD_ISSET(smux_listen_sd, &readfds)) {
-                    int sd;
+                    NETSNMP_SOCKET sd;
 
                     sd = smux_accept(smux_listen_sd);
-                    if (sd >= 0) {
+                    if (NETSNMP_IS_VALID_SOCKET(sd)) {
                         smux_snmp_select_list_add(sd);
                     }
                 }

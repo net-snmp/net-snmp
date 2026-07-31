@@ -68,12 +68,14 @@ netsnmp_std_recv(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
-    DEBUGMSGTL(("domain:std","recv on sock %d.  data=%p\n",t->sock, t->data));
+    DEBUGMSGTL(("domain:std", "recv on sock %" NETSNMP_FMT_SKT ".  data=%p\n",
+                t->sock, t->data));
     while (rc < 0) {
         rc = read(t->sock, buf, size);
         DEBUGMSGTL(("domain:std","  bytes: %d.\n", rc));
         if (rc < 0 && errno != EINTR) {
-            DEBUGMSGTL(("netsnmp_std", " read on fd %d failed: %d (\"%s\")\n",
+            DEBUGMSGTL(("netsnmp_std",
+                        " read on fd %" NETSNMP_FMT_SKT " failed: %d (\"%s\")\n",
                         t->sock, errno, strerror(errno)));
             break;
         }
@@ -117,6 +119,7 @@ netsnmp_std_close(netsnmp_transport *t)
     DEBUGMSGTL(("domain:std","close.  data=%p\n", t->data));
     if (t->data) {
         netsnmp_std_data *data = (netsnmp_std_data*)t->data;
+
         close(data->outfd);
         close(t->sock);
 
@@ -136,12 +139,12 @@ netsnmp_std_close(netsnmp_transport *t)
 
 
 
-static int
+static NETSNMP_SOCKET
 netsnmp_std_accept(netsnmp_transport *t)
 {
     DEBUGMSGTL(("domain:std"," accept data=%p\n", t->data));
     /* nothing to do here */
-    return 0;
+    return NETSNMP_INVALID_SOCKET;
 }
 
 /*
@@ -162,7 +165,6 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
     t->domain = netsnmp_snmpSTDDomain;
     t->domain_length =
         sizeof(netsnmp_snmpSTDDomain) / sizeof(netsnmp_snmpSTDDomain[0]);
-
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM | NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     /*

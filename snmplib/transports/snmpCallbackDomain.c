@@ -161,8 +161,8 @@ netsnmp_callback_fmtaddr(netsnmp_transport *t, const void *data, int len)
         return strdup("callback: unknown");
 
     mystuff = t->data;
-    if (asprintf(&buf, "callback: %d on fd %d", mystuff->callback_num,
-		 mystuff->pipefds[0]) < 0)
+    if (asprintf(&buf, "callback: %d on fd %" NETSNMP_FMT_SKT,
+                 mystuff->callback_num, mystuff->pipefds[0]) < 0)
         buf = NULL;
     return buf;
 }
@@ -342,17 +342,13 @@ netsnmp_callback_close(netsnmp_transport *t)
     return rc;
 }
 
-
-
-int
+NETSNMP_SOCKET
 netsnmp_callback_accept(netsnmp_transport *t)
 {
     DEBUGMSGTL(("transport_callback", "hook_accept enter\n"));
     DEBUGMSGTL(("transport_callback", "hook_accept exit\n"));
-    return -1;
+    return NETSNMP_INVALID_SOCKET;
 }
-
-
 
 /*
  * Open a Callback-domain transport for SNMP.  Local is TRUE if addr
@@ -401,8 +397,8 @@ netsnmp_callback_transport(int to)
         return NULL;
     }
 
-    netsnmp_assert(mydata->pipefds[0] != -1);
-    t->sock      = mydata->pipefds[0];
+    netsnmp_assert(NETSNMP_IS_VALID_SOCKET(mydata->pipefds[0]));
+    t->sock = mydata->pipefds[0];
 
     /*
      * Message size is not limited by this transport (hence msgMaxSize
