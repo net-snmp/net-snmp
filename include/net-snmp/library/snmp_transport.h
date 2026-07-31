@@ -280,6 +280,8 @@ int netsnmp_sockaddr_size(const struct sockaddr *sa);
 
 netsnmp_transport *netsnmp_transport_copy(const netsnmp_transport *t);
 
+NETSNMP_IMPORT
+netsnmp_transport *netsnmp_transport_alloc(void);
 
 /*  Free an netsnmp_transport.  */
 

@@ -83,11 +83,9 @@ netsnmp_udpipv4base_transport_init(const struct netsnmp_ep *ep, int local)
         return NULL;
     }
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (NULL == t)
         return NULL;
-
-    t->sock = -1;
 
     addr_ptr = netsnmp_memdup(addr, sizeof(*addr));
     if (NULL == addr_ptr) {

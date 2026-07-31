@@ -156,12 +156,11 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
         return NULL;
     }
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (t == NULL) {
         return NULL;
     }
 
-    t->sock = -1;
     addr_pair = (netsnmp_udp_addr_pair *)malloc(sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL)
         goto err;

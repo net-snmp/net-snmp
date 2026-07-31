@@ -154,7 +154,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
 {
     netsnmp_transport *t;
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (t == NULL) {
         return NULL;
     }
@@ -163,7 +163,6 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
     t->domain_length =
         sizeof(netsnmp_snmpSTDDomain) / sizeof(netsnmp_snmpSTDDomain[0]);
 
-    t->sock = -1;
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM | NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     /*

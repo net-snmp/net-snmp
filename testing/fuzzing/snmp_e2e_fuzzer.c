@@ -102,7 +102,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     snmp_parse_args(3, fake_argv, ss, "", NULL);
 
-    transport = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    transport = netsnmp_transport_alloc();
     transport->sock = FAKE_FD;
     transport->f_recv = snmpfuzz_recv;
 

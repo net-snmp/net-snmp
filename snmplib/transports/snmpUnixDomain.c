@@ -313,7 +313,7 @@ netsnmp_unix_transport(const struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (t == NULL) {
         return NULL;
     }

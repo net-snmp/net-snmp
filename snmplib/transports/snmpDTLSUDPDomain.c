@@ -691,7 +691,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGTRACETOK("9:dtlsudp");
 
-    if (NULL == t || t->sock == 0)
+    if (!t || t->sock == 0)
         return -1;
 
     /* create a tmStateRef cache for slow fill-in */
@@ -1117,7 +1117,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     DEBUGTRACETOK("9:dtlsudp");
     DEBUGMSGTL(("dtlsudp", "sending %d bytes\n", size));
 
-    if (NULL == t || t->sock <= 0) {
+    if (NULL == t || t->sock < 0) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
         snmp_log(LOG_ERR, "invalid netsnmp_dtlsudp_send usage\n");
         return -1;

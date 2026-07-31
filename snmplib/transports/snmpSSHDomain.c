@@ -646,7 +646,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
         return NULL;
     }
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (t == NULL) {
         return NULL;
     }

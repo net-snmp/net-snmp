@@ -265,7 +265,7 @@ int main(int argc, char **argv)
     }
     init_snmp(app_name);
 
-    transport = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    transport = netsnmp_transport_alloc();
     if ( transport == NULL ) {
         fprintf(stderr, "Could not malloc transport\n" );
         return 3;

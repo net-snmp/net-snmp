@@ -163,7 +163,7 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
     if (addr == NULL || addr->sin6_family != AF_INET6)
         return NULL;
 
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (t == NULL)
         return NULL;
 
@@ -176,7 +176,6 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
         free(str);
     }
 
-    t->sock = -1;
     addr_pair = calloc(1, sizeof(netsnmp_udp_addr_pair));
     if (addr_pair == NULL)
         goto err;

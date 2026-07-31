@@ -373,7 +373,7 @@ netsnmp_callback_transport(int to)
     /*
      * transport 
      */
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    t = netsnmp_transport_alloc();
     if (!t)
         return NULL;
 
