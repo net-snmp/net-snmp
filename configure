@@ -24639,7 +24639,7 @@ while test "x$new_transport_list" != "x"; do
       if test -f "$srcdir/$rel_transport_src"; then
         transport_result_list="$transport_result_list $i"
         transport_src_list="$transport_src $transport_src_list"
-        if test -f "$srcdir/$rel_transport_hdr"; then
+        if test -f "$srcdir/include/net-snmp/library/$transport_hdr"; then
           transport_hdr_list="$transport_hdr $transport_hdr_list"
         fi
         transport_def=`echo $i | $SED 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
