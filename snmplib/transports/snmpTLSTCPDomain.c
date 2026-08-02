@@ -757,6 +757,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     /* Create a BIO connection for it */
     DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n",
                 tlsdata->addr_string));
+    free(t->remote);
     t->remote = strdup(tlsdata->addr_string);
     t->remote_length = strlen(tlsdata->addr_string) + 1;
 
@@ -929,6 +930,7 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n",
                 tlsdata->addr_string));
     tlsdata->accept_bio = BIO_new_accept(tlsdata->addr_string);
+    free(t->local);
     t->local = strdup(tlsdata->addr_string);
     t->local_length = strlen(tlsdata->addr_string) + 1;
     if (NULL == tlsdata->accept_bio) {
