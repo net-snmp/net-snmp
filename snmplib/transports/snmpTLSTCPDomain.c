@@ -65,6 +65,7 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/callback.h>
+#include "snmpTLSBaseDomain.h"
 
 #include "openssl/bio.h"
 #include "openssl/ssl.h"

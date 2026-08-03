@@ -82,6 +82,7 @@ netsnmp_feature_require(sockaddr_size);
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
+#include "snmpTLSBaseDomain.h"
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1

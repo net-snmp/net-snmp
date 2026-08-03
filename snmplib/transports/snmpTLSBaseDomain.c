@@ -51,6 +51,7 @@ netsnmp_feature_require(cert_util);
 #include <net-snmp/library/read_config.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
+#include "snmpTLSBaseDomain.h"
 
 #ifndef X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS
 #define X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS 0

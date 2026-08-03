@@ -2,6 +2,9 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#include <openssl/evp.h>
+#include <net-snmp/library/container.h>
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
