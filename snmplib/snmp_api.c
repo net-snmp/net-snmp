@@ -6227,8 +6227,7 @@ _sess_read_accept(struct session_list *slp)
  * Beware recursive send maybe inside snmp_read callback function.
  */
 static int
-_sess_read_dgram_packet(struct session_list *slp, netsnmp_large_fd_set * fdset,
-                        snmp_rcv_packet *rcvp)
+_sess_read_dgram_packet(struct session_list *slp, snmp_rcv_packet *rcvp)
 {
     netsnmp_session *sp = slp ? slp->session : NULL;
     struct snmp_internal_session *isp = slp ? slp->internal : NULL;
@@ -6337,7 +6336,7 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
         memset(&rcvp, 0x0, sizeof(rcvp));
 
         /** read the packet */
-        rc = _sess_read_dgram_packet(slp, fdset, &rcvp);
+        rc = _sess_read_dgram_packet(slp, &rcvp);
         if (-1 == rc) /* protocol error */
             return -1;
         else if (-2 == rc) /* no packet to process */
