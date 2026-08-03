@@ -19,8 +19,6 @@ extern          "C" {
 NETSNMP_IMPORT const oid netsnmpTLSTCPDomain[];
 NETSNMP_IMPORT size_t netsnmpTLSTCPDomain_len;
 
-netsnmp_transport *netsnmp_tlstcp_transport(const char *addr_string, int local);
-
 /*
  * Register any configuration tokens specific to the agent.  
  */

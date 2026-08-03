@@ -211,6 +211,7 @@ netsnmp_transport_copy(const netsnmp_transport *t)
     n->f_recv = t->f_recv;
     n->f_send = t->f_send;
     n->f_close = t->f_close;
+    n->f_pending = t->f_pending;
     n->f_copy = t->f_copy;
     n->f_config = t->f_config;
     n->f_fmtaddr = t->f_fmtaddr;

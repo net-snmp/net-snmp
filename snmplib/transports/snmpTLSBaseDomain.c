@@ -1080,11 +1080,6 @@ void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
         SSL_CTX_free(tlsbase->ssl_context);
     if (tlsbase->accept_bio)
         BIO_free(tlsbase->accept_bio);
-    /* and this is freed by the SSL shutdown */
-    /* 
-    if (tlsbase->accepted_bio)
-      BIO_free(tlsbase->accept_bio);
-    */
 
     /* free the config data */
     SNMP_FREE(tlsbase->securityName);

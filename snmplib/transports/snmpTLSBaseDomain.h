@@ -38,7 +38,6 @@ typedef struct _netsnmpTLSBaseData_s {
     SSL                       *ssl;
     BIO                       *sslbio;
     BIO                       *accept_bio;
-    BIO                       *accepted_bio;
     char                      *securityName;
     char                      *addr_string;
     netsnmp_indexed_addr_pair *addr;
@@ -47,6 +46,7 @@ typedef struct _netsnmpTLSBaseData_s {
     char                      *their_fingerprint;
     char                      *their_hostname;
     char                      *trust_cert;
+    int                        want_read;
 } _netsnmpTLSBaseData;
 
 #define VRFY_PARENT_WAS_OK 1

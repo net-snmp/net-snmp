@@ -183,6 +183,7 @@ typedef struct netsnmp_transport_s {
     int             (*f_send)   (struct netsnmp_transport_s *, const void *,
 				 int, void **, int *);
     int             (*f_close)  (struct netsnmp_transport_s *);
+    int             (*f_pending)(struct netsnmp_transport_s *);
 
     /* Optional: opening can occur during creation if more appropriate */
    struct netsnmp_transport_s * (*f_open)   (struct netsnmp_transport_s *);

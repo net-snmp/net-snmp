@@ -6665,6 +6665,27 @@ snmp_sess_read2(struct session_list *slp, netsnmp_large_fd_set * fdset)
     return rc;
 }
 
+/*
+ * For the transports that define the .f_pending() callback, invoke that
+ * callback. Call __sess_read() if .f_pending() indicates that data is pending.
+ * The .f_pending() callback is only defined by the TLS-TCP transport. That
+ * transport may buffer data in memory and hence needs the .f_pending()
+ * callback.
+ */
+void
+snmp_sess_poll(struct session_list *sessp)
+{
+    struct session_list *slp, *next;
+
+    for (slp = sessp ? sessp : Sessions; slp; slp = next) {
+        next = slp->next;
+
+        if (slp->transport &&
+            slp->transport->f_pending &&
+            slp->transport->f_pending(slp->transport))
+            __sess_read(slp);
+    }
+}
 
 /**
  * Returns info about what snmp requires from a select statement.

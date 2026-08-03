@@ -149,6 +149,9 @@ extern          "C" {
     int             snmp_synch_response(netsnmp_session *, netsnmp_pdu *,
                                         netsnmp_pdu **);
 
+    NETSNMP_IMPORT
+    void            snmp_sess_poll(struct session_list *);
+
     /*
      * int snmp_select_info(numfds, fdset, timeout, block)
      * int *numfds;

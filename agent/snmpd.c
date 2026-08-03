@@ -1274,6 +1274,8 @@ receive(void)
         if (reconfig)
             snmpd_reconfig();
 
+        snmp_sess_poll(NULL);
+
         /*
          * default to sleeping for a really long time. INT_MAX
          * should be sufficient (eg we don't care if time_t is
