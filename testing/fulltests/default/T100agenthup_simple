@@ -31,6 +31,6 @@ CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNM
 
 STOPAGENT
 
-CHECK "not-anywhere-in-particular"
+CHECK "STRING: not-anywhere-in-particular"
 
 FINISHED
