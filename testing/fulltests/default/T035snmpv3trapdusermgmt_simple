@@ -84,12 +84,12 @@ CHECKORDIE "SNMPv3 Key(s) successfully changed"
 # test (anp)
 CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l anp -a $DEFAUTHTYPE -A $NEWAUTHPASS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s received_inform_anp"
 DELAY
-CHECKTRAPDORDIE "received_inform_anp"
+CHECKTRAPDORDIE "STRING: received_inform_anp"
 
 # test (ap)
 CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -A $NEWAUTHPASS -x $DEFPRIVTYPE -X $NEWPRIVPASS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s received_inform_ap"
 DELAY
-CHECKTRAPDORDIE "received_inform_ap"
+CHECKTRAPDORDIE "STRING: received_inform_ap"
 
 ## 2) change localized auth key, test, change localized priv key, test
 
@@ -100,7 +100,7 @@ CHECKORDIE "SNMPv3 Key(s) successfully changed"
 # test (anp)
 CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l anp -a $DEFAUTHTYPE -3k $NEWAUTHKEY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s received_inform_anp2"
 DELAY
-CHECKTRAPDORDIE "received_inform_anp2"
+CHECKTRAPDORDIE "STRING: received_inform_anp2"
 
 # change localized priv key
 CAPTURE "snmpusm $SNMP_FLAGS $AGENT_TESTPRIVARGS $SNMPUSM_TRAPD_CONTEXT_ARGS -Cx -Ck $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT passwd $NEWPRIVPASS $NEWPRIVKEY $NEWUSER"
@@ -109,7 +109,7 @@ CHECKORDIE "SNMPv3 Key(s) successfully changed"
 # test (ap)
 CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -3k $NEWAUTHKEY -x $DEFPRIVTYPE -3K $NEWPRIVKEY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s received_inform_ap2"
 DELAY
-CHECKTRAPDORDIE "received_inform_ap2"
+CHECKTRAPDORDIE "STRING: received_inform_ap2"
 
 ## 3) persistency I: reconfigure (SIGHUP), re-test
 
@@ -119,7 +119,7 @@ HUPTRAPD
 # test (ap)
 CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -3k $NEWAUTHKEY -x $DEFPRIVTYPE -3K $NEWPRIVKEY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 0 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s received_inform_ap3"
 DELAY
-CHECKTRAPDORDIE "received_inform_ap3"
+CHECKTRAPDORDIE "STRING: received_inform_ap3"
 
 ## stop daemons and finish
 STOPTRAPD
