@@ -6284,14 +6284,8 @@ _sess_read_dgram_packet(struct session_list *slp, snmp_rcv_packet *rcvp)
     return 0;
 }
 
-/*
- * Same as snmp_read, but works just one session. 
- * returns 0 if success, -1 if fail 
- * MTR: can't lock here and at snmp_read 
- * Beware recursive send maybe inside snmp_read callback function. 
- */
-int
-_sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
+static int
+__sess_read(struct session_list *slp)
 {
     netsnmp_session *sp = slp ? slp->session : NULL;
     struct snmp_internal_session *isp = slp ? slp->internal : NULL;
@@ -6302,7 +6296,7 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
     void           *opaque = NULL;
 
     if (NULL == slp || NULL == sp || NULL == isp || NULL == transport) {
-        snmp_log(LOG_ERR, "bad parameters to _sess_read\n");
+        snmp_log(LOG_ERR, "bad parameters to __sess_read\n");
         return SNMPERR_GENERR;
     }
 
@@ -6311,14 +6305,6 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n",
                   transport->sock);
         return 0; 
-    }
-
-    if (!fdset || !(NETSNMP_LARGE_FD_ISSET(transport->sock, fdset))) {
-        DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
-                    transport->sock, fdset,
-                    fdset ? NETSNMP_LARGE_FD_ISSET(transport->sock, fdset)
-		    : -9));
-        return 0;
     }
 
     sp->s_snmp_errno = 0;
@@ -6620,6 +6606,31 @@ _sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
     }
 
     return rc;
+}
+
+/*
+ * Same as snmp_read, but works just one session.
+ * returns 0 if success, -1 if fail
+ * MTR: can't lock here and at snmp_read
+ * Beware recursive send maybe inside snmp_read callback function.
+ */
+int
+_sess_read(struct session_list *slp, netsnmp_large_fd_set * fdset)
+{
+    netsnmp_transport *transport;
+
+    if (!slp || !fdset)
+        return 0;
+
+    transport = slp->transport;
+
+    if (!transport || !NETSNMP_LARGE_FD_ISSET(transport->sock, fdset)) {
+        DEBUGMSGTL(("sess_read", "not reading %d\n", transport ?
+                    transport->sock : -1));
+        return 0;
+    }
+
+    return __sess_read(slp);
 }
 
 
