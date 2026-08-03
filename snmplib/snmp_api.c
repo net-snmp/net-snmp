@@ -6266,9 +6266,6 @@ _sess_read_dgram_packet(struct session_list *slp, netsnmp_large_fd_set * fdset,
         return -1;
     }
 
-    /** clear so any other sess sharing this socket won't try reading again */
-    NETSNMP_LARGE_FD_CLR(transport->sock, fdset);
-
     if (0 == rcvp->packet_len &&
         transport->flags & NETSNMP_TRANSPORT_FLAG_EMPTY_PKT) {
         /* this allows for a transport that needs to return from
