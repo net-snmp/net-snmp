@@ -160,6 +160,6 @@ NO_OF_TRAPS=0
 [ "x$TRAPSESS" = "xyes" ] && NO_OF_TRAPS=$((NO_OF_TRAPS+1))
 [ "x$DYNTRAP"  = "xyes" ] && NO_OF_TRAPS=$((NO_OF_TRAPS+1))
 
-CHECKTRAPDCOUNT $NO_OF_TRAPS "life the universe and everything"
+CHECKTRAPDCOUNT $NO_OF_TRAPS 'STRING: "life the universe and everything"'
 
 FINISHED

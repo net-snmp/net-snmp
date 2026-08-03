@@ -58,6 +58,6 @@ STOPAGENT
 
 STOPTRAPD
 
-CHECKTRAPDCOUNT 2 "life the universe and everything"
+CHECKTRAPDCOUNT 2 'STRING: "life the universe and everything"'
 
 FINISHED
