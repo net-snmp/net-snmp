@@ -2,7 +2,7 @@
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
  */
-/* 
+/*
  * See the following web pages for useful documentation on this transport:
  * http://www.net-snmp.org/wiki/index.php/TUT:Using_TLS
  * http://www.net-snmp.org/wiki/index.php/Using_DTLS
@@ -85,7 +85,7 @@ static netsnmp_tdomain tlstcpDomain;
 
 /*
  * Return a string representing the address in data, or else the "far end"
- * address if data is NULL.  
+ * address if data is NULL.
  */
 
 static char *
@@ -133,9 +133,9 @@ static void netsnmp_tlstcp_get_taddr(struct netsnmp_transport_s *t,
 }
 
 /*
- * You can write something into opaque that will subsequently get passed back 
+ * You can write something into opaque that will subsequently get passed back
  * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
+ * remember where a PDU came from, so that you can send a reply there...
  */
 
 static int
@@ -147,7 +147,7 @@ netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
     oldtlsdata->ssl = NULL;
     newtlsdata->ssl_context = NULL;
     newtlsdata->accept_bio = NULL;
-    
+
     if (oldtlsdata->addr_string)
         newtlsdata->addr_string = strdup(oldtlsdata->addr_string);
     if (oldtlsdata->securityName)
@@ -187,7 +187,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("tlstcp", "\n"));
         return -1;
     }
-        
+
     /* RFC5953 Section 5.1.2 step 1:
     1) Determine the tlstmSessionID for the incoming message. The
        tlstmSessionID MUST be a unique session identifier for this
@@ -310,7 +310,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             SNMP_FREE(tmStateRef);
             return rc;
         }
-    } while (rc < 0 && errno == EINTR); 
+    } while (rc < 0 && errno == EINTR);
 
     DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
 
@@ -347,10 +347,10 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
     int rc = -1;
     const netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
-    
+
     DEBUGTRACETOK("tlstcp");
 
-    /* RFC5953 section 5.2: 
+    /* RFC5953 section 5.2:
       1)  If tmStateReference does not refer to a cache containing values
       for tmTransportDomain, tmTransportAddress, tmSecurityName,
       tmRequestedSecurityLevel, and tmSameSecurity, then increment the
@@ -368,7 +368,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
         return SNMPERR_GENERR;
     }
 
-    /* RFC5953 section 5.2: 
+    /* RFC5953 section 5.2:
        2)  Extract the tmSessionID, tmTransportDomain, tmTransportAddress,
        tmSecurityName, tmRequestedSecurityLevel, and tmSameSecurity
        values from the tmStateReference.  Note: The tmSessionID value
@@ -384,7 +384,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
        - The sessionID is stored in the t->data memory pointer.
     */
 
-    /* RFC5953 section 5.2: 
+    /* RFC5953 section 5.2:
        3)  If tmSameSecurity is true and either tmSessionID is undefined or
            refers to a session that is no longer open then increment the
            snmpTlstmSessionNoSessions counter, discard the message and
@@ -398,7 +398,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
          transport, which is what the above text is trying to prevent.
      */
 
-    /* RFC5953 section 5.2: 
+    /* RFC5953 section 5.2:
        4)  If tmSameSecurity is false and tmSessionID refers to a session
            that is no longer available then an implementation SHOULD open a
            new session using the openSession() ASI (described in greater
@@ -413,8 +413,8 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
          transport, which is what the above text is trying to prevent.
        - Auto-connections are handled higher in the Net-SNMP library stack
      */
-    
-    /* RFC5953 section 5.2: 
+
+    /* RFC5953 section 5.2:
        5)  If tmSessionID is undefined, then use tmTransportDomain,
            tmTransportAddress, tmSecurityName and tmRequestedSecurityLevel
            to see if there is a corresponding entry in the LCD suitable to
@@ -448,7 +448,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
     }
 
     tlsdata = t->data;
-    
+
     if (tlsdata->ssl == NULL) {
         snmp_log(LOG_ERR, "tlstcp_send was called without a SSL connection.\n");
         return SNMPERR_GENERR;
@@ -460,9 +460,9 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
     if ((tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) &&
         !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
-        
-        
-    /* RFC5953 section 5.2: 
+
+
+    /* RFC5953 section 5.2:
        6)  Using either the session indicated by the tmSessionID if there
            was one or the session resulting from a previous step (4 or 5),
            pass the outgoingMessage to (D)TLS for encapsulation and
@@ -494,7 +494,7 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
     */
     if (t->flags & NETSNMP_TLSBASE_IS_CLIENT)
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONCLIENTCLOSES);
-    else 
+    else
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONSERVERCLOSES);
 
     /* RFC5953 Section 5.4.  Closing a Session
@@ -534,7 +534,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     SSL_CTX *ctx;
     SSL     *ssl;
     _netsnmpTLSBaseData *tlsdata = NULL;
-    
+
     DEBUGMSGTL(("tlstcp", "netsnmp_tlstcp_accept called\n"));
 
     tlsdata = (_netsnmpTLSBaseData *) t->data;
@@ -566,7 +566,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         tlsdata->accepted_bio = NULL;
         return -1;
     }
-        
+
     SSL_set_bio(ssl, accepted_bio, accepted_bio);
 
     {
@@ -575,7 +575,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         if (fd >= 0 && netsnmp_set_non_blocking_mode(fd, FALSE) < 0)
             DEBUGMSGTL(("tlstcp", "couldn't set blocking mode on accepted fd %d\n", fd));
     }
-        
+
     if ((rc = SSL_accept(ssl)) <= 0) {
         snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
         _openssl_log_error(rc, ssl, "SSL_accept");
@@ -584,7 +584,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         tlsdata->accepted_bio = NULL; /* freed by SSL_free */
         tlsdata->ssl = NULL;
         return -1;
-    }   
+    }
 
     /*
      * currently netsnmp_tlsbase_wrapup_recv is where we check for
@@ -986,8 +986,8 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
 
 /*
  * Create a TLS-based transport for SNMP.  Local is TRUE if addr is the local
- * address to bind to (i.e. this is a server-type session); otherwise addr is 
- * the remote address to send things to.  
+ * address to bind to (i.e. this is a server-type session); otherwise addr is
+ * the remote address to send things to.
  */
 
 netsnmp_transport *
@@ -997,7 +997,7 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     _netsnmpTLSBaseData *tlsdata;
     const char *cp;
     char buf[SPRINT_MAX_LEN];
-    
+
 #ifdef NETSNMP_NO_LISTEN_SUPPORT
     if (isserver)
         return NULL;
@@ -1038,11 +1038,11 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     /*
      * Set Domain
      */
-    t->domain = netsnmpTLSTCPDomain;                                     
-    t->domain_length = netsnmpTLSTCPDomain_len;     
+    t->domain = netsnmpTLSTCPDomain;
+    t->domain_length = netsnmpTLSTCPDomain_len;
 
     /*
-     * 16-bit length field, 8 byte TLS header, 20 byte IPv4 header  
+     * 16-bit length field, 8 byte TLS header, 20 byte IPv4 header
      */
 
     t->msgMaxSize      = 0xffff - 8 - 20;
