@@ -102,12 +102,12 @@ DELAY
 
 ## 1) SNMP GET against mib object implemented by the perl subagent
 CAPTURE "snmpget -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $TESTOID"
-CHECK "hello world"
+CHECK 'STRING: "hello world"'
 
 ## 2) persistency: reconfigure master agent (HUP), re-test
 HUPAGENT
 CAPTURE "snmpget -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $TESTOID2"
-CHECK "hello again world"
+CHECK 'STRING: "hello again world"'
 
 ## stop
 STOPAGENT
