@@ -28,6 +28,6 @@ STOPAGENT
 
 STOPTRAPD
 
-CHECKTRAPD "life the universe and everything"
+CHECKTRAPD 'STRING: "life the universe and everything"'
 
 FINISHED
