@@ -20,6 +20,6 @@ CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u testuser -l nanp $SNMP_TRANSPORT
 
 STOPTRAPD
 
-CHECKTRAPDCOUNT 0 "coldStart"
+CHECKTRAPDCOUNT 0 "snmpTrapOID.*coldStart"
 
 FINISHED

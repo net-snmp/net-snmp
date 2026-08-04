@@ -20,6 +20,6 @@ CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -d -v 3 -u nottestuser -l nanp $SNMP_TRANSP
 
 STOPTRAPD
 
-CHECKTRAPDCOUNT 0 "coldStart"
+CHECKTRAPDCOUNT 0 "snmpTrapOID.*coldStart"
 
 FINISHED
