@@ -145,7 +145,7 @@ _expValue_evalParam( netsnmp_variable_list *expIdx, int param,
         n = obj->expObjectID_len;
         while ( val_var ) {
             if ( snmp_oid_compare( val_var->name+n, val_var->name_length-n,
-                                   suffix, suffix_len ))
+                                   suffix, suffix_len ) == 0 )
                 break;
             val_var = val_var->next_variable;
             if (oval_var)
