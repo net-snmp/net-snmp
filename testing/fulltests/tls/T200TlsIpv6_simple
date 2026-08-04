@@ -5,6 +5,7 @@
 HEADER TLS-TCP over IPV6
 
 SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+SKIPIFNOT NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
 openssl_version=$(openssl version | cut -d ' ' -f2)
 major=$(echo $openssl_version | cut -d. -f1)
