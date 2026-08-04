@@ -62,6 +62,7 @@ cat >>"$2.c" <<EOF
 
 int
 main(int argc, char *argv[]) {
+   snmp_set_do_debugging(0);
 
 EOF
 echo >>"$2.c" "#line 1 \"$1\""
