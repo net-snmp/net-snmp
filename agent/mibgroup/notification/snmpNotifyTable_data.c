@@ -703,12 +703,6 @@ snmpNotifyTable_unregister_notification(const char *name, unsigned char nameLen)
 
     DEBUGMSGTL(("trapsess", "removing %s from trap tables\n", name));
 
-    if (NULL != nt)
-        snmpNotifyTable_remove(nt);
-    else
-        DEBUGMSGTL(("snmpNotifyTable:unregister",
-                    "No NotifyTable entry for %s\n", name));
-
     if (NULL != tp)
         snmpTargetParamTable_remove(tp);
     else
@@ -726,6 +720,12 @@ snmpNotifyTable_unregister_notification(const char *name, unsigned char nameLen)
     else
         DEBUGMSGTL(("snmpNotifyTable:unregister",
                     "No FilterProfileTable entry for %s\n", name));
+
+    if (NULL != nt)
+        snmpNotifyTable_remove(nt);
+    else
+        DEBUGMSGTL(("snmpNotifyTable:unregister",
+                    "No NotifyTable entry for %s\n", name));
 
 }
 
