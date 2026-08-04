@@ -29,8 +29,8 @@ DELAY
 
 STOPTRAPD
 
-CHECKTRAPD "received_trap_nanp"
-CHECKTRAPD "received_trap_anp"
-CHECKTRAPD "received_trap_ap"
+CHECKTRAPD 'sysContact.*STRING: received_trap_nanp'
+CHECKTRAPD 'sysContact.*STRING: received_trap_anp'
+CHECKTRAPD 'sysContact.*STRING: received_trap_ap'
 
 FINISHED
