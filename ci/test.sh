@@ -18,7 +18,7 @@ scriptdir="$(dirname "$0")"
 case "$MODE" in
     "")
 	;;
-    asan|disable-ipv6|regular)
+    asan|debug|disable-ipv6|regular)
         ;;
     *)
 	exit 0

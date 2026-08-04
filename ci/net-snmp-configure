@@ -138,7 +138,7 @@ case "$MODE" in
 esac
 
 case "$MODE" in
-    asan)
+    asan|debug)
 	SANITIZE_FLAGS=(
 	    -fsanitize=address
 	    -fsanitize=leak
@@ -447,6 +447,8 @@ case "$(uname):${MODE}" in
     esac
 
 case "$MODE" in
+    debug)
+	options+=(--enable-debugging);;
     developer)
 	options+=(--enable-developer);;
     disable-ipv6)
