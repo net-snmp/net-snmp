@@ -116,7 +116,9 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
         (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
          X509_V_ERR_CERT_UNTRUSTED == err ||
          X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE == err ||
-         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {
+         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err ||
+         X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY == err ||
+         X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == err)) {
         X509 *leaf_cert = X509_STORE_CTX_get0_cert(ctx);
         char *leaf_fp = netsnmp_openssl_cert_get_fingerprint(leaf_cert ? leaf_cert : thecert, NS_HASH_SHA1);
         cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
