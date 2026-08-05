@@ -1250,9 +1250,6 @@ receive(void)
     netsnmp_large_fd_set readfds, writefds, exceptfds;
     struct timeval  timeout, *tvp = &timeout;
     int             count, block, i;
-#ifdef	USING_SMUX_MODULE
-    int             sd;
-#endif                          /* USING_SMUX_MODULE */
 
     netsnmp_large_fd_set_init(&readfds, FD_SETSIZE);
     netsnmp_large_fd_set_init(&writefds, FD_SETSIZE);
@@ -1302,9 +1299,10 @@ receive(void)
                 smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
 
             for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
+                int sd;
+
                 sd = smux_snmp_select_list_get_SD_from_List(i);
-                if (sd != 0)
-                {
+                if (sd != 0) {
                    NETSNMP_LARGE_FD_SET(sd, &readfds);
                    numfds = sd >= numfds ? sd + 1 : numfds;
                 }
@@ -1343,6 +1341,8 @@ receive(void)
              */
             if (smux_listen_sd >= 0) {
                 for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
+                    int sd;
+
                     sd = smux_snmp_select_list_get_SD_from_List(i);
                     if (NETSNMP_LARGE_FD_ISSET(sd, &readfds)) {
                         if (smux_process(sd) < 0) {
@@ -1354,7 +1354,10 @@ receive(void)
                  * new connection 
                  */
                 if (NETSNMP_LARGE_FD_ISSET(smux_listen_sd, &readfds)) {
-                    if ((sd = smux_accept(smux_listen_sd)) >= 0) {
+                    int sd;
+
+                    sd = smux_accept(smux_listen_sd);
+                    if (sd >= 0) {
                         smux_snmp_select_list_add(sd);
                     }
                 }
