@@ -11,7 +11,8 @@ goto eof
 call "%VCVARSPATH%\vcvars64.bat"
 call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
-set PATH=c:\perl-msvc\bin;%PATH%
+set PATH=C:\OpenSSL-Win64\bin;c:\perl-msvc\bin;%PATH%
+if exist "C:\OpenSSL-Win64\bin\ossl-modules" (set "OPENSSL_MODULES=C:\OpenSSL-Win64\bin\ossl-modules") else if exist "C:\OpenSSL-Win64\lib\ossl-modules" (set "OPENSSL_MODULES=C:\OpenSSL-Win64\lib\ossl-modules") else (set "OPENSSL_MODULES=C:\OpenSSL-Win64\bin")
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=dynamic --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc\x64\MD
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -26,7 +27,8 @@ goto eof
 call "%VCVARSPATH%\vcvars64.bat"
 call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
-set PATH=c:\perl-msvc\bin;%PATH%
+set PATH=C:\OpenSSL-Win64\bin;c:\perl-msvc\bin;%PATH%
+if exist "C:\OpenSSL-Win64\bin\ossl-modules" (set "OPENSSL_MODULES=C:\OpenSSL-Win64\bin\ossl-modules") else if exist "C:\OpenSSL-Win64\lib\ossl-modules" (set "OPENSSL_MODULES=C:\OpenSSL-Win64\lib\ossl-modules") else (set "OPENSSL_MODULES=C:\OpenSSL-Win64\bin")
 cd win32
 perl Configure --config=release --enable-blumenthal-aes --with-sdk --with-ipv6 --with-winextdll --linktype=static --with-ssl --with-sslincdir=C:\OpenSSL-Win64\include --with-ssllibdir=C:\OpenSSL-Win64\lib\vc\x64\MT
 if %errorlevel% neq 0 exit /b %errorlevel%
