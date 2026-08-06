@@ -38,6 +38,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
 #include <errno.h>
 
 #ifdef HAVE_UNISTD_H
@@ -120,6 +123,15 @@ log_agentx_listening_address(netsnmp_transport *t)
 
     if (getsockname(t->sock, (void *)&sa, &len) < 0)
         return;
+
+#if defined(AF_UNIX) && defined(HAVE_SYS_UN_H)
+    if (sa.ss_family == AF_UNIX) {
+        struct sockaddr_un *sun_addr = (struct sockaddr_un *)&sa;
+        snmp_log(LOG_INFO, "AgentX master listening on %s\n",
+                 sun_addr->sun_path[0] ? sun_addr->sun_path : "abstract");
+        return;
+    }
+#endif
 
     if (getnameinfo((void *)&sa, len, name, sizeof(name), serv,
                     sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV) < 0)

@@ -49,6 +49,9 @@ SOFTWARE.
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
 #include <stdio.h>
 #if !defined(mingw32) && defined(HAVE_SYS_TIME_H)
 # include <sys/time.h>
@@ -602,6 +605,15 @@ log_listening_address(netsnmp_transport *transport)
 
     if (getsockname(transport->sock, (void *)&sa, &len) < 0)
         return;
+
+#if defined(AF_UNIX) && defined(HAVE_SYS_UN_H)
+    if (sa.ss_family == AF_UNIX) {
+        struct sockaddr_un *sun_addr = (struct sockaddr_un *)&sa;
+        snmp_log(LOG_INFO, "Listening on address %s\n",
+                 sun_addr->sun_path[0] ? sun_addr->sun_path : "abstract");
+        return;
+    }
+#endif
 
     if (getnameinfo((void *)&sa, len, name, sizeof(name), serv,
                     sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV) < 0)
