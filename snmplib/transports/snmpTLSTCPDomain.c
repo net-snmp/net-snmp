@@ -108,7 +108,7 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
     switch (data ? len : 0) {
     case sizeof(netsnmp_indexed_addr_pair):
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-        if (t->base_transport &&
+        if (t && t->base_transport &&
             t->base_transport->domain == netsnmp_TCPIPv6Domain)
             return netsnmp_ipv6_fmtaddr("TLSTCP", t, data, len);
 #endif
@@ -118,7 +118,7 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, const void *data, int len)
         const netsnmp_indexed_addr_pair *p = &r->addresses;
 
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-        if (t->base_transport &&
+        if (t && t->base_transport &&
             t->base_transport->domain == netsnmp_TCPIPv6Domain)
             return netsnmp_ipv6_fmtaddr("TLSTCP", t, p, sizeof(*p));
 #endif
