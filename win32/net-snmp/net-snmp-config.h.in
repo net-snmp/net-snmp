@@ -1380,6 +1380,9 @@
 /* Define to 1 if you have the <openssl/hmac.h> header file. */
 #define HAVE_OPENSSL_HMAC_H 1
 
+/* Define to 1 if you have the <openssl/provider.h> header file. */
+/* #undef HAVE_OPENSSL_PROVIDER_H */
+
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #define HAVE_AES_CFB128_ENCRYPT 1
 

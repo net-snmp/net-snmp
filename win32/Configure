@@ -274,8 +274,22 @@ if ($sdk == 1) {
 }
 if ($openssl == 1) {
     $net_snmp_config_subs{"ssl"} = [ "^.*#undef NETSNMP_USE_OPENSSL.*", "#define NETSNMP_USE_OPENSSL 1" ];
+    my $has_provider_h = 0;
+    if ($opensslincdir) {
+        my $provider_h = "$opensslincdir/openssl/provider.h";
+        $provider_h =~ s/\\/\//g;
+        if (-e $provider_h) {
+            $has_provider_h = 1;
+        }
+    }
+    if ($has_provider_h) {
+        $net_snmp_config_subs{"prov"} = [ "^.*#undef HAVE_OPENSSL_PROVIDER_H.*", "#define HAVE_OPENSSL_PROVIDER_H 1" ];
+    } else {
+        $net_snmp_config_subs{"prov"} = [ "^.*#undef HAVE_OPENSSL_PROVIDER_H.*", "/* #undef HAVE_OPENSSL_PROVIDER_H */" ];
+    }
 } else {
     $net_snmp_config_subs{"ssl"} = [ "^.*#undef NETSNMP_USE_INTERNAL_MD5.*", "#define NETSNMP_USE_INTERNAL_MD5 1" ];
+    $net_snmp_config_subs{"prov"} = [ "^.*#undef HAVE_OPENSSL_PROVIDER_H.*", "/* #undef HAVE_OPENSSL_PROVIDER_H */" ];
 }
 if ($blumenthal_aes) {
     $net_snmp_config_subs{"baes"} = [ "^.*#undef NETSNMP_DRAFT_BLUMENTHAL_AES_04.*", "#define NETSNMP_DRAFT_BLUMENTHAL_AES_04 1" ];
