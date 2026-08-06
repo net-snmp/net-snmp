@@ -605,7 +605,8 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
                     t->base_transport->f_send(t->base_transport, out_buf,
                                               out_bytes, NULL, NULL);
                 } else if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
-                    send(t->sock, out_buf, out_bytes, 0);
+                    if (send(t->sock, out_buf, out_bytes, 0) < 0)
+                        break;
                 }
             }
         }
