@@ -571,8 +571,11 @@ sc_init(void)
 
 #if defined(NETSNMP_USE_OPENSSL)
 #if defined(HAVE_OPENSSL_PROVIDER_H)
-    if (legacy_provider == NULL)
+    if (legacy_provider == NULL) {
         legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
+        snmp_log(LOG_INFO, "Loading the OpenSSL legacy provider %s\n",
+                 legacy_provider ? "succeeded" : "failed");
+    }
     if (default_provider == NULL)
         default_provider = OSSL_PROVIDER_load(NULL, "default");
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
