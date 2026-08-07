@@ -54,15 +54,25 @@ sub config_app {
 sub require_feature {
     my ($self, $feature) = @_;
     my $srcdir = $ENV{'srcdir'} || "..";
-    my $fh = new IO::File("$srcdir/include/net-snmp/net-snmp-config.h");
-    while (<$fh>) {
-	if (/#define $feature 1/) {
-	    $fh->close();
-	    return 1;
-	}
+    my $updir = $ENV{'SNMP_UPDIR'} || $srcdir;
+    my $builddir = $ENV{'builddir'} || $updir;
+    for my $dir ($builddir, $updir) {
+        for my $rel ("include/net-snmp/net-snmp-config.h",
+                     "include/net-snmp/agent/agent_module_config.h",
+                     "include/net-snmp/agent/mib_module_config.h") {
+            my $fh = new IO::File("$dir/$rel");
+            next if !$fh;
+            while (<$fh>) {
+                if (/^\s*#\s*define\s+$feature\b/) {
+                    $fh->close();
+                    return 1;
+                }
+            }
+            $fh->close();
+        }
     }
     print "1..0 # SKIP missing $feature\n";
-    exit;
+    exit 0;
 }
 
 sub start_agent {
