@@ -11,6 +11,9 @@ our @ISA = qw(NetSNMPTest);
 sub run_tests {
     my ($self) = @_;
 
+    $self->require_feature("USING_MIBII_VACM_CONF_MODULE");
+    $self->require_feature("USING_MIBII_SYSTEM_MIB_MODULE");
+
     plan(tests => 2);
 
     # set it up with a snmpv3 USM user

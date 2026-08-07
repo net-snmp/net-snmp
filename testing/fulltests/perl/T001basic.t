@@ -21,6 +21,9 @@ if (open(my $fh, '<', $config_h)) {
     close($fh);
 }
 
+NetSNMPTest->require_feature("USING_MIBII_VACM_CONF_MODULE");
+NetSNMPTest->require_feature("USING_MIBII_SYSTEM_MIB_MODULE");
+
 my $value;
 
 plan(tests => 10);

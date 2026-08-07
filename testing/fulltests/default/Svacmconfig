@@ -5,6 +5,8 @@
 # generically set up the community "testcommunity1 and testcommunity2" for various snmp
 # version access to the agent.
 
+SKIPIFNOT USING_MIBII_VACM_CONF_MODULE
+
 if [ "x$snmp_version" = "x" ]; then
   snmp_version="any"
 fi
