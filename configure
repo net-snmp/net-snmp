@@ -27971,7 +27971,7 @@ new_module_list="$new_with_mib_modules"
 
 case "x$PARTIALTARGETOS" in
     Linux)
-	if "x$ac_cv_header_netlink_route_addr_h" != xyes; then
+	if test "x$ac_cv_header_netlink_route_addr_h" != xyes; then
 new_with_out_mib_modules="$new_with_out_mib_modules
 etherlike-mib
 etherlike-mib/dot3StatsTable
