@@ -13,12 +13,13 @@ SKIPIFNOT NETSNMP_SECMOD_USM
 # Begin test
 #
 
+# standard V3 configuration for initial user
+. ./Sv3config
+
 # start the trap daemon
 CONFIGTRAPD authcommunity log public
 STARTTRAPD
 
-# standard V3 configuration for initial user
-. ./Sv3config
 # configure the trap receiver.
 CONFIGAGENT trapsink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
 

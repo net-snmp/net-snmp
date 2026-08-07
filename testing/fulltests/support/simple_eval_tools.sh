@@ -112,6 +112,8 @@ GRONIK
 #------------------------------------ -o-
 #
 SKIP() {
+	STOPAGENT >/dev/null 2>&1
+	STOPTRAPD >/dev/null 2>&1
 	REMOVETESTDATA
 	echo "1..0 # SKIP $*"
 	exit 0
