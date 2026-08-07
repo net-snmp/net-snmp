@@ -69,7 +69,7 @@ sub start_agent {
     $flags ||= $self->{'snmpdflags'};
 
     $ENV{'SNMPCONFPATH'} = $self->{'confdir'};
-    $ENV{'SNMP_PERSISTENT_DIR'} = $self->{'peristentdir'};
+    $ENV{'SNMP_PERSISTENT_DIR'} = $self->{'persistentdir'};
 
     my $cmd = "snmpd $flags -r -U -p $self->{'snmpd.pid'} -Lf $self->{'snmpd.log'} $self->{'agentaddress'} > $self->{'snmpd.out'} 2>&1";
     System("$cmd &");
