@@ -111,6 +111,21 @@ cd `dirname "$testscript"` || return $?
 PATH=`pwd`:$PATH
 export PATH
 
+# Start a 60s timer.
+test_pid=$$
+(
+    trap 'kill $sleep_pid 2>/dev/null; exit 0' TERM
+    sleep 60 & sleep_pid=$!
+    wait $sleep_pid && kill "$test_pid"
+) >/dev/null 2>&1 &
+timer_pid=$!
+trap 'kill "$timer_pid" >/dev/null 2>&1; wait "$timer_pid" >/dev/null 2>&1' EXIT
+
 . `basename "$testscript"`
+
+# Stop the timer.
+kill "$timer_pid" >/dev/null 2>&1
+wait "$timer_pid" >/dev/null 2>&1
+trap - EXIT
 
 FINISHED
