@@ -360,6 +360,7 @@ CHECKAGENTCOUNT() {
 # Return 0 (true) if a process with pid $1 exists and 1 (false) if no process
 # with pid $1 exists.
 ISRUNNING() {
+    [ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null || return 1
     if [ "x$OSTYPE" = "xmsys" ]; then
 	pslist.exe "$1" 2>&1 | while read name pspid rest; do
 	    if [ "$1" = "$pspid" ]; then
