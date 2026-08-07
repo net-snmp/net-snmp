@@ -1,8 +1,13 @@
 #!/bin/sh
-${DYNAMIC_ANALYZER} ${builddir}/libtool --mode=execute "$1" 2>&1 \
-| \
-if [ "x$SNMP_SAVE_TMPDIR" = "xyes" ]; then
-  tee "/tmp/snmp-unit-test-`basename $1`"
-else
-  cat
+
+outputfile="/tmp/snmp-unit-test-$(basename "$1")"
+
+{
+    ${DYNAMIC_ANALYZER} "${builddir}/libtool" --mode=execute "$1" 2>&1
+    echo $? >"${outputfile}.rc"
+} | tee "${outputfile}"
+
+if [ "$(cat "${outputfile}.rc")" = 0 ] && [ "$SNMP_SAVE_TMPDIR" != "xyes" ]
+then
+    rm -f "${outputfile}" "${outputfile}.rc"
 fi

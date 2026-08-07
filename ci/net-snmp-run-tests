@@ -9,7 +9,6 @@ if killall snmpd snmptrapd >/dev/null 2>&1; then :; fi
 if rm -rf /tmp/snmp*; then :; fi
 
 export NETSNMP_SRC_DIR="$PWD"
-export SNMP_SAVE_TMPDIR=yes
 export SNMP_VERBOSE=1
 cat <<EOF >lsan.supp
 leak:/usr/bin/

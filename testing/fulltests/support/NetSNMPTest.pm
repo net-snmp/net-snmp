@@ -17,11 +17,9 @@ sub new {
 
 sub init {
     my ($self) = @_;
-    my $cleanup = 1;
-    if (defined($ENV{'SNMP_SAVE_TMPDIR'}) && ($ENV{'SNMP_SAVE_TMPDIR'} eq 'yes' || $ENV{'SNMP_SAVE_TMPDIR'} eq '1')) {
-        $cleanup = 0;
-    }
-    $self->{'dir'} = tempdir('snmp-test-perl-XXXXXX', DIR => '/tmp', CLEANUP => $cleanup);
+    $self->{'failed'} = 0;
+    $self->{'dir'} = tempdir('snmp-test-perl-XXXXXX', DIR => '/tmp',
+			     CLEANUP => 0);
     print "# using tempdir $self->{dir}\n";
 
     foreach my $suffix (qw(conf pid log out)) {
@@ -153,8 +151,24 @@ sub System {
 
 sub DIE {
     my $self = shift;
+    $self->{'failed'} = 1;
     $self->stop_agent();
     die @_;
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    return if !$self->{'dir'} || ! -d $self->{'dir'};
+    my $failed = $self->{'failed'} || $?;
+    if (defined($Test::ntest) && defined($Test::planned) && $Test::ntest < $Test::planned) {
+        $failed = 1;
+    }
+    my $save_tmpdir = (defined($ENV{'SNMP_SAVE_TMPDIR'}) &&
+		       $ENV{'SNMP_SAVE_TMPDIR'} eq 'yes');
+    if (!$save_tmpdir && !$failed) {
+        require File::Path;
+        File::Path::rmtree($self->{'dir'});
+    }
 }
 
 1;
