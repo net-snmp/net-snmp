@@ -13,6 +13,8 @@ BEGIN {
 my $test = new NetSNMPTest(agentaddress => $agentaddress);
 
 $test->require_feature($feature);
+$test->require_feature("USING_MIBII_VACM_CONF_MODULE");
+$test->require_feature("USING_MIBII_SYSTEM_MIB_MODULE");
 
 my $netsnmpcert = "$ENV{'srcdir'}/local/net-snmp-cert -I -C $test->{'dir'}";
 

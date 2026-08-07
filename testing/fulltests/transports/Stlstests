@@ -2,6 +2,9 @@
 
 # this file contains tests common to both tls and dtls usages
 
+SKIPIFNOT USING_MIBII_VACM_CONF_MODULE
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
 export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
 NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert -I"
 NSCERTARGS="-C $SNMP_TMPDIR"
