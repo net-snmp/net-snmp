@@ -45,6 +45,52 @@ def target_support_disabled():
             break
     return True
 
+def vacm_support_disabled():
+    srcdir = os.environ.get("NETSNMP_SRC_DIR")
+    paths_to_try = []
+    if srcdir:
+        paths_to_try.append(os.path.join(srcdir, "include/net-snmp/agent/agent_module_config.h"))
+        paths_to_try.append(os.path.join(srcdir, "include/net-snmp/agent/mib_module_config.h"))
+    paths_to_try.extend([
+        "include/net-snmp/agent/agent_module_config.h",
+        "include/net-snmp/agent/mib_module_config.h",
+        "../include/net-snmp/agent/agent_module_config.h",
+        "../include/net-snmp/agent/mib_module_config.h",
+        "../../include/net-snmp/agent/agent_module_config.h",
+        "../../include/net-snmp/agent/mib_module_config.h",
+        "../../../include/net-snmp/agent/agent_module_config.h",
+        "../../../include/net-snmp/agent/mib_module_config.h"
+    ])
+    for config_h in paths_to_try:
+        if os.path.exists(config_h):
+            with open(config_h, "r") as f:
+                for line in f:
+                    if "#define USING_MIBII_VACM_CONF_MODULE 1" in line:
+                        return False
+    return True
+
+def system_mib_support_disabled():
+    srcdir = os.environ.get("NETSNMP_SRC_DIR")
+    paths_to_try = []
+    if srcdir:
+        paths_to_try.append(os.path.join(srcdir, "include/net-snmp/agent/mib_module_config.h"))
+    paths_to_try.extend([
+        "include/net-snmp/agent/mib_module_config.h",
+        "../include/net-snmp/agent/mib_module_config.h",
+        "../../include/net-snmp/agent/mib_module_config.h",
+        "../../../include/net-snmp/agent/mib_module_config.h"
+    ])
+    for config_h in paths_to_try:
+        if os.path.exists(config_h):
+            with open(config_h, "r") as f:
+                for line in f:
+                    if "#define USING_MIBII_SYSTEM_MIB_MODULE 1" in line:
+                        return False
+    return True
+
+def vacm_or_system_support_disabled():
+    return vacm_support_disabled() or system_mib_support_disabled()
+
 def snmp_dest(**kwargs):
     """Return information about how to communicate with snmpd"""
     dest = {
@@ -106,6 +152,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(var.tag, '.1.3.6.1.2.1.1.1.0')
         self.assertEqual(var.iid, '')
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_get(self):
         print("\n")
         print("---v1 GET tests -------------------------------------\n")
@@ -123,6 +170,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(var.val, res[0])
         self.assertEqual(var.type, 'OCTETSTR')
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_get_no_such_oid(self):
         print("\n")
         print("---v1 GET test of nonexistent OID -------------------\n")
@@ -142,6 +190,7 @@ class BasicTests(unittest.TestCase):
         self.assertIsNone(var.type)
 
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_getnext(self):
         print("\n")
         print("---v1 GETNEXT tests-------------------------------------\n")
@@ -157,7 +206,7 @@ class BasicTests(unittest.TestCase):
         self.assertTrue(var.val is not None)
         self.assertTrue(var.type is not None)
 
-    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
+    @unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
     def test_v1_set(self):
         print("\n")
         print("---v1 SET tests-------------------------------------\n")
@@ -178,6 +227,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(var.val, 'my new name')
         self.assertTrue(var.type is None)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_walk(self):
         print("\n")
         print("---v1 walk tests-------------------------------------\n")
@@ -202,6 +252,7 @@ class BasicTests(unittest.TestCase):
             self.assertIsNotNone(var.val)
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_walk_2(self):
         print("\n")
         print("---v1 walk 2-------------------------------------\n")
@@ -222,6 +273,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(var.val, None)
         self.assertEqual(var.type, None)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_mv_get(self):
         print("\n")
         print("---v1 multi-varbind test-------------------------------------\n")
@@ -269,7 +321,7 @@ class BasicTests(unittest.TestCase):
             self.assertIsNone(var.val)
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
-    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
+    @unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
     def test_v1_set_2(self):
         print("\n")
         print("---v1 set2-------------------------------------\n")
@@ -285,6 +337,7 @@ class BasicTests(unittest.TestCase):
         res = sess.set(varlist)
         print("v1 sess.set result: ", res, "\n")
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_walk_3(self):
         print("\n")
         print("---v1 walk3-------------------------------------\n")
@@ -299,6 +352,7 @@ class BasicTests(unittest.TestCase):
         for var in varlist:
             print("  ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_walk_4(self):
         print("\n")
         print("---v1 walk4-------------------------------------\n")
@@ -310,6 +364,7 @@ class BasicTests(unittest.TestCase):
         print("v1 sess.walk length: ", len(vals), "\n")
         self.assertTrue(len(vals) > 0)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v2c_get(self):
         print("\n")
         print("---v2c get-------------------------------------\n")
@@ -322,6 +377,7 @@ class BasicTests(unittest.TestCase):
         print("v2 sess.get result: ", vals, "\n")
         self.assertEqual(len(vals), 3)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v2c_getnext(self):
         print("\n")
         print("---v2c getnext-------------------------------------\n")
@@ -351,6 +407,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v2c_getbulk(self):
         print("\n")
         print("---v2c getbulk-------------------------------------\n")
@@ -375,7 +432,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
-    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
+    @unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
     def test_v2c_set(self):
         print("\n")
         print("---v2c set-------------------------------------\n")
@@ -393,6 +450,7 @@ class BasicTests(unittest.TestCase):
         print("v2 sess.set result: ", res, "\n")
         self.assertEqual(res, 1)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v2c_walk(self):
         print("\n")
         print("---v2c walk-------------------------------------\n")
@@ -408,6 +466,7 @@ class BasicTests(unittest.TestCase):
         for var in varlist:
             print("  ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v3_get(self):
         print("\n")
         sess = setup_v3();
@@ -427,6 +486,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v3_getnext(self):
         print("\n")
         print("---v3 getnext-------------------------------------\n")
@@ -447,6 +507,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v3_getbulk(self):
         sess = setup_v3();
         varlist = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
@@ -467,7 +528,7 @@ class BasicTests(unittest.TestCase):
             print(var.tag, var.iid, "=", var.val, '(', var.type, ')')
         print("\n")
 
-    @unittest.skipIf(set_support_disabled(), "SET support is disabled")
+    @unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
     def test_v3_set(self):
         print("\n")
         print("---v3 set-------------------------------------\n")
@@ -484,6 +545,7 @@ class BasicTests(unittest.TestCase):
         print("v3 sess.set result: ", res, "\n")
         self.assertEqual(res, 1)
 
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v3_walk(self):
         print("\n")
         print("---v3 walk-------------------------------------\n")
@@ -498,7 +560,7 @@ class BasicTests(unittest.TestCase):
             print("  ", var.tag, var.iid, "=", var.val, '(', var.type, ')')
 
 
-@unittest.skipIf(set_support_disabled(), "SET support is disabled")
+@unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
 class SetTests(unittest.TestCase):
     """SNMP set tests for the Net-SNMP Python interface"""
     def testFuncs(self):
