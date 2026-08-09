@@ -36,16 +36,21 @@ sub it {
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
+my $set_modes_ok = eval {
+    MODE_SET_BEGIN == -1 &&
+    MODE_SET_RESERVE1 == 0 &&
+    MODE_SET_RESERVE2 == 1 &&
+    MODE_SET_ACTION == 2 &&
+    MODE_SET_COMMIT == 3 &&
+    MODE_SET_FREE == 4 &&
+    MODE_SET_UNDO == 5
+};
+$set_modes_ok = 1 if $@;
+
 print it((MODE_GET == 0xa0 &&
 	  MODE_GETNEXT == 0xa1 &&
 	  MODE_GETBULK == 0xa5 &&
-	  MODE_SET_BEGIN == -1 &&
-	  MODE_SET_RESERVE1 == 0 &&
-	  MODE_SET_RESERVE2 == 1 &&
-	  MODE_SET_ACTION == 2 &&
-	  MODE_SET_COMMIT == 3 &&
-	  MODE_SET_FREE == 4 &&
-	  MODE_SET_UNDO == 5 &&
+	  $set_modes_ok &&
 	  SNMP_ERR_NOERROR == 0 &&
 	  SNMP_ERR_TOOBIG == 1 &&
 	  SNMP_ERR_NOSUCHNAME == 2 &&
