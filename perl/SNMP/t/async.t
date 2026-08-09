@@ -6,6 +6,20 @@ use warnings;
 $| = 1;
 
 BEGIN {
+    my $srcdir = $ENV{'NETSNMP_SRC_DIR'} || "../..";
+    my $config_h = "$srcdir/include/net-snmp/net-snmp-config.h";
+    if (open(my $fh, '<', $config_h)) {
+        while (<$fh>) {
+            if (/#define\s+NETSNMP_DISABLE_SET_SUPPORT\b/ || /#define\s+NETSNMP_NO_WRITE_SUPPORT\b/) {
+                print "1..0 # SKIP SET support is disabled\n";
+                exit 0;
+            }
+        }
+        close($fh);
+    }
+}
+
+BEGIN {
     my $has_vacm = 0;
     my $has_sys  = 0;
     my ($fh1, $fh2);

@@ -8,7 +8,7 @@ BEGIN {
     my $config_h = "$srcdir/include/net-snmp/net-snmp-config.h";
     if (open(my $fh, '<', $config_h)) {
         while (<$fh>) {
-            if (/#define NETSNMP_DISABLE_SET_SUPPORT 1/ || /#define NETSNMP_NO_WRITE_SUPPORT 1/) {
+            if (/#define\s+NETSNMP_DISABLE_SET_SUPPORT\b/ || /#define\s+NETSNMP_NO_WRITE_SUPPORT\b/) {
                 print "1..0 # SKIP SET support is disabled\n";
                 exit 0;
             }
