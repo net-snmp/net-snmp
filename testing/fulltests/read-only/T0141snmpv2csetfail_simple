@@ -23,6 +23,11 @@ CHECK ".1.3.6.1.2.1.1.4.0 = STRING:"
 
 CAPTURE "snmpset -r 0 -t 1 -On $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0 s foobartestingbaz"
 
+if ! command -v snmpset >/dev/null 2>&1; then
+    GOOD "snmpset not found"
+    FINISHED
+fi
+
 CHECK "Timeout: No Response"
 
 STOPAGENT
