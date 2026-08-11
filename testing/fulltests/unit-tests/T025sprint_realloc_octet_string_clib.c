@@ -185,6 +185,41 @@ static const struct {
         data_two,
         2,
         "10"
+    },
+    {
+        "data shorter than multi-byte numeric hint width (DateAndTime 2d with 1 byte)",
+        "2d",
+        data_single,
+        1,
+        "42"
+    },
+    {
+        "data shorter than 4-byte numeric decimal hint width",
+        "4d",
+        data_two,
+        2,
+        "2580"
+    },
+    {
+        "data shorter than multi-byte hex hint width (2x with 1 byte)",
+        "2x",
+        data_single,
+        1,
+        "2a"
+    },
+    {
+        "data shorter than multi-byte octal hint width (2o with 1 byte)",
+        "2o",
+        data_single,
+        1,
+        "52"
+    },
+    {
+        "multi-byte numeric hint with exact width followed by truncated field",
+        "2d-2d",
+        data_three,
+        3,
+        "2580-30"
     }
 };
 
