@@ -30,6 +30,8 @@ case "$(uname)" in
 		    libncurses-dev
 		    libncurses5-dev
 		    libnl-route-3-dev
+		    libpci-dev
+		    libpcre2-dev
 		    libpcre3-dev
 		    libperl-dev
 		    libsensors-dev
@@ -39,6 +41,7 @@ case "$(uname)" in
 		    make
 		    pkg-config
 		    python3-dev
+		    python3-setuptools
 		    util-linux
 		"
 		;;
