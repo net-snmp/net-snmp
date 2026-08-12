@@ -249,16 +249,22 @@ _refresh_disks(int minpercent)
 {
     netsnmp_fsys_info *entry;
 
+    if (allDisksIncluded)
+        numdisks = 0;
+
     for (entry = netsnmp_fsys_get_first();
          entry != NULL; entry = netsnmp_fsys_get_next(entry)) {
 
-        if (!(entry->flags & NETSNMP_FS_FLAG_UCD)) {
-            /*
-             * this is new disk, add it to the table 
-             */
-            entry->minspace = -1;
-            entry->minpercent = minpercent;
-            entry->flags |= NETSNMP_FS_FLAG_UCD;
+        if ((entry->flags & NETSNMP_FS_FLAG_ACTIVE) &&
+            !(entry->type & _NETSNMP_FS_TYPE_SKIP_BIT)) {
+            if (!(entry->flags & NETSNMP_FS_FLAG_UCD)) {
+                /*
+                 * this is new disk, add it to the table
+                 */
+                entry->minspace = -1;
+                entry->minpercent = minpercent;
+                entry->flags |= NETSNMP_FS_FLAG_UCD;
+            }
             /*
              * Ensure there is space for the new entry
              */
@@ -327,6 +333,8 @@ var_extensible_disk(struct variable *vp,
         (vp, name, length, exact, var_len, write_method, numdisks))
         return (NULL);
     disknum = name[*length - 1] - 1;
+    if (!disks || disknum < 0 || disknum >= numdisks)
+        return NULL;
     entry = disks[disknum];
     if (!entry) {
         if (exact)
