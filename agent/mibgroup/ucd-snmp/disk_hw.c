@@ -102,6 +102,7 @@ _expand_disk_array(char *cptr)
 
     new_disks = realloc(disks, maxdisks * sizeof(netsnmp_fsys_info *));
     if (!new_disks) {
+        maxdisks = prev_max;
         config_perror("malloc failed for new disk allocation.");
         netsnmp_config_error("\tignoring: %s", cptr);
         return NULL;
