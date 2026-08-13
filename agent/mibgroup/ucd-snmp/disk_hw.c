@@ -330,6 +330,7 @@ var_extensible_disk(struct variable *vp,
     const netsnmp_fsys_info *entry;
     unsigned long long val;
     static long     long_ret;
+    static unsigned long ulong_ret;
     static char    *errmsg;
     static char     empty_str[1];
     netsnmp_cache  *cache;
@@ -365,7 +366,7 @@ var_extensible_disk(struct variable *vp,
     switch (vp->magic) {
     case MIBINDEX:
         long_ret = disknum + 1;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case ERRORNAME:            /* DISKPATH */
         *var_len = strlen(entry->path);
         return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->path);
@@ -374,10 +375,10 @@ var_extensible_disk(struct variable *vp,
         return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->device);
     case DISKMINIMUM:
         long_ret = entry->minspace;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKMINPERCENT:
         long_ret = entry->minpercent;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case DISKTOTAL:
         val = netsnmp_fsys_size_ull(entry);
@@ -385,13 +386,13 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKTOTALLOW:
-        long_ret = netsnmp_fsys_size_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_size_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKTOTALHIGH:
-        long_ret = netsnmp_fsys_size_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_size_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKAVAIL:
         val = netsnmp_fsys_avail_ull(entry);
@@ -399,13 +400,13 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKAVAILLOW:
-        long_ret = netsnmp_fsys_avail_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_avail_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKAVAILHIGH:
-        long_ret = netsnmp_fsys_avail_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_avail_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKUSED:
         val = netsnmp_fsys_used_ull(entry);
@@ -413,17 +414,17 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKUSEDLOW:
-        long_ret = netsnmp_fsys_used_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_used_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKUSEDHIGH:
-        long_ret = netsnmp_fsys_used_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_used_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKPERCENT:
         long_ret = _percent(entry->used, entry->size);
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case DISKPERCENTNODE:
         if (entry->inums_total == 0 || entry->inums_avail > entry->inums_total)
@@ -432,7 +433,7 @@ var_extensible_disk(struct variable *vp,
             long_ret =
                 _percent(entry->inums_total - entry->inums_avail,
                          entry->inums_total);
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case ERRORFLAG:
         long_ret = 0;
@@ -442,7 +443,7 @@ var_extensible_disk(struct variable *vp,
         else if ((entry->minpercent >= 0) &&
                  (_percent(entry->avail, entry->size) < entry->minpercent))
             long_ret = 1;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case ERRORMSG:
         free(errmsg);
