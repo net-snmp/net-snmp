@@ -426,9 +426,12 @@ var_extensible_disk(struct variable *vp,
         return ((u_char *) (&long_ret));
 
     case DISKPERCENTNODE:
-        long_ret =
-            _percent(entry->inums_total - entry->inums_avail,
-                     entry->inums_total);
+        if (entry->inums_total == 0 || entry->inums_avail > entry->inums_total)
+            long_ret = 0;
+        else
+            long_ret =
+                _percent(entry->inums_total - entry->inums_avail,
+                         entry->inums_total);
         return ((u_char *) (&long_ret));
 
     case ERRORFLAG:
