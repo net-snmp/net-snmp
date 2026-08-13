@@ -185,15 +185,13 @@ disk_parse_config(const char *token, char *cptr)
 static void
 disk_parse_config_all(const char *token, char *cptr)
 {
-    int             minpercent = DISKMINPERCENT;
+    int             minpercent = 5;
 
     /*
      * read the minimum disk usage percent
      */
-    if (cptr != NULL) {
-        if (strchr(cptr, '%') != NULL) {
-            minpercent = atoi(cptr);
-        }
+    if (cptr != NULL && *cptr != '\0') {
+        minpercent = atoi(cptr);
     }
     /*
      * if we have already seen the "includeAllDisks" directive
