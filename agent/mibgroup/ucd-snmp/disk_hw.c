@@ -116,6 +116,21 @@ _expand_disk_array(char *cptr)
 }
 
 static void
+disk_insert_entry(netsnmp_fsys_info *entry)
+{
+    int                 i;
+
+    if (!entry)
+        return;
+
+    for (i = 0; i < numdisks; i++)
+        if (disks[i] == entry)
+            return;
+
+    disks[numdisks++] = entry;
+}
+
+static void
 disk_parse_config(const char *token, char *cptr)
 {
     char            path[STRMAX];
@@ -159,12 +174,12 @@ disk_parse_config(const char *token, char *cptr)
      * parameters. if it does not exist then add it
      */
     entry = netsnmp_fsys_by_path(path, NETSNMP_FS_FIND_CREATE);
-    if (entry) {
-        entry->minspace = minspace;
-        entry->minpercent = minpercent;
-        entry->flags |= NETSNMP_FS_FLAG_UCD;
-        disks[numdisks++] = entry;
-    }
+    if (!entry)
+        return;
+    entry->minspace = minspace;
+    entry->minpercent = minpercent;
+    entry->flags |= NETSNMP_FS_FLAG_UCD;
+    disk_insert_entry(entry);
 }
 
 static void
@@ -273,7 +288,7 @@ _refresh_disks(int minpercent)
                 if (!_expand_disk_array(entry->device))
                     return;
             }
-            disks[numdisks++] = entry;
+            disk_insert_entry(entry);
         }
     }
 }
