@@ -1,0 +1,106 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER "UCD-SNMP-MIB::dskTable and disk_hw functionality"
+
+SKIPIFNOT USING_UCD_SNMP_DISK_HW_MODULE
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+
+# Ensure snmpget, snmpgetnext, and snmpwalk binaries are present
+SNMPGET="${SNMP_UPDIR}/apps/snmpget"
+SNMPGETNEXT="${SNMP_UPDIR}/apps/snmpgetnext"
+SNMPWALK="${SNMP_UPDIR}/apps/snmpwalk"
+[ -x "$SNMPGET" ]     || SKIP "snmpget not compiled"
+[ -x "$SNMPGETNEXT" ] || SKIP "snmpgetnext not compiled"
+[ -x "$SNMPWALK" ]    || SKIP "snmpwalk not compiled"
+
+snmp_version=v2c
+TESTCOMMUNITY=testcommunity
+. ./Sv2cconfig
+
+# Detect an active mounted filesystem on the current test host
+TEST_MOUNT=`df -P /tmp 2>/dev/null | awk 'END {print $6}'`
+[ -n "$TEST_MOUNT" ] || TEST_MOUNT="/"
+
+# ==============================================================================
+# Configuration:
+# - includeAllDisks 10%: dynamic filesystem discovery (Commit 067c5415347e & 7aa0279c5f96)
+# - disk $TEST_MOUNT: default threshold check (Commit e1e89c004e1e)
+# - disk $TEST_MOUNT 2147483647: deduplication & error msg trigger (Commit 4ba7eb53b354 & eef79c824b3c)
+# - 55 dummy entries: array expansion beyond 50 entries (Commit 313ccd2a25a5)
+# ==============================================================================
+
+CONFIGAGENT "includeAllDisks 10%"
+CONFIGAGENT "disk $TEST_MOUNT"
+CONFIGAGENT "disk $TEST_MOUNT 2147483647"
+
+i=1
+while [ $i -le 55 ]; do
+    CONFIGAGENT "disk /dummy_mount_path_$i 10000"
+    i=$((i + 1))
+done
+
+STARTAGENT
+
+# Verify that TEST_MOUNT appears in dskTable and threshold was updated to 2147483647
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.2.1"
+CHECKORDIE ".1.3.6.1.4.1.2021.9.1.2.1 = STRING: $TEST_MOUNT"
+
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.4.1"
+CHECKORDIE ".1.3.6.1.4.1.2021.9.1.4.1 = INTEGER: 2147483647"
+
+# Query DISKTOTALLOW / DISKTOTALHIGH (ASN_UNSIGNED / Gauge32 - Commit 8eaf82a04eac)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.11.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.11.1 = Gauge32:"
+
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.12.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.12.1 = Gauge32:"
+
+# Query DISKAVAILLOW / DISKAVAILHIGH (ASN_UNSIGNED / Gauge32 - Commit 8eaf82a04eac)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.13.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.13.1 = Gauge32:"
+
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.14.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.14.1 = Gauge32:"
+
+# Query DISKUSEDLOW / DISKUSEDHIGH (ASN_UNSIGNED / Gauge32 - Commit 8eaf82a04eac)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.15.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.15.1 = Gauge32:"
+
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.16.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.16.1 = Gauge32:"
+
+# Query DISKPERCENTNODE (inode computation without underflow - Commit 3d24ae6f1711)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.10.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.10.1 = INTEGER:"
+
+# Query ERRORFLAG (should be error(1) because 2147483647 > available space)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.100.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.100.1 = INTEGER:.*1"
+
+# Query ERRORMSG (should contain formatted string: "$TEST_MOUNT: less than 2147483647 free (= ...)" - Commit eef79c824b3c)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.101.1"
+CHECK ".1.3.6.1.4.1.2021.9.1.101.1 = STRING: $TEST_MOUNT: less than 2147483647 free"
+
+# Query out-of-bounds index to test bounds checking (Commit 7aa0279c5f96)
+CAPTURE "$SNMPGET -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9.1.2.9999"
+CHECK "No Such Instance"
+
+# Full walk of dskTable (exercising _refresh_disks dynamic loading - Commit 7aa0279c5f96)
+CAPTURE "$SNMPWALK -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9"
+CHECKORDIE ".1.3.6.1.4.1.2021.9.1.2.1 = STRING: $TEST_MOUNT"
+
+# Test configuration reload via SIGHUP (Commit eef79c824b3c & disk_free_config)
+if ISDEFINED HAVE_SIGHUP; then
+    DELAY
+    HUPAGENT
+    DELAY
+
+    # Re-walk dskTable to verify state re-population after config free
+    CAPTURE "$SNMPWALK -On $SNMP_FLAGS -$snmp_version -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.9"
+    CHECKORDIE ".1.3.6.1.4.1.2021.9.1.2.1 = STRING: $TEST_MOUNT"
+fi
+
+STOPAGENT
+FINISHED
