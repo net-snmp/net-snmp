@@ -49,6 +49,7 @@ static int     allDisksIncluded;
 static int     allDisksMinPercent;
 static int     maxdisks;
 static netsnmp_fsys_info **disks;
+static char    *errmsg;
 
 static const struct variable2 extensible_disk_variables[] = {
     {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
@@ -225,6 +226,8 @@ disk_free_config(void)
         disks = NULL;
         maxdisks = numdisks = 0;
     }
+    free(errmsg);
+    errmsg = NULL;
     allDisksIncluded = 0;
     allDisksMinPercent = 0;
 }
@@ -331,7 +334,6 @@ var_extensible_disk(struct variable *vp,
     unsigned long long val;
     static long     long_ret;
     static unsigned long ulong_ret;
-    static char    *errmsg;
     static char     empty_str[1];
     netsnmp_cache  *cache;
 
@@ -438,7 +440,7 @@ var_extensible_disk(struct variable *vp,
     case ERRORFLAG:
         long_ret = 0;
         val = netsnmp_fsys_avail_ull(entry);
-        if ((entry->minspace >= 0) && (val < entry->minspace))
+        if ((entry->minspace >= 0) && (val < (unsigned long long) entry->minspace))
             long_ret = 1;
         else if ((entry->minpercent >= 0) &&
                  (_percent(entry->avail, entry->size) < entry->minpercent))
@@ -450,16 +452,21 @@ var_extensible_disk(struct variable *vp,
         errmsg = NULL;
         *var_len = 0;
         val = netsnmp_fsys_avail_ull(entry);
-        if ((entry->minspace >= 0 && val < entry->minspace &&
-             asprintf(&errmsg, "%s: less than %d free (= %d)", entry->path,
-                      entry->minspace, (int) val) >= 0) ||
-            (entry->minpercent >= 0 &&
-             _percent(entry->avail, entry->size) < entry->minpercent &&
-             asprintf(&errmsg, "%s: less than %d%% free (= %d%%)",
-                      entry->path, entry->minpercent,
-                      _percent(entry->avail, entry->size))
-             >= 0)) {
-            *var_len = strlen(errmsg);
+        if (entry->minspace >= 0 && val < (unsigned long long) entry->minspace) {
+            if (asprintf(&errmsg, "%s: less than %d free (= %llu)", entry->path,
+                         entry->minspace, val) >= 0)
+                *var_len = strlen(errmsg);
+            else
+                errmsg = NULL;
+        } else if (entry->minpercent >= 0 &&
+                   _percent(entry->avail, entry->size) < entry->minpercent) {
+            int             pct = _percent(entry->avail, entry->size);
+
+            if (asprintf(&errmsg, "%s: less than %d%% free (= %d%%)",
+                         entry->path, entry->minpercent, pct) >= 0)
+                *var_len = strlen(errmsg);
+            else
+                errmsg = NULL;
         }
         return (u_char *) (errmsg ? errmsg : empty_str);
     }
