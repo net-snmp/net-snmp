@@ -36,7 +36,7 @@ case "$(uname)" in
 		    libperl-dev
 		    libsensors-dev
 		    libsensors4-dev
-		    libssh2-1-dev
+		    libssh-dev
 		    libssl-dev
 		    make
 		    pkg-config
