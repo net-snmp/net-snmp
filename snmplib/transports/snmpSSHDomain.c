@@ -546,7 +546,7 @@ netsnmp_ssh_accept(netsnmp_transport *t)
     /* much of this is duplicated from snmpUnixDomain.c */
 
     netsnmp_ssh_addr_pair *addr_pair;    
-    SOCKET                 newsock   = NETSNMP_INVALID_SOCKET;
+    NETSNMP_SOCKET         newsock   = NETSNMP_INVALID_SOCKET;
     struct sockaddr       *farend    = NULL;
     socklen_t              farendlen = sizeof(struct sockaddr_un);
 

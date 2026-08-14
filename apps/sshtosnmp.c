@@ -35,6 +35,8 @@
 #define MAXPATHLEN 2048
 #endif
 
+#include <net-snmp/types.h>
+
 #define DEFAULT_SOCK_PATH NETSNMP_PERSISTENT_DIRECTORY "/sshdomainsocket"
 
 #define NETSNMP_SSHTOSNMP_VERSION_NUMBER 1
