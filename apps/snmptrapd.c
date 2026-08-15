@@ -551,6 +551,9 @@ snmptrapd_main_loop(void)
             }
             reconfig = 0;
         }
+
+        snmp_sess_poll(NULL);
+
         numfds = 0;
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
