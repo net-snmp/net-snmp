@@ -1284,7 +1284,6 @@ Section Uninstall
   Delete "$INSTDIR\include\net-snmp\library\snmpTCPDomain.h"
   Delete "$INSTDIR\include\net-snmp\library\snmpUDPDomain.h"
   Delete "$INSTDIR\include\net-snmp\library\tools.h"
-  Delete "$INSTDIR\include\net-snmp\library\winpipe.h"
   Delete "$INSTDIR\include\net-snmp\library\snmp_enum.h"
   Delete "$INSTDIR\include\net-snmp\library\cmu_compat.h"
   Delete "$INSTDIR\include\net-snmp\library\snmpv3-security-includes.h"

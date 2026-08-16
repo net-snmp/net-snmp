@@ -94,7 +94,6 @@ INCLUDESUBDIRHEADERS=README \
 	types.h \
 	ucd_compat.h \
 	vacm.h \
-	winpipe.h \
 	winservice.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@

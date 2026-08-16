@@ -43,6 +43,7 @@ ABI CHANGES
    - SSL_CTX *get_server_ctx()
    - _openssl_log_error()
    - _x509_get_error()
+   - create_winpipe_transport()
    - netsnmp_factory_get()
    - netsnmp_factory_init()
    - netsnmp_factory_produce()

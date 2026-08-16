@@ -8,7 +8,7 @@
 #include <errno.h>
 
 #ifdef WIN32
-#include <net-snmp/library/winpipe.h>
+#include "winpipe.h"
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
