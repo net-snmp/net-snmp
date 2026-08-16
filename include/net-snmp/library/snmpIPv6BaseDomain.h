@@ -19,6 +19,8 @@ extern          "C" {
  * Prototypes
  */
 
+    struct netsnmp_ep;
+
     char *netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                                const void *data, int len);
     void netsnmp_ipv6_get_taddr(struct netsnmp_transport_s *t, void **addr,

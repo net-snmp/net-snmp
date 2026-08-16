@@ -14,6 +14,7 @@
 
 #include <net-snmp/types.h>
 #include "snmpIPBaseDomain.h"
+#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
 #include <stddef.h>

@@ -34,6 +34,7 @@
 #include <net-snmp/agent/agent_index.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/snmpCallbackDomain.h>
 
 #include "snmpd.h"
 #include "agent_global_vars.h"

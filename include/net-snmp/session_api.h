@@ -332,28 +332,6 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_service.h>
-#include <net-snmp/library/snmpCallbackDomain.h>
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-#include <net-snmp/library/snmpUnixDomain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
-#include <net-snmp/library/snmpUDPDomain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
-#include <net-snmp/library/snmpTCPDomain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-#include <net-snmp/library/snmpUDPIPv6Domain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-#include <net-snmp/library/snmpTCPIPv6Domain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_IPX_DOMAIN
-#include <net-snmp/library/snmpIPXDomain.h>
-#endif
-#ifdef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN
-#include <net-snmp/library/snmpAAL5PVCDomain.h>
-#endif
 
 #include <net-snmp/library/ucd_compat.h>
 
