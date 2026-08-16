@@ -2,6 +2,66 @@
 
 -----------------------
 
+ABI CHANGES
+ * The new function snmp_sess_poll() must be called before snmp_select_info(),
+   snmp_select_info2(), snmp_sess_select_info_flags() or
+   snmp_sess_select_info2_flags() is called. If snmp_sess_poll() is not called,
+   timeouts will occur for the TLS-TCP and DTLS-UDP transport protocols.
+ * The following data structures, type definitions and constants have been
+   removed from the Net-SNMP header files:
+   - FACTORY_EXISTS
+   - FACTORY_GENERR
+   - FACTORY_MAXIMUM_ERROR
+   - FACTORY_NOERROR
+   - FACTORY_NOTFOUND
+   - _netsnmpTLSBaseData
+   - _netsnmp_verify_info
+   - netsnmp_factory
+   - netsnmp_request_list
+   - struct _netsnmpTLSBaseData_s
+   - struct _netsnmp_verify_info_s
+   - struct netsnmp_factory_s
+   - struct request_list
+ * The following data structures have been modified for all operating systems:
+   - netsnmp_transport
+   - struct netsnmp_transport_s
+ * The following data structures have been modified on 64-bit Windows systems:
+   - netsnmp_callback_info
+ * The argument types of the following functions have been modified on 64-bit
+   Windows systems:
+   - _netsnmp_udp_sockopt_set()
+   - netsnmp_set_non_blocking_mode()
+   - netsnmp_sock_buffer_set()
+   - netsnmp_udp_recvfrom()
+   - netsnmp_udp_sendto()
+   - netsnmp_udpbase_recvfrom()
+   - netsnmp_udpbase_sendto()
+   - netsnmp_udpipv4_recvfrom()
+   - netsnmp_udpipv4_sendto()
+ * The following functions have been removed from the Net-SNMP API and ABI:
+   - SSL_CTX *get_client_ctx()
+   - SSL_CTX *get_server_ctx()
+   - _openssl_log_error()
+   - _x509_get_error()
+   - netsnmp_factory_get()
+   - netsnmp_factory_init()
+   - netsnmp_factory_produce()
+   - netsnmp_init_tlsbase()
+   - netsnmp_tlsbase_allocate_tlsdata()
+   - netsnmp_tlsbase_config()
+   - netsnmp_tlsbase_ctor()
+   - netsnmp_tlsbase_extract_security_name()
+   - netsnmp_tlsbase_free_tlsdata()
+   - netsnmp_tlsbase_session_init()
+   - netsnmp_tlsbase_verify_client_cert()
+   - netsnmp_tlsbase_verify_server_cert()
+   - netsnmp_tlsbase_wrapup_recv()
+   - netsnmp_tlstcp_transport()
+   - sc_shutdown()
+   - sslctx_client_setup()
+   - sslctx_server_setup()
+   - tls_get_verify_info_index()
+
 Changes: V5.10.pre1 -> V5.10.pre2
 
 commit 593c7b7445b5f7c9d7ea5a83e90ee3a5c8c4e1f8
