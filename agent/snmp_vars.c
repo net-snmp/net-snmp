@@ -136,6 +136,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/mib_modules.h>
 #include <net-snmp/agent/agent_sysORTable.h>
+#include <net-snmp/library/snmpCallbackDomain.h>
+#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 #include "agent_global_vars.h"
 #include "kernel.h"
 

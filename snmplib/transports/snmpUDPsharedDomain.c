@@ -10,6 +10,7 @@
 
 #include <net-snmp/types.h>
 #include "snmpIPBaseDomain.h"
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpUDPsharedDomain.h>
 
 #include <stddef.h>

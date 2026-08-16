@@ -50,6 +50,11 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/library/snmpTCPDomain.h>
+#include <net-snmp/library/snmpTCPIPv6Domain.h>
+#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 #include "vacm_conf.h"
 
 #include "snmpd.h"

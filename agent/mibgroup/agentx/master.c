@@ -52,6 +52,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"

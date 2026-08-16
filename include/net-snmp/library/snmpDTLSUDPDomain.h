@@ -19,6 +19,8 @@ extern          "C" {
 NETSNMP_IMPORT const oid netsnmpDTLSUDPDomain[];
 NETSNMP_IMPORT size_t netsnmpDTLSUDPDomain_len;
 
+struct netsnmp_ep;
+
 netsnmp_transport *
 netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local);
 
