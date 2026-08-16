@@ -5006,55 +5006,47 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
         ctvp->tv_sec = -1;
         ctvp->tv_usec = 0;
         ltvp = &last_time;
-        gettimeofday(ltvp,(struct timezone*)0);
-	timersub(ltvp,itvp,ltvp);
+        gettimeofday(ltvp, NULL);
+	timersub(ltvp, itvp, ltvp);
         while (1) {
            numfds = 0;
            FD_ZERO(&fdset);
            block = 1;
            tvp = &time_val;
            timerclear(tvp);
-	  if(api_mode == SNMP_API_SINGLE)
-	  {
-           snmp_sess_select_info(ss,&numfds, &fdset, tvp, &block);
-	  } else {
-           snmp_select_info(&numfds, &fdset, tvp, &block);
-	  }
+           if (api_mode == SNMP_API_SINGLE)
+              snmp_sess_select_info(ss,&numfds, &fdset, tvp, &block);
+           else
+              snmp_select_info(&numfds, &fdset, tvp, &block);
            __recalc_timeout(tvp,ctvp,ltvp,itvp,&block);
-           # printf("pre-select: numfds = %ld, block = %ld\n", numfds, block);
+# printf("pre-select: numfds = %ld, block = %ld\n", numfds, block);
            if (block == 1) tvp = NULL; /* block without timeout */
            fd_count = select(numfds, &fdset, 0, 0, tvp);
-           #printf("post-select: fd_count = %ld,block = %ld\n",fd_count,block);
+#printf("post-select: fd_count = %ld,block = %ld\n",fd_count,block);
            if (fd_count > 0) {
-                       ENTER;
-                       SAVETMPS;
-		if(api_mode == SNMP_API_SINGLE)
-		{
-		  snmp_sess_read(ss, &fdset);
-		} else {
-              	  snmp_read(&fdset);
-		}
-                       FREETMPS;
-                       LEAVE;
-
+              ENTER;
+              SAVETMPS;
+              if (api_mode == SNMP_API_SINGLE)
+                 snmp_sess_read(ss, &fdset);
+              else
+                 snmp_read(&fdset);
+              FREETMPS;
+              LEAVE;
            } else switch(fd_count) {
               case 0:
 		 SPAGAIN;
 		 ENTER;
 		 SAVETMPS;
-		if(api_mode == SNMP_API_SINGLE)
-		{
-		snmp_sess_timeout( ss );
-		} else { 
-                 snmp_timeout();
-		}
+                 if (api_mode == SNMP_API_SINGLE)
+                    snmp_sess_timeout(ss);
+                 else
+                    snmp_timeout();
                  if (!timerisset(ctvp)) {
                     if (SvTRUE(perl_callback)) {
                        /* sv_2mortal(perl_callback); */
                        cb = __push_cb_args(perl_callback, NULL);
                        __call_callback(cb, G_DISCARD);
                        ctvp->tv_sec = -1;
-
                     } else {
                        FREETMPS;
                        LEAVE;
@@ -5082,7 +5074,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
                     goto done;
                  }
 #endif
-           }
+              }
 
 	   /* A call to snmp_mainloop_finish() in the callback sets the
 	   ** mainloop_finish flag.  Exit the loop after the callback returns.
@@ -5091,8 +5083,8 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
 	      goto done;
 
         }
-     done:
-           return;
+done:
+        return;
 	}
 
 
