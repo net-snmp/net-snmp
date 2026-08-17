@@ -49,6 +49,14 @@
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
 
+typedef struct netsnmp_callback_info_s {
+    int             linkedto;
+    void           *parent_data;
+    netsnmp_callback_pass *data;
+    int             callback_num;
+    NETSNMP_SOCKET  pipefds[2];
+} netsnmp_callback_info;
+
 static netsnmp_transport_list *trlist = NULL;
 
 static int      callback_count = 0;

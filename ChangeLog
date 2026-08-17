@@ -16,6 +16,7 @@ ABI CHANGES
    - FACTORY_NOTFOUND
    - _netsnmpTLSBaseData
    - _netsnmp_verify_info
+   - netsnmp_callback_info
    - netsnmp_factory
    - netsnmp_request_list
    - struct _netsnmpTLSBaseData_s
@@ -25,8 +26,6 @@ ABI CHANGES
  * The following data structures have been modified for all operating systems:
    - netsnmp_transport
    - struct netsnmp_transport_s
- * The following data structures have been modified on 64-bit Windows systems:
-   - netsnmp_callback_info
  * The argument types of the following functions have been modified on 64-bit
    Windows systems:
    - _netsnmp_udp_sockopt_set()
