@@ -75,6 +75,35 @@ case "$(uname)" in
 	;;
 esac
 
+case "$(uname -a)" in
+    MSYS*|MINGW*)
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-ada
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-fortran
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-libgfortran
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-objc
+	pacman --noconfirm --sync --refresh
+	pacman --noconfirm --sync --needed diffutils
+	pacman --noconfirm --sync --needed make
+	pacman --noconfirm --sync --needed perl-ExtUtils-MakeMaker
+	pacman --noconfirm --sync --needed perl-Test-Harness
+	pacman --noconfirm --sync --needed procps-ng
+	;;
+esac
+case "$(uname -a)" in
+    MSYS*x86_64*)
+	pacman --noconfirm --sync --needed openssl-devel
+	pacman --noconfirm --sync --needed pkg-config
+	;;
+    MINGW64*)
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-gcc
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-libmariadbclient
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-openssl
+	pacman --noconfirm --sync --needed mingw-w64-x86_64-pkgconf ||
+	    pacman --noconfirm --sync --needed mingw-w64-x86_64-pkg-config
+	export PATH="/mingw64/bin:$PATH"
+	;;
+esac
+
 case "$MODE" in
     wolfssl)
 	if [ -n "$SUDO_UID" ] && [ -n "$SUDO_GID" ]; then
