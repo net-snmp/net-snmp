@@ -20,14 +20,6 @@ typedef struct netsnmp_callback_pass_s {
     struct netsnmp_callback_pass_s *next;
 } netsnmp_callback_pass;
 
-typedef struct netsnmp_callback_info_s {
-    int             linkedto;
-    void           *parent_data;
-    netsnmp_callback_pass *data;
-    int             callback_num;
-    NETSNMP_SOCKET  pipefds[2];
-} netsnmp_callback_info;
-
 netsnmp_transport *netsnmp_callback_transport(int);
 int             netsnmp_callback_hook_parse(netsnmp_session * sp,
                                             netsnmp_pdu *pdu,
