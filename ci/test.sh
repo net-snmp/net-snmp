@@ -11,16 +11,9 @@ esac
 
 scriptdir="$(dirname "$0")"
 
-case "$MODE" in
-    Android)
-	exit 0
-	;;
-esac
+build=$(sed -n '/^  \$ \.\/configure/ s/.*--build=\([^ ]*\).*/\1/p' config.log | tr -d "\"'" )
+host=$(sed -n '/^  \$ \.\/configure/ s/.*--host=\([^ ]*\).*/\1/p' config.log | tr -d "\"'" )
 
-case $(uname) in
-    MinGW)
-	;;
-    *)
-	"${scriptdir}"/net-snmp-run-tests
-	;;
-esac
+if [ "$build" = "$host" ]; then
+    "${scriptdir}"/net-snmp-run-tests
+fi
