@@ -57,7 +57,7 @@ CONFIGTRAPD  authuser log -s tsm testuser authpriv
 STARTTRAPD
 
 # app flags
-FLAGS="-Dtls -r1 -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT"
+FLAGS="-Dtls -r1 -t 2 -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT"
 
 ########################################
 # POST-TRAPD-STARTUP Certificates

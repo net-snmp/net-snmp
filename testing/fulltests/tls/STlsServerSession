@@ -34,7 +34,7 @@ CONFIGAPP   clientCert		  $TESTUSERFP
 STARTAGENT
 
 # app flags
-FLAGS="-v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-v3 -r1 -t 2 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 ########################################
 # Positive tests
