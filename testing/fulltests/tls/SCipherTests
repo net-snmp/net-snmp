@@ -37,7 +37,7 @@ CONFIGAGENT '[snmp]' tlsAlgorithms DHE-RSA-AES256-SHA:AES256-SHA:DES-CBC3-SHA
 STARTAGENT
 
 # app flags
-FLAGS="-v3 -r1 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-v3 -r1 -t 2 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 # ensure we can access it via standard algorithms on the client side
 DOSETTEST defaultAlgs "$FLAGS"
