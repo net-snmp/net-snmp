@@ -70,4 +70,4 @@ build_script:
 
 test_script:
   - cmd: 'ci\test.bat'
-  - sh:  'if [ $(uname) != Darwin ]; then sudo -E ci/test.sh; fi'
+  - sh:  'sudo -E ci/test.sh'
