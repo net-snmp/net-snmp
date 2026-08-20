@@ -10,6 +10,10 @@
 #
 
 INIT() {
+    if [ "$(uname)" = "Darwin" ]; then
+        SKIP "Darwin does not support sending UDP packets from loopback to a non-loopback IP"
+    fi
+
     # We need to set $SNMP_TEST_DEST to a real IP address; we have a helper script
     # to determine this
     MYIP=`perl ../support/myip $1`
