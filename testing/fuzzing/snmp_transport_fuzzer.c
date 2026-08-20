@@ -30,8 +30,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "../../snmplib/transports/snmpIPBaseDomain.h"
-#include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpIPXDomain.h>
+#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmpUnixDomain.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
