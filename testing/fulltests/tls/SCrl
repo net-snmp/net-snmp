@@ -69,7 +69,7 @@ AGENT_FLAGS="-Dtls"
 STARTAGENT
 
 # app flags
-FLAGS="-Dtls -v3 -r1 -t 2 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="$FLAGS -Dtls -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 # using user 1 - a common name mapped certificate
 # (using the default "snmpapp" certificate because we don't specify another)

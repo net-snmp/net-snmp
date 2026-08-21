@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SNMP_TEST_TIMEOUT=180
+
 . ../support/simple_eval_tools.sh
 
 HEADER TLS-TCP server certificate tests
