@@ -1154,7 +1154,7 @@ snmp_sess_synch_response(struct session_list *slp,
     }
 
     while (state->waiting) {
-        snmp_sess_poll(NULL);
+        snmp_sess_poll(slp);
 
         numfds = 0;
         NETSNMP_LARGE_FD_ZERO(&fdset);

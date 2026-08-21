@@ -6685,6 +6685,8 @@ snmp_sess_poll(struct session_list *sessp)
             slp->transport->f_pending &&
             slp->transport->f_pending(slp->transport))
             __sess_read(slp);
+        if (sessp)
+            break;
     }
 }
 

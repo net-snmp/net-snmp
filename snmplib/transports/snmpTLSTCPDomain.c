@@ -340,6 +340,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     int got_eof = 0;
     SSL *ssl;
     int err;
+    int pending_before;
 
     if (!t || !NETSNMP_IS_VALID_SOCKET(t->sock) || !t->data) {
         snmp_log(LOG_ERR,
@@ -424,10 +425,31 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         tmStateRef->have_addresses = 0;
     }
 
-    rc = SSL_read(ssl, buf, size);
-    MAKE_MEM_DEFINED(&rc, sizeof(rc));
-    if (rc > 0)
-        MAKE_MEM_DEFINED(buf, rc);
+    do {
+        pending_before = read_bio ? BIO_pending(read_bio) : 0;
+
+        rc = SSL_read(ssl, buf, size);
+        MAKE_MEM_DEFINED(&rc, sizeof(rc));
+        if (rc > 0) {
+            MAKE_MEM_DEFINED(buf, rc);
+            break;
+        }
+
+        /* Check if SSL wants to write something */
+        while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) > 0) {
+            DEBUGMSGTL(("tlstcp",
+                        "recv: writing %d bytes of ciphertext to base transport\n",
+                        out_bytes));
+            t->base_transport->f_send(t->base_transport, out_buf, out_bytes, NULL,
+                                      NULL);
+        }
+
+        err = SSL_get_error(ssl, rc);
+        if (err != SSL_ERROR_WANT_READ && err != SSL_ERROR_WANT_WRITE)
+            break;
+        if (!read_bio || BIO_pending(read_bio) >= pending_before)
+            break;
+    } while (!got_eof);
 
     err = SSL_get_error(ssl, rc);
 
