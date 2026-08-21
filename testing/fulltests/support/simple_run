@@ -111,14 +111,37 @@ cd `dirname "$testscript"` || return $?
 PATH=`pwd`:$PATH
 export PATH
 
-# Start a 60s timer.
+# Start a watchdog timer (default: 60s).
+SNMP_TEST_TIMEOUT=${SNMP_TEST_TIMEOUT:=60}
 test_pid=$$
+
+timeout_handler() {
+    trap - TERM INT HUP EXIT
+    kill "$timer_pid" >/dev/null 2>&1
+    wait "$timer_pid" >/dev/null 2>&1
+    testnum=`expr ${testnum:-0} + 1`
+    echo "not ok $testnum - Test timed out after ${SNMP_TEST_TIMEOUT}s"
+    echo "1..$testnum"
+    if [ -n "$SNMP_TMPDIR" ] && [ -d "$SNMP_TMPDIR" ]; then
+        for pfile in "$SNMP_TMPDIR"/*pid*; do
+            [ -f "$pfile" ] || continue
+            pid=`cat "$pfile" 2>/dev/null`
+            if [ -n "$pid" ]; then
+                kill -TERM "$pid" >/dev/null 2>&1
+                kill -KILL "$pid" >/dev/null 2>&1
+            fi
+        done
+    fi
+    exit 1
+}
+
 (
     trap 'kill $sleep_pid 2>/dev/null; exit 0' TERM
-    sleep 60 & sleep_pid=$!
-    wait $sleep_pid && kill "$test_pid"
+    sleep "$SNMP_TEST_TIMEOUT" & sleep_pid=$!
+    wait $sleep_pid && kill -TERM "$test_pid"
 ) >/dev/null 2>&1 &
 timer_pid=$!
+trap 'timeout_handler' TERM INT HUP
 trap 'kill "$timer_pid" >/dev/null 2>&1; wait "$timer_pid" >/dev/null 2>&1' EXIT
 
 . `basename "$testscript"`
@@ -126,6 +149,6 @@ trap 'kill "$timer_pid" >/dev/null 2>&1; wait "$timer_pid" >/dev/null 2>&1' EXIT
 # Stop the timer.
 kill "$timer_pid" >/dev/null 2>&1
 wait "$timer_pid" >/dev/null 2>&1
-trap - EXIT
+trap - EXIT TERM INT HUP
 
 FINISHED

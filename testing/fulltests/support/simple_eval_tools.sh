@@ -541,7 +541,7 @@ STARTPROG() {
     {
 	{ $COMMAND; } >$LOG_FILE.stdout 2>&1
 	echo $? >$LOG_FILE.exitcode
-    } &
+    } >/dev/null 2>&1 </dev/null &
 }
 
 #------------------------------------ -o-
