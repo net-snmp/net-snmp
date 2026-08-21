@@ -116,6 +116,8 @@ netsnmp_tcp_accept(netsnmp_transport *t)
                         "couldn't f_getfl of fd %" NETSNMP_FMT_SKT "\n",
                         newsock));
 
+        netsnmp_set_tcp_nodelay(newsock, 1);
+
         /*
          * Allow user to override the send and receive buffers. Default is
          * to use os default.  Don't worry too much about errors --
@@ -282,6 +284,8 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
         rc = connect(t->sock, (const struct sockaddr *)addr, sizeof(*addr));
         if (rc < 0)
             goto err;
+
+        netsnmp_set_tcp_nodelay(t->sock, 1);
 
         /*
          * Allow user to override the send and receive buffers. Default is

@@ -897,6 +897,7 @@ netsnmp_ssh_transport(const struct netsnmp_ep *ep, int local, int domain)
          */
         netsnmp_sock_buffer_set(t->sock, SO_SNDBUF, local, 0);
         netsnmp_sock_buffer_set(t->sock, SO_RCVBUF, local, 0);
+        netsnmp_set_tcp_nodelay(t->sock, 1);
 
         /* open the SSH session and channel */
         addr_pair->session = libssh2_session_init();

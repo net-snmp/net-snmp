@@ -19,6 +19,7 @@ extern          "C" {
                                 int size);
     int netsnmp_set_non_blocking_mode(NETSNMP_SOCKET sock,
                                       int non_blocking_mode);
+    int netsnmp_set_tcp_nodelay(NETSNMP_SOCKET sock, int nodelay);
 
 #ifdef __cplusplus
 }
