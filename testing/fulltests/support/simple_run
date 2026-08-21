@@ -112,6 +112,7 @@ PATH=`pwd`:$PATH
 export PATH
 
 # Start a watchdog timer (default: 60s).
+[ -z "$SNMP_TEST_TIMEOUT" ] && eval `grep '^SNMP_TEST_TIMEOUT=[0-9][0-9]*' "$testscript" 2>/dev/null`
 SNMP_TEST_TIMEOUT=${SNMP_TEST_TIMEOUT:=60}
 test_pid=$$
 

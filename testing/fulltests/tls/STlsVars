@@ -12,6 +12,11 @@ export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
 NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert -I"
 NSCERTARGS="-C $SNMP_TMPDIR"
 
+FLAGS="-r0"
+if [ -n "${GITHUB_ACTIONS}${APPVEYOR}" ]; then
+    FLAGS="$FLAGS -t2"
+fi
+
 DOSETTEST() {
   value=$1
   args=$2

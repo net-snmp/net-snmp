@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SNMP_TEST_TIMEOUT=300
+
 . ../support/simple_eval_tools.sh
 
 HEADER "full snmpwalk (SNMPv2c) against agent (may take time)"
