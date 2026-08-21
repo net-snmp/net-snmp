@@ -30,6 +30,12 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
 #include <errno.h>
 
 #include <net-snmp/types.h>
@@ -360,4 +366,36 @@ netsnmp_set_non_blocking_mode(NETSNMP_SOCKET sock, int non_blocking_mode)
     } else
         return -1;
 #endif
+}
+
+/**
+ * Sets or clears the TCP_NODELAY option on a socket.
+ *
+ * @param[in] sock Socket descriptor (Unix) or socket handle (Windows).
+ * @param[in] nodelay Non-zero to enable TCP_NODELAY (disable Nagle's algorithm),
+ *                    zero to disable TCP_NODELAY (enable Nagle's algorithm).
+ *
+ * @return zero upon success and a negative value upon error.
+ */
+int
+netsnmp_set_tcp_nodelay(NETSNMP_SOCKET sock, int nodelay)
+{
+    int rc = -1;
+
+#if defined(TCP_NODELAY)
+    if (NETSNMP_IS_VALID_SOCKET(sock)) {
+        rc = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void *)&nodelay,
+                        sizeof(nodelay));
+        if (rc < 0) {
+            DEBUGMSGTL(("socket:nodelay",
+                        "could not set TCP_NODELAY to %d on socket %" NETSNMP_FMT_SKT ": %s\n",
+                        nodelay, sock, strerror(errno)));
+        } else {
+            DEBUGMSGTL(("socket:nodelay",
+                        "set TCP_NODELAY to %d on socket %" NETSNMP_FMT_SKT "\n",
+                        nodelay, sock));
+        }
+    }
+#endif
+    return rc;
 }

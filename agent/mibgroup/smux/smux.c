@@ -64,6 +64,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/tools.h>
 
 #include "smux.h"
@@ -652,6 +653,7 @@ smux_accept(NETSNMP_SOCKET sd)
         snmp_log_perror("[smux_accept] accept failed");
         return NETSNMP_INVALID_SOCKET;
     } else {
+        netsnmp_set_tcp_nodelay(fd, 1);
         DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
                  fd, inet_ntoa(in_socket.sin_addr),
                  ntohs(in_socket.sin_port)));

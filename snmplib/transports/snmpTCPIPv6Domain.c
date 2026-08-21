@@ -123,6 +123,8 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
                         "accept: couldn't f_getfl of fd %" NETSNMP_FMT_SKT "\n",
                         newsock));
 
+        netsnmp_set_tcp_nodelay(newsock, 1);
+
         /*
          * Allow user to override the send and receive buffers. Default is
          * to use os default.  Don't worry too much about errors --
@@ -308,6 +310,8 @@ netsnmp_tcp6_transport(const struct netsnmp_ep *ep, int local)
         DEBUGMSGTL(("netsnmp_tcp6", "connect returns %d\n", rc));
         if (rc < 0)
             goto err;
+
+        netsnmp_set_tcp_nodelay(t->sock, 1);
 
         /*
          * Allow user to override the send and receive buffers. Default is
