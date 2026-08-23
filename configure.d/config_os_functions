@@ -54,6 +54,30 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
     [AC_MSG_RESULT([void])])
 fi
 
+if test x$ac_cv_func_getnetgrent = xyes; then
+AC_MSG_CHECKING([whether the first argument of getnetgrent() is a const pointer])
+netsnmp_save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[
+#ifdef HAVE_NETDB_H
+    #include <netdb.h>
+#endif
+#ifdef HAVE_NETGROUP_H
+    #include <netgroup.h>
+#endif
+]],[[
+    const char *host = NULL;
+    char *user = NULL, *domain = NULL;
+    return getnetgrent(&host, (void *)&user, (void *)&domain);
+]]
+    )], [AC_MSG_RESULT([yes])
+	 AC_DEFINE([GETNETGRENT_ARG1_IS_CONST], [1],
+            [Define if the first argument of getnetgrent() is a const pointer])],
+    [AC_MSG_RESULT([no])])
+CFLAGS="$netsnmp_save_CFLAGS"
+fi
+
 AC_MSG_CHECKING([for _NSGetArgv()])
 AC_LINK_IFELSE(
   [AC_LANG_PROGRAM([#include <crt_externs.h>], [return _NSGetArgv])],

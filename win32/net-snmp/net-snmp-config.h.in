@@ -1365,6 +1365,8 @@
 
 #define SECOND_APPVERIFY_COOKIE_CB_ARG_QUALIFIER const
 
+#define X509_NAME_GET_TEXT_BY_NID_ARG1_IS_CONST 1
+
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #define HAVE_OPENSSL_AES_H 1
 
