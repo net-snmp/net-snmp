@@ -20,7 +20,8 @@ static const struct testdata_s {
     { 1, { 0, 0, 4294967295, 0, 4294967295 }, 5,
       { 6, 12, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f, 0, 0x8f, 0xff, 0xff, 0xff, 0x7f },
       14 },
-#ifndef _WIN32
+#if !defined(__CYGWIN__) && !defined(EIGHTBIT_SUBIDS) && \
+    defined(SIZEOF_UNSIGNED_LONG) && SIZEOF_UNSIGNED_LONG > 4
     { 1, { 1, 3, 1ull << 32 }, 3, { 6, 2, 0x2b, 0 }, 4 },
 #endif
     { 1, { 2, 99, 1 },       3, { 6, 3, 0x81, 0x33, 1 }, 5 },

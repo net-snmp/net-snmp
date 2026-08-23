@@ -1835,6 +1835,9 @@ enum {
  */
 #define UDP_ADDRESSES_IN_HOST_ORDER 1
 
+/* The size of 'unsigned long', as computed by sizeof. */
+#define SIZEOF_UNSIGNED_LONG 4
+
 /* Timeout in milliseconds for Win32 function WaitForSingleObject.
    Used by agent pass. */
 #define NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT 5000

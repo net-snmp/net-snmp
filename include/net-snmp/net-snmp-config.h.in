@@ -1854,6 +1854,9 @@
 /* The size of 'sockaddr_un.sun_path', as computed by sizeof. */
 #undef SIZEOF_SOCKADDR_UN_SUN_PATH
 
+/* The size of 'unsigned long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG
+
 /* Define if statfs takes 2 args and the second argument has type struct
    fs_data. [Ultrix] */
 #undef STAT_STATFS_FS_DATA

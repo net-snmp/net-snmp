@@ -33079,6 +33079,41 @@ printf "%s\n" "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
 fi
 # End of obsolete code.
 
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like 'int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of unsigned long" >&5
+printf %s "checking size of unsigned long... " >&6; }
+if test ${ac_cv_sizeof_unsigned_long+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (unsigned long))" "ac_cv_sizeof_unsigned_long"        "$ac_includes_default"
+then :
+
+else case e in #(
+  e) if test "$ac_cv_type_unsigned_long" = yes; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (unsigned long)
+See 'config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_unsigned_long=0
+   fi ;;
+esac
+fi
+ ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_unsigned_long" >&5
+printf "%s\n" "$ac_cv_sizeof_unsigned_long" >&6; }
+
+
+
+printf "%s\n" "#define SIZEOF_UNSIGNED_LONG $ac_cv_sizeof_unsigned_long" >>confdefs.h
+
+
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
