@@ -1,59 +1,18 @@
-image:
-  - Visual Studio 2022
-  - macos-monterey
-  - Ubuntu2004
-  - Ubuntu2204
-
 environment:
   matrix:
-    - BUILD: MSVCDYNAMIC64
-    - BUILD: MSVCSTATIC64
-    - BUILD: INSTALLER
-    - BUILD: MSYS2
-    - BUILD: MinGW64
-
-matrix:
-  exclude:
-    - image: Ubuntu2004
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      BUILD: MSVCDYNAMIC64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       BUILD: MSVCSTATIC64
-    - image: Ubuntu2004
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       BUILD: INSTALLER
-    - image: Ubuntu2004
-      BUILD: MinGW32
-    - image: Ubuntu2004
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       BUILD: MSYS2
-    - image: Ubuntu2004
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       BUILD: MinGW64
-    - image: Ubuntu2204
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu2204
-      BUILD: INSTALLER
-    - image: Ubuntu2204
-      BUILD: MinGW32
-    - image: Ubuntu2204
-      BUILD: MSYS2
-    - image: Ubuntu2204
-      BUILD: MinGW64
-    - image: Ubuntu2204
-      BUILD: MSVCSTATIC64
-    - image: Ubuntu2204
-      BUILD: INSTALLER
-    - image: Ubuntu2204
-      BUILD: MinGW32
-    - image: Ubuntu2204
-      BUILD: MSYS2
-    - image: Ubuntu2204
-      BUILD: MinGW64
-    - image: macos-monterey
-      BUILD: MSVCSTATIC64
-    - image: macos-monterey
-      BUILD: INSTALLER
-    - image: macos-monterey
-      BUILD: MinGW32
-    - image: macos-monterey
-      BUILD: MSYS2
-    - image: macos-monterey
-      BUILD: MinGW64
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2204
 
 artifacts:
   - path: installer
