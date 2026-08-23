@@ -1,5 +1,7 @@
 environment:
   matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2026
+      BUILD: MSVCDYNAMIC64
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       BUILD: MSVCDYNAMIC64
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
