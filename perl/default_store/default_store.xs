@@ -1,10 +1,17 @@
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/default_store.h>

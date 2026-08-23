@@ -31,13 +31,20 @@
     #pragma push_macro("select")
 #endif
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 #ifdef WIN32
     /* 5. Restore Winsock macro definitions, overriding Perl's redefinitions */
@@ -460,8 +467,10 @@ int type;
 #define USE_ENUMS 1
 #define USE_SPRINT_VALUE 2
 static int
-#if defined(__has_attribute) && __has_attribute(nonnull)
+#if defined(__has_attribute)
+#if __has_attribute(nonnull)
 __attribute__((nonnull(1)))
+#endif
 #endif
 __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
                 struct tree *tp, int type, int flag)

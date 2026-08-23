@@ -191,7 +191,7 @@ _cert_get_name(X509 *ocert, int which, char **buf, int *len, int flags)
 char *
 netsnmp_openssl_cert_get_subjectName(X509 *ocert, char **buf, int *len)
 {
-    X509_NAME       *osubj_name;
+    const X509_NAME *osubj_name;
     int              space;
     char            *buf_ptr;
 
@@ -237,12 +237,12 @@ netsnmp_openssl_cert_get_commonName(X509 *ocert, char **buf, int *len)
 void
 netsnmp_openssl_cert_dump_names(X509 *ocert)
 {
-    int              i, onid;
-    int              oname_value_type;
-    X509_NAME_ENTRY *oname_entry;
-    ASN1_STRING     *oname_value;
-    X509_NAME       *osubj_name;
-    const char      *prefix_short, *prefix_long;
+    int                    i, onid;
+    int                    oname_value_type;
+    const X509_NAME_ENTRY *oname_entry;
+    const ASN1_STRING     *oname_value;
+    const X509_NAME       *osubj_name;
+    const char            *prefix_short, *prefix_long;
 
     if (NULL == ocert)
         return;
@@ -282,7 +282,7 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
 #endif /* NETSNMP_FEATURE_REMOVE_CERT_DUMP_NAMES */
 
 static char *
-_cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
+_cert_get_extension(const X509_EXTENSION  *oext, char **buf, int *len, int flags)
 {
     int              space;
     char            *buf_ptr = NULL;
@@ -297,7 +297,7 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
         snmp_log(LOG_ERR, "could not get bio for extension\n");
         return NULL;
     }
-    if (X509V3_EXT_print(bio, oext, 0, 0) != 1) {
+    if (X509V3_EXT_print(bio, NETSNMP_REMOVE_CONST(X509_EXTENSION *, oext), 0, 0) != 1) {
         snmp_log(LOG_ERR, "could not print extension!\n");
         goto out;
     }
@@ -336,7 +336,7 @@ out:
 X509_EXTENSION  *
 _cert_get_extension_at(X509 *ocert, int pos, char **buf, int *len, int flags)
 {
-    X509_EXTENSION  *oext;
+    const X509_EXTENSION  *oext;
 
     if ((NULL == ocert) || ((buf && !len) || (len && !buf)))
         return NULL;
@@ -348,7 +348,7 @@ _cert_get_extension_at(X509 *ocert, int pos, char **buf, int *len, int flags)
         return NULL;
     }
 
-    return oext;
+    return NETSNMP_REMOVE_CONST(X509_EXTENSION *, oext);
 }
 
 /** netsnmp_openssl_cert_get_extension: get extension field from cert
@@ -360,7 +360,7 @@ static char *
 _cert_get_extension_str_at(X509 *ocert, int pos, char **buf, int *len,
                            int flags)
 {
-    X509_EXTENSION  *oext;
+    const X509_EXTENSION  *oext;
 
     if ((NULL == ocert) || ((buf && !len) || (len && !buf)))
         return NULL;
@@ -494,10 +494,10 @@ netsnmp_openssl_cert_get_subjectAltNames(X509 *ocert, char **buf, int *len)
 void
 netsnmp_openssl_cert_dump_extensions(X509 *ocert)
 {
-    X509_EXTENSION  *extension;
-    const char      *extension_name;
-    char             buf[SNMP_MAXBUF], *buf_ptr = buf, *str, *lf;
-    int              i, num_extensions, buf_len, nid;
+    const X509_EXTENSION *extension;
+    const char           *extension_name;
+    char                  buf[SNMP_MAXBUF], *buf_ptr = buf, *str, *lf;
+    int                   i, num_extensions, buf_len, nid;
 
     if (NULL == ocert)
         return;
@@ -512,7 +512,7 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
         DEBUGMSGT(("9:cert:dump", "    0 extensions\n"));
     for(i = 0; i < num_extensions; i++) {
         extension = X509_get_ext(ocert, i);
-        nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
+        nid = OBJ_obj2nid(X509_EXTENSION_get_object(NETSNMP_REMOVE_CONST(X509_EXTENSION *, extension)));
         extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
         str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);

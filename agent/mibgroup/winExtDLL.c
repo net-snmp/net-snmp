@@ -316,7 +316,14 @@ init_winExtDLL(void)
 
     DEBUGMSG(("winExtDLL", "init_winExtDLL started.\n"));
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
     GetVersionEx(&s_versioninfo);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
     IsWow64Process = (pfIsWow64Process)(uintptr_t)
 	GetProcAddress(GetModuleHandle("kernel32"), "IsWow64Process");

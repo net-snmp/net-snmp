@@ -46,6 +46,9 @@
 #ifdef HAVE_WIN32_PLATFORM_SDK
 #include "mibgroup/mibII/at.h"
 #include "mibgroup/mibII/interfaces.h"
+#include "mibgroup/if-mib/ifTable/ifTable.h"
+#include "mibgroup/if-mib/ifXTable/ifXTable.h"
+#include <net-snmp/data_access/interface.h>
 #include "mibgroup/mibII/tcp.h"
 #include "mibgroup/mibII/icmp.h"
 #include "mibgroup/mibII/ip.h"
