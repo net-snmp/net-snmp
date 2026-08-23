@@ -147,7 +147,11 @@ void netsnmp_init_openssl(void) {
 static char *
 _cert_get_name(X509 *ocert, int which, char **buf, int *len, int flags)
 {
+#ifdef X509_NAME_GET_TEXT_BY_NID_ARG1_IS_CONST
+    const X509_NAME *osubj_name;
+#else
     X509_NAME       *osubj_name;
+#endif
     int              space;
     char            *buf_ptr;
 

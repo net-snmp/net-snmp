@@ -392,7 +392,11 @@ int netsnmp_parse_source_as_netgroup(const char *sourcep, const char *community,
                        const char *secName, const char *contextName, int negate)
 {
     const char *netgroup = sourcep+1;
+#ifdef GETNETGRENT_ARG1_IS_CONST
+    const char *host, *user, *domain;
+#else
     char *host, *user, *domain;
+#endif
     struct in_addr network, mask;
     int rc;
 
