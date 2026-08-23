@@ -1058,7 +1058,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
     }
 
     while (state->waiting) {
-        snmp_sess_poll(NULL);
+        snmp_poll();
 
         numfds = 0;
         NETSNMP_LARGE_FD_ZERO(&fdset);

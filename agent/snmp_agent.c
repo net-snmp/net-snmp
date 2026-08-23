@@ -777,7 +777,7 @@ agent_check_and_process(int block)
     int                  count;
     int                  fakeblock = 0;
 
-    snmp_sess_poll(NULL);
+    snmp_poll();
 
     numfds = 0;
     netsnmp_large_fd_set_init(&readfds, FD_SETSIZE);

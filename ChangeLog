@@ -3,9 +3,9 @@
 -----------------------
 
 ABI CHANGES
- * The new function snmp_sess_poll() must be called before snmp_select_info(),
-   snmp_select_info2(), snmp_sess_select_info_flags() or
-   snmp_sess_select_info2_flags() is called. If snmp_sess_poll() is not called,
+ * The new functions snmp_poll() and snmp_sess_poll() must be called before
+   snmp_select_info(), snmp_select_info2(), snmp_sess_select_info_flags() or
+   snmp_sess_select_info2_flags() is called. If neither function is called,
    timeouts will occur for the TLS-TCP and DTLS-UDP transport protocols.
  * The following data structures, type definitions and constants have been
    removed from the Net-SNMP header files:

@@ -150,6 +150,9 @@ extern          "C" {
                                         netsnmp_pdu **);
 
     NETSNMP_IMPORT
+    void            snmp_poll(void);
+
+    NETSNMP_IMPORT
     void            snmp_sess_poll(struct session_list *);
 
     /*

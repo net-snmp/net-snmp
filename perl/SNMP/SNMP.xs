@@ -5009,7 +5009,10 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
         gettimeofday(ltvp, NULL);
 	timersub(ltvp, itvp, ltvp);
         while (1) {
-           snmp_sess_poll(api_mode == SNMP_API_SINGLE ? ss : NULL);
+           if (api_mode == SNMP_API_SINGLE)
+              snmp_sess_poll(ss);
+           else
+              snmp_poll();
            numfds = 0;
            FD_ZERO(&fdset);
            block = 1;

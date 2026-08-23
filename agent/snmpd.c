@@ -1270,7 +1270,7 @@ receive(void)
         if (reconfig)
             snmpd_reconfig();
 
-        snmp_sess_poll(NULL);
+        snmp_poll();
 
         /*
          * default to sleeping for a really long time. INT_MAX
