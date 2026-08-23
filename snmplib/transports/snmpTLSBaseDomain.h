@@ -29,6 +29,13 @@ SSL_CTX *get_server_ctx(void);
 #define NETSNMP_TLSBASE_IS_CLIENT     0x01
 #define NETSNMP_TLSBASE_CERT_FP_VERIFIED 0x02
 
+typedef enum {
+    NETSNMP_TLS_HANDSHAKE_IDLE = 0,
+    NETSNMP_TLS_HANDSHAKE_IN_PROGRESS,
+    NETSNMP_TLS_HANDSHAKE_COMPLETE,
+    NETSNMP_TLS_HANDSHAKE_FAILED
+} netsnmp_tls_handshake_state;
+
 /*
  * _Internal_ structures
  */
@@ -47,6 +54,9 @@ typedef struct _netsnmpTLSBaseData_s {
     char                      *their_hostname;
     char                      *trust_cert;
     int                        want_read;
+    netsnmp_tls_handshake_state handshake_state;
+    char                      *write_cache;
+    size_t                     write_cache_len;
 } _netsnmpTLSBaseData;
 
 #define VRFY_PARENT_WAS_OK 1

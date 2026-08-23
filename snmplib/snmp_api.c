@@ -6825,6 +6825,7 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
     struct timeval  now, earliest, alarm_tm;
     int             active = 0, requests = 0;
     int             next_alarm = 0;
+    int             has_pending_data = 0;
 
     timerclear(&earliest);
 
@@ -6870,6 +6871,10 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
         }
 
         NETSNMP_LARGE_FD_SET(slp->transport->sock, fdset);
+        if (slp->transport->f_pending &&
+            slp->transport->f_pending(slp->transport)) {
+            has_pending_data = 1;
+        }
         if (slp->internal != NULL && slp->internal->requests) {
             /*
              * Found another session with outstanding requests.  
@@ -6895,6 +6900,14 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
         }
     }
     DEBUGMSG(("sess_select", "\n"));
+
+    if (has_pending_data) {
+        DEBUGMSGT(("sess_select",
+                   "pending transport data present, setting timeout to 0\n"));
+        timerclear(timeout);
+        *block = 0;
+        return active;
+    }
 
     netsnmp_get_monotonic_clock(&now);
 

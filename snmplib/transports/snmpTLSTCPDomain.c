@@ -177,6 +177,9 @@ netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
     oldtlsdata->ssl = NULL;
     newtlsdata->ssl_context = NULL;
     newtlsdata->accept_bio = NULL;
+    newtlsdata->handshake_state = oldtlsdata->handshake_state;
+    oldtlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_IDLE;
+    newtlsdata->flags = oldtlsdata->flags;
 
     if (oldtlsdata->addr_string)
         newtlsdata->addr_string = strdup(oldtlsdata->addr_string);
@@ -200,127 +203,177 @@ netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
 }
 
 static int
-netsnmp_tlstcp_run_handshake(netsnmp_transport *t)
+_tlstcp_send_all(netsnmp_transport *base_transport, const void *buf, int len)
 {
-    _netsnmpTLSBaseData *tlsdata = t->data;
-    SSL *ssl = tlsdata->ssl;
-    BIO *write_bio = SSL_get_wbio(ssl);
-    BIO *read_bio = SSL_get_rbio(ssl);
-    char buf[4096];
-    int ssl_err;
-    int bytes;
-    int rc;
+    const char *p = (const char *)buf;
+    int         remaining = len;
 
-    while (1) {
-        rc = SSL_connect(ssl);
-        if (rc == 1) {
-            /* Flush final handshake messages */
-            while ((bytes = BIO_read(write_bio, buf, sizeof(buf))) > 0) {
-                int sent = t->base_transport->f_send(t->base_transport, buf, bytes, NULL, NULL);
-                if (sent < 0) {
-                    snmp_log(LOG_ERR, "TLSTCP: handshake flush failed\n");
-                    return -1;
-                }
-            }
-            return 1; /* Success */
-        }
-        ssl_err = SSL_get_error(ssl, rc);
+    if (!base_transport || !base_transport->f_send)
+        return -1;
 
-        /* Check if we have data to write to socket */
-        while ((bytes = BIO_read(write_bio, buf, sizeof(buf))) > 0) {
-            int sent;
-
-            sent = t->base_transport->f_send(t->base_transport, buf, bytes,
-                                             NULL, NULL);
-            if (sent < 0) {
-                snmp_log(LOG_ERR, "TLSTCP: handshake send failed\n");
-                return -1;
-            }
-        }
-
-        if (ssl_err == SSL_ERROR_WANT_READ) {
-            /* We need to read from socket and write to read_bio */
-            void *opaque = NULL;
-            int olen = 0;
-
-            bytes = t->base_transport->f_recv(t->base_transport, buf,
-                                              sizeof(buf), &opaque, &olen);
-            free(opaque);
-            if (bytes < 0) {
-                snmp_log(LOG_ERR, "TLSTCP: handshake recv failed\n");
-                return -1;
-            }
-            if (bytes == 0) {
-                snmp_log(LOG_ERR, "TLSTCP: handshake recv connection closed\n");
-                return -1;
-            }
-            BIO_write(read_bio, buf, bytes);
-        } else if (ssl_err == SSL_ERROR_WANT_WRITE) {
-            continue;
-        } else {
-            _openssl_log_error(rc, ssl, "SSL_connect");
+    while (remaining > 0) {
+        int sent =
+            base_transport->f_send(base_transport, p, remaining, NULL, NULL);
+        if (sent < 0) {
+            if (errno == EINTR)
+                continue;
             return -1;
         }
+        if (sent == 0)
+            return -1;
+        p += sent;
+        remaining -= sent;
     }
+    return len;
 }
 
 static int
-netsnmp_tlstcp_run_handshake_server(SSL *ssl, NETSNMP_SOCKET newsock)
+_tlstcp_socket_send_all(NETSNMP_SOCKET sock, const void *buf, int len)
 {
-    BIO *read_bio = SSL_get_rbio(ssl);
-    BIO *write_bio = SSL_get_wbio(ssl);
-    char buf[4096];
-    int ssl_err;
-    int bytes;
-    int rc;
+    const char *p = (const char *)buf;
+    int         remaining = len;
 
-    while (1) {
-        rc = SSL_accept(ssl);
-        if (rc == 1) {
-            /* Flush final handshake messages */
-            while ((bytes = BIO_read(write_bio, buf, sizeof(buf))) > 0) {
-                int sent;
-
-                sent = send(newsock, (const char *)buf, bytes, 0);
-                if (sent < 0) {
-                    snmp_log(LOG_ERR, "TLSTCP: server handshake flush failed\n");
-                    return -1;
-                }
-            }
-            return 1; /* Success */
-        }
-        ssl_err = SSL_get_error(ssl, rc);
-
-        /* Check if we have data to write to socket */
-        while ((bytes = BIO_read(write_bio, buf, sizeof(buf))) > 0) {
-            int sent = send(newsock, buf, bytes, 0);
-            if (sent < 0) {
-                snmp_log(LOG_ERR, "TLSTCP: server handshake send failed\n");
-                return -1;
-            }
-        }
-
-        if (ssl_err == SSL_ERROR_WANT_READ) {
-            /* We need to read from socket and write to read_bio */
-            bytes = recv(newsock, buf, sizeof(buf), 0);
-            if (bytes < 0) {
-                snmp_log(LOG_ERR, "TLSTCP: server handshake recv failed\n");
-                return -1;
-            }
-            if (bytes == 0) {
-                snmp_log(LOG_ERR,
-                         "TLSTCP: server handshake recv connection closed\n");
-                return -1;
-            }
-            BIO_write(read_bio, buf, bytes);
-        } else if (ssl_err == SSL_ERROR_WANT_WRITE) {
-            continue;
-        } else {
-            snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
-            _openssl_log_error(rc, ssl, "SSL_accept");
+    while (remaining > 0) {
+        int sent = send(sock, p, remaining, 0);
+        if (sent < 0) {
+            if (errno == EINTR)
+                continue;
             return -1;
         }
+        if (sent == 0)
+            return -1;
+        p += sent;
+        remaining -= sent;
     }
+    return len;
+}
+
+static int
+_tlstcp_step_handshake(netsnmp_transport *t)
+{
+    _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
+    SSL *ssl = tlsdata->ssl;
+    BIO *write_bio;
+    char out_buf[4096];
+    int out_bytes;
+    int rc;
+
+    if (!ssl)
+        return -1;
+
+    write_bio = SSL_get_wbio(ssl);
+
+    rc = SSL_do_handshake(ssl);
+
+    /* Flush any handshake messages produced */
+    if (write_bio) {
+        while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) > 0) {
+            if (_tlstcp_send_all(t->base_transport, out_buf, out_bytes) < 0) {
+                tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_FAILED;
+                return -1;
+            }
+        }
+    }
+
+    if (rc == 1) {
+        int vrfy;
+        if (tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) {
+            vrfy = netsnmp_tlsbase_verify_server_cert(ssl, tlsdata);
+            if (vrfy != SNMPERR_SUCCESS) {
+                snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
+                snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
+                tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_FAILED;
+                return -1;
+            }
+        } else {
+            vrfy = netsnmp_tlsbase_verify_client_cert(ssl, tlsdata);
+            if (vrfy != SNMPERR_SUCCESS) {
+                snmp_log(LOG_ERR, "TLSTCP: Failed checking client certificate\n");
+                snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+                snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
+                tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_FAILED;
+                return -1;
+            }
+        }
+        tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_COMPLETE;
+        return 1;
+    }
+
+    {
+        int err = SSL_get_error(ssl, rc);
+        if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+            return 0;
+        }
+    }
+
+    tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_FAILED;
+    if (!(tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT))
+        snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
+    else
+        snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
+    _openssl_log_error(rc, ssl, "SSL_do_handshake");
+    return -1;
+}
+
+static int
+_tlstcp_add_buffered_data(_netsnmpTLSBaseData *tlsdata, const void *buf, size_t size)
+{
+    if (tlsdata->write_cache && tlsdata->write_cache_len > 0) {
+        size_t newsize = tlsdata->write_cache_len + size;
+        char *newbuf = realloc(tlsdata->write_cache, newsize);
+        if (!newbuf)
+            return -1;
+        tlsdata->write_cache = newbuf;
+        memcpy(tlsdata->write_cache + tlsdata->write_cache_len, buf, size);
+        tlsdata->write_cache_len = newsize;
+    } else {
+        SNMP_FREE(tlsdata->write_cache);
+        tlsdata->write_cache = netsnmp_memdup(buf, size);
+        if (!tlsdata->write_cache)
+            return -1;
+        tlsdata->write_cache_len = size;
+    }
+    return 0;
+}
+
+static int
+_tlstcp_flush_buffered_data(netsnmp_transport *t)
+{
+    _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
+    SSL *ssl = tlsdata->ssl;
+    BIO *write_bio;
+    char out_buf[4096];
+    int out_bytes;
+    int rc;
+
+    if (!tlsdata->write_cache || tlsdata->write_cache_len == 0)
+        return 0;
+
+    if (tlsdata->handshake_state != NETSNMP_TLS_HANDSHAKE_COMPLETE)
+        return 0;
+
+    write_bio = SSL_get_wbio(ssl);
+
+    rc = SSL_write(ssl, tlsdata->write_cache, tlsdata->write_cache_len);
+    if (rc > 0) {
+        if ((size_t)rc >= tlsdata->write_cache_len) {
+            SNMP_FREE(tlsdata->write_cache);
+            tlsdata->write_cache_len = 0;
+        } else {
+            memmove(tlsdata->write_cache, tlsdata->write_cache + rc,
+                    tlsdata->write_cache_len - rc);
+            tlsdata->write_cache_len -= rc;
+        }
+    }
+
+    if (write_bio) {
+        while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) > 0) {
+            if (_tlstcp_send_all(t->base_transport, out_buf, out_bytes) < 0)
+                return -1;
+        }
+    }
+
+    return 0;
 }
 
 static int
@@ -403,7 +456,33 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     if (bytes_read_total > 0)
         tlsdata->want_read = 0;
 
-    /* 2. Read decrypted plaintext from SSL */
+    /* 2. Advance handshake if in progress */
+    if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_IN_PROGRESS) {
+        int h_rc = _tlstcp_step_handshake(t);
+        if (h_rc < 0)
+            return -1;
+        if (tlsdata->handshake_state != NETSNMP_TLS_HANDSHAKE_COMPLETE) {
+            t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
+            *opaque = NULL;
+            *olength = 0;
+            return 0;
+        }
+    }
+
+    if (tlsdata->handshake_state != NETSNMP_TLS_HANDSHAKE_COMPLETE) {
+        if (got_eof)
+            return -1;
+        t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
+        *opaque = NULL;
+        *olength = 0;
+        return 0;
+    }
+
+    /* 3. Flush any buffered outgoing writes */
+    if (tlsdata->write_cache_len > 0)
+        _tlstcp_flush_buffered_data(t);
+
+    /* 4. Read decrypted plaintext from SSL */
     tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
 
     if (tmStateRef == NULL) {
@@ -432,6 +511,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         MAKE_MEM_DEFINED(&rc, sizeof(rc));
         if (rc > 0) {
             MAKE_MEM_DEFINED(buf, rc);
+            tlsdata->want_read = 0;
             break;
         }
 
@@ -440,8 +520,10 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             DEBUGMSGTL(("tlstcp",
                         "recv: writing %d bytes of ciphertext to base transport\n",
                         out_bytes));
-            t->base_transport->f_send(t->base_transport, out_buf, out_bytes, NULL,
-                                      NULL);
+            if (_tlstcp_send_all(t->base_transport, out_buf, out_bytes) < 0) {
+                DEBUGMSGTL(
+                    ("tlstcp", "recv: failed to send ciphertext reply\n"));
+            }
         }
 
         err = SSL_get_error(ssl, rc);
@@ -458,8 +540,9 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("tlstcp",
                     "recv: writing %d bytes of ciphertext to base transport\n",
                     out_bytes));
-        t->base_transport->f_send(t->base_transport, out_buf, out_bytes, NULL,
-                                  NULL);
+        if (_tlstcp_send_all(t->base_transport, out_buf, out_bytes) < 0) {
+            DEBUGMSGTL(("tlstcp", "recv: failed to send ciphertext reply\n"));
+        }
     }
 
     if (rc <= 0) {
@@ -509,14 +592,16 @@ netsnmp_tlstcp_pending(netsnmp_transport *t)
     _netsnmpTLSBaseData *tlsdata = t->data;
 
     if (tlsdata && tlsdata->ssl) {
-        BIO *read_bio = SSL_get_rbio(tlsdata->ssl);
-        int ssl_p = SSL_pending(tlsdata->ssl);
-        int bio_p = read_bio ? BIO_pending(read_bio) : 0;
+        if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE) {
+            BIO *read_bio = SSL_get_rbio(tlsdata->ssl);
+            int ssl_p = SSL_pending(tlsdata->ssl);
+            int bio_p = read_bio ? BIO_pending(read_bio) : 0;
 
-        if (ssl_p > 0 || (bio_p > 0 && !tlsdata->want_read)) {
-            DEBUGMSGTL(("tlstcp", "pending: SSL %d, BIO %d (want_read %d)\n",
-                        ssl_p, bio_p, tlsdata->want_read));
-            return 1;
+            if (ssl_p > 0 || (bio_p > 0 && !tlsdata->want_read)) {
+                DEBUGMSGTL(("tlstcp", "pending: SSL %d, BIO %d (want_read %d)\n",
+                            ssl_p, bio_p, tlsdata->want_read));
+                return 1;
+            }
         }
     }
     return 0;
@@ -564,6 +649,20 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
         !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
 
+    /* If handshake is still in progress or we have buffered data, queue this packet */
+    if (tlsdata->handshake_state != NETSNMP_TLS_HANDSHAKE_COMPLETE ||
+        tlsdata->write_cache_len > 0) {
+        if (_tlstcp_add_buffered_data(tlsdata, buf, size) < 0) {
+            snmp_log(LOG_ERR, "tlstcp_send: failed to buffer data\n");
+            return -1;
+        }
+        if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_IN_PROGRESS)
+            _tlstcp_step_handshake(t);
+        else if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE)
+            _tlstcp_flush_buffered_data(t);
+        return size;
+    }
+
     write_bio = SSL_get_wbio(ssl);
 
     rc = SSL_write(ssl, buf, size);
@@ -571,21 +670,25 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
     if (rc <= 0) {
         int err = SSL_get_error(ssl, rc);
         if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
-            /* try to send anyway */
+            /* Buffer data to be retried when socket is ready */
+            if (_tlstcp_add_buffered_data(tlsdata, buf, size) < 0) {
+                snmp_log(LOG_ERR, "tlstcp_send: failed to buffer data\n");
+                return -1;
+            }
+            rc = size;
         } else {
             _openssl_log_error(rc, ssl, "SSL_write");
             return rc;
         }
     }
 
-    while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) > 0) {
-        int sent;
-        DEBUGMSGTL(("tlstcp", "writing %d bytes of ciphertext to base transport\n", out_bytes));
-        sent = t->base_transport->f_send(t->base_transport, out_buf, out_bytes, NULL, NULL);
-        DEBUGMSGTL(("tlstcp", "base transport sent %d bytes\n", sent));
-        if (sent < 0) {
-            snmp_log(LOG_ERR, "TLSTCP: send failed\n");
-            return -1;
+    if (write_bio) {
+        while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) > 0) {
+            int sent = _tlstcp_send_all(t->base_transport, out_buf, out_bytes);
+            if (sent < 0) {
+                snmp_log(LOG_ERR, "TLSTCP: send failed\n");
+                return -1;
+            }
         }
     }
 
@@ -593,6 +696,44 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
 }
 
 
+
+static void
+_tlstcp_drain(netsnmp_transport *t)
+{
+    _netsnmpTLSBaseData *tlsdata = t->data;
+    int i;
+    char drain_buf[4096];
+    void *opaque = NULL;
+    int olen = 0;
+    fd_set readfs;
+    struct timeval tv;
+
+    if (!tlsdata || !tlsdata->ssl ||
+        (tlsdata->write_cache_len == 0 &&
+         tlsdata->handshake_state != NETSNMP_TLS_HANDSHAKE_IN_PROGRESS))
+        return;
+
+    for (i = 0; i < 10 && (tlsdata->write_cache_len > 0 ||
+                           tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_IN_PROGRESS); ++i) {
+        if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_IN_PROGRESS)
+            _tlstcp_step_handshake(t);
+        if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE &&
+            tlsdata->write_cache_len > 0)
+            _tlstcp_flush_buffered_data(t);
+        if (tlsdata->write_cache_len == 0 &&
+            tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE)
+            break;
+
+        FD_ZERO(&readfs);
+        FD_SET(t->sock, &readfs);
+        tv.tv_sec = 0;
+        tv.tv_usec = 50000;
+        if (select(t->sock + 1, &readfs, NULL, NULL, &tv) > 0) {
+            netsnmp_tlstcp_recv(t, drain_buf, sizeof(drain_buf), &opaque, &olen);
+            SNMP_FREE(opaque);
+        }
+    }
+}
 
 static int
 netsnmp_tlstcp_close(netsnmp_transport *t)
@@ -615,6 +756,8 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
 
     _tlstcp_sync_socks(t);
 
+    _tlstcp_drain(t);
+
     DEBUGMSGTL(("tlstcp", "Shutting down SSL connection\n"));
     if (tlsdata->ssl) {
         SSL_shutdown(tlsdata->ssl);
@@ -624,10 +767,12 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
             while ((out_bytes = BIO_read(write_bio, out_buf, sizeof(out_buf))) >
                    0) {
                 if (t->base_transport) {
-                    t->base_transport->f_send(t->base_transport, out_buf,
-                                              out_bytes, NULL, NULL);
+                    if (_tlstcp_send_all(t->base_transport, out_buf,
+                                         out_bytes) < 0)
+                        break;
                 } else if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
-                    if (send(t->sock, out_buf, out_bytes, 0) < 0)
+                    if (_tlstcp_socket_send_all(t->sock, out_buf, out_bytes) <
+                        0)
                         break;
                 }
             }
@@ -653,10 +798,10 @@ static NETSNMP_SOCKET
 netsnmp_tlstcp_accept(netsnmp_transport *t)
 {
     _netsnmpTLSBaseData *tlsdata = t->data;
+    _netsnmp_verify_info *verify_info;
     BIO *read_bio, *write_bio;
     NETSNMP_SOCKET newsock;
     SSL *ssl;
-    int rc;
 
     DEBUGMSGTL(("tlstcp", "netsnmp_tlstcp_accept called\n"));
 
@@ -680,8 +825,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         }
     }
 
-    /* Ensure newsock is blocking for handshake */
-    netsnmp_set_non_blocking_mode(newsock, FALSE);
+    netsnmp_set_non_blocking_mode(newsock, TRUE);
 
     ssl = SSL_new(tlsdata->ssl_context);
     if (!ssl) {
@@ -699,26 +843,22 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         goto free_ssl;
     }
     SSL_set_bio(ssl, read_bio, write_bio);
-    SSL_set_accept_state(ssl);
+    SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
-    rc = netsnmp_tlstcp_run_handshake_server(ssl, newsock);
-    if (rc <= 0)
-        goto free_ssl;
-
-    if (netsnmp_tlsbase_verify_client_cert(ssl, tlsdata) != SNMPERR_SUCCESS) {
-        snmp_log(LOG_ERR, "TLSTCP: Failed checking client certificate\n");
-        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
-        SSL_shutdown(ssl);
+    verify_info = SNMP_MALLOC_TYPEDEF(_netsnmp_verify_info);
+    if (NULL == verify_info) {
+        snmp_log(LOG_ERR, "TLSTCP: failed to allocate verify_info\n");
         goto free_ssl;
     }
+    SSL_set_ex_data(ssl, tls_get_verify_info_index(), verify_info);
+
+    SSL_set_accept_state(ssl);
+    tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_IN_PROGRESS;
 
     DEBUGMSGTL(("tlstcp", "accept succeeded on sock %" NETSNMP_FMT_SKT "\n",
                 newsock));
 
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
-
-    /* Make newsock non-blocking again before returning */
-    netsnmp_set_non_blocking_mode(newsock, TRUE);
 
     tlsdata->ssl = ssl;
 
@@ -744,7 +884,6 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     BIO *read_bio, *write_bio;
     SSL_CTX *ctx;
     SSL *ssl;
-    int rc = 0;
 
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENS);
 
@@ -797,26 +936,22 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
 
     SSL_set_ex_data(ssl, tls_get_verify_info_index(), verify_info);
 
-    /* Run handshake (blocking during open) */
-    rc = netsnmp_tlstcp_run_handshake(t);
-    if (rc <= 0) {
-        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
-        snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
-        goto err_free_ssl;
-    }
-
-    if (netsnmp_tlsbase_verify_server_cert(ssl, tlsdata) != SNMPERR_SUCCESS) {
-        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
-        snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
-        goto err_free_ssl;
-    }
-
     t->sock = t->base_transport->sock;
     if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
         if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
             DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on client fd %d\n",
                         t->sock));
         }
+    }
+
+    SSL_set_connect_state(ssl);
+    tlsdata->handshake_state = NETSNMP_TLS_HANDSHAKE_IN_PROGRESS;
+
+    /* Perform initial non-blocking handshake step (sends ClientHello) */
+    if (_tlstcp_step_handshake(t) < 0) {
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+        snmp_log(LOG_ERR, "tlstcp: failed initial handshake step\n");
+        goto err_free_ssl;
     }
 
     return t;

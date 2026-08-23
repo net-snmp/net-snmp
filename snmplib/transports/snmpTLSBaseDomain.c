@@ -1092,6 +1092,7 @@ void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
     SNMP_FREE(tlsbase->their_hostname);
     SNMP_FREE(tlsbase->trust_cert);
     SNMP_FREE(tlsbase->addr);
+    SNMP_FREE(tlsbase->write_cache);
 
     /* free the base itself */
     SNMP_FREE(tlsbase);
