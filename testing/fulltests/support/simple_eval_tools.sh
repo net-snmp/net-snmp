@@ -72,13 +72,30 @@ CAN_USLEEP() {
    if [ "$SNMP_CAN_USLEEP" = 0 -o "$SNMP_CAN_USLEEP" = 1 ] ; then
      return 0
    fi
-   sleep .1 > /dev/null 2>&1
-   if [ $? = 0 ] ; then
+   if sleep .1 > /dev/null 2>&1; then
+     SNMP_CAN_USLEEP=1
+   elif command -v perl > /dev/null 2>&1; then
+     SNMP_CAN_USLEEP=1
+   elif command -v python3 > /dev/null 2>&1 || command -v python > /dev/null 2>&1; then
      SNMP_CAN_USLEEP=1
    else
      SNMP_CAN_USLEEP=0
    fi
    export SNMP_CAN_USLEEP
+}
+
+SLEEP() {
+   if sleep .1 > /dev/null 2>&1; then
+     :
+   elif command -v perl > /dev/null 2>&1; then
+     perl -e 'select(undef, undef, undef, 0.1);'
+   elif command -v python3 > /dev/null 2>&1; then
+     python3 -c 'import time; time.sleep(0.1)'
+   elif command -v python > /dev/null 2>&1; then
+     python -c 'import time; time.sleep(0.1)'
+   else
+     sleep 1
+   fi
 }
 
 
@@ -405,31 +422,19 @@ WAITFORCOND() {
 	if eval "$@"; then
 	    break
 	fi
-        if [ $SNMP_CAN_USLEEP = 1 ]; then
-            sleep .1
-        else
-            sleep 1
-        fi
+        SLEEP
         sleeptime=`expr $sleeptime - 1`
     done
 }
 
 WAITFORAGENT() {
     WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
-    if [ $SNMP_CAN_USLEEP = 1 ]; then
-        sleep .1
-    else
-        sleep 1
-    fi
+    SLEEP
 }
 
 WAITFORTRAPD() {
     WAITFOR "$@" $SNMP_SNMPTRAPD_LOG_FILE
-    if [ $SNMP_CAN_USLEEP = 1 ]; then
-        sleep .1
-    else
-        sleep 1
-    fi
+    SLEEP
 }
 
 # Wait until pattern "$1" appears in file "$2".
