@@ -41,8 +41,6 @@
 	 *
 	 *********************/
 
-static int      HRP_savedDiskIndex;
-static int      HRP_savedPartIndex;
 static char     HRP_savedName[1024];
 static char     HRP_savedLabel[1024];
 
@@ -329,8 +327,6 @@ Get_Next_HR_Partition(void)
 static void
 Save_HR_Partition(int disk_idx, int part_idx)
 {
-    HRP_savedDiskIndex = disk_idx;
-    HRP_savedPartIndex = part_idx;
     (void) Get_Next_HR_Disk_Partition(HRP_savedName, sizeof(HRP_savedName), HRP_index);
     (void) Get_HR_Disk_Label(HRP_savedLabel, sizeof(HRP_savedLabel), HRP_savedName);
 }

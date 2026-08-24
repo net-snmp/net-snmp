@@ -45,7 +45,6 @@ size_t netsnmp_max_message_number_oid_len = 13;
 oid objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 
 #define DEFAULT_MAX_DELIVER_SIZE -1
-static int default_max_size;
 unsigned int alarm_reg;
 static netsnmp_container *deliver_container;
 
@@ -103,9 +102,6 @@ init_deliverByNotify(void)
     }
     deliver_container->container_name = strdup("deliverByNotify");
     deliver_container->compare = _deliver_compare;
-
-    /* set the defaults */
-    default_max_size = DEFAULT_MAX_DELIVER_SIZE;
 
     alarm_reg = 0;
 }
@@ -238,7 +234,6 @@ parse_deliver_config(const char *token, char *line) {
 
 void
 parse_deliver_maxsize_config(const char *token, char *line) {
-    default_max_size = atoi(line);
 }
 
 static void
@@ -253,7 +248,6 @@ _free_deliver_obj(void *p, void *context)
 
 void
 free_deliver_config(void) {
-    default_max_size = DEFAULT_MAX_DELIVER_SIZE;
     CONTAINER_CLEAR(deliver_container, _free_deliver_obj, NULL);
     if (alarm_reg) {
         snmp_alarm_unregister(alarm_reg);
