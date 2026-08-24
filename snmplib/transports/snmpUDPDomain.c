@@ -98,22 +98,27 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, const void *data, int len)
 }
 
 static int
-netsnmp_udp_resolve_source(char *source, struct in_addr *network,
+netsnmp_udp_resolve_source(const char *source, struct in_addr *network,
         struct in_addr *mask)
 {
+    char *src = strdup(source);
+    char *strmask;
+
+    if (!src)
+        return -1;
+
     /* Split the source/netmask parts */
-    char *strmask = strchr(source, '/');
+    strmask = strchr(src, '/');
     if (strmask != NULL)
         /* Mask given. */
         *strmask++ = '\0';
 
     /* Try interpreting as a dotted quad. */
-   if (inet_pton(AF_INET, source, network) == 0) {
+    if (inet_pton(AF_INET, src, network) == 0) {
         /* Nope, wasn't a dotted quad.  Must be a hostname. */
-        int ret = netsnmp_gethostbyname_v4(source, &(network->s_addr));
-        if (ret < 0) {
+        if (netsnmp_gethostbyname_v4(src, &(network->s_addr)) < 0) {
             config_perror("cannot resolve source hostname");
-            return ret;
+            goto err;
         }
     }
 
@@ -132,22 +137,27 @@ netsnmp_udp_resolve_source(char *source, struct in_addr *network,
                 mask->s_addr = 0;
             else {
                 config_perror("bad mask length");
-                return -1;
+                goto err;
             }
         }
         /* Try to interpret mask as a dotted quad. */
         else if (inet_pton(AF_INET, strmask, mask) == 0) {
             config_perror("bad mask");
-            return -1;
+            goto err;
         }
 
         /* Check that the network and mask are consistent. */
         if (network->s_addr & ~mask->s_addr) {
             config_perror("source/mask mismatch");
-            return -1;
+            goto err;
         }
     }
+    free(src);
     return 0;
+
+err:
+    free(src);
+    return -1;
 }
 
 #if defined(HAVE_IP_PKTINFO) || (defined(HAVE_IP_RECVDSTADDR) && defined(HAVE_IP_SENDSRCADDR))
