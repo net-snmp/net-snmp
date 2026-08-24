@@ -74,6 +74,7 @@ case "$(uname -a)" in
 	pacman --noconfirm --remove mingw-w64-x86_64-gcc-libgfortran
 	pacman --noconfirm --remove mingw-w64-x86_64-gcc-objc
 	pacman --noconfirm --sync --refresh
+	pacman --noconfirm --sync --needed coreutils
 	pacman --noconfirm --sync --needed diffutils
 	pacman --noconfirm --sync --needed make
 	pacman --noconfirm --sync --needed perl-ExtUtils-MakeMaker
