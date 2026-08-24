@@ -289,6 +289,7 @@ case "$(uname):${MODE}" in
               mibs+=(Rmon)
               ;;
       esac
+      # Use the Homebrew OpenSSL library because it includes AES support.
       options+=("--with-openssl=$(brew --prefix openssl)")
     ;;
   FreeBSD*)
