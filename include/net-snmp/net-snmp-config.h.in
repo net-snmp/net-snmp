@@ -381,6 +381,9 @@
 /* Define to 1 if you have the <ioctls.h> header file. */
 #undef HAVE_IOCTLS_H
 
+/* Define to 1 if you have the 'IOMainPort' function. */
+#undef HAVE_IOMAINPORT
+
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 

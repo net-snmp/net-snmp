@@ -34611,6 +34611,12 @@ fi
 
 
 # Agent, Darwin (Apple):
+ac_fn_c_check_func "$LINENO" "IOMainPort" "ac_cv_func_IOMainPort"
+if test "x$ac_cv_func_IOMainPort" = xyes
+then :
+  printf "%s\n" "#define HAVE_IOMAINPORT 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "vm_region" "ac_cv_func_vm_region"
 if test "x$ac_cv_func_vm_region" = xyes
 then :
@@ -34624,6 +34630,18 @@ then :
 
 fi
 
+if test "x$ac_cv_func_IOMainPort" != "xyes"; then
+    netsnmp_save_LIBS="$LIBS"
+    LIBS="-framework IOKit $LIBS"
+    ac_fn_c_check_func "$LINENO" "IOMainPort" "ac_cv_func_IOMainPort"
+if test "x$ac_cv_func_IOMainPort" = xyes
+then :
+  printf "%s\n" "#define HAVE_IOMAINPORT 1" >>confdefs.h
+
+fi
+
+    LIBS="$netsnmp_save_LIBS"
+fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for FD_CLOEXEC" >&5
 printf %s "checking for FD_CLOEXEC... " >&6; }

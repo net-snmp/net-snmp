@@ -42,7 +42,11 @@ static int num_drives;			/* number of drives detected	*/
 void init_diskio_darwin(void)
 {
     /* Get the I/O Kit communication handle. */
+#ifdef HAVE_IOMAINPORT
+    IOMainPort(bootstrap_port, &masterPort);
+#else
     IOMasterPort(bootstrap_port, &masterPort);
+#endif
 }    
 
 static int
