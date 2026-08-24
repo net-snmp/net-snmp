@@ -189,7 +189,7 @@ perl/Makefile: perl/Makefile.PL subdirs
 	fi &&								\
 	export PERL5LIB="$$dir/perl" &&					\
 	$(PERL) $$carp Makefile.PL -NET-SNMP-IN-SOURCE=true		\
-	    -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" $(PERLARGS)
+	    -NET-SNMP-CONFIG="sh $$dir/net-snmp-config" CC="$(CC)" LD="$(CC)" $(PERLARGS)
 
 perlinstall:
 	@(cd perl ; $(MAKE) install) ; \
