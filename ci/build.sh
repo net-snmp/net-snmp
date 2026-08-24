@@ -27,8 +27,10 @@ case "$MODE" in
 	# parallel compilation for minimalist mode.
 	nproc=1;;
     *)
-	if type nproc >/dev/null 2>&1; then
+	if command -v nproc >/dev/null 2>&1; then
 	    nproc=$(nproc)
+	elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+	    nproc=$(sysctl -n hw.ncpu)
 	else
 	    nproc=1
 	fi;;
