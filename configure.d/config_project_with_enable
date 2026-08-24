@@ -90,7 +90,11 @@ NETSNMP_ARG_WITH(openssl,
     elif test -d "$withval"; then
       if test -d "$withval/lib/MinGW"; then
         LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
-        CPPFLAGS="-I$withval/include $CPPFLAGS"
+        if test "x$GCC" = "xyes"; then
+          CPPFLAGS="-isystem $withval/include $CPPFLAGS"
+        else
+          CPPFLAGS="-I$withval/include $CPPFLAGS"
+        fi
       else
         AC_ADD_SEARCH_PATH($withval)
       fi

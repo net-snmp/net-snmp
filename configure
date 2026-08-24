@@ -14761,7 +14761,11 @@ then :
        LDFLAGS="-L$withval/lib $LDFLAGS"
      fi
      if test -d $withval/include; then
-	CPPFLAGS="-I$withval/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem $withval/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I$withval/include $CPPFLAGS"
+	fi
      fi
   fi
 
@@ -14794,7 +14798,11 @@ then :
     elif test -d "$withval"; then
       if test -d "$withval/lib/MinGW"; then
         LDFLAGS="-L$withval/lib/MinGW $LDFLAGS"
-        CPPFLAGS="-I$withval/include $CPPFLAGS"
+        if test "x$GCC" = "xyes"; then
+          CPPFLAGS="-isystem $withval/include $CPPFLAGS"
+        else
+          CPPFLAGS="-I$withval/include $CPPFLAGS"
+        fi
       else
 
   if test "x$withval" != x -a -d $withval; then
@@ -14802,7 +14810,11 @@ then :
        LDFLAGS="-L$withval/lib $LDFLAGS"
      fi
      if test -d $withval/include; then
-	CPPFLAGS="-I$withval/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem $withval/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I$withval/include $CPPFLAGS"
+	fi
      fi
   fi
 
@@ -14889,7 +14901,11 @@ then :
        LDFLAGS="-L$withval/lib $LDFLAGS"
      fi
      if test -d $withval/include; then
-	CPPFLAGS="-I$withval/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem $withval/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I$withval/include $CPPFLAGS"
+	fi
      fi
   fi
 
@@ -24926,7 +24942,11 @@ fi
        LDFLAGS="-L$krb5path/lib $LDFLAGS"
      fi
      if test -d $krb5path/include; then
-	CPPFLAGS="-I$krb5path/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem $krb5path/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I$krb5path/include $CPPFLAGS"
+	fi
      fi
   fi
 
@@ -24937,7 +24957,11 @@ fi
        LDFLAGS="-L/usr/kerberos/lib $LDFLAGS"
      fi
      if test -d /usr/kerberos/include; then
-	CPPFLAGS="-I/usr/kerberos/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem /usr/kerberos/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I/usr/kerberos/include $CPPFLAGS"
+	fi
      fi
   fi
 

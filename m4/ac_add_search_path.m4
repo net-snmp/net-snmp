@@ -7,7 +7,12 @@ AC_DEFUN([AC_ADD_SEARCH_PATH],[
        LDFLAGS="-L$1/lib $LDFLAGS"
      fi
      if test -d $1/include; then
-	CPPFLAGS="-I$1/include $CPPFLAGS"
+	if test "x$GCC" = "xyes"; then
+	  CPPFLAGS="-isystem $1/include $CPPFLAGS"
+	else
+	  CPPFLAGS="-I$1/include $CPPFLAGS"
+	fi
      fi
   fi
 ])
+
