@@ -62,9 +62,9 @@ FLAGS="$FLAGS -Dtls -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNM
 ########################################
 # POST-TRAPD-STARTUP Certificates
 # user
-CAPTURE $NSCERT gencert -t snmptrap --cn 'testuser'  $NSCERTARGS
-TESTUSERFP=`$NSCERT showcerts --fingerprint --brief snmptrap $NSCERTARGS`
-CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
+CAPTURE $NSCERT gencert -t unknownuser --cn 'testuser'  $NSCERTARGS
+UNKNOWNUSERFP=`$NSCERT showcerts --fingerprint --brief unknownuser $NSCERTARGS`
+CHECKVALUEISNT "$UNKNOWNUSERFP" "" "generated fingerprint for unknownuser certificate"
 
 ######################################################################
 # ACTUAL TESTS
@@ -76,8 +76,8 @@ CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
 # (using the default "snmpapp" certificate because we don't specify another)
 DOTRAPTEST user1TrapTest "$FLAGS"
 
-# failing using the CA signed cert without
-DOFAILTRAPTEST user2UnknownUser "-T our_identity=snmptrap $FLAGS"
+# failing using the untrusted cert
+DOFAILTRAPTEST user2UnknownUser "-T our_identity=unknownuser $FLAGS"
 
 # using user 1 - sending an INFORM
 # (using the default "snmpapp" certificate because we don't specify another)
