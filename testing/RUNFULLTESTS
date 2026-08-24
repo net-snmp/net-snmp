@@ -203,10 +203,18 @@ sub decide_exec {
                 }
                 close(M);
             }
+            my @libs;
             my $asan_lib = `$cc -print-file-name=libasan.so 2>/dev/null`;
             chomp($asan_lib);
-            if (-f $asan_lib) {
-                return [ "env", "LD_PRELOAD=$asan_lib", "LSAN_OPTIONS=exitcode=0", $^X, $testfile ];
+            push @libs, $asan_lib if -f $asan_lib;
+            if ($cflags =~ /-fsanitize=undefined/) {
+                my $ubsan_lib = `$cc -print-file-name=libubsan.so 2>/dev/null`;
+                chomp($ubsan_lib);
+                push @libs, $ubsan_lib if -f $ubsan_lib;
+            }
+            if (@libs) {
+                my $preload = join(" ", @libs);
+                return [ "env", "LD_PRELOAD=$preload", "LSAN_OPTIONS=exitcode=0", $^X, $testfile ];
             }
         }
     }

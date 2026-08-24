@@ -4,11 +4,21 @@ set -eu
 
 preload_libasan() {
     cc=$(sed -n "s/^CC='//p" config.status | sed "s/'$//")
+    preload=""
     if nm ./snmplib/.libs/libnetsnmp.so 2>/dev/null | grep -q __asan; then
 	libasan_path=$(${cc} -print-file-name=libasan.so 2>/dev/null)
 	if [ -n "$libasan_path" ] && [ -f "$libasan_path" ]; then
-            export ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD="$libasan_path"
+            preload="$libasan_path"
 	fi
+    fi
+    if nm ./snmplib/.libs/libnetsnmp.so 2>/dev/null | grep -q __ubsan; then
+	libubsan_path=$(${cc} -print-file-name=libubsan.so 2>/dev/null)
+	if [ -n "$libubsan_path" ] && [ -f "$libubsan_path" ]; then
+            preload="${preload:+$preload:}$libubsan_path"
+	fi
+    fi
+    if [ -n "$preload" ]; then
+        export ASAN_OPTIONS=detect_leaks=0 LD_PRELOAD="$preload"
     fi
 }
 
