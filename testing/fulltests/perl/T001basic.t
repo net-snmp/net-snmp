@@ -31,7 +31,7 @@ plan(tests => 10);
 ok(1,1,"started up");
 
 # use a basic UDP port
-my $destination = "udp:localhost:9897";
+my $destination = "udp:localhost:0";
 
 my $test = new NetSNMPTest(agentaddress => $destination);
 
@@ -43,7 +43,7 @@ $test->config_agent("syscontact itworked");
 $test->DIE("failed to start the agent") if (!$test->start_agent());
 
 # now create a session to test things with
-my $session = new SNMP::Session(DestHost => $destination,
+my $session = new SNMP::Session(DestHost => $test->{'agentaddress'},
                                 Version => '3',
 				SecName => 'testuser',
 				SecLevel => 'authNoPriv',

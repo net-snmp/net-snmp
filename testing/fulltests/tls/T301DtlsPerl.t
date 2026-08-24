@@ -2,7 +2,7 @@
 
 # HEADER Perl DTLS/UDP Test
 
-$agentaddress = "dtlsudp:localhost:9875";
-$feature = "NETSNMP_TRANSPORT_TLSTCP_DOMAIN";
+$agentaddress = "dtlsudp:127.0.0.1:0";
+$feature = "NETSNMP_TRANSPORT_DTLSUDP_DOMAIN";
 
 do "$ENV{'srcdir'}/testing/fulltests/tls/S300tlsperl.pl";

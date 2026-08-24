@@ -88,7 +88,21 @@ sub start_agent {
 
     sleep(1);
 
-    return $self->wait_for($self->{'snmpd.log'}, "NET-SNMP version");
+    my $res = $self->wait_for($self->{'snmpd.log'}, "NET-SNMP version");
+    if ($res) {
+        my $fh = new IO::File "$self->{'snmpd.log'}";
+        if ($fh) {
+            while (my $line = <$fh>) {
+                if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
+                    my $port = $1;
+                    $self->{'agentaddress'} =~ s/:\d+$/:$port/;
+                    last;
+                }
+            }
+            $fh->close();
+        }
+    }
+    return $res;
 }
 
 sub stop_agent {
