@@ -40,13 +40,18 @@ AGENT_FLAGS="$AGENT_FLAGS -DexpValueTable -Ddisman:expr:run"
 
 STARTAGENT
 
-capture_snmpset() {
-    CAPTURE "snmpset $SNMP_FLAGS $NOAUTHTESTARGS                 \
+capture_snmpget() {
+    CAPTURE "snmpget $SNMP_FLAGS $NOAUTHTESTARGS                 \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $*"
 }
 
-capture_snmpget() {
-    CAPTURE "snmpget $SNMP_FLAGS $NOAUTHTESTARGS                 \
+capture_snmpget IF-MIB::ifIndex.2
+if grep -q "No Such" "$junkoutputfile"; then
+    SKIP "IF-MIB::ifIndex.2 is not available"
+fi
+
+capture_snmpset() {
+    CAPTURE "snmpset $SNMP_FLAGS $NOAUTHTESTARGS                 \
          $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT $*"
 }
 
