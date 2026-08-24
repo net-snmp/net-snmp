@@ -156,7 +156,6 @@ esac
 options=()
 options+=(--enable-developer)
 options+=("--prefix=/usr/local/net-snmp-${branch_name}")
-options+=("--with-cflags=$CFLAGS")
 options+=(--with-defaults)
 transports=()
 # Mib names can be found as follows:
@@ -480,4 +479,5 @@ set -x
 ./configure "${options[@]}" --with-transports="${transports[*]}" \
             --with-security-modules="${security_modules[*]}"	 \
 	    --with-mib-modules="${mibs[*]}" \
-	    CFLAGS="$CFLAGS" CPPFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" "$@"
+	    ${CC:+CC="$CC"} \
+	    CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" "$@"
