@@ -1585,7 +1585,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   struct session_list *ss;
   netsnmp_pdu *pdu, *response;
   netsnmp_pdu *newpdu;
-  netsnmp_variable_list *vars, *oldvars;
+  netsnmp_variable_list *vars;
   int len;
   oid **oid_arr = NULL;
   size_t *oid_arr_len = NULL;
@@ -1789,11 +1789,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
       } else {
           newpdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
-          for(vars = response->variables, varlist_ind = 0,
-		oldvars = pdu->variables;
+          for(vars = response->variables, varlist_ind = 0;
               vars && (varlist_ind < varlist_len);
-              vars = vars->next_variable, varlist_ind++,
-                  oldvars = (oldvars ? oldvars->next_variable : NULL)) {
+              vars = vars->next_variable, varlist_ind++) {
 
               if ((vars->name_length < oid_arr_len[varlist_ind]) ||
                   (memcmp(oid_arr[varlist_ind], vars->name,
