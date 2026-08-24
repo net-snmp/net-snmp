@@ -111,6 +111,13 @@
 /* Define to 1 if you have the 'asprintf' function. */
 #undef HAVE_ASPRINTF
 
+/* Define to 1 if you have the 'CFURLCopyResourcePropertiesForKeys' function.
+   */
+#undef HAVE_CFURLCOPYRESOURCEPROPERTIESFORKEYS
+
+/* Define to 1 if you have the 'CFURLCopyResourcePropertyForKey' function. */
+#undef HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY
+
 /* Define to 1 if you have the 'cgetnext' function. */
 #undef HAVE_CGETNEXT
 
@@ -245,6 +252,9 @@
 
 /* Define to 1 if you have the 'forkall' function. */
 #undef HAVE_FORKALL
+
+/* Define to 1 if you have the 'FSOpenResFile' function. */
+#undef HAVE_FSOPENRESFILE
 
 /* Define to 1 if you have the <fstab.h> header file. */
 #undef HAVE_FSTAB_H
@@ -534,6 +544,9 @@
 
 /* Define to 1 if you have the 'lrand48' function. */
 #undef HAVE_LRAND48
+
+/* Define to 1 if you have the 'LSCopyItemInfoForURL' function. */
+#undef HAVE_LSCOPYITEMINFOFORURL
 
 /* Define to 1 if you have the 'lseek64' function. */
 #undef HAVE_LSEEK64

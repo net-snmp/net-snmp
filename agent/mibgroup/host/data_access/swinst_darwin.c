@@ -26,7 +26,9 @@
 #undef __APPLE_API_EVOLVING 
 
 #include <CoreFoundation/CoreFoundation.h>
+#if defined(HAVE_FSOPENRESFILE) && !defined(HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY)
 #include <ApplicationServices/ApplicationServices.h>
+#endif
 
 netsnmp_feature_require(container_directory);
 netsnmp_feature_require(date_n_time);
@@ -37,8 +39,10 @@ static int _add_applications_in_dir(netsnmp_container *, const char* path);
 static int32_t _index;
 static int _check_bundled_app(CFURLRef currentURL, CFStringRef *name,
                               CFStringRef *info, const char* path);
+#if defined(HAVE_FSOPENRESFILE) && !defined(HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY)
 static int _check_classic_app(CFURLRef currentURL, CFStringRef *name,
                               CFStringRef *info, const char* path);
+#endif
 static netsnmp_container *dirs = NULL;
 
 /* ---------------------------------------------------------------------
@@ -132,6 +136,22 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags )
     return 0;
 }
 
+#ifdef HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY
+static Boolean
+_cfurl_get_bool_prop(CFURLRef url, CFStringRef key)
+{
+    CFBooleanRef val = NULL;
+    Boolean res = false;
+
+    if (CFURLCopyResourcePropertyForKey(url, key, &val, NULL) && val) {
+        res = CFBooleanGetValue(val);
+        CFRelease(val);
+    }
+    return res;
+}
+#endif
+
+#if defined(HAVE_LSCOPYITEMINFOFORURL) && !defined(HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY)
 static void
 _dump_flags(u_long flags)
 {
@@ -163,6 +183,7 @@ _dump_flags(u_long flags)
         }
     }
 }
+#endif
 
 static int
 _add_applications_in_dir(netsnmp_container *container, const char* path)
@@ -178,7 +199,9 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
 
     CFStringRef         currentPath = NULL;
     CFURLRef            currentURL = NULL;
+#if defined(HAVE_LSCOPYITEMINFOFORURL) && !defined(HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY)
     LSItemInfoRecord    itemInfoRecord;
+#endif
     CFStringRef         prodName = NULL;
     CFStringRef         version = NULL;
     CFStringEncoding    sys_encoding = CFStringGetSystemEncoding();
@@ -205,6 +228,9 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
              CFRelease(currentURL)) {
 
         int                 rc2 = 0;
+#ifdef HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY
+        Boolean             isPlainFile, isDir, isApp, isPkg, isHidden, isAlias;
+#endif
         
         currentPath =
             CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, file,
@@ -213,6 +239,39 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
         currentURL =
             CFURLCreateWithFileSystemPath(kCFAllocatorDefault, currentPath,
                                           kCFURLPOSIXPathStyle, true); 
+#ifdef HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY
+        isPlainFile = _cfurl_get_bool_prop(currentURL, kCFURLIsRegularFileKey);
+        isDir       = _cfurl_get_bool_prop(currentURL, kCFURLIsDirectoryKey);
+        isApp       = _cfurl_get_bool_prop(currentURL, kCFURLIsApplicationKey);
+        isPkg       = _cfurl_get_bool_prop(currentURL, kCFURLIsPackageKey);
+        isHidden    = _cfurl_get_bool_prop(currentURL, kCFURLIsHiddenKey);
+        isAlias     = _cfurl_get_bool_prop(currentURL, kCFURLIsAliasFileKey);
+
+        if (isHidden || isAlias || (isPlainFile && !isApp)) {
+            continue;
+        }
+        /** recurse on non-application containers (i.e. directory) */
+        if (isDir && !isApp) {
+            netsnmp_directory_container_read(files, file, 0);
+            continue;
+        }
+
+        /** skip any other non-application files */
+        if (!isApp) {
+            continue;
+        }
+
+        if (isPkg || isDir) {
+            rc2 = _check_bundled_app(currentURL, &prodName, &version, file);
+        } else {
+            continue;
+        }
+        if (rc2) { /* not an app. if directory, recurse; else continue */
+            if (1 == rc2)
+                netsnmp_directory_container_read(files, file, 0);
+            continue;
+        }
+#elif defined(HAVE_LSCOPYITEMINFOFORURL)
         LSCopyItemInfoForURL(currentURL,
                              kLSRequestBasicFlagsOnly|kLSRequestAppTypeFlags,
                              &itemInfoRecord); 
@@ -227,21 +286,24 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
             (!(itemInfoRecord.flags & kLSItemInfoIsApplication))) {
             netsnmp_directory_container_read(files, file, 0);
             continue;
-       }
+        }
 
         /** skip any other non-application files */
         if (!(itemInfoRecord.flags & kLSItemInfoIsApplication)) {
             continue;
-       }
+        }
 
         if ((itemInfoRecord.flags & kLSItemInfoIsPackage) ||           
             (itemInfoRecord.flags & kLSItemInfoIsContainer)) {
             rc2 = _check_bundled_app(currentURL, &prodName, &version, file);
         } 
+#ifdef HAVE_FSOPENRESFILE
         else if ((itemInfoRecord.flags & kLSItemInfoIsClassicApp) ||
                  (itemInfoRecord.flags & kLSItemInfoIsPlainFile)) {
             rc2 = _check_classic_app(currentURL, &prodName, &version, file);
-        } else {
+        }
+#endif
+        else {
             snmp_log(LOG_ERR,"swinst shouldn't get here: %s\n", file);
             _dump_flags(itemInfoRecord.flags);
             continue;
@@ -252,6 +314,9 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
                 netsnmp_directory_container_read(files, file, 0);
             continue;
         }
+#else
+        continue;
+#endif
         
         /*
          * allocate entry
@@ -364,6 +429,7 @@ _check_bundled_app(CFURLRef currentURL, CFStringRef *prodName,
     return 0;
 }
 
+#if defined(HAVE_FSOPENRESFILE) && !defined(HAVE_CFURLCOPYRESOURCEPROPERTYFORKEY)
 static int
 _check_classic_app(CFURLRef currentURL, CFStringRef *prodName,
                    CFStringRef *version, const char* file)
@@ -414,3 +480,4 @@ _check_classic_app(CFURLRef currentURL, CFStringRef *prodName,
 
     return 0;
 }
+#endif
