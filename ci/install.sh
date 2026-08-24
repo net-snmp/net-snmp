@@ -49,14 +49,6 @@ case "$(uname)" in
 	done
 	true
 	;;
-    Darwin)
-	# Upgrade openssl such that Net-SNMP can be built with Blumenthal
-	# AES support. Disabled because this upgrade takes long and even
-	# sometimes fails.
-	if false; then
-	    brew upgrade openssl
-	fi
-	;;
     FreeBSD)
 	pkg install -y bash
 	pkg install -y gawk
