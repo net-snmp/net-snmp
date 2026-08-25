@@ -1510,8 +1510,11 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                            response->variables->val_len);
         if (!session->contextEngineID) {
             snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing: memory allocation failed\n");
+            session->contextEngineIDLen = 0;
+            snmp_free_pdu(response);
             return SNMP_ERR_GENERR;
         }
+        session->contextEngineIDLen = response->variables->val_len;
         
         /* technically there likely isn't a securityEngineID but just
            in case anyone goes looking we might as well have one */
@@ -1521,11 +1524,12 @@ snmpv3_probe_contextEngineID_rfc5343(struct session_list *slp,
                            response->variables->val_len);
         if (!session->securityEngineID) {
             snmp_log(LOG_ERR, "failed rfc5343 securityEngineID probing: memory allocation failed\n");
+            session->securityEngineIDLen = 0;
+            snmp_free_pdu(response);
             return SNMP_ERR_GENERR;
         }
         
-        session->securityEngineIDLen = session->contextEngineIDLen =
-            response->variables->val_len;
+        session->securityEngineIDLen = response->variables->val_len;
         
         if (snmp_get_do_debugging()) {
             size_t i;
