@@ -22,10 +22,8 @@ case "$(uname)" in
 		packages="
 		    libatm1-dev
 		    libkrb5-dev
-		    libmariadb-client-lgpl-dev
 		    libmariadb-dev
 		    libmariadb-dev-compat
-		    libmariadbclient-dev
 		    libmysqlclient-dev
 		    libncurses-dev
 		    libncurses5-dev
@@ -35,7 +33,6 @@ case "$(uname)" in
 		    libpcre3-dev
 		    libperl-dev
 		    libsensors-dev
-		    libsensors4-dev
 		    libssh-dev
 		    libssl-dev
 		    make
