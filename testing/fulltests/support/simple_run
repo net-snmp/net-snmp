@@ -19,9 +19,7 @@ fi
 
 if [ "x$srcdir" = "x" ]; then
     srcdir=`dirname "$0"`
-    srcdir=`dirname "$srcdir"`
-    srcdir=`dirname "$srcdir"`
-    srcdir=`dirname "$srcdir"`
+    srcdir=`cd "$srcdir/../../.." && pwd`
     if [ -d "${srcdir}/testing" ]; then
        :
     else
