@@ -191,7 +191,7 @@ sub decide_exec {
 
     if ($testfile =~ /\.t$/) {
         my $cflags = `$opts{'builddir'}/net-snmp-config --cflags 2>/dev/null`;
-        if ($cflags && $cflags =~ /-fsanitize=address/) {
+        if ($cflags && $cflags =~ /-fsanitize=/) {
             my $cc = "gcc";
             if (open(M, "<$opts{'builddir'}/Makefile")) {
                 while (<M>) {
@@ -204,10 +204,12 @@ sub decide_exec {
                 close(M);
             }
             my @libs;
-            my $asan_lib = `$cc -print-file-name=libasan.so 2>/dev/null`;
-            chomp($asan_lib);
-            push @libs, $asan_lib if -f $asan_lib;
-            if ($cflags =~ /-fsanitize=undefined/) {
+            if ($cflags =~ /-fsanitize=\S*address/) {
+                my $asan_lib = `$cc -print-file-name=libasan.so 2>/dev/null`;
+                chomp($asan_lib);
+                push @libs, $asan_lib if -f $asan_lib;
+            }
+            if ($cflags =~ /-fsanitize=\S*undefined/) {
                 my $ubsan_lib = `$cc -print-file-name=libubsan.so 2>/dev/null`;
                 chomp($ubsan_lib);
                 push @libs, $ubsan_lib if -f $ubsan_lib;
