@@ -49,6 +49,7 @@ static int     allDisksIncluded;
 static int     allDisksMinPercent;
 static int     maxdisks;
 static netsnmp_fsys_info **disks;
+static char    *errmsg;
 
 static const struct variable2 extensible_disk_variables[] = {
     {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
@@ -102,6 +103,7 @@ _expand_disk_array(char *cptr)
 
     new_disks = realloc(disks, maxdisks * sizeof(netsnmp_fsys_info *));
     if (!new_disks) {
+        maxdisks = prev_max;
         config_perror("malloc failed for new disk allocation.");
         netsnmp_config_error("\tignoring: %s", cptr);
         return NULL;
@@ -112,6 +114,21 @@ _expand_disk_array(char *cptr)
            sizeof(netsnmp_fsys_info *));
 
     return disks;
+}
+
+static void
+disk_insert_entry(netsnmp_fsys_info *entry)
+{
+    int                 i;
+
+    if (!entry)
+        return;
+
+    for (i = 0; i < numdisks; i++)
+        if (disks[i] == entry)
+            return;
+
+    disks[numdisks++] = entry;
 }
 
 static void
@@ -140,7 +157,7 @@ disk_parse_config(const char *token, char *cptr)
     /*
      * read optional minimum disk usage spec 
      */
-    if (cptr != NULL) {
+    if (cptr != NULL && *cptr != '\0') {
         if (strchr(cptr, '%') == NULL) {
             minspace = atoi(cptr);
             minpercent = -1;
@@ -158,26 +175,24 @@ disk_parse_config(const char *token, char *cptr)
      * parameters. if it does not exist then add it
      */
     entry = netsnmp_fsys_by_path(path, NETSNMP_FS_FIND_CREATE);
-    if (entry) {
-        entry->minspace = minspace;
-        entry->minpercent = minpercent;
-        entry->flags |= NETSNMP_FS_FLAG_UCD;
-        disks[numdisks++] = entry;
-    }
+    if (!entry)
+        return;
+    entry->minspace = minspace;
+    entry->minpercent = minpercent;
+    entry->flags |= NETSNMP_FS_FLAG_UCD;
+    disk_insert_entry(entry);
 }
 
 static void
 disk_parse_config_all(const char *token, char *cptr)
 {
-    int             minpercent = DISKMINPERCENT;
+    int             minpercent = 5;
 
     /*
      * read the minimum disk usage percent
      */
-    if (cptr != NULL) {
-        if (strchr(cptr, '%') != NULL) {
-            minpercent = atoi(cptr);
-        }
+    if (cptr != NULL && *cptr != '\0') {
+        minpercent = atoi(cptr);
     }
     /*
      * if we have already seen the "includeAllDisks" directive
@@ -211,6 +226,8 @@ disk_free_config(void)
         disks = NULL;
         maxdisks = numdisks = 0;
     }
+    free(errmsg);
+    errmsg = NULL;
     allDisksIncluded = 0;
     allDisksMinPercent = 0;
 }
@@ -272,7 +289,7 @@ _refresh_disks(int minpercent)
                 if (!_expand_disk_array(entry->device))
                     return;
             }
-            disks[numdisks++] = entry;
+            disk_insert_entry(entry);
         }
     }
 }
@@ -316,7 +333,7 @@ var_extensible_disk(struct variable *vp,
     const netsnmp_fsys_info *entry;
     unsigned long long val;
     static long     long_ret;
-    static char    *errmsg;
+    static unsigned long ulong_ret;
     static char     empty_str[1];
     netsnmp_cache  *cache;
 
@@ -351,7 +368,7 @@ var_extensible_disk(struct variable *vp,
     switch (vp->magic) {
     case MIBINDEX:
         long_ret = disknum + 1;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case ERRORNAME:            /* DISKPATH */
         *var_len = strlen(entry->path);
         return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->path);
@@ -360,10 +377,10 @@ var_extensible_disk(struct variable *vp,
         return (u_char *)NETSNMP_REMOVE_CONST(char *, entry->device);
     case DISKMINIMUM:
         long_ret = entry->minspace;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKMINPERCENT:
         long_ret = entry->minpercent;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case DISKTOTAL:
         val = netsnmp_fsys_size_ull(entry);
@@ -371,13 +388,13 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKTOTALLOW:
-        long_ret = netsnmp_fsys_size_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_size_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKTOTALHIGH:
-        long_ret = netsnmp_fsys_size_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_size_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKAVAIL:
         val = netsnmp_fsys_avail_ull(entry);
@@ -385,13 +402,13 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKAVAILLOW:
-        long_ret = netsnmp_fsys_avail_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_avail_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKAVAILHIGH:
-        long_ret = netsnmp_fsys_avail_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_avail_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKUSED:
         val = netsnmp_fsys_used_ull(entry);
@@ -399,49 +416,57 @@ var_extensible_disk(struct variable *vp,
             long_ret = MAX_INT_32;
         else
             long_ret = (long) val;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
     case DISKUSEDLOW:
-        long_ret = netsnmp_fsys_used_ull(entry) & MAX_UINT_32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_used_ull(entry) & MAX_UINT_32;
+        return (u_char *)&ulong_ret;
     case DISKUSEDHIGH:
-        long_ret = netsnmp_fsys_used_ull(entry) >> 32;
-        return ((u_char *) (&long_ret));
+        ulong_ret = netsnmp_fsys_used_ull(entry) >> 32;
+        return (u_char *)&ulong_ret;
 
     case DISKPERCENT:
         long_ret = _percent(entry->used, entry->size);
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case DISKPERCENTNODE:
-        long_ret =
-            _percent(entry->inums_total - entry->inums_avail,
-                     entry->inums_total);
-        return ((u_char *) (&long_ret));
+        if (entry->inums_total == 0 || entry->inums_avail > entry->inums_total)
+            long_ret = 0;
+        else
+            long_ret =
+                _percent(entry->inums_total - entry->inums_avail,
+                         entry->inums_total);
+        return (u_char *)&long_ret;
 
     case ERRORFLAG:
         long_ret = 0;
         val = netsnmp_fsys_avail_ull(entry);
-        if ((entry->minspace >= 0) && (val < entry->minspace))
+        if ((entry->minspace >= 0) && (val < (unsigned long long) entry->minspace))
             long_ret = 1;
         else if ((entry->minpercent >= 0) &&
                  (_percent(entry->avail, entry->size) < entry->minpercent))
             long_ret = 1;
-        return ((u_char *) (&long_ret));
+        return (u_char *)&long_ret;
 
     case ERRORMSG:
         free(errmsg);
         errmsg = NULL;
         *var_len = 0;
         val = netsnmp_fsys_avail_ull(entry);
-        if ((entry->minspace >= 0 && val < entry->minspace &&
-             asprintf(&errmsg, "%s: less than %d free (= %d)", entry->path,
-                      entry->minspace, (int) val) >= 0) ||
-            (entry->minpercent >= 0 &&
-             _percent(entry->avail, entry->size) < entry->minpercent &&
-             asprintf(&errmsg, "%s: less than %d%% free (= %d%%)",
-                      entry->path, entry->minpercent,
-                      _percent(entry->avail, entry->size))
-             >= 0)) {
-            *var_len = strlen(errmsg);
+        if (entry->minspace >= 0 && val < (unsigned long long) entry->minspace) {
+            if (asprintf(&errmsg, "%s: less than %d free (= %llu)", entry->path,
+                         entry->minspace, val) >= 0)
+                *var_len = strlen(errmsg);
+            else
+                errmsg = NULL;
+        } else if (entry->minpercent >= 0 &&
+                   _percent(entry->avail, entry->size) < entry->minpercent) {
+            int             pct = _percent(entry->avail, entry->size);
+
+            if (asprintf(&errmsg, "%s: less than %d%% free (= %d%%)",
+                         entry->path, entry->minpercent, pct) >= 0)
+                *var_len = strlen(errmsg);
+            else
+                errmsg = NULL;
         }
         return (u_char *) (errmsg ? errmsg : empty_str);
     }
