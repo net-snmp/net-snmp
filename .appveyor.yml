@@ -61,7 +61,6 @@ artifacts:
 clone_depth: 5
 
 install:
-  - cmd: 'ci\openssl.bat'
   - sh:  'sudo ci/install.sh'
 
 build_script:

@@ -8,6 +8,8 @@ echo "Error: unknown build type %BUILD%"
 goto eof
 
 :MSVCDYNAMIC64
+call %~dp0openssl.bat
+if %errorlevel% neq 0 exit /b %errorlevel%
 call "%VCVARSPATH%\vcvars64.bat"
 call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -24,6 +26,8 @@ cd ..
 goto eof
 
 :MSVCSTATIC64
+call %~dp0openssl.bat
+if %errorlevel% neq 0 exit /b %errorlevel%
 call "%VCVARSPATH%\vcvars64.bat"
 call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -38,6 +42,8 @@ cd ..
 goto eof
 
 :INSTALLER
+call %~dp0openssl.bat
+if %errorlevel% neq 0 exit /b %errorlevel%
 call "%VCVARSPATH%\vcvars64.bat"
 call ci/perl.bat MSVC142
 if %errorlevel% neq 0 exit /b %errorlevel%
