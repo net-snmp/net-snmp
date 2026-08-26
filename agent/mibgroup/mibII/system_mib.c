@@ -111,6 +111,16 @@ system_parse_config_string(const char *token, char *cptr,
         } else {
             *guard = 1;
         }
+        if (*cptr == '"' || strncasecmp(cptr, "0x", 2) == 0) {
+            u_char *valp = (u_char *)value;
+            size_t len = size;
+            if (!read_config_read_octet_string(cptr, &valp, &len)) {
+                netsnmp_config_error("invalid octet string for %s:\n\t%s",
+                                     token, cptr);
+                return;
+            }
+            return;
+        }
     } else {
         if (*guard > 0) {
             /*
@@ -193,17 +203,24 @@ static int
 system_store(int a, int b, void *c, void *d)
 {
     char            line[SNMP_MAXBUF_SMALL];
+    char           *cur;
 
     if (sysLocationSet > 0) {
-        snprintf(line, SNMP_MAXBUF_SMALL, "psyslocation %s", sysLocation);
+        cur = line + snprintf(line, sizeof(line), "psyslocation ");
+        read_config_save_octet_string(cur, (const u_char *)sysLocation,
+                                      strlen(sysLocation));
         snmpd_store_config(line);
     }
     if (sysContactSet > 0) {
-        snprintf(line, SNMP_MAXBUF_SMALL, "psyscontact %s", sysContact);
+        cur = line + snprintf(line, sizeof(line), "psyscontact ");
+        read_config_save_octet_string(cur, (const u_char *)sysContact,
+                                      strlen(sysContact));
         snmpd_store_config(line);
     }
     if (sysNameSet > 0) {
-        snprintf(line, SNMP_MAXBUF_SMALL, "psysname %s", sysName);
+        cur = line + snprintf(line, sizeof(line), "psysname ");
+        read_config_save_octet_string(cur, (const u_char *)sysName,
+                                      strlen(sysName));
         snmpd_store_config(line);
     }
 

@@ -313,8 +313,14 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
 
     newEntry = snmpTargetParamTable_create();
 
-    cptr = copy_nword(cptr, buff, sizeof(buff));
-    if (snmpTargetParams_addParamName(newEntry, buff) == 0) {
+    SNMP_FREE(newEntry->paramNameData);
+    newEntry->paramNameLen = 0;
+    cptr = read_config_read_octet_string(cptr,
+                                         (u_char **)&newEntry->paramNameData,
+                                         &newEntry->paramNameLen);
+    if (!cptr || newEntry->paramNameLen < 1 || newEntry->paramNameLen > 32) {
+        DEBUGMSGTL(("snmpTargetParamsEntry",
+                    "ERROR snmpTargetParamsEntry: param name out of range in config string\n"));
         snmpTargetParamTable_dispose(newEntry);
         return;
     }
@@ -328,8 +334,14 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
         snmpTargetParamTable_dispose(newEntry);
         return;
     }
-    cptr = copy_nword(cptr, buff, sizeof(buff));
-    if (snmpTargetParams_addSecName(newEntry, buff) == 0) {
+    SNMP_FREE(newEntry->secNameData);
+    newEntry->secNameLen = 0;
+    cptr = read_config_read_octet_string(cptr,
+                                         (u_char **)&newEntry->secNameData,
+                                         &newEntry->secNameLen);
+    if (!cptr || newEntry->secNameLen > 255) {
+        DEBUGMSGTL(("snmpTargetParamsEntry",
+                    "ERROR snmpTargetParamsEntry: sec name out of range in config string\n"));
         snmpTargetParamTable_dispose(newEntry);
         return;
     }

@@ -338,10 +338,18 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
             *cur++ = ' ';
             cur = read_config_save_octet_string(
                 cur, curr_struct->tAddress, curr_struct->tAddressLen);
-            snprintf(cur, ep - cur, " %i %i \"%s\" %s %i %i",
-                     curr_struct->timeout,
-                     curr_struct->retryCount, curr_struct->tagListData,
-                     curr_struct->paramsData, curr_struct->storageType,
+            cur += snprintf(cur, ep - cur, " %i %i ",
+                            curr_struct->timeout,
+                            curr_struct->retryCount);
+            cur = read_config_save_octet_string(
+                cur, (const u_char *)curr_struct->tagListData,
+                curr_struct->tagListLen);
+            *cur++ = ' ';
+            cur = read_config_save_octet_string(
+                cur, (const u_char *)curr_struct->paramsData,
+                curr_struct->paramsLen);
+            snprintf(cur, ep - cur, " %i %i",
+                     curr_struct->storageType,
                      curr_struct->rowStatus);
 
             /*
@@ -437,57 +445,6 @@ snmpTargetAddr_addRetryCount(struct targetAddrTable_struct *entry,
     }
     return (1);
 }                               /* snmpTargetAddr_addRetryCount  */
-
-
-static int
-snmpTargetAddr_addTagList(struct targetAddrTable_struct *entry, char *cptr)
-{
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no tag list in config string\n"));
-        return (0);
-    } else {
-        size_t len = strlen(cptr);
-        /*
-         * spec check for string 0-255 
-         */
-        if (len > 255) {
-            DEBUGMSGTL(("snmpTargetAddrEntry",
-                        "ERROR snmpTargetAddrEntry: tag list out of range in config string\n"));
-            return (0);
-        }
-        SNMP_FREE(entry->tagListData);
-        entry->tagListData = strdup(cptr);
-        entry->tagListLen = strlen(cptr);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addTagList */
-
-
-static int
-snmpTargetAddr_addParams(struct targetAddrTable_struct *entry, char *cptr)
-{
-    size_t          len;
-    if (cptr == NULL) {
-        DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no params in config string\n"));
-        return (0);
-    } else {
-        len = strlen(cptr);
-        /*
-         * spec check for string 1-32 
-         */
-        if (len < 1 || len > 32) {
-            DEBUGMSGTL(("snmpTargetAddrEntry",
-                        "ERROR snmpTargetAddrEntry: params out of range in config string\n"));
-            return (0);
-        }
-        entry->paramsData = strdup(cptr);
-        entry->paramsLen = strlen(cptr);
-    }
-    return (1);
-}                               /* snmpTargetAddr_addParams */
-
 
 static int
 snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
@@ -618,13 +575,23 @@ snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
         snmpTargetAddrTable_dispose(newEntry);
         return;
     }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addTagList(newEntry, buff) == 0) {
+    SNMP_FREE(newEntry->tagListData);
+    newEntry->tagListLen = 0;
+    cptr = read_config_read_octet_string_const(
+        cptr, (u_char **)&newEntry->tagListData, &newEntry->tagListLen);
+    if (!cptr || newEntry->tagListLen > 255) {
+        DEBUGMSGTL(("snmpTargetAddrEntry",
+                    "ERROR snmpTargetAddrEntry: tag list out of range in config string\n"));
         snmpTargetAddrTable_dispose(newEntry);
         return;
     }
-    cptr = copy_nword_const(cptr, buff, sizeof(buff));
-    if (snmpTargetAddr_addParams(newEntry, buff) == 0) {
+    SNMP_FREE(newEntry->paramsData);
+    newEntry->paramsLen = 0;
+    cptr = read_config_read_octet_string_const(
+        cptr, (u_char **)&newEntry->paramsData, &newEntry->paramsLen);
+    if (!cptr || newEntry->paramsLen < 1 || newEntry->paramsLen > 32) {
+        DEBUGMSGTL(("snmpTargetAddrEntry",
+                    "ERROR snmpTargetAddrEntry: params out of range in config string\n"));
         snmpTargetAddrTable_dispose(newEntry);
         return;
     }

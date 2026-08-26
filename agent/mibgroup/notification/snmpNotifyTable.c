@@ -292,7 +292,7 @@ var_snmpNotifyTable(struct variable *vp,
 static int
 is_delim(const char c)
 {
-    return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+    return 0 <= c && c <= 0x20;
 }
 
 int

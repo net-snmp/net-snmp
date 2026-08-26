@@ -565,10 +565,27 @@ write_snmpTargetAddrRetryCount(int action,
     return SNMP_ERR_NOERROR;
 }                               /* write_snmpTargetAddrRetryCount */
 
+/*
+ * From mibs/SNMP-TARGET-MIB.txt:
+ *
+ * A tag value is an arbitrary string of octets, but
+ * may not contain a delimiter character.  Delimiter
+ * characters are defined to be one of the following:
+ *
+ * -  An ASCII space character (0x20).
+ *
+ * -  An ASCII TAB character (0x09).
+ *
+ * -  An ASCII carriage return (CR) character (0x0D).
+ *
+ * -  An ASCII line feed (LF) character (0x0A).
+ *
+ * Delimiter characters are used to separate tag values.
+ */
 static int
 is_delim(const char c)
 {
-    return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
+    return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0a);
 }
 
 int
@@ -577,6 +594,8 @@ snmpTagListValid(const char *tagList, const size_t tagListLen)
     size_t          i = 0;
     int             inTag = 0;
 
+    if (tagListLen == 0)
+        return 1;
 
     for (i = 0; i < tagListLen; i++) {
         if (is_delim(tagList[i]) && !inTag) {

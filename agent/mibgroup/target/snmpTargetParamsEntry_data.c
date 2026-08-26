@@ -302,13 +302,20 @@ store_snmpTargetParamsEntry(int majorID, int minorID, void *serverarg,
                 &&
                 (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
                  curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE)) {
-                snprintf(line, sizeof(line),
-                        "targetParams %s %i %i %s %i %i %i\n",
-                        curr_struct->paramNameData, curr_struct->mpModel,
-                        curr_struct->secModel, curr_struct->secNameData,
-                        curr_struct->secLevel, curr_struct->storageType,
-                        curr_struct->rowStatus);
-                line[ sizeof(line)-1 ] = 0;
+                char *cur;
+
+                cur = line + snprintf(line, sizeof(line), "targetParams ");
+                cur = read_config_save_octet_string(
+                    cur, (const u_char *)curr_struct->paramNameData,
+                    curr_struct->paramNameLen);
+                cur += snprintf(cur, sizeof(line) - (cur - line), " %i %i ",
+                                curr_struct->mpModel, curr_struct->secModel);
+                cur = read_config_save_octet_string(
+                    cur, (const u_char *)curr_struct->secNameData,
+                    curr_struct->secNameLen);
+                snprintf(cur, sizeof(line) - (cur - line), " %i %i %i",
+                         curr_struct->secLevel, curr_struct->storageType,
+                         curr_struct->rowStatus);
 
                 /*
                  * store to file 

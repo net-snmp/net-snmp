@@ -1,0 +1,101 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER snmpTarget newline injection CWE-93
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIFNOT USING_TARGET_SNMPTARGETADDRENTRY_MODULE
+SKIPIFNOT USING_TARGET_SNMPTARGETPARAMSENTRY_MODULE
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
+#
+# Begin test
+#
+
+snmp_write_access='all'
+. ./Sv2cconfig
+
+STARTAGENT
+
+# 1. Create snmpTargetAddrTable row "poc" (RowStatus col 9 = createAndWait)
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.9.3.112.111.99 i 5"
+CHECKORDIE ".1.3.6.1.6.3.12.1.2.1.9.3.112.111.99 = INTEGER: 5"
+
+# 2. Complete the row: TDomain, TAddress, Params
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.2.3.112.111.99 o 1.3.6.1.6.1.1 .1.3.6.1.6.3.12.1.2.1.3.3.112.111.99 x 7F0000010A00 .1.3.6.1.6.3.12.1.2.1.7.3.112.111.99 s p"
+CHECKORDIE ".1.3.6.1.6.3.12.1.2.1.2.3.112.111.99 = OID: .1.3.6.1.6.1.1"
+
+# 3. Test delimiter validation in snmpTagListValid (LF 0x0a is a delimiter):
+# 3a. Consecutive delimiters with newline: t1\n\nx (Hex: 74310a0a78) -> must fail
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.6.3.112.111.99 x 74310a0a78"
+CHECKORDIE "wrongValue"
+
+# 3b. Leading newline: \nt1 (Hex: 0a7431) -> must fail
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.6.3.112.111.99 x 0a7431"
+CHECKORDIE "wrongValue"
+
+# 3c. Trailing newline: t1\n (Hex: 74310a) -> must fail
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.6.3.112.111.99 x 74310a"
+CHECKORDIE "wrongValue"
+
+# 4. Set tagList with newline-separated tokens attempting extend injection:
+#    tagList = t1\nextend pocx /bin/sh -c "echo evil"\nx
+#    Hex: 74310a657874656e6420706f6378202f62696e2f7368202d6320226563686f206576696c220a78
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.6.3.112.111.99 x 74310a657874656e6420706f6378202f62696e2f7368202d6320226563686f206576696c220a78"
+CHECKORDIE ".1.3.6.1.6.3.12.1.2.1.6.3.112.111.99 = STRING: "
+
+# 5. Activate targetAddr row
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.2.1.9.3.112.111.99 i 1"
+CHECKORDIE ".1.3.6.1.6.3.12.1.2.1.9.3.112.111.99 = INTEGER: 1"
+
+# 6. Create targetParams row "params1"
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.3.1.7.7.112.97.114.97.109.115.49 i 5"
+CHECKORDIE ".1.3.6.1.6.3.12.1.3.1.7.7.112.97.114.97.109.115.49 = INTEGER: 5"
+
+# 7. Complete targetParams row (mpModel=1, secModel=2, secName="secName1", secLevel=1)
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.3.1.2.7.112.97.114.97.109.115.49 i 1 .1.3.6.1.6.3.12.1.3.1.3.7.112.97.114.97.109.115.49 i 2 .1.3.6.1.6.3.12.1.3.1.4.7.112.97.114.97.109.115.49 s secName1 .1.3.6.1.6.3.12.1.3.1.5.7.112.97.114.97.109.115.49 i 1"
+CHECKORDIE ".1.3.6.1.6.3.12.1.3.1.2.7.112.97.114.97.109.115.49 = INTEGER: 1"
+
+# 8. Activate targetParams row
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.3.1.7.7.112.97.114.97.109.115.49 i 1"
+CHECKORDIE ".1.3.6.1.6.3.12.1.3.1.7.7.112.97.114.97.109.115.49 = INTEGER: 1"
+
+# 9. Set sysLocation and sysContact
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.6.0 x 526f6f6d203130312c20426c64672041 .1.3.6.1.2.1.1.4.0 x 41646d696e203c61646d696e406578616d706c652e636f6d3e"
+CHECKORDIE ".1.3.6.1.2.1.1.6.0 = STRING: Room 101, Bldg A"
+CHECKORDIE ".1.3.6.1.2.1.1.4.0 = STRING: Admin <admin@example.com>"
+
+# 10. Force persistent storage save via versionSavePersistentData.0
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.100.13.0 i 1"
+CHECKORDIE ".1.3.6.1.4.1.2021.100.13.0 = INTEGER: 1"
+
+# 11. Verify persistent store file was written safely without injected newlines
+PERSIST_FILE="$SNMP_PERSISTENT_DIR/snmpd.conf"
+CHECKORDIE "targetAddr 0x03706f63 .1.3.6.1.6.1.1 0x7f0000010a00 1500 3 0x74310a" "$PERSIST_FILE"
+CHECKORDIE "targetParams 0x07706172616d7331 1 2 \"secName1\" 1 3 1" "$PERSIST_FILE"
+CHECKORDIE "psyslocation 0x526f6f6d203130312c20426c64672041" "$PERSIST_FILE"
+CHECKORDIE "psyscontact 0x41646d696e203c61646d696e406578616d706c652e636f6d3e" "$PERSIST_FILE"
+CHECKANDDIE "^extend " "$PERSIST_FILE"
+
+# 12. Reload config via versionUpdateConfig.0
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.100.11.0 i 1"
+CHECKORDIE ".1.3.6.1.4.1.2021.100.11.0 = INTEGER: 1"
+
+# 13. Verify no injected extend directive was executed
+CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.8072.1.3.2.3.1.2.4.112.111.99.120"
+CHECKANDDIE "STRING:"
+
+# 14. Verify persisted values are correctly intact after reload
+CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.6.0 .1.3.6.1.2.1.1.4.0"
+CHECKORDIE ".1.3.6.1.2.1.1.6.0 = STRING: Room 101, Bldg A"
+CHECKORDIE ".1.3.6.1.2.1.1.4.0 = STRING: Admin <admin@example.com>"
+
+CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.3.1.4.7.112.97.114.97.109.115.49"
+CHECKORDIE ".1.3.6.1.6.3.12.1.3.1.4.7.112.97.114.97.109.115.49 = STRING: secName1"
+
+STOPAGENT
+
+FINISHED

@@ -1253,7 +1253,7 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
 static int
 _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
 {
-    char   buf[SNMP_MAXBUF_SMALL], *hashType;
+    char   line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
 
     hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
     if (NULL == hashType) {
@@ -1269,13 +1269,16 @@ _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
                        entry->snmpTargetParamsName_len]);
     netsnmp_assert(0 == entry->snmpTlstmParamsClientFingerprint[
                        entry->snmpTlstmParamsClientFingerprint_len]);
-    snprintf(buf, sizeof(buf), "%s %s %s %s %d", mib_token,
-             entry->snmpTargetParamsName, hashType,
-             entry->snmpTlstmParamsClientFingerprint,
+    cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)entry->snmpTargetParamsName,
+                                         strlen(entry->snmpTargetParamsName));
+    snprintf(cptr, line + sizeof(line) - cptr, " --%s %s %d",
+             hashType, entry->snmpTlstmParamsClientFingerprint,
              entry->snmpTlstmParamsRowStatus);
 
-    read_config_store(type, buf);
-    DEBUGMSGTL(("tlstmParamsTable:row:save", "saving entry '%s'\n", buf));
+    read_config_store(type, line);
+    DEBUGMSGTL(("tlstmParamsTable:row:save", "saving entry '%s'\n", line));
 
     return SNMP_ERR_NOERROR;
 }
@@ -1283,7 +1286,7 @@ _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
 static int
 _save_params(snmpTlstmParams *params, void *app_type)
 {
-    char buf[SNMP_MAXBUF_SMALL], *hashType;
+    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
 
     if (NULL == params)
         return SNMP_ERR_GENERR;
@@ -1294,12 +1297,16 @@ _save_params(snmpTlstmParams *params, void *app_type)
                  params->hashType);
         return SNMP_ERR_GENERR;
     }
-    snprintf(buf, sizeof(buf), "%s %s --%s %s %d", mib_token, params->name,
+    cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)params->name,
+                                         strlen(params->name));
+    snprintf(cptr, line + sizeof(line) - cptr, " --%s %s %d",
              hashType, params->fingerprint, RS_ACTIVE);
 
     DEBUGMSGTL(("tlstmParamsTable:params:save", "saving params '%s'\n",
-                buf));
-    read_config_store(app_type, buf);
+                line));
+    read_config_store(app_type, line);
 
     return SNMP_ERR_NOERROR;
 }

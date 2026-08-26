@@ -1301,7 +1301,7 @@ _tlstmAddr_init_persistence(void)
 static int
 _save_entry(tlstmAddrTable_entry *entry, void *type)
 {
-    char *buf = NULL, *hashType;
+    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
 
     hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
     if (NULL == hashType) {
@@ -1317,17 +1317,20 @@ _save_entry(tlstmAddrTable_entry *entry, void *type)
                        entry->snmpTargetAddrName_len]);
     netsnmp_assert(0 == entry->tlstmAddrServerFingerprint[
                        entry->tlstmAddrServerFingerprint_len]);
-    if (asprintf(&buf, "%s %s --%s %s %s %d", mib_token,
-                 entry->snmpTargetAddrName, hashType,
-                 entry->tlstmAddrServerFingerprint,
-                 entry->tlstmAddrServerIdentity,
-                 entry->tlstmAddrRowStatus) < 0) {
-        return SNMP_ERR_GENERR;
-    }
+    cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)entry->snmpTargetAddrName,
+                                         strlen(entry->snmpTargetAddrName));
+    cptr += snprintf(cptr, line + sizeof(line) - cptr, " --%s %s ",
+                     hashType, entry->tlstmAddrServerFingerprint);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)entry->tlstmAddrServerIdentity,
+                                         entry->tlstmAddrServerIdentity_len);
+    snprintf(cptr, line + sizeof(line) - cptr, " %d",
+             entry->tlstmAddrRowStatus);
 
-    read_config_store(type, buf);
-    DEBUGMSGTL(("tlstmAddrTable:row:save", "saving entry '%s'\n", buf));
-    free(buf);
+    read_config_store(type, line);
+    DEBUGMSGTL(("tlstmAddrTable:row:save", "saving entry '%s'\n", line));
 
     return SNMP_ERR_NOERROR;
 }
@@ -1335,7 +1338,7 @@ _save_entry(tlstmAddrTable_entry *entry, void *type)
 static int
 _save_addrs(snmpTlstmAddr *addrs, void *app_type)
 {
-    char buf[SNMP_MAXBUF_SMALL], *hashType;
+    char            line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
 
     if (NULL == addrs)
         return SNMP_ERR_GENERR;
@@ -1346,12 +1349,20 @@ _save_addrs(snmpTlstmAddr *addrs, void *app_type)
                  addrs->hashType);
         return SNMP_ERR_GENERR;
     }
-    snprintf(buf, sizeof(buf), "%s %s --%s %s %s %d", mib_token, addrs->name,
-             hashType, addrs->fingerprint, addrs->identity, RS_ACTIVE);
+    cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)addrs->name,
+                                         strlen(addrs->name));
+    cptr += snprintf(cptr, line + sizeof(line) - cptr, " --%s %s ",
+                     hashType, addrs->fingerprint);
+    cptr = read_config_save_octet_string(cptr,
+                                         (const u_char *)(addrs->identity ? addrs->identity : ""),
+                                         addrs->identity ? strlen(addrs->identity) : 0);
+    snprintf(cptr, line + sizeof(line) - cptr, " %d", RS_ACTIVE);
 
     DEBUGMSGTL(("tlstmAddrTable:addrs:save", "saving addrs '%s'\n",
-                buf));
-    read_config_store(app_type, buf);
+                line));
+    read_config_store(app_type, line);
 
     return SNMP_ERR_NOERROR;
 }
