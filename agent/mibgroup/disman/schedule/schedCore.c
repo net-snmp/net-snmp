@@ -281,8 +281,10 @@ sched_nextTime( struct schedTable_entry *entry )
         return;
     }
 
-    if ( entry->schedCallbackID )
+    if ( entry->schedCallbackID ) {
         snmp_alarm_unregister( entry->schedCallbackID );
+        entry->schedCallbackID = 0;
+    }
 
     if (!(entry->flags & SCHEDULE_FLAG_ENABLED) ||
         !(entry->flags & SCHEDULE_FLAG_ACTIVE))  {
@@ -516,6 +518,8 @@ schedTable_removeEntry(netsnmp_tdata_row *row)
     if (entry) {
         DEBUGMSGTL(("disman:schedule:entry", "remove entry (%s, %s)\n",
                                      entry->schedOwner, entry->schedName));
+        if (entry->schedCallbackID)
+            snmp_alarm_unregister(entry->schedCallbackID);
         SNMP_FREE(entry);
     }
 }

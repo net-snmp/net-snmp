@@ -83,7 +83,6 @@ schedTable_handler(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *tinfo;
     netsnmp_tdata_row          *row;
     struct schedTable_entry    *entry;
-    int    recalculate = 0;
     size_t len;
     char  *cp;
     char   owner[SCHED_STR1_LEN+1];
@@ -429,8 +428,9 @@ schedTable_handler(netsnmp_mib_handler *handler,
          * All these assignments are "unfailable", so it's
          *  (reasonably) safe to apply them in the Commit phase
          */
-        entry = NULL;
         for (request = requests; request; request = request->next) {
+            int recalculate = 0;
+
             if (request->processed)
                 continue;
 
@@ -494,12 +494,14 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_SCHEDTYPE:
                 entry->schedType  = *request->requestvb->val.integer;
+                recalculate = 1;
                 break;
             case COLUMN_SCHEDADMINSTATUS:
                 if (*request->requestvb->val.integer == TV_TRUE)
                     entry->flags |=  SCHEDULE_FLAG_ENABLED;
                 else
                     entry->flags &= ~SCHEDULE_FLAG_ENABLED;
+                recalculate = 1;
                 break;
             case COLUMN_SCHEDSTORAGETYPE:
                 entry->schedStorageType = *request->requestvb->val.integer;
@@ -508,31 +510,39 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_ACTIVE:
                     entry->flags |= SCHEDULE_FLAG_ACTIVE;
+                    recalculate = 1;
+                    break;
+                case RS_NOTINSERVICE:
+                    entry->flags &= ~SCHEDULE_FLAG_ACTIVE;
+                    recalculate = 1;
                     break;
                 case RS_CREATEANDGO:
                     entry->flags |= SCHEDULE_FLAG_ACTIVE;
                     entry->flags |= SCHEDULE_FLAG_VALID;
                     entry->session =
                         netsnmp_iquery_pdu_session(reqinfo->asp->pdu);
+                    recalculate = 1;
                     break;
                 case RS_CREATEANDWAIT:
                     entry->flags |= SCHEDULE_FLAG_VALID;
                     entry->session =
                         netsnmp_iquery_pdu_session(reqinfo->asp->pdu);
+                    recalculate = 1;
                     break;
 
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
                     schedTable_removeEntry(row);
+                    entry = NULL;
+                    break;
                 }
-                recalculate = 1;
                 break;
             }
-        }
-        if (recalculate) {
-            netsnmp_assert(entry);
-            sched_nextTime(entry);
+            if (recalculate) {
+                netsnmp_assert(entry);
+                sched_nextTime(entry);
+            }
         }
         break;
     }

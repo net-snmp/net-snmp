@@ -1,0 +1,99 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER DISMAN SCHEDULE MIB RowStatus destroy
+
+ISDEFINED USING_DISMAN_SCHEDULE_SCHEDTABLE_MODULE ||
+ISDEFINED USING_DISMAN_SCHEDULE_MODULE ||
+SKIP "DISMAN SCHEDULE MIB is not available"
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+
+# SNMPv2-TC RowStatus values
+active=1
+notInService=2
+createAndGo=4
+createAndWait=5
+destroy=6
+
+DISMAN_SCHEDULE_MIB=.1.3.6.1.2.1.63.1.2
+schedTable=${DISMAN_SCHEDULE_MIB}
+schedEntry=${schedTable}.1
+schedDescr=${schedEntry}.3
+schedInterval=${schedEntry}.4
+schedContextName=${schedEntry}.10
+schedVariable=${schedEntry}.11
+schedValue=${schedEntry}.12
+schedType=${schedEntry}.13
+schedAdminStatus=${schedEntry}.14
+schedOperStatus=${schedEntry}.15
+schedRowStatus=${schedEntry}.20
+
+# Test index: schedOwner="me", schedName="x"
+# "me" -> length 2, 109, 101
+# "x"  -> length 1, 120
+IDX="2.109.101.1.120"
+
+# standard V2c configuration: testcommunity
+snmp_write_access='all'
+. ./Sv2cconfig
+
+STARTAGENT
+
+# Step 1: Create a row using createAndWait(5)
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX i $createAndWait"
+
+CHECK "^$schedRowStatus.$IDX = INTEGER: $createAndWait"
+
+# Step 2: Destroy the row using destroy(6).
+# If the UAF bug is present, snmpd will crash or ASan will trigger.
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX i $destroy"
+
+CHECK "^$schedRowStatus.$IDX = INTEGER: $destroy"
+
+# Step 3: Verify the row is destroyed (snmpget returns noSuchInstance)
+CAPTURE "snmpget -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX"
+
+CHECK "No Such Instance"
+
+# Step 4: Test creating, configuring, activating, and destroying an active schedule entry
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX i $createAndWait"
+
+CHECK "^$schedRowStatus.$IDX = INTEGER: $createAndWait"
+
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedInterval.$IDX u 60 \
+         $schedVariable.$IDX o .1.3.6.1.2.1.1.4.0 \
+         $schedValue.$IDX i 0 \
+         $schedAdminStatus.$IDX i 1 \
+         $schedRowStatus.$IDX i $active"
+
+CHECK "^$schedRowStatus.$IDX = INTEGER: $active"
+
+CAPTURE "snmpset -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX i $destroy"
+
+CHECK "^$schedRowStatus.$IDX = INTEGER: $destroy"
+
+CAPTURE "snmpget -One $SNMP_FLAGS -c testcommunity -v 2c \
+         $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT \
+         $schedRowStatus.$IDX"
+
+CHECK "No Such Instance"
+
+STOPAGENT
+
+FINISHED
