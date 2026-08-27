@@ -14,7 +14,7 @@ NSCERTARGS="-C $SNMP_TMPDIR"
 
 FLAGS="-r0"
 if [ -n "${GITHUB_ACTIONS}${APPVEYOR}" ]; then
-    FLAGS="$FLAGS -t2"
+    FLAGS="$FLAGS -t1"
 fi
 
 DOSETTEST() {
