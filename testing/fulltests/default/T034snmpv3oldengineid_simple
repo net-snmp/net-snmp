@@ -1,0 +1,107 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER SNMPv3 oldEngineID parsing when backup snmpd.0.conf exists
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIFNOT USING_SNMPV3_USMUSER_MODULE
+SKIPIFNOT NETSNMP_CAN_DO_CRYPTO
+SKIPIFNOT NETSNMP_ENABLE_SCAPI_AUTHPRIV
+
+#
+# Begin test
+#
+
+DEFSECURITYLEVEL=authPriv
+. ./Sv3usmconfigagent
+
+AGENT_ENGINEID=0x80001f88801ff4905ea7804943
+AGENT_ENGINEID_HEX="80 00 1F 88 80 1F F4 90 5E A7 80 49 43"
+
+# Set up SNMPCONFPATH and SNMP_PERSISTENT_DIR so snmpd loads configs from
+# SNMP_TMPDIR and SNMP_TMP_PERSISTENTDIR without using -C -c
+SNMPCONFPATH="${SNMP_TMPDIR}${SNMP_ENV_SEPARATOR}${SNMP_TMP_PERSISTENTDIR}"
+export SNMPCONFPATH
+SNMP_PERSISTENT_DIR="$SNMP_TMP_PERSISTENTDIR"
+export SNMP_PERSISTENT_DIR
+
+# Main static configuration in SNMP_TMPDIR/snmpd.conf
+MAIN_CONFIG="$SNMP_TMPDIR/snmpd.conf"
+echo "[snmp] persistentdir $SNMP_TMP_PERSISTENTDIR" > "$MAIN_CONFIG"
+echo "smuxsocket 1.0.0.0" >> "$MAIN_CONFIG"
+echo "createUser $TESTPRIVUSER $DEFAUTHTYPE $TESTAUTHPASS $DEFPRIVTYPE $TESTPRIVPASS" >> "$MAIN_CONFIG"
+echo "rwuser $TESTPRIVUSER priv" >> "$MAIN_CONFIG"
+
+# Pre-populate persistent storage directory with snmpd.conf and snmpd.0.conf
+# both containing oldEngineID (reproducing issue #821 conditions)
+mkdir -p "$SNMP_TMP_PERSISTENTDIR"
+echo "engineBoots 1" > "$SNMP_TMP_PERSISTENTDIR/snmpd.0.conf"
+echo "oldEngineID $AGENT_ENGINEID" >> "$SNMP_TMP_PERSISTENTDIR/snmpd.0.conf"
+
+echo "engineBoots 1" > "$SNMP_TMP_PERSISTENTDIR/snmpd.conf"
+echo "oldEngineID $AGENT_ENGINEID" >> "$SNMP_TMP_PERSISTENTDIR/snmpd.conf"
+
+# Set SNMP_CONFIG_FILE to nonexistent so STARTPROG does not pass -C -c
+SNMP_CONFIG_FILE="does-not-exist"
+
+# Start the agent with both snmpd.conf and snmpd.0.conf present in persistent dir
+STARTAGENT
+
+# Verify that snmpEngineID.0 matches the oldEngineID from persistent configs
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $TESTPRIVUSER -l ap -a $DEFAUTHTYPE \
+-A $TESTAUTHPASS -x $DEFPRIVTYPE -X $TESTPRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.1.0 = Hex-STRING: $AGENT_ENGINEID_HEX"
+
+# Also test without explicit -e (engineID discovery)
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $TESTPRIVUSER -l ap -a $DEFAUTHTYPE \
+-A $TESTAUTHPASS -x $DEFPRIVTYPE -X $TESTPRIVPASS \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.1.0 = Hex-STRING: $AGENT_ENGINEID_HEX"
+
+# Stop agent and verify persistent config retains oldEngineID
+STOPAGENT
+CHECKORDIE "oldEngineID $AGENT_ENGINEID" "$SNMP_TMP_PERSISTENTDIR/snmpd.conf"
+
+# Simulate an ungraceful reboot/power loss where a backup snmpd.0.conf is present
+cp "$SNMP_TMP_PERSISTENTDIR/snmpd.conf" "$SNMP_TMP_PERSISTENTDIR/snmpd.0.conf"
+CHECKORDIE "oldEngineID $AGENT_ENGINEID" "$SNMP_TMP_PERSISTENTDIR/snmpd.0.conf"
+
+# Start the agent again
+SNMP_SNMPD_LOG_FILE=${SNMP_TMPDIR}/snmpd2.log
+STARTAGENT
+
+# Verify snmpEngineID.0 is still preserved and matches oldEngineID
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $TESTPRIVUSER -l ap -a $DEFAUTHTYPE \
+-A $TESTAUTHPASS -x $DEFPRIVTYPE -X $TESTPRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.1.0 = Hex-STRING: $AGENT_ENGINEID_HEX"
+
+# Verify engineBoots incremented
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $TESTPRIVUSER -l ap -a $DEFAUTHTYPE \
+-A $TESTAUTHPASS -x $DEFPRIVTYPE -X $TESTPRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.2.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.2.0 = INTEGER:"
+
+# Stop agent and verify oldEngineID is still in persistent config
+STOPAGENT
+CHECKORDIE "oldEngineID $AGENT_ENGINEID" "$SNMP_TMP_PERSISTENTDIR/snmpd.conf"
+
+# Test with multiple backup files (snmpd.0.conf and snmpd.1.conf)
+cp "$SNMP_TMP_PERSISTENTDIR/snmpd.conf" "$SNMP_TMP_PERSISTENTDIR/snmpd.1.conf"
+cp "$SNMP_TMP_PERSISTENTDIR/snmpd.conf" "$SNMP_TMP_PERSISTENTDIR/snmpd.0.conf"
+
+SNMP_SNMPD_LOG_FILE=${SNMP_TMPDIR}/snmpd3.log
+STARTAGENT
+
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -u $TESTPRIVUSER -l ap -a $DEFAUTHTYPE \
+-A $TESTAUTHPASS -x $DEFPRIVTYPE -X $TESTPRIVPASS -e $AGENT_ENGINEID \
+$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT 1.3.6.1.6.3.10.2.1.1.0"
+CHECKORDIE ".1.3.6.1.6.3.10.2.1.1.0 = Hex-STRING: $AGENT_ENGINEID_HEX"
+
+STOPAGENT
+CHECKORDIE "oldEngineID $AGENT_ENGINEID" "$SNMP_TMP_PERSISTENTDIR/snmpd.conf"
+
+FINISHED
