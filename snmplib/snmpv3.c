@@ -886,18 +886,13 @@ oldengineID_conf(const char *word, char *cptr)
     unsigned char *EngineID = NULL;
     size_t         EngineIDLength = 0;
 
-    if (oldEngineID) {
-        free(oldEngineID);
-        oldEngineID = NULL;
-        oldEngineIDLength = 0;
-    }
-
     read_config_read_octet_string(cptr, &EngineID, &EngineIDLength);
     if (EngineIDLength < 4) {
         config_perror("Invalid oldEngineID");
         free(EngineID);
         return;
     }
+    free(oldEngineID);
     oldEngineID = EngineID;
     oldEngineIDLength = EngineIDLength;
 }
