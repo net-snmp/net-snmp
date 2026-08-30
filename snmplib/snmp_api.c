@@ -1783,7 +1783,7 @@ _sess_open(netsnmp_session * in_session)
         } else {
             transport =
                 netsnmp_tdomain_transport_full("snmp", in_session->peername,
-                                               in_session->local_port, "udp,udp6",
+                                               in_session->local_port, NULL,
                                                NULL);
         }
 
