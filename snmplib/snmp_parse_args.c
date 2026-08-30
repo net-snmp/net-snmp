@@ -20,6 +20,16 @@
 #include <net-snmp/net-snmp-config.h>
 #include <errno.h>
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef INT_MAX
+#define INT_MAX 2147483647
+#endif
+#ifndef LONG_MAX
+#define LONG_MAX ((long)(~0UL >> 1))
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -209,6 +219,8 @@ netsnmp_parse_args(int argc,
     char            Opts[BUF_SIZE];
     int             zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
     char           *backup_NETSNMP_DS_LIB_OUTPUT_PRECISION = NULL;
+
+    netsnmp_assert(proc);
 
     /*
      * initialize session to default values 
@@ -414,23 +426,42 @@ netsnmp_parse_args(int argc,
         }
         break;
             
-        case 't':
-            session->timeout = (long)(atof(optarg) * 1000000L);
-            if (session->timeout <= 0) {
+        case 't': {
+            char *endptr;
+            double timeout, usec;
+
+            errno = 0;
+            timeout = strtod(optarg, &endptr);
+            while (isspace((unsigned char)*endptr))
+                endptr++;
+            usec = timeout * 1000000.0;
+            if (errno || endptr == optarg || *endptr != '\0' ||
+                !(usec >= 1.0 && usec < (double)LONG_MAX + 1.0)) {
                 fprintf(stderr, "Invalid timeout in seconds after -t flag.\n");
                 ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
                 goto out;
             }
+            session->timeout = (long)usec;
             break;
+        }
 
-        case 'r':
-            session->retries = atoi(optarg);
-            if (session->retries < 0 || !isdigit((unsigned char)(optarg[0]))) {
+        case 'r': {
+            char *endptr;
+            long retries;
+
+            errno = 0;
+            retries = strtol(optarg, &endptr, 10);
+            while (isspace((unsigned char)*endptr))
+                endptr++;
+            if (errno || endptr == optarg || *endptr != '\0' ||
+                retries < 0 || retries > INT_MAX) {
                 fprintf(stderr, "Invalid number of retries after -r flag.\n");
                 ret = NETSNMP_PARSE_ARGS_ERROR_USAGE;
                 goto out;
             }
+            session->retries = (int)retries;
             break;
+        }
 
         case 'c':
 	    if (zero_sensitive) {
