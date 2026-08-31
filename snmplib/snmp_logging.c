@@ -205,7 +205,7 @@ netsnmp_set_line_buffering(FILE *stream)
  * Decodes log priority.
  * @param optarg - IN - priority to decode, "0" or "0-7"
  *                 OUT - points to last character after the decoded priority
- * @param pri_max - OUT - maximum priority (i.e. 0x7 from "0-7")
+ * @param pri_max - OUT - maximum priority (i.e. 0 from "0-7")
  */
 static int
 decode_priority( char **optarg, int *pri_max )
@@ -327,7 +327,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 	 */
     char            missing_opt = 'e';	/* old -L is new -Le */
     int             priority = LOG_DEBUG;
-    int             pri_max  = LOG_DEBUG;
+    int             pri_max  = LOG_EMERG;
     int             inc_optind = 0;
     netsnmp_log_handler *logh;
 
@@ -1335,7 +1335,7 @@ snmp_log_string(int priority, const char *str)
          *     ensure this logging is turned on (see snmp_disable_stderrlog
          *     and its cohorts).
          */
-        if (logh->enabled && priority <= logh->pri_max)
+        if (logh->enabled && priority >= logh->pri_max)
             logh->handler( logh, priority, str );
     }
 }
