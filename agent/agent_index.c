@@ -234,6 +234,8 @@ register_index(netsnmp_variable_list * varbind, int flags,
                     res2 =
                         memcmp(varbind->val.string,
                                idxptr2->varbind->val.string, i);
+                    if (res2 == 0)
+                        res2 = (int)varbind->val_len - (int)idxptr2->varbind->val_len;
                     break;
                 case ASN_OBJECT_ID:
                     res2 =
@@ -331,6 +333,7 @@ register_index(netsnmp_variable_list * varbind, int flags,
      */
     if (flags & ALLOCATE_ANY_INDEX) {
         if (prev_idx_ptr) {
+            snmp_free_var_internals(new_index->varbind);
             if (snmp_clone_var(prev_idx_ptr->varbind, new_index->varbind)
                 != 0) {
                 snmp_free_var(new_index->varbind);
@@ -351,8 +354,8 @@ register_index(netsnmp_variable_list * varbind, int flags,
         case ASN_OCTET_STR:
             if (prev_idx_ptr && new_index->varbind->val_len > 0) {
                 i = new_index->varbind->val_len - 1;
-                while (i >= 0 && new_index->varbind->buf[i] == 'z') {
-                    new_index->varbind->buf[i] = 'a';
+                while (i >= 0 && new_index->varbind->val.string[i] == 'z') {
+                    new_index->varbind->val.string[i] = 'a';
                     i--;
                     if (i < 0) {
                         if (new_index->varbind->val_len + 1 >=
@@ -362,17 +365,19 @@ register_index(netsnmp_variable_list * varbind, int flags,
                             return NULL;
                         }
                         i = new_index->varbind->val_len;
-                        new_index->varbind->buf[i] = 'a' - 1;
-                        new_index->varbind->buf[i + 1] = 0;
+                        new_index->varbind->val.string[i] = 'a' - 1;
+                        new_index->varbind->val.string[i + 1] = 0;
+                        new_index->varbind->val_len++;
                         break;
                     }
                 }
                 if (i >= 0)
-                    new_index->varbind->buf[i]++;
-            } else
+                    new_index->varbind->val.string[i]++;
+            } else {
                 strcpy((char *) new_index->varbind->buf, "aaaa");
-            new_index->varbind->val_len =
-                strlen((char *) new_index->varbind->buf);
+                new_index->varbind->val.string = new_index->varbind->buf;
+                new_index->varbind->val_len = 4;
+            }
             break;
         case ASN_OBJECT_ID:
             if (prev_idx_ptr && new_index->varbind->val_len >= sizeof(oid)) {
@@ -559,6 +564,8 @@ unregister_index(netsnmp_variable_list * varbind, int remember,
             res2 =
                 memcmp(varbind->val.string,
                        idxptr2->varbind->val.string, i);
+            if (res2 == 0)
+                res2 = (int)varbind->val_len - (int)idxptr2->varbind->val_len;
             break;
         case ASN_OBJECT_ID:
             res2 =

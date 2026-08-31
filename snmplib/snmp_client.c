@@ -273,14 +273,17 @@ snmp_clone_var(netsnmp_variable_list * var, netsnmp_variable_list * newvar)
      */
     if (var->val.string) {
         if (var->val.string != &var->buf[0]) {
-            if (var->val_len <= sizeof(var->buf))
+            if (var->val_len < sizeof(var->buf)) {
                 newvar->val.string = newvar->buf;
-            else {
-                newvar->val.string = (u_char *) malloc(var->val_len);
+                memmove(newvar->val.string, var->val.string, var->val_len);
+                newvar->val.string[var->val_len] = 0;
+            } else {
+                newvar->val.string = (u_char *) malloc(var->val_len + 1);
                 if (!newvar->val.string)
                     return 1;
+                memmove(newvar->val.string, var->val.string, var->val_len);
+                newvar->val.string[var->val_len] = 0;
             }
-            memmove(newvar->val.string, var->val.string, var->val_len);
         } else {                /* fix the pointer to new local store */
             newvar->val.string = newvar->buf;
             /*

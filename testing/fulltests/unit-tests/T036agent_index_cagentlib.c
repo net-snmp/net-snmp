@@ -13,6 +13,7 @@ extern netsnmp_session *main_session;
     oid inc_oid[] = { 1, 2 };
     netsnmp_variable_list *res;
     char max_buf_str[40];
+    char large_str[256];
     char *sres;
     int ires;
 
@@ -172,6 +173,44 @@ extern netsnmp_session *main_session;
 
     ires = register_int_index(name, OID_LENGTH(name), ANY_INTEGER_INDEX);
     OK(ires == 6, "Allocating ANY_INTEGER_INDEX from 5 produces 6");
+
+    /*
+     * 9. Test issue #1047: ASN_OCTET_STR index allocation heap buffer overflow.
+     * When the previous index is > 40 bytes (e.g. 256 bytes), allocating ANY_STRING_INDEX
+     * must use val.string instead of buf to avoid out-of-bounds access.
+     */
+    name[8] = 10;
+    for (size_t i = 0; i < sizeof(large_str) - 1; i++)
+        large_str[i] = (char)('A' + (i % 26));
+    large_str[sizeof(large_str) - 1] = '\0';
+    sres = register_string_index(name, OID_LENGTH(name), large_str);
+    OK(sres != NULL, "Register initial 255-char (> 40 bytes) string index");
+    free(sres);
+
+    sres = register_string_index(name, OID_LENGTH(name), ANY_STRING_INDEX);
+    OK(sres != NULL, "Allocating ANY_STRING_INDEX for > 40 bytes string index succeeds");
+    if (sres) {
+        OK(strlen(sres) == sizeof(large_str) - 1, "Length of incremented large string is preserved");
+        OK(sres[sizeof(large_str) - 2] == large_str[sizeof(large_str) - 2] + 1,
+           "Last character of large string was incremented");
+        free(sres);
+    }
+
+    /*
+     * 10. Test issue #1047: Large string index rollover capacity limit.
+     * When a 255-char string of all 'z's rolls over, extending must return NULL without overflow.
+     */
+    name[8] = 11;
+    memset(large_str, 'z', sizeof(large_str) - 1);
+    large_str[sizeof(large_str) - 1] = '\0';
+    sres = register_string_index(name, OID_LENGTH(name), large_str);
+    OK(sres != NULL, "Register 255-char 'z' string index");
+    free(sres);
+
+    sres = register_string_index(name, OID_LENGTH(name), ANY_STRING_INDEX);
+    OK(sres == NULL, "Allocating ANY_STRING_INDEX for full large string returns NULL");
+    if (sres)
+        free(sres);
 
     unregister_index_by_session(main_session);
 
