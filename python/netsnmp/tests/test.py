@@ -152,6 +152,18 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(var.tag, '.1.3.6.1.2.1.1.1.0')
         self.assertEqual(var.iid, '')
 
+    def test_session_args(self):
+        sess = netsnmp.Session(DontCheckOrdering=1, Cc=1, UseLongNames=1,
+                               UseSprintValue=1, UseEnums=1, BestGuess=1,
+                               RetryNoSuch=1)
+        self.assertEqual(sess.DontCheckOrdering, 1)
+        self.assertEqual(sess.Cc, 1)
+        self.assertEqual(sess.UseLongNames, 1)
+        self.assertEqual(sess.UseSprintValue, 1)
+        self.assertEqual(sess.UseEnums, 1)
+        self.assertEqual(sess.BestGuess, 1)
+        self.assertEqual(sess.RetryNoSuch, 1)
+
     @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v1_get(self):
         print("\n")
@@ -363,6 +375,32 @@ class BasicTests(unittest.TestCase):
         vals = sess.walk(varlist)
         print("v1 sess.walk length: ", len(vals), "\n")
         self.assertTrue(len(vals) > 0)
+
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
+    def test_v1_walk_dont_check_ordering(self):
+        print("\n")
+        print("---v1 walk with DontCheckOrdering---------------------\n")
+        sess = setup_v1()
+        sess.DontCheckOrdering = 1
+        varlist = netsnmp.VarList(netsnmp.Varbind('system'))
+        vals = sess.walk(varlist)
+        self.assertTrue(len(vals) > 0)
+
+        # Also test via Cc attribute on session
+        sess2 = setup_v1()
+        sess2.Cc = 1
+        varlist2 = netsnmp.VarList(netsnmp.Varbind('system'))
+        vals2 = sess2.walk(varlist2)
+        self.assertEqual(len(vals), len(vals2))
+
+        # Also test via snmpwalk keyword argument
+        varlist3 = netsnmp.VarList(netsnmp.Varbind('system'))
+        vals3 = netsnmp.snmpwalk(varlist3, DontCheckOrdering=1, **snmp_dest())
+        self.assertEqual(len(vals), len(vals3))
+
+        varlist4 = netsnmp.VarList(netsnmp.Varbind('system'))
+        vals4 = netsnmp.snmpwalk(varlist4, Cc=1, **snmp_dest())
+        self.assertEqual(len(vals), len(vals4))
 
     @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
     def test_v2c_get(self):

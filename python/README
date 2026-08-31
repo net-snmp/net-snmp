@@ -123,6 +123,11 @@ Operational Description:
                   to 0 causes a regular lookup.  setting to 1 causes a regular 
                   expression match (defined as -Ib in snmpcmd). setting to 2 
                   causes a random access lookup (defined as -IR in snmpcmd).
+    DontCheckOrdering - default '0', set to non-zero to disable checking
+                  whether the returned OIDs are increasing (equivalent to
+                  the -Cc option of the snmpwalk application). Some agents
+                  return OIDs out of order, but can complete the walk anyway.
+                  Can also be specified as 'Cc'.
     ErrorStr    - read-only, holds the error message assoc. w/ last request
     ErrorNum    - read-only, holds the snmp_err or status of last request
     ErrorInd    - read-only, holds the snmp_err_index when appropriate

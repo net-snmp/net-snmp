@@ -1601,6 +1601,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   int old_format;
   int best_guess;
   int retry_nosuch;
+  int dont_check_ordering;
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
@@ -1641,6 +1642,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       sprintval_flag = USE_SPRINT_VALUE;
     best_guess = (int)py_netsnmp_attr_long(session, "BestGuess");
     retry_nosuch = (int)py_netsnmp_attr_long(session, "RetryNoSuch");
+    dont_check_ordering = (int)(py_netsnmp_attr_long(session, "DontCheckOrdering") > 0 ||
+                                py_netsnmp_attr_long(session, "Cc") > 0);
 
     pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
@@ -1769,8 +1772,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
         vars != NULL;
         vars = vars->next_variable, varlist_ind++) {
 
-        oid_arr_broken_check[varlist_ind] = calloc(MAX_OID_LEN, sizeof(oid));
-
         oid_arr_broken_check_len[varlist_ind] = (int)vars->name_length;
         memcpy(oid_arr_broken_check[varlist_ind],
                vars->name, vars->name_length * sizeof(oid));
@@ -1807,18 +1808,17 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   break;
               }
 
-              if (snmp_oid_compare(vars->name, vars->name_length,
+              if (!dont_check_ordering &&
+                  snmp_oid_compare(vars->name, vars->name_length,
                                    oid_arr_broken_check[varlist_ind],
                                    oid_arr_broken_check_len[varlist_ind]) <= 0) {
                   /* The agent responded with an illegal response
-                     as the returning OID was lexogragically less
-                     then or equal to the requested OID...
+                     as the returning OID was lexicographically less
+                     than or equal to the requested OID...
                      We need to give up here because an infinite
-                     loop will result otherwise.
-
-                     XXX: this really should be an option to
-                     continue like the -Cc option to the snmpwalk
-                     application.
+                     loop will result otherwise unless DontCheckOrdering
+                     is enabled (like the -Cc option to the snmpwalk
+                     application).
                   */
                   notdone = 0;
                   break;

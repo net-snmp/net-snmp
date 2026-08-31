@@ -33,7 +33,14 @@ def _parse_session_args(kargs):
         'OurIdentity':'',
         'TheirIdentity':'',
         'TheirHostname':'',
-        'TrustCert':''
+        'TrustCert':'',
+        'UseLongNames':0,
+        'UseSprintValue':0,
+        'UseEnums':0,
+        'BestGuess':0,
+        'RetryNoSuch':0,
+        'DontCheckOrdering':0,
+        'Cc':0
         }
     keys = list(kargs.keys())
     for key in keys:
@@ -129,6 +136,8 @@ class Session(object):
         self.UseEnums = 0
         self.BestGuess = 0
         self.RetryNoSuch = 0
+        self.DontCheckOrdering = 0
+        self.Cc = 0
         self._clear_error()
 
         sess_args = _parse_session_args(args)
