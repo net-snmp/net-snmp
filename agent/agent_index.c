@@ -75,6 +75,7 @@ char           *
 register_string_index(oid * name, size_t name_len, char *cp)
 {
     netsnmp_variable_list varbind, *res;
+    char *rv = NULL;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OCTET_STR;
@@ -86,23 +87,23 @@ register_string_index(oid * name, size_t name_len, char *cp)
         res = register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
 
-    if (res == NULL) {
-        return NULL;
-    } else {
-        char *rv = (char *)malloc(res->val_len + 1);
+    if (res != NULL) {
+        rv = (char *)malloc(res->val_len + 1);
         if (rv) {
             memcpy(rv, res->val.string, res->val_len);
             rv[res->val_len] = 0;
         }
-        free(res);
-        return rv;
+        snmp_free_var(res);
     }
+    snmp_free_var_internals(&varbind);
+    return rv;
 }
 
 int
 register_int_index(oid * name, size_t name_len, int val)
 {
     netsnmp_variable_list varbind, *res;
+    int rv = -1;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_INTEGER;
@@ -116,13 +117,12 @@ register_int_index(oid * name, size_t name_len, int val)
         res = register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
 
-    if (res == NULL) {
-        return -1;
-    } else {
-        int             rv = *(res->val.integer);
-        free(res);
-        return rv;
+    if (res != NULL) {
+        rv = *(res->val.integer);
+        snmp_free_var(res);
     }
+    snmp_free_var_internals(&varbind);
+    return rv;
 }
 
 /*
@@ -135,6 +135,7 @@ register_oid_index(oid * name, size_t name_len,
                    oid * value, size_t value_len)
 {
     netsnmp_variable_list varbind;
+    netsnmp_variable_list *res;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OBJECT_ID;
@@ -142,10 +143,12 @@ register_oid_index(oid * name, size_t name_len,
     if (value != ANY_OID_INDEX) {
         snmp_set_var_value(&varbind, (u_char *) value,
                            value_len * sizeof(oid));
-        return register_index(&varbind, ALLOCATE_THIS_INDEX, main_session);
+        res = register_index(&varbind, ALLOCATE_THIS_INDEX, main_session);
     } else {
-        return register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
+        res = register_index(&varbind, ALLOCATE_ANY_INDEX, main_session);
     }
+    snmp_free_var_internals(&varbind);
+    return res;
 }
 
 /*
@@ -330,6 +333,7 @@ register_index(netsnmp_variable_list * varbind, int flags,
         if (prev_idx_ptr) {
             if (snmp_clone_var(prev_idx_ptr->varbind, new_index->varbind)
                 != 0) {
+                snmp_free_var(new_index->varbind);
                 free(new_index);
                 return NULL;
             }
@@ -345,44 +349,61 @@ register_index(netsnmp_variable_list * varbind, int flags,
             new_index->varbind->val_len = sizeof(long);
             break;
         case ASN_OCTET_STR:
-            if (prev_idx_ptr) {
+            if (prev_idx_ptr && new_index->varbind->val_len > 0) {
                 i = new_index->varbind->val_len - 1;
-                while (new_index->varbind->buf[i] == 'z') {
+                while (i >= 0 && new_index->varbind->buf[i] == 'z') {
                     new_index->varbind->buf[i] = 'a';
                     i--;
                     if (i < 0) {
+                        if (new_index->varbind->val_len + 1 >=
+                            sizeof(new_index->varbind->buf)) {
+                            snmp_free_var(new_index->varbind);
+                            free(new_index);
+                            return NULL;
+                        }
                         i = new_index->varbind->val_len;
-                        new_index->varbind->buf[i] = 'a';
+                        new_index->varbind->buf[i] = 'a' - 1;
                         new_index->varbind->buf[i + 1] = 0;
+                        break;
                     }
                 }
-                new_index->varbind->buf[i]++;
+                if (i >= 0)
+                    new_index->varbind->buf[i]++;
             } else
                 strcpy((char *) new_index->varbind->buf, "aaaa");
             new_index->varbind->val_len =
                 strlen((char *) new_index->varbind->buf);
             break;
         case ASN_OBJECT_ID:
-            if (prev_idx_ptr) {
+            if (prev_idx_ptr && new_index->varbind->val_len >= sizeof(oid)) {
                 i = prev_idx_ptr->varbind->val_len / sizeof(oid) - 1;
-                while (new_index->varbind->val.objid[i] == 255) {
+                while (i >= 0 && new_index->varbind->val.objid[i] == 255) {
                     new_index->varbind->val.objid[i] = 1;
                     i--;
-                    if (i == 0 && new_index->varbind->val.objid[0] == 2) {
+                    if (i < 0 || (i == 0 && new_index->varbind->val.objid[0] >= 2)) {
+                        if (new_index->varbind->val_len + sizeof(oid) >
+                            sizeof(new_index->varbind->buf)) {
+                            snmp_free_var(new_index->varbind);
+                            free(new_index);
+                            return NULL;
+                        }
                         new_index->varbind->val.objid[0] = 1;
                         i = new_index->varbind->val_len / sizeof(oid);
                         new_index->varbind->val.objid[i] = 0;
                         new_index->varbind->val_len += sizeof(oid);
+                        break;
                     }
                 }
-                new_index->varbind->val.objid[i]++;
+                if (i >= 0)
+                    new_index->varbind->val.objid[i]++;
             } else {
                 /*
                  * If the requested OID name is small enough,
                  * *   append another OID (1) and use this as the
                  * *   default starting value for new indexes.
                  */
-                if ((varbind->name_length + 1) * sizeof(oid) <= 40) {
+                if ((varbind->name_length + 1) * sizeof(oid) <=
+                    sizeof(new_index->varbind->buf)) {
                     for (i = 0; i < (int) varbind->name_length; i++)
                         new_index->varbind->val.objid[i] =
                             varbind->name[i];
@@ -394,7 +415,7 @@ register_index(netsnmp_variable_list * varbind, int flags,
                     /*
                      * Otherwise use '.1.1.1.1...' 
                      */
-                    i = 40 / sizeof(oid);
+                    i = sizeof(new_index->varbind->buf) / sizeof(oid);
                     if (i > 4)
                         i = 4;
                     new_index->varbind->val_len = i * (sizeof(oid));
@@ -603,18 +624,22 @@ int
 unregister_string_index(oid * name, size_t name_len, char *cp)
 {
     netsnmp_variable_list varbind;
+    int res;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OCTET_STR;
     snmp_set_var_objid(&varbind, name, name_len);
     snmp_set_var_value(&varbind, (u_char *) cp, strlen(cp));
-    return (unregister_index(&varbind, FALSE, main_session));
+    res = unregister_index(&varbind, FALSE, main_session);
+    snmp_free_var_internals(&varbind);
+    return res;
 }
 
 int
 unregister_int_index(oid * name, size_t name_len, int val)
 {
     netsnmp_variable_list varbind;
+    int res;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_INTEGER;
@@ -622,7 +647,9 @@ unregister_int_index(oid * name, size_t name_len, int val)
     varbind.val.string = varbind.buf;
     varbind.val_len = sizeof(long);
     *varbind.val.integer = val;
-    return (unregister_index(&varbind, FALSE, main_session));
+    res = unregister_index(&varbind, FALSE, main_session);
+    snmp_free_var_internals(&varbind);
+    return res;
 }
 
 int
@@ -630,13 +657,16 @@ unregister_oid_index(oid * name, size_t name_len,
                      oid * value, size_t value_len)
 {
     netsnmp_variable_list varbind;
+    int res;
 
     memset(&varbind, 0, sizeof(netsnmp_variable_list));
     varbind.type = ASN_OBJECT_ID;
     snmp_set_var_objid(&varbind, name, name_len);
     snmp_set_var_value(&varbind, (u_char *) value,
                        value_len * sizeof(oid));
-    return (unregister_index(&varbind, FALSE, main_session));
+    res = unregister_index(&varbind, FALSE, main_session);
+    snmp_free_var_internals(&varbind);
+    return res;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_UNREGISTER_INDEXES */
 
