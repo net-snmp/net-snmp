@@ -8,10 +8,8 @@ AC_DEFUN([NETSNMP_SEARCH_LIBS],
     [netsnmp_cv_func_$1_]netsnmp_target,
     [netsnmp_func_search_save_LIBS="$LIBS"
      m4_if(netsnmp_target, [LIBS],
-         [netsnmp_target_val="$LIBS"
-          netsnmp_temp_LIBS="$5 ${LIBS}"],
-         [netsnmp_target_val="$netsnmp_target"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $5 ${LIBS}"])
+         [netsnmp_temp_LIBS="$5 ${LIBS}"],
+         [netsnmp_temp_LIBS="$netsnmp_target $5 ${LIBS}"])
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      AC_LINK_IFELSE([AC_LANG_CALL([],[$1])],
@@ -27,7 +25,7 @@ AC_DEFUN([NETSNMP_SEARCH_LIBS],
      [netsnmp_cv_func_$1_]netsnmp_target="${netsnmp_result}"])
  if test "${[netsnmp_cv_func_$1_]netsnmp_target}" != "no" ; then
     if test "${[netsnmp_cv_func_$1_]netsnmp_target}" != "none required" ; then
-       netsnmp_target="${netsnmp_result} ${netsnmp_target_val}"
+       netsnmp_target="${[netsnmp_cv_func_$1_]netsnmp_target} ${netsnmp_target}"
     fi
     $3
  m4_ifval([$4], [else

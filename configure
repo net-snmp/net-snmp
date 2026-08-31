@@ -23056,8 +23056,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -23128,7 +23127,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pkginfo_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pkginfo_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_pkginfo_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_PKGINFO 1" >>confdefs.h
@@ -23154,8 +23153,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LIBS"
-          netsnmp_temp_LIBS=" ${LIBS}"
+     netsnmp_temp_LIBS=" ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -23226,7 +23224,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pkg_init_LIBS" >&6; }
  if test "${netsnmp_cv_func_pkg_init_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pkg_init_LIBS}" != "none required" ; then
-       LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LIBS="${netsnmp_cv_func_pkg_init_LIBS} ${LIBS}"
     fi
 
 printf "%s\n" "#define HAVE_LIBPKG 1" >>confdefs.h
@@ -23259,8 +23257,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LIBS"
-          netsnmp_temp_LIBS=" ${LIBS}"
+     netsnmp_temp_LIBS=" ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -23331,7 +23328,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pkg_init_LIBS" >&6; }
  if test "${netsnmp_cv_func_pkg_init_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pkg_init_LIBS}" != "none required" ; then
-       LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LIBS="${netsnmp_cv_func_pkg_init_LIBS} ${LIBS}"
     fi
 
 printf "%s\n" "#define HAVE_LIBPKG 1" >>confdefs.h
@@ -23373,8 +23370,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -23445,7 +23441,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_perfstat_cpu_total_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_PERFSTAT 1" >>confdefs.h
@@ -23473,8 +23469,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -23545,7 +23540,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_open_mib_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_open_mib_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_open_mib_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_open_mib_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_LIBNM 1" >>confdefs.h
@@ -24988,8 +24983,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$CRYPTO_LIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$CRYPTO_LIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25060,7 +25054,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
  if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
-       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       CRYPTO_LIBS="${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS} ${CRYPTO_LIBS}"
     fi
     ac_cv_have_krb5=yes
  else
@@ -25075,8 +25069,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$CRYPTO_LIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$CRYPTO_LIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25147,7 +25140,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_error_message_CRYPTO_LIBS" >&6; }
  if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_error_message_CRYPTO_LIBS}" != "none required" ; then
-       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       CRYPTO_LIBS="${netsnmp_cv_func_error_message_CRYPTO_LIBS} ${CRYPTO_LIBS}"
     fi
 
 
@@ -25223,8 +25216,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$CRYPTO_LIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$CRYPTO_LIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25295,7 +25287,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS" >&6; }
  if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS}" != "none required" ; then
-       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       CRYPTO_LIBS="${netsnmp_cv_func_krb5_init_context_CRYPTO_LIBS} ${CRYPTO_LIBS}"
     fi
     ac_cv_NETSNMP_USE_KERBEROS_MIT=yes
  else
@@ -25314,8 +25306,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$CRYPTO_LIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$CRYPTO_LIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25386,7 +25377,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS" >&6; }
  if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS}" != "none required" ; then
-       CRYPTO_LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       CRYPTO_LIBS="${netsnmp_cv_func_krb5_c_keyed_checksum_types_CRYPTO_LIBS} ${CRYPTO_LIBS}"
     fi
 
 
@@ -25704,8 +25695,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_temp_LIBS="$_rpmlibs $LMIBLIBS ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25776,7 +25766,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_rpmGetPath__rpmlibs" >&6; }
  if test "${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "no" ; then
     if test "${netsnmp_cv_func_rpmGetPath__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+       _rpmlibs="${netsnmp_cv_func_rpmGetPath__rpmlibs} ${_rpmlibs}"
     fi
 
 
@@ -25792,8 +25782,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_temp_LIBS="$_rpmlibs $LMIBLIBS ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25864,7 +25853,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_rpmReadConfigFiles__rpmlibs" >&6; }
  if test "${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "no" ; then
     if test "${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+       _rpmlibs="${netsnmp_cv_func_rpmReadConfigFiles__rpmlibs} ${_rpmlibs}"
     fi
 
 
@@ -25885,8 +25874,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LIBS"
-          netsnmp_temp_LIBS="$LMIBLIBS ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25924,7 +25912,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_headerGet_LIBS" >&6; }
  if test "${netsnmp_cv_func_headerGet_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_headerGet_LIBS}" != "none required" ; then
-       LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LIBS="${netsnmp_cv_func_headerGet_LIBS} ${LIBS}"
     fi
 
 
@@ -26185,8 +26173,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26257,7 +26244,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_exp_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_exp_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_exp_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_exp_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26275,8 +26262,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LAGENTLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26347,7 +26333,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_read_LAGENTLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_read_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LAGENTLIBS="${netsnmp_cv_func_kvm_read_LAGENTLIBS} ${LAGENTLIBS}"
     fi
 
 
@@ -26361,8 +26347,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LAGENTLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26433,7 +26418,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_openfiles_LAGENTLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LAGENTLIBS="${netsnmp_cv_func_kvm_openfiles_LAGENTLIBS} ${LAGENTLIBS}"
     fi
 
 
@@ -26447,8 +26432,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26519,7 +26503,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_getprocs_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_kvm_getprocs_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26533,8 +26517,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26605,7 +26588,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_getproc2_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_getproc2_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_kvm_getproc2_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26619,8 +26602,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26691,7 +26673,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_getfiles_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_getfiles_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_kvm_getfiles_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26705,8 +26687,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26777,7 +26758,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_getfile2_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_getfile2_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_kvm_getfile2_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26791,8 +26772,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26863,7 +26843,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -26921,8 +26901,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LAGENTLIBS $LSNMPLIBS ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS $LAGENTLIBS $LSNMPLIBS ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -26993,7 +26972,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_dlopen_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_dlopen_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_dlopen_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 
@@ -27048,8 +27027,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LAGENTLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -27120,7 +27098,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pcre2_match_8_LAGENTLIBS" >&6; }
  if test "${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LAGENTLIBS="${netsnmp_cv_func_pcre2_match_8_LAGENTLIBS} ${LAGENTLIBS}"
     fi
 
     LMIBLIBS="$LMIBLIBS -lpcre2-8"
@@ -27171,8 +27149,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LAGENTLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -27243,7 +27220,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pcre_exec_LAGENTLIBS" >&6; }
  if test "${netsnmp_cv_func_pcre_exec_LAGENTLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pcre_exec_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LAGENTLIBS="${netsnmp_cv_func_pcre_exec_LAGENTLIBS} ${LAGENTLIBS}"
     fi
 
     LMIBLIBS="$LMIBLIBS -lpcre"
@@ -27622,8 +27599,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -27694,7 +27670,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_nl_connect_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_nl_connect_LMIBLIBS} ${LMIBLIBS}"
     fi
     ac_fn_c_check_header_compile "$LINENO" "netlink/cache.h" "ac_cv_header_netlink_cache_h" "$ac_includes_default"
 if test "x$ac_cv_header_netlink_cache_h" = xyes
@@ -27734,8 +27710,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -27806,7 +27781,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_rtnl_link_alloc_cache_LMIBLIBS} ${LMIBLIBS}"
     fi
     ac_fn_c_check_header_compile "$LINENO" "netlink/route/addr.h" "ac_cv_header_netlink_route_addr_h" "$ac_includes_default"
 if test "x$ac_cv_header_netlink_route_addr_h" = xyes
@@ -27835,8 +27810,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -27907,7 +27881,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_nl_connect_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_nl_connect_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_nl_connect_LMIBLIBS} ${LMIBLIBS}"
     fi
 
                 ac_fn_c_check_header_compile "$LINENO" "netlink/cache.h" "ac_cv_header_netlink_cache_h" "$ac_includes_default"
@@ -29824,8 +29798,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LNETSNMPLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LNETSNMPLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -29896,7 +29869,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_clock_gettime_LNETSNMPLIBS" >&6; }
  if test "${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS}" != "none required" ; then
-       LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LNETSNMPLIBS="${netsnmp_cv_func_clock_gettime_LNETSNMPLIBS} ${LNETSNMPLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
@@ -29925,8 +29898,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -29997,7 +29969,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_getdevs_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_getdevs_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_getdevs_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_getdevs_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_GETDEVS 1" >>confdefs.h
@@ -30013,8 +29985,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -30085,7 +30056,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_devstat_getdevs_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_devstat_getdevs_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_devstat_getdevs_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_DEVSTAT_GETDEVS 1" >>confdefs.h
@@ -30106,8 +30077,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -30178,7 +30148,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_pci_lookup_name_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_pci_lookup_name_LMIBLIBS} ${LMIBLIBS}"
     fi
 
 printf "%s\n" "#define HAVE_PCI_LOOKUP_NAME 1" >>confdefs.h
@@ -30231,8 +30201,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LMIBLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LMIBLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -30303,7 +30272,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS" >&6; }
  if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS}" != "none required" ; then
-       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LMIBLIBS="${netsnmp_cv_func_sensors_get_detected_chips_LMIBLIBS} ${LMIBLIBS}"
     fi
 
  else
@@ -31777,8 +31746,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LIBCURSES"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LIBCURSES  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -31849,7 +31817,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_endwin_LIBCURSES" >&6; }
  if test "${netsnmp_cv_func_endwin_LIBCURSES}" != "no" ; then
     if test "${netsnmp_cv_func_endwin_LIBCURSES}" != "none required" ; then
-       LIBCURSES="${netsnmp_result} ${netsnmp_target_val}"
+       LIBCURSES="${netsnmp_cv_func_endwin_LIBCURSES} ${LIBCURSES}"
     fi
 
   ac_fn_c_check_header_compile "$LINENO" "curses.h" "ac_cv_header_curses_h" "$ac_includes_default"
@@ -31880,8 +31848,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LIBS"
-          netsnmp_temp_LIBS=" ${LIBS}"
+     netsnmp_temp_LIBS=" ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -31952,7 +31919,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_cbreak_LIBS" >&6; }
  if test "${netsnmp_cv_func_cbreak_LIBS}" != "no" ; then
     if test "${netsnmp_cv_func_cbreak_LIBS}" != "none required" ; then
-       LIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LIBS="${netsnmp_cv_func_cbreak_LIBS} ${LIBS}"
     fi
     LIBCURSES="$LIBCURSES -ltinfo"
 
@@ -31970,8 +31937,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e) netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LNETSNMPLIBS"
-          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_temp_LIBS="$LNETSNMPLIBS  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -32042,7 +32008,7 @@ fi
 printf "%s\n" "$netsnmp_cv_func_ceil_LNETSNMPLIBS" >&6; }
  if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "no" ; then
     if test "${netsnmp_cv_func_ceil_LNETSNMPLIBS}" != "none required" ; then
-       LNETSNMPLIBS="${netsnmp_result} ${netsnmp_target_val}"
+       LNETSNMPLIBS="${netsnmp_cv_func_ceil_LNETSNMPLIBS} ${LNETSNMPLIBS}"
     fi
 
 
