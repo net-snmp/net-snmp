@@ -495,6 +495,10 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     netsnmp_pdu           *template_v1pdu;
     netsnmp_variable_list *first_vb, *vblist;
     netsnmp_variable_list *var;
+    size_t                 trap_oid_len;
+
+    if (!template_v2pdu)
+        return NULL;
 
     /*
      * Make a copy of the v2 Trap PDU
@@ -516,7 +520,11 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
      */
     if (!vblist ||
         snmp_oid_compare(vblist->name,  vblist->name_length,
-                         sysuptime_oid, sysuptime_oid_len)) {
+                         sysuptime_oid, sysuptime_oid_len) ||
+        !vblist->val.integer ||
+        vblist->val_len < sizeof(u_long) ||
+        (vblist->type != ASN_TIMETICKS && vblist->type != ASN_INTEGER &&
+         vblist->type != ASN_UINTEGER)) {
         snmp_log(LOG_WARNING,
                  "send_trap: no v2 sysUptime varbind to set from\n");
         snmp_free_pdu(template_v1pdu);
@@ -530,9 +538,20 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
      */
     if (!vblist ||
         snmp_oid_compare(vblist->name, vblist->name_length,
-                         snmptrap_oid, snmptrap_oid_len)) {
+                         snmptrap_oid, snmptrap_oid_len) ||
+        vblist->type != ASN_OBJECT_ID ||
+        !vblist->val.objid ||
+        vblist->val_len < sizeof(oid)) {
         snmp_log(LOG_WARNING,
                  "send_trap: no v2 trapOID varbind to set from\n");
+        snmp_free_pdu(template_v1pdu);
+        return NULL;
+    }
+
+    trap_oid_len = vblist->val_len / sizeof(oid);
+    if (trap_oid_len > MAX_OID_LEN) {
+        snmp_log(LOG_WARNING,
+                 "send_trap: v2 trapOID too long (%zu)\n", trap_oid_len);
         snmp_free_pdu(template_v1pdu);
         return NULL;
     }
@@ -559,8 +578,12 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
      *    and the enterprise field from the v2 varbind list.
      * If there's an agentIPAddress varbind, set the agent_addr too
      */
-    if (!snmp_oid_compare(vblist->val.objid, OID_LENGTH(trap_prefix),
-                          trap_prefix,       OID_LENGTH(trap_prefix))) {
+    if (trap_oid_len == OID_LENGTH(trap_prefix) + 1 &&
+        snmp_oid_ncompare(vblist->val.objid, trap_oid_len,
+                          trap_prefix, OID_LENGTH(trap_prefix),
+                          OID_LENGTH(trap_prefix)) == 0 &&
+        vblist->val.objid[OID_LENGTH(trap_prefix)] >= 1 &&
+        vblist->val.objid[OID_LENGTH(trap_prefix)] <= 6) {
         /*
          * For 'standard' traps, extract the generic trap type
          *   from the snmpTrapOID value, and take the enterprise
@@ -573,24 +596,31 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         var = find_varbind_in_list( vblist,
                              snmptrapenterprise_oid,
                              snmptrapenterprise_oid_len);
-        if (var) {
+        SNMP_FREE(template_v1pdu->enterprise);
+        if (var && var->type == ASN_OBJECT_ID && var->val.objid &&
+            var->val_len >= sizeof(oid) &&
+            (var->val_len / sizeof(oid)) <= MAX_OID_LEN) {
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
             template_v1pdu->enterprise =
                 snmp_duplicate_objid(var->val.objid,
                                      template_v1pdu->enterprise_length);
+            if (!template_v1pdu->enterprise)
+                template_v1pdu->enterprise_length = 0;
         } else {
-            template_v1pdu->enterprise        = NULL;
-            template_v1pdu->enterprise_length = 0;		/* XXX ??? */
+            template_v1pdu->enterprise =
+                snmp_duplicate_objid(trap_prefix, OID_LENGTH(trap_prefix));
+            template_v1pdu->enterprise_length =
+                template_v1pdu->enterprise ? OID_LENGTH(trap_prefix) : 0;
         }
     } else {
         /*
          * For enterprise-specific traps, split the snmpTrapOID value
          *   into enterprise and specific trap
          */
-        size_t len = vblist->val_len / sizeof(oid);
-        if ( len <= 2 ) {
+        size_t len = trap_oid_len;
+        if ( len < 2 || (len == 2 && vblist->val.objid[0] == 0) ) {
             snmp_log(LOG_WARNING,
-                     "send_trap: v2 trapOID too short (%d)\n", (int)len);
+                     "send_trap: v2 trapOID too short (%zu)\n", len);
             snmp_free_pdu(template_v1pdu);
             return NULL;
         }
@@ -602,13 +632,15 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         SNMP_FREE(template_v1pdu->enterprise);
         template_v1pdu->enterprise =
             snmp_duplicate_objid(vblist->val.objid, len);
-        template_v1pdu->enterprise_length = len;
+        template_v1pdu->enterprise_length =
+            template_v1pdu->enterprise ? len : 0;
     }
     var = find_varbind_in_list( vblist, agentaddr_oid,
                                         agentaddr_oid_len);
-    if (var) {
+    if (var && var->val.string &&
+        var->val_len == sizeof(template_v1pdu->agent_addr)) {
         memcpy(template_v1pdu->agent_addr,
-               var->val.string, 4);
+               var->val.string, sizeof(template_v1pdu->agent_addr));
     }
 
     /*
@@ -632,7 +664,9 @@ netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *t_oid, size_t *t_oid_len)
     if (NULL == pdu || NULL == t_oid || NULL == t_oid_len)
         return SNMPERR_GENERR;
     if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-        if (pdu->enterprise_length > MAX_OID_LEN ||
+        if (pdu->enterprise == NULL ||
+            pdu->enterprise_length == 0 ||
+            pdu->enterprise_length > MAX_OID_LEN ||
             *t_oid_len < (pdu->enterprise_length + 2))
             return SNMPERR_LONG_OID;
         memcpy(t_oid, pdu->enterprise, pdu->enterprise_length*sizeof(oid));
@@ -643,8 +677,10 @@ netsnmp_build_trap_oid(netsnmp_pdu *pdu, oid *t_oid, size_t *t_oid_len)
         /** use cold_start_oid as template */
         if (*t_oid_len < OID_LENGTH(cold_start_oid))
             return SNMPERR_LONG_OID;
+        if (pdu->trap_type < 0 || pdu->trap_type > 5)
+            return SNMPERR_GENERR;
         memcpy(t_oid, cold_start_oid, sizeof(cold_start_oid));
-        t_oid[9]  = pdu->trap_type + 1; /* set actual trap type */
+        t_oid[OID_LENGTH(cold_start_oid) - 1]  = pdu->trap_type + 1; /* set actual trap type */
         *t_oid_len = OID_LENGTH(cold_start_oid);
     }
     return SNMPERR_SUCCESS;
@@ -743,7 +779,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
     var = find_varbind_in_list( template_v2pdu->variables,
                                 snmptrapenterprise_oid,
                                 snmptrapenterprise_oid_len);
-    if (!var) {
+    if (!var && template_v1pdu->enterprise && template_v1pdu->enterprise_length > 0) {
         if (!snmp_varlist_add_variable( &(template_v2pdu->variables),
                  snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                  ASN_OBJECT_ID,
@@ -886,12 +922,17 @@ netsnmp_send_traps(int trap, int specific,
             snmp_free_pdu(template_v2pdu);
             return -1;
         }
-        if (!snmp_oid_compare(vblist->val.objid, OID_LENGTH(trap_prefix),
-                              trap_prefix,       OID_LENGTH(trap_prefix))) {
+        if (trap_vb->type == ASN_OBJECT_ID && trap_vb->val.objid &&
+            trap_vb->val_len == (OID_LENGTH(trap_prefix) + 1) * sizeof(oid) &&
+            snmp_oid_ncompare(trap_vb->val.objid, OID_LENGTH(trap_prefix) + 1,
+                              trap_prefix, OID_LENGTH(trap_prefix),
+                              OID_LENGTH(trap_prefix)) == 0 &&
+            trap_vb->val.objid[OID_LENGTH(trap_prefix)] >= 1 &&
+            trap_vb->val.objid[OID_LENGTH(trap_prefix)] <= 6) {
             var = find_varbind_in_list( template_v2pdu->variables,
                                         snmptrapenterprise_oid,
                                         snmptrapenterprise_oid_len);
-            if (!var &&
+            if (!var && enterprise && enterprise_length > 0 &&
                 !snmp_varlist_add_variable( &(template_v2pdu->variables),
                      snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                      ASN_OBJECT_ID,
