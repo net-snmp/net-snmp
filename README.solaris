@@ -147,7 +147,7 @@ platforms, but especially for linux, there's a better chance of
 it working using gcc at any given time. We also do regular test
 builds with Sun cc, though.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
  -- Thomas Anders <tanders@users.sourceforge.net>
 
 ------------------------------------------------------------
@@ -176,7 +176,7 @@ mdlogd.  Leave this alone.
 You will need to create a new script to start net-snmp.
 See dist/snmpd-init.d and dist/snmptrapd-init.d for templates.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -261,7 +261,7 @@ that may be running (see section 2) and type:
 
 When complete, go on to section 5 below.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -330,7 +330,7 @@ Install a startup script (see section 1).
 For further information, see README.solaris.binaries.x that ships
 with the binaries.
 
---Bruce Shaw <Bruce.Shaw at shaw.ca>
+--Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -388,7 +388,7 @@ To display all debug messages type:
 
 but this will be extremely verbose.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca> with suggestions by Thushara Wickram
+ -- Bruce Shaw <hagenbizsvcs@gmail.com> with suggestions by Thushara Wickram
 
 ------------------------------------------------------------
 
@@ -422,7 +422,7 @@ a startup script (see section 2).
 Note that if you create a binary with Perl support (see below) an
 identically configured Perl needs to be installed as well.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -571,7 +571,7 @@ You may wish to modify the subtrees in net-snmp.reg as you find things
 that do and don't work.  Remember to keep backup copies of working
 configurations.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca> from notes by Stefan Radman and C Wells
+ -- Bruce Shaw <hagenbizsvcs@gmail.com> from notes by Stefan Radman and C Wells
 
 ------------------------------------------------------------
 
@@ -681,7 +681,7 @@ snmpwalk -v 2c -c public -m ALL localhost prNames
 The same methodology can presumably be used for fileName and laNames.  Your mileage may vary.
 
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>  with Allan McIntosh and Wes Hardaker
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>  with Allan McIntosh and Wes Hardaker
 
 ------------------------------------------------------------
 
@@ -896,7 +896,7 @@ In order to prevent inordinant consumption of machine resources,
 some sensor information is cached.  Currently, information
 retrieved from picld is cached for six seconds.  
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -1127,7 +1127,7 @@ WARNING!!  If you are planning on creating binary versions of net-snmp with
 Perl capability, you will also need to ship the Perl which you created in 
 /usr/local/net-snmp.
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
  -- Thomas Anders <tanders@users.sourceforge.net>
 
 ------------------------------------------------------------
@@ -1232,7 +1232,7 @@ crle -c /var/ld/ld.config -l /usr/lib:/usr/local/ssl/lib
 
 Thanks to Dave Shield and Johannes Schmidt-Fischer
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
@@ -1275,7 +1275,7 @@ Rework the host mib module to work even if net-snmp is built with
 largefile support. This would eliminate the most important problems 
 with Perl (see section 12).
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
  -- Thomas Anders <tanders@users.sourceforge.net>
 
 ------------------------------------------------------------
@@ -1300,7 +1300,7 @@ interested in in snmpd.conf and examine
 using UCD-SNMP-MIB.
 
 
- -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+ -- Bruce Shaw <hagenbizsvcs@gmail.com>
 
 ------------------------------------------------------------
 
