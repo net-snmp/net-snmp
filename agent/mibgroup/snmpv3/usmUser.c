@@ -113,26 +113,26 @@ usm_parse_oid(const oid * oidIndex, size_t oidLen,
               unsigned char **engineID, size_t * engineIDLen,
               unsigned char **name, size_t * nameLen)
 {
-    int             nameL;
-    int             engineIDL;
-    int             i;
+    size_t          nameL;
+    size_t          engineIDL;
+    size_t          i;
 
     /*
      * first check the validity of the oid 
      */
-    if ((oidLen <= 0) || (!oidIndex)) {
+    if (oidLen < 2 || !oidIndex) {
         DEBUGMSGTL(("usmUser",
                     "parse_oid: null oid or zero length oid passed in\n"));
         return 1;
     }
     engineIDL = *oidIndex;      /* initial engineID length */
-    if ((int) oidLen < engineIDL + 2) {
+    if (engineIDL > oidLen - 2) {
         DEBUGMSGTL(("usmUser",
                     "parse_oid: invalid oid length: less than the engineIDLen\n"));
         return 1;
     }
     nameL = oidIndex[engineIDL + 1];    /* the initial name length */
-    if ((int) oidLen != engineIDL + nameL + 2) {
+    if (nameL != oidLen - engineIDL - 2) {
         DEBUGMSGTL(("usmUser",
                     "parse_oid: invalid oid length: length is not exact\n"));
         return 1;
@@ -141,13 +141,13 @@ usm_parse_oid(const oid * oidIndex, size_t oidLen,
     /*
      * its valid, malloc the space and store the results 
      */
-    if (engineID == NULL || name == NULL) {
+    if (engineID == NULL || name == NULL || engineIDLen == NULL || nameLen == NULL) {
         DEBUGMSGTL(("usmUser",
                     "parse_oid: null storage pointer passed in.\n"));
         return 1;
     }
 
-    *engineID = (unsigned char *) malloc(engineIDL);
+    *engineID = (unsigned char *) malloc(engineIDL + 1);
     if (*engineID == NULL) {
         DEBUGMSGTL(("usmUser",
                     "parse_oid: malloc of the engineID failed\n"));
@@ -159,6 +159,7 @@ usm_parse_oid(const oid * oidIndex, size_t oidLen,
     if (*name == NULL) {
         DEBUGMSGTL(("usmUser", "parse_oid: malloc of the name failed\n"));
         free(*engineID);
+        *engineID = NULL;
         return 1;
     }
     *nameLen = nameL;
@@ -175,6 +176,8 @@ usm_parse_oid(const oid * oidIndex, size_t oidLen,
           UPO_parse_error:
             free(*engineID);
             free(*name);
+            *engineID = NULL;
+            *name = NULL;
             return 1;
         }
         name[0][i] = (unsigned char) oidIndex[i + 2 + engineIDL];
@@ -211,7 +214,8 @@ usm_parse_user(oid * name, size_t name_len)
     /*
      * get the name and engineID out of the incoming oid 
      */
-    if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+    if (name_len < USM_MIB_LENGTH ||
+        usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
                       &engineID, &engineIDLen, &newName, &nameLen))
         return NULL;
 
@@ -789,6 +793,9 @@ write_usmUserAuthKeyChange(int action,
     static size_t   oldkeylen;
     static int      resetOnFail;
 
+    if (name_len < USM_MIB_LENGTH)
+        return SNMP_ERR_INCONSISTENTNAME;
+
     switch (name[USM_MIB_LENGTH - 1]) {
     case 6:
         fname = "write_usmUserAuthKeyChange";
@@ -1045,6 +1052,9 @@ write_usmUserPrivKeyChange(int action,
     static unsigned char *oldkey;
     static size_t   oldkeylen;
     static int      resetOnFail;
+
+    if (name_len < USM_MIB_LENGTH)
+        return SNMP_ERR_INCONSISTENTNAME;
 
     switch (name[USM_MIB_LENGTH - 1]) {
     case 9:
@@ -1338,7 +1348,8 @@ write_usmUserStatus(int action,
         /*
          * See if we can parse the oid for engineID/name first.  
          */
-        if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+        if (name_len < USM_MIB_LENGTH ||
+            usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
                           &engineID, &engineIDLen, &newName, &nameLen)) {
             DEBUGMSGTL(("usmUser",
                         "can't parse the OID for engineID or name\n"));
@@ -1406,8 +1417,10 @@ write_usmUserStatus(int action,
             }
         }
     } else if (action == ACTION) {
-        usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, &newName, &nameLen);
+        if (name_len < USM_MIB_LENGTH ||
+            usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+                          &engineID, &engineIDLen, &newName, &nameLen))
+            return SNMP_ERR_INCONSISTENTNAME;
         uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
@@ -1435,8 +1448,10 @@ write_usmUserStatus(int action,
             }
         }
     } else if (action == COMMIT) {
-        usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, &newName, &nameLen);
+        if (name_len < USM_MIB_LENGTH ||
+            usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+                          &engineID, &engineIDLen, &newName, &nameLen))
+            return SNMP_ERR_INCONSISTENTNAME;
         uptr = usm_get_user2(engineID, engineIDLen, newName, nameLen);
         SNMP_FREE(engineID);
         SNMP_FREE(newName);
@@ -1448,8 +1463,9 @@ write_usmUserStatus(int action,
             }
         }
     } else if (action == UNDO || action == FREE) {
-        if (usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
-                      &engineID, &engineIDLen, &newName, &nameLen)) {
+        if (name_len < USM_MIB_LENGTH ||
+            usm_parse_oid(&name[USM_MIB_LENGTH], name_len - USM_MIB_LENGTH,
+                          &engineID, &engineIDLen, &newName, &nameLen)) {
             /* Can't extract engine info from the OID - nothing to undo */
             return SNMP_ERR_NOERROR;
         }

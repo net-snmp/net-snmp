@@ -50,6 +50,7 @@ config_add_mib(SNMP-USER-BASED-SM-MIB);
                                    unsigned char **engineID,
                                    size_t * engineIDLen,
                                    unsigned char **name, size_t * nameLen);
+     struct usmUser *usm_parse_user(oid * name, size_t name_len);
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT 
      WriteMethod     write_usmUserSpinLock;

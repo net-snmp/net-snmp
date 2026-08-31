@@ -328,7 +328,7 @@ var_vacm_access(struct variable * vp,
          */
         op = name + 11;
         len = *op++;
-        if (len > VACM_MAX_STRING)
+        if (len > VACM_MAX_STRING || (size_t)(name + *length - op) < len + 3)
             return NULL;
         cp = groupName;
         while (len-- > 0) {
@@ -342,7 +342,7 @@ var_vacm_access(struct variable * vp,
          * ... followed by the context index ...
          */
         len = *op++;
-        if (len > VACM_MAX_STRING)
+        if (len > VACM_MAX_STRING || (size_t)(name + *length - op) < len + 2)
             return NULL;
         cp = contextPrefix;
         while (len-- > 0) {
@@ -547,7 +547,7 @@ var_vacm_view(struct variable * vp,
              */
             op = name + 12;
             len = *op++;
-            if (len > VACM_MAX_STRING)
+            if (len > VACM_MAX_STRING || (size_t)(name + *length - op) < len + 1)
                 return NULL;
             cp = viewName;
             while (len-- > 0) {
@@ -562,9 +562,7 @@ var_vacm_view(struct variable * vp,
              */
             subtree[0] = len = *op++;
             subtreeLen = 1;
-            if (len > MAX_OID_LEN)
-                return NULL;
-            if ( (op+len) != (name + *length) )
+            if (len > MAX_OID_LEN || (size_t)(name + *length - op) != len)
                 return NULL;     /* Declared length doesn't match what we actually got */
             op1 = &(subtree[1]);
             while (len-- > 0) {
@@ -693,14 +691,14 @@ sec2group_parse_oid(oid * oidIndex, size_t oidLen,
         return 1;
     }
     nameL = oidIndex[1];        /* the initial name length */
-    if (oidLen != nameL + 2) {
+    if (nameL != oidLen - 2) {
         return 1;
     }
 
     /*
      * its valid, malloc the space and store the results 
      */
-    if (name == NULL) {
+    if (name == NULL || nameLen == NULL || model == NULL) {
         return 1;
     }
 
@@ -716,6 +714,7 @@ sec2group_parse_oid(oid * oidIndex, size_t oidLen,
     for (i = 0; i < nameL; i++) {
         if (oidIndex[i + 2] > 255) {
             free(*name);
+            *name = NULL;
             return 1;
         }
         name[0][i] = (unsigned char) oidIndex[i + 2];
@@ -1008,7 +1007,9 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
     /*
      * its valid, malloc the space and store the results 
      */
-    if (contextPrefix == NULL || groupName == NULL) {
+    if (contextPrefix == NULL || groupName == NULL ||
+        contextPrefixLen == NULL || groupNameLen == NULL ||
+        model == NULL || level == NULL) {
         return 1;
     }
 
@@ -1020,6 +1021,7 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
     *contextPrefix = (unsigned char *) malloc(contextPrefixL + 1);
     if (*contextPrefix == NULL) {
         free(*groupName);
+        *groupName = NULL;
         return 1;
     }
 
@@ -1030,6 +1032,8 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
         if (oidIndex[i + 1] > 255) {
             free(*groupName);
             free(*contextPrefix);
+            *groupName = NULL;
+            *contextPrefix = NULL;
             return 1;
         }
         groupName[0][i] = (unsigned char) oidIndex[i + 1];
@@ -1041,6 +1045,8 @@ access_parse_oid(oid * oidIndex, size_t oidLen,
         if (oidIndex[i + groupNameL + 2] > 255) {
             free(*groupName);
             free(*contextPrefix);
+            *groupName = NULL;
+            *contextPrefix = NULL;
             return 1;
         }
         contextPrefix[0][i] = (unsigned char) oidIndex[i + groupNameL + 2];
@@ -1485,7 +1491,8 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
     /*
      * its valid, malloc the space and store the results 
      */
-    if (viewName == NULL || subtree == NULL) {
+    if (viewName == NULL || subtree == NULL ||
+        viewNameLen == NULL || subtreeLen == NULL) {
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
 
@@ -1498,6 +1505,7 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
     *subtree = (oid *) malloc(subtreeL * sizeof(oid));
     if (*subtree == NULL) {
         free(*viewName);
+        *viewName = NULL;
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
 
@@ -1508,6 +1516,8 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
         if (oidIndex[i + 1] > 255) {
             free(*viewName);
             free(*subtree);
+            *viewName = NULL;
+            *subtree = NULL;
             return SNMP_ERR_INCONSISTENTNAME;
         }
         viewName[0][i] = (unsigned char) oidIndex[i + 1];
