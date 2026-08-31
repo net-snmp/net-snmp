@@ -44,5 +44,5 @@ cat >>"$2.c" <<EOF
 EOF
 
 # ... and compile it.
-${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -I$srcdir/agent/mibgroup -o $2 $2.c ${builddir}/snmplib/libnetsnmp.la ${builddir}/agent/libnetsnmpagent.la `${builddir}/net-snmp-config --external-libs`
+${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -I$srcdir/agent/mibgroup -o $2 $2.c ${builddir}/snmplib/libnetsnmp.la ${builddir}/agent/libnetsnmpagent.la ${builddir}/agent/libnetsnmpmibs.la `${builddir}/net-snmp-config --external-libs`
 echo $2

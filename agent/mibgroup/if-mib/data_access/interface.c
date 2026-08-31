@@ -946,13 +946,13 @@ int netsnmp_access_interface_include(const char *name)
     for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
 #if defined(HAVE_PCRE2_H)
         if (pcre2_match(if_ptr->regex_ptr, (const unsigned char *)name,
-                        strlen(name), 0, 0, ndx_match, NULL) >= 0)  {
+                        strlen(name), 0, PCRE2_ANCHORED, ndx_match, NULL) >= 0)  {
                 pcre2_match_data_free(ndx_match);
                 return TRUE;
         }
 #elif defined(HAVE_PCRE_H)
-        if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0, 0,
-                      found_ndx, 3) >= 0)
+        if (pcre_exec(if_ptr->regex_ptr, NULL, name, strlen(name), 0,
+                      PCRE_ANCHORED, found_ndx, 3) >= 0)
             return TRUE;
 #elif defined(HAVE_REGEX_H)
         if (regexec(if_ptr->regex_ptr, name, 0, NULL, 0) == 0)
@@ -1076,7 +1076,8 @@ static void
 _parse_include_if_config(const char *token, char *cptr)
 {
     netsnmp_include_if_list *if_ptr, *if_new;
-    char                    *name, *st;
+    char                    name[SPRINT_MAX_LEN];
+    const char              *cp = cptr;
 #if defined(HAVE_PCRE2_H)
     /*
      * We can only get the message upon calling pcre2_error_message.
@@ -1089,23 +1090,33 @@ _parse_include_if_config(const char *token, char *cptr)
     const char              *pcre_error;
     int                     pcre_error_offset;
 #elif defined(HAVE_REGEX_H)
+    char                    *pattern = NULL;
     int                     r = 0;
 #endif
 
-    name = strtok_r(cptr, " \t", &st);
-    if (!name) {
+    name[0] = '\0';
+    if (cp)
+        cp = copy_nword_const(cp, name, sizeof(name));
+    if (!name[0]) {
         config_perror("Missing NAME parameter");
         return;
     }
 
     /* check for duplicate prefix configuration */
-    while (name != NULL) {
+    while (name[0]) {
         for (if_ptr = include_list; if_ptr; if_ptr = if_ptr->next) {
-            if (strncmp(name, if_ptr->name, strlen(if_ptr->name)) == 0) {
+            if (strcmp(name, if_ptr->name) == 0) {
                 config_pwarn("Duplicate include interface prefix specification");
-                return;
+                break;
             }
         }
+        if (if_ptr) {
+            name[0] = '\0';
+            if (cp)
+                cp = copy_nword_const(cp, name, sizeof(name));
+            continue;
+        }
+
         /* now save the prefixes */
         if_new = SNMP_MALLOC_TYPEDEF(netsnmp_include_if_list);
         if (!if_new) {
@@ -1119,7 +1130,7 @@ _parse_include_if_config(const char *token, char *cptr)
         }
 #if defined(HAVE_PCRE2_H)
         if_new->regex_ptr = pcre2_compile((const unsigned char *)if_new->name,
-                                          PCRE2_ZERO_TERMINATED, 0,
+                                          PCRE2_ZERO_TERMINATED, PCRE2_ANCHORED,
                                           &pcre2_err_code, &pcre2_error_offset,
                                           NULL);
         if (!if_new->regex_ptr) {
@@ -1130,8 +1141,8 @@ _parse_include_if_config(const char *token, char *cptr)
             goto err;
         }
 #elif defined(HAVE_PCRE_H)
-        if_new->regex_ptr = pcre_compile(if_new->name, 0,  &pcre_error,
-                                         &pcre_error_offset, NULL);
+        if_new->regex_ptr = pcre_compile(if_new->name, PCRE_ANCHORED,
+                                         &pcre_error, &pcre_error_offset, NULL);
         if (!if_new->regex_ptr) {
             config_perror(pcre_error);
             goto err;
@@ -1142,7 +1153,19 @@ _parse_include_if_config(const char *token, char *cptr)
             config_perror("Out of memory");
             goto err;
         }
-        r = regcomp(if_new->regex_ptr, if_new->name, REG_NOSUB);
+        if (if_new->name[0] == '^') {
+            pattern = strdup(if_new->name);
+        } else {
+            if (asprintf(&pattern, "^(%s)", if_new->name) < 0)
+                pattern = NULL;
+        }
+        if (!pattern) {
+            config_perror("Out of memory");
+            goto err;
+        }
+        r = regcomp(if_new->regex_ptr, pattern, REG_EXTENDED | REG_NOSUB);
+        free(pattern);
+        pattern = NULL;
         if (r) {
             char buf[BUFSIZ];
             size_t regerror_len = 0;
@@ -1159,14 +1182,24 @@ _parse_include_if_config(const char *token, char *cptr)
         if_new->next = include_list;
         include_list = if_new;
         if_new = NULL;
-        name = strtok_r(NULL, " \t", &st);
+        name[0] = '\0';
+        if (cp)
+            cp = copy_nword_const(cp, name, sizeof(name));
     }
     return;
 
 err:
     if (if_new) {
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H) || defined(HAVE_REGEX_H)
+#if defined(HAVE_PCRE2_H)
+        pcre2_code_free(if_new->regex_ptr);
+#elif defined(HAVE_PCRE_H)
         free(if_new->regex_ptr);
+#elif defined(HAVE_REGEX_H)
+        if (if_new->regex_ptr) {
+            if (!r)
+                regfree(if_new->regex_ptr);
+            free(if_new->regex_ptr);
+        }
 #endif
         free(if_new->name);
     }
@@ -1180,7 +1213,9 @@ _free_include_if_config(void)
 
     while (if_ptr) {
         if_next = if_ptr->next;
-#if defined(HAVE_PCRE2_H) || defined(HAVE_PCRE_H)
+#if defined(HAVE_PCRE2_H)
+        pcre2_code_free(if_ptr->regex_ptr);
+#elif defined(HAVE_PCRE_H)
         free(if_ptr->regex_ptr);
 #elif defined(HAVE_REGEX_H)
         regfree(if_ptr->regex_ptr);
