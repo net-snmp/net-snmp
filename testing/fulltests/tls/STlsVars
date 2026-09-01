@@ -13,8 +13,8 @@ NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert -I"
 NSCERTARGS="-C $SNMP_TMPDIR"
 
 FLAGS="-r0"
-if [ -n "${GITHUB_ACTIONS}${APPVEYOR}" ]; then
-    FLAGS="$FLAGS -t1"
+if [ -n "${GITHUB_ACTIONS}${APPVEYOR}${CIRRUS_CI}" ]; then
+    FLAGS="$FLAGS -t2"
 fi
 
 DOSETTEST() {
