@@ -114,11 +114,11 @@ system_parse_config_string(const char *token, char *cptr,
         if (*cptr == '"' || strncasecmp(cptr, "0x", 2) == 0) {
             u_char *valp = (u_char *)value;
             size_t len = size;
-            if (!read_config_read_octet_string(cptr, &valp, &len)) {
+
+            read_config_read_octet_string(cptr, &valp, &len);
+            if (len == 0)
                 netsnmp_config_error("invalid octet string for %s:\n\t%s",
                                      token, cptr);
-                return;
-            }
             return;
         }
     } else {

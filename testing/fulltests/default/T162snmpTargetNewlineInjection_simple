@@ -96,6 +96,24 @@ CHECKORDIE ".1.3.6.1.2.1.1.4.0 = STRING: Admin <admin@example.com>"
 CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.6.3.12.1.3.1.4.7.112.97.114.97.109.115.49"
 CHECKORDIE ".1.3.6.1.6.3.12.1.3.1.4.7.112.97.114.97.109.115.49 = STRING: secName1"
 
+# 15. Test system_parse_config_string with invalid hex characters
+echo "psyslocation 0xzz" >> "$SNMP_CONFIG_FILE"
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.100.11.0 i 1"
+CHECKORDIE ".1.3.6.1.4.1.2021.100.11.0 = INTEGER: 1"
+CHECKAGENTCOUNT 1 "invalid octet string for psyslocation"
+CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.6.0"
+CHECKORDIE ".1.3.6.1.2.1.1.6.0 = STRING: Room 101, Bldg A"
+
+# 16. Test system_parse_config_string with oversized hex string (buffer too small)
+OVERSIZED_HEX="0x$(perl -e 'print "41" x 260')"
+echo "psyslocation $OVERSIZED_HEX" >> "$SNMP_CONFIG_FILE"
+CAPTURE "snmpset -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.4.1.2021.100.11.0 i 1"
+CHECKORDIE ".1.3.6.1.4.1.2021.100.11.0 = INTEGER: 1"
+CHECKAGENT "buffer too small to read octet string"
+CHECKAGENTCOUNT 3 "invalid octet string for psyslocation"
+CAPTURE "snmpget -On -Oe $SNMP_FLAGS -c testcommunity -v 2c $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.6.0"
+CHECKORDIE ".1.3.6.1.2.1.1.6.0 = STRING: Room 101, Bldg A"
+
 STOPAGENT
 
 FINISHED
