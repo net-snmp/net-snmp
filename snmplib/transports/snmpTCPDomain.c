@@ -251,7 +251,10 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
          * could otherwise wedge the agent.
          */
 
-        netsnmp_set_non_blocking_mode(t->sock, TRUE);
+        if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0)
+            DEBUGMSGTL(("netsnmp_tcp",
+                        "couldn't set non-blocking mode on fd %" NETSNMP_FMT_SKT "\n",
+                        t->sock));
 
         /*
          * Now sit here and wait for connections to arrive.  

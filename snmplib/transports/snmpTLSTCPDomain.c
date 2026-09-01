@@ -825,7 +825,10 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         }
     }
 
-    netsnmp_set_non_blocking_mode(newsock, TRUE);
+    if (netsnmp_set_non_blocking_mode(newsock, TRUE) < 0)
+        DEBUGMSGTL(("tlstcp",
+                    "couldn't set non-blocking mode on fd %" NETSNMP_FMT_SKT "\n",
+                    newsock));
 
     ssl = SSL_new(tlsdata->ssl_context);
     if (!ssl) {
