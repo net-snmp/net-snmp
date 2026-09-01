@@ -2004,7 +2004,8 @@ read_config_save_octet_string(char *saveto, const u_char * str, size_t len)
  * @param[in,out] len      If str != NULL, *len is the size of the buffer *str
  *   points at. If str == NULL, the value passed via *len is ignored.
  *   Before this function returns the number of bytes read will be stored
- *   in *len. If a buffer overflow occurs, *len will be set to 0.
+ *   in *len. If a buffer overflow occurs or if a parsing failure occurs, *len
+ *   will be set to 0.
  *
  * @return A pointer to the next character in the input to be parsed if
  *   parsing succeeded; NULL when the end of the input string has been reached
@@ -2027,8 +2028,11 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     u_int           tmp;
     size_t          i, ilen;
 
-    if (readfrom == NULL || str == NULL || len == NULL)
+    if (len == NULL)
         return NULL;
+
+    if (readfrom == NULL || str == NULL)
+        goto err;
 
     if (strncasecmp(readfrom, "0x", 2) == 0) {
         /*
@@ -2045,7 +2049,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             snmp_log(LOG_WARNING,"invalid hex string: wrong length\n");
             DEBUGMSGTL(("read_config_read_octet_string",
                         "invalid hex string: wrong length\n"));
-            return NULL;
+            goto err;
         }
         ilen = ilen / 2;
 
@@ -2053,9 +2057,9 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
          * malloc data space if needed (+1 for good measure) 
          */
         if (*str == NULL) {
-            *str = (u_char *) malloc(ilen + 1);
+            *str = malloc(ilen + 1);
             if (!*str)
-                return NULL;
+                goto err;
         } else {
             /*
              * require caller to have +1, and bail if not enough space.
@@ -2083,7 +2087,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
                 /*
                  * we may lose memory, but don't know caller's buffer XX free(cptr); 
                  */
-                return (NULL);
+                goto err;
             }
             readfrom += 2;
         }
@@ -2105,9 +2109,9 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
 
             *len = strlen(buf);
-            *str = (u_char *) malloc(*len + 1);
+            *str = malloc(*len + 1);
             if (*str == NULL)
-                return NULL;
+                goto err;
             memcpy(*str, buf, *len + 1);
         } else {
             readfrom = copy_nword_const(readfrom, (char *) *str, *len);
@@ -2117,6 +2121,10 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     }
 
     return readfrom;
+
+err:
+    *len = 0;
+    return NULL;
 }
 
 /*

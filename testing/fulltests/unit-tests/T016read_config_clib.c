@@ -22,8 +22,8 @@ static const u_char obuf2[] = { 'a', 'b', 'c', 0 };
 
 static const struct read_config_testcase test_input[] = {
     { &read_config_read_octet_string_const, "",           1, -1, NULL,  0 },
-    { &read_config_read_octet_string_const, "0x0",        1, -1, NULL,  1 },
-    { &read_config_read_octet_string_const, "0x0 0",      1, -1, NULL,  1 },
+    { &read_config_read_octet_string_const, "0x0",        1, -1, NULL,  0 },
+    { &read_config_read_octet_string_const, "0x0 0",      1, -1, NULL,  0 },
 
     { &read_config_read_octet_string_const, "0x010002",   1, -1, NULL,  0 },
     { &read_config_read_octet_string_const, "0x010002",   2, -1, NULL,  0 },
