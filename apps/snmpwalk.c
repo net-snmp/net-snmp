@@ -431,6 +431,7 @@ main(int argc, char *argv[])
 
 out:
     netsnmp_cleanup_session(&session);
+    snmp_shutdown(NETSNMP_APPLICATION_CONFIG_TYPE);
     SOCK_CLEANUP;
     return exitval;
 }
