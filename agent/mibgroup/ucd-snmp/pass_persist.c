@@ -245,7 +245,8 @@ void
 pass_persist_free_config(void)
 {
     struct extensible *etmp, *etmp2;
-    int i;
+
+    destruct_persist_pipes();
 
     for (etmp = persistpassthrus; etmp != NULL;) {
         etmp2 = etmp;
@@ -253,11 +254,6 @@ pass_persist_free_config(void)
         unregister_mib_priority(etmp2->miboid, etmp2->miblen, etmp2->mibpriority);
         free(etmp2->command);
         free(etmp2);
-    }
-    if (persist_pipes) {
-        for (i = 0; i <= numpersistpassthrus; i++) {
-            close_persist_pipe(i);
-        }
     }
     persistpassthrus = NULL;
     numpersistpassthrus = 0;
