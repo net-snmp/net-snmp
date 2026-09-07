@@ -384,7 +384,7 @@ write_laConfig(int action,
 
     case RESERVE2: /* Allocate memory and similar resources */
         {
-            char buf[8];
+            char buf[9];
             int old_errno = errno;
             double val;
             char *endp;
