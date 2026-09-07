@@ -1335,10 +1335,7 @@ main(int argc, char *argv[])
 #endif
             ) {
             snmp_log_perror("setgid failed");
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                goto sock_cleanup;
-            }
+            goto sock_cleanup;
         }
     }
     }
@@ -1352,10 +1349,7 @@ main(int argc, char *argv[])
         DEBUGMSGTL(("snmptrapd/main", "Changing uid to %d.\n", uid));
         if (setuid(uid) == -1) {
             snmp_log_perror("setuid failed");
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                goto sock_cleanup;
-            }
+            goto sock_cleanup;
         }
     }
     }
