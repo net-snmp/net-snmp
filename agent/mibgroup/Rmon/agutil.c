@@ -156,8 +156,10 @@ AGUTIL_get_string_value(u_char * var_val, u_char var_val_type,
         return SNMP_ERR_WRONGTYPE;
     }
 
-    if (var_val_len > buffer_max_size) {
-        ag_trace("wrong len=%d > %d", (int) var_val_len, buffer_max_size);
+    if (var_val_len > buffer_max_size ||
+        (should_zero_limited && var_val_len == buffer_max_size)) {
+        ag_trace("length %d does not fit buffer size %d",
+                 (int)var_val_len, buffer_max_size);
         return SNMP_ERR_WRONGLENGTH;
     }
 

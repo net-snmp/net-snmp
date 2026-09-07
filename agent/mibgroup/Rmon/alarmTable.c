@@ -81,6 +81,7 @@ void shutdown_alarmTable(void)
 
 
 #define ALARM_STR1_LEN	32
+#define ALARM_OWNER_MAX_LEN 127
 typedef enum {
     RMON1_ENTRY_VALID = 1,
     RMON1_ENTRY_CREATE_REQUEST,
@@ -132,9 +133,9 @@ struct alarmTable_entry {
     long            old_alarmRisingEventIndex;
     long            alarmFallingEventIndex;
     long            old_alarmFallingEventIndex;
-    char            alarmOwner[ALARM_STR1_LEN];
+    char            alarmOwner[ALARM_OWNER_MAX_LEN];
     size_t          alarmOwner_len;
-    char            old_alarmOwner[ALARM_STR1_LEN];
+    char            old_alarmOwner[ALARM_OWNER_MAX_LEN];
     size_t          old_alarmOwner_len;
     long            alarmStatus;
     long            old_alarmStatus;
@@ -504,9 +505,13 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 }
                 break;
             case COLUMN_ALARMOWNER:
-                /*
-                 * or possibly 'netsnmp_check_vb_type_and_max_size' 
-                 */
+                ret = netsnmp_check_vb_type_and_max_size(
+                    request->requestvb, ASN_OCTET_STR,
+                    sizeof(table_entry->alarmOwner));
+                if (ret != SNMP_ERR_NOERROR) {
+                    netsnmp_set_request_error(reqinfo, request, ret);
+                    return SNMP_ERR_NOERROR;
+                }
                 break;
             case COLUMN_ALARMSTATUS:
                 /*

@@ -293,7 +293,7 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
                 return SNMP_ERR_TOOBIG;
             snmp_status = AGUTIL_get_string_value(var_val, var_val_type,
                                                   var_val_len,
-                                                  MAX_event_description,
+                                                  1 + MAX_event_description,
                                                   1, NULL, char_temp);
             if (SNMP_ERR_NOERROR != snmp_status) {
                 AGFREE(char_temp);
@@ -329,7 +329,7 @@ write_eventControl(int action, u_char * var_val, u_char var_val_type,
                 return SNMP_ERR_TOOBIG;
             snmp_status = AGUTIL_get_string_value(var_val, var_val_type,
                                                   var_val_len,
-                                                  MAX_event_community,
+                                                  1 + MAX_event_community,
                                                   1, NULL, char_temp);
             if (SNMP_ERR_NOERROR != snmp_status) {
                 AGFREE(char_temp);
