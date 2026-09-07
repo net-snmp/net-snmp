@@ -489,6 +489,25 @@ netsnmp_unregister_table_data(netsnmp_handler_registration *reginfo)
  * data down to the lower handler(s).  It sets request->processed if
  * the request should not be handled.
  */
+static int
+netsnmp_table_data_build_oid_fits(netsnmp_handler_registration *reginfo,
+                                  netsnmp_table_row *row)
+{
+    return reginfo->rootoid_len <= MAX_OID_LEN - 2 &&
+        row->index_oid_len <= MAX_OID_LEN - reginfo->rootoid_len - 2;
+}
+
+static netsnmp_table_row *
+netsnmp_table_data_get_next_fitting_row(
+    netsnmp_handler_registration *reginfo, netsnmp_table_row *row)
+{
+    for (; row; row = row->next) {
+        if (netsnmp_table_data_build_oid_fits(reginfo, row))
+            return row;
+    }
+    return NULL;
+}
+
 int
 netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                                   netsnmp_handler_registration *reginfo,
@@ -602,11 +621,12 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                     }
                 }
             }
+            row = netsnmp_table_data_get_next_fitting_row(reginfo, row);
             if (!row) {
                 table_info->colnum++;
-                if (table_info->colnum <= table_reg_info->max_column) {
-                    row = table->first_row;
-                }
+                if (table_info->colnum <= table_reg_info->max_column)
+                    row = netsnmp_table_data_get_next_fitting_row(
+                        reginfo, table->first_row);
             }
             if (row) {
                 valid_request = 1;
@@ -831,8 +851,11 @@ netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
 {
     oid             build_space[MAX_OID_LEN];
 
-    if (!reginfo || !reqinfo || !request)
+    if (!reginfo || !reqinfo || !request || !row)
         return SNMPERR_GENERR;
+
+    if (!netsnmp_table_data_build_oid_fits(reginfo, row))
+        return SNMPERR_TOO_LONG;
 
     if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
         /*
