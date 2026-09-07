@@ -124,12 +124,21 @@ int             unregister_mib_priority	   (oid *, size_t, int);
 int             unregister_mib_range	   (oid *, size_t, int, int, oid);
 int             unregister_mib_context	   (oid *, size_t, int, int, oid,
 					    const char *);
+int             unregister_mib_context_by_session(oid *, size_t, int, int,
+                                                   oid, const char *,
+                                                   netsnmp_session *);
 void            clear_context              (void);
 void            unregister_mibs_by_session (netsnmp_session *);
 int     netsnmp_unregister_mib_table_row   (oid *mibloc, size_t mibloclen,
 					    int priority, int var_subid,
 					    oid range_ubound,
 					    const char *context);
+int     netsnmp_unregister_mib_table_row_by_session(
+                                            oid *mibloc, size_t mibloclen,
+                                            int priority, int var_subid,
+                                            oid range_ubound,
+                                            const char *context,
+                                            netsnmp_session *session);
 
 int             compare_tree		   (const oid *, size_t, 
 					    const oid *, size_t);
