@@ -1027,7 +1027,7 @@ agentx_realloc_build(netsnmp_session * session, netsnmp_pdu *pdu,
 	*
 	***********************/
 
-static int
+static u_int
 agentx_parse_int(const u_char *data, u_int network_byte_order)
 {
     u_int           value = 0;
@@ -1205,9 +1205,16 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
     }
 
     for (i = 0; i < n_subid; i++) {
-	int x;
+	u_int x;
 
 	x = agentx_parse_int(buf_ptr, network_byte_order);
+#ifdef EIGHTBIT_SUBIDS
+        if (x > MAX_SUBID) {
+            DEBUGMSGTL(("agentx", "Object ID sub-identifier too large\n"));
+            DEBUGINDENTLESS();
+            return NULL;
+        }
+#endif
         *oid_ptr++ = x;
         buf_ptr += 4;
         *length -= 4;
@@ -1575,7 +1582,8 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         end_oid_buffer,
         -(int)sizeof(end_oid_buffer)
     };
-    int             range_bound;        /* OID-range upper bound */
+    oid             range_bound;        /* OID-range upper bound */
+    u_int           parsed_range_bound;
     int             inc;        /* Inclusive SearchRange flag */
     int             type;       /* VarBind data type */
     size_t         *length = &len;
@@ -1725,8 +1733,13 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
             if (pdu->range_subid > oid_buf.used)
                 goto parse_err;
             AGENTX_NEEDLEN(4);
-            range_bound = agentx_parse_int(bufp, pdu->flags &
-                                           AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+            parsed_range_bound = agentx_parse_int(bufp, pdu->flags &
+                                                  AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+#ifdef EIGHTBIT_SUBIDS
+            if (parsed_range_bound > MAX_SUBID)
+                goto parse_err;
+#endif
+            range_bound = parsed_range_bound;
             bufp += 4;
             *length -= 4;
 

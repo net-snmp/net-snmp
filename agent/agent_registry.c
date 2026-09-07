@@ -1151,8 +1151,8 @@ netsnmp_register_mib(const char *moduleName,
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
 
-    if (moduleName == NULL ||
-        mibloc     == NULL) {
+    if (moduleName == NULL || mibloc == NULL ||
+        mibloclen > UCD_REGISTRY_OID_MAX_LEN) {
         /* Shouldn't happen ??? */
         netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
