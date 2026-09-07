@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# Testing this script is possible by running e.g. the following commands:
+# srcdir=/z/software/net-snmp/trunk builddir=/z/software/net-snmp/trunk-mingw
+# cd $builddir/testing
+# TRAPD_FLAGS="-Dsnmptrapd -Drun:shell" $srcdir/testing/fulltests/support/simple_run $srcdir/testing/fulltests/default/T059trapdtraphandle_noauth_simple
+
+# "inline" trap handler
+if [ "x$1" = "xtraphandle" ]; then
+  cat - >>"$2"
+  exit 0
+fi
+
+. ../support/simple_eval_tools.sh
+
+TRAPHANDLE_LOGFILE=${SNMP_TMPDIR}/traphandle.log
+
+HEADER snmptrapd traphandle with authorization disabled
+
+SKIPIF NETSNMP_DISABLE_SNMPV1
+SKIPIFNOT USING_UTILITIES_EXECUTE_MODULE
+
+#
+# Begin test
+#
+
+TESTCOMMUNITY=testcommunity
+
+# Make the paths of arguments $0 and $1 absolute.
+NETSNMPDIR="`pwd`"
+NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+if [ "`echo $1|cut -c1`" = "/" ]; then
+  traphandle_arg="$1"
+else
+  traphandle_arg="${NETSNMPDIR}/$1"
+fi
+
+CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
+CONFIGTRAPD [snmp] tempFilePattern /tmp/snmpd-tmp-XXXXXX
+CONFIGTRAPD disableAuthorization yes
+CONFIGTRAPD doNotLogTraps true
+if [ "x$OSTYPE" = "xmsys" ]; then
+    CONFIGTRAPD traphandle default $MSYS_SH -c "'" $traphandle_arg traphandle $TRAPHANDLE_LOGFILE "'"
+else
+    CONFIGTRAPD traphandle default $traphandle_arg traphandle $TRAPHANDLE_LOGFILE
+fi
+CONFIGTRAPD agentxsocket /dev/null
+
+STARTTRAPD
+
+## 1) reject malformed v1 traps without invoking the handler
+
+CAPTURE "snmptrap -Ir -d -v 1 -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT .1.3.6.1.4.1.8072 127.0.0.1 7 0 0 .1.3.6.1.2.1.1.4.0 s rejected_v1"
+DELAY
+CHECKFILECOUNT $TRAPHANDLE_LOGFILE 0 "rejected_v1"
+
+## 2) a valid v1 trap should still reach the handler
+
+CAPTURE "snmptrap -d -v 1 -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT .1.3.6.1.4.1.8072 127.0.0.1 0 0 0 .1.3.6.1.2.1.1.4.0 s handled_v1"
+DELAY
+CHECKORDIE "handled_v1" $TRAPHANDLE_LOGFILE
+
+## stop
+STOPTRAPD
+
+FINISHED

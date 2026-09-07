@@ -600,6 +600,12 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
         return;
     }
 
+    if (pdu->command == SNMP_MSG_TRAP) {
+        pdu = convert_v1pdu_to_v2(orig_pdu);
+        if (!pdu)
+            return;
+    }
+
     DEBUGMSGTL(("notification_log", "logging something\n"));
     row = netsnmp_create_table_data_row();
 
@@ -658,8 +664,6 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     netsnmp_set_row_column(row, COLUMN_NLMLOGCONTEXTNAME, ASN_OCTET_STR,
                            pdu->contextName, pdu->contextNameLen);
 
-    if (pdu->command == SNMP_MSG_TRAP)
-	pdu = convert_v1pdu_to_v2(orig_pdu);
     for (vptr = pdu->variables; vptr; vptr = vptr->next_variable) {
         if (snmp_oid_compare(snmptrapoid, snmptrapoid_len,
                              vptr->name, vptr->name_length) == 0) {

@@ -861,6 +861,8 @@ int   command_handler( netsnmp_pdu           *pdu,
 	    v2_pdu = convert_v1pdu_to_v2(pdu);
 	else
 	    v2_pdu = pdu;
+        if (!v2_pdu)
+            return NETSNMPTRAPD_HANDLER_FAIL;
         oldquick = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                           NETSNMP_DS_LIB_QUICK_PRINT);
         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
@@ -1158,10 +1160,10 @@ snmp_input(int op, netsnmp_session *session,
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
                 trapOidLen = pdu->enterprise_length;
                 /*
-                 * Drop packets that would trigger an out-of-bounds trapOid[]
-                 * access.
+                 * Drop packets that cannot be represented by the v2-style
+                 * trap OID passed to notification handlers.
                  */
-                if (trapOidLen < 1 || trapOidLen > OID_LENGTH(trapOid) - 2)
+                if (trapOidLen < 1 || trapOidLen > MAX_OID_LEN - 2)
                     return 1;
                 memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
                 if (trapOid[trapOidLen - 1] != 0) {
@@ -1172,7 +1174,8 @@ snmp_input(int op, netsnmp_session *session,
                 memcpy(trapOid, stdTrapOidRoot, sizeof(stdTrapOidRoot));
                 trapOidLen = OID_LENGTH(stdTrapOidRoot);  /* 9 */
                 /* Drop packets with an invalid trap type. */
-                if (pdu->trap_type == LONG_MAX)
+                if (pdu->trap_type < SNMP_TRAP_COLDSTART ||
+                    pdu->trap_type > SNMP_TRAP_EGPNEIGHBORLOSS)
                     return 1;
                 trapOid[trapOidLen++] = pdu->trap_type+1;
             }
@@ -1299,4 +1302,3 @@ t        *     d) any other global handlers
     }
     return 0;
 }
-

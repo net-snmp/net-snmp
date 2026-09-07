@@ -125,6 +125,11 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     /* nuke v1 PDUs */
     if (pdu->command == SNMP_MSG_TRAP) {
         v2pdu = convert_v1pdu_to_v2(pdu);
+        if (!v2pdu) {
+            FREETMPS;
+            LEAVE;
+            return NETSNMPTRAPD_HANDLER_FAIL;
+        }
         pdu = v2pdu;
     }
 
