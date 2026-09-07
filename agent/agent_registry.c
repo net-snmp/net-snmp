@@ -1232,17 +1232,23 @@ netsnmp_register_mib(const char *moduleName,
 	rest of the range.  */
 
     if (res == MIB_REGISTERED_OK && range_subid != 0) {
-        int i;
-	for (i = mibloc[range_subid - 1] + 1; i <= (int)range_ubound; i++) {
+        oid i = mibloc[range_subid - 1];
+	while (i < range_ubound) {
+            ++i;
 	    sub2 = netsnmp_subtree_deepcopy(subtree);
 
 	    if (sub2 == NULL) {
-                unregister_mib_context(mibloc, mibloclen, priority,
-                                       range_subid, range_ubound, context);
+                unregister_mib_table_row_session(
+                    mibloc, mibloclen, priority, range_subid, i - 1,
+                    range_ubound, context, ss);
                 netsnmp_set_lookup_cache_size(old_lookup_cache_val);
                 invalidate_lookup_cache(context);
                 return MIB_REGISTRATION_FAILED;
             }
+
+            sub2->children = NULL;
+            sub2->next = NULL;
+            sub2->prev = NULL;
 
             sub2->name_a[range_subid - 1]  = i;
             sub2->start_a[range_subid - 1] = i;
@@ -1257,9 +1263,12 @@ netsnmp_register_mib(const char *moduleName,
 
             res = netsnmp_subtree_load(sub2, context);
             if (res != MIB_REGISTERED_OK) {
-                unregister_mib_context(mibloc, mibloclen, priority,
-                                       range_subid, range_ubound, context);
-                netsnmp_remove_subtree(sub2);
+                unregister_mib_table_row_session(
+                    mibloc, mibloclen, priority, range_subid, i - 1,
+                    range_ubound, context, ss);
+                if (sub2->prev != NULL || sub2->next != NULL ||
+                    netsnmp_subtree_find_first(context) == sub2)
+                    netsnmp_remove_subtree(sub2);
 		netsnmp_subtree_free(sub2);
                 netsnmp_set_lookup_cache_size(old_lookup_cache_val);
                 invalidate_lookup_cache(context);
@@ -1852,12 +1861,15 @@ unregister_mib_table_row_session(oid * name, size_t len, int priority,
     DEBUGMSGOIDRANGE(("register_mib", name, len, var_subid, range_ubound));
     DEBUGMSG(("register_mib", "\n"));
 
-    for (; name[var_subid - 1] <= range_ubound; name[var_subid - 1]++) {
+    if (range_lbound > range_ubound)
+        return MIB_NO_SUCH_REGISTRATION;
+
+    for (;;) {
         list = netsnmp_subtree_find(name, len, 
 				netsnmp_subtree_find_first(context), context);
 
         if (list == NULL) {
-            continue;
+            goto next_subid;
         }
 
         for (child = list, prev = NULL; child != NULL;
@@ -1870,7 +1882,7 @@ unregister_mib_table_row_session(oid * name, size_t len, int priority,
         }
 
         if (child == NULL) {
-            continue;
+            goto next_subid;
         }
 
         netsnmp_subtree_unload(child, prev, context);
@@ -1900,6 +1912,11 @@ unregister_mib_table_row_session(oid * name, size_t len, int priority,
             }
         }
         netsnmp_subtree_free(myptr);
+
+next_subid:
+        if (name[var_subid - 1] == range_ubound)
+            break;
+        ++name[var_subid - 1];
     }
 
     name[var_subid - 1] = range_lbound;
@@ -2516,4 +2533,3 @@ unregister_signal(int sig)
 #endif /* NETSNMP_FEATURE_REMOVE_REGISTER_SIGNAL */
 
 /**  @} */
-

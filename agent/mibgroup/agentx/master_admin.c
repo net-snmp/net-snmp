@@ -52,6 +52,31 @@ netsnmp_feature_require(calculate_sectime_diff);
 netsnmp_feature_require(allocate_globalcacheid);
 netsnmp_feature_require(remove_index);
 
+#define AGENTX_MAX_REGISTRATION_RANGE 1024
+
+static int
+agentx_registration_range(const netsnmp_pdu *pdu, oid *upper_bound)
+{
+    size_t range_index;
+    oid lower_bound;
+
+    *upper_bound = 0;
+    if (pdu->range_subid == 0)
+        return 1;
+    if (pdu->variables == NULL || pdu->variables->val.objid == NULL ||
+        pdu->range_subid > pdu->variables->name_length)
+        return 0;
+
+    range_index = pdu->range_subid - 1;
+    lower_bound = pdu->variables->name[range_index];
+    *upper_bound = pdu->variables->val.objid[range_index];
+
+    return lower_bound <= *upper_bound &&
+        *upper_bound - lower_bound < AGENTX_MAX_REGISTRATION_RANGE &&
+        !(range_index == pdu->variables->name_length - 1 &&
+          *upper_bound == MAX_SUBID);
+}
+
 netsnmp_session *
 find_agentx_session(netsnmp_session * session, int sessid)
 {
@@ -214,9 +239,8 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
      * * TODO: registration timeout
      * *   registration context
      */
-    if (pdu->range_subid) {
-        ubound = pdu->variables->val.objid[pdu->range_subid - 1];
-    }
+    if (!agentx_registration_range(pdu, &ubound))
+        return AGENTX_ERR_REQUEST_DENIED;
 
     if (pdu->flags & AGENTX_MSG_FLAG_INSTANCE_REGISTER) {
         flags = FULLY_QUALIFIED_INSTANCE;
@@ -279,8 +303,10 @@ unregister_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
         return AGENTX_ERR_REQUEST_DENIED;
 
     if (pdu->range_subid != 0) {
-        oid             ubound =
-            pdu->variables->val.objid[pdu->range_subid - 1];
+        oid ubound;
+
+        if (!agentx_registration_range(pdu, &ubound))
+            return AGENTX_ERR_REQUEST_DENIED;
         rc = netsnmp_unregister_mib_table_row_by_session(
             pdu->variables->name, pdu->variables->name_length,
             pdu->priority, pdu->range_subid, ubound,
