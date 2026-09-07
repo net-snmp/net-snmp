@@ -168,6 +168,15 @@ static int      _snmp_store_needed = 0;
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
+#ifndef NETSNMP_STREAM_FRAME_TIMEOUT
+#define NETSNMP_STREAM_FRAME_TIMEOUT 30
+#endif
+#ifndef NETSNMP_STREAM_MAX_SESSIONS
+#define NETSNMP_STREAM_MAX_SESSIONS 32
+#endif
+#ifndef NETSNMP_STREAM_MAX_SESSIONS_PER_PEER
+#define NETSNMP_STREAM_MAX_SESSIONS_PER_PEER 8
+#endif
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -227,6 +236,10 @@ struct snmp_internal_session {
     u_char       *packet;      /* curr rcv packet data (may be incomplete) */
     size_t        packet_len;  /* length of data received so far */
     size_t        packet_size; /* size of buffer for packet data */
+    struct timeval packet_deadline; /* incomplete stream frame deadline */
+    int            accepted_stream;
+    int            stream_peer_valid;
+    netsnmp_sockaddr_storage stream_peer;
 
     u_char       *obuf;         /* send packet buffer */
     size_t        obuf_size;    /* size of buffer for packet data */
@@ -6182,6 +6195,89 @@ _sess_process_packet(struct session_list *slp, netsnmp_session * sp,
   return rc;
 }
 
+static void
+_sess_set_packet_deadline(struct snmp_internal_session *isp)
+{
+    netsnmp_get_monotonic_clock(&isp->packet_deadline);
+    isp->packet_deadline.tv_sec += NETSNMP_STREAM_FRAME_TIMEOUT;
+}
+
+static int
+_sess_packet_deadline_expired(struct snmp_internal_session *isp)
+{
+    struct timeval now;
+
+    if (isp == NULL || !timerisset(&isp->packet_deadline))
+        return 0;
+    netsnmp_get_monotonic_clock(&now);
+    return !timercmp(&now, &isp->packet_deadline, <);
+}
+
+static int
+_sess_same_stream_peer(const netsnmp_sockaddr_storage *a,
+                       const netsnmp_sockaddr_storage *b)
+{
+    if (a->sa.sa_family != b->sa.sa_family)
+        return 0;
+    if (a->sa.sa_family == AF_INET)
+        return memcmp(&a->sin.sin_addr, &b->sin.sin_addr,
+                      sizeof(a->sin.sin_addr)) == 0;
+#ifdef NETSNMP_ENABLE_IPV6
+    if (a->sa.sa_family == AF_INET6)
+        return memcmp(&a->sin6.sin6_addr, &b->sin6.sin6_addr,
+                      sizeof(a->sin6.sin6_addr)) == 0;
+#endif
+    return 0;
+}
+
+static int
+_sess_stream_accept_allowed(NETSNMP_SOCKET sock,
+                            netsnmp_sockaddr_storage *peer,
+                            int *peer_valid)
+{
+    struct session_list *slp;
+    socklen_t peer_len = sizeof(*peer);
+    int accepted = 0, same_peer = 0;
+
+    memset(peer, 0, sizeof(*peer));
+    *peer_valid = getpeername(sock, &peer->sa, &peer_len) == 0;
+    for (slp = Sessions; slp; slp = slp->next) {
+        struct snmp_internal_session *isp = slp->internal;
+
+        if (isp == NULL || !isp->accepted_stream || slp->transport == NULL ||
+            !NETSNMP_IS_VALID_SOCKET(slp->transport->sock))
+            continue;
+        accepted++;
+        if (*peer_valid && isp->stream_peer_valid &&
+            _sess_same_stream_peer(peer, &isp->stream_peer))
+            same_peer++;
+    }
+    return accepted < NETSNMP_STREAM_MAX_SESSIONS &&
+        same_peer < NETSNMP_STREAM_MAX_SESSIONS_PER_PEER;
+}
+
+static void
+_sess_close_stream(struct session_list *slp)
+{
+    netsnmp_session *sp = slp->session;
+    struct snmp_internal_session *isp = slp->internal;
+    netsnmp_transport *transport = slp->transport;
+
+    if (sp->callback != NULL) {
+        DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
+        (void)sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT, sp, 0, NULL,
+                           sp->callback_magic);
+    }
+    DEBUGMSGTL(("sess_read", "fd %" NETSNMP_FMT_SKT " closed\n",
+                transport->sock));
+    transport->f_close(transport);
+    SNMP_FREE(isp->packet);
+    isp->packet_size = 0;
+    isp->packet_len = 0;
+    isp->accepted_stream = 0;
+    timerclear(&isp->packet_deadline);
+}
+
 /*
  * Checks to see if any of the fd's set in the fdset belong to
  * snmp.  Each socket with it's fd set has a packet read from it
@@ -6208,6 +6304,10 @@ snmp_read2(netsnmp_large_fd_set * fdset)
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for (slp = Sessions; slp; slp = next) {
         next = slp->next;
+        if (_sess_packet_deadline_expired(slp->internal)) {
+            _sess_close_stream(slp);
+            continue;
+        }
         snmp_sess_read2(slp, fdset);
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
@@ -6225,6 +6325,8 @@ _sess_read_accept(struct session_list *slp)
     netsnmp_transport *transport = slp ? slp->transport : NULL;
     netsnmp_transport *new_transport;
     struct session_list *nslp;
+    netsnmp_sockaddr_storage peer;
+    int             peer_valid;
     NETSNMP_SOCKET    data_sock;
 
     if (NULL == slp || NULL == sp || NULL == transport || NULL == isp ||
@@ -6237,6 +6339,14 @@ _sess_read_accept(struct session_list *slp)
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
         return -1;
+    }
+    if (!_sess_stream_accept_allowed(data_sock, &peer, &peer_valid)) {
+#ifndef HAVE_CLOSESOCKET
+        close(data_sock);
+#else
+        closesocket(data_sock);
+#endif
+        return 0;
     }
 
     /*
@@ -6282,6 +6392,11 @@ _sess_read_accept(struct session_list *slp)
                          isp->hook_create_pdu);
 
     if (nslp != NULL) {
+        nslp->internal->accepted_stream = 1;
+        nslp->internal->stream_peer_valid = peer_valid;
+        if (peer_valid)
+            nslp->internal->stream_peer = peer;
+        _sess_set_packet_deadline(nslp->internal);
         snmp_session_insert(nslp);
         /** Tell the new session about its existence if possible. */
         DEBUGMSGTL(("sess_read",
@@ -6364,7 +6479,9 @@ __sess_read(struct session_list *slp)
     netsnmp_session *sp = slp ? slp->session : NULL;
     struct snmp_internal_session *isp = slp ? slp->internal : NULL;
     netsnmp_transport *transport = slp ? slp->transport : NULL;
-    size_t          pdulen = 0, rxbuf_len = SNMP_MAX_RCV_MSG_SIZE;
+    size_t          pdulen = 0;
+    size_t          rxbuf_len;
+    size_t          stream_limit;
     u_char         *rxbuf = NULL;
     int             length = 0, olength = 0, rc = 0;
     void           *opaque = NULL;
@@ -6382,6 +6499,11 @@ __sess_read(struct session_list *slp)
 
     sp->s_snmp_errno = 0;
     sp->s_errno = 0;
+
+    stream_limit = sp->rcvMsgMaxSize ?
+        SNMP_MIN(SNMP_MAX_PACKET_LEN, sp->rcvMsgMaxSize) :
+        SNMP_MAX_PACKET_LEN;
+    rxbuf_len = SNMP_MIN(SNMP_MAX_RCV_MSG_SIZE, stream_limit);
 
     if (transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)
         return _sess_read_accept(slp);
@@ -6442,6 +6564,12 @@ __sess_read(struct session_list *slp)
     }
 
     /** stream transport */
+
+        if (isp->packet_len >= stream_limit) {
+            _sess_close_stream(slp);
+            return -1;
+        }
+        rxbuf_len = SNMP_MIN(rxbuf_len, stream_limit - isp->packet_len);
 
         if (isp->packet == NULL) {
             /*
@@ -6505,18 +6633,7 @@ __sess_read(struct session_list *slp)
         /*
          * Alert the application if possible.  
          */
-        if (sp->callback != NULL) {
-            DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
-            (void) sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT, sp, 0,
-                                NULL, sp->callback_magic);
-        }
-        /*
-         * Close socket and mark session for deletion.  
-         */
-        DEBUGMSGTL(("sess_read", "fd %" NETSNMP_FMT_SKT " closed\n",
-                    transport->sock));
-        transport->f_close(transport);
-        SNMP_FREE(isp->packet);
+        _sess_close_stream(slp);
         SNMP_FREE(opaque);
         return -1;
     }
@@ -6543,23 +6660,15 @@ __sess_read(struct session_list *slp)
                         "  loop packet_len %" NETSNMP_PRIz "u, PDU length %"
                         NETSNMP_PRIz "u\n", isp->packet_len, pdulen));
 
-            if (pdulen > SNMP_MAX_PACKET_LEN) {
+            if ((int)pdulen < 0 || pdulen > SNMP_MAX_PACKET_LEN ||
+                (sp->rcvMsgMaxSize && pdulen > sp->rcvMsgMaxSize)) {
                 /*
                  * Illegal length, drop the connection.  
                  */
                 snmp_log(LOG_ERR, 
 			 "Received broken packet. Closing session.\n");
-		if (sp->callback != NULL) {
-		  DEBUGMSGTL(("sess_read",
-			      "perform callback with op=DISCONNECT\n"));
-		  (void)sp->callback(NETSNMP_CALLBACK_OP_DISCONNECT,
-				     sp, 0, NULL, sp->callback_magic);
-		}
-		DEBUGMSGTL(("sess_read", "fd %" NETSNMP_FMT_SKT " closed\n",
-                            transport->sock));
-                transport->f_close(transport);
+                _sess_close_stream(slp);
                 SNMP_FREE(opaque);
-                /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
                 return -1;
             }
 
@@ -6578,6 +6687,8 @@ __sess_read(struct session_list *slp)
                 if (pptr != isp->packet)
                     break; /* opaque freed for us outside of loop. */
 
+                if (!timerisset(&isp->packet_deadline))
+                    _sess_set_packet_deadline(isp);
                 SNMP_FREE(opaque);
                 return 0;
             }
@@ -6611,6 +6722,7 @@ __sess_read(struct session_list *slp)
                     SET_SNMP_ERROR(sp->s_snmp_errno);
                 }
             }
+            timerclear(&isp->packet_deadline);
 
 	    /*  ocopy has been free()d by _sess_process_packet by this point,
 		so set it to NULL.  */
@@ -6629,7 +6741,7 @@ __sess_read(struct session_list *slp)
 
 	SNMP_FREE(opaque);
 
-        if (isp->packet_len >= SNMP_MAX_PACKET_LEN) {
+        if (isp->packet_len >= stream_limit) {
             /*
              * Obviously this should never happen!  
              */
@@ -6637,8 +6749,7 @@ __sess_read(struct session_list *slp)
                      "too large packet_len = %" NETSNMP_PRIz
                      "u, dropping connection %" NETSNMP_FMT_SKT "\n",
                      isp->packet_len, transport->sock);
-            transport->f_close(transport);
-            /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
+            _sess_close_stream(slp);
             return -1;
         } else if (isp->packet_len == 0) {
             /*
@@ -6650,6 +6761,7 @@ __sess_read(struct session_list *slp)
             SNMP_FREE(isp->packet);
             isp->packet_size = 0;
             isp->packet_len = 0;
+            timerclear(&isp->packet_deadline);
             return rc;
         }
 
@@ -6661,6 +6773,8 @@ __sess_read(struct session_list *slp)
          */
 
         memmove(isp->packet, pptr, isp->packet_len);
+        if (!timerisset(&isp->packet_deadline))
+            _sess_set_packet_deadline(isp);
         DEBUGMSGTL(("sess_read",
                     "end: memmove(%p, %p, %" NETSNMP_PRIz "u); realloc(%p, %"
                     NETSNMP_PRIz "u)\n",
@@ -6899,6 +7013,7 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
     int             active = 0, requests = 0;
     int             next_alarm = 0;
     int             has_pending_data = 0;
+    int             packet_deadlines = 0;
 
     timerclear(&earliest);
 
@@ -6963,6 +7078,13 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
                 }
             }
         }
+        if (slp->internal != NULL &&
+            timerisset(&slp->internal->packet_deadline)) {
+            packet_deadlines++;
+            if (!timerisset(&earliest) ||
+                timercmp(&slp->internal->packet_deadline, &earliest, <))
+                earliest = slp->internal->packet_deadline;
+        }
 
         active++;
         if (sessp) {
@@ -6992,7 +7114,7 @@ snmp_sess_select_info2_flags(struct session_list *sessp, int *numfds,
             DEBUGMSGT(("sess_select","next alarm at %ld.%06ld sec\n",
                        (long)alarm_tm.tv_sec, (long)alarm_tm.tv_usec));
     }
-    if (next_alarm == 0 && requests == 0) {
+    if (next_alarm == 0 && requests == 0 && packet_deadlines == 0) {
         /*
          * If none are active, skip arithmetic.  
          */
@@ -7071,6 +7193,13 @@ snmp_sess_timeout(struct session_list *slp)
     }
 
     netsnmp_get_monotonic_clock(&now);
+
+    if (_sess_packet_deadline_expired(isp)) {
+        snmp_log(LOG_WARNING,
+                 "Incomplete stream frame timed out. Closing session.\n");
+        _sess_close_stream(slp);
+        return;
+    }
 
     /*
      * For each request outstanding, check to see if it has expired.
