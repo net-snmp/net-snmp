@@ -1402,6 +1402,12 @@ _extend_find_entry( netsnmp_request_info       *request,
             }
         }
         if (eptr) {
+            size_t token_len = strlen(eptr->token);
+
+            if (ereg->oid_len > MAX_OID_LEN - 5 ||
+                token_len > MAX_OID_LEN - ereg->oid_len - 5)
+                return NULL;
+
             DEBUGMSGTL(( "nsExtendTable:output2", "GETNEXT -> %s / %d\n ",
                           eptr->token, line_idx));
             /*
@@ -1416,10 +1422,10 @@ _extend_find_entry( netsnmp_request_info       *request,
             oid_buf[ oid_len++ ] = 1;    /* nsExtendOutput2Entry */
             oid_buf[ oid_len++ ] = COLUMN_EXTOUT2_OUTLINE;
                                          /* string token index */
-            oid_buf[ oid_len++ ] = strlen(eptr->token);
-            for ( i=0; i < (int)strlen(eptr->token); i++ )
+            oid_buf[ oid_len++ ] = token_len;
+            for ( i=0; i < (int)token_len; i++ )
                 oid_buf[ oid_len+i ] = eptr->token[i];
-            oid_len += strlen( eptr->token );
+            oid_len += token_len;
                                          /* plus line number */
             oid_buf[ oid_len++ ] = line_idx;
             snmp_set_var_objid( request->requestvb, oid_buf, oid_len );
