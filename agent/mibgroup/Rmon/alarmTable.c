@@ -21,6 +21,7 @@ netsnmp_feature_require(iquery);
 netsnmp_feature_require(query_set_default_session);
 netsnmp_feature_require(table_tdata);
 netsnmp_feature_require(check_vb_type_and_max_size);
+netsnmp_feature_require(check_vb_oid);
 netsnmp_feature_require(table_tdata_extract_table);
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(table_tdata_insert_row);
@@ -114,9 +115,9 @@ struct alarmTable_entry {
      */
     long            alarmInterval;
     long            old_alarmInterval;
-    oid             alarmVariable[ALARM_STR1_LEN];
+    oid             alarmVariable[MAX_OID_LEN];
     size_t          alarmVariable_len;
-    oid             old_alarmVariable[ALARM_STR1_LEN];
+    oid             old_alarmVariable[MAX_OID_LEN];
     size_t          old_alarmVariable_len;
     long            alarmSampleType;
     long            old_alarmSampleType;
@@ -436,9 +437,11 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 }
                 break;
             case COLUMN_ALARMVARIABLE:
-                /*
-                 * or possibly 'netsnmp_check_vb_type_and_max_size' 
-                 */
+                ret = netsnmp_check_vb_oid(request->requestvb);
+                if (ret != SNMP_ERR_NOERROR) {
+                    netsnmp_set_request_error(reqinfo, request, ret);
+                    return SNMP_ERR_NOERROR;
+                }
                 break;
             case COLUMN_ALARMSAMPLETYPE:
                 /*
