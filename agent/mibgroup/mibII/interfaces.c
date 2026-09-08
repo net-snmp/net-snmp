@@ -442,7 +442,7 @@ struct small_ifaddr {
 
 static int      Interface_Scan_By_Index(int, struct if_msghdr *, char *,
                                         u_int, struct small_ifaddr *);
-static int      Interface_Get_Ether_By_Index(int, u_char *);
+static int      Interface_Get_Ether_By_Index(int, u_char *, u_int);
 
 static int
 Interface_Scan_By_Index(int iindex,
@@ -755,7 +755,7 @@ Interface_Scan_NextInt(int *Index,
 #ifndef hpux11
 static int      Interface_Scan_By_Index(int, char *, u_int, struct ifnet *,
                                         struct in_ifaddr *);
-static int      Interface_Get_Ether_By_Index(int, u_char *);
+static int      Interface_Get_Ether_By_Index(int, u_char *, u_int);
 #else
 static int      Interface_Scan_By_Index(int, char *, u_int, nmapi_phystat *);
 #endif
@@ -846,7 +846,8 @@ var_ifEntry(struct variable *vp,
         }
         return (u_char *) & long_return;
     case NETSNMP_IFPHYSADDRESS:
-        Interface_Get_Ether_By_Index(interface, return_buf);
+        Interface_Get_Ether_By_Index(interface, return_buf,
+                                     sizeof(return_buf));
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 	*var_len = 0;
 #else
@@ -1176,7 +1177,8 @@ var_ifEntry(struct variable *vp,
         *var_len = ifnet.if_entry.ifPhysAddress.o_length;
         return (u_char *) ifnet.if_entry.ifPhysAddress.o_bytes;
 #else
-        Interface_Get_Ether_By_Index(interface, return_buf);
+        Interface_Get_Ether_By_Index(interface, return_buf,
+                                     sizeof(return_buf));
         if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
             (return_buf[2] == 0) && (return_buf[3] == 0) &&
             (return_buf[4] == 0) && (return_buf[5] == 0))
@@ -2228,7 +2230,8 @@ Interface_Scan_Get_Count(void)
 
 
 static int
-Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr)
+Interface_Get_Ether_By_Index(int Index, u_char * EtherAddr,
+                             u_int EtherAddrLen)
 {
     int             i;
 #if !(defined(linux) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
