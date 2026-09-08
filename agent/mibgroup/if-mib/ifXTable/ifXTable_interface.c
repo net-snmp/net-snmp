@@ -1803,7 +1803,7 @@ static char    *_ifXTable_container_col_restore(ifXTable_rowreq_ctx *
                                                 char *buf);
 static char    *_ifXTable_container_col_save(ifXTable_rowreq_ctx *
                                              rowreq_ctx, u_int col,
-                                             char *buf);
+                                             char *buf, u_int buf_len);
 
 static const char row_token[] = "ifXTable";
 
@@ -1909,8 +1909,8 @@ static void _ifXTable_container_row_save(void *data, void *type)
         ( IFXTABLE_MAX_COL * 12 ) + /* column num prefix + : */ \
     2 /* LINE_TERM_CHAR + \n */ )
 
-    char            buf[MAX_ROW_SIZE], *pos = buf, *max =
-        &buf[MAX_ROW_SIZE - 1];
+    char            buf[MAX_ROW_SIZE], *pos = buf;
+    const char* const max = &buf[MAX_ROW_SIZE - 1];
     char           *tmp;
     int             i;
 
@@ -1945,7 +1945,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
             continue;
 
         tmp = pos;
-        pos = _ifXTable_container_col_save(rowreq_ctx, i, pos);
+        pos = _ifXTable_container_col_save(rowreq_ctx, i, pos, max + 1 - pos);
         if (NULL == pos)
             pos = tmp;
         else
@@ -2076,7 +2076,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
  */
 static char    *
 _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
-                             u_int col, char *buf)
+                             u_int col, char *buf, u_int buf_len)
 {
     if ((NULL == rowreq_ctx) || (NULL == buf)) {
         snmp_log(LOG_ERR, "bad parameter in "
