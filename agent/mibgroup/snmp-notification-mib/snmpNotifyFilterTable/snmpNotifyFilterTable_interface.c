@@ -1982,7 +1982,7 @@ static char
     
     
     *_snmpNotifyFilterTable_container_col_save
-    (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx, u_int col, char *buf);
+    (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx, u_int col, char *buf, u_int buf_len);
 
 static char     row_token[] = "snmpNotifyFilterTable";
 
@@ -2100,8 +2100,8 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
         ( SNMPNOTIFYFILTERTABLE_MAX_COL * 12 ) + /* column num prefix + : */ \
     2 /* LINE_TERM_CHAR + \n */ )
 
-    char            buf[MAX_ROW_SIZE], *pos = buf, *max =
-        &buf[MAX_ROW_SIZE - 1];
+    char            buf[MAX_ROW_SIZE], *pos = buf;
+    const char *const max = &buf[MAX_ROW_SIZE - 1];
     char           *tmp;
     int             i;
 
@@ -2137,8 +2137,8 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
             continue;
 
         tmp = pos;
-        pos =
-            _snmpNotifyFilterTable_container_col_save(rowreq_ctx, i, pos);
+        pos = _snmpNotifyFilterTable_container_col_save(rowreq_ctx, i, pos,
+                                                        max + 1 - pos);
         if (NULL == pos)
             pos = tmp;
         else
@@ -2274,7 +2274,7 @@ _snmpNotifyFilterTable_container_row_restore(const char *token, char *buf)
 static char    *
 _snmpNotifyFilterTable_container_col_save(snmpNotifyFilterTable_rowreq_ctx
                                           * rowreq_ctx, u_int col,
-                                          char *buf)
+                                          char *buf, u_int buf_len)
 {
     if ((NULL == rowreq_ctx) || (NULL == buf)) {
         snmp_log(LOG_ERR, "bad parameter in "
