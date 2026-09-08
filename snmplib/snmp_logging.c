@@ -539,7 +539,7 @@ snmp_get_do_logging(void)
 
 
 static char    *
-sprintf_stamp(time_t * now, char *sbuf)
+snprintf_stamp(time_t * now, char *sbuf, size_t sbuf_len)
 {
     time_t          Now;
     struct tm      *tm;
@@ -1105,7 +1105,7 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
-        sprintf_stamp(NULL, sbuf);
+        snprintf_stamp(NULL, sbuf, sizeof(sbuf));
     } else {
         strcpy(sbuf, "");
     }
@@ -1227,7 +1227,7 @@ log_handler_file(    netsnmp_log_handler* logh, int pri, const char *str)
      */
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
                                NETSNMP_DS_LIB_LOG_TIMESTAMP) && logh->imagic) {
-        sprintf_stamp(NULL, sbuf);
+        snprintf_stamp(NULL, sbuf, sizeof(sbuf));
     } else {
         strcpy(sbuf, "");
     }
