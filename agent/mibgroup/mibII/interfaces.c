@@ -441,13 +441,14 @@ struct small_ifaddr {
 };
 
 static int      Interface_Scan_By_Index(int, struct if_msghdr *, char *,
-                                        struct small_ifaddr *);
+                                        u_int, struct small_ifaddr *);
 static int      Interface_Get_Ether_By_Index(int, u_char *);
 
 static int
 Interface_Scan_By_Index(int iindex,
                         struct if_msghdr *if_msg,
-                        char *if_name, struct small_ifaddr *sifa)
+                        char *if_name, u_int if_name_len,
+                        struct small_ifaddr *sifa)
 {
     u_char         *cp;
     struct if_msghdr *ifp;
@@ -598,7 +599,8 @@ var_ifEntry(struct variable *vp,
     if (interface == MATCH_FAILED)
         return NULL;
 
-    if (Interface_Scan_By_Index(interface, &if_msg, if_name, NULL) != 0)
+    if (Interface_Scan_By_Index(interface, &if_msg, if_name, sizeof(if_name),
+                                NULL) != 0)
         return NULL;
     if_ptr = netsnmp_access_interface_entry_overrides_get(if_name);
 
@@ -751,11 +753,11 @@ Interface_Scan_NextInt(int *Index,
 
 #ifndef solaris2
 #ifndef hpux11
-static int      Interface_Scan_By_Index(int, char *, struct ifnet *,
+static int      Interface_Scan_By_Index(int, char *, u_int, struct ifnet *,
                                         struct in_ifaddr *);
 static int      Interface_Get_Ether_By_Index(int, u_char *);
 #else
-static int      Interface_Scan_By_Index(int, char *, nmapi_phystat *);
+static int      Interface_Scan_By_Index(int, char *, u_int, nmapi_phystat *);
 #endif
 #endif
 
@@ -789,7 +791,8 @@ var_ifEntry(struct variable *vp,
     if (interface == MATCH_FAILED)
         return NULL;
 
-    Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddr);
+    Interface_Scan_By_Index(interface, Name, sizeof(Name), &ifnet,
+                            &in_ifaddr);
     if_ptr = netsnmp_access_interface_entry_overrides_get(Name);
 
     switch (vp->magic) {
@@ -1091,9 +1094,10 @@ var_ifEntry(struct variable *vp,
         return NULL;
 
 #if defined(hpux11)
-    Interface_Scan_By_Index(interface, Name, &ifnet);
+    Interface_Scan_By_Index(interface, Name, sizeof(Name), &ifnet);
 #else
-    Interface_Scan_By_Index(interface, Name, &ifnet, &in_ifaddrVar);
+    Interface_Scan_By_Index(interface, Name, sizeof(Name), &ifnet,
+                            &in_ifaddrVar);
 #endif
 
 #if !defined(hpux11)
@@ -2140,7 +2144,8 @@ Interface_Scan_NextInt(int *Index,
 #if defined(hpux11)
 
 static int
-Interface_Scan_By_Index(int Index, char *Name, nmapi_phystat * Retifnet)
+Interface_Scan_By_Index(int Index, char *Name, u_int if_name_len,
+                        nmapi_phystat * Retifnet)
 {
     int           i;
 
@@ -2157,8 +2162,7 @@ Interface_Scan_By_Index(int Index, char *Name, nmapi_phystat * Retifnet)
 #else                           /* hpux11 */
 
 static int
-Interface_Scan_By_Index(int Index,
-                        char *Name,
+Interface_Scan_By_Index(int Index, char *Name, u_int if_name_len,
                         struct ifnet *Retifnet,
                         struct in_ifaddr *Retin_ifaddr)
 {
