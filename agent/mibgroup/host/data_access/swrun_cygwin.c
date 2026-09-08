@@ -196,7 +196,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 
         if (curproc.ppid) {
             entry->hrSWRunPath_len =
-                sprintf(entry->hrSWRunPath, "%.*s",
+                snprintf(entry->hrSWRunPath, sizeof(entry->hrSWRunPath), "%.*s",
                         (int)sizeof(entry->hrSWRunPath) - 1,
                         cygwin_conv_to_posix_path(curproc.progname));
         } else if (query == CW_GETPINFO_FULL) {
@@ -208,7 +208,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                 if (n && myGetModuleFileNameEx(h, hm[0], string,
                                                   sizeof string)) {
                    entry->hrSWRunPath_len =
-                       sprintf(entry->hrSWRunPath, "%.*s",
+                       snprintf(entry->hrSWRunPath, sizeof(entry->hrSWRunPath), "%.*s",
                                (int)sizeof(entry->hrSWRunPath) - 1, string);
                 }
             }
@@ -228,7 +228,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             else
                 cp2 = entry->hrSWRunPath;          /* ... if any */
             entry->hrSWRunName_len =
-                sprintf(entry->hrSWRunName, "%.*s",
+                snprintf(entry->hrSWRunName, sizeof(entry->hrSWRunName), "%.*s",
                         (int)sizeof(entry->hrSWRunName) - 1, cp2);
 
             if ( cp1 )

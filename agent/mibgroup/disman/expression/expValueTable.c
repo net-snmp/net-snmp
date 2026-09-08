@@ -439,17 +439,14 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
     struct expObjectTable_data *objstorage, *objfound;
     struct expValueTable_data *const valstorage = vtable_data;
     const char     *expression;
-    char           *result, *resultbak;
-    char           *temp, *tempbak;
+    char            result[100], *resultbak;
+    char            temp[100], *tempbak;
     int             i = 0, j, l;
     unsigned long   result_u_long = 0;
     static int      level;
 
-    temp = malloc(100);
-    result = malloc(100);
     tempbak = temp;
-    memset(result, 0, 100);
-    *result = '\0';
+    memset(result, 0, sizeof(result));
     resultbak = result;
 
     level++;
@@ -480,7 +477,7 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                     break;
                 }
             }
-            sprintf(temp, "%.*s", j - 1, expression + 1);
+            snprintf(temp, sizeof(temp), "%.*s", j - 1, expression + 1);
             l = atoi(temp);
             expression = expression + j;
             /*
@@ -542,8 +539,8 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                         anOID, anOID_len);
             if (rc != SNMP_ERR_NOERROR)
                 snmp_log(LOG_ERR, "Error in packet: %s\n", snmp_errstring(rc));
-            sprintf(result, "%lu", rc == SNMP_ERR_NOERROR ?
-                    *(vars->val.integer) : 0);
+            snprintf(result, resultbak + sizeof(result) - result, "%lu",
+                     rc == SNMP_ERR_NOERROR ? *(vars->val.integer) : 0);
             result += strlen(result);
         } else {
             *result++ = *expression++;
@@ -555,8 +552,6 @@ static unsigned long Evaluate_Expression(struct expValueTable_data *vtable_data)
                 resultbak, result_u_long));
 
 out:
-    free(tempbak);
-    free(resultbak);
     level--;
     return result_u_long;
 }
@@ -602,7 +597,7 @@ static void build_valuetable(void)
                     {
                         char temp[100];
 
-                        sprintf(temp, "%.*s", j - 1, expression + 1);
+                        snprintf(temp, sizeof(temp), "%.*s", j - 1, expression + 1);
                         l = atoi(temp);
                     }
                     for (object_hcindex = expObjectTableStorage;

@@ -1168,7 +1168,7 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
         tlsdata = (_netsnmpTLSBaseData *)t->data;
         /* search for a : */
         if (NULL != (cp = strrchr(str, ':'))) {
-            sprintf(buf, "%.*s", (int) SNMP_MIN(cp - str, sizeof(buf) - 1),
+            snprintf(buf, sizeof(buf), "%.*s", (int) SNMP_MIN(cp - str, sizeof(buf) - 1),
                     str);
         } else {
             /* else the entire spec is a host name only */

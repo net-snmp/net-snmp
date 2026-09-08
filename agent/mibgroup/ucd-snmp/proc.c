@@ -264,7 +264,7 @@ proc_parse_config(const char *token, char *cptr)
          * processes that should _not_ be running. */
     }
 #ifdef NETSNMP_PROCFIXCMD
-    sprintf((*procp)->fixcmd, NETSNMP_PROCFIXCMD, (*procp)->name);
+    snprintf((*procp)->fixcmd, sizeof((*procp)->fixcmd), NETSNMP_PROCFIXCMD, (*procp)->name);
 #endif
     DEBUGMSGTL(("ucd-snmp/proc", "Read:  %s (%d) (%d)\n",
                 (*procp)->name, (*procp)->max, (*procp)->min));
@@ -538,7 +538,7 @@ sh_count_procs(char *procname)
       if(!(ent->d_name[0] >= '0' && ent->d_name[0] <= '9')) continue;
 #ifdef USE_PROC_CMDLINE  /* old method */
       /* read /proc/XX/cmdline */
-      sprintf(cmdline,"/proc/%s/cmdline",ent->d_name);
+      snprintf(cmdline, sizeof(cmdline), "/proc/%s/cmdline", ent->d_name);
       if((fd = open(cmdline, O_RDONLY)) < 0) continue;
       len = read(fd,cmdline,sizeof(cmdline) - 1);
       close(fd);
@@ -550,7 +550,7 @@ sh_count_procs(char *procname)
       if(!strncmp(cmdline,procname,plen)) total++;
 #else
       /* read /proc/XX/status */
-      sprintf(cmdline,"/proc/%s/status",ent->d_name);
+      snprintf(cmdline, sizeof(cmdline), "/proc/%s/status", ent->d_name);
       if ((status = fopen(cmdline, "r")) == NULL)
           continue;
       if (fgets(cmdline, sizeof(cmdline), status) == NULL) {

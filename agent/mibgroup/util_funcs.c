@@ -925,7 +925,7 @@ string_append_int(char *s, int val)
         *s = '\0';
         return;
     }
-    sprintf(textVal, "%d", val);
+    snprintf(textVal, sizeof(textVal), "%d", val);
     strcpy(s, textVal);
     return;
 }

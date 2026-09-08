@@ -1966,23 +1966,9 @@ static char
     
     *_snmpNotifyFilterTable_container_col_restore
     (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx, u_int col, char *buf);
-static char
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    *_snmpNotifyFilterTable_container_col_save
-    (snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx, u_int col, char *buf, u_int buf_len);
+static char *_snmpNotifyFilterTable_container_col_save
+(snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx, u_int col, char *buf,
+ u_int buf_len);
 
 static char     row_token[] = "snmpNotifyFilterTable";
 
@@ -2112,7 +2098,7 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
     /*
      * build the line
      */
-    pos += sprintf(pos, "%s ", row_token);
+    pos += snprintf(pos, sizeof(buf) - (pos - buf), "%s ", row_token);
     pos = read_config_save_objid(pos, rowreq_ctx->oid_idx.oids,
                                  rowreq_ctx->oid_idx.len);
     if (NULL == pos) {
@@ -2158,7 +2144,7 @@ _snmpNotifyFilterTable_container_row_save(void *data, void *type)
     /*
      * store the line
      */
-    pos += sprintf(pos, "%c", LINE_TERM_CHAR);
+    pos += snprintf(pos, sizeof(buf) - (pos - buf), "%c", LINE_TERM_CHAR);
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving snmpNotifyFilterTable row "
                  "to persistent file (too long)\n");
@@ -2276,6 +2262,8 @@ _snmpNotifyFilterTable_container_col_save(snmpNotifyFilterTable_rowreq_ctx
                                           * rowreq_ctx, u_int col,
                                           char *buf, u_int buf_len)
 {
+    const char *const end = buf + buf_len;
+
     if ((NULL == rowreq_ctx) || (NULL == buf)) {
         snmp_log(LOG_ERR, "bad parameter in "
                  "_snmpNotifyFilterTable_container_col_save\n");
@@ -2288,7 +2276,7 @@ _snmpNotifyFilterTable_container_col_save(snmpNotifyFilterTable_rowreq_ctx
      * prefix with column number, so we don't ever depend on
      * order saved.
      */
-    buf += sprintf(buf, "%u:", col);
+    buf += snprintf(buf, end - buf, "%u:", col);
 
     /*
      * save data for the column
@@ -2305,19 +2293,18 @@ _snmpNotifyFilterTable_container_col_save(snmpNotifyFilterTable_rowreq_ctx
         break;
 
     case COLUMN_SNMPNOTIFYFILTERTYPE:   /** INTEGER = ASN_INTEGER */
-        buf += sprintf(buf, "%ld", rowreq_ctx->data.snmpNotifyFilterType);
+        buf += snprintf(buf, end - buf, "%ld",
+                        rowreq_ctx->data.snmpNotifyFilterType);
         break;
 
     case COLUMN_SNMPNOTIFYFILTERSTORAGETYPE:   /** StorageType = ASN_INTEGER */
-        buf +=
-            sprintf(buf, "%ld",
-                    rowreq_ctx->data.snmpNotifyFilterStorageType);
+        buf += snprintf(buf, end - buf, "%ld",
+                        rowreq_ctx->data.snmpNotifyFilterStorageType);
         break;
 
     case COLUMN_SNMPNOTIFYFILTERROWSTATUS:   /** RowStatus = ASN_INTEGER */
-        buf +=
-            sprintf(buf, "%ld",
-                    rowreq_ctx->data.snmpNotifyFilterRowStatus);
+        buf += snprintf(buf, end - buf, "%ld",
+                        rowreq_ctx->data.snmpNotifyFilterRowStatus);
         break;
 
     default:

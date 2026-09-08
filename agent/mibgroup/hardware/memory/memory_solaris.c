@@ -151,7 +151,7 @@ getSwapInfo(long *total_mem, long *total_free)
         if (!mem)
             continue;
         if (!mem->descr) {
-            sprintf(buf, "swap #%d %s", i, s->swt_ent[i].ste_path);
+            snprintf(buf, sizeof(buf), "swap #%d %s", i, s->swt_ent[i].ste_path);
             mem->descr = strdup( buf );
         }
         mem->units = getpagesize();

@@ -69,8 +69,8 @@ void init_cpu_nlist( void ) {
             return;
         }
         cpu->status = 2;  /* running */
-        sprintf(cpu->name, "cpu%d", i);
-        sprintf(cpu->descr, "%s", descr);
+        snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
+        snprintf(cpu->descr, sizeof(cpu->descr), "%s", descr);
     }
     cpu_num = n;
 }

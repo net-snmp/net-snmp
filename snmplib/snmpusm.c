@@ -4250,7 +4250,7 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
 
     memset(line, 0, sizeof(line));
 
-    sprintf(line, "%s %d %d ", token, user->userStatus,
+    snprintf(line, sizeof(line), "%s %d %d ", token, user->userStatus,
             user->userStorageType);
     cptr = &line[strlen(line)]; /* the NULL */
     cptr =

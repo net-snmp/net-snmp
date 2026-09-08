@@ -1921,7 +1921,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
     /*
      * build the line
      */
-    pos += sprintf(pos, "%s ", row_token);
+    pos += snprintf(pos, sizeof(buf) - (pos - buf), "%s ", row_token);
     pos = read_config_save_objid(pos, rowreq_ctx->oid_idx.oids,
                                  rowreq_ctx->oid_idx.len);
     if (NULL == pos) {
@@ -1965,7 +1965,7 @@ static void _ifXTable_container_row_save(void *data, void *type)
     /*
      * store the line
      */
-    pos += sprintf(pos, "%c", LINE_TERM_CHAR);
+    pos += snprintf(pos, sizeof(buf) - (pos - buf), "%c", LINE_TERM_CHAR);
     if (pos > max) {
         snmp_log(LOG_ERR, "error saving ifXTable row "
                  "to persistent file (too long)\n");
@@ -2078,6 +2078,8 @@ static char    *
 _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
                              u_int col, char *buf, u_int buf_len)
 {
+    const char *const end = buf + buf_len;
+
     if ((NULL == rowreq_ctx) || (NULL == buf)) {
         snmp_log(LOG_ERR, "bad parameter in "
                  "_ifXTable_container_col_save\n");
@@ -2091,7 +2093,7 @@ _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
      * prefix with column number, so we don't ever depend on
      * order saved.
      */
-    buf += sprintf(buf, "%u:", col);
+    buf += snprintf(buf, end - buf, "%u:", col);
 
     /*
      * save data for the column
@@ -2099,8 +2101,8 @@ _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
     switch (col) {
 
     case COLUMN_IFLINKUPDOWNTRAPENABLE:   /** INTEGER = ASN_INTEGER */
-        buf +=
-            sprintf(buf, "%ld", rowreq_ctx->data.ifLinkUpDownTrapEnable);
+        buf += snprintf(buf, end - buf, "%ld",
+                        rowreq_ctx->data.ifLinkUpDownTrapEnable);
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */

@@ -333,7 +333,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                      const char *inpeername, int remote_port)
 {
     char buf[sizeof(remote_port) * 3 + 2];
-    sprintf(buf, ":%u", remote_port);
+    snprintf(buf, sizeof(buf), ":%u", remote_port);
     return netsnmp_sockaddr_in6_2(addr, inpeername, remote_port ? buf : NULL);
 }
 

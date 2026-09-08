@@ -7463,6 +7463,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     char *cp   = NULL;
     char *temp = NULL;
     int   temp_len = 0;
+    size_t temp_sz = 0;
     int check = !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
 	                                NETSNMP_DS_LIB_DONT_CHECK_RANGE);
   
@@ -7476,16 +7477,17 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
 	}
 	if (!rp) {
 	    *resptr = SNMPERR_RANGE;
-            temp = (char *)malloc( temp_len+strlen(errmsg)+7);
+            temp_sz = temp_len + strlen(errmsg) + 7;
+            temp = (char *)malloc(temp_sz);
             if ( temp ) {
                 /* Append the Display Hint range information to the error message */
-                sprintf( temp, "%s :: {", errmsg );
+                snprintf( temp, temp_sz, "%s :: {", errmsg );
                 cp = temp+(strlen(temp));
                 for ( rp = tp->ranges; rp; rp=rp->next ) {
                     if ( rp->low != rp->high ) 
-                        sprintf( cp, "(%d..%d), ", rp->low, rp->high );
+                        snprintf( cp, temp_sz - (cp - temp), "(%d..%d), ", rp->low, rp->high );
                     else
-                        sprintf( cp, "(%d), ", rp->low );
+                        snprintf( cp, temp_sz - (cp - temp), "(%d), ", rp->low );
                     cp += strlen(cp);
                 }
                 *(cp-2) = '}';   /* Replace the final comma with a '}' */
@@ -7978,7 +7980,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         result = SNMPERR_VAR_TYPE;
 	buf = calloc(1, 4);
 	if (buf != NULL) {
-	    sprintf((char *)buf, "\"%c\"", type);
+	    snprintf((char *)buf, 4, "\"%c\"", type);
 	    snmp_set_detail((char *)buf);
 	}
         break;
@@ -8044,7 +8046,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             var_type = "Integer32";
             break;
         default:
-            sprintf(undef_msg, "TYPE_%d", tp->type);
+            snprintf(undef_msg, sizeof(undef_msg), "TYPE_%d", tp->type);
             var_type = undef_msg;
         }
         snprintf(error_msg, sizeof(error_msg),

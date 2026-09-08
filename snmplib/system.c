@@ -480,10 +480,10 @@ winsock_startup(void)
     i = WSAStartup(VersionRequested, &stWSAData);
     if (i != 0) {
         if (i == WSAVERNOTSUPPORTED)
-            sprintf(errmsg,
+            snprintf(errmsg, sizeof(errmsg),
                     "Unable to init. socket lib, does not support 1.1");
         else {
-            sprintf(errmsg, "Socket Startup error %d", i);
+            snprintf(errmsg, sizeof(errmsg), "Socket Startup error %d", i);
         }
         return (errmsg);
     }

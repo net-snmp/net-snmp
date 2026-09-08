@@ -128,7 +128,7 @@ swrun_count_processes_by_regex( char *name, netsnmp_regex_ptr regexp )
     it = CONTAINER_ITERATOR( swrun_container );
     while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
         /* need to assemble full command back so regexps can get full picture */
-        sprintf(fullCommand, "%s %s", entry->hrSWRunPath, entry->hrSWRunParameters);
+        snprintf(fullCommand, sizeof(fullCommand), "%s %s", entry->hrSWRunPath, entry->hrSWRunParameters);
 #ifdef HAVE_PCRE2_H
         found = pcre2_match(regexp.regex_ptr, (unsigned char *)fullCommand,
                             strlen(fullCommand), 0, 0, ndx_match, NULL);

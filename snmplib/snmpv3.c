@@ -1148,7 +1148,7 @@ snmpv3_store(int majorID, int minorID, void *serverarg, void *clientarg)
     if (type == NULL)           /* should never happen, since the arg is ours */
         type = "unknown";
 
-    sprintf(line, "engineBoots %ld", engineBoots);
+    snprintf(line, sizeof(line), "engineBoots %ld", engineBoots);
     read_config_store(type, line);
 
     engineIDLen = snmpv3_get_engineID(c_engineID, SNMP_MAXBUF_SMALL);
@@ -1157,7 +1157,7 @@ snmpv3_store(int majorID, int minorID, void *serverarg, void *clientarg)
         /*
          * store the engineID used for this run 
          */
-        sprintf(line, "oldEngineID ");
+        snprintf(line, sizeof(line), "oldEngineID ");
         read_config_save_octet_string(line + strlen(line), c_engineID,
                                       engineIDLen);
         read_config_store(type, line);

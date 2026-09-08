@@ -491,7 +491,7 @@ get_proc_file_line(char *fmt,
     static char     string[1024];
     FILE *fp;
     *buf = '\0';
-    sprintf(string,fmt,pid);
+    snprintf(string, sizeof(string), fmt, pid);
     if (   ((fp = fopen(string, "r")) == NULL)
 	|| (fgets(buf, buflen, fp) == NULL) ) {
 	if (fp)
@@ -613,7 +613,7 @@ var_hrswrun(struct variable * vp,
     if (oldpid != pid || proc_buf == NULL) {
 #if _SLASH_PROC_METHOD_
         proc_buf = &psinfo;
-        sprintf(procfn, "/proc/%.5d/psinfo", pid);
+        snprintf(procfn, sizeof(procfn), "/proc/%.5d/psinfo", pid);
         if ((procfd = open(procfn, O_RDONLY)) != -1) {
             ret =  read(procfd, proc_buf, sizeof(*proc_buf));
             close(procfd);
@@ -746,7 +746,7 @@ var_hrswrun(struct variable * vp,
 #ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
-        sprintf(string, "process name");
+        snprintf(string, sizeof(string), "process name");
 #endif
         *var_len = strlen(string);
         /*
@@ -770,7 +770,7 @@ var_hrswrun(struct variable * vp,
         /*
          * Path not available - use argv[0] 
          */
-        sprintf(string, "%s", proc_buf.pst_cmd);
+        snprintf(string, sizeof(string), "%s", proc_buf.pst_cmd);
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
@@ -778,7 +778,7 @@ var_hrswrun(struct variable * vp,
         /*
          * Path not available - use argv[0] 
          */
-        sprintf(string, "%s", lowpsinfo.pr_psargs);
+        snprintf(string, sizeof(string), "%s", lowpsinfo.pr_psargs);
         cp = strchr(string, ' ');
         if (cp != NULL)
             *cp = '\0';
@@ -787,7 +787,7 @@ var_hrswrun(struct variable * vp,
         if (proc_buf)
             strlcpy(string, proc_buf->pr_psargs, sizeof(string));
         else
-            sprintf(string, "<exited>");
+            snprintf(string, sizeof(string), "<exited>");
         cp = strchr(string, ' ');
         if (cp)
             *cp = 0;
@@ -862,7 +862,7 @@ var_hrswrun(struct variable * vp,
 #ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
-        sprintf(string, "/bin/wombat");
+        snprintf(string, sizeof(string), "/bin/wombat");
 #endif
         *var_len = strlen(string);
         if (*var_len > 128) { /* MIB limit */
@@ -875,14 +875,14 @@ var_hrswrun(struct variable * vp,
         cp = strchr(proc_buf.pst_cmd, ' ');
         if (cp != NULL) {
             cp++;
-            sprintf(string, "%s", cp);
+            snprintf(string, sizeof(string), "%s", cp);
         } else
             string[0] = '\0';
 #elif defined(dynix)
         cp = strchr(lowpsinfo.pr_psargs, ' ');
         if (cp != NULL) {
             cp++;
-            sprintf(string, "%s", cp);
+            snprintf(string, sizeof(string), "%s", cp);
         } else
             string[0] = '\0';
 #elif defined(solaris2)
@@ -907,7 +907,7 @@ var_hrswrun(struct variable * vp,
         cp = strchr(proc_table[LowProcIndex].pi_comm, ' ');
         if (cp != NULL) {
             cp++;
-            sprintf(string, "%s", cp);
+            snprintf(string, sizeof(string), "%s", cp);
         } else
             string[0] = '\0';
 #elif defined(HAVE_KVM_GETPROC2)
@@ -969,7 +969,7 @@ var_hrswrun(struct variable * vp,
 #ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
-        sprintf(string, "-h -q -v");
+        snprintf(string, sizeof(string), "-h -q -v");
 #endif
         *var_len = strlen(string);
         if (*var_len > 128) { /* MIB limit */

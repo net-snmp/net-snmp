@@ -78,7 +78,7 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
               }
            }
            if (!len) {
-              sprintf(buf,"%ld", *var->val.integer);
+              snprintf(buf, buf_len, "%ld", *var->val.integer);
               len = strlen(buf);
            }
            break;
@@ -87,7 +87,7 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
         case ASN_COUNTER:
         case ASN_TIMETICKS:
         case ASN_UINTEGER:
-           sprintf(buf,"%lu", (unsigned long) *var->val.integer);
+           snprintf(buf, buf_len, "%lu", (unsigned long) *var->val.integer);
            len = strlen(buf);
            break;
 
@@ -99,7 +99,7 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
 
         case ASN_IPADDRESS:
           ip = (u_char*)var->val.string;
-          sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+          snprintf(buf, buf_len, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
           len = strlen(buf);
           break;
 
@@ -113,13 +113,13 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
           break;
 
 	case SNMP_ENDOFMIBVIEW:
-          sprintf(buf,"%s", "ENDOFMIBVIEW");
+          snprintf(buf, buf_len, "%s", "ENDOFMIBVIEW");
 	  break;
 	case SNMP_NOSUCHOBJECT:
-	  sprintf(buf,"%s", "NOSUCHOBJECT");
+	  snprintf(buf, buf_len, "%s", "NOSUCHOBJECT");
 	  break;
 	case SNMP_NOSUCHINSTANCE:
-	  sprintf(buf,"%s", "NOSUCHINSTANCE");
+	  snprintf(buf, buf_len, "%s", "NOSUCHINSTANCE");
 	  break;
 
         case ASN_COUNTER64:

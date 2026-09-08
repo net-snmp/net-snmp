@@ -237,10 +237,10 @@ _dump_pdu_stats(void)
         }
         tm = localtime(&entry->timestamp);
         if (NULL == tm)
-            sprintf(timestr, "UNKNOWN");
+            snprintf(timestr, sizeof(timestr), "UNKNOWN");
         else if (strftime(timestr, sizeof(timestr), "%m/%d/%Y %H:%M:%S",
                           tm) == 0)
-            sprintf(timestr, "UNKNOWN");
+            snprintf(timestr, sizeof(timestr), "UNKNOWN");
 
         DEBUGMSGT_NC(("9:stats:pdu", "[%d] %ld ms, %s\n",
                       x, entry->processing_time, timestr));

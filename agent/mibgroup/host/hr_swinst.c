@@ -523,7 +523,7 @@ err:
 #ifdef NETSNMP_NO_DUMMY_VALUES
                 ret = NULL;
 #else
-                sprintf(string, "back in the mists of time");
+                snprintf(string, sizeof(string), "back in the mists of time");
                 *var_len = strlen(string);
                 ret = (u_char *) string;
 #endif

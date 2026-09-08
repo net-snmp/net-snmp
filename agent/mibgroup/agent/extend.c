@@ -1544,7 +1544,7 @@ char * _get_cmdline(netsnmp_extend *extend)
         cmdlinebuf = newbuf;
         cmdlinesize = size;
     }
-    sprintf(cmdlinebuf, "%s %s", extend->command, args);
+    snprintf(cmdlinebuf, cmdlinesize, "%s %s", extend->command, args);
     return cmdlinebuf;
 }
 

@@ -172,7 +172,7 @@ parse_expression(const char *token, char *line)
             entry->expPrefix_len = name_len;
             object->flags |= EXP_OBJ_FLAG_PREFIX;
         }
-        sprintf(cp2, "$%d", i++);
+        snprintf(cp2, sizeof(entry->expExpression) - (cp2 - entry->expExpression), "$%d", i++);
         while (*cp2)
             cp2++;  /* Skip over this parameter */
     }

@@ -229,23 +229,23 @@ netsnmp_internal_pass_set_format(char *buf,
         tmp = *((const long *) var_val);
         switch (var_val_type) {
         case ASN_INTEGER:
-            sprintf(buf, "integer %d", (int) tmp);
+            snprintf(buf, SNMP_MAXBUF, "integer %d", (int) tmp);
             break;
         case ASN_COUNTER:
-            sprintf(buf, "counter %d", (int) tmp);
+            snprintf(buf, SNMP_MAXBUF, "counter %d", (int) tmp);
             break;
         case ASN_GAUGE:
-            sprintf(buf, "gauge %d", (int) tmp);
+            snprintf(buf, SNMP_MAXBUF, "gauge %d", (int) tmp);
             break;
         case ASN_TIMETICKS:
-            sprintf(buf, "timeticks %d", (int) tmp);
+            snprintf(buf, SNMP_MAXBUF, "timeticks %d", (int) tmp);
             break;
         }
         break;
     case ASN_IPADDRESS:
         utmp = *((const u_long *) var_val);
         utmp = ntohl(utmp);
-        sprintf(buf, "ipaddress %d.%d.%d.%d",
+        snprintf(buf, SNMP_MAXBUF, "ipaddress %d.%d.%d.%d",
                 (int) ((utmp & 0xff000000) >> (8 * 3)),
                 (int) ((utmp & 0xff0000) >> (8 * 2)),
                 (int) ((utmp & 0xff00) >> (8)),
@@ -253,7 +253,7 @@ netsnmp_internal_pass_set_format(char *buf,
         break;
     case ASN_OCTET_STR:
         if (var_val_len == 0)
-            sprintf(buf, "string \"\"");
+            snprintf(buf, SNMP_MAXBUF, "string \"\"");
         else if (netsnmp_internal_bin2asc(var_val, var_val_len, buf2, sizeof(buf2)) ==
                  var_val_len)
             snprintf(buf, SNMP_MAXBUF, "string \"%s\"", buf2);

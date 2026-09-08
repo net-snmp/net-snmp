@@ -208,8 +208,8 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
     if (sp == NULL)
         return AGENTX_ERR_NOT_OPEN;
 
-    sprintf(buf, "AgentX subagent %ld, session %8p, subsession %8p",
-            sp->sessid, session, sp);
+    snprintf(buf, sizeof(buf), "AgentX subagent %ld, session %8p, subsession %8p",
+             sp->sessid, session, sp);
     /*
      * * TODO: registration timeout
      * *   registration context

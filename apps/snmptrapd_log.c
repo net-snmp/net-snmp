@@ -456,9 +456,10 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     unsigned long   time_ul;    /* u_long time/timeticks */
     struct tm      *parsed_time;        /* parsed version of current time */
     char           *safe_bfr = NULL;
+    const size_t    safe_bfr_len = 30;
     char            fmt_cmd = options->cmd;     /* the format command to use */
 
-    if ((safe_bfr = calloc(30, 1)) == NULL) {
+    if ((safe_bfr = calloc(safe_bfr_len, 1)) == NULL) {
         return 0;
     }
 
@@ -481,9 +482,9 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
      * Handle output in Unix time format.  
      */
     if (fmt_cmd == CHR_CUR_TIME) {
-        sprintf(safe_bfr, "%lu", time_ul);
+        snprintf(safe_bfr, safe_bfr_len, "%lu", time_ul);
     } else if (fmt_cmd == CHR_UP_TIME && !options->alt_format) {
-        sprintf(safe_bfr, "%lu", time_ul);
+        snprintf(safe_bfr, safe_bfr_len, "%lu", time_ul);
     } else if (fmt_cmd == CHR_UP_TIME) {
         unsigned int    centisecs, seconds, minutes, hours, days;
 
@@ -500,15 +501,15 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
 
         switch (days) {
         case 0:
-            sprintf(safe_bfr, "%u:%02u:%02u.%02u",
+            snprintf(safe_bfr, safe_bfr_len, "%u:%02u:%02u.%02u",
                     hours, minutes, seconds, centisecs);
             break;
         case 1:
-            sprintf(safe_bfr, "1 day, %u:%02u:%02u.%02u",
+            snprintf(safe_bfr, safe_bfr_len, "1 day, %u:%02u:%02u.%02u",
                     hours, minutes, seconds, centisecs);
             break;
         default:
-            sprintf(safe_bfr, "%u days, %u:%02u:%02u.%02u",
+            snprintf(safe_bfr, safe_bfr_len, "%u days, %u:%02u:%02u.%02u",
                     days, hours, minutes, seconds, centisecs);
         }
     } else {
@@ -523,7 +524,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
 
         if (!parsed_time) {
-            sprintf(safe_bfr, "(unknown)");
+            snprintf(safe_bfr, safe_bfr_len, "(unknown)");
         } else {
             switch (fmt_cmd) {
                 /*
@@ -534,7 +535,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_YEAR:
             case CHR_UP_YEAR:
-                sprintf(safe_bfr, "%d", parsed_time->tm_year + 1900);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_year + 1900);
                 break;
 
                 /*
@@ -542,7 +543,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_MONTH:
             case CHR_UP_MONTH:
-                sprintf(safe_bfr, "%d", parsed_time->tm_mon + 1);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_mon + 1);
                 break;
 
                 /*
@@ -550,7 +551,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_MDAY:
             case CHR_UP_MDAY:
-                sprintf(safe_bfr, "%d", parsed_time->tm_mday);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_mday);
                 break;
 
                 /*
@@ -558,7 +559,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_HOUR:
             case CHR_UP_HOUR:
-                sprintf(safe_bfr, "%d", parsed_time->tm_hour);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_hour);
                 break;
 
                 /*
@@ -566,7 +567,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_MIN:
             case CHR_UP_MIN:
-                sprintf(safe_bfr, "%d", parsed_time->tm_min);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_min);
                 break;
 
                 /*
@@ -574,14 +575,14 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                  */
             case CHR_CUR_SEC:
             case CHR_UP_SEC:
-                sprintf(safe_bfr, "%d", parsed_time->tm_sec);
+                snprintf(safe_bfr, safe_bfr_len, "%d", parsed_time->tm_sec);
                 break;
 
                 /*
                  * unknown format command - just output the character 
                  */
             default:
-                sprintf(safe_bfr, "%c", fmt_cmd);
+                snprintf(safe_bfr, safe_bfr_len, "%c", fmt_cmd);
             }
         }
     }
@@ -857,7 +858,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         /*
          * Write the trap's number.  
          */
-        tout_len = sprintf((char*)temp_buf, "%ld", pdu->trap_type);
+        tout_len = snprintf((char*)temp_buf, tbuf_len, "%ld", pdu->trap_type);
         break;
 
     case CHR_TRAP_DESC:
@@ -865,7 +866,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write the trap's description.  
          */
         tout_len =
-            sprintf((char*)temp_buf, "%s", trap_description(pdu->trap_type));
+            snprintf((char*)temp_buf, tbuf_len, "%s", trap_description(pdu->trap_type));
         break;
 
     case CHR_TRAP_STYPE:
@@ -873,7 +874,7 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
          * Write the trap's subtype.  
          */
         if (pdu->trap_type != SNMP_TRAP_ENTERPRISESPECIFIC) {
-            tout_len = sprintf((char*)temp_buf, "%ld", pdu->specific_type);
+            tout_len = snprintf((char*)temp_buf, tbuf_len, "%ld", pdu->specific_type);
         } else {
             /*
              * Get object ID for the trap.  
@@ -1282,7 +1283,7 @@ realloc_handle_backslash(u_char ** buf, size_t * buf_len, size_t * out_len,
     case '"':
         return snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\"");
     default:
-        sprintf(temp_bfr, "\\%c", fmt_cmd);
+        snprintf(temp_bfr, sizeof(temp_bfr), "\\%c", fmt_cmd);
         return snmp_cstrcat(buf, buf_len, out_len, allow_realloc, temp_bfr);
     }
 }
@@ -1326,12 +1327,12 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
     time(&now);
     now_parsed = localtime(&now);
     if (now_parsed)
-        sprintf(safe_bfr, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
+        snprintf(safe_bfr, sizeof(safe_bfr), "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
             now_parsed->tm_year + 1900, now_parsed->tm_mon + 1,
             now_parsed->tm_mday, now_parsed->tm_hour,
             now_parsed->tm_min, now_parsed->tm_sec);
     else
-        sprintf(safe_bfr, "(unknown)");
+        snprintf(safe_bfr, sizeof(safe_bfr), "(unknown)");
     if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, safe_bfr)) {
         return 0;
     }
@@ -1463,7 +1464,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
         /*
          * Handle traps that aren't enterprise specific.  
          */
-        sprintf(safe_bfr, "%ld", pdu->specific_type);
+        snprintf(safe_bfr, sizeof(safe_bfr), "%ld", pdu->specific_type);
         if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, safe_bfr)) {
             return 0;
         }

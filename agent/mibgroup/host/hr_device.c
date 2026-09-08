@@ -255,7 +255,7 @@ really_try_next:
 #ifdef NETSNMP_NO_DUMMY_VALUES
             goto try_next;
 #else
-            sprintf(string, "a black box of some sort");
+            snprintf(string, sizeof(string), "a black box of some sort");
 #endif
         *var_len = strlen(string);
         return (u_char *) string;

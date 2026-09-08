@@ -37,10 +37,10 @@ void init_cpu_mach( void ) {
     for ( i = 0; i < hi.avail_cpus; i++) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         cpu->status = 2;  /* running */
-        sprintf( cpu->name,  "cpu%d", i );
+        snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
 	/* XXX get per-cpu type?  Could it be different? */
 	slot_name(hi.cpu_type, hi.cpu_subtype, &cpu_type, &cpu_subtype);
-        sprintf( cpu->descr, "%s - %s", cpu_type, cpu_subtype );
+        snprintf(cpu->descr, sizeof(cpu->descr), "%s - %s", cpu_type, cpu_subtype);
     }
     cpu_num = hi.avail_cpus;
 }

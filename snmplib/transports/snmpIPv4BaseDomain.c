@@ -57,7 +57,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 {
     char buf[sizeof(int) * 3 + 2];
 
-    sprintf(buf, ":%u", remote_port);
+    snprintf(buf, sizeof(buf), ":%u", remote_port);
     return netsnmp_sockaddr_in2(addr, inpeername, remote_port ? buf : NULL);
 }
 

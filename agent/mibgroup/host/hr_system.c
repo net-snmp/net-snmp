@@ -321,7 +321,7 @@ var_hrsys(struct variable * vp,
 #ifdef NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
-        sprintf(string, "ask Dave");    /* XXX */
+        snprintf(string, sizeof(string), "ask Dave");    /* XXX */
 #endif
         *var_len = strlen(string);
         return (u_char *) string;

@@ -445,7 +445,7 @@ _extract_oname(const GENERAL_NAME *oname)
                 ASN1_STRING_get0_data(oname->d.iPAddress);
 
             if (iplen == 4) {
-                sprintf(ipbuf, "%d.%d.%d.%d", ipdata[0],
+                snprintf(ipbuf, sizeof(ipbuf), "%d.%d.%d.%d", ipdata[0],
                         ipdata[1],
                         ipdata[2],
                         ipdata[3]);

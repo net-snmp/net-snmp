@@ -63,7 +63,7 @@ parse_sched_periodic( const char *token, char *line )
     size_t var_len = MAX_OID_LEN;
     
     schedEntries++;
-    sprintf(buf, "_conf%03d", schedEntries);
+    snprintf(buf, sizeof(buf), "_conf%03d", schedEntries);
 
     DEBUGMSGTL(( "disman:schedule:conf", "periodic: %s %s\n", token, line));
     /*
@@ -207,7 +207,7 @@ parse_sched_timed( const char *token, char *line )
     size_t var_len = MAX_OID_LEN;
     
     schedEntries++;
-    sprintf(buf, "_conf%03d", schedEntries);
+    snprintf(buf, sizeof(buf), "_conf%03d", schedEntries);
 
     DEBUGMSGTL(( "sched", "config: %s %s\n", token, line));
     /*

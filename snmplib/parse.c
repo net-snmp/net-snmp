@@ -4873,7 +4873,7 @@ fetch_next_token:
                 *cp = 0;
                 return LABEL;
             }
-            sprintf(token, "%ld", val);
+            snprintf(token, maxtlen, "%ld", val);
             return NUMBER;
         } else
             return LABEL;

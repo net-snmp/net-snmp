@@ -45,7 +45,7 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              break;
              
         case ERRORNAME:            /* dummy name */
-             sprintf(cp, "systemStats");
+             snprintf(cp, sizeof(cp), "systemStats");
              snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                                       cp, strlen(cp));
              break;

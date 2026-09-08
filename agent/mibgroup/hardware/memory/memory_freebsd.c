@@ -261,7 +261,7 @@ swapmode(long pagesize)
             if (!mem)
                 continue;
             if (!mem->descr) {
-                sprintf(buf, "swap %s", kswap[i].ksw_devname);
+                snprintf(buf, sizeof(buf), "swap %s", kswap[i].ksw_devname);
                 mem->descr = strdup( buf );
             }
             mem->units = pagesize;

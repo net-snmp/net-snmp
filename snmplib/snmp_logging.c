@@ -550,11 +550,11 @@ snprintf_stamp(time_t * now, char *sbuf, size_t sbuf_len)
     }
     tm = localtime(now);
     if (tm)
-        sprintf(sbuf, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
+        snprintf(sbuf, sbuf_len, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d ",
                 tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
                 tm->tm_hour, tm->tm_min, tm->tm_sec);
     else
-        sprintf(sbuf, "(unknown)");
+        snprintf(sbuf, sbuf_len, "(unknown)");
     return sbuf;
 }
 

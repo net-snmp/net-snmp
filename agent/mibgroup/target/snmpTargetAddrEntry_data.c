@@ -606,7 +606,7 @@ snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
         return;
     }
     bptr = buff;
-    bptr += sprintf(bptr, "snmp_parse_config_targetAddr, read: ");
+    bptr += snprintf(bptr, buff + sizeof(buff) - bptr, "snmp_parse_config_targetAddr, read: ");
     bptr = read_config_save_octet_string(bptr, (u_char*)newEntry->nameData,
                                          newEntry->nameLen);
     *bptr++ = '\n';

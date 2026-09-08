@@ -227,13 +227,13 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         argv = kvm_getargv(  kd, &(proc_table[i]), BUFSIZ);
 #endif
 
-        entry->hrSWRunName_len = sprintf(entry->hrSWRunName, "%.*s",
-                                         (int)sizeof(entry->hrSWRunName) - 1,
+        entry->hrSWRunName_len = snprintf(entry->hrSWRunName, sizeof(entry->hrSWRunName), "%.*s",
+                                          (int)sizeof(entry->hrSWRunName) - 1,
                                          proc_table[i].SWRUN_K_COMM);
 
         if (argv && *argv) {
-            entry->hrSWRunPath_len = sprintf(entry->hrSWRunPath, "%.*s",
-                                             (int)sizeof(entry->hrSWRunPath)-1,
+            entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath, sizeof(entry->hrSWRunPath), "%.*s",
+                                              (int)sizeof(entry->hrSWRunPath)-1,
                                              argv[0]);
         } else {
             memcpy( entry->hrSWRunPath, entry->hrSWRunName,
@@ -264,7 +264,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         if (strlen(buf) >= BUFSIZ-10)
             snmp_log(LOG_ERR, "params %lu/%d %s\n", strlen(buf), BUFSIZ, buf);
         entry->hrSWRunParameters_len =
-            sprintf(entry->hrSWRunParameters, "%.*s",
+            snprintf(entry->hrSWRunParameters, sizeof(entry->hrSWRunParameters), "%.*s",
                     (int)sizeof(entry->hrSWRunParameters) - 1, buf+1);
 
         entry->hrSWRunType = (P_SYSTEM & proc_table[i].SWRUN_K_FLAG) 

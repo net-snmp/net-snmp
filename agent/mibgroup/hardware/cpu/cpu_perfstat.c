@@ -36,7 +36,7 @@ void init_cpu_perfstat( void ) {
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), cpu_num) > 0) {
         for ( i = 0; i < cpu_num; i++ ) {
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
-            sprintf( cpu->name, cs2[i].name);
+            snprintf(cpu->name, sizeof(cpu->name), "%s", cs2[i].name);
         }
     }
     free(cs2);

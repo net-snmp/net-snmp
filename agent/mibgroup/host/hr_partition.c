@@ -246,7 +246,7 @@ var_hrpartition(struct variable * vp,
             return (u_char *) HRP_savedName;
         }
     case HRPART_ID:            /* Use the device number */
-        sprintf(string, "0x%x", (int) stat_buf.st_rdev);
+        snprintf(string, sizeof(string), "0x%x", (int) stat_buf.st_rdev);
         *var_len = strlen(string);
         return (u_char *) string;
     case HRPART_SIZE:

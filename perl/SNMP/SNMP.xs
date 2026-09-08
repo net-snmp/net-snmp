@@ -2228,7 +2228,8 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    */
    if ((context->pkts_exch == 1) && (context->oid_saved < context->non_reps)) {
       /* Re-use space from the value string for error message. */
-      sprintf(str_buf, "%d non-repeaters went unanswered", context->non_reps);
+      snprintf(str_buf, sizeof(str_buf), "%d non-repeaters went unanswered",
+               context->non_reps);
       sv_setpv(*err_str_svp, str_buf);
       sv_setiv(*err_num_svp, SNMPERR_GENERR);
       sv_setiv(*err_num_svp, context->oid_saved);
@@ -4036,7 +4037,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   */
 	   Newz(0x57616b6c /* "Walk" */, context, 1, walk_context);
 	   if (context == NULL) {
-	      sprintf(str_buf, "malloc(context) failed (%s)", strerror(errno));
+	      snprintf(str_buf, sizeof(str_buf), "malloc(context) failed (%s)",
+                       strerror(errno));
 	      sv_setpv(*err_str_svp, str_buf);
 	      sv_setiv(*err_num_svp, SNMPERR_MALLOC);
 	      goto err;
@@ -4084,7 +4086,8 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   Newz(0, context->req_oids, varlist_len, bulktbl);
 
 	   if (context->req_oids == NULL) {
-	      sprintf(str_buf, "Newz(req_oids) failed (%s)", strerror(errno));
+	      snprintf(str_buf, sizeof(str_buf), "Newz(req_oids) failed (%s)",
+                       strerror(errno));
 	      if (verbose)
 	         warn("%s", str_buf);
 	      sv_setpv(*err_str_svp, str_buf);
@@ -4811,7 +4814,7 @@ snmp_map_enum(tag, val, iflag, best_guess)
               } else {
                  for(ep = tp->enums; ep; ep = ep->next) {
                     if (strEQ(ep->label, val)) {
-                       sprintf(str_buf,"%d", ep->value);
+                       snprintf(str_buf, sizeof(str_buf), "%d", ep->value);
                        RETVAL = str_buf;
                        break;
                     }

@@ -36,8 +36,8 @@ void init_cpu_kinfo( void ) {
     for ( i = 0; i < cpu_num; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         cpu->status = 2;  /* running */
-        sprintf(cpu->name, "cpu%d", i);
-        sprintf(cpu->descr, "%s", descr);
+        snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
+        snprintf(cpu->descr, sizeof(cpu->descr), "%s", descr);
     }
 }
 

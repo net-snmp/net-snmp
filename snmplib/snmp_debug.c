@@ -433,12 +433,12 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
         rc = sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid,
                                   var_subid-1);  /* Adjust for C's 0-based array indexing */
         if (rc) {
-            sprintf(tmpbuf, ".%" NETSNMP_PRIo "u--%" NETSNMP_PRIo "u",
+            snprintf(tmpbuf, sizeof(tmpbuf), ".%" NETSNMP_PRIo "u--%" NETSNMP_PRIo "u",
                     theoid[var_subid - 1], range_ubound);
             rc = snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf);
             if (rc) {
                 for (i = var_subid; i < len; i++) {
-                    sprintf(tmpbuf, ".%" NETSNMP_PRIo "u", theoid[i]);
+                    snprintf(tmpbuf, sizeof(tmpbuf), ".%" NETSNMP_PRIo "u", theoid[i]);
                     if (!snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf)) {
                         break;
                     }
@@ -483,7 +483,7 @@ debugmsg_hextli(const char *token, const u_char * thedata, size_t len)
     u_char         *b3 = NULL;
     size_t          b3_len = 0, o3_len = 0;
     int             incr;
-    sprintf(token2, "dumpx_%s", token);
+    snprintf(token2, sizeof(token2), "dumpx_%s", token);
 
     /*
      * XX tracing lines removed from this function DEBUGTRACE; 
@@ -496,7 +496,7 @@ debugmsg_hextli(const char *token, const u_char * thedata, size_t len)
             /*
              * XXnext two lines were DEBUGPRINTINDENT(token);
              */
-            sprintf(buf, "dumpx%s", token);
+            snprintf(buf, sizeof(buf), "dumpx%s", token);
             debugmsg(buf, "%s: %*s", token2, debug_indent_get(), "");
             if (sprint_realloc_hexstring
                 (&b3, &b3_len, &o3_len, 1, thedata, incr)) {

@@ -389,7 +389,7 @@ write_laConfig(int action,
             double val;
             char *endp;
 
-            sprintf(buf, "%.*s", (int) var_val_len, (char *)var_val);
+            snprintf(buf, sizeof(buf), "%.*s", (int) var_val_len, (char *)var_val);
             val = strtod(buf, &endp);
 
             if (errno == ERANGE || *endp != '\0' || val < 0 || val > 65536.00) {
@@ -440,7 +440,7 @@ var_extensible_loadave(struct variable * vp,
         *write_method = write_laConfig;
         break;
     case ERRORNAME:
-        sprintf(errmsg, "Load-%d", ((name[*length - 1] == 1) ? 1 :
+        snprintf(errmsg, sizeof(errmsg), "Load-%d", ((name[*length - 1] == 1) ? 1 :
                                     ((name[*length - 1] == 2) ? 5 : 15)));
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
@@ -451,11 +451,11 @@ var_extensible_loadave(struct variable * vp,
     switch (vp->magic) {
     case LOADAVE:
 
-        sprintf(errmsg, "%.2f", avenrun[name[*length - 1] - 1]);
+        snprintf(errmsg, sizeof(errmsg), "%.2f", avenrun[name[*length - 1] - 1]);
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case LOADMAXVAL:
-        sprintf(errmsg, "%.2f", maxload[name[*length - 1] - 1]);
+        snprintf(errmsg, sizeof(errmsg), "%.2f", maxload[name[*length - 1] - 1]);
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case LOADAVEINT:

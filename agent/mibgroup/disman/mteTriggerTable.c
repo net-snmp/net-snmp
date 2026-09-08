@@ -513,7 +513,7 @@ parse_simple_monitor(const char *token, char *line)
                  */
                 return;
             }
-            sprintf(buf, "snmpd.conf%d", monitor_call_count);
+            snprintf(buf, sizeof(buf), "snmpd.conf%d", monitor_call_count);
             mte_add_object_to_table("snmpd.conf", buf, obuf, obufLen, 1);
 
             if (StorageNew->mteTriggerObjectsOwnerLen == 0) {

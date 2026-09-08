@@ -145,10 +145,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                     if (*cp == '\0')
                             *cp = ' ';
 
-            entry->hrSWRunParameters_len
-                = sprintf(entry->hrSWRunParameters, "%.*s",
-                          (int)sizeof(entry->hrSWRunParameters) - 1,
-                          buf + ret + 1);
+            entry->hrSWRunParameters_len =
+                snprintf(entry->hrSWRunParameters,
+                         sizeof(entry->hrSWRunParameters), "%.*s",
+                         (int)sizeof(entry->hrSWRunParameters) - 1,
+                         buf + ret + 1);
         } else {
             /* empty /proc/PID/cmdline, it's probably a kernel thread */
             entry->hrSWRunPath_len = 0;

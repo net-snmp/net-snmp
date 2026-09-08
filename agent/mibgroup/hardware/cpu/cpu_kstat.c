@@ -60,8 +60,8 @@ void init_cpu_kstat(void)
             }
             i   = ksp->ks_instance;
             cpu = netsnmp_cpu_get_byIdx( i, 1 );
-            sprintf( cpu->name,  "cpu%d", i );
-            sprintf( cpu->descr, "CPU %d Sun %d MHz %s with %s FPU %s",
+            snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
+            snprintf(cpu->descr, sizeof(cpu->descr), "CPU %d Sun %d MHz %s with %s FPU %s",
                                  i, clock, ctype, ftype, state  );
             cpu->status = _cpu_status(state); /* XXX - or in 'n_c_a_load' ? */
         }

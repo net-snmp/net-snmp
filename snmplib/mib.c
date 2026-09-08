@@ -311,14 +311,14 @@ _sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
      * .... and display the hex values themselves....
      */
     for (; lenleft >= 8; lenleft-=8) {
-        sprintf((char *) (*buf + *out_len),
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len,
                 "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1],
                 cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
         *out_len += strlen((char *) (*buf + *out_len));
         cp       += 8;
     }
     for (; lenleft > 0; lenleft--) {
-        sprintf((char *) (*buf + *out_len), "%02X ", *cp++);
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len, "%02X ", *cp++);
         *out_len += strlen((char *) (*buf + *out_len));
     }
 
@@ -331,13 +331,13 @@ _sprint_hexstring_line(u_char ** buf, size_t * buf_len, size_t * out_len,
                 return 0;
             }
         }
-        sprintf((char *) (*buf + *out_len), "  [");
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len, "  [");
         *out_len += strlen((char *) (*buf + *out_len));
         for (tp = cp2; tp < cp; tp++) {
             sprint_char((char *) (*buf + *out_len), *tp);
             (*out_len)++;
         }
-        sprintf((char *) (*buf + *out_len), "]");
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len, "]");
         *out_len += strlen((char *) (*buf + *out_len));
     }
     return 1;
@@ -569,9 +569,9 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                      */
                     if (((value < 16) && (1 == width)) &&
                         (hex2digit || ((0 == separ) && (0 == *hint)))) {
-                        sprintf(intbuf, "0%lx", value);
+                        snprintf(intbuf, sizeof(intbuf), "0%lx", value);
                     } else {
-                        sprintf(intbuf, "%lx", value);
+                        snprintf(intbuf, sizeof(intbuf), "%lx", value);
                     }
                     if (!snmp_cstrcat
                         (buf, buf_len, out_len, allow_realloc, intbuf)) {
@@ -579,14 +579,14 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     }
                     break;
                 case 'd':
-                    sprintf(intbuf, "%lu", value);
+                    snprintf(intbuf, sizeof(intbuf), "%lu", value);
                     if (!snmp_cstrcat
                         (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
                     }
                     break;
                 case 'o':
-                    sprintf(intbuf, "%lo", value);
+                    snprintf(intbuf, sizeof(intbuf), "%lo", value);
                     if (!snmp_cstrcat
                         (buf, buf_len, out_len, allow_realloc, intbuf)) {
                         return 0;
@@ -1570,7 +1570,7 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     } else {
-        sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
+        snprintf(tmp, sizeof(tmp), "%u", (unsigned int)(*var->val.integer & 0xffffffff));
         if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmp)) {
             return 0;
         }
@@ -1630,7 +1630,7 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     }
-    sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
+    snprintf(tmp, sizeof(tmp), "%u", (unsigned int)(*var->val.integer & 0xffffffff));
     if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, tmp)) {
         return 0;
     }
@@ -1697,7 +1697,7 @@ sprint_realloc_networkaddress(u_char ** buf, size_t * buf_len,
     }
 
     for (i = 0; i < var->val_len; i++) {
-        sprintf((char *) (*buf + *out_len), "%02X", var->val.string[i]);
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len, "%02X", var->val.string[i]);
         *out_len += 2;
         if (i < var->val_len - 1) {
             *(*buf + *out_len) = ':';
@@ -1761,7 +1761,7 @@ sprint_realloc_ipaddress(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
     if (ip)
-        sprintf((char *) (*buf + *out_len), "%d.%d.%d.%d",
+        snprintf((char *) (*buf + *out_len), *buf_len - *out_len, "%d.%d.%d.%d",
                                             ip[0], ip[1], ip[2], ip[3]);
     *out_len += strlen((char *) (*buf + *out_len));
     return 1;
@@ -2165,19 +2165,21 @@ static void
 handle_mibdirs_conf(const char *token, char *line)
 {
     char           *ctmp;
+    size_t          ctmp_len;
 
     if (confmibdir) {
         if ((*line == '+') || (*line == '-')) {
-            ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
+            ctmp_len = strlen(confmibdir) + strlen(line) + 2;
+            ctmp = (char *) malloc(ctmp_len);
             if (!ctmp) {
                 DEBUGMSGTL(("read_config:initmib",
                             "mibdir conf malloc failed"));
                 return;
             }
             if(*line++ == '+')
-                sprintf(ctmp, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
+                snprintf(ctmp, ctmp_len, "%s%c%s", confmibdir, ENV_SEPARATOR_CHAR, line);
             else
-                sprintf(ctmp, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
+                snprintf(ctmp, ctmp_len, "%s%c%s", line, ENV_SEPARATOR_CHAR, confmibdir);
         } else {
             ctmp = strdup(line);
             if (!ctmp) {
@@ -2657,16 +2659,18 @@ netsnmp_fixup_mib_directory(void)
     char *oldmibpath = NULL;
     char *ptr_home;
     char *new_mibpath;
+    size_t new_mibpath_len;
 
     DEBUGTRACE;
     if (homepath && mibpath) {
         DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
         while ((ptr_home = strstr(mibpath, "$HOME"))) {
-            new_mibpath = (char *)malloc(strlen(mibpath) - strlen("$HOME") +
-					 strlen(homepath)+1);
+            new_mibpath_len = strlen(mibpath) - strlen("$HOME") +
+					 strlen(homepath)+1;
+            new_mibpath = (char *)malloc(new_mibpath_len);
             if (new_mibpath) {
                 *ptr_home = 0; /* null out the spot where we stop copying */
-                sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
+                snprintf(new_mibpath, new_mibpath_len, "%s%s%s", mibpath, homepath,
 			ptr_home + strlen("$HOME"));
                 /** swap in the new value and repeat */
                 mibpath = new_mibpath;
@@ -2794,21 +2798,18 @@ netsnmp_init_mib(void)
     if (env_var != NULL) {
         if ((*env_var == '+') || (*env_var == '-')) {
 #ifdef NETSNMP_DEFAULT_MIBFILES
-            entry =
-                (char *) malloc(strlen(NETSNMP_DEFAULT_MIBFILES) +
-                                strlen(env_var) + 2);
-            if (!entry) {
+            int res;
+
+            if (*env_var++ == '+')
+                res = asprintf(&entry, "%s%c%s", NETSNMP_DEFAULT_MIBFILES,
+                               ENV_SEPARATOR_CHAR, env_var);
+            else
+                res = asprintf(&entry, "%s%c%s", env_var,
+                               ENV_SEPARATOR_CHAR, NETSNMP_DEFAULT_MIBFILES);
+            if (res >= 0)
+                env_var = entry;
+            else
                 DEBUGMSGTL(("init_mib", "env mibfiles malloc failed"));
-            } else {
-                if (*env_var++ == '+')
-                    sprintf(entry, "%s%c%s", NETSNMP_DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
-                            env_var );
-                else
-                    sprintf(entry, "%s%c%s", env_var, ENV_SEPARATOR_CHAR,
-                            NETSNMP_DEFAULT_MIBFILES );
-            }
-            SNMP_FREE(env_var);
-            env_var = entry;
 #else
             env_var = strdup(env_var + 1);
 #endif
@@ -4173,7 +4174,7 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
     }
 
     while (objidlen-- > 0) {    /* output rest of name, uninterpreted */
-        sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid++);
+        snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u.", *objid++);
         if (!*buf_overflow && !snmp_cstrcat(buf, buf_len, out_len,
                                             allow_realloc, intbuf)) {
             *buf_overflow = 1;
@@ -4247,7 +4248,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
 
             if (!strncmp(subtree->label, ANON, ANON_LEN) ||
                 (NETSNMP_OID_OUTPUT_NUMERIC == output_format)) {
-                sprintf(intbuf, "%lu", subtree->subid);
+                snprintf(intbuf, sizeof(intbuf), "%lu", subtree->subid);
                 if (!*buf_overflow && !snmp_cstrcat(buf, buf_len, out_len,
                                                     allow_realloc, intbuf)) {
                     *buf_overflow = 1;
@@ -4299,7 +4300,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
      */
 
     if (orgtree && in_dices && objidlen > 0) {
-	sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid);
+	snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u.", *objid);
 	if (!*buf_overflow
 	    && !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
 	    *buf_overflow = 1;
@@ -4478,7 +4479,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                         *buf_overflow = 1;
                     }
                 } else {
-                    sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
+                    snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u", *objid);
                     if (!*buf_overflow &&
                         !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                                       intbuf)) {
@@ -4486,7 +4487,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                     }
                 }
             } else {
-                sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
+                snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u", *objid);
                 if (!*buf_overflow &&
                     !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                                   intbuf)) {
@@ -4502,7 +4503,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
             if (extended_index) {
                 uptimeString( *objid, intbuf, sizeof( intbuf ) );
             } else {
-                sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
+                snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u", *objid);
             }   
             if (!*buf_overflow &&
                 !snmp_cstrcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
@@ -4555,7 +4556,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
         case TYPE_IPADDR:
             if (objidlen < 4)
                 goto finish_it;
-            sprintf(intbuf, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+            snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
                     "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                     objid[0], objid[1], objid[2], objid[3]);
             objid += 4;
@@ -4570,7 +4571,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 oid             ntype = *objid++;
 
                 objidlen--;
-                sprintf(intbuf, "%" NETSNMP_PRIo "u.", ntype);
+                snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u.", ntype);
                 if (!*buf_overflow &&
                     !snmp_cstrcat(buf, buf_len, out_len, allow_realloc,
                                   intbuf)) {
@@ -4578,7 +4579,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 }
 
                 if (ntype == 1 && objidlen >= 4) {
-                    sprintf(intbuf, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                    snprintf(intbuf, sizeof(intbuf), "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
                             "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                             objid[0], objid[1], objid[2], objid[3]);
                     if (!*buf_overflow &&
@@ -4744,7 +4745,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             cp = " MODULE-COMPLIANCE";
             break;
         default:
-            sprintf(tmpbuf, " type_%d", tp->type);
+            snprintf(tmpbuf, sizeof(tmpbuf), " type_%d", tp->type);
             cp = tmpbuf;
         }
 
@@ -4766,7 +4767,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
                 if (strncmp(subtree->label, ANON, ANON_LEN)) {
                     snprintf(tmpbuf, sizeof(tmpbuf), " %s(%lu)", subtree->label, subtree->subid);
                 } else
-                    sprintf(tmpbuf, " %lu", subtree->subid);
+                    snprintf(tmpbuf, sizeof(tmpbuf), " %lu", subtree->subid);
                 len = strlen(tmpbuf);
                 if (pos + len + 2 > width) {
                     if (!snmp_cstrcat(buf, buf_len, out_len,
@@ -4788,7 +4789,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             break;
     }
     while (objidlen > 1) {
-        sprintf(tmpbuf, " %" NETSNMP_PRIo "u", *objid);
+        snprintf(tmpbuf, sizeof(tmpbuf), " %" NETSNMP_PRIo "u", *objid);
         len = strlen(tmpbuf);
         if (pos + len + 2 > width) {
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))
@@ -4801,7 +4802,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
         objid++;
         objidlen--;
     }
-    sprintf(tmpbuf, " %" NETSNMP_PRIo "u }", *objid);
+    snprintf(tmpbuf, sizeof(tmpbuf), " %" NETSNMP_PRIo "u }", *objid);
     len = strlen(tmpbuf);
     if (pos + len + 2 > width) {
         if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))
@@ -5751,14 +5752,16 @@ get_node(const char *name, oid * objid, size_t * objidlen)
             res = get_module_node(name, "ANY", objid, objidlen);
     else {
         char           *module;
+        size_t          module_len;
         /*
          *  requested name is of the form
          *      "module:subidentifier"
          */
-        module = (char *) malloc((size_t) (cp - name + 1));
+        module_len = (size_t) (cp - name + 1);
+        module = (char *) malloc(module_len);
         if (!module)
             return SNMPERR_GENERR;
-        sprintf(module, "%.*s", (int) (cp - name), name);
+        snprintf(module, module_len, "%.*s", (int) (cp - name), name);
         cp++;                   /* cp now point to the subidentifier */
         if (*cp == ':')
             cp++;

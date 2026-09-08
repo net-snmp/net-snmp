@@ -6174,8 +6174,9 @@ findsaddr(const struct sockaddr_in *to,
         if (strcmp(device, al->device) == 0)
             break;
     if (i <= 0) {
-        sprintf(errbuf, "Can't find interface \"%.32s\"", device);
-        return (errbuf);
+        if (asprintf(&errbuf, "Can't find interface \"%.32s\"", device) < 0)
+            return NULL;
+        return errbuf;
     }
 
     setsin(from, al->addr);
@@ -6200,7 +6201,7 @@ ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        (void) sprintf(errbuf, "socket: %s", strerror(errno));
+        snprintf(errbuf, errbuf_len, "socket: %s", strerror(errno));
         return (-1);
     }
     ifc.ifc_len = sizeof(ibuf);
@@ -6209,11 +6210,11 @@ ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
     if (ioctl(fd, SIOCGIFCONF, (char *) &ifc) < 0 ||
         ifc.ifc_len < sizeof(struct ifreq)) {
         if (errno == EINVAL)
-            (void) sprintf(errbuf,
-                           "SIOCGIFCONF: ifreq struct too small (%d bytes)",
-                           (int)sizeof(ibuf));
+            snprintf(errbuf, errbuf_len,
+                     "SIOCGIFCONF: ifreq struct too small (%d bytes)",
+                     (int)sizeof(ibuf));
         else
-            (void) sprintf(errbuf, "SIOCGIFCONF: %s", strerror(errno));
+            snprintf(errbuf, errbuf_len, "SIOCGIFCONF: %s", strerror(errno));
         (void) close(fd);
         return (-1);
     }
@@ -6244,9 +6245,9 @@ ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
         if (ioctl(fd, SIOCGIFFLAGS, (char *) &ifr) < 0) {
             if (errno == ENXIO)
                 continue;
-            (void) sprintf(errbuf, "SIOCGIFFLAGS: %.*s: %s",
-                           (int) sizeof(ifr.ifr_name), ifr.ifr_name,
-                           strerror(errno));
+            snprintf(errbuf, errbuf_len, "SIOCGIFFLAGS: %.*s: %s",
+                     (int) sizeof(ifr.ifr_name), ifr.ifr_name,
+                     strerror(errno));
             (void) close(fd);
             return (-1);
         }
@@ -6257,7 +6258,7 @@ ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
         if ((ifr.ifr_flags & IFF_UP) == 0)
             continue;
 
-        sprintf(device, "%.*s", (int) sizeof(ifr.ifr_name), ifr.ifr_name);
+        snprintf(device, sizeof(device), "%.*s", (int) sizeof(ifr.ifr_name), ifr.ifr_name);
 #ifdef sun
         /*
          * Ignore sun virtual interfaces 
@@ -6266,14 +6267,15 @@ ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
             continue;
 #endif
         if (ioctl(fd, SIOCGIFADDR, (char *) &ifr) < 0) {
-            (void) sprintf(errbuf, "SIOCGIFADDR: %s: %s",
-                           device, strerror(errno));
+            snprintf(errbuf, errbuf_len, "SIOCGIFADDR: %s: %s", device,
+                     strerror(errno));
             (void) close(fd);
             return (-1);
         }
 
         if (nipaddr >= MAX_IPADDR) {
-            (void) sprintf(errbuf, "Too many interfaces (%d)", nipaddr);
+            snprintf(errbuf, errbuf_len, "Too many interfaces (%d)",
+                     nipaddr);
             (void) close(fd);
             return (-1);
         }

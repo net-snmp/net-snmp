@@ -89,10 +89,9 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         read( fd, &psinfo, sizeof(psinfo));
         close(fd);
 
-        entry->hrSWRunName_len
-            = sprintf(entry->hrSWRunName, "%.*s",
-                      (int)sizeof(entry->hrSWRunName) - 1,
-                      psinfo.pr_fname);
+        entry->hrSWRunName_len =
+            snprintf(entry->hrSWRunName, sizeof(entry->hrSWRunName), "%.*s",
+                     (int)sizeof(entry->hrSWRunName) - 1, psinfo.pr_fname);
         /*
          *  Split pr_psargs into two:
          *     argv[0]   is hrSWRunPath
@@ -101,10 +100,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         cp = strchr(psinfo.pr_psargs, ' ');
         if (cp)
             *cp = '\0';    /* End of argv[0] */
-        entry->hrSWRunPath_len = sprintf(entry->hrSWRunPath, "%.*s",
+        entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath, sizeof(entry->hrSWRunPath), "%.*s",
                       (int)sizeof(entry->hrSWRunPath) - 1, psinfo.pr_psargs);
         if (cp) {
-            entry->hrSWRunParameters_len = sprintf(entry->hrSWRunParameters,
+            entry->hrSWRunParameters_len = snprintf(entry->hrSWRunParameters, sizeof(entry->hrSWRunParameters),
                       "%.*s", (int)sizeof(entry->hrSWRunParameters) - 1, cp+1);
             *cp = ' ';     /* Restore pr_psargs value */
         }

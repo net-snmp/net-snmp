@@ -303,7 +303,7 @@ notifyTable_register_notifications(int major, int minor,
     if (NULL == name) {
         int len;
         for (i = 0; i < MAX_ENTRIES; i++) {
-            sprintf(buf, "internal%d", i);
+            snprintf(buf, sizeof(buf), "internal%d", i);
             len = strlen(buf);
             if ((get_addrForName2(buf,len) == NULL) &&
                 (get_paramEntry2(buf,len) == NULL))

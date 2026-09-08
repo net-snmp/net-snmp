@@ -999,7 +999,7 @@ vacm_create_simple(const char *token, char *confline,
     if (parsetype == VACM_CREATE_SIMPLE_V3) {
         /* support for SNMPv3 user names */
         if (view_ptr) {
-            sprintf(viewname,"viewUSM%d",commcount);
+            snprintf(viewname, sizeof(viewname), "viewUSM%d", commcount);
         }
         if ( strcmp( token, "authgroup" ) == 0 ) {
             strlcpy(grpname, community, sizeof(grpname));

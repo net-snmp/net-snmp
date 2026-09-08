@@ -217,7 +217,7 @@ example_parse_config_examplestr(const char *token, char *cptr)
          * An alternative approach would be to log an error,
          *  and discard this value altogether.
          */
-        sprintf(example_str, "%.*s...", (int) (sizeof(example_str) - 4), cptr);
+        snprintf(example_str, sizeof(example_str), "%.*s...", (int) (sizeof(example_str) - 4), cptr);
         netsnmp_assert(strlen(example_str) < sizeof(example_str));
     }
 }

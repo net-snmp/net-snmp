@@ -156,7 +156,7 @@ diskio_getstats(void)
       if (len > DEVSTAT_NAME_LEN - 3)
         len -= 3;
       cp += len;
-      sprintf(cp, "%d", stat->dinfo->devices[i].unit_number);
+      snprintf(cp, sizeof(stat->dinfo->devices[i].device_name) - len, "%d", stat->dinfo->devices[i].unit_number);
     }
     diskio_set_cache_time(now);
     return 0;

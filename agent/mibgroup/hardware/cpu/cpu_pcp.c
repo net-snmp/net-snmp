@@ -119,7 +119,7 @@ void init_cpu_pcp( void ) {
 
     for (i=0; i<cpu_num ; i++) {
        cpu = netsnmp_cpu_get_byIdx( i, 1 );
-       sprintf(tstr, "cpu%d",i);
+       snprintf(tstr, sizeof(tstr), "cpu%d", i);
        strlcpy(cpu->name, tstr, sizeof(cpu->name));
        strcpy(cpu->descr, "An electronic chip that makes the computer work");
     }

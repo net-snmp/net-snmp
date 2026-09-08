@@ -115,7 +115,7 @@ get_swapinfo(long *total, long *free, long *size)
             if (!mem)
                 continue;
             if (!mem->descr) {
-                sprintf(buf, "swap #%d %s", i, pss.pss_mntpt);
+                snprintf(buf, sizeof(buf), "swap #%d %s", i, pss.pss_mntpt);
                 mem->descr = strdup( buf );
             }
             mem->units = 1024;

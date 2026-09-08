@@ -133,7 +133,7 @@ var_extensible_mem(struct variable *vp,
         long_ret = 0;
         return ((u_char *) (&long_ret));
     case ERRORNAME:            /* dummy name */
-        sprintf(errmsg, "swap");
+        snprintf(errmsg, sizeof(errmsg), "swap");
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case MEMTOTALSWAP:
@@ -163,7 +163,7 @@ var_extensible_mem(struct variable *vp,
     case ERRORMSG:
         long_ret = getTotalFree() * (getpagesize() / 1024);
         if ((long_ret > minimumswap) ? 0 : 1)
-            sprintf(errmsg, "Running out of swap space (%ld)", long_ret);
+            snprintf(errmsg, sizeof(errmsg), "Running out of swap space (%ld)", long_ret);
         else
             errmsg[0] = 0;
         *var_len = strlen(errmsg);

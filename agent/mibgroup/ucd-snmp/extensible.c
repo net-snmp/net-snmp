@@ -254,7 +254,7 @@ extensible_parse_config(const char *token, char *cptr)
             ptmp->command = NULL;
     }
 #ifdef NETSNMP_EXECFIXCMD
-    sprintf(ptmp->fixcmd, NETSNMP_EXECFIXCMD, ptmp->name);
+    snprintf(ptmp->fixcmd, sizeof(ptmp->fixcmd), NETSNMP_EXECFIXCMD, ptmp->name);
 #endif
     if (ptmp->miblen > 0) {
       /*

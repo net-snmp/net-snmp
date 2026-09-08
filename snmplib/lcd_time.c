@@ -542,15 +542,9 @@ void
 dump_etimelist_entry(Enginetime e, int count)
 {
     size_t          buflen;
-    char            tabs[SNMP_MAXBUF], *t = tabs, *s;
+    char            tabs[SNMP_MAXBUF], *s;
 
-
-
-    count += 1;
-    while (count--) {
-        t += sprintf(t, "  ");
-    }
-
+    snprintf(tabs, sizeof(tabs), "%*s", 2 * (count + 1), "");
 
     buflen = e->engineID_len;
     if (!(s = dump_snmpEngineID(e->engineID, &buflen))) {

@@ -79,7 +79,7 @@ handle_memory(netsnmp_mib_handler *handler,
             val = 0;
             break;
         case MEMORY_ERRNAME:
-            sprintf(buf, "swap");
+            snprintf(buf, sizeof(buf), "swap");
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                                      (u_char *)buf, strlen(buf));
             return SNMP_ERR_NOERROR;
@@ -295,7 +295,7 @@ handle_memory(netsnmp_mib_handler *handler,
             if ((mem_info->units / 1024) * mem_info->free > minimum_swap)
                 buf[0] = 0;
             else
-                sprintf(buf, "Running out of swap space (%ld)", mem_info->free);
+                snprintf(buf, sizeof(buf), "Running out of swap space (%ld)", mem_info->free);
             snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
                                      (u_char *)buf, strlen(buf));
             return SNMP_ERR_NOERROR;

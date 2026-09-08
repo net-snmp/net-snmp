@@ -214,9 +214,9 @@ write_ucdDemoPublicString(int action,
         return SNMP_ERR_WRONGLENGTH;
     }
     if (action == COMMIT) {
-        sprintf((char*) publicString, "%.*s",
-                (int) SNMP_MIN(sizeof(publicString) - 1, var_val_len),
-                (const char*) var_val);
+        snprintf((char*) publicString, sizeof(publicString), "%.*s",
+                 (int) SNMP_MIN(sizeof(publicString) - 1, var_val_len),
+                 (const char*) var_val);
     }
     return SNMP_ERR_NOERROR;
 }

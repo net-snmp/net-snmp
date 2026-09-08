@@ -69,8 +69,8 @@ void init_cpu_pstat( void ) {
             for (i = 0; i < nspu; i++) {
                 if (psp[i].psp_processor_state == PSP_SPU_ENABLED) {
                     cpu = netsnmp_cpu_get_byIdx( i, 1 );
-                    sprintf( cpu->name, "cpu%d", i );
-                    sprintf( cpu->descr, descr );
+                    snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
+                    snprintf(cpu->descr, sizeof(cpu->descr), "%s", descr);
                 }
             }
         }

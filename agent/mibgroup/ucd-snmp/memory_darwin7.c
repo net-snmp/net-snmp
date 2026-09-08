@@ -156,10 +156,10 @@ swapsize(void)
 	 * we want to stat the file to get it's size
 	 */
 	if(strspn(dp->d_name, SWAPFILE_PREFIX) == strlen(SWAPFILE_PREFIX)) {
-		sprintf(full_name,"%s/%s",SWAPFILE_DIR,dp->d_name);
+		snprintf(full_name, sizeof(full_name), "%s/%s", SWAPFILE_DIR, dp->d_name);
 		/* we need to stat each swapfile to get it's size */
 		if(stat(full_name,&buf) != 0) {
-        		sprintf(errmsg, "swapsize: can't stat file %s",full_name);
+        		snprintf(errmsg, sizeof(errmsg), "swapsize: can't stat file %s", full_name);
 	    		snmp_log_perror(errmsg);
 		} else {
 			/* total swap allocated is the size of
@@ -274,7 +274,7 @@ var_extensible_mem(struct variable *vp,
         long_ret = 0;
         return ((u_char *) (&long_ret));
     case ERRORNAME:            /* dummy name */
-        sprintf(errmsg, "swap");
+        snprintf(errmsg, sizeof(errmsg), "swap");
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case MEMTOTALSWAP:
@@ -314,7 +314,7 @@ var_extensible_mem(struct variable *vp,
         return ((u_char *) (&long_ret));
     case ERRORMSG:
         if (swapFree < minimumswap)
-            sprintf(errmsg, "Running out of swap space (%qd)", swapFree);
+            snprintf(errmsg, sizeof(errmsg), "Running out of swap space (%qd)", swapFree);
         else
             errmsg[0] = 0;
         *var_len = strlen(errmsg);
@@ -352,7 +352,7 @@ int pages_swapped(void) {
      mach_port = mach_host_self();
      error = host_processor_sets(mach_port, &psets, &pcnt);
      if (error != KERN_SUCCESS) {
-        sprintf(errmsg, "Error in host_processor_sets(): %s\n", mach_error_string(error));
+        snprintf(errmsg, sizeof(errmsg), "Error in host_processor_sets(): %s\n", mach_error_string(error));
         snmp_log_perror(errmsg);
         return(0);
      }
@@ -360,14 +360,14 @@ int pages_swapped(void) {
      for (i = 0; i < pcnt; i++) {
         error = host_processor_set_priv(mach_port, psets[i], &pset);
         if (error != KERN_SUCCESS) {
-            sprintf(errmsg,"Error in host_processor_set_priv(): %s\n", mach_error_string(error));
+            snprintf(errmsg, sizeof(errmsg), "Error in host_processor_set_priv(): %s\n", mach_error_string(error));
             snmp_log_perror(errmsg);
             return(0);
         }
 
         error = processor_set_tasks(pset, &tasks, &tcnt);
         if (error != KERN_SUCCESS) {
-            sprintf(errmsg,"Error in processor_set_tasks(): %s\n", mach_error_string(error));
+            snprintf(errmsg, sizeof(errmsg), "Error in processor_set_tasks(): %s\n", mach_error_string(error));
             snmp_log_perror(errmsg);
             return(0);
         }

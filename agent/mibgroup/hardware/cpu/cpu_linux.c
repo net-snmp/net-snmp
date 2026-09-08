@@ -64,7 +64,7 @@ void init_cpu_linux( void ) {
                 return;
             }
             cpu->status = 2;  /* running */
-            sprintf( cpu->name, "cpu%d", i );
+            snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
 #if defined(__s390__) || defined(__s390x__)
             strlcat(cpu->descr, "An S/390 CPU", sizeof(cpu->descr));
 #endif
@@ -82,7 +82,7 @@ void init_cpu_linux( void ) {
                     return;
                 }
                 cpu->status = 2;  /* running */
-                sprintf(cpu->name, "cpu%d", i);
+                snprintf(cpu->name, sizeof(cpu->name), "cpu%d", i);
                 strlcat(cpu->descr, "An S/390 CPU", sizeof(cpu->descr));
             }
         }

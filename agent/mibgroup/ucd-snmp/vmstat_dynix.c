@@ -688,7 +688,7 @@ var_extensible_vmstat(struct variable *vp,
         long_ret = 1;
         return ((u_char *) (&long_ret));
     case ERRORNAME:            /* dummy name */
-        sprintf(errmsg, "systemStats");
+        snprintf(errmsg, sizeof(errmsg), "systemStats");
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case SWAPIN:

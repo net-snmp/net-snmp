@@ -771,7 +771,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
     }
 
     s = buf;
-    s += sprintf(s, "enterprise %d, ", ((*(esp + 0) & 0x7f) << 24) |
+    s += snprintf(s, sizeof(buf) - (s - buf), "enterprise %d, ",
+                 ((*(esp + 0) & 0x7f) << 24) |
                  ((*(esp + 1) & 0xff) << 16) |
                  ((*(esp + 2) & 0xff) << 8) | ((*(esp + 3) & 0xff)));
     /*
@@ -799,7 +800,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
         if (!(t = inet_ntoa(iaddr)))
             goto dump_snmpEngineID_violation;
-        s += sprintf(s, "%s", t);
+        s += snprintf(s, sizeof(buf) - (s - buf), "%s", t);
 
         esp += 4;
         remaining_len -= 4;
@@ -810,7 +811,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         if (remaining_len < 16)
             goto dump_snmpEngineID_violation;
 
-        s += sprintf(s,
+        s += snprintf(s, sizeof(buf) - (s - buf),
                      "%02X%02X %02X%02X %02X%02X %02X%02X::"
                      "%02X%02X %02X%02X %02X%02X %02X%02X",
                      eb(0), eb(1), eb(2), eb(3),
@@ -827,7 +828,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         if (remaining_len < 6)
             goto dump_snmpEngineID_violation;
 
-        s += sprintf(s, "%02X:%02X:%02X:%02X:%02X:%02X",
+        s += snprintf(s, sizeof(buf) - (s - buf), "%02X:%02X:%02X:%02X:%02X:%02X",
                      eb(0), eb(1), eb(2), eb(3), eb(4), eb(5));
 
         esp += 6;
@@ -836,7 +837,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 
     case 4:                    /* Text. */
 
-        s += sprintf(s, "\"%.*s\"", (int) (sizeof(buf)-strlen(buf)-3), esp);
+        s += snprintf(s, sizeof(buf) - (s - buf), "\"%.*s\"", (int) (sizeof(buf)-strlen(buf)-3), esp);
         goto dump_snmpEngineID_quit;
         break;
 
@@ -854,13 +855,13 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
                                  * *   -OR- of expected length.
                                  */
         gotviolation = 1;
-        s += sprintf(s, "!!! ");
+        s += snprintf(s, sizeof(buf) - (s - buf), "!!! ");
         NETSNMP_FALLTHROUGH;
 
     default:                   /* Unknown encoding. */
 
         if (!gotviolation) {
-            s += sprintf(s, "??? ");
+            s += snprintf(s, sizeof(buf) - (s - buf), "??? ");
         }
         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
                           esp, remaining_len);
@@ -878,14 +879,14 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
      * octets, but perhaps they do.  Throw them in too.  XXX
      */
     if (remaining_len > 0) {
-        s += sprintf(s, " (??? ");
+        s += snprintf(s, sizeof(buf) - (s - buf), " (??? ");
 
         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
                           esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
 
-        s += sprintf(s, ")");
+        s += snprintf(s, sizeof(buf) - (s - buf), ")");
     }
 
 

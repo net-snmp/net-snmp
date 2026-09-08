@@ -33,7 +33,13 @@ static void     init_nlist(struct nlist *);
 long
 auto_nlist_value(const char *string)
 {
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
+    static const char prefix[] = "";
+#else
+    static const char prefix[] = "_";
+#endif
     struct autonlist **ptr, *it = 0;
+    char           *name;
     int             cmp;
 
     if (string == 0)
@@ -68,35 +74,14 @@ auto_nlist_value(const char *string)
             return 0;
         }
         strcpy(it->symbol, string);
-        /*
-         * allocate an extra byte for inclusion of a preceding '_' later
-         */
-        it->nl[0].n_name = (char *) malloc(strlen(string) + 2);
-        if (it->nl[0].n_name == NULL) {
+        if (asprintf(&name, "%s%s", prefix, string) < 0) {
             snmp_log(LOG_ERR, "auto_nlist: malloc failed\n");
             free(it->symbol);
             free(*ptr);
             *ptr = NULL;
             return 0;
         }
-#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
-        strcpy(it->nl[0].n_name, string);
-        it->nl[0].n_name[strlen(string)+1] = '\0';
-#elif defined(freebsd9)
-        sprintf(__DECONST(char*, it->nl[0].n_name), "_%s", string);
-#else
-        {
-            static char *name;
-
-            free(name);
-	    name = NULL;
-	    if (asprintf(&name, "_%s", string) < 0) {
-                snmp_log(LOG_ERR, "nlist err: failed to allocate memory");
-                return -1;
-            }
-            it->nl[0].n_name = name;
-        }
-#endif
+        it->nl[0].n_name = name;
         it->nl[1].n_name = 0;
         init_nlist(it->nl);
 #if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7) || \
@@ -264,7 +249,7 @@ auto_nlist_print_tree(int indent, struct autonlist *ptr)
     } else {
         if (ptr == 0)
             return;
-        sprintf(buf, "%%%ds\n", indent);
+        snprintf(buf, sizeof(buf), "%%%ds\n", indent);
         /*
          * DEBUGMSGTL(("auto_nlist", "buf: %s\n",buf)); 
          */
