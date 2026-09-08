@@ -219,11 +219,6 @@ struct module_init_list *noinitlist = NULL;
  */
 
 long            long_return;
-#ifndef ibm032
-u_char          return_buf[258];
-#else
-u_char          return_buf[256];        /* nee 64 */
-#endif
 
 static int
 _warn_if_all_disabled(int maj, int min, void *serverarg, void *clientarg);

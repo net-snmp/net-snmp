@@ -212,6 +212,8 @@ netsnmp_feature_provide(interface_legacy);
 static unsigned long LastLoad = 0;        /* ET in secs at last table load */
 #endif
 
+static u_char   return_buf[256];
+
 #define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
 struct variable3 interfaces_variables[] = {
