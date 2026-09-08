@@ -595,7 +595,7 @@ int             wait_for_reply(int, struct sockaddr_in *,
 int             usleep(u_int);
 #endif
 void            setsin(struct sockaddr_in *, u_int32_t);
-int             ifaddrlist(struct ifaddrlist **, char *);
+int             ifaddrlist(struct ifaddrlist **, char *, u_int);
 struct addrinfo *host_serv_tr(const char *, const char *, int, int);
 char           *sock_ntop_host_tr(const struct sockaddr *, socklen_t);
 

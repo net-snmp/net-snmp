@@ -4325,7 +4325,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
     /*
      * Get the interface address list 
      */
-    n = ifaddrlist(&al, errbuf);
+    n = ifaddrlist(&al, errbuf, sizeof(errbuf));
     if (n < 0) {
         DEBUGMSGTL(("traceRouteCtlTable",
                     " ifaddrlist: %s\n", errbuf));
@@ -6122,6 +6122,7 @@ findsaddr(const struct sockaddr_in *to,
     struct ifaddrlist *al;
     char            buf[256], tdevice[256], device[256];
     char            *errbuf = NULL;
+    char            errbuf_arr[132];
     static const char route[] = "/proc/net/route";
 
     if ((f = fopen(route, "r")) == NULL) {
@@ -6159,8 +6160,9 @@ findsaddr(const struct sockaddr_in *to,
     /*
      * Get the interface address list 
      */
-    if ((n = ifaddrlist(&al, errbuf)) < 0)
-        return (errbuf);
+    n = ifaddrlist(&al, errbuf_arr, sizeof(errbuf_arr));
+    if (n < 0)
+        return strdup(errbuf_arr);
 
     if (n == 0)
         return strdup("Can't find any network interfaces");
@@ -6181,7 +6183,7 @@ findsaddr(const struct sockaddr_in *to,
 }
 
 int
-ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf)
+ifaddrlist(struct ifaddrlist **ipaddrp, char *errbuf, u_int errbuf_len)
 {
     int    fd, nipaddr;
 #ifdef HAVE_SOCKADDR_SA_LEN
