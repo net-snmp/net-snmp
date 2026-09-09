@@ -551,7 +551,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
     trap_oid_len = vblist->val_len / sizeof(oid);
     if (trap_oid_len > MAX_OID_LEN) {
         snmp_log(LOG_WARNING,
-                 "send_trap: v2 trapOID too long (%zu)\n", trap_oid_len);
+                 "send_trap: v2 trapOID too long (%" NETSNMP_PRIz "u)\n",
+                 trap_oid_len);
         snmp_free_pdu(template_v1pdu);
         return NULL;
     }
@@ -620,7 +621,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         size_t len = trap_oid_len;
         if ( len < 2 || (len == 2 && vblist->val.objid[0] == 0) ) {
             snmp_log(LOG_WARNING,
-                     "send_trap: v2 trapOID too short (%zu)\n", len);
+                     "send_trap: v2 trapOID too short (%" NETSNMP_PRIz "u)\n",
+                     len);
             snmp_free_pdu(template_v1pdu);
             return NULL;
         }

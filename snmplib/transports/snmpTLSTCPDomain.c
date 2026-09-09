@@ -398,8 +398,9 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     if (!t || !NETSNMP_IS_VALID_SOCKET(t->sock) || !t->data) {
         snmp_log(LOG_ERR,
                  "tlstcp received an invalid invocation with missing data\n");
-        DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
-                    (t ? t->sock : -1), errno, strerror(errno)));
+        DEBUGMSGTL(("tlstcp", "recvfrom fd %" NETSNMP_FMT_SKT " err %d (\"%s\")\n",
+                    (t ? t->sock : NETSNMP_INVALID_SOCKET), errno,
+                    strerror(errno)));
         if (t)
             DEBUGMSGTL(("tlstcp", "  tdata = %p", t->data));
         DEBUGMSGTL(("tlstcp", "\n"));
@@ -573,7 +574,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     DEBUGIF("tlstcp") {
         char *str = netsnmp_tlstcp_fmtaddr(t, NULL, 0);
         DEBUGMSGTL(("tlstcp",
-                    "recvfrom fd %d got %d bytes (from %s)\n",
+                    "recvfrom fd %" NETSNMP_FMT_SKT " got %d bytes (from %s)\n",
                     t->sock, rc, str));
         free(str);
     }
@@ -942,8 +943,9 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
     t->sock = t->base_transport->sock;
     if (NETSNMP_IS_VALID_SOCKET(t->sock)) {
         if (netsnmp_set_non_blocking_mode(t->sock, TRUE) < 0) {
-            DEBUGMSGTL(("tlstcp", "couldn't set non-blocking mode on client fd %d\n",
-                        t->sock));
+            DEBUGMSGTL(("tlstcp",
+                        "couldn't set non-blocking mode on client fd %"
+                        NETSNMP_FMT_SKT "\n", t->sock));
         }
     }
 
