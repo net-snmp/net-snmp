@@ -146,8 +146,6 @@ netsnmp_feature_child_of(snmp_api, libnetsnmp);
 netsnmp_feature_child_of(oid_is_subtree, snmp_api);
 netsnmp_feature_child_of(snmpv3_probe_contextEngineID_rfc5343, snmp_api);
 
-static void     _init_snmp(void);
-
 static int      _snmp_store_needed = 0;
 
 #include "../agent/mibgroup/agentx/protocol.h"
@@ -235,10 +233,6 @@ struct snmp_internal_session {
     u_char       *opacket;      /* send packet data (within obuf) */
     size_t        opacket_len;  /* length of data */
 };
-
-static void
-remove_request(struct snmp_internal_session *isp,
-               netsnmp_request_list *orp, netsnmp_request_list *rp);
 
 /*
  * information about received packet
@@ -357,22 +351,6 @@ int             snmp_errno = 0;
  */
 static char     snmp_detail[192];
 static int      snmp_detail_f = 0;
-
-/*
- * Prototypes.
- */
-static void     snmpv3_calc_msg_flags(int, int, u_char *);
-static int      snmpv3_verify_msg(netsnmp_request_list *, netsnmp_pdu *);
-static int      snmpv3_build(u_char ** pkt, size_t * pkt_len,
-                             size_t * offset, netsnmp_session * session,
-                             netsnmp_pdu *pdu);
-static int      snmp_parse_version(u_char *, size_t);
-static int      snmp_resend_request(struct session_list *slp,
-                                    netsnmp_request_list *orp,
-                                    netsnmp_request_list *rp,
-                                    int incr_retries);
-static void     register_default_handlers(void);
-static struct session_list *snmp_sess_copy(netsnmp_session * pss);
 
 /*
  * return configured max message size for outgoing packets
@@ -2096,6 +2074,29 @@ snmp_free_session(netsnmp_session * s)
     netsnmp_callback_clear_client_arg(s, 0, 0);
 
     free(s);
+}
+
+/* Remove request @rp from session @isp. @orp is the request before @rp. */
+static void
+remove_request(struct snmp_internal_session *isp,
+               netsnmp_request_list *orp, netsnmp_request_list *rp)
+{
+    if (orp)
+        orp->next_request = rp->next_request;
+    else
+        isp->requests = rp->next_request;
+    if (isp->requestsEnd == rp)
+        isp->requestsEnd = orp;
+    if (rp->cb_data_refcounted) {
+        netsnmp_refcnt_void *aux = (netsnmp_refcnt_void*) rp->cb_data;
+        if (aux) {
+            aux->refcnt--;
+            if (aux->refcnt <= 0) {
+                free(aux);
+            }
+        }
+    }
+    snmp_free_pdu(rp->pdu);
 }
 
 /*
@@ -5873,27 +5874,95 @@ _sess_process_packet_parse_pdu(struct session_list *slp, netsnmp_session * sp,
   return pdu;
 }
 
-/* Remove request @rp from session @isp. @orp is the request before @rp. */
-static void
-remove_request(struct snmp_internal_session *isp,
-               netsnmp_request_list *orp, netsnmp_request_list *rp)
+static int
+snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
+                    netsnmp_request_list *rp, int incr_retries)
 {
-    if (orp)
-        orp->next_request = rp->next_request;
-    else
-        isp->requests = rp->next_request;
-    if (isp->requestsEnd == rp)
-        isp->requestsEnd = orp;
-    if (rp->cb_data_refcounted) {
-        netsnmp_refcnt_void *aux = (netsnmp_refcnt_void*) rp->cb_data;
-        if (aux) {
-            aux->refcnt--;
-            if (aux->refcnt <= 0) {
-                free(aux);
-            }
-        }
+    struct snmp_internal_session *isp;
+    netsnmp_session *sp;
+    netsnmp_transport *transport;
+    u_char         *pktbuf = NULL, *packet = NULL;
+    size_t          pktbuf_len = 0, length = 0;
+    struct timeval  tv, now;
+    int             result = 0;
+
+    sp = slp->session;
+    isp = slp->internal;
+    transport = slp->transport;
+    if (!sp || !isp || !transport) {
+        DEBUGMSGTL(("sess_read", "resend fail: closing...\n"));
+        return 0;
     }
-    snmp_free_pdu(rp->pdu);
+
+    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
+        DEBUGMSGTL(("sess_resend",
+                    "couldn't malloc initial packet buffer\n"));
+        return 0;
+    } else {
+        pktbuf_len = 2048;
+    }
+
+    if (incr_retries) {
+        rp->retries++;
+    }
+
+    /*
+     * Always increment msgId for resent messages.  
+     */
+    rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
+
+    result = netsnmp_build_packet(isp, sp, rp->pdu, &pktbuf, &pktbuf_len,
+                                  &packet, &length);
+    if (result < 0) {
+        /*
+         * This should never happen.  
+         */
+        DEBUGMSGTL(("sess_resend", "encoding failure\n"));
+        SNMP_FREE(pktbuf);
+        return -1;
+    }
+
+    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld "
+                "rp_reqid#%ld rp_msgid#%ld len %" NETSNMP_PRIz "u\n",
+                rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id, length));
+    result = netsnmp_transport_send(transport, packet, length,
+                                    &(rp->pdu->transport_data),
+                                    &(rp->pdu->transport_data_length));
+
+    /*
+     * We are finished with the local packet buffer, if we allocated one (due
+     * to there being no saved packet).  
+     */
+
+    if (pktbuf != NULL) {
+        SNMP_FREE(pktbuf);
+        packet = NULL;
+    }
+
+    if (result < 0) {
+        sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
+        sp->s_errno = errno;
+        snmp_set_detail(strerror(errno));
+        if (rp->callback) {
+            rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
+                         rp->pdu->reqid, rp->pdu, rp->cb_data);
+            remove_request(isp, orp, rp);
+            free(rp);
+	}
+        return -1;
+    } else {
+        netsnmp_get_monotonic_clock(&now);
+        tv = now;
+        rp->timeM = tv;
+        tv.tv_usec += rp->timeout;
+        tv.tv_sec += tv.tv_usec / 1000000L;
+        tv.tv_usec %= 1000000L;
+        rp->expireM = tv;
+        if (rp->callback)
+            rp->callback(NETSNMP_CALLBACK_OP_RESEND, sp,
+                         rp->pdu->reqid, rp->pdu, rp->cb_data);
+    }
+    return 0;
 }
 
 /*
@@ -6982,99 +7051,6 @@ snmp_timeout(void)
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
-
-static int
-snmp_resend_request(struct session_list *slp, netsnmp_request_list *orp,
-                    netsnmp_request_list *rp, int incr_retries)
-{
-    struct snmp_internal_session *isp;
-    netsnmp_session *sp;
-    netsnmp_transport *transport;
-    u_char         *pktbuf = NULL, *packet = NULL;
-    size_t          pktbuf_len = 0, length = 0;
-    struct timeval  tv, now;
-    int             result = 0;
-
-    sp = slp->session;
-    isp = slp->internal;
-    transport = slp->transport;
-    if (!sp || !isp || !transport) {
-        DEBUGMSGTL(("sess_read", "resend fail: closing...\n"));
-        return 0;
-    }
-
-    if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
-        DEBUGMSGTL(("sess_resend",
-                    "couldn't malloc initial packet buffer\n"));
-        return 0;
-    } else {
-        pktbuf_len = 2048;
-    }
-
-    if (incr_retries) {
-        rp->retries++;
-    }
-
-    /*
-     * Always increment msgId for resent messages.  
-     */
-    rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
-
-    result = netsnmp_build_packet(isp, sp, rp->pdu, &pktbuf, &pktbuf_len,
-                                  &packet, &length);
-    if (result < 0) {
-        /*
-         * This should never happen.  
-         */
-        DEBUGMSGTL(("sess_resend", "encoding failure\n"));
-        SNMP_FREE(pktbuf);
-        return -1;
-    }
-
-    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld "
-                "rp_reqid#%ld rp_msgid#%ld len %" NETSNMP_PRIz "u\n",
-                rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id, length));
-    result = netsnmp_transport_send(transport, packet, length,
-                                    &(rp->pdu->transport_data),
-                                    &(rp->pdu->transport_data_length));
-
-    /*
-     * We are finished with the local packet buffer, if we allocated one (due
-     * to there being no saved packet).  
-     */
-
-    if (pktbuf != NULL) {
-        SNMP_FREE(pktbuf);
-        packet = NULL;
-    }
-
-    if (result < 0) {
-        sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
-        sp->s_errno = errno;
-        snmp_set_detail(strerror(errno));
-        if (rp->callback) {
-            rp->callback(NETSNMP_CALLBACK_OP_SEND_FAILED, sp,
-                         rp->pdu->reqid, rp->pdu, rp->cb_data);
-            remove_request(isp, orp, rp);
-            free(rp);
-	}
-        return -1;
-    } else {
-        netsnmp_get_monotonic_clock(&now);
-        tv = now;
-        rp->timeM = tv;
-        tv.tv_usec += rp->timeout;
-        tv.tv_sec += tv.tv_usec / 1000000L;
-        tv.tv_usec %= 1000000L;
-        rp->expireM = tv;
-        if (rp->callback)
-            rp->callback(NETSNMP_CALLBACK_OP_RESEND, sp,
-                         rp->pdu->reqid, rp->pdu, rp->cb_data);
-    }
-    return 0;
-}
-
-
 
 void
 snmp_sess_timeout(struct session_list *slp)
