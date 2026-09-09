@@ -33767,6 +33767,10 @@ printf %s "checking return type of setnetgrent()... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+#endif
+#include <stddef.h>
 #ifdef HAVE_NETDB_H
     #include <netdb.h>
 #endif
@@ -33806,6 +33810,10 @@ CFLAGS="$CFLAGS -Werror"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+#endif
+#include <stddef.h>
 #ifdef HAVE_NETDB_H
     #include <netdb.h>
 #endif

@@ -41,6 +41,10 @@ if test x$ac_cv_func_setnetgrent = xyes; then
 AC_MSG_CHECKING([return type of setnetgrent()])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
         [[
+#ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+#endif
+#include <stddef.h>
 #ifdef HAVE_NETDB_H
     #include <netdb.h>
 #endif
@@ -60,6 +64,10 @@ netsnmp_save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
         [[
+#ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+#endif
+#include <stddef.h>
 #ifdef HAVE_NETDB_H
     #include <netdb.h>
 #endif
