@@ -2939,6 +2939,7 @@ parse_notificationDefinition(FILE * fp, char *name)
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
+                free(np->description);
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -2999,6 +3000,7 @@ parse_trapDefinition(FILE * fp, char *name)
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
+                free(np->description);
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -3009,6 +3011,7 @@ parse_trapDefinition(FILE * fp, char *name)
                 print_error("Bad REFERENCE", quoted_string_buffer, type);
                 goto free_node;
             }
+            free(np->reference);
             np->reference = strdup(quoted_string_buffer);
             break;
         case ENTERPRISE:
