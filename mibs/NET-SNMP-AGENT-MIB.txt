@@ -34,7 +34,7 @@ netSnmpAgentMIB MODULE-IDENTITY
 	 "Defines control and monitoring structures for the Net-SNMP agent."
     REVISION     "202609140000Z"
     DESCRIPTION
-	"Added the trusted certificate table."
+	"Added a Linux/OpenSSL certificate trust-location inventory table."
     REVISION     "201003170000Z"
     DESCRIPTION
 	 "Made sure that this MIB can be compiled by MIB compilers that do not
@@ -59,7 +59,7 @@ nsTransactions         OBJECT IDENTIFIER ::= {netSnmpObjects 8}
 nsTrustedCertificates  OBJECT IDENTIFIER ::= {netSnmpObjects 10}
 
 --
--- Operating system trusted certificate store
+-- OpenSSL trusted certificate locations on Linux
 --
 
 nsTrustedCertificateTable OBJECT-TYPE
@@ -67,7 +67,7 @@ nsTrustedCertificateTable OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-      "Certificates in the trust store used by the operating system."
+      "Certificates discovered from the OpenSSL trust locations used by Net-SNMP on Linux. The implementation consults SSL_CERT_FILE, SSL_CERT_DIR, and the OpenSSL default certificate file and directory."
     ::= { nsTrustedCertificates 1 }
 
 nsTrustedCertificateEntry OBJECT-TYPE
@@ -75,7 +75,7 @@ nsTrustedCertificateEntry OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-      "Information about one trusted certificate."
+      "Information about one certificate discovered in the configured OpenSSL trust locations."
     INDEX       { nsTrustedCertificateIndex }
     ::= { nsTrustedCertificateTable 1 }
 
@@ -88,7 +88,6 @@ NsTrustedCertificateEntry ::= SEQUENCE {
     nsTrustedCertificateNotBefore          OCTET STRING,
     nsTrustedCertificateNotAfter           OCTET STRING,
     nsTrustedCertificateSignatureAlgorithm OCTET STRING,
-    nsTrustedCertificateTrustStatus        INTEGER,
     nsTrustedCertificateSource             OCTET STRING
 }
 
@@ -148,19 +147,13 @@ nsTrustedCertificateSignatureAlgorithm OBJECT-TYPE
     DESCRIPTION "The certificate signature algorithm."
     ::= { nsTrustedCertificateEntry 8 }
 
-nsTrustedCertificateTrustStatus OBJECT-TYPE
-    SYNTAX      INTEGER { trusted(1) }
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION "The trust status assigned by the operating system store."
-    ::= { nsTrustedCertificateEntry 9 }
 
 nsTrustedCertificateSource OBJECT-TYPE
     SYNTAX      OCTET STRING
     MAX-ACCESS  read-only
     STATUS      current
-    DESCRIPTION "The file from which the certificate was loaded."
-    ::= { nsTrustedCertificateEntry 10 }
+    DESCRIPTION "The OpenSSL certificate file or directory entry from which the certificate was loaded."
+    ::= { nsTrustedCertificateEntry 9 }
 
 --
 --  MIB Module data caching management
