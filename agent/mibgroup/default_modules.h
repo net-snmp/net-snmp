@@ -38,6 +38,12 @@ config_require(disman/schedule);
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
 config_require(utilities);
 
+/* Make the native certificate trust store observable when OpenSSL is
+ * available.  The first implementation uses the Linux trust-store layout. */
+#if defined(__linux__) && defined(HAVE_OPENSSL_X509_H)
+config_require(agent/trustedCertTable);
+#endif
+
 /* default MIBs to auto-include for parsing */
 /* NOTE: we consider these MIBs users will likely want to load by
    default, even if they're not supporting it in the agent (ie, the
