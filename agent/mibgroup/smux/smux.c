@@ -94,6 +94,8 @@ static void     smux_send_close(NETSNMP_SOCKET, int);
 static void     smux_list_detach(smux_reg **, smux_reg *);
 static void     smux_replace_active(smux_reg *, smux_reg *);
 static void     smux_peer_cleanup(NETSNMP_SOCKET);
+static int      smux_peer_is_authenticated(NETSNMP_SOCKET);
+static void     smux_auth_timeout_cb(unsigned int, void *);
 static int      smux_auth_peer(oid *, size_t, char *, NETSNMP_SOCKET);
 static int      smux_build(u_char, long, oid *,
                            size_t *, u_char, u_char *, size_t, u_char *,
@@ -624,24 +626,47 @@ var_smux_write(int action,
     return reterr;
 }
 
+static int
+smux_peer_is_authenticated(NETSNMP_SOCKET sd)
+{
+    int i;
+
+    for (i = 0; i < nauths; i++)
+        if (Auths[i]->sa_active_fd == sd)
+            return 1;
+
+    return 0;
+}
+
+static void
+smux_auth_timeout_cb(unsigned int clientreg, void *clientarg)
+{
+    NETSNMP_SOCKET fd = (NETSNMP_SOCKET)(uintptr_t)clientarg;
+    int i, found = 0;
+
+    for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
+        if (smux_snmp_select_list_get_SD_from_List(i) == fd) {
+            found = 1;
+            break;
+        }
+    }
+    if (found && !smux_peer_is_authenticated(fd)) {
+        DEBUGMSGTL(("smux",
+                    "[smux_auth_timeout] closing idle unauthenticated fd %"
+                    NETSNMP_FMT_SKT "\n", fd));
+        close(fd);
+        smux_snmp_select_list_del(fd);
+    }
+}
+
 NETSNMP_SOCKET
 smux_accept(NETSNMP_SOCKET sd)
 {
-    u_char          data[SMUXMAXPKTSIZE], *ptr, type;
     struct sockaddr_in in_socket;
-    struct timeval  tv;
-    int             fail;
     NETSNMP_SOCKET  fd;
     socklen_t       alen;
-    int             length;
-    size_t          len;
 
     alen = sizeof(struct sockaddr_in);
-    /*
-     * this may be too high 
-     */
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
 
     /*
      * connection request 
@@ -652,91 +677,23 @@ smux_accept(NETSNMP_SOCKET sd)
     if (!NETSNMP_IS_VALID_SOCKET(fd)) {
         snmp_log_perror("[smux_accept] accept failed");
         return NETSNMP_INVALID_SOCKET;
-    } else {
-        netsnmp_set_tcp_nodelay(fd, 1);
-        DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
-                 fd, inet_ntoa(in_socket.sin_addr),
-                 ntohs(in_socket.sin_port)));
-        if (npeers + 1 == SMUXMAXPEERS) {
-            snmp_log(LOG_ERR,
-                     "[smux_accept] denied peer on fd %" NETSNMP_FMT_SKT ", limit %d reached",
-                     fd, SMUXMAXPEERS);
-            close(fd);
-            return NETSNMP_INVALID_SOCKET;
-        }
-
-        /*
-         * now block for an OpenPDU 
-         */
-        do
-        {
-           length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, 0, NULL, NULL);
-        }
-        while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
-
-        if (length <= 0) {
-            DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on fd %" NETSNMP_FMT_SKT " died or timed out\n",
-                        fd));
-            close(fd);
-            return NETSNMP_INVALID_SOCKET;
-        }
-        /*
-         * try to authorize him 
-         */
-        ptr = data;
-        len = length;
-        if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
-            smux_send_close(fd, SMUXC_PACKETFORMAT);
-            close(fd);
-            DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " sent bad open",
-                        fd));
-            return NETSNMP_INVALID_SOCKET;
-        } else if (type != (u_char) SMUX_OPEN) {
-            smux_send_close(fd, SMUXC_PROTOCOLERROR);
-            close(fd);
-            DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " did not send open: (%d)\n",
-                        fd, type));
-            return NETSNMP_INVALID_SOCKET;
-        }
-        ptr = smux_open_process(fd, ptr, &len, &fail);
-        if (fail) {
-            smux_send_close(fd, SMUXC_AUTHENTICATIONFAILURE);
-            close(fd);
-            DEBUGMSGTL(("smux",
-                        "[smux_accept] peer on %" NETSNMP_FMT_SKT " failed authentication\n",
-                        fd));
-            return NETSNMP_INVALID_SOCKET;
-        }
-
-        /*
-         * he's OK 
-         */
-#ifdef SO_RCVTIMEO
-        if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void *) &tv, sizeof(tv)) <
-            0) {
-            DEBUGMSGTL(("smux",
-                        "[smux_accept] setsockopt(SO_RCVTIMEO) failed fd %" NETSNMP_FMT_SKT "\n",
-                        fd));
-            snmp_log_perror("smux_accept: setsockopt SO_RCVTIMEO");
-        }
-#endif
-        npeers++;
-        DEBUGMSGTL(("smux", "[smux_accept] fd %" NETSNMP_FMT_SKT "\n", fd));
-
-        /*
-         * Process other PDUs already read, e.g. a registerRequest. 
-         */
-        len = length - (ptr - data);
-        if (smux_pdu_process(fd, ptr, len) < 0) {
-            /*
-             * Easy come, easy go.  Clean-up is already done. 
-             */
-            return NETSNMP_INVALID_SOCKET;
-        }
     }
+
+    netsnmp_set_tcp_nodelay(fd, 1);
+    netsnmp_set_non_blocking_mode(fd, TRUE);
+    DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
+             fd, inet_ntoa(in_socket.sin_addr),
+             ntohs(in_socket.sin_port)));
+    if (npeers + 1 == SMUXMAXPEERS) {
+        snmp_log(LOG_ERR,
+                 "[smux_accept] denied peer on fd %" NETSNMP_FMT_SKT ", limit %d reached",
+                 fd, SMUXMAXPEERS);
+        close(fd);
+        return NETSNMP_INVALID_SOCKET;
+    }
+
+    snmp_alarm_register(5, 0, smux_auth_timeout_cb, (void *)(intptr_t)fd);
+
     return fd;
 }
 
@@ -746,21 +703,102 @@ smux_process(NETSNMP_SOCKET sock)
     int             length, tmp_length;
     u_char          data[SMUXMAXPKTSIZE];
     u_char          type, *ptr;
-    size_t          packet_len;
+    size_t          packet_len, len;
+    int             fail;
 
-    do
-    {
+    if (!smux_peer_is_authenticated(sock)) {
+        /*
+         * Unauthenticated peer: read OpenPDU non-blockingly.
+         */
+        do {
+            length = recvfrom(sock, (char *) data, SMUXMAXPKTSIZE, 0, NULL, NULL);
+        } while (length == -1 && errno == EINTR);
+
+        if (length < 0) {
+            if (errno == EAGAIN ||
+                (EAGAIN != EWOULDBLOCK && errno == EWOULDBLOCK))
+                return 0;
+            DEBUGMSGTL(("smux",
+                        "[smux_process] recvfrom failed on unauthenticated fd %"
+                        NETSNMP_FMT_SKT "\n", sock));
+            close(sock);
+            return -1;
+        }
+        if (length == 0) {
+            DEBUGMSGTL(("smux",
+                        "[smux_process] peer on fd %" NETSNMP_FMT_SKT
+                        " closed connection before auth\n", sock));
+            close(sock);
+            return -1;
+        }
+
+        /*
+         * Try to authorize peer.
+         */
+        ptr = data;
+        len = length;
+        if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
+            smux_send_close(sock, SMUXC_PACKETFORMAT);
+            close(sock);
+            DEBUGMSGTL(("smux",
+                        "[smux_process] peer on %" NETSNMP_FMT_SKT " sent bad open\n",
+                        sock));
+            return -1;
+        } else if (type != (u_char) SMUX_OPEN) {
+            smux_send_close(sock, SMUXC_PROTOCOLERROR);
+            close(sock);
+            DEBUGMSGTL(("smux",
+                        "[smux_process] peer on %" NETSNMP_FMT_SKT " did not send open: (%d)\n",
+                        sock, type));
+            return -1;
+        }
+        ptr = smux_open_process(sock, ptr, &len, &fail);
+        if (fail) {
+            smux_send_close(sock, SMUXC_AUTHENTICATIONFAILURE);
+            close(sock);
+            DEBUGMSGTL(("smux",
+                        "[smux_process] peer on %" NETSNMP_FMT_SKT " failed authentication\n",
+                        sock));
+            return -1;
+        }
+
+        npeers++;
+        DEBUGMSGTL(("smux", "[smux_process] authenticated peer on fd %" NETSNMP_FMT_SKT "\n", sock));
+
+        /*
+         * Process other PDUs already read, e.g. a registerRequest.
+         */
+        len = length - (ptr - data);
+        if (len > 0) {
+            if (smux_pdu_process(sock, ptr, len) < 0) {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    /*
+     * Authenticated peer: process incoming data.
+     */
+    do {
        length = recvfrom(sock, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK, NULL,
                          NULL);
-    }
-    while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+    } while (length == -1 && errno == EINTR);
 
-    if (length <= 0)
-    {
-       if (length < 0)
-           snmp_log_perror("[smux_process] peek failed");
-       smux_peer_cleanup(sock);
-       return -1;
+    if (length < 0) {
+        if (errno == EAGAIN ||
+            (EAGAIN != EWOULDBLOCK && errno == EWOULDBLOCK))
+            return 0;
+        snmp_log_perror("[smux_process] peek failed");
+        smux_peer_cleanup(sock);
+        return -1;
+    }
+    if (length == 0) {
+        DEBUGMSGTL(("smux",
+                    "[smux_process] peer on fd %" NETSNMP_FMT_SKT " died or disconnected\n",
+                    sock));
+        smux_peer_cleanup(sock);
+        return -1;
     }
 
     /*
@@ -768,10 +806,12 @@ smux_process(NETSNMP_SOCKET sock)
      */
     packet_len = length;
     ptr = asn_parse_header(data, &packet_len, &type);
-    if (ptr == NULL)
+    if (ptr == NULL) {
+        smux_peer_cleanup(sock);
         return -1;
+    }
     packet_len += (ptr - data);
-    if (length > packet_len) {
+    if ((size_t)length > packet_len) {
         /*
          * set length to receive only the first packet 
          */
@@ -779,18 +819,16 @@ smux_process(NETSNMP_SOCKET sock)
     }
 
     tmp_length = length;
-    do
-    {
+    do {
        length = tmp_length;
        length = recvfrom(sock, (char *) data, length, 0, NULL, NULL);
-    }
-    while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+    } while (length == -1 && errno == EINTR);
 
     if (length <= 0) {
-        /*
-         * the peer went away, close this descriptor 
-         * * and delete it from the list
-         */
+        if (length < 0 &&
+            (errno == EAGAIN ||
+             (EAGAIN != EWOULDBLOCK && errno == EWOULDBLOCK)))
+            return 0;
         DEBUGMSGTL(("smux",
                     "[smux_process] peer on fd %" NETSNMP_FMT_SKT " died or timed out\n",
                     sock));
@@ -1919,11 +1957,6 @@ smux_peer_cleanup(NETSNMP_SOCKET sd)
     }
 
     /*
-     * decrement the peer count 
-     */
-    npeers--;
-
-    /*
      * make his auth available again 
      */
     for (i = 0; i < nauths; i++) {
@@ -1933,6 +1966,8 @@ smux_peer_cleanup(NETSNMP_SOCKET sd)
             snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid,
                           Auths[i]->sa_oid_len);
             DEBUGMSGTL(("smux", "peer disconnected: %s\n", oid_name));
+            if (npeers > 0)
+                npeers--;
         }
     }
 }
