@@ -26,8 +26,7 @@
 #define COLUMN_NOT_BEFORE    6
 #define COLUMN_NOT_AFTER     7
 #define COLUMN_SIGNATURE     8
-#define COLUMN_TRUST_STATUS  9
-#define COLUMN_SOURCE       10
+#define COLUMN_SOURCE        9
 
 struct trusted_cert_entry {
     struct trusted_cert_entry *next;
@@ -316,9 +315,6 @@ trusted_cert_handler(netsnmp_mib_handler *handler,
         case COLUMN_NOT_BEFORE: value = entry->not_before; break;
         case COLUMN_NOT_AFTER: value = entry->not_after; break;
         case COLUMN_SIGNATURE: value = entry->signature; break;
-        case COLUMN_TRUST_STATUS:
-            snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER, 1);
-            continue;
         case COLUMN_SOURCE: value = entry->source; break;
         default:
             netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
