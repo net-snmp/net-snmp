@@ -1,5 +1,5 @@
 /*
- * Read-only access to the Linux system certificate trust store.
+ * Read-only access to OpenSSL trust locations on Linux.
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
