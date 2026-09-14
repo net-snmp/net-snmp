@@ -33,4 +33,4 @@ jobs:
         run: make -j2
 
       - name: Test
-        run: make check
+        run: sudo -E ci/test.sh
