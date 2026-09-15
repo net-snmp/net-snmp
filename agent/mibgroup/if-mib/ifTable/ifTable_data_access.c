@@ -468,8 +468,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
         /*
          * Check for changes, then update
          */
-        if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
-            && (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
+        if (rowreq_ctx->data.ifOperStatus != ifentry->oper_status)
             oper_changed = 1;
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry,
                                             ifentry);
@@ -482,10 +481,20 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
     }
 
     /*
-     * if ifOperStatus changed, update ifLastChange
+     * if the backend does not provide ifLastChange, update or restore it
+     */
+    if (NULL == ifentry ||
+        !(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE)) {
+        if (oper_changed)
+            rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+        else
+            rowreq_ctx->data.ifLastChange = lastchanged;
+    }
+
+    /*
+     * if ifOperStatus changed, send linkUpDown notifications if enabled
      */
     if (oper_changed) {
-        rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         if (rowreq_ctx->data.ifLinkUpDownTrapEnable == 1) {
             if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_UP) {
@@ -503,8 +512,6 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
             }
         }
 #endif
-    } else {
-        rowreq_ctx->data.ifLastChange = lastchanged;
     }
 }
 
