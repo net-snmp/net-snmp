@@ -542,6 +542,7 @@ sc_get_proper_priv_length_bytype(int privtype)
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_PROVIDER_H)
 static OSSL_PROVIDER *legacy_provider;
 static OSSL_PROVIDER *default_provider;
+static int sc_initialized;
 
 static int
 sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
@@ -554,6 +555,7 @@ sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
         OSSL_PROVIDER_unload(default_provider);
         default_provider = NULL;
     }
+    sc_initialized = 0;
     return SNMPERR_SUCCESS;
 }
 #endif
@@ -571,13 +573,18 @@ sc_init(void)
 
 #if defined(NETSNMP_USE_OPENSSL)
 #if defined(HAVE_OPENSSL_PROVIDER_H)
-    if (legacy_provider == NULL)
+    if (!sc_initialized) {
+        sc_initialized = 1;
         legacy_provider = OSSL_PROVIDER_load(NULL, "legacy");
-    if (default_provider == NULL)
+        if (legacy_provider == NULL)
+            snmp_log(LOG_WARNING, "Failed to load OpenSSL legacy provider\n");
         default_provider = OSSL_PROVIDER_load(NULL, "default");
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                           SNMP_CALLBACK_SHUTDOWN,
-                           sc_shutdown, NULL);
+        if (default_provider == NULL)
+            snmp_log(LOG_WARNING, "Failed to load OpenSSL default provider\n");
+        snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                               SNMP_CALLBACK_SHUTDOWN,
+                               sc_shutdown, NULL);
+    }
 #endif
 #else /* !NETSNMP_USE_OPENSSL */
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
