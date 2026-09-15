@@ -27981,7 +27981,7 @@ new_with_out_mib_modules=`echo $with_out_mib_modules | $SED 's/,/ /g;'`
 new_module_list="$new_with_mib_modules"
 
 case "x$PARTIALTARGETOS" in
-    Linux)
+    xlinux*)
 	if test "x$ac_cv_header_netlink_route_addr_h" != xyes; then
 new_with_out_mib_modules="$new_with_out_mib_modules
 etherlike-mib
@@ -28074,6 +28074,9 @@ tunnel/tunnel
 	fi
 	;;
 esac
+
+# Convert from newline-separated into space-separated.
+new_with_out_mib_modules=`echo $new_with_out_mib_modules`
 
 if test "x$enable_agent" != "xno" ; then
   # If the agent should be built then use default_modules
