@@ -86,6 +86,10 @@ static void
 system_parse_config_string2(const char *token, char *cptr,
                             char* value, size_t size)
 {
+    netsnmp_assert(token);
+    netsnmp_assert(cptr);
+    netsnmp_assert(value);
+
     if (strlen(cptr) < size) {
         strcpy(value, cptr);
     } else {
@@ -99,6 +103,12 @@ system_parse_config_string(const char *token, char *cptr,
                            const char *name, char* value, size_t size,
                            int* guard)
 {
+    netsnmp_assert(token);
+    netsnmp_assert(cptr);
+    netsnmp_assert(name);
+    netsnmp_assert(value);
+    netsnmp_assert(guard);
+
     if (*token == 'p') {
         if (*guard < 0) {
             /*
