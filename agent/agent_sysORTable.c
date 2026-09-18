@@ -22,6 +22,7 @@ typedef struct data_node_s {
 }* data_node;
 
 static data_node table = NULL;
+static data_node table_tail = NULL;
 
 static void
 erase(data_node entry)
@@ -32,28 +33,27 @@ erase(data_node entry)
                         &entry->data);
     free(entry->data.OR_oid);
     free(entry->data.OR_descr);
-    if (entry->next == entry)
-        table = NULL;
-    else {
-        entry->next->prev = entry->prev;
+    if (entry->prev)
         entry->prev->next = entry->next;
-        if (entry == table)
-            table = entry->next;
-    }
+    else
+        table = entry->next;
+    if (entry->next)
+        entry->next->prev = entry->prev;
+    else
+        table_tail = entry->prev;
     free(entry);
 }
 
 void
 netsnmp_sysORTable_foreach(void (*f)(const struct sysORTable*, void*), void* c)
 {
+    data_node run = table;
+
     DEBUGMSGTL(("agent/sysORTable", "foreach(%p, %p)\n", f, c));
-    if(table) {
-        data_node run = table;
-        do {
-            data_node tmp = run;
-            run = run->next;
-            f(&tmp->data, c);
-        } while(table && run != table);
+    while (run) {
+        data_node next = run->next;
+        f(&run->data, c);
+        run = next;
     }
 }
 
@@ -93,13 +93,13 @@ register_sysORTable_sess(oid * oidin,
     entry->data.OR_oidlen = oidlen;
     entry->data.OR_sess = ss;
 
-    if(table) {
-        entry->next = table;
-        entry->prev = table->prev;
-        table->prev->next = entry;
-        table->prev = entry;
-    } else
-        table = entry->next = entry->prev = entry;
+    if (table == NULL) {
+        table = table_tail = entry;
+    } else {
+        table_tail->next = entry;
+        entry->prev = table_tail;
+        table_tail = entry;
+    }
 
     entry->data.OR_uptime = netsnmp_get_agent_uptime();
 
@@ -119,24 +119,22 @@ int
 unregister_sysORTable_sess(oid * oidin,
                            size_t oidlen, netsnmp_session * ss)
 {
+    data_node run = table;
     int any_unregistered = 0;
 
     DEBUGMSGTL(("agent/sysORTable", "sysORTable unregistering: "));
     DEBUGMSGOID(("agent/sysORTable", oidin, oidlen));
     DEBUGMSG(("agent/sysORTable", ", session %p\n", ss));
 
-    if(table) {
-        data_node run = table;
-        do {
-            data_node tmp = run;
-            run = run->next;
-            if (tmp->data.OR_sess == ss &&
-                snmp_oid_compare(oidin, oidlen,
-                                 tmp->data.OR_oid, tmp->data.OR_oidlen) == 0) {
-                erase(tmp);
-                any_unregistered = 1;
-            }
-        } while(table && run != table);
+    while (run) {
+        data_node next = run->next;
+        if (run->data.OR_sess == ss &&
+            snmp_oid_compare(oidin, oidlen,
+                             run->data.OR_oid, run->data.OR_oidlen) == 0) {
+            erase(run);
+            any_unregistered = 1;
+        }
+        run = next;
     }
 
     if (any_unregistered) {
@@ -159,20 +157,21 @@ unregister_sysORTable(oid * oidin, size_t oidlen)
 void
 unregister_sysORTable_by_session(netsnmp_session * ss)
 {
+    data_node run = table;
+
     DEBUGMSGTL(("agent/sysORTable",
                 "sysORTable unregistering session %p\n", ss));
 
-   if(table) {
-        data_node run = table;
-        do {
-            data_node tmp = run;
-            run = run->next;
-            if (((ss->flags & SNMP_FLAGS_SUBSESSION) &&
-                 tmp->data.OR_sess == ss) ||
-                (!(ss->flags & SNMP_FLAGS_SUBSESSION) && tmp->data.OR_sess &&
-                 tmp->data.OR_sess->subsession == ss))
-                erase(tmp);
-        } while(table && run != table);
+    if (!ss)
+        return;
+
+    while (run) {
+        data_node next = run->next;
+        if (run->data.OR_sess == ss ||
+            (!(ss->flags & SNMP_FLAGS_SUBSESSION) && run->data.OR_sess &&
+             run->data.OR_sess->subsession == ss))
+            erase(run);
+        run = next;
     }
 
     DEBUGMSGTL(("agent/sysORTable",
