@@ -61,6 +61,8 @@
 #include <net-snmp/library/read_config.h>
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmptsm.h>
+#include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmpIPv6BaseDomain.h>
 
 netsnmp_feature_require(transport_cache);
 netsnmp_feature_require(user_information);
