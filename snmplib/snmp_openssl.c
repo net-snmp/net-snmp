@@ -753,17 +753,42 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     
     CONTAINER_INSERT(chain_map, cert_map);
 
-    /** check for a chain to a CA */
-    ochain = SSL_get_peer_cert_chain(ssl);
-    sk_num_res = sk_X509_num(ochain);
-    if (!ochain || sk_num_res == 0) {
-        DEBUGMSGT(("ssl:cert:chain", "peer has no cert chain\n"));
+    /*
+     * Check for a chain to a CA.
+     *
+     * The snmpTlstmCertToTSNTable DESCRIPTION only treats a row as a match
+     * for a certificate other than the presented one when that row identifies
+     * a locally held copy of a trusted CA certificate that was used to
+     * validate the path to the presented certificate. Walk the chain that was
+     * verified during the handshake rather than the list of certificates the
+     * peer supplied, and skip any entry that is not a CA certificate in the
+     * local store.
+     *
+     * verify_callback() accepts a locally known peer even when the issuer
+     * could not be checked, and the chain reported for such a session is not
+     * a validated path, so only consult it when verification itself
+     * succeeded.
+     */
+#ifdef HAVE_SSL_GET0_VERIFIED_CHAIN
+    if (X509_V_OK == SSL_get_verify_result(ssl))
+        ochain = SSL_get0_verified_chain(ssl);
+    else {
+        DEBUGMSGT(("ssl:cert:chain",
+                   "peer certificate was not verified; using it alone\n"));
+        ochain = NULL;
+    }
+#else
+    ochain = NULL;
+#endif
+    sk_num_res = ochain ? sk_X509_num(ochain) : 0;
+    if (sk_num_res <= 0) {
+        DEBUGMSGT(("ssl:cert:chain", "peer has no verified cert chain\n"));
     }
     else {
         /*
          * loop over chain, adding fingerprint / cert for each
          */
-        DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
+        DEBUGMSGT(("ssl:cert:chain", "examining verified cert chain\n"));
         for(i = 0; i < sk_num_res; ++i) {
             ocert_tmp = sk_X509_value(ochain, i);
             if (ocert_tmp == ocert || X509_cmp(ocert_tmp, ocert) == 0)
@@ -771,6 +796,14 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp, NS_HASH_SHA1);
             if (NULL == fingerprint)
                 break;
+            if (NULL == netsnmp_cert_find(NS_CERT_CA, NS_CERTKEY_FINGERPRINT,
+                                          fingerprint)) {
+                DEBUGMSGT(("ssl:cert:chain",
+                           "ignoring chain cert %s; not a local CA\n",
+                           fingerprint));
+                free(fingerprint);
+                continue;
+            }
             cert_map = netsnmp_cert_map_alloc(NULL, ocert_tmp);
             if (NULL == cert_map) {
                 free(fingerprint);
@@ -786,7 +819,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          */
         if (i < sk_num_res)
             CONTAINER_FREE_ALL(chain_map, NULL);
-    } /* got peer chain */
+    } /* got verified chain */
 
     DEBUGMSGT(("ssl:cert:chain", "found %" NETSNMP_PRIz "u certs in chain\n",
                CONTAINER_SIZE(chain_map)));
