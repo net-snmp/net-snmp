@@ -30,7 +30,29 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_parse_args.h>
+#include <libgen.h>
+#include <limits.h>
 #include "ada_fuzz_header.h"
+
+int
+LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    char path[PATH_MAX];
+    char mibdirs[PATH_MAX];
+    char *dir;
+
+    if (getenv("NETSNMP_DEBUGGING") != NULL) {
+        snmp_enable_stderrlog();
+        snmp_set_do_debugging(1);
+        debug_register_tokens("");
+    }
+    strlcpy(path, (*argv)[0], sizeof(path));
+    dir = dirname(path);
+    snprintf(mibdirs, sizeof(mibdirs), "%s/../../mibs", dir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS,
+                          mibdirs);
+    return 0;
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)

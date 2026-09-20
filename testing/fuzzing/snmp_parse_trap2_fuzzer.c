@@ -30,6 +30,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <libgen.h>
+#include <limits.h>
 #include "../../apps/snmptrapd_handlers.h"
 #include "ada_fuzz_header.h"
 
@@ -52,12 +54,21 @@ static netsnmp_session *add_session(netsnmp_transport *t)
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
+    char path[PATH_MAX];
+    char mibdirs[PATH_MAX];
+    char *dir;
+
     if (getenv("NETSNMP_DEBUGGING") != NULL) {
         snmp_enable_stderrlog();
         snmp_set_do_debugging(1);
         debug_register_tokens("sess_process_packet");
     }
 
+    strlcpy(path, (*argv)[0], sizeof(path));
+    dir = dirname(path);
+    snprintf(mibdirs, sizeof(mibdirs), "%s/../../mibs", dir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS,
+                          mibdirs);
     return 0;
 }
 
@@ -72,7 +83,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (pkt_len == 0)
         goto cleanup;
 
-    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, "mibs");
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
                            NETSNMP_DS_LIB_DONT_PERSIST_STATE, 1);
     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR,

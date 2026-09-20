@@ -34,6 +34,8 @@
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/snmptsm.h>
 #include <net-snmp/library/vacm.h>
+#include <libgen.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -41,12 +43,21 @@
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
+    char path[PATH_MAX];
+    char mibdirs[PATH_MAX];
+    char *dir;
+
     if (getenv("NETSNMP_DEBUGGING") != NULL) {
         snmp_enable_stderrlog();
         snmp_set_do_debugging(1);
         debug_register_tokens("");
     }
 
+    strlcpy(path, (*argv)[0], sizeof(path));
+    dir = dirname(path);
+    snprintf(mibdirs, sizeof(mibdirs), "%s/../../mibs", dir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS,
+                          mibdirs);
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
                            NETSNMP_DS_LIB_DONT_PERSIST_STATE, 1);
     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
