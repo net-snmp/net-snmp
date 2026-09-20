@@ -5095,13 +5095,9 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
         return NULL;
     }
 
-    if (tmp_buf_len) {
-        pdu->contextName = netsnmp_memdup(tmp_buf, tmp_buf_len);
-        pdu->contextNameLen = tmp_buf_len;
-    } else {
-        pdu->contextName = strdup("");
-        pdu->contextNameLen = 0;
-    }
+    SNMP_FREE(pdu->contextName);
+    pdu->contextName = netsnmp_memdup_nt(tmp_buf, tmp_buf_len,
+                                         &pdu->contextNameLen);
     if (pdu->contextName == NULL) {
         ERROR_MSG("error copying contextName from scopedPdu");
         return NULL;
