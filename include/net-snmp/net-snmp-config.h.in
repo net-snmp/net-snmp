@@ -1001,6 +1001,9 @@
 /* Define to 1 if you have the `SSL_CTX_set_cookie_generate_cb' function. */
 #undef HAVE_SSL_CTX_SET_COOKIE_GENERATE_CB
 
+/* Define to 1 if you have the `SSL_get0_verified_chain' function. */
+#undef HAVE_SSL_GET0_VERIFIED_CHAIN
+
 /* Define to 1 if you have the `SSL_get1_peer_certificate' function. */
 #undef HAVE_SSL_GET1_PEER_CERTIFICATE
 

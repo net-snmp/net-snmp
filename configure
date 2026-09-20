@@ -30844,6 +30844,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 	    OPENSSL_sk_value			\
 	    OpenSSL_add_all_algorithms		\
 	    SSL_CTX_set_cookie_generate_cb	\
+	    SSL_get0_verified_chain		\
 	    SSL_get1_peer_certificate		\
 	    SSL_library_init			\
 	    SSL_load_error_strings		\
