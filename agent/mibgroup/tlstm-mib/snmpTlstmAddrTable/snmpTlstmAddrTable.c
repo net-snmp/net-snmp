@@ -1410,8 +1410,8 @@ _tlstmAddrTable_save_rows(int majorID, int minorID, void *serverarg,
                 continue;
             _save_addrs(addr, type);
         }
+        ITERATOR_RELEASE(addrs_itr);
     }
-    ITERATOR_RELEASE(addrs_itr);
 
     /*
      * save inactive rows from mib
