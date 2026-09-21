@@ -80,8 +80,12 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, const void *data, int len)
 
     if (data != NULL)
         to = (const struct sockaddr_un *) data;
-    else if (t != NULL && t->data != NULL)
-        to = &(((const sockaddr_un_pair *) t->data)->server);
+    else if (t != NULL && t->data != NULL) {
+        const sockaddr_un_pair *sup = (const sockaddr_un_pair *) t->data;
+
+        /* Accepted connections only have the peer address. */
+        to = sup->server.sun_path[0] != 0 ? &sup->server : &sup->client;
+    }
     if (to == NULL) {
         /*
          * "Local IPC" is the Posix.1g term for Unix domain protocols,
@@ -201,19 +205,16 @@ netsnmp_unix_close(netsnmp_transport *t)
         rc = closesocket(t->sock);
 #endif
         t->sock = NETSNMP_INVALID_SOCKET;
-        if (sup != NULL) {
-            if (sup->local) {
-                if (sup->server.sun_path[0] != 0) {
-                  DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
-                              sup->server.sun_path));
-                  unlink(sup->server.sun_path);
-                }
-            } else {
-                if (sup->client.sun_path[0] != 0) {
-                  DEBUGMSGTL(("netsnmp_unix", "close: client unlink(\"%s\")\n",
-                              sup->client.sun_path));
-                  unlink(sup->client.sun_path);
-                }
+        /*
+         * Only remove the socket path this transport created itself.  The
+         * peer address of an accepted connection is owned by the peer and
+         * must never be unlinked here.
+         */
+        if (sup != NULL && sup->local) {
+            if (sup->server.sun_path[0] != 0) {
+                DEBUGMSGTL(("netsnmp_unix", "close: server unlink(\"%s\")\n",
+                            sup->server.sun_path));
+                unlink(sup->server.sun_path);
             }
         }
         return rc;
@@ -225,29 +226,31 @@ netsnmp_unix_close(netsnmp_transport *t)
 static NETSNMP_SOCKET
 netsnmp_unix_accept(netsnmp_transport *t)
 {
-    struct sockaddr *farend = NULL;
+    sockaddr_un_pair *sup = NULL;
+    struct sockaddr_un farend;
     NETSNMP_SOCKET  newsock = NETSNMP_INVALID_SOCKET;
-    socklen_t       farendlen = sizeof(struct sockaddr_un);
+    socklen_t       farendlen = sizeof(farend);
 
-    farend = (struct sockaddr *) malloc(farendlen);
+    sup = (sockaddr_un_pair *) malloc(sizeof(*sup));
 
-    if (farend == NULL) {
+    if (sup == NULL) {
         /*
          * Indicate that the acceptance of this socket failed.
          */
         DEBUGMSGTL(("netsnmp_unix", "accept: malloc failed\n"));
         return NETSNMP_INVALID_SOCKET;
     }
-    memset(farend, 0, farendlen);
+    memset(sup, 0, sizeof(*sup));
+    memset(&farend, 0, sizeof(farend));
 
     if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
-        newsock = accept(t->sock, farend, &farendlen);
+        newsock = accept(t->sock, (struct sockaddr *) &farend, &farendlen);
 
         if (!NETSNMP_IS_VALID_SOCKET(newsock)) {
             DEBUGMSGTL(("netsnmp_unix",
                         "accept failed errno %d \"%s\"\n",
                         errno, strerror(errno)));
-            free(farend);
+            free(sup);
             return newsock;
         }
 
@@ -255,15 +258,24 @@ netsnmp_unix_accept(netsnmp_transport *t)
             free(t->data);
         }
 
+        /*
+         * The peer address is stored as the client end of the pair, so that
+         * netsnmp_unix_close() does not mistake it for a path of our own.
+         */
+        if (farendlen > sizeof(farend))
+            farendlen = sizeof(farend);
+        memcpy(&sup->client, &farend, farendlen);
+        sup->local = 0;
+
         DEBUGMSGTL(("netsnmp_unix", "accept succeeded (farend %p len %d)\n",
-                    farend, (int) farendlen));
-        t->data = farend;
-        t->data_length = sizeof(struct sockaddr_un);
+                    (void *) &sup->client, (int) farendlen));
+        t->data = sup;
+        t->data_length = sizeof(*sup);
        netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
        netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
         return newsock;
     } else {
-        free(farend);
+        free(sup);
         return NETSNMP_INVALID_SOCKET;
     }
 }
