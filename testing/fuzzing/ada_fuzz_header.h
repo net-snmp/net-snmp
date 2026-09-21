@@ -115,11 +115,12 @@ short af_get_short(const uint8_t **data, size_t *size) {
 }
 
 int af_get_int(const uint8_t **data, size_t *size) {
-  if (*size <= 4) return 0;
-  const uint8_t *ptr = *data;
-  int val = *((const int*)ptr);
-  *data += 4;
-  *size -= 4;
+  int val;
+
+  if (*size < sizeof(val)) return 0;
+  memcpy(&val, *data, sizeof(val));
+  *data += sizeof(val);
+  *size -= sizeof(val);
   return val;
 }
 // end simple garbage collector.
