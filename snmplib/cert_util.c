@@ -2971,7 +2971,7 @@ netsnmp_cert_map *
 netsnmp_certToTSN_parse_common(char **line)
 {
     netsnmp_cert_map *map;
-    char             *tmp, buf[SNMP_MAXBUF_SMALL];
+    char             *tmp, buf[SNMP_MAXBUF];
     size_t            len;
     netsnmp_cert     *tmpcert;
 
@@ -3057,6 +3057,7 @@ netsnmp_certToTSN_parse_common(char **line)
         len = sizeof(buf);
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+        tmp[len] = 0;
         map->data = strdup(buf);
         if (map->data)
             map->mapType = TSNM_tlstmCertSpecified;
@@ -3312,8 +3313,15 @@ netsnmp_tlstmParams_restore_common(char **line)
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     /** xxx-rks: validate snmpadminstring? */
-    if (len)
-        stp->name = strdup(buf);
+    if ((0 == len) || (NULL == *line)) {
+        netsnmp_tlstmParams_free(stp);
+        return NULL;
+    }
+    stp->name = strdup(buf);
+    if (NULL == stp->name) {
+        netsnmp_tlstmParams_free(stp);
+        return NULL;
+    }
 
     /** fingerprint hash type*/
     len = sizeof(buf);

@@ -45,10 +45,10 @@ typedef struct certToTSN_undo_s {
     /*
      * undo Column space 
      */
-    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE];
+    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE + 1];
     size_t          fingerprint_len;
     int             mapType;
-    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE];
+    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE + 1];
     size_t          data_len;
     u_char          hashType;
     char            storageType;
@@ -67,10 +67,10 @@ typedef struct certToTSN_entry_s {
     /*
      * Column values 
      */
-    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE];
+    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE + 1];
     size_t          fingerprint_len;
     int             mapType;
-    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE];
+    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE + 1];
     size_t          data_len;
     char            storageType;
     char            rowStatus;
@@ -408,7 +408,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
-                     sizeof(entry->fingerprint));
+                     SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE);
                 /** check len/algorithm MIB requirements */
                 if (ret == SNMP_ERR_NOERROR)
                     ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
@@ -426,7 +426,8 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_MAPTYPE */
             case COL_SNMPTLSTMCERTTOTSN_DATA:
                 ret = netsnmp_check_vb_type_and_max_size
-                    (request->requestvb, ASN_OCTET_STR, sizeof(entry->data));
+                    (request->requestvb, ASN_OCTET_STR,
+                     SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE);
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
             case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
@@ -922,19 +923,19 @@ _entry_from_map(netsnmp_cert_map  *map)
     entry->map_flags = map->flags;
 
     entry->fingerprint_len = strlen(map->fingerprint);
-    if (entry->fingerprint_len > sizeof(entry->fingerprint))
+    if (entry->fingerprint_len >= sizeof(entry->fingerprint))
         entry->fingerprint_len = sizeof(entry->fingerprint) - 1;
     memcpy(entry->fingerprint, map->fingerprint, entry->fingerprint_len);
-    entry->fingerprint[sizeof(entry->fingerprint) - 1] = 0;
+    entry->fingerprint[entry->fingerprint_len] = 0;
     entry->hashType = map->hashType;
     
     if (map->data) {
         entry->data_len = strlen(map->data);
         if (entry->data_len) {
-            if (entry->data_len > sizeof(entry->data))
+            if (entry->data_len >= sizeof(entry->data))
                 entry->data_len = sizeof(entry->data) - 1;
             memcpy(entry->data, map->data, entry->data_len);
-            entry->data[sizeof(entry->data) - 1] = 0;
+            entry->data[entry->data_len] = 0;
         }
     }
     entry->mapType = map->mapType;
@@ -1044,7 +1045,7 @@ _parse_mib_maps(const char *token, char *line)
     certToTSN_entry   *entry;
     netsnmp_cert_map *map = netsnmp_certToTSN_parse_common(&line);
 
-    if (NULL == line) {
+    if ((NULL == map) || (NULL == line)) {
         netsnmp_config_error("incomplete line");
         netsnmp_cert_map_free(map);
         return;
@@ -1080,7 +1081,7 @@ _parse_mib_maps(const char *token, char *line)
 static int
 _save_entry(certToTSN_entry *entry, void *app_type)
 {
-    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType, *mapType, *data = NULL;
+    char line[SNMP_MAXBUF], *cptr, *hashType, *mapType, *data = NULL;
 
     if (NULL == entry)
         return SNMP_ERR_GENERR;
@@ -1114,7 +1115,7 @@ _save_entry(certToTSN_entry *entry, void *app_type)
 static int
 _save_map(netsnmp_cert_map *map, int row_status, void *app_type)
 {
-    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType, *mapType, *data = NULL;
+    char line[SNMP_MAXBUF], *cptr, *hashType, *mapType, *data = NULL;
 
     if (NULL == map)
         return SNMP_ERR_GENERR;

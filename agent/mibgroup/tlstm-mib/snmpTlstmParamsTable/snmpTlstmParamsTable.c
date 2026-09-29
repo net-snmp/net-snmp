@@ -48,7 +48,7 @@ netsnmp_feature_require(table_tdata_insert_row);
     signed char  is_consistent;
     netsnmp_request_info *req[SNMPTLSTMPARAMSTABLE_MAX_COLUMN + 1];
     /* undo Column space */
-    char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE];
+    char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE + 1];
     size_t snmpTlstmParamsClientFingerprint_len;
     char snmpTlstmParamsStorageType;
     char snmpTlstmParamsRowStatus;
@@ -59,11 +59,11 @@ netsnmp_feature_require(table_tdata_insert_row);
      */
 typedef struct snmpTlstmParamsTable_entry_s {
     /* Index values */
-    char snmpTargetParamsName[SNMPTARGETPARAMSNAME_MAX_SIZE];
+    char snmpTargetParamsName[SNMPTARGETPARAMSNAME_MAX_SIZE + 1];
     size_t snmpTargetParamsName_len;
 
     /* Column values */
-    char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE];
+    char snmpTlstmParamsClientFingerprint[SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE + 1];
     size_t snmpTlstmParamsClientFingerprint_len;
     char snmpTlstmParamsStorageType;
     char snmpTlstmParamsRowStatus;
@@ -277,8 +277,9 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
     snmpTlstmParamsTable_entry *entry;
     netsnmp_tdata_row *row;
 
-    if ((NULL == snmpTargetParamsName) || (snmpTargetParamsName_len >
-                                           sizeof(entry->snmpTargetParamsName)))
+    if ((NULL == snmpTargetParamsName) ||
+        (snmpTargetParamsName_len == 0) ||
+        (snmpTargetParamsName_len >= sizeof(entry->snmpTargetParamsName)))
         return NULL;
 
     entry = SNMP_MALLOC_TYPEDEF(snmpTlstmParamsTable_entry);
@@ -296,11 +297,10 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
                entry, row));
 
     DEBUGIF("snmpTlstmParamTable:entry:create") {
-        char name[sizeof(entry->snmpTargetParamsName)+1];
-        snprintf(name, sizeof(name), "%s", snmpTargetParamsName);
         DEBUGMSGT(("tlstmParamsTable:entry:create",
-                   "entry %s %p / row %p\n",
-                   name, entry, row));
+                   "entry %.*s %p / row %p\n",
+                   (int)snmpTargetParamsName_len, snmpTargetParamsName,
+                   entry, row));
     }
 
     /*
@@ -308,6 +308,7 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
      */
     memcpy(entry->snmpTargetParamsName, snmpTargetParamsName,
            snmpTargetParamsName_len);
+    entry->snmpTargetParamsName[snmpTargetParamsName_len] = '\0';
     entry->snmpTargetParamsName_len = snmpTargetParamsName_len;
     netsnmp_tdata_row_add_index( row, ASN_PRIV_IMPLIED_OCTET_STR,
                                  entry->snmpTargetParamsName,
@@ -321,7 +322,10 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
     if (table_data) {
         DEBUGMSGTL(("tlstmParamsTable:row:insert", "row %p\n",
                     row));
-        netsnmp_tdata_add_row( table_data, row );
+        if (netsnmp_tdata_add_row(table_data, row) != SNMPERR_SUCCESS) {
+            snmpTlstmParamsTable_removeEntry(NULL, row);
+            return NULL;
+        }
     }
     return row;
 }
@@ -482,13 +486,14 @@ _entry_from_params(snmpTlstmParams  *params)
     if (params->fingerprint) {
         entry->snmpTlstmParamsClientFingerprint_len = 
             strlen(params->fingerprint);
-        if (entry->snmpTlstmParamsClientFingerprint_len >
+        if (entry->snmpTlstmParamsClientFingerprint_len >=
             sizeof(entry->snmpTlstmParamsClientFingerprint))
             entry->snmpTlstmParamsClientFingerprint_len =
                 sizeof(entry->snmpTlstmParamsClientFingerprint) - 1;
         memcpy(entry->snmpTlstmParamsClientFingerprint, params->fingerprint,
                entry->snmpTlstmParamsClientFingerprint_len);
-        entry->snmpTlstmParamsClientFingerprint[sizeof(entry->snmpTlstmParamsClientFingerprint) - 1] = 0;
+        entry->snmpTlstmParamsClientFingerprint[
+            entry->snmpTlstmParamsClientFingerprint_len] = 0;
     }
     entry->hashType = params->hashType;
     entry->params_flags = params->flags;
@@ -682,7 +687,8 @@ snmpTlstmParamsTable_handler(
             switch (table_info->colnum) {
             case COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT:
                 ret = netsnmp_check_vb_type_and_max_size(
-                          request->requestvb, ASN_OCTET_STR, sizeof(table_entry->snmpTlstmParamsClientFingerprint));
+                          request->requestvb, ASN_OCTET_STR,
+                          SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE);
                 /** check len/algorithm MIB requirements */
                 if (SNMP_ERR_NOERROR == ret)
                     ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
@@ -1253,7 +1259,7 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
 static int
 _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
 {
-    char   line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
+    char   line[SNMP_MAXBUF], *cptr, *hashType;
 
     hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
     if (NULL == hashType) {
@@ -1272,7 +1278,7 @@ _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
     cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
     cptr = read_config_save_octet_string(cptr,
                                          (const u_char *)entry->snmpTargetParamsName,
-                                         strlen(entry->snmpTargetParamsName));
+                                         entry->snmpTargetParamsName_len);
     snprintf(cptr, line + sizeof(line) - cptr, " --%s %s %d",
              hashType, entry->snmpTlstmParamsClientFingerprint,
              entry->snmpTlstmParamsRowStatus);
@@ -1286,7 +1292,7 @@ _save_entry(snmpTlstmParamsTable_entry *entry, void *type)
 static int
 _save_params(snmpTlstmParams *params, void *app_type)
 {
-    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
+    char line[SNMP_MAXBUF], *cptr, *hashType;
 
     if (NULL == params)
         return SNMP_ERR_GENERR;
@@ -1302,7 +1308,8 @@ _save_params(snmpTlstmParams *params, void *app_type)
                                          (const u_char *)params->name,
                                          strlen(params->name));
     snprintf(cptr, line + sizeof(line) - cptr, " --%s %s %d",
-             hashType, params->fingerprint, RS_ACTIVE);
+             hashType, params->fingerprint ? params->fingerprint : "",
+             RS_ACTIVE);
 
     DEBUGMSGTL(("tlstmParamsTable:params:save", "saving params '%s'\n",
                 line));
@@ -1326,6 +1333,7 @@ _tlstmParamsTable_row_restore_mib(const char *token, char *buf)
 
     if (NULL == buf) {
         config_perror("incomplete line");
+        netsnmp_tlstmParams_free(params);
         return;
     }
     rowStatus = atoi(buf);

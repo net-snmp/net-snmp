@@ -45,9 +45,9 @@ typedef struct tlstmAddrTable_undo_s {
     /*
      * undo Column space 
      */
-    char            tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    char            tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE + 1];
     size_t          tlstmAddrServerFingerprint_len;
-    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE + 1];
     size_t          tlstmAddrServerIdentity_len;
     char            tlstmAddrStorageType;
     char            tlstmAddrRowStatus;
@@ -61,15 +61,15 @@ typedef struct tlstmAddrTable_entry_s {
     /*
      * Index values 
      */
-    char            snmpTargetAddrName[SNMPTARGETADDRNAME_MAX_SIZE];
+    char            snmpTargetAddrName[SNMPTARGETADDRNAME_MAX_SIZE + 1];
     size_t          snmpTargetAddrName_len;
 
     /*
      * Column values 
      */
-    char        tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    char        tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE + 1];
     size_t          tlstmAddrServerFingerprint_len;
-    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE + 1];
     size_t          tlstmAddrServerIdentity_len;
     char            tlstmAddrStorageType;
     char            tlstmAddrRowStatus;
@@ -296,7 +296,9 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     tlstmAddrTable_entry *entry;
     netsnmp_tdata_row *row;
 
-    if (snmpTargetAddrName_len > sizeof(entry->snmpTargetAddrName))
+    if ((NULL == snmpTargetAddrName) ||
+        (snmpTargetAddrName_len == 0) ||
+        (snmpTargetAddrName_len >= sizeof(entry->snmpTargetAddrName)))
         return NULL;
 
     entry = SNMP_MALLOC_TYPEDEF(tlstmAddrTable_entry);
@@ -311,10 +313,9 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     row->data = entry;
 
     DEBUGIF("tlstmAddrTable:entry:create") {
-        char name[sizeof(entry->snmpTargetAddrName)+1];
-        snprintf(name, sizeof(name), "%s", snmpTargetAddrName);
-        DEBUGMSGT(("tlstmAddrTable:entry:create", "entry %s %p / row %p\n",
-                   name, entry, row));
+        DEBUGMSGT(("tlstmAddrTable:entry:create", "entry %.*s %p / row %p\n",
+                   (int)snmpTargetAddrName_len, snmpTargetAddrName, entry,
+                   row));
     }
 
     /*
@@ -322,6 +323,7 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
      */
     memcpy(entry->snmpTargetAddrName, snmpTargetAddrName,
            snmpTargetAddrName_len);
+    entry->snmpTargetAddrName[snmpTargetAddrName_len] = '\0';
     entry->snmpTargetAddrName_len = snmpTargetAddrName_len;
     netsnmp_tdata_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
                                 entry->snmpTargetAddrName,
@@ -340,7 +342,10 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
 
     if (table_data) {
         DEBUGMSGTL(("tlstmAddrTable:row:insert", "row %p\n",row));
-        netsnmp_tdata_add_row(table_data, row);
+        if (netsnmp_tdata_add_row(table_data, row) != SNMPERR_SUCCESS) {
+            tlstmAddrTable_removeEntry(NULL, row);
+            return NULL;
+        }
     }
     return row;
 }
@@ -515,7 +520,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
-                     sizeof(table_entry->tlstmAddrServerFingerprint));
+                     TLSTMADDRSERVERFINGERPRINT_MAX_SIZE);
                 /** check len/algorithm MIB requirements */
                 if (ret == SNMP_ERR_NOERROR)
                     ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
@@ -523,7 +528,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
-                     sizeof(table_entry->tlstmAddrServerIdentity));
+                     TLSTMADDRSERVERIDENTITY_MAX_SIZE);
                 break;          /* case COLUMN_SNMPTLSTMADDRSERVERIDENTITY */
             case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
@@ -1139,24 +1144,25 @@ _entry_from_addr(snmpTlstmAddr  *addr)
 
     if (addr->fingerprint) {
         entry->tlstmAddrServerFingerprint_len = strlen(addr->fingerprint);
-        if (entry->tlstmAddrServerFingerprint_len >
+        if (entry->tlstmAddrServerFingerprint_len >=
             sizeof(entry->tlstmAddrServerFingerprint))
             entry->tlstmAddrServerFingerprint_len =
                 sizeof(entry->tlstmAddrServerFingerprint) - 1;
         memcpy(entry->tlstmAddrServerFingerprint, addr->fingerprint,
                entry->tlstmAddrServerFingerprint_len);
-        entry->tlstmAddrServerFingerprint[sizeof(entry->tlstmAddrServerFingerprint) - 1] = 0;
+        entry->tlstmAddrServerFingerprint[
+            entry->tlstmAddrServerFingerprint_len] = 0;
     }
 
     if (addr->identity) {
         entry->tlstmAddrServerIdentity_len = strlen(addr->identity);
-        if (entry->tlstmAddrServerIdentity_len >
+        if (entry->tlstmAddrServerIdentity_len >=
             sizeof(entry->tlstmAddrServerIdentity))
             entry->tlstmAddrServerIdentity_len =
                 sizeof(entry->tlstmAddrServerIdentity) - 1;
         memcpy(entry->tlstmAddrServerIdentity, addr->identity,
                entry->tlstmAddrServerIdentity_len);
-        entry->tlstmAddrServerIdentity[sizeof(entry->tlstmAddrServerIdentity) - 1] = 0;
+        entry->tlstmAddrServerIdentity[entry->tlstmAddrServerIdentity_len] = 0;
     }
 
     entry->hashType = addr->hashType;
@@ -1301,7 +1307,7 @@ _tlstmAddr_init_persistence(void)
 static int
 _save_entry(tlstmAddrTable_entry *entry, void *type)
 {
-    char line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
+    char line[SNMP_MAXBUF], *cptr, *hashType;
 
     hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
     if (NULL == hashType) {
@@ -1320,7 +1326,7 @@ _save_entry(tlstmAddrTable_entry *entry, void *type)
     cptr = line + snprintf(line, sizeof(line), "%s ", mib_token);
     cptr = read_config_save_octet_string(cptr,
                                          (const u_char *)entry->snmpTargetAddrName,
-                                         strlen(entry->snmpTargetAddrName));
+                                         entry->snmpTargetAddrName_len);
     cptr += snprintf(cptr, line + sizeof(line) - cptr, " --%s %s ",
                      hashType, entry->tlstmAddrServerFingerprint);
     cptr = read_config_save_octet_string(cptr,
@@ -1338,7 +1344,7 @@ _save_entry(tlstmAddrTable_entry *entry, void *type)
 static int
 _save_addrs(snmpTlstmAddr *addrs, void *app_type)
 {
-    char            line[SNMP_MAXBUF_SMALL], *cptr, *hashType;
+    char            line[SNMP_MAXBUF], *cptr, *hashType;
 
     if (NULL == addrs)
         return SNMP_ERR_GENERR;
@@ -1354,7 +1360,7 @@ _save_addrs(snmpTlstmAddr *addrs, void *app_type)
                                          (const u_char *)addrs->name,
                                          strlen(addrs->name));
     cptr += snprintf(cptr, line + sizeof(line) - cptr, " --%s %s ",
-                     hashType, addrs->fingerprint);
+                     hashType, addrs->fingerprint ? addrs->fingerprint : "");
     cptr = read_config_save_octet_string(cptr,
                                          (const u_char *)(addrs->identity ? addrs->identity : ""),
                                          addrs->identity ? strlen(addrs->identity) : 0);
