@@ -1781,34 +1781,40 @@ do_linkup(struct module *mp, struct node *np)
      * quietly move all internal references to the orphan list 
      */
     oldp = orphan_nodes;
-    do {
-        for (i = 0; i < NHASHSIZE; i++)
-            for (onp = nbuckets[i]; onp; onp = onp->next) {
-                struct node    *op = NULL;
-                int             hash = NBUCKET(name_hash(onp->label));
-                np = nbuckets[hash];
-                while (np) {
-                    if (label_compare(onp->label, np->parent)) {
-                        op = np;
-                        np = np->next;
-                    } else {
-                        if (op)
-                            op->next = np->next;
-                        else
-                            nbuckets[hash] = np->next;
-			DEBUGMSGTL(("parse-mibs", "Moving %s to orphanage", np->label));
-                        np->next = orphan_nodes;
-                        orphan_nodes = np;
-                        op = NULL;
-                        np = nbuckets[hash];
-                    }
+    for (i = 0; i < NHASHSIZE; i++) {
+        struct node    *next_onp;
+        for (onp = nbuckets[i]; onp; onp = next_onp) {
+            struct node    *op = NULL;
+            int             hash = NBUCKET(name_hash(onp->label));
+
+            next_onp = onp->next;
+            np = nbuckets[hash];
+            while (np) {
+                if (label_compare(onp->label, np->parent)) {
+                    op = np;
+                    np = np->next;
+                } else {
+                    if (np == next_onp)
+                        next_onp = np->next;
+                    if (op)
+                        op->next = np->next;
+                    else
+                        nbuckets[hash] = np->next;
+                    DEBUGMSGTL(("parse-mibs", "Moving %s to orphanage", np->label));
+                    np->next = orphan_nodes;
+                    orphan_nodes = np;
+                    np = op ? op->next : nbuckets[hash];
                 }
             }
+        }
+    }
+    do {
         newp = orphan_nodes;
         more = 0;
         for (onp = orphan_nodes; onp != oldp; onp = onp->next) {
             struct node    *op = NULL;
             int             hash = NBUCKET(name_hash(onp->label));
+
             np = nbuckets[hash];
             while (np) {
                 if (label_compare(onp->label, np->parent)) {
@@ -1821,8 +1827,7 @@ do_linkup(struct module *mp, struct node *np)
                         nbuckets[hash] = np->next;
                     np->next = orphan_nodes;
                     orphan_nodes = np;
-                    op = NULL;
-                    np = nbuckets[hash];
+                    np = op ? op->next : nbuckets[hash];
                     more = 1;
                 }
             }
@@ -1833,15 +1838,9 @@ do_linkup(struct module *mp, struct node *np)
     /*
      * complain about left over nodes 
      */
-    for (np = orphan_nodes; np && np->next; np = np->next);     /* find the end of the orphan list */
     for (i = 0; i < NHASHSIZE; i++)
         if (nbuckets[i]) {
-            if (orphan_nodes)
-                onp = np->next = nbuckets[i];
-            else
-                onp = orphan_nodes = nbuckets[i];
-            nbuckets[i] = NULL;
-            while (onp) {
+            for (onp = nbuckets[i]; onp; onp = onp->next) {
                 snmp_log(LOG_WARNING,
                          "Cannot resolve OID in %s: %s ::= { %s %ld } at line %d in %s\n",
                          (mp->name ? mp->name : "<no module>"),
@@ -1849,8 +1848,10 @@ do_linkup(struct module *mp, struct node *np)
                          (onp->parent ? onp->parent : "<no parent>"),
                          onp->subid, onp->lineno, onp->filename);
                 np = onp;
-                onp = onp->next;
             }
+            np->next = orphan_nodes;
+            orphan_nodes = nbuckets[i];
+            nbuckets[i] = NULL;
         }
     return;
 }
