@@ -4581,6 +4581,17 @@ parse(FILE * fp)
                 new_module(name, File);
                 current_module = which_module(name);
             }
+            {
+                struct module  *mp;
+
+                for (mp = module_head; mp; mp = mp->next) {
+                    if (mp->modid == current_module) {
+                        if (mp->no_imports == -1)
+                            mp->no_imports = 0;
+                        break;
+                    }
+                }
+            }
             DEBUGMSGTL(("parse-mibs", "Parsing MIB: %d %s\n",
                         current_module, name));
             while ((type = get_token(fp, token, MAXTOKEN)) != ENDOFFILE)
