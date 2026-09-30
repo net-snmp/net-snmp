@@ -364,24 +364,7 @@ STEP: 4: Release File Steps
 
   ===== Entering Step: 4 =====
 
-STEP: 4.1: code:makedepend
-
-  This step creates Makefile dependencies using the "distdepend" rule in
-  the top level Makefile.
-
-  Commands to execute:
-
-    make distdepend
-
-STEP: 4.2: code:commitdepend
-
-  This step commits the dependency changes done in the previous step.
-
-  Commands to execute:
-
-    svn commit -m "make depend" `find . -name Makefile.depend`
-
-STEP: 4.3: changelog:svn2cl
+STEP: 4.1: changelog:svn2cl
 
   We need to extract the portions of the change logs committed to the
   repository.
@@ -687,13 +670,7 @@ DOCUMENTATION:
 
         $ make checks
 
-  6) Update Makefile dependencies:
-
-        $ make distdepend
-
-     'makerelease' will commit these dependencies automatically.
-
-  7) Update the ChangeLog file with details of all (recent) changes
+  6) Update the ChangeLog file with details of all (recent) changes
      to the suite.  See MANUAL - STEP 2 later in these instructions.
      'makerelease' will commit this file automatically.
 

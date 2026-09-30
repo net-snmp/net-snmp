@@ -417,26 +417,6 @@
       <text>Certain files in the distribution are built on a
 	per-release basis.  These steps will help set up these files.</text>
       <steps>
-	<step type="system" stepname="code:makedepend" title="code:makedepend">
-          <text>This step creates Makefile dependencies using the
-          "distdepend" rule in the top level Makefile.
-
-          Note that if you have any additional MIB module code files in the
-          source tree, these will be included in the Makefile dependency list.
-          You may wish to remove these and re-run "make distdepend" before
-          committing the changes.
-          </text>
-	  <commands>
-	    <command>make distdepend</command>
-	  </commands>
-	</step>
-	<step prompt="true" type="system" stepname="code:commitdepend" title="code:commitdepend">
-          <text>This step commits the dependency changes done in the
-          previous step.</text>
-	  <commands>
-	    <command ignoreerror="1">git commit -m "make depend for {VERSION}" `find . -name Makefile.depend`</command>
-	  </commands>
-	</step>
 	<step type="system" stepname="changelog:create" title="Creating a changelog update">
           <text>We need to extract the portions of the change logs
           committed to the repository.</text>
