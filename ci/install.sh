@@ -64,7 +64,7 @@ case "$(uname)" in
 	fi
 	;;
     OpenBSD)
-	pkg_add bash gawk libssh2
+	pkg_add bash gawk git libssh2
 	;;
 esac
 
