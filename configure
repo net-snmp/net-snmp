@@ -757,8 +757,11 @@ HELPER_INCLUDES
 AGENT_INCLUDES
 SNMPLIB_INCLUDES
 TOP_INCLUDES
+DEPFLAGS_O
+DEPFLAGS_LO
 DEVFLAGS
 PERL_SYSTEM_INVOKES_POSIX_SHELL
+DEP_INCLUDE
 UNAMEPROG
 PYTHONPROG
 PSPROG
@@ -1108,6 +1111,7 @@ with_mnttab
 enable_mnttab
 with_mysql
 enable_mysql
+enable_dependency_tracking
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1833,6 +1837,8 @@ Optional Features:
   --disable-perl-cc-checks        Disable configure checks for whether Perl's
                                   C Compiler is compatible with ours when
                                   embedded Perl is enabled.
+  --disable-dependency-tracking
+                          speeds up one-time builds
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -18154,6 +18160,29 @@ MAKE=${MAKE-"make"}
 $MAKE -v -f /dev/null 2>/dev/null | $GREP GNU >/dev/null
 have_gnu_make=$?
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking how $MAKE handles silent inclusion of files" >&5
+printf %s "checking how $MAKE handles silent inclusion of files... " >&6; }
+DEP_INCLUDE="#"
+for netsnmp_inc in "-include" ".sinclude" ".-include"; do
+    cat > confmf << EOF
+$netsnmp_inc /dev/null confinc \$(DEPFILES)
+all:
+EOF
+    if $MAKE -f confmf >/dev/null 2>&1; then
+        DEP_INCLUDE="$netsnmp_inc"
+        break
+    fi
+done
+rm -f confmf
+if test "x$DEP_INCLUDE" = "x#"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: none" >&5
+printf "%s\n" "none" >&6; }
+else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $DEP_INCLUDE" >&5
+printf "%s\n" "$DEP_INCLUDE" >&6; }
+fi
+
+
 
 ##
 #   The Perl function system() is used for running the Net-SNMP regression
@@ -18292,6 +18321,61 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 else
     DEVFLAGS=""
 fi
+
+
+# Check whether --enable-dependency-tracking was given.
+if test ${enable_dependency_tracking+y}
+then :
+  enableval=$enable_dependency_tracking;
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports dependency generation flags" >&5
+printf %s "checking whether $CC supports dependency generation flags... " >&6; }
+DEPFLAGS_LO=""
+DEPFLAGS_O=""
+if test "x$enable_dependency_tracking" != "xno"; then
+    netsnmp_save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -MMD -MP -MF conftest.d -MT conftest.o"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+        if test -f conftest.d; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+            DEPFLAGS_LO="-MMD -MP -MF \$(@:.lo=.d) -MT \$@"
+            DEPFLAGS_O="-MMD -MP -MF \$(@:.o=.d) -MT \$@"
+        else
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        fi
+
+else case e in #(
+  e)
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+     ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    CFLAGS="$netsnmp_save_CFLAGS"
+    rm -f conftest.d
+else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
+printf "%s\n" "disabled" >&6; }
+fi
+
 
 
 
@@ -30823,6 +30907,7 @@ printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 
 
 
+
 	for symbol in				\
 	    AES_cfb128_encrypt			\
 	    ASN1_STRING_get0_data		\
@@ -38783,17 +38868,17 @@ export CFLAGS
 
 ac_config_files="$ac_config_files Makefile:Makefile.top:Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules:snmplib/Makefile.depend"
+ac_config_files="$ac_config_files snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules:apps/Makefile.depend"
+ac_config_files="$ac_config_files apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in:Makefile.rules:apps/snmpnetstat/Makefile.depend"
+ac_config_files="$ac_config_files apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files agent/Makefile:Makefile.top:agent/Makefile.in:Makefile.rules:agent/Makefile.depend"
+ac_config_files="$ac_config_files agent/Makefile:Makefile.top:agent/Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files agent/helpers/Makefile:Makefile.top:agent/helpers/Makefile.in:Makefile.rules:agent/helpers/Makefile.depend"
+ac_config_files="$ac_config_files agent/helpers/Makefile:Makefile.top:agent/helpers/Makefile.in:Makefile.rules"
 
-ac_config_files="$ac_config_files agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in:Makefile.rules:agent/mibgroup/Makefile.depend"
+ac_config_files="$ac_config_files agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in:Makefile.rules"
 
 ac_config_files="$ac_config_files local/Makefile:Makefile.top:local/Makefile.in:Makefile.rules"
 
@@ -39887,12 +39972,12 @@ do
     "include/net-snmp/net-snmp-config.h") CONFIG_HEADERS="$CONFIG_HEADERS include/net-snmp/net-snmp-config.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile:Makefile.top:Makefile.in:Makefile.rules" ;;
-    "snmplib/Makefile") CONFIG_FILES="$CONFIG_FILES snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules:snmplib/Makefile.depend" ;;
-    "apps/Makefile") CONFIG_FILES="$CONFIG_FILES apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules:apps/Makefile.depend" ;;
-    "apps/snmpnetstat/Makefile") CONFIG_FILES="$CONFIG_FILES apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in:Makefile.rules:apps/snmpnetstat/Makefile.depend" ;;
-    "agent/Makefile") CONFIG_FILES="$CONFIG_FILES agent/Makefile:Makefile.top:agent/Makefile.in:Makefile.rules:agent/Makefile.depend" ;;
-    "agent/helpers/Makefile") CONFIG_FILES="$CONFIG_FILES agent/helpers/Makefile:Makefile.top:agent/helpers/Makefile.in:Makefile.rules:agent/helpers/Makefile.depend" ;;
-    "agent/mibgroup/Makefile") CONFIG_FILES="$CONFIG_FILES agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in:Makefile.rules:agent/mibgroup/Makefile.depend" ;;
+    "snmplib/Makefile") CONFIG_FILES="$CONFIG_FILES snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules" ;;
+    "apps/Makefile") CONFIG_FILES="$CONFIG_FILES apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules" ;;
+    "apps/snmpnetstat/Makefile") CONFIG_FILES="$CONFIG_FILES apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in:Makefile.rules" ;;
+    "agent/Makefile") CONFIG_FILES="$CONFIG_FILES agent/Makefile:Makefile.top:agent/Makefile.in:Makefile.rules" ;;
+    "agent/helpers/Makefile") CONFIG_FILES="$CONFIG_FILES agent/helpers/Makefile:Makefile.top:agent/helpers/Makefile.in:Makefile.rules" ;;
+    "agent/mibgroup/Makefile") CONFIG_FILES="$CONFIG_FILES agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in:Makefile.rules" ;;
     "local/Makefile") CONFIG_FILES="$CONFIG_FILES local/Makefile:Makefile.top:local/Makefile.in:Makefile.rules" ;;
     "testing/Makefile") CONFIG_FILES="$CONFIG_FILES testing/Makefile:Makefile.top:testing/Makefile.in" ;;
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile:Makefile.top:man/Makefile.in:Makefile.rules" ;;

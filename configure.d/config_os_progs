@@ -66,6 +66,26 @@ MAKE=${MAKE-"make"}
 $MAKE -v -f /dev/null 2>/dev/null | $GREP GNU >/dev/null
 have_gnu_make=$?
 
+AC_MSG_CHECKING([how $MAKE handles silent inclusion of files])
+DEP_INCLUDE="#"
+for netsnmp_inc in "-include" [".sinclude"] ".-include"; do
+    cat > confmf << EOF
+$netsnmp_inc /dev/null confinc \$(DEPFILES)
+all:
+EOF
+    if $MAKE -f confmf >/dev/null 2>&1; then
+        DEP_INCLUDE="$netsnmp_inc"
+        break
+    fi
+done
+rm -f confmf
+if test "x$DEP_INCLUDE" = "x#"; then
+    AC_MSG_RESULT([none])
+else
+    AC_MSG_RESULT([$DEP_INCLUDE])
+fi
+AC_SUBST(DEP_INCLUDE)
+
 
 ##
 #   The Perl function system() is used for running the Net-SNMP regression
@@ -157,6 +177,35 @@ else
     DEVFLAGS=""
 fi
 AC_SUBST(DEVFLAGS)
+
+AC_ARG_ENABLE([dependency-tracking],
+    AS_HELP_STRING([--disable-dependency-tracking],
+        [speeds up one-time builds]))
+
+AC_MSG_CHECKING([whether $CC supports dependency generation flags])
+DEPFLAGS_LO=""
+DEPFLAGS_O=""
+if test "x$enable_dependency_tracking" != "xno"; then
+    netsnmp_save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -MMD -MP -MF conftest.d -MT conftest.o"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])], [
+        if test -f conftest.d; then
+            AC_MSG_RESULT([yes])
+            DEPFLAGS_LO="-MMD -MP -MF \$(@:.lo=.d) -MT \$@"
+            DEPFLAGS_O="-MMD -MP -MF \$(@:.o=.d) -MT \$@"
+        else
+            AC_MSG_RESULT([no])
+        fi
+    ], [
+        AC_MSG_RESULT([no])
+    ])
+    CFLAGS="$netsnmp_save_CFLAGS"
+    rm -f conftest.d
+else
+    AC_MSG_RESULT([disabled])
+fi
+AC_SUBST(DEPFLAGS_LO)
+AC_SUBST(DEPFLAGS_O)
 
 
 #   building outside source directory

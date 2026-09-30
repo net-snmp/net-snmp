@@ -380,12 +380,8 @@ tarclean:
 	fi
 
 checks:
-	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck \
+	$(MAKE) -k makefilecheck commentcheck warningcheck \
 	assertcheck perlcalloccheck
-
-dependcheck:
-	@echo "Checking for full paths in dependency files..."
-	@if grep -n -E "^/" `$(FIND) $(top_srcdir) -name Makefile.depend`; then false; fi
 
 warningcheck:
 	@echo "Checking for cpp warnings..."

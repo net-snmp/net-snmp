@@ -23,7 +23,7 @@ FEATUREFILE=../../include/net-snmp/agent/features-mibgroups.h
 # object files in the sub directory.
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
+	$(CC) @DEPFLAGS_O@ -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 @mib_module_list_o@
 @mib_module_list_lo@

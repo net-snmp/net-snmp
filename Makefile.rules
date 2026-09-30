@@ -414,6 +414,7 @@ uninstallsubdirs:
 #
 clean: cleansubdirs $(OTHERCLEANTODOS)
 	$(LIBTOOLCLEAN) ${OBJS} ${LOBJS}  ${FTOBJS} core $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
+	rm -f $(DEPFILES)
 
 cleansubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
@@ -431,64 +432,13 @@ lint:
 	lint -nhx $(CSRCS)
 
 #
-# wacky dependency building.
+# dependency building (now generated automatically during compilation)
 #
-depend: dependdirs
-	@if test -f Makefile.depend ; then \
-		makedepend `echo $(CPPFLAGS) | \
-		awk '{for(i=1;i<=NF;i++) if (match(substr($$i,1,2), "-[ID]")) print $$i}'` \
-		-o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
-	fi
+depend nosysdepend distdepend dependdirs nosysdependdirs distdependdirs:
 
-
-nosysdepend: nosysdependdirs
-	@if test -f Makefile.depend ; then \
-		makedepend `echo $(CPPFLAGS) | \
-		awk '{for(i=1;i<=NF;i++) if (match(substr($$i,1,2), "-[ID]")) print $$i}'` \
-		-o .lo $(srcdir)/*.c $(srcdir)/*/*.c ; \
-		$(PERL) -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile ; \
-	fi
-
-distdepend: nosysdepend distdependdirs
-	@if test -f Makefile.depend ; then \
-		$(PERL) $(top_srcdir)/makefileindepend.pl ; \
-	fi
-
-dependdirs:
-	@if test "$(SUBDIRS)" != ""; then \
-		it="$(SUBDIRS)" ; \
-		for i in $$it ; do \
-			echo "making depend in `pwd`/$$i"; \
-			( cd $$i ; $(MAKE) depend) ;   \
-			if test $$? != 0 ; then \
-				exit 1 ; \
-			fi  \
-		done \
-	fi
-
-nosysdependdirs:
-	@if test "$(SUBDIRS)" != ""; then \
-		it="$(SUBDIRS)" ; \
-		for i in $$it ; do \
-			echo "making nosysdepend in `pwd`/$$i"; \
-			( cd $$i ; $(MAKE) nosysdepend) ;   \
-			if test $$? != 0 ; then \
-				exit 1 ; \
-			fi  \
-		done \
-	fi
-
-distdependdirs:
-	@if test "$(SUBDIRS)" != ""; then \
-		it="$(SUBDIRS)" ; \
-		for i in $$it ; do \
-			echo "making distdepend in `pwd`/$$i"; \
-			( cd $$i ; $(MAKE) distdepend) ;   \
-			if test $$? != 0 ; then \
-				exit 1 ; \
-			fi  \
-		done \
-	fi
+# Include compiler-generated dependency files
+DEPFILES = $(LOBJS:.lo=.d) $(OBJS:.o=.d)
+@DEP_INCLUDE@ /dev/null $(DEPFILES)
 
 # These aren't real targets, let gnu's make know that.
 .PHONY: clean cleansubdirs lint \

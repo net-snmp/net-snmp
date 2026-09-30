@@ -96,8 +96,9 @@ RANLIB		= :
 
 # libtool definitions
 .SUFFIXES: .c .o .lo .rc
+DEPFLAGS	= @DEPFLAGS_LO@
 .c.lo:
-	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(DEPFLAGS) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 .rc.lo:
 	$(LIBTOOL) --mode=compile --tag=RC @RC@ -o $@ -i $<
 

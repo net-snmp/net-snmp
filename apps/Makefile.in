@@ -120,8 +120,9 @@ LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo \
 		  snmptrapd_auth.lo snmptrapd_sql.lo
 LIBTRAPD_FTS    = snmptrapd_handlers.ft snmptrapd_log.ft \
 		  snmptrapd_auth.ft snmptrapd_sql.ft
-OBJS  = *.o
-LOBJS = *.lo
+APP_LOBJS = $(INSTALLBINPROGS:$(EXEEXT)=.lo) $(INSTALLSBINPROGS:$(EXEEXT)=.lo) $(LLIBTRAPD_OBJS)
+LOBJS = $(APP_LOBJS)
+OBJS  = $(APP_LOBJS:.lo=.o)
 FTOBJS=$(LIBTRAPD_FTS) \
        snmpwalk.ft \
        snmpbulkwalk.ft \
