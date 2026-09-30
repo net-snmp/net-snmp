@@ -52,6 +52,7 @@ case "$(uname)" in
     FreeBSD)
 	pkg install -y bash
 	pkg install -y gawk
+	pkg install -y git
 	pkg install -y krb5 krb5-appl krb5-devel
 	pkg install -y libssh2
 	#pkg install -y openssl111
