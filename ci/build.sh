@@ -18,23 +18,13 @@ if ! "${scriptdir}"/net-snmp-configure "${branch_name}"; then
     cat config.log
     exit 1
 fi
-case "$MODE" in
-    mini*)
-	# Net-SNMP uses static dependencies, the Makefile.depend files have
-	# been generated for MODE=regular, net-snmp-features.h includes
-	# <net-snmp/library/features.h> in minimalist mode and that file is
-	# generated dynamically and is not in Makefile.depend. Hence disable
-	# parallel compilation for minimalist mode.
-	nproc=1;;
-    *)
-	if command -v nproc >/dev/null 2>&1; then
-	    nproc=$(nproc)
-	elif sysctl -n hw.ncpu >/dev/null 2>&1; then
-	    nproc=$(sysctl -n hw.ncpu)
-	else
-	    nproc=1
-	fi;;
-esac
+if command -v nproc >/dev/null 2>&1; then
+    nproc=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+    nproc=$(sysctl -n hw.ncpu)
+else
+    nproc=1
+fi
 make -s -j"${nproc}" || exit $?
 case "$MODE" in
     regular)
