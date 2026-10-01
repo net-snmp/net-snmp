@@ -26,7 +26,7 @@ jobs:
     - name: Install Net-SNMP build dependencies
       run: sudo bash -c "MODE=regular ci/install.sh"
     - name: Configure Net-SNMP
-      run: ci/net-snmp-configure master CFLAGS=-fPIE
+      run: MODE=regular ci/net-snmp-configure master CFLAGS="-fPIE -DNETSNMP_USE_ASSERT"
     - name: Build Net-SNMP with cov-build
       run: |
           export PATH=$(pwd)/cov-analysis-linux64/bin:$PATH
