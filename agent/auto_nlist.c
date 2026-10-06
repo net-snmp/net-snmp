@@ -120,7 +120,9 @@ auto_nlist_value(const char *string)
                         it->symbol, it->nl[0].n_value));
             return (it->nl[0].n_value);
         }
-    } else
+    } else if (it->nl[0].n_type == 0)
+        return (-1);
+    else
         return (it->nl[0].n_value);
 }
 
@@ -166,6 +168,11 @@ init_nlist(struct nlist nl[])
     if ((ret = kvm_nlist(kernel, nl)) == -1) {
         if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 				   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+            for (ret = 0; nl[ret].n_name != NULL; ret++) {
+                nl[ret].n_type = 0;
+                nl[ret].n_value = 0;
+            }
+            kvm_close(kernel);
             return;
 	} else {
             snmp_log_perror("kvm_nlist");
