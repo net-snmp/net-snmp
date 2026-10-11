@@ -28,6 +28,14 @@ OK(CONTAINER_FIND(container, "bar") == NULL,
 OK(CONTAINER_SIZE(container) == 2,
    "container has the proper size for the elements after a removal");
 
+{
+    int rc;
+
+    container->flags |= CONTAINER_KEY_ALLOW_DUPLICATES;
+    CONTAINER_CHECK_OPTION(container, CONTAINER_KEY_ALLOW_DUPLICATES, rc);
+    OK(rc != 0, "CONTAINER_CHECK_OPTION reports set option");
+}
+
 while ((p = CONTAINER_FIRST(container)))
   CONTAINER_REMOVE(container, p);
 CONTAINER_FREE(container);

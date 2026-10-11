@@ -383,7 +383,7 @@ extern "C" {
     } while(0)
 
 #define CONTAINER_CHECK_OPTION(x,o,rc)    do {                          \
-        rc = x->flags & 0;                                              \
+        rc = (x)->flags & (o);                                          \
     } while(0)
 
 
