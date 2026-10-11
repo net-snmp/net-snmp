@@ -2181,6 +2181,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 #ifndef NETSNMP_NO_WRITE_SUPPORT
   PyObject *session;
   PyObject *varlist;
+  PyObject *varlist_iter = NULL;
   PyObject *varbind = NULL;
   struct session_list *ss;
   netsnmp_pdu *pdu, *response;
@@ -2226,7 +2227,7 @@ netsnmp_set(PyObject *self, PyObject *args)
     pdu = snmp_pdu_create(SNMP_MSG_SET);
 
     if (varlist) {
-      PyObject *varlist_iter = PyObject_GetIter(varlist);
+      varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
         char* tmp_val_str = NULL;
@@ -2288,8 +2289,6 @@ netsnmp_set(PyObject *self, PyObject *args)
 	Py_DECREF(varbind);
       }
 
-      Py_DECREF(varlist_iter);
-
       if (PyErr_Occurred()) {
 	/* propagate error */
 	if (verbose)
@@ -2313,8 +2312,13 @@ netsnmp_set(PyObject *self, PyObject *args)
   }
  done:
   Py_XDECREF(varbind);
+  Py_XDECREF(varlist_iter);
   free(oid_arr);
 #endif  /* NETSNMP_NO_WRITE_SUPPORT */
+  if (PyErr_Occurred()) {
+    Py_XDECREF(ret);
+    return NULL;
+  }
   return (ret ? ret : Py_BuildValue(""));
 }
 
