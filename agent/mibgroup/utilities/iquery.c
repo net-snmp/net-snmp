@@ -214,6 +214,9 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
      */
     netsnmp_session *ss = NULL;
 
+    if (!secName)
+        return NULL;
+
     NETSNMP_RUNTIME_PROTOCOL_CHECK(version, unsupported_version);
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
