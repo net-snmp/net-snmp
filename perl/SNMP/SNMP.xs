@@ -3213,6 +3213,9 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
+                    SvREFCNT_dec(xs_cb_data->perl_cb);
+                    SvREFCNT_dec(xs_cb_data->sess_ref);
+                    free(xs_cb_data);
                     snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
@@ -3406,6 +3409,9 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
+                    SvREFCNT_dec(xs_cb_data->perl_cb);
+                    SvREFCNT_dec(xs_cb_data->sess_ref);
+                    free(xs_cb_data);
 		    snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
@@ -3649,6 +3655,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
+                    SvREFCNT_dec(xs_cb_data->perl_cb);
+                    SvREFCNT_dec(xs_cb_data->sess_ref);
+                    free(xs_cb_data);
                     snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
@@ -3893,6 +3902,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
+                    SvREFCNT_dec(xs_cb_data->perl_cb);
+                    SvREFCNT_dec(xs_cb_data->sess_ref);
+                    free(xs_cb_data);
                     snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
@@ -4763,6 +4775,9 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
                     XPUSHs(sv_2mortal(newSViv(status))); /* push the reqid?? */
                  } else {
                     snmp_free_pdu(pdu);
+                    SvREFCNT_dec(xs_cb_data->perl_cb);
+                    SvREFCNT_dec(xs_cb_data->sess_ref);
+                    free(xs_cb_data);
                     snmp_return_err(ss, *err_str_svp, *err_num_svp, *err_ind_svp);
                     XPUSHs(&sv_undef);
                  }
