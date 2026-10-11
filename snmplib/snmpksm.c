@@ -492,7 +492,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     unsigned char  *encrypted_data = NULL;
     long            zero = 0, tmp;
     int             i;
-    u_char         *cksum_pointer;
+    size_t          cksum_offset;
     krb5_cksumtype  cksumtype;
     krb5_checksum   pdu_checksum;
     u_char         **wholeMsg = parms->wholeMsg;
@@ -1009,10 +1009,17 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
      * we remember where that is, and we'll fill it in later.
      */
 
+    while ((*parms->wholeMsgLen - *offset) < CHECKSUM_LENGTH(&pdu_checksum)) {
+        if (!asn_realloc(wholeMsg, parms->wholeMsgLen)) {
+            DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
+            retval = SNMPERR_TOO_LONG;
+            goto error;
+        }
+    }
     *offset += CHECKSUM_LENGTH(&pdu_checksum);
-    memset(*wholeMsg + *parms->wholeMsgLen - *offset, 0, CHECKSUM_LENGTH(&pdu_checksum));
-
-    cksum_pointer = *wholeMsg + *parms->wholeMsgLen - *offset;
+    cksum_offset = *offset;
+    memset(*wholeMsg + *parms->wholeMsgLen - cksum_offset, 0,
+           CHECKSUM_LENGTH(&pdu_checksum));
 
     rc = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
                                          parms->wholeMsgOffset, 1,
@@ -1073,10 +1080,12 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
      * header and wrap up the whole PDU.
      */
 
-    if (*parms->wholeMsgLen < parms->globalDataLen) {
-        DEBUGMSGTL(("ksm", "Building global data failed.\n"));
-        retval = SNMPERR_TOO_LONG;
-        goto error;
+    while ((*parms->wholeMsgLen - *offset) < parms->globalDataLen) {
+        if (!asn_realloc(wholeMsg, parms->wholeMsgLen)) {
+            DEBUGMSGTL(("ksm", "Building global data failed.\n"));
+            retval = SNMPERR_TOO_LONG;
+            goto error;
+        }
     }
 
     *offset += parms->globalDataLen;
@@ -1145,11 +1154,12 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     DEBUGMSGTL(("ksm", "KSM: Checksum calculation complete.\n"));
 
-    memcpy(cksum_pointer, CHECKSUM_CONTENTS(&pdu_checksum), CHECKSUM_LENGTH(&pdu_checksum));
+    memcpy(*wholeMsg + *parms->wholeMsgLen - cksum_offset,
+           CHECKSUM_CONTENTS(&pdu_checksum), CHECKSUM_LENGTH(&pdu_checksum));
 
     DEBUGMSGTL(("ksm", "KSM: Writing checksum of %d bytes at offset %d\n",
                 (int)CHECKSUM_LENGTH(&pdu_checksum),
-		(int)(cksum_pointer - (*wholeMsg + 1))));
+		(int)(*parms->wholeMsgLen - cksum_offset - 1)));
 
     DEBUGMSGTL(("ksm", "KSM: Checksum:"));
 
