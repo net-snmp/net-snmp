@@ -1953,6 +1953,7 @@ asn_parse_unsigned_int64(u_char * data,
     static const char *errpre = "parse uint64";
     const int       uint64sizelimit = (4 * 2) + 1;
     register u_char *bufp = data;
+    u_char         *endp;
     u_long          asn_length;
     register u_long low = 0, high = 0;
 
@@ -1986,6 +1987,7 @@ asn_parse_unsigned_int64(u_char * data,
         _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
+    endp = bufp + asn_length;
 
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
@@ -2003,6 +2005,8 @@ asn_parse_unsigned_int64(u_char * data,
         (*bufp == ASN_OPAQUE_TAG1) &&
         ((*(bufp + 1) == ASN_OPAQUE_COUNTER64) ||
          (*(bufp + 1) == ASN_OPAQUE_U64))) {
+        size_t          outer_length = asn_length - 2;
+
         /*
          * change type to Counter64 or U64 
          */
@@ -2010,10 +2014,9 @@ asn_parse_unsigned_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
-        *datalength = asn_length;
-        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        bufp = asn_parse_nlength(bufp + 2, outer_length, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque uint64", *datalength - 2, asn_length);
+            _asn_short_err("parse opaque uint64", outer_length, asn_length);
             return NULL;
         }
     }
@@ -2023,11 +2026,12 @@ asn_parse_unsigned_int64(u_char * data,
         _asn_length_err(errpre, (size_t) asn_length, uint64sizelimit);
         return NULL;
     }
-    *datalength -= (int) asn_length + (bufp - data);
+    *datalength -= endp - data;
     while (asn_length--) {
         high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000U) >> 24);
         low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
+    bufp = endp;
 
     CHECK_OVERFLOW_U(high,6);
     CHECK_OVERFLOW_U(low,6);
@@ -2224,6 +2228,7 @@ asn_parse_signed_int64(u_char * data,
     const int       int64sizelimit = (4 * 2) + 1;
     char            ebuf[128];
     register u_char *bufp = data;
+    u_char         *endp;
     u_long          asn_length;
     register u_int  low = 0, high = 0;
 
@@ -2249,6 +2254,7 @@ asn_parse_signed_int64(u_char * data,
         _asn_short_err(errpre, *datalength - 1, asn_length);
         return NULL;
     }
+    endp = bufp + asn_length;
 
     /** need at least 2 bytes: ASN_OPAQUE_TAG1 and ASN_OPAQUE_I64 */
     if (asn_length < 2) {
@@ -2260,6 +2266,8 @@ asn_parse_signed_int64(u_char * data,
     if ((*type == ASN_OPAQUE) &&
         (asn_length <= ASN_OPAQUE_COUNTER64_MX_BER_LEN) &&
         (*bufp == ASN_OPAQUE_TAG1) && (*(bufp + 1) == ASN_OPAQUE_I64)) {
+        size_t          outer_length = asn_length - 2;
+
         /*
          * change type to Int64 
          */
@@ -2267,10 +2275,9 @@ asn_parse_signed_int64(u_char * data,
         /*
          * value is encoded as special format 
          */
-        *datalength = asn_length;
-        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        bufp = asn_parse_nlength(bufp + 2, outer_length, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque int64", *datalength - 2, asn_length);
+            _asn_short_err("parse opaque int64", outer_length, asn_length);
             return NULL;
         }
     }
@@ -2289,7 +2296,7 @@ asn_parse_signed_int64(u_char * data,
         _asn_length_err(errpre, (size_t) asn_length, int64sizelimit);
         return NULL;
     }
-    *datalength -= (int) asn_length + (bufp - data);
+    *datalength -= endp - data;
     if ((asn_length > 0) && (*bufp & 0x80)) {
         low = 0xFFFFFFFFU;   /* first byte bit 1 means start the data with 1s */
         high = 0xFFFFFF;
@@ -2299,6 +2306,7 @@ asn_parse_signed_int64(u_char * data,
         high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000U) >> 24);
         low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
+    bufp = endp;
 
     CHECK_OVERFLOW_U(high,8);
     CHECK_OVERFLOW_U(low,8);
@@ -2476,14 +2484,14 @@ asn_parse_float(u_char * data,
     if ((*type == ASN_OPAQUE) &&
         (asn_length == ASN_OPAQUE_FLOAT_BER_LEN) &&
         (*bufp == ASN_OPAQUE_TAG1) && (*(bufp + 1) == ASN_OPAQUE_FLOAT)) {
+        size_t          outer_length = asn_length - 2;
 
         /*
          * value is encoded as special format 
          */
-        *datalength = asn_length;
-        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        bufp = asn_parse_nlength(bufp + 2, outer_length, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque float", *datalength - 2, asn_length);
+            _asn_short_err("parse opaque float", outer_length, asn_length);
             return NULL;
         }
         /*
@@ -2666,14 +2674,14 @@ asn_parse_double(u_char * data,
     if ((*type == ASN_OPAQUE) &&
         (asn_length == ASN_OPAQUE_DOUBLE_BER_LEN) &&
         (*bufp == ASN_OPAQUE_TAG1) && (*(bufp + 1) == ASN_OPAQUE_DOUBLE)) {
+        size_t          outer_length = asn_length - 2;
 
         /*
          * value is encoded as special format 
          */
-        *datalength = asn_length;
-        bufp = asn_parse_nlength(bufp+2, *datalength - 2, &asn_length);
+        bufp = asn_parse_nlength(bufp + 2, outer_length, &asn_length);
         if (NULL == bufp) {
-            _asn_short_err("parse opaque double", *datalength - 2, asn_length);
+            _asn_short_err("parse opaque double", outer_length, asn_length);
             return NULL;
         }
 
