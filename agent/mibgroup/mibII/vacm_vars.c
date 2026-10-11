@@ -784,13 +784,14 @@ write_vacmGroupName(int action,
                 geptr->status = RS_NOTINSERVICE;
             }
         }
-    } else if (action == FREE) {
+    } else if (action == FREE || action == UNDO) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
         if ((geptr = sec2group_parse_groupEntry(name, name_len)) != NULL &&
             resetOnFail) {
             memcpy(geptr->groupName, string, VACMSTRINGLEN);
+            resetOnFail = 0;
         }
     }
     return SNMP_ERR_NOERROR;
@@ -813,7 +814,7 @@ write_vacmSecurityToGroupStorageType(int action,
     if (var_val_type != ASN_INTEGER) {
         return SNMP_ERR_WRONGTYPE;
     }
-    if (var_val_len > sizeof(long_ret)) {
+    if (var_val_len != sizeof(long_ret)) {
         return SNMP_ERR_WRONGLENGTH;
     }
     if (action == COMMIT) {
@@ -847,12 +848,14 @@ write_vacmSecurityToGroupStatus(int action,
                                 oid * name, size_t name_len)
 {
     static long     long_ret;
+    static int      row_created;
     int             model;
     char           *newName;
     size_t          nameLen;
     struct vacm_groupEntry *geptr;
 
     if (action == RESERVE1) {
+        row_created = 0;
         if (var_val_type != ASN_INTEGER) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -910,6 +913,7 @@ write_vacmSecurityToGroupStatus(int action,
                     free(newName);
                     return SNMP_ERR_GENERR;
                 }
+                row_created = 1;
 
                 /*
                  * Set defaults.  
@@ -955,6 +959,7 @@ write_vacmSecurityToGroupStatus(int action,
         }
         free(newName);
     } else if (action == COMMIT) {
+        row_created = 0;
         if (name_len <= SEC2GROUP_MIB_LENGTH ||
             sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
                                 name_len - SEC2GROUP_MIB_LENGTH,
@@ -970,22 +975,21 @@ write_vacmSecurityToGroupStatus(int action,
             }
         }
         free(newName);
-    } else if (action == UNDO) {
-        if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-            if (name_len <= SEC2GROUP_MIB_LENGTH ||
-                sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
-                                    name_len - SEC2GROUP_MIB_LENGTH,
-                                    &model, (u_char **) & newName, &nameLen)) {
-                return SNMP_ERR_INCONSISTENTNAME;
-            }
-
-            geptr = vacm_getGroupEntry(model, newName);
-
-            if (geptr != NULL) {
-                vacm_destroyGroupEntry(model, newName);
-            }
-            free(newName);
+    } else if ((action == FREE || action == UNDO) && row_created) {
+        row_created = 0;
+        if (name_len <= SEC2GROUP_MIB_LENGTH ||
+            sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+                                name_len - SEC2GROUP_MIB_LENGTH,
+                                &model, (u_char **) & newName, &nameLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
         }
+
+        geptr = vacm_getGroupEntry(model, newName);
+
+        if (geptr != NULL) {
+            vacm_destroyGroupEntry(model, newName);
+        }
+        free(newName);
     }
 
     return SNMP_ERR_NOERROR;
@@ -1112,12 +1116,14 @@ write_vacmAccessStatus(int action,
                        u_char * statP, oid * name, size_t name_len)
 {
     static long     long_ret;
+    static int      row_created;
     int             model, level;
     char           *newGroupName = NULL, *newContextPrefix = NULL;
     size_t          groupNameLen, contextPrefixLen;
     struct vacm_accessEntry *aptr = NULL;
 
     if (action == RESERVE1) {
+        row_created = 0;
         if (var_val_type != ASN_INTEGER) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -1159,6 +1165,7 @@ write_vacmAccessStatus(int action,
             if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
                 free(newGroupName);
                 free(newContextPrefix);
+                long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
             if (long_ret == RS_DESTROY && aptr->storageType == ST_PERMANENT) {
@@ -1181,6 +1188,7 @@ write_vacmAccessStatus(int action,
                     free(newContextPrefix);
                     return SNMP_ERR_GENERR;
                 }
+                row_created = 1;
 
                 /*
                  * Set defaults.  
@@ -1222,6 +1230,7 @@ write_vacmAccessStatus(int action,
         free(newGroupName);
         free(newContextPrefix);
     } else if (action == COMMIT) {
+        row_created = 0;
         if (name_len <= ACCESS_MIB_LENGTH ||
             access_parse_oid(&name[ACCESS_MIB_LENGTH],
                              name_len - ACCESS_MIB_LENGTH,
@@ -1241,25 +1250,24 @@ write_vacmAccessStatus(int action,
         }
         free(newGroupName);
         free(newContextPrefix);
-    } else if (action == UNDO) {
-        if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-            if (name_len <= ACCESS_MIB_LENGTH ||
-                access_parse_oid(&name[ACCESS_MIB_LENGTH],
-                                 name_len - ACCESS_MIB_LENGTH,
-                                 (u_char **) & newGroupName, &groupNameLen,
-                                 (u_char **) & newContextPrefix, &contextPrefixLen,
-                                 &model, &level)) {
-                return SNMP_ERR_INCONSISTENTNAME;
-            }
-
-            aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
-            if (aptr != NULL) {
-                vacm_destroyAccessEntry(newGroupName, newContextPrefix,
-                                        model, level);
-            }
-            free(newGroupName);
-            free(newContextPrefix);
+    } else if ((action == FREE || action == UNDO) && row_created) {
+        row_created = 0;
+        if (name_len <= ACCESS_MIB_LENGTH ||
+            access_parse_oid(&name[ACCESS_MIB_LENGTH],
+                             name_len - ACCESS_MIB_LENGTH,
+                             (u_char **) & newGroupName, &groupNameLen,
+                             (u_char **) & newContextPrefix, &contextPrefixLen,
+                             &model, &level)) {
+            return SNMP_ERR_INCONSISTENTNAME;
         }
+
+        aptr = vacm_getAccessEntry(newGroupName, newContextPrefix, model, level);
+        if (aptr != NULL) {
+            vacm_destroyAccessEntry(newGroupName, newContextPrefix,
+                                    model, level);
+        }
+        free(newGroupName);
+        free(newContextPrefix);
     }
 
     return SNMP_ERR_NOERROR;
@@ -1283,7 +1291,7 @@ write_vacmAccessStorageType(int action,
                     "write to vacmSecurityToGroupStorageType not ASN_INTEGER\n"));
         return SNMP_ERR_WRONGTYPE;
     }
-    if (var_val_len > sizeof(long_ret)) {
+    if (var_val_len != sizeof(long_ret)) {
         DEBUGMSGTL(("mibII/vacm_vars",
                     "write to vacmSecurityToGroupStorageType: bad length\n"));
         return SNMP_ERR_WRONGLENGTH;
@@ -1331,7 +1339,7 @@ write_vacmAccessContextMatch(int action,
                     "write to vacmAccessContextMatch not ASN_INTEGER\n"));
         return SNMP_ERR_WRONGTYPE;
     }
-    if (var_val_len > sizeof(long_ret)) {
+    if (var_val_len != sizeof(long_ret)) {
         DEBUGMSGTL(("mibII/vacm_vars",
                     "write to vacmAccessContextMatch: bad length\n"));
         return SNMP_ERR_WRONGLENGTH;
@@ -1385,13 +1393,14 @@ write_vacmAccessReadViewName(int action,
             memcpy(aptr->views[VACM_VIEW_READ], var_val, var_val_len);
             aptr->views[VACM_VIEW_READ][var_val_len] = 0;
         }
-    } else if (action == FREE) {
+    } else if (action == FREE || action == UNDO) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->views[VACM_VIEW_READ], string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_READ], string, VACMSTRINGLEN);
+            resetOnFail = 0;
         }
     }
     return SNMP_ERR_NOERROR;
@@ -1429,13 +1438,14 @@ write_vacmAccessWriteViewName(int action,
             memcpy(aptr->views[VACM_VIEW_WRITE], var_val, var_val_len);
             aptr->views[VACM_VIEW_WRITE][var_val_len] = 0;
         }
-    } else if (action == FREE) {
+    } else if (action == FREE || action == UNDO) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->views[VACM_VIEW_WRITE], string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_WRITE], string, VACMSTRINGLEN);
+            resetOnFail = 0;
         }
     }
     return SNMP_ERR_NOERROR;
@@ -1473,13 +1483,14 @@ write_vacmAccessNotifyViewName(int action,
             memcpy(aptr->views[VACM_VIEW_NOTIFY], var_val, var_val_len);
             aptr->views[VACM_VIEW_NOTIFY][var_val_len] = 0;
         }
-    } else if (action == FREE) {
+    } else if (action == FREE || action == UNDO) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
         if ((aptr = access_parse_accessEntry(name, name_len)) != NULL &&
             resetOnFail) {
-            memcpy(aptr->views[VACM_VIEW_NOTIFY], string, var_val_len);
+            memcpy(aptr->views[VACM_VIEW_NOTIFY], string, VACMSTRINGLEN);
+            resetOnFail = 0;
         }
     }
     return SNMP_ERR_NOERROR;
@@ -1591,6 +1602,7 @@ write_vacmViewStatus(int action,
                      u_char * statP, oid * name, size_t name_len)
 {
     static long     long_ret;
+    static int      row_created;
     char           *newViewName;
     oid            *newViewSubtree;
     size_t          viewNameLen, viewSubtreeLen;
@@ -1598,6 +1610,7 @@ write_vacmViewStatus(int action,
     int             rc = 0;
 
     if (action == RESERVE1) {
+        row_created = 0;
         if (var_val_type != ASN_INTEGER) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -1677,6 +1690,7 @@ write_vacmViewStatus(int action,
                     free(newViewSubtree);
                     return SNMP_ERR_GENERR;
                 }
+                row_created = 1;
 
                 /*
                  * Set defaults.  
@@ -1689,9 +1703,12 @@ write_vacmViewStatus(int action,
         free(newViewName);
         free(newViewSubtree);
     } else if (action == ACTION) {
-        view_parse_oid(&name[VIEW_MIB_LENGTH], name_len - VIEW_MIB_LENGTH,
-                       (u_char **) & newViewName, &viewNameLen,
-                       (oid **) & newViewSubtree, &viewSubtreeLen);
+        if (name_len <= VIEW_MIB_LENGTH ||
+            view_parse_oid(&name[VIEW_MIB_LENGTH], name_len - VIEW_MIB_LENGTH,
+                           (u_char **) & newViewName, &viewNameLen,
+                           (oid **) & newViewSubtree, &viewSubtreeLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
 
         vptr =
             vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
@@ -1720,9 +1737,13 @@ write_vacmViewStatus(int action,
         free(newViewName);
         free(newViewSubtree);
     } else if (action == COMMIT) {
-        view_parse_oid(&name[VIEW_MIB_LENGTH], name_len - VIEW_MIB_LENGTH,
-                       (u_char **) & newViewName, &viewNameLen,
-                       (oid **) & newViewSubtree, &viewSubtreeLen);
+        row_created = 0;
+        if (name_len <= VIEW_MIB_LENGTH ||
+            view_parse_oid(&name[VIEW_MIB_LENGTH], name_len - VIEW_MIB_LENGTH,
+                           (u_char **) & newViewName, &viewNameLen,
+                           (oid **) & newViewSubtree, &viewSubtreeLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
 
         vptr =
             vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
@@ -1741,30 +1762,32 @@ write_vacmViewStatus(int action,
         }
         free(newViewName);
         free(newViewSubtree);
-    } else if (action == UNDO) {
-        if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
+    } else if ((action == FREE || action == UNDO) && row_created) {
+        row_created = 0;
+        if (name_len <= VIEW_MIB_LENGTH ||
             view_parse_oid(&name[VIEW_MIB_LENGTH],
                            name_len - VIEW_MIB_LENGTH,
                            (u_char **) & newViewName, &viewNameLen,
-                           (oid **) & newViewSubtree, &viewSubtreeLen);
-
-            vptr = vacm_getViewEntry(newViewName, &newViewSubtree[1],
-                                     viewSubtreeLen-1, VACM_MODE_IGNORE_MASK);
-            if (vptr &&
-                netsnmp_oid_equals(vptr->viewSubtree + 1,
-                                   vptr->viewSubtreeLen - 1,
-                                   newViewSubtree + 1,
-                                   viewSubtreeLen - 1) != 0) {
-                vptr = NULL;
-            }
-
-            if (vptr != NULL) {
-                vacm_destroyViewEntry(newViewName, newViewSubtree,
-                                      viewSubtreeLen);
-            }
-            free(newViewName);
-            free(newViewSubtree);
+                           (oid **) & newViewSubtree, &viewSubtreeLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
         }
+
+        vptr = vacm_getViewEntry(newViewName, &newViewSubtree[1],
+                                 viewSubtreeLen-1, VACM_MODE_IGNORE_MASK);
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1,
+                               vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1,
+                               viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
+
+        if (vptr != NULL) {
+            vacm_destroyViewEntry(newViewName, newViewSubtree,
+                                  viewSubtreeLen);
+        }
+        free(newViewName);
+        free(newViewSubtree);
     }
 
     return SNMP_ERR_NOERROR;
@@ -1777,11 +1800,13 @@ write_vacmViewStorageType(int action,
                           size_t var_val_len,
                           u_char * statP, oid * name, size_t name_len)
 {
-    long            newValue = *((long *) var_val);
+    long            newValue;
     static long     oldValue;
+    static int      resetOnFail;
     struct vacm_viewEntry *vptr = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -1792,18 +1817,21 @@ write_vacmViewStorageType(int action,
         if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
+            newValue = *((long *) var_val);
             if ((newValue == ST_VOLATILE || newValue == ST_NONVOLATILE) &&
                 (vptr->viewStorageType == ST_VOLATILE ||
                  vptr->viewStorageType == ST_NONVOLATILE)) {
                 oldValue = vptr->viewStorageType;
                 vptr->viewStorageType = newValue;
+                resetOnFail = 1;
             } else if (newValue == vptr->viewStorageType) {
                 return SNMP_ERR_NOERROR;
             } else {
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
         }
-    } else if (action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
+        resetOnFail = 0;
         if ((vptr = view_parse_viewEntry(name, name_len)) != NULL) {
             vptr->viewStorageType = oldValue;
         }
@@ -1821,9 +1849,11 @@ write_vacmViewMask(int action,
 {
     static unsigned char string[VACMSTRINGLEN];
     static long     length;
+    static int      resetOnFail;
     struct vacm_viewEntry *vptr = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -1834,12 +1864,14 @@ write_vacmViewMask(int action,
         if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
+            resetOnFail = 1;
             memcpy(string, vptr->viewMask, vptr->viewMaskLen);
             length = vptr->viewMaskLen;
             memcpy(vptr->viewMask, var_val, var_val_len);
             vptr->viewMaskLen = var_val_len;
         }
-    } else if (action == FREE) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
+        resetOnFail = 0;
         if ((vptr = view_parse_viewEntry(name, name_len)) != NULL) {
             memcpy(vptr->viewMask, string, length);
             vptr->viewMaskLen = length;
@@ -1855,17 +1887,20 @@ write_vacmViewType(int action,
                    size_t var_val_len,
                    u_char * statP, oid * name, size_t name_len)
 {
-    long            newValue = *((long *) var_val);
+    long            newValue;
     static long     oldValue;
+    static int      resetOnFail;
     struct vacm_viewEntry *vptr = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             return SNMP_ERR_WRONGTYPE;
         }
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        newValue = *((long *) var_val);
         if (newValue < 1 || newValue > 2) {
             return SNMP_ERR_WRONGVALUE;
         }
@@ -1873,10 +1908,13 @@ write_vacmViewType(int action,
         if ((vptr = view_parse_viewEntry(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
         } else {
+            newValue = *((long *) var_val);
             oldValue = vptr->viewType;
             vptr->viewType = newValue;
+            resetOnFail = 1;
         }
-    } else if (action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
+        resetOnFail = 0;
         if ((vptr = view_parse_viewEntry(name, name_len)) != NULL) {
             vptr->viewType = oldValue;
         }
