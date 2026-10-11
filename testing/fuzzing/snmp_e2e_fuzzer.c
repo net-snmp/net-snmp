@@ -80,6 +80,11 @@ fuzz_fake_pcap(const u_char * buf, size_t len)
     netsnmp_large_fd_set_cleanup(&lfdset);
 }
 
+static void
+dummy_opt_proc(int argc, char *const *argv, int opt)
+{
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
@@ -100,7 +105,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     fake_argv[1] = strdup("-Dall");
     fake_argv[2] = strdup("localhost");
 
-    snmp_parse_args(3, fake_argv, ss, "", NULL);
+    snmp_parse_args(3, fake_argv, ss, "", dummy_opt_proc);
 
     transport = netsnmp_transport_alloc();
     transport->sock = FAKE_FD;

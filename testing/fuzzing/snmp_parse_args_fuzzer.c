@@ -54,6 +54,11 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
     return 0;
 }
 
+static void
+dummy_opt_proc(int argc, char *const *argv, int opt)
+{
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
@@ -74,7 +79,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     netsnmp_session *ss = SNMP_MALLOC_TYPEDEF(netsnmp_session);
 
-    snmp_parse_args(argc, argv, ss, "", NULL);
+    snmp_parse_args(argc, argv, ss, "", dummy_opt_proc);
 
     snmp_close(ss);
     netsnmp_cleanup_session(ss);
