@@ -59,5 +59,21 @@ OKF(rc != 0, ("Parsing of AgentX data failed"));
        "agentx_parse() rejects expanded OID exceeding MAX_OID_LEN");
 }
 
+{
+    /*
+     * Verify that agentx_check_packet() rejects an AgentX header whose
+     * 32-bit payload length would overflow a signed int when 20 is added.
+     */
+    u_char overflow_hdr[20] = {
+        1, AGENTX_MSG_OPEN, AGENTX_FLAGS_NETWORK_BYTE_ORDER, 0,
+        0, 0, 0, 1,
+        0, 0, 0, 1,
+        0, 0, 0, 1,
+        0xff, 0xff, 0xff, 0xf0
+    };
+    OK(agentx_check_packet(overflow_hdr, sizeof(overflow_hdr)) == -1,
+       "agentx_check_packet() rejects payload_len > INT_MAX - 20");
+}
+
 netsnmp_cleanup_session(&session);
 #endif

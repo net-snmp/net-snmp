@@ -2062,11 +2062,16 @@ int main(void)
 int
 agentx_check_packet(u_char * packet, size_t packet_len)
 {
+    u_int           payload_len;
 
     if (packet_len < 20)
         return 0;               /* minimum header length == 20 */
 
-    return agentx_parse_int(packet + 16,
-                            *(packet +
-                              2) & AGENTX_FLAGS_NETWORK_BYTE_ORDER) + 20;
+    payload_len = agentx_parse_int(packet + 16,
+                                   *(packet + 2) &
+                                   AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+    if (payload_len > INT_MAX - 20)
+        return -1;
+
+    return (int)payload_len + 20;
 }
