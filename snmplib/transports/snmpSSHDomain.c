@@ -172,7 +172,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
 	    if (rc < 0) {  /* XXX: from tcp; ssh equiv?:  && errno != EINTR */
 		DEBUGMSGTL(("ssh", "recv fd %d err %d (\"%s\")\n",
 			    t->sock, errno, strerror(errno)));
-		break;
+		return -1;
 	    }
 	    DEBUGMSGTL(("ssh", "recv fd %d got %d bytes\n",
 			t->sock, rc));
@@ -185,16 +185,9 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
         socklen_t       tolen = sizeof(struct sockaddr_un);
 
         if (t != NULL && t->sock >= 0) {
-            struct sockaddr *to;
-            to = (struct sockaddr *) SNMP_MALLOC_STRUCT(sockaddr_un);
-            if (NULL == to) {
-                *opaque = NULL;
-                *olength = 0;
-                return -1;
-            }
+            struct sockaddr_un to;
 
-            if(getsockname(t->sock, to, &tolen) != 0){
-                free(to);
+            if(getsockname(t->sock, (struct sockaddr *)&to, &tolen) != 0){
                 *opaque = NULL;
                 *olength = 0;
                 return -1;
@@ -305,8 +298,6 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                                     t->sock, errno, strerror(errno)));
                         return rc;
                     }
-                    *opaque = (void*)to;
-                    *olength = sizeof(struct sockaddr_un);
                 }
             }
             DEBUGMSGTL(("ssh", "recv fd %d got %d bytes\n",
@@ -325,7 +316,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                 DEBUGMSGTL(("ssh",
                             " read on stdin failed: %d (\"%s\")\n",
                             errno, strerror(errno)));
-                break;
+                return -1;
             }
             if (rc == 0) {
                 /* 0 input is probably bad since we selected on it */
@@ -358,6 +349,11 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
 
     /* create a tmStateRef cache */
     tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
+    if (!tmStateRef) {
+        *opaque = NULL;
+        *olength = 0;
+        return -1;
+    }
 
     /* secshell document says were always authpriv, even if NULL algorithms */
     /* ugh! */
@@ -381,6 +377,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
         const char *securityName = getenv("USER");
         if (!securityName) {
             snmp_log(LOG_ERR, "USER environment variable missing, no username available\n\n");
+            SNMP_FREE(tmStateRef);
             return -1;
         }
 	if (strlen(securityName) > (sizeof(tmStateRef->securityName) - 1)) {
@@ -388,6 +385,7 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
             /* XXX: clean up */
             snmp_log(LOG_ERR, "User name '%s' too long for snmp\n",
                      securityName);
+            SNMP_FREE(tmStateRef);
             return -1;
         }
 
