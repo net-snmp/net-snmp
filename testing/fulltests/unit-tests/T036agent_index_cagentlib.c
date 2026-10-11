@@ -212,6 +212,34 @@ extern netsnmp_session *main_session;
     if (sres)
         free(sres);
 
+    {
+        /*
+         * Verify that ANY_INDEX on an ASN_OBJECT_ID index tree with an
+         * existing entry rejects a zero-length OID varbind without
+         * underflowing val_len / sizeof(oid) - 1.
+         */
+        oid                    empty_idx_oid[] = { 1, 3, 6, 1, 4, 1, 99999, 20 };
+        netsnmp_variable_list  vb_init, vb_empty, *res_vb;
+
+        memset(&vb_init, 0, sizeof(vb_init));
+        snmp_set_var_objid(&vb_init, empty_idx_oid, OID_LENGTH(empty_idx_oid));
+        vb_init.type = ASN_OBJECT_ID;
+        vb_init.val_len = 0;
+        res_vb = register_index(&vb_init, ALLOCATE_THIS_INDEX, main_session);
+        OK(res_vb != NULL, "zero-length ASN_OBJECT_ID index registration succeeds");
+        snmp_free_var(res_vb);
+        snmp_free_var_internals(&vb_init);
+
+        memset(&vb_empty, 0, sizeof(vb_empty));
+        snmp_set_var_objid(&vb_empty, empty_idx_oid, OID_LENGTH(empty_idx_oid));
+        vb_empty.type = ASN_OBJECT_ID;
+        vb_empty.val_len = 0;
+        res_vb = register_index(&vb_empty, ALLOCATE_ANY_INDEX, main_session);
+        OK(res_vb == NULL,
+           "ANY_INDEX rejects zero-length ASN_OBJECT_ID when prior index exists");
+        snmp_free_var_internals(&vb_empty);
+    }
+
     unregister_index_by_session(main_session);
 
     snmp_shutdown("test");

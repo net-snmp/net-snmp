@@ -340,8 +340,11 @@ register_index(netsnmp_variable_list * varbind, int flags,
                 free(new_index);
                 return NULL;
             }
-        } else
+        } else {
+            if (new_index->varbind->val.string != new_index->varbind->buf)
+                free(new_index->varbind->val.string);
             new_index->varbind->val.string = new_index->varbind->buf;
+        }
 
         switch (varbind->type) {
         case ASN_INTEGER:
@@ -380,7 +383,12 @@ register_index(netsnmp_variable_list * varbind, int flags,
             }
             break;
         case ASN_OBJECT_ID:
-            if (prev_idx_ptr && new_index->varbind->val_len >= sizeof(oid)) {
+            if (prev_idx_ptr) {
+                if (new_index->varbind->val_len < sizeof(oid)) {
+                    snmp_free_var(new_index->varbind);
+                    free(new_index);
+                    return NULL;
+                }
                 i = prev_idx_ptr->varbind->val_len / sizeof(oid) - 1;
                 while (i >= 0 && new_index->varbind->val.objid[i] == 255) {
                     new_index->varbind->val.objid[i] = 1;
