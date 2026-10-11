@@ -462,13 +462,9 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
      * very gross hack, as this is passed later to the transport_send
      * function 
      */
-    callback_hack  *ch = SNMP_MALLOC_TYPEDEF(callback_hack);
-    if (ch == NULL)
-        return -1;
+    callback_hack  *ch;
+
     DEBUGMSGTL(("transport_callback", "hook_build enter\n"));
-    ch->pdu = pdu;
-    ch->orig_transport_data = pdu->transport_data;
-    pdu->transport_data = ch;
     switch (pdu->command) {
     case SNMP_MSG_GETBULK:
         if (pdu->max_repetitions < 0) {
@@ -534,6 +530,12 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
             pdu->securityLevel = sp->securityLevel;
         /* WHAT ELSE ?? */
     }
+    ch = SNMP_MALLOC_TYPEDEF(callback_hack);
+    if (ch == NULL)
+        return -1;
+    ch->pdu = pdu;
+    ch->orig_transport_data = pdu->transport_data;
+    pdu->transport_data = ch;
     ptk[0] = 0;
     *len = 1;
     DEBUGMSGTL(("transport_callback", "hook_build exit\n"));
