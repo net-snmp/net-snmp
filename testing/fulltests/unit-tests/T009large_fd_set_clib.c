@@ -43,4 +43,14 @@ OKF(netsnmp_large_fd_set_resize(&fds, 1000) == 1, ("resizing to 1000"));
     }
 }
 
+{
+    struct timeval tv = { 0, 0 };
+
+    OKF(netsnmp_large_fd_set_resize(&fds, 16) == 1, ("resizing to 16"));
+    NETSNMP_LARGE_FD_ZERO(&fds);
+    OKF(netsnmp_large_fd_set_select(64, &fds, NULL, NULL, &tv) == 0,
+        ("select resizes fds to numfds"));
+    OKF(fds.lfs_setsize == 64, ("lfs_setsize after select is 64"));
+}
+
 netsnmp_large_fd_set_cleanup(&fds);

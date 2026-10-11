@@ -17,6 +17,7 @@
 #error broken
 #endif
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h> /* memset(), which is invoked by FD_ZERO() */
 
@@ -40,8 +41,9 @@ netsnmp_large_fd_setfd(SOCKET fd, netsnmp_large_fd_set * fdset)
 
     netsnmp_assert(fd != INVALID_SOCKET);
 
-    if (fdset->lfs_setptr->fd_count == fdset->lfs_setsize)
-        netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
+    if (fdset->lfs_setptr->fd_count == fdset->lfs_setsize &&
+        !netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1)))
+        return;
 
     for (i = 0; i < fdset->lfs_setptr->fd_count; i++) {
         if (fdset->lfs_setptr->fd_array[i] == fd)
@@ -120,8 +122,10 @@ netsnmp_large_fd_setfd(int fd, netsnmp_large_fd_set * fdset)
 {
     netsnmp_assert(fd >= 0);
 
-    while (fd >= (int)fdset->lfs_setsize)
-        netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
+    while (fd >= (int)fdset->lfs_setsize) {
+        if (!netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1)))
+            return;
+    }
 
     LFD_SET(fd, fdset->lfs_setptr);
 }
@@ -171,12 +175,21 @@ netsnmp_large_fd_set_select(int numfds, netsnmp_large_fd_set *readfds,
     }
 #if defined(cygwin) || !defined(HAVE_WINSOCK_H)
     /* Bit-set representation: make sure all fds have at least size 'numfds'. */
-    if (readfds && readfds->lfs_setsize < numfds)
-        netsnmp_large_fd_set_resize(readfds, numfds);
-    if (writefds && writefds->lfs_setsize < numfds)
-        netsnmp_large_fd_set_resize(writefds, numfds);
-    if (exceptfds && exceptfds->lfs_setsize < numfds)
-        netsnmp_large_fd_set_resize(exceptfds, numfds);
+    if (readfds && readfds->lfs_setsize < numfds &&
+        !netsnmp_large_fd_set_resize(readfds, numfds)) {
+        errno = ENOMEM;
+        return -1;
+    }
+    if (writefds && writefds->lfs_setsize < numfds &&
+        !netsnmp_large_fd_set_resize(writefds, numfds)) {
+        errno = ENOMEM;
+        return -1;
+    }
+    if (exceptfds && exceptfds->lfs_setsize < numfds &&
+        !netsnmp_large_fd_set_resize(exceptfds, numfds)) {
+        errno = ENOMEM;
+        return -1;
+    }
 #else
     /* Array representation: no resizing is necessary. */
 #endif
@@ -196,15 +209,19 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
         goto success;
 
     if (setsize > FD_SETSIZE) {
+        fd_set         *new_setptr;
+
         fd_set_bytes = NETSNMP_FD_SET_BYTES(setsize);
         if (fdset->lfs_setsize > FD_SETSIZE) {
-            fdset->lfs_setptr = realloc(fdset->lfs_setptr, fd_set_bytes);
-            if (!fdset->lfs_setptr)
+            new_setptr = realloc(fdset->lfs_setptr, fd_set_bytes);
+            if (!new_setptr)
                 goto out_of_mem;
+            fdset->lfs_setptr = new_setptr;
         } else {
-            fdset->lfs_setptr = malloc(fd_set_bytes);
-            if (!fdset->lfs_setptr)
+            new_setptr = malloc(fd_set_bytes);
+            if (!new_setptr)
                 goto out_of_mem;
+            fdset->lfs_setptr = new_setptr;
             *fdset->lfs_setptr = fdset->lfs_set;
         }
     } else {
@@ -240,10 +257,6 @@ success:
     return 1;
 
 out_of_mem:
-    fdset->lfs_setsize = 0;
-#if !defined(cygwin) && defined(HAVE_WINSOCK_H)
-    fdset->lfs_setptr->fd_count = 0;
-#endif
     return 0;
 }
 
