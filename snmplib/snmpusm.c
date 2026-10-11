@@ -3419,7 +3419,10 @@ usm_handle_report(struct session_list *slp,
 
             pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
             pdu2 = snmp_clone_pdu(pdu);
-            pdu->flags = pdu2->flags = flags;
+            pdu->flags = flags;
+            if (pdu2 == NULL)
+                break;
+            pdu2->flags = flags;
             snmpv3_make_report(pdu2, result);
             if (0 == snmp_sess_send(slp, pdu2)) {
                 snmp_free_pdu(pdu2);
