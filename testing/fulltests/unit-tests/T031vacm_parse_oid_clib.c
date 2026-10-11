@@ -191,3 +191,25 @@
 }
 
 #endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
+{
+    oid view_oid[] = { 1, 3, 6, 1 };
+    const char *long_ctx = "01234567890123456789012345678901234*";
+
+    OK(netsnmp_vacm_simple_usm_del(NULL, SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v1", view_oid, OID_LENGTH(view_oid),
+                                   "") == SNMPERR_GENERR,
+       "netsnmp_vacm_simple_usm_del rejects NULL user");
+    OK(netsnmp_vacm_simple_usm_add("u1", 1, SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v1", view_oid, OID_LENGTH(view_oid),
+                                   long_ctx) == SNMPERR_GENERR,
+       "netsnmp_vacm_simple_usm_add rejects overlong context");
+    OK(netsnmp_vacm_simple_usm_add("u1", 1, SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v1", view_oid, OID_LENGTH(view_oid),
+                                   "") == SNMPERR_SUCCESS,
+       "netsnmp_vacm_simple_usm_add accepts empty context");
+    OK(netsnmp_vacm_simple_usm_del("u1", SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v1", view_oid, OID_LENGTH(view_oid),
+                                   "") == SNMPERR_SUCCESS,
+       "netsnmp_vacm_simple_usm_del accepts empty context");
+}

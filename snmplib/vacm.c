@@ -1298,8 +1298,10 @@ netsnmp_vacm_simple_usm_add(const char *user, int rw, int authLevel,
         context = localContext;
     } else {
         /** check for wildcard in context */
-        int contextLen = strlen(context);
-        if ('*' == context[contextLen - 1]) {
+        size_t contextLen = strlen(context);
+        if (contextLen >= sizeof(localContext))
+            goto bail;
+        if (contextLen > 0 && '*' == context[contextLen - 1]) {
             strlcpy(localContext, context, sizeof(localContext));
             localContext[contextLen - 1] = 0;
             context = localContext;
@@ -1347,6 +1349,9 @@ netsnmp_vacm_simple_usm_del(const char *user, int authLevel,
     char                     localContext[VACMSTRINGLEN];
     char                     group[VACMSTRINGLEN];
 
+    if (NULL == user)
+        return SNMPERR_GENERR;
+
     /*
      * only delete simple views (one OID) for which we have an OID.
      * never delete '_all_'.
@@ -1365,8 +1370,10 @@ netsnmp_vacm_simple_usm_del(const char *user, int authLevel,
         context = localContext;
     } else {
         /** check for wildcard in context */
-        int contextLen = strlen(context);
-        if ('*' == context[contextLen - 1]) {
+        size_t contextLen = strlen(context);
+        if (contextLen >= sizeof(localContext))
+            return SNMPERR_GENERR;
+        if (contextLen > 0 && '*' == context[contextLen - 1]) {
             strlcpy(localContext, context, sizeof(localContext));
             localContext[contextLen - 1] = 0;
             context = localContext;
