@@ -960,8 +960,14 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
      */
     auth_type = sc_get_authtype(hashtype, hashtype_len);
     iauth_length = sc_get_proper_auth_length_bytype(auth_type);
-    if (iauth_length == SNMPERR_GENERR)
+    if (iauth_length <= 0)
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+
+    if (oldkey_len > sizeof(tmpbuf) / 2 ||
+        oldkey_len > sizeof(tmpbuf) - (size_t)iauth_length ||
+        newkey_len > sizeof(delta)) {
+        QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+    }
 
     auth_length = SNMP_MIN(oldkey_len, (size_t)iauth_length);
 

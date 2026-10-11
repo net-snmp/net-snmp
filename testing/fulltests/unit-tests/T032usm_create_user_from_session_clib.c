@@ -267,5 +267,30 @@
            "sc_generate_keyed_hash rejects key shorter than full hash length");
     }
 
+    {
+        u_char dummy_ku[64] = { 0 };
+        u_char dummy_kul[64] = { 0 };
+        size_t kul_len = sizeof(dummy_kul);
+        u_char huge_engine[SNMP_MAXBUF + 16];
+        u_char huge_key[SNMP_MAXBUF_SMALL];
+        u_char kcout[2 * SNMP_MAXBUF_SMALL];
+        size_t kcout_len = sizeof(kcout);
+
+        memset(huge_engine, 0xaa, sizeof(huge_engine));
+        memset(huge_key, 0xbb, sizeof(huge_key));
+        OK(generate_kul(usmHMACSHA1AuthProtocol,
+                        OID_LENGTH(usmHMACSHA1AuthProtocol),
+                        huge_engine, sizeof(huge_engine),
+                        dummy_ku, sizeof(dummy_ku),
+                        dummy_kul, &kul_len) == SNMPERR_GENERR,
+           "generate_kul rejects oversized engineID_len");
+        OK(encode_keychange(usmHMACSHA1AuthProtocol,
+                            OID_LENGTH(usmHMACSHA1AuthProtocol),
+                            huge_key, sizeof(huge_key),
+                            huge_key, sizeof(huge_key),
+                            kcout, &kcout_len) == SNMPERR_GENERR,
+           "encode_keychange rejects oversized key length");
+    }
+
     snmp_shutdown("T032usm");
 }
