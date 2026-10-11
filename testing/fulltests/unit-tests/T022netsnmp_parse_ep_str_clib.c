@@ -56,6 +56,47 @@ SOCK_STARTUP;
         }
         free(ep_str.addr);
     }
+
+    {
+        extern int netsnmp_sockaddr_in3(struct netsnmp_ep *ep,
+                                        const char *inpeername,
+                                        const char *default_target);
+        struct netsnmp_ep ep;
+
+        OK(netsnmp_sockaddr_in3(&ep, NULL, "127.0.0.1:1161") == 1,
+           "netsnmp_sockaddr_in3 NULL inpeername with default_target");
+        OK(ep.a.sin.sin_addr.s_addr == htonl(INADDR_LOOPBACK) &&
+           ep.a.sin.sin_port == htons(1161),
+           "netsnmp_sockaddr_in3 uses default_target addr and port");
+
+        OK(netsnmp_sockaddr_in3(&ep, ":2161", "127.0.0.1:1161") == 1,
+           "netsnmp_sockaddr_in3 port-only inpeername with default_target");
+        OK(ep.a.sin.sin_addr.s_addr == htonl(INADDR_LOOPBACK) &&
+           ep.a.sin.sin_port == htons(2161),
+           "netsnmp_sockaddr_in3 preserves default_target addr on port override");
+    }
+#ifdef NETSNMP_ENABLE_IPV6
+    {
+        extern int netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
+                                          const char *inpeername,
+                                          const char *default_target);
+        struct netsnmp_ep ep6;
+
+        OK(netsnmp_sockaddr_in6_3(&ep6, NULL, "[::1]:1161") == 1,
+           "netsnmp_sockaddr_in6_3 NULL inpeername with default_target");
+        OK(memcmp(&ep6.a.sin6.sin6_addr, &in6addr_loopback,
+                  sizeof(in6addr_loopback)) == 0 &&
+           ep6.a.sin6.sin6_port == htons(1161),
+           "netsnmp_sockaddr_in6_3 uses default_target addr and port");
+
+        OK(netsnmp_sockaddr_in6_3(&ep6, ":2161", "[::1]:1161") == 1,
+           "netsnmp_sockaddr_in6_3 port-only inpeername with default_target");
+        OK(memcmp(&ep6.a.sin6.sin6_addr, &in6addr_loopback,
+                  sizeof(in6addr_loopback)) == 0 &&
+           ep6.a.sin6.sin6_port == htons(2161),
+           "netsnmp_sockaddr_in6_3 preserves default_target addr on port override");
+    }
+#endif
 }
 
 SOCK_CLEANUP;
