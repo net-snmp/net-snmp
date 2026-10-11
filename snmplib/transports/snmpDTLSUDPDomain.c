@@ -330,8 +330,6 @@ start_new_cached_connection(netsnmp_transport *t,
     }
     
     DEBUGMSGTL(("dtlsudp", "starting a new connection\n"));
-    cachep->next = biocache;
-    biocache = cachep;
 
     if (remote_addr->sa.sa_family == AF_INET)
         memcpy(&cachep->sas.sin, &remote_addr->sin, sizeof(remote_addr->sin));
@@ -339,19 +337,26 @@ start_new_cached_connection(netsnmp_transport *t,
     else if (remote_addr->sa.sa_family == AF_INET6)
         memcpy(&cachep->sas.sin6, &remote_addr->sin6, sizeof(remote_addr->sin6));
 #endif
-    else
+    else {
+        netsnmp_tlsbase_free_tlsdata(tlsdata);
+        SNMP_FREE(cachep);
         DIEHERE("unknown address family");
+    }
 
     /* create caching memory bios for OpenSSL to read and write to */
 
     cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
-    if (!cachep->read_bio)
+    if (!cachep->read_bio) {
+        netsnmp_tlsbase_free_tlsdata(tlsdata);
+        SNMP_FREE(cachep);
         DIEHERE("failed to create the openssl read_bio");
+    }
 
     cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
     if (!cachep->write_bio) {
         BIO_free(cachep->read_bio);
-        cachep->read_bio = NULL;
+        netsnmp_tlsbase_free_tlsdata(tlsdata);
+        SNMP_FREE(cachep);
         DIEHERE("failed to create the openssl write_bio");
     }
 
@@ -367,8 +372,8 @@ start_new_cached_connection(netsnmp_transport *t,
         if (!ctx) {
             BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
-            cachep->read_bio = NULL;
-            cachep->write_bio = NULL;
+            netsnmp_tlsbase_free_tlsdata(tlsdata);
+            SNMP_FREE(cachep);
             DIEHERE("failed to create the SSL Context");
         }
         tlsdata->ssl_context = ctx;
@@ -381,8 +386,8 @@ start_new_cached_connection(netsnmp_transport *t,
         if (!ctx) {
             BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
-            cachep->read_bio = NULL;
-            cachep->write_bio = NULL;
+            netsnmp_tlsbase_free_tlsdata(tlsdata);
+            SNMP_FREE(cachep);
             DIEHERE("failed to create the SSL Context");
         }
 
@@ -400,8 +405,8 @@ start_new_cached_connection(netsnmp_transport *t,
     if (!tlsdata->ssl) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
-        cachep->read_bio = NULL;
-        cachep->write_bio = NULL;
+        netsnmp_tlsbase_free_tlsdata(tlsdata);
+        SNMP_FREE(cachep);
         DIEHERE("failed to create the SSL session structure");
     }
         
@@ -460,6 +465,8 @@ start_new_cached_connection(netsnmp_transport *t,
     /* Implementation notes:
        + our sessionID is stored as the transport's data pointer member
     */
+    cachep->next = biocache;
+    biocache = cachep;
     DEBUGMSGT(("9:dtlsudp:bio_cache:created", "%p\n", cachep));
 
     return cachep;
