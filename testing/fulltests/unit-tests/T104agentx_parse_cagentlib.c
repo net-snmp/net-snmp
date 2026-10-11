@@ -34,5 +34,30 @@ fflush(stderr);
 
 OKF(rc != 0, ("Parsing of AgentX data failed"));
 
+{
+    /*
+     * Verify that agentx_parse() rejects an AgentX OPEN PDU whose expanded
+     * OID length (n_subid + 5 * (prefix != 0)) exceeds MAX_OID_LEN (128).
+     */
+    u_char oversized_oid_pkt[20 + 4 + 4 + 125 * 4];
+    netsnmp_pdu pdu2;
+
+    memset(oversized_oid_pkt, 0, sizeof(oversized_oid_pkt));
+    oversized_oid_pkt[0] = 1; /* version 1 */
+    oversized_oid_pkt[1] = AGENTX_MSG_OPEN;
+    oversized_oid_pkt[2] = AGENTX_FLAGS_NETWORK_BYTE_ORDER;
+    /* payload length = 4 (timeout) + 4 (OID hdr) + 500 (125 subids) = 508 (0x01fc) */
+    oversized_oid_pkt[18] = 0x01;
+    oversized_oid_pkt[19] = 0xfc;
+    /* OID header at offset 24: n_subid = 125, prefix = 4 -> 125 + 5 = 130 > MAX_OID_LEN */
+    oversized_oid_pkt[24] = 125;
+    oversized_oid_pkt[25] = 4;
+
+    memset(&pdu2, 0, sizeof(pdu2));
+    OK(agentx_parse(&session, &pdu2, oversized_oid_pkt,
+                    sizeof(oversized_oid_pkt)) != SNMP_ERR_NOERROR,
+       "agentx_parse() rejects expanded OID exceeding MAX_OID_LEN");
+}
+
 netsnmp_cleanup_session(&session);
 #endif

@@ -1182,6 +1182,12 @@ agentx_parse_oid(const u_char *data, size_t *length, int *inc,
      * Check that the expanded OID will fit in the buffer provided
      */
     tmp_oid_len = n_subid + 5 * (prefix != 0);
+    if (tmp_oid_len > MAX_OID_LEN) {
+        DEBUGMSGTL(("agentx", "OID length %d exceeds MAX_OID_LEN\n",
+                    tmp_oid_len));
+        DEBUGINDENTLESS();
+        return NULL;
+    }
     if (!increase_size(oid_buf, tmp_oid_len * sizeof(oid))) {
         DEBUGMSGTL(("agentx", "Out of memory\n"));
         DEBUGINDENTLESS();
