@@ -405,8 +405,12 @@ execfix_parse_config(const char *token, char *cptr)
         config_perror("No exec entry registered for this exec name yet.");
         return;
     }
+    if (!cptr) {
+        config_perror("Missing fix command.");
+        return;
+    }
 
-    if (strlen(cptr) > sizeof(execp->fixcmd)) {
+    if (strlen(cptr) >= sizeof(execp->fixcmd)) {
         config_perror("fix command too long.");
         return;
     }
@@ -438,7 +442,10 @@ var_extensible_shell(struct variable * vp,
             *var_len = strlen(exten->name);
             return ((u_char *) (exten->name));
         case SHELLCOMMAND:
-            *var_len = strlen(exten->command);
+            if (exten->command)
+                *var_len = strlen(exten->command);
+            else
+                *var_len = 0;
             return ((u_char *) (exten->command));
         case ERRORFLAG:        /* return code from the process */
             exec_command(exten);
@@ -555,8 +562,13 @@ var_extensible_relocatable(struct variable *vp,
         *var_len = strlen(exten->name);
         return ((u_char *) (exten->name));
     case SHELLCOMMAND:
-        *var_len = strlen(exten->command);
-        return ((u_char *) (exten->command));
+        if (exten->command) {
+            *var_len = strlen(exten->command);
+            return ((u_char *) (exten->command));
+        }
+        *var_len = 0;
+        errmsg[0] = '\0';
+        return ((u_char *) errmsg);
     case ERRORFLAG:            /* return code from the process */
         exec_command(exten);
         long_ret = exten->result;

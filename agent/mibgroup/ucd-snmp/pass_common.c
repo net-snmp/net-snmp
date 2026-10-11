@@ -126,10 +126,12 @@ netsnmp_internal_pass_parse(char * buf,
      * buf contains the return type, and buf2 contains the data
      */
     if (!strncasecmp(buf, "string", 6)) {
-        buf2[strlen(buf2) - 1] = 0; /* zap the linefeed */
-        if (buf2[strlen(buf2) - 1] == '\r')
-            buf2[strlen(buf2) - 1] = 0; /* zap the carriage-return */
-        *var_len = strlen(buf2);
+        size_t len = strlen(buf2);
+        if (len > 0 && buf2[len - 1] == '\n')
+            buf2[--len] = 0; /* zap the linefeed */
+        if (len > 0 && buf2[len - 1] == '\r')
+            buf2[--len] = 0; /* zap the carriage-return */
+        *var_len = len;
         vp->type = ASN_OCTET_STR;
         return ((unsigned char *) buf2);
     }
@@ -265,6 +267,9 @@ netsnmp_internal_pass_set_format(char *buf,
                        var_val_len/sizeof(oid));
         snprintf(buf, SNMP_MAXBUF, "objectid \"%s\"", buf2);
         buf[ SNMP_MAXBUF-1 ] = 0;
+        break;
+    default:
+        buf[0] = '\0';
         break;
     }
 }

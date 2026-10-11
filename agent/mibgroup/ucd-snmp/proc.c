@@ -176,8 +176,12 @@ procfix_parse_config(const char *token, char *cptr)
         config_perror("No proc entry registered for this proc name yet.");
         return;
     }
+    if (!cptr) {
+        config_perror("Missing fix command.");
+        return;
+    }
 
-    if (strlen(cptr) > sizeof(procp->fixcmd)) {
+    if (strlen(cptr) >= sizeof(procp->fixcmd)) {
         config_perror("fix command too long.");
         return;
     }
