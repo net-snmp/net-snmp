@@ -232,9 +232,9 @@ _pm_save_everything(FILE *f, netsnmp_container *cin, int flags)
     while (fgets(line, sizeof(line), f) != NULL) {
 
         ptr = line;
-        len = strlen(line) - 1;
-        if (line[len] == '\n')
-            line[len] = 0;
+        len = strlen(line);
+        if (len && line[len - 1] == '\n')
+            line[len - 1] = 0;
 
         /*
          * save blank line or comment?
@@ -273,9 +273,9 @@ _pm_save_index_string_string(FILE *f, netsnmp_container *cin,
 
         ++count;
         ptr = line;
-        len = strlen(line) - 1;
-        if (line[len] == '\n')
-            line[len] = 0;
+        len = strlen(line);
+        if (len && line[len - 1] == '\n')
+            line[len - 1] = 0;
 
         /*
          * save blank line or comment?
@@ -351,10 +351,10 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
 
         ++li.index;
         li.start = li.line;
-        li.line_len = strlen(li.line) - 1;
+        li.line_len = strlen(li.line);
         if ((!(lpi->flags & PMLP_FLAG_LEAVE_NEWLINE)) &&
-            (li.line[li.line_len] == '\n'))
-            li.line[li.line_len] = 0;
+            li.line_len && (li.line[li.line_len - 1] == '\n'))
+            li.line[--li.line_len] = 0;
         
         /*
          * save blank line or comment?
