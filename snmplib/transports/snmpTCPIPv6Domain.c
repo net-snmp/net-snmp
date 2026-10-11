@@ -91,7 +91,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
     }
 
     farend = &addr_pair->remote_addr.sa;
-    farendlen = sizeof(addr_pair->remote_addr.sa);
+    farendlen = sizeof(addr_pair->remote_addr.sin6);
 
     if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         newsock = accept(t->sock, farend, &farendlen);
@@ -135,7 +135,7 @@ netsnmp_tcp6_accept(netsnmp_transport *t)
 
         return newsock;
     } else {
-        free(farend);
+        free(addr_pair);
         return NETSNMP_INVALID_SOCKET;
     }
 }
