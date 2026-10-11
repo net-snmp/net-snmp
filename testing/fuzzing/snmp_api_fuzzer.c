@@ -132,15 +132,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         free(out_pkt);
     }
 
-    /*
-     * We forcefully added securityName which will be garbage collected by af_gb_cleanup.
-     * This means we have to NULL it out here to avoid a double-free.
-     */
-    if (pdu != NULL) {
-        pdu->securityName = NULL;
-        pdu->securityNameLen = 0;
-    }
-
     snmp_free_pdu(pdu);
     af_gb_cleanup();
     return 0;
