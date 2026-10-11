@@ -656,6 +656,8 @@ smux_auth_timeout_cb(unsigned int clientreg, void *clientarg)
     }
 }
 
+#define NUM_SOCKETS	32
+
 NETSNMP_SOCKET
 smux_accept(NETSNMP_SOCKET sd)
 {
@@ -681,7 +683,8 @@ smux_accept(NETSNMP_SOCKET sd)
     DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
              fd, inet_ntoa(in_socket.sin_addr),
              ntohs(in_socket.sin_port)));
-    if (npeers + 1 == SMUXMAXPEERS) {
+    if (npeers + 1 >= SMUXMAXPEERS ||
+        smux_snmp_select_list_get_length() >= NUM_SOCKETS) {
         snmp_log(LOG_ERR,
                  "[smux_accept] denied peer on fd %" NETSNMP_FMT_SKT ", limit %d reached",
                  fd, SMUXMAXPEERS);
@@ -2238,7 +2241,6 @@ err:
     return NULL;
 }
 
-#define NUM_SOCKETS	32
 static NETSNMP_SOCKET sdlist[NUM_SOCKETS];
 static int sdlen;
 

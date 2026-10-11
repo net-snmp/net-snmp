@@ -1357,7 +1357,8 @@ receive(void)
 
                     sd = smux_accept(smux_listen_sd);
                     if (NETSNMP_IS_VALID_SOCKET(sd)) {
-                        smux_snmp_select_list_add(sd);
+                        if (!smux_snmp_select_list_add(sd))
+                            close(sd);
                     }
                 }
             }
