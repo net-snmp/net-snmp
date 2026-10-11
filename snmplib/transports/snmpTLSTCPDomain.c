@@ -532,7 +532,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             break;
         if (!read_bio || BIO_pending(read_bio) >= pending_before)
             break;
-    } while (!got_eof);
+    } while (read_bio && BIO_pending(read_bio) > 0);
 
     err = SSL_get_error(ssl, rc);
 
