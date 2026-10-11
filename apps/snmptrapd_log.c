@@ -1576,24 +1576,27 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
 		size_t i, j;
 		i = sizeof(separator);
 		j = 0;
-		memset(separator, 0, i);
-		while (j < i && next_chr && next_chr != CHR_FMT_DELIM) {
+		memset(separator, 0, sizeof(separator));
+		while (next_chr && next_chr != CHR_FMT_DELIM) {
 		    if (next_chr == '\\') {
 			/*
 			 * Handle backslash interpretation
 			 * Print to "separator" string rather than the output buffer
 			 *    (a bit of a hack, but it should work!)
 			 */
+			if (format_str[fmt_idx + 1] == '\0')
+			    break;
 			next_chr = format_str[++fmt_idx];
-			if (!realloc_handle_backslash
-			    ((u_char **)&sep, &i, &j, 0, next_chr)) {
-			    return 0;
-			}
-		    } else {
+			if (j + 1 < i)
+			    (void)realloc_handle_backslash
+				((u_char **)&sep, &i, &j, 0, next_chr);
+		    } else if (j + 1 < i) {
 			separator[j++] = next_chr;
 		    }
 		    next_chr = format_str[++fmt_idx];
 		}
+		if (next_chr == '\0')
+		    fmt_idx--;
 	    }
             state = PARSE_IN_FORMAT;
             break;
