@@ -177,8 +177,8 @@ params_row_create(const char *param_name, int hash_type, const char *fp,
     memcpy(name, paramsTbl, sizeof(paramsTbl));
     name[name_len++] = 1; /* entry */
     col_pos = name_len++; /* column */
-    while (*param_name)
-        name[name_len++] = *param_name++;
+    while (*param_name && name_len < MAX_OID_LEN)
+        name[name_len++] = (u_char)*param_name++;
 
     bin_fp_len = sizeof(bin_fp);
     netsnmp_tls_fingerprint_build(hash_type, fp, &bin_fp_ptr, &bin_fp_len, 0);
@@ -243,8 +243,8 @@ addr_row_create(const char *target_name, int hash_type, const char *fp,
     memcpy(name, addrTbl, sizeof(addrTbl));
     name[name_len++] = 1; /* entry */
     col_pos = name_len++; /* column */
-    while (*target_name)
-        name[name_len++] = *target_name++;
+    while (*target_name && name_len < MAX_OID_LEN)
+        name[name_len++] = (u_char)*target_name++;
 
     if (fp) {
         bin_fp_len = sizeof(bin_fp);
@@ -466,12 +466,21 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    if (arg >= argc) {
+        fprintf(stderr, "no command specified\n");
+        usage();
+    }
+
     if (strcmp(argv[arg], "certToSecName") == 0) {
 
         oid           map_type[MAX_OID_LEN];
         u_int         pri;
         size_t        map_type_len = 0;
 
+        if (arg + 4 >= argc) {
+            fprintf(stderr, "missing certToSecName arguments\n");
+            usage();
+        }
         if (strcmp(argv[++arg], "add") != 0) {
             fprintf(stderr, "only add is supported at this time\n");
             exit(1);
@@ -509,6 +518,10 @@ main(int argc, char **argv)
 
         char * params_name;
 
+        if (arg + 4 >= argc) {
+            fprintf(stderr, "missing targetParamsFingerprint arguments\n");
+            usage();
+        }
         if (strcmp(argv[++arg], "add") != 0) {
             fprintf(stderr, "only add is supported at this time\n");
             exit(1);
@@ -532,6 +545,10 @@ main(int argc, char **argv)
 
         char * addr_name;
 
+        if (arg + 2 >= argc) {
+            fprintf(stderr, "missing targetAddr arguments\n");
+            usage();
+        }
         if (strcmp(argv[++arg], "add") != 0) {
             fprintf(stderr, "only add is supported at this time\n");
             exit(1);
