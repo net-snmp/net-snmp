@@ -1799,6 +1799,11 @@ netsnmp_walk(PyObject *self, PyObject *args)
       if (verbose)
         printf("error: walk: deleting old varbinds failed\n");
       snmp_free_pdu(pdu);
+      Py_DECREF(val_tuple);
+      val_tuple = NULL;
+      netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                         NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                         old_format);
       goto done;
     }
 
@@ -1908,7 +1913,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
       /* propagate error */
       if (verbose)
 	printf("error: walk response processing: unknown python error");
-      Py_DECREF(val_tuple);
+      Py_XDECREF(val_tuple);
+      val_tuple = NULL;
     }
   }
 
