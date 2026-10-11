@@ -1379,8 +1379,13 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         3)  If there is no open session associated with the tmSessionID, then
             closeSession processing is completed.
     */
-    if (NULL == cachep)
+    if (NULL == cachep) {
+        if (tlsbase) {
+            netsnmp_tlsbase_free_tlsdata(tlsbase);
+            t->data = NULL;
+        }
         return netsnmp_socketbase_close(t);
+    }
 
     /* if we have any remaining packets to send, try to send them */
     if (cachep->write_cache_len > 0) {
