@@ -173,6 +173,7 @@ vacm_parse_config_view(const char *token, const char *line)
     u_char         *viewMask;
     size_t          len;
 
+    memset(&view, 0, sizeof(view));
     view.viewStatus = atoi(line);
     line = skip_token_const(line);
     if (!line) {
@@ -296,6 +297,7 @@ _vacm_parse_config_access_common(struct vacm_accessEntry **aptr,
     char           *gName   = (char *) &access.groupName;
     size_t          len;
 
+    memset(&access, 0, sizeof(access));
     access.status = atoi(line);
     line = skip_token_const(line);
     if (!line) {
@@ -433,6 +435,7 @@ vacm_parse_config_group(const char *token, const char *line)
     char           *groupName;
     size_t          len;
 
+    memset(&group, 0, sizeof(group));
     group.status = atoi(line);
     line = skip_token_const(line);
     if (!line) {
