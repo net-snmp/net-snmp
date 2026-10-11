@@ -40,4 +40,12 @@ while ((p = CONTAINER_FIRST(container)))
   CONTAINER_REMOVE(container, p);
 CONTAINER_FREE(container);
 
+OK(snmp_call_callbacks(-1, 0, NULL) == SNMPERR_GENERR &&
+   snmp_count_callbacks(0, -1) == SNMPERR_GENERR &&
+   snmp_callback_available(-1, -1) == SNMPERR_GENERR &&
+   snmp_unregister_callback(-1, 0, NULL, NULL, 0) == SNMPERR_GENERR &&
+   snmp_callback_list(-1, 0) == NULL &&
+   netsnmp_callback_clear_client_arg(NULL, -1, 0) == SNMPERR_GENERR,
+   "callback functions reject negative major and minor indices");
+
 snmp_shutdown("container-test");

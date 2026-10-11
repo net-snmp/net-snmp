@@ -121,7 +121,8 @@ _callback_lock(int major, int minor, const char* warn, int do_assert)
     NETSNMP_SELECT_TIMEVAL lock_time;
 
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         netsnmp_assert("bad callback id");
         return 1;
     }
@@ -156,7 +157,8 @@ NETSNMP_STATIC_INLINE void
 _callback_unlock(int major, int minor)
 {
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         netsnmp_assert("bad callback id");
         return;
     }
@@ -278,7 +280,8 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
 {
     struct snmp_gen_callback *newscp = NULL, *scp = NULL;
 
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
 
@@ -339,7 +342,8 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
     struct snmp_gen_callback *scp;
     unsigned int    count = 0;
     
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
     
@@ -397,7 +401,8 @@ snmp_count_callbacks(int major, int minor)
     int             count = 0;
     struct snmp_gen_callback *scp;
 
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
     
@@ -415,7 +420,8 @@ snmp_count_callbacks(int major, int minor)
 int
 snmp_callback_available(int major, int minor)
 {
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS) {
         return SNMPERR_GENERR;
     }
     
@@ -432,8 +438,6 @@ snmp_callback_available(int major, int minor)
 /**
  * This function unregisters a specified callback function given a major
  * and minor type.
- *
- * Note: no bound checking on major and minor.
  *
  * @param major is the SNMP callback major type used
  *
@@ -464,11 +468,9 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
     int             count = 0;
     int             lock_failed;
 
-    if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS)
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS)
         return SNMPERR_GENERR;
-
-    scp = thecallbacks[major][minor];
-    prevNext = &(thecallbacks[major][minor]);
 
     if (_callback_need_init)
         init_callbacks();
@@ -477,6 +479,9 @@ snmp_unregister_callback(int major, int minor, SNMPCallback * target,
      * - this gets hit at shutdown, during cleanup. No easy fix.
      */
     lock_failed = _callback_lock(major,minor,"snmp_unregister_callback", 0);
+
+    scp = thecallbacks[major][minor];
+    prevNext = &(thecallbacks[major][minor]);
 
     while (scp != NULL) {
         if ((scp->sc_callback == target) &&
@@ -516,6 +521,10 @@ netsnmp_callback_clear_client_arg(void *ptr, int i, int j)
 {
     struct snmp_gen_callback *scp = NULL;
     int rc = 0;
+
+    if (i < 0 || i >= MAX_CALLBACK_IDS ||
+        j < 0 || j >= MAX_CALLBACK_SUBIDS)
+        return SNMPERR_GENERR;
 
     /*
      * don't init i and j before loop, since the caller specified
@@ -593,6 +602,10 @@ clear_callback(void)
 struct snmp_gen_callback *
 snmp_callback_list(int major, int minor)
 {
+    if (major < 0 || major >= MAX_CALLBACK_IDS ||
+        minor < 0 || minor >= MAX_CALLBACK_SUBIDS)
+        return NULL;
+
     if (_callback_need_init)
         init_callbacks();
 
