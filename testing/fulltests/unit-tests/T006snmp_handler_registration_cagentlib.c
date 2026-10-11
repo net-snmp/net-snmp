@@ -43,4 +43,9 @@ OK(netsnmp_unregister_handler(handler) == SNMPERR_SUCCESS,
 netsnmp_handler_free(dh);
 OK(TRUE, "Freeing duplicate handler");
 
+OK(netsnmp_register_scalar(NULL) == MIB_REGISTRATION_FAILED,
+   "netsnmp_register_scalar(NULL) returns MIB_REGISTRATION_FAILED");
+OK(netsnmp_register_read_only_scalar(NULL) == MIB_REGISTRATION_FAILED,
+   "netsnmp_register_read_only_scalar(NULL) returns MIB_REGISTRATION_FAILED");
+
 snmp_shutdown("snmp");
