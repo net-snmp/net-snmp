@@ -1290,7 +1290,7 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
           netsnmp_container_find("transport_configuration:fifo");
       if (!session.transport_configuration) {
           fprintf(stderr, "failed to initialize the transport configuration container\n");
-          return NULL;
+          return PyLong_FromVoidPtr(NULL);
       }
 
       session.transport_configuration->compare =
@@ -1318,7 +1318,11 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
                                                        trust_cert));
 
   ss = snmp_sess_open(&session);
-  return ss ? PyLong_FromVoidPtr(ss) : NULL;
+  session.peername = NULL;
+  session.contextName = NULL;
+  session.securityName = NULL;
+  netsnmp_cleanup_session(&session);
+  return PyLong_FromVoidPtr(ss);
 }
 
 static PyObject *
