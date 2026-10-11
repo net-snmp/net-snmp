@@ -294,7 +294,7 @@ static int _iterator_free(netsnmp_container *c)
     if(NULL == ii)
         return 0;
     
-    if(ii->user_ctx)
+    if(ii->user_ctx && ii->free_user_ctx)
         ii->free_user_ctx(ii->user_ctx,ii->user_ctx);
     
     free(ii);
