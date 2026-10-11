@@ -1522,8 +1522,7 @@ _context_add(walk_context *context)
 	assert(_valid_contexts->valid != NULL);
 
 	/* Computer number of slots in the array. */
-	_valid_contexts->sz_valid = sizeof(*_valid_contexts->valid) /
-							sizeof(walk_context *);
+	_valid_contexts->sz_valid = 4;
 
 	for (i = 0; i < _valid_contexts->sz_valid; i++)
 	    _valid_contexts->valid[i] = NULL;
