@@ -1422,7 +1422,11 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
       goto done;
     }
     if (pdu_type == SNMP_MSG_GETNEXT) {
-        memcpy(&err_str, tmpstr, tmplen);
+        if ((size_t)tmplen >= sizeof(err_str))
+            tmplen = sizeof(err_str) - 1;
+        if (tmpstr && tmplen > 0)
+            memcpy(err_str, tmpstr, tmplen);
+        err_str[tmplen > 0 ? tmplen : 0] = '\0';
         err_num = (int)py_netsnmp_attr_long(session, "ErrorNum");
         err_ind = (int)py_netsnmp_attr_long(session, "ErrorInd");
     }
@@ -1640,7 +1644,11 @@ netsnmp_walk(PyObject *self, PyObject *args)
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
     }
-    memcpy(&err_str, tmpstr, tmplen);
+    if ((size_t)tmplen >= sizeof(err_str))
+      tmplen = sizeof(err_str) - 1;
+    if (tmpstr && tmplen > 0)
+      memcpy(err_str, tmpstr, tmplen);
+    err_str[tmplen > 0 ? tmplen : 0] = '\0';
     err_num = (int)py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = (int)py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -1953,7 +1961,11 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
       if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
         goto done;
       }
-      memcpy(&err_str, tmpstr, tmplen);
+      if ((size_t)tmplen >= sizeof(err_str))
+        tmplen = sizeof(err_str) - 1;
+      if (tmpstr && tmplen > 0)
+        memcpy(err_str, tmpstr, tmplen);
+      err_str[tmplen > 0 ? tmplen : 0] = '\0';
       err_num = (int)py_netsnmp_attr_long(session, "ErrorNum");
       err_ind = (int)py_netsnmp_attr_long(session, "ErrorInd");
 
