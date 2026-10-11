@@ -368,14 +368,19 @@ set_enginetime(const u_char * engineID,
         }
 
         e = calloc(1, sizeof(*e));
-
-        e->next = etimelist[iindex];
-        etimelist[iindex] = e;
+        if (!e) {
+            QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
+        }
 
         e->engineID = calloc(1, engineID_len);
+        if (!e->engineID) {
+            QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
+        }
         memcpy(e->engineID, engineID, engineID_len);
 
         e->engineID_len = engineID_len;
+        e->next = etimelist[iindex];
+        etimelist[iindex] = e;
     }
 #ifdef LCD_TIME_SYNC_OPT
     if (authenticated || !e->authenticatedFlag) {
