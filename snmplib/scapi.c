@@ -1285,7 +1285,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
             }
             out_len = 0;
             if (sprint_realloc_hexstring(&buf, &buf_len, &out_len, 1,
-                                         plaintext, 16)) {
+                                         plaintext, SNMP_MIN(ptlen, 16))) {
                 DEBUGMSGTL(("scapi", "encrypt: string: %s\n", buf));
             } else {
                 DEBUGMSGTL(("scapi", "encrypt: string: %s [TRUNCATED]\n",
