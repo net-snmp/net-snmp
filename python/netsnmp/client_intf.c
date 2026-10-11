@@ -2079,7 +2079,12 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
             /* propagate error */
             if (verbose)
                 printf("error: bulk: deleting old varbinds failed\n");
-            snmp_free_pdu(pdu);
+            snmp_free_pdu(response);
+            Py_DECREF(val_tuple);
+            val_tuple = NULL;
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                               old_format);
             goto done;
         }
 
