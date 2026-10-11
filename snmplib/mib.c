@@ -1276,11 +1276,13 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
                 shift = 0;
         }
         fmt[2] = decimaltype;
-        if (val < 0) {
+        if (val < 0 && decimaltype == 'd') {
             negative = 1;
-            val = -val;
+            fmt[2] = 'u';
+            snprintf(tmp, sizeof(tmp), fmt, 0UL - (unsigned long)val);
+        } else {
+            snprintf(tmp, sizeof(tmp), fmt, val);
         }
-        snprintf(tmp, sizeof(tmp), fmt, val);
         break;
     case 'o':
     case 'x':
@@ -1304,13 +1306,15 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
     if (shift != 0) {
         len = strlen(tmp);
         if (shift <= len) {
+            if (len + 2 > (int)sizeof(tmp))
+                return 0;
             tmp[len + 1] = 0;
             while (shift--) {
                 tmp[len] = tmp[len - 1];
                 len--;
             }
             tmp[len] = '.';
-        } else if (shift < sizeof(tmp) - 1) {
+        } else if (shift < (int)sizeof(tmp) - 1) {
             tmp[shift + 1] = 0;
             while (shift) {
                 if (len-- > 0) {
@@ -1325,6 +1329,8 @@ sprint_realloc_hinted_integer(u_char ** buf, size_t * buf_len,
     }
     if (negative) {
         len = strlen(tmp)+1;
+        if (len + 1 > (int)sizeof(tmp))
+            return 0;
         while (len) {
             tmp[len] = tmp[len-1];
             len--;
