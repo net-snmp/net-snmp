@@ -109,6 +109,13 @@ static int
 _ssll_free(netsnmp_container *c)
 {
     if(c) {
+        sl_container *sl = (sl_container *)c;
+        sl_node *curr, *next;
+
+        for (curr = sl->head; curr; curr = next) {
+            next = curr->next;
+            free(curr);
+        }
         free(c);
     }
     return 0;
