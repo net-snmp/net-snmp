@@ -6423,6 +6423,11 @@ _sess_read_accept(struct session_list *slp)
         sp->s_snmp_errno = SNMPERR_MALLOC;
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
+#ifndef HAVE_CLOSESOCKET
+        close(data_sock);
+#else
+        closesocket(data_sock);
+#endif
         return -1;
     }
     nslp = NULL;
