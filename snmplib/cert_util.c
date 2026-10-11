@@ -813,9 +813,10 @@ _certindexes_load( void )
             continue;
         }
         cp = fgets( line, sizeof(line), fp );
-        if ( cp ) {
-            line[strlen(line)-1] = 0;
-            pos = strrchr(line, ' ');
+        if ( cp )
+            line[strcspn(line, "\r\n")] = '\0';
+        if ( cp && strncmp(line, "DIR ", 4) == 0 ) {
+            pos = strrchr(line + 4, ' ');
             if (pos)
                 *pos = '\0';
             DEBUGMSGT(("9:cert:index:load","adding (%d) %s\n", i, line));
