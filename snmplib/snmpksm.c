@@ -1208,6 +1208,9 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     if (encrypted_data)
         free(encrypted_data);
 
+    if (outdata.data)
+        free(outdata.data);
+
     if (cc)
         krb5_cc_close(kcontext, cc);
 
