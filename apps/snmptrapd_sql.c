@@ -620,12 +620,16 @@ _sql_log(void *p, void *dontcare)
              "trap:%d-%d-%d %d:%d:%d,%s,%d,%d,%d,%s,%s,%d,%d,%d,%s,%s,%s,%s\n",
              sqlb->time.year,sqlb->time.month,sqlb->time.day,
              sqlb->time.hour,sqlb->time.minute,sqlb->time.second,
-             sqlb->user,
-             sqlb->type, sqlb->version, sqlb->reqid, sqlb->oid,
-             sqlb->transport, sqlb->security_model, sqlb->msgid,
-             sqlb->security_level, sqlb->context,
-             sqlb->context_engine, sqlb->security_name,
-             sqlb->security_engine);
+             sqlb->user ? sqlb->user : "",
+             sqlb->type, sqlb->version, sqlb->reqid,
+             sqlb->oid ? sqlb->oid : "",
+             sqlb->transport ? sqlb->transport : "",
+             sqlb->security_model, sqlb->msgid,
+             sqlb->security_level,
+             sqlb->context ? sqlb->context : "",
+             sqlb->context_engine ? sqlb->context_engine : "",
+             sqlb->security_name ? sqlb->security_name : "",
+             sqlb->security_engine ? sqlb->security_engine : "");
 
     sqlb->logged = 1; /* prevent multiple logging */
 
@@ -639,17 +643,20 @@ _sql_log(void *p, void *dontcare)
     /** log varbind info */
     for( sqlvb = ITERATOR_FIRST(it); sqlvb; sqlvb = ITERATOR_NEXT(it)) {
 #ifdef NETSNMP_MYSQL_TRAP_VALUE_TEXT
-        snmp_log(LOG_ERR,"varbind:%s,%s\n", sqlvb->oid, sqlvb->val);
+        snmp_log(LOG_ERR, "varbind:%s,%s\n",
+                 sqlvb->oid ? sqlvb->oid : "",
+                 sqlvb->val ? (char *)sqlvb->val : "");
 #else
         char *hex;
         int len = binary_to_hex(sqlvb->val, sqlvb->val_len, &hex);
         if (hex) {
-            snmp_log(LOG_ERR,"varbind:%d,%s,%s\n", sqlvb->oid, hex);
+            snmp_log(LOG_ERR,"varbind:%s,%s\n",
+                     sqlvb->oid ? sqlvb->oid : "", hex);
             free(hex);
         }
         else {
             snmp_log(LOG_ERR,"malloc failed for varbind hex value\n");
-            snmp_log(LOG_ERR,"varbind:%s,\n", sqlvb->oid);
+            snmp_log(LOG_ERR,"varbind:%s,\n", sqlvb->oid ? sqlvb->oid : "");
         }
 #endif
     }
@@ -741,7 +748,7 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
                     netsnmp_transport     *transport)
 {
     static oid   trapoids[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 0 };
-    oid         *trap_oid, tmp_oid[MAX_OID_LEN];
+    oid         *trap_oid, tmp_oid[MAX_OID_LEN + 2];
     time_t       now;
     struct tm   *cur_time;
     size_t       tmp_size;
@@ -782,8 +789,11 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
          */
         if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
             trap_oid_len = pdu->enterprise_length;
-            memcpy(tmp_oid, pdu->enterprise, sizeof(oid) * trap_oid_len);
-            if (tmp_oid[trap_oid_len - 1] != 0)
+            if (trap_oid_len > MAX_OID_LEN)
+                trap_oid_len = MAX_OID_LEN;
+            if (trap_oid_len > 0 && pdu->enterprise)
+                memcpy(tmp_oid, pdu->enterprise, sizeof(oid) * trap_oid_len);
+            if (trap_oid_len == 0 || tmp_oid[trap_oid_len - 1] != 0)
                 tmp_oid[trap_oid_len++] = 0;
             tmp_oid[trap_oid_len++] = pdu->specific_type;
             trap_oid = tmp_oid;
@@ -795,7 +805,8 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     }
     else {
         vars = pdu->variables;
-        if (vars && vars->next_variable) {
+        if (vars && vars->next_variable &&
+            vars->next_variable->type == ASN_OBJECT_ID) {
             trap_oid_len = vars->next_variable->val_len / sizeof(oid);
             trap_oid = vars->next_variable->val.objid;
         }
@@ -831,8 +842,9 @@ _sql_save_trap_info(sql_buf *sqlb, netsnmp_pdu  *pdu,
     sqlb->user_len = buf_user_len_t;
 
     /** transport */
-    sqlb->transport = transport->f_fmtaddr(transport, pdu->transport_data,
-                                           pdu->transport_data_length);
+    sqlb->transport = transport->f_fmtaddr ?
+        transport->f_fmtaddr(transport, pdu->transport_data,
+                             pdu->transport_data_length) : NULL;
 
     /** security model */
     sqlb->security_model = pdu->securityModel;
