@@ -128,12 +128,17 @@ auth_oid(oid * it, size_t * len, const char *groupName,
     int             i;
     int             itIndex = AUTH_OID_LEN;
 
+    if (itIndex + 1 + strlen(groupName) + 1 + (prefix ? strlen(prefix) : 0) +
+        2 + 1 + strlen(authtype) > MAX_OID_LEN) {
+        fprintf(stderr, "OID length exceeds MAX_OID_LEN\n");
+        exit(1);
+    }
+
     it[itIndex++] = strlen(groupName);
     for (i = 0; i < (int) strlen(groupName); i++)
         it[itIndex++] = groupName[i];
 
     if (prefix) {
-        *len += strlen(prefix);
         it[itIndex++] = strlen(prefix);
         for (i = 0; i < (int) strlen(prefix); i++)
             it[itIndex++] = prefix[i];
@@ -158,14 +163,17 @@ access_oid(oid * it, size_t * len, const char *groupName,
 
     int             itIndex = ACCESS_OID_LEN;
 
-    *len = itIndex + 4 + +strlen(groupName);
+    if (itIndex + 4 + strlen(groupName) +
+        (prefix ? strlen(prefix) : 0) > MAX_OID_LEN) {
+        fprintf(stderr, "OID length exceeds MAX_OID_LEN\n");
+        exit(1);
+    }
 
     it[itIndex++] = strlen(groupName);
     for (i = 0; i < (int) strlen(groupName); i++)
         it[itIndex++] = groupName[i];
 
     if (prefix) {
-        *len += strlen(prefix);
         it[itIndex++] = strlen(prefix);
         for (i = 0; i < (int) strlen(prefix); i++)
             it[itIndex++] = prefix[i];
@@ -174,6 +182,8 @@ access_oid(oid * it, size_t * len, const char *groupName,
 
     it[itIndex++] = model;
     it[itIndex++] = level;
+
+    *len = itIndex;
 }
 
 
@@ -183,6 +193,11 @@ sec2group_oid(oid * it, size_t * len, int model, const char *name)
     int             i;
 
     int             itIndex = SEC2GROUP_OID_LEN;
+
+    if (itIndex + 2 + strlen(name) > MAX_OID_LEN) {
+        fprintf(stderr, "OID length exceeds MAX_OID_LEN\n");
+        exit(1);
+    }
 
     *len = itIndex + 2 + strlen(name);
 
@@ -204,6 +219,11 @@ view_oid(oid * it, size_t * len, const char *viewName, char *viewSubtree)
 
     if (!snmp_parse_oid(viewSubtree, c_oid, &c_oid_length)) {
         printf("Error parsing subtree (%s)\n", viewSubtree);
+        exit(1);
+    }
+
+    if (itIndex + 2 + strlen(viewName) + c_oid_length > MAX_OID_LEN) {
+        fprintf(stderr, "OID length exceeds MAX_OID_LEN\n");
         exit(1);
     }
 
@@ -381,7 +401,7 @@ main(int argc, char *argv[])
                 i++;
             }
 	} else {
-            for (i=0 ; i < (name_length+7)/8; i++)
+            for (i=0 ; i < (name_length+7)/8 && i < sizeof(viewMask); i++)
                 viewMask[i] = (u_char)0xff;
         }
         view_oid(vacmViewTreeFamilyMask, &name_length, argv[arg],
