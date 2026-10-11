@@ -4607,6 +4607,7 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
          */
         memset(*key, 0, *keyLen);
         SNMP_FREE(*key);
+        *keyLen = 0;
     }
 
     if (type == 0) {
@@ -4647,12 +4648,20 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
 
     if (type < 2) {
         *key = (u_char *) malloc(SNMP_MAXBUF_SMALL);
+        if (*key == NULL) {
+            *keyLen = 0;
+            memset(userKey, 0, sizeof(userKey));
+            return;
+        }
         *keyLen = SNMP_MAXBUF_SMALL;
         ret = generate_kul(user->authProtocol, user->authProtocolLen,
                            engineID, engineIDLen,
                            userKey, userKeyLen, *key, keyLen);
         if (ret != SNMPERR_SUCCESS) {
             config_perror("setting key failed (in generate_kul())");
+            SNMP_FREE(*key);
+            *keyLen = 0;
+            memset(userKey, 0, sizeof(userKey));
             return;
         }
 
