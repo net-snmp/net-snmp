@@ -87,7 +87,8 @@ static u_char  *smux_open_process(NETSNMP_SOCKET, u_char *, size_t *, int *);
 static u_char  *smux_rreq_process(NETSNMP_SOCKET, u_char *, size_t *);
 static u_char  *smux_close_process(NETSNMP_SOCKET, u_char *, size_t *);
 static u_char  *smux_trap_process(u_char *, size_t *);
-static u_char  *smux_parse(u_char *, oid *, size_t *, size_t *, u_char *);
+static u_char  *smux_parse(u_char *, size_t, oid *, size_t *, size_t *,
+                           u_char *);
 static u_char  *smux_parse_var(u_char *, size_t *, oid *, size_t *,
                                size_t *, u_char *);
 static void     smux_send_close(NETSNMP_SOCKET, int);
@@ -1114,6 +1115,11 @@ smux_rreq_process(NETSNMP_SOCKET sd, u_char * ptr, size_t * len)
 
     oid_name_len = MAX_OID_LEN;
     ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len);
+    if (ptr == NULL) {
+        DEBUGMSGTL(("smux", "[smux_rreq_process] oid parse failed\n"));
+        smux_send_rrsp(sd, -1);
+        return NULL;
+    }
 
     DEBUGMSGTL(("smux", "[smux_rreq_process] smux subtree: "));
     DEBUGMSGOID(("smux", oid_name, oid_name_len));
@@ -1616,7 +1622,7 @@ smux_snmp_process(int exact,
             /*
              * Interpret reply 
              */
-            ptr = smux_parse(result, objid, len, return_len, return_type);
+            ptr = smux_parse(result, length, objid, len, return_len, return_type);
             /*
              * ptr will point to query result or NULL if error 
              */
@@ -1628,11 +1634,9 @@ smux_snmp_process(int exact,
 }
 
 static u_char  *
-smux_parse(u_char * rsp,
-           oid * objid,
-           size_t * oidlen, size_t * return_len, u_char * return_type)
+smux_parse(u_char * rsp, size_t length, oid * objid, size_t * oidlen,
+           size_t * return_len, u_char * return_type)
 {
-    size_t          length = SMUXMAXPKTSIZE;
     u_char         *ptr, type;
     long            reqid, errstat, errindex;
 
@@ -1718,6 +1722,8 @@ smux_parse_var(u_char * varbind,
     var_name_len = MAX_OID_LEN;
     ptr = snmp_parse_var_op(ptr, var_name, &var_name_len, vartype,
                             &var_val_len, &var_val, &len);
+    if (ptr == NULL)
+        return NULL;
 
     *oidlen = var_name_len;
     memcpy(objid, var_name, var_name_len * sizeof(oid));
@@ -1728,7 +1734,7 @@ smux_parse_var(u_char * varbind,
     /*
      * XXX 
      */
-    len = SMUXMAXPKTSIZE;
+    len = (size_t)(ptr - var_val);
     DEBUGMSGTL(("smux",
                 "[smux_parse_var] Asn coded len of var %" NETSNMP_PRIz
                 "u, type %d\n", var_val_len, (int) *vartype));
@@ -1736,8 +1742,9 @@ smux_parse_var(u_char * varbind,
     switch ((short) *vartype) {
     case ASN_INTEGER:
         *varlength = sizeof(long);
-        asn_parse_int(var_val, &len, vartype,
-                      (long *) &smux_long, *varlength);
+        if (asn_parse_int(var_val, &len, vartype,
+                          (long *) &smux_long, *varlength) == NULL)
+            return NULL;
         return (u_char *) & smux_long;
         break;
     case ASN_COUNTER:
@@ -1745,15 +1752,17 @@ smux_parse_var(u_char * varbind,
     case ASN_TIMETICKS:
     case ASN_UINTEGER:
         *varlength = sizeof(u_long);
-        asn_parse_unsigned_int(var_val, &len, vartype,
-                               (u_long *) & smux_ulong, *varlength);
+        if (asn_parse_unsigned_int(var_val, &len, vartype,
+                                   (u_long *) & smux_ulong, *varlength) == NULL)
+            return NULL;
         return (u_char *) & smux_ulong;
         break;
     case ASN_COUNTER64:
         *varlength = sizeof(smux_counter64);
-        asn_parse_unsigned_int64(var_val, &len, vartype,
-                                 (struct counter64 *) &smux_counter64,
-                                 *varlength);
+        if (asn_parse_unsigned_int64(var_val, &len, vartype,
+                                     (struct counter64 *) &smux_counter64,
+                                     *varlength) == NULL)
+            return NULL;
         return (u_char *) & smux_counter64;
         break;
     case ASN_IPADDRESS:
@@ -1763,6 +1772,8 @@ smux_parse_var(u_char * varbind,
          * because we know it is an ip address
          */
         if ((var_val = asn_parse_header(var_val, &len, &type)) == NULL)
+            return NULL;
+        if (type != ASN_IPADDRESS || len != 4)
             return NULL;
         memcpy((u_char *) & (smux_sa.sin_addr.s_addr), var_val,
                *varlength);
@@ -1775,7 +1786,8 @@ smux_parse_var(u_char * varbind,
         if (len == 0)
             return NULL;
         str_len = SMUXMAXSTRLEN;
-        asn_parse_string(var_val, &len, vartype, smux_str, &str_len);
+        if (asn_parse_string(var_val, &len, vartype, smux_str, &str_len) == NULL)
+            return NULL;
         *varlength = str_len;
         return smux_str;
         break;
@@ -1783,7 +1795,8 @@ smux_parse_var(u_char * varbind,
     case ASN_NSAP:
     case ASN_OBJECT_ID:
         objid_len = MAX_OID_LEN;
-        asn_parse_objid(var_val, &len, vartype, smux_objid, &objid_len);
+        if (asn_parse_objid(var_val, &len, vartype, smux_objid, &objid_len) == NULL)
+            return NULL;
         *varlength = objid_len * sizeof(oid);
         return (u_char *) smux_objid;
         break;
@@ -1800,7 +1813,8 @@ smux_parse_var(u_char * varbind,
         if (len == 0)
             return NULL;
         str_len = SMUXMAXSTRLEN;
-        asn_parse_bitstring(var_val, &len, vartype, smux_str, &str_len);
+        if (asn_parse_bitstring(var_val, &len, vartype, smux_str, &str_len) == NULL)
+            return NULL;
         *varlength = str_len;
         return (u_char *) smux_str;
         break;
@@ -2106,12 +2120,13 @@ smux_trap_process(u_char * rsp, size_t * len)
         if (ptr == NULL)
             goto err;
 
-        maxlen = SMUXMAXPKTSIZE;
+        maxlen = (size_t)(ptr - var_val);
         switch ((short) vartype) {
         case ASN_INTEGER:
             var_val_len = sizeof(long);
-            asn_parse_int(var_val, &maxlen, &vartype,
-                          (long *) &smux_long, var_val_len);
+            if (asn_parse_int(var_val, &maxlen, &vartype,
+                              (long *) &smux_long, var_val_len) == NULL)
+                goto err;
             var_val = (u_char *) & smux_long;
             break;
         case ASN_COUNTER:
@@ -2119,15 +2134,17 @@ smux_trap_process(u_char * rsp, size_t * len)
         case ASN_TIMETICKS:
         case ASN_UINTEGER:
             var_val_len = sizeof(u_long);
-            asn_parse_unsigned_int(var_val, &maxlen, &vartype,
-                                   (u_long *) & smux_ulong, var_val_len);
+            if (asn_parse_unsigned_int(var_val, &maxlen, &vartype,
+                                       (u_long *) & smux_ulong, var_val_len) == NULL)
+                goto err;
             var_val = (u_char *) & smux_ulong;
             break;
         case ASN_COUNTER64:
             var_val_len = sizeof(smux_counter64);
-            asn_parse_unsigned_int64(var_val, &maxlen, &vartype,
-                                     (struct counter64 *) &smux_counter64,
-                                     var_val_len);
+            if (asn_parse_unsigned_int64(var_val, &maxlen, &vartype,
+                                         (struct counter64 *) &smux_counter64,
+                                         var_val_len) == NULL)
+                goto err;
             var_val = (u_char *) & smux_counter64;
             break;
         case ASN_IPADDRESS:
@@ -2139,6 +2156,8 @@ smux_trap_process(u_char * rsp, size_t * len)
             if ((var_val =
                  asn_parse_header(var_val, &maxlen, &vartype)) == NULL)
                 goto err;
+            if (vartype != ASN_IPADDRESS || maxlen != 4)
+                goto err;
             memcpy((u_char *) & (smux_sa.sin_addr.s_addr), var_val,
                    var_val_len);
             var_val = (u_char *) & (smux_sa.sin_addr.s_addr);
@@ -2149,14 +2168,16 @@ smux_trap_process(u_char * rsp, size_t * len)
              * XXX 
              */
             var_val_len = SMUXMAXSTRLEN;
-            asn_parse_string(var_val, &maxlen, &vartype,
-                             smux_str, &var_val_len);
+            if (asn_parse_string(var_val, &maxlen, &vartype,
+                                 smux_str, &var_val_len) == NULL)
+                goto err;
             var_val = smux_str;
             break;
         case ASN_OBJECT_ID:
             var_val_len = MAX_OID_LEN;
-            asn_parse_objid(var_val, &maxlen, &vartype,
-                            smux_objid, &var_val_len);
+            if (asn_parse_objid(var_val, &maxlen, &vartype,
+                                smux_objid, &var_val_len) == NULL)
+                goto err;
             var_val_len *= sizeof(oid);
             var_val = (u_char *) smux_objid;
             break;
@@ -2165,20 +2186,23 @@ smux_trap_process(u_char * rsp, size_t * len)
         case SNMP_ENDOFMIBVIEW:
         case ASN_NULL:
             var_val = NULL;
+            var_val_len = 0;
             break;
         case ASN_BIT_STR:
             /*
              * XXX 
              */
             var_val_len = SMUXMAXSTRLEN;
-            asn_parse_bitstring(var_val, &maxlen, &vartype,
-                                smux_str, &var_val_len);
+            if (asn_parse_bitstring(var_val, &maxlen, &vartype,
+                                    smux_str, &var_val_len) == NULL)
+                goto err;
             var_val = (u_char *) smux_str;
             break;
         case ASN_NSAP:
         default:
             snmp_log(LOG_ERR, "bad type returned (%x)\n", vartype);
             var_val = NULL;
+            var_val_len = 0;
             break;
         }
 
