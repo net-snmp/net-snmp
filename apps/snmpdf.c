@@ -186,9 +186,10 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
                     snmp_errstring(response->errstat));
             exit(1);
         }
-        if (snmp_oid_compare(response->variables->name,
-                             SNMP_MIN(base_length,
-                                      response->variables->name_length),
+        if (!response->variables ||
+            response->variables->name_length <= base_length ||
+            snmp_oid_compare(response->variables->name,
+                             base_length,
                              base, base_length) != 0)
             running = 0;
         else if (response->variables->type == SNMP_NOSUCHINSTANCE ||
@@ -341,22 +342,33 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next;
             len = vlp2->val_len;
             if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
-            memcpy(descr, vlp2->val.string, len);
+            if (vlp2->val.string && len > 0)
+                memcpy(descr, vlp2->val.string, len);
+            else
+                len = 0;
             descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next;
             units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next;
             hssize = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next;
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next;
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             if (human_units) {
@@ -420,19 +432,28 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next2;
             len = vlp2->val_len;
             if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
-            memcpy(descr, vlp2->val.string, len);
+            if (vlp2->val.string && len > 0)
+                memcpy(descr, vlp2->val.string, len);
+            else
+                len = 0;
             descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
-            hssize = *(vlp2->val.integer);
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next2;
+            hssize = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             vlp2 = vlp2->next_variable;
-            if (vlp2->type == SNMP_NOSUCHINSTANCE) goto next2;
-            hsused = *(vlp2->val.integer);
+            if (!vlp2 || vlp2->type == SNMP_NOSUCHINSTANCE ||
+                vlp2->type == SNMP_NOSUCHOBJECT)
+                goto next2;
+            hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             if (human_units) {
                 char size[10], used[10], avail[10];
