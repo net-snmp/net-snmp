@@ -295,8 +295,13 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     }
                     idx = idx->next_variable;
 	            logh->type  = 0;
-	            logh->token = strdup((char *) idx->val.string);
+	            logh->token = strdup(idx->val.string ?
+                                         (char *) idx->val.string : "");
                     netsnmp_insert_iterator_context(request, (void*)logh);
+                    netsnmp_request_add_list_data(
+                        request,
+                        netsnmp_create_data_list("nsLogging:created",
+                                                 logh, NULL));
 	            break;
 
                 case RS_DESTROY:
@@ -328,6 +333,8 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
             }
             logh = (netsnmp_log_handler*)netsnmp_extract_iterator_context(request);
             table_info  =                 netsnmp_extract_table_info(request);
+            if (!table_info || !table_info->indexes)
+                continue;
 
             switch (table_info->colnum) {
             case NSLOGGING_TYPE:
@@ -357,6 +364,15 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
             }
             logh = (netsnmp_log_handler*)netsnmp_extract_iterator_context(request);
             table_info  =                 netsnmp_extract_table_info(request);
+            if (!table_info || !table_info->indexes)
+                continue;
+
+            if (!logh && (table_info->colnum != NSLOGGING_STATUS ||
+                          *request->requestvb->val.integer != RS_DESTROY)) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_INCONSISTENTNAME);
+                return SNMP_ERR_INCONSISTENTNAME;
+            }
 
             switch (table_info->colnum) {
             case NSLOGGING_STATUS:
@@ -416,14 +432,21 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 		 * and the failure was elsewhere, so we need to undo it.
 		 *  (Or else there was an attempt to write the same value!)
 		 */
-                if ( logh && logh->type == *request->requestvb->val.integer )
+                if ( logh && request->requestvb->val.integer &&
+                     logh->type == *request->requestvb->val.integer )
                     logh->type = 0;
 	        break;
 
             case NSLOGGING_STATUS:
-                temp = *request->requestvb->val.integer;
-                if ( logh && ( temp == RS_CREATEANDGO ||
-                               temp == RS_CREATEANDWAIT)) {
+                if ( logh &&
+                     netsnmp_request_get_list_data(request,
+                                                   "nsLogging:created") ) {
+                    netsnmp_request_info *req;
+                    for (req = requests; req; req = req->next) {
+                        if (netsnmp_extract_iterator_context(req) == logh)
+                            netsnmp_request_remove_list_data(
+                                req, TABLE_ITERATOR_NAME);
+                    }
 		    netsnmp_remove_loghandler( logh );
 		}
 	        break;
@@ -443,11 +466,11 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                 return SNMP_ERR_NOERROR;	/* Already got an error */
             }
             logh = (netsnmp_log_handler*)netsnmp_extract_iterator_context(request);
-            if (!logh) {
-                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_COMMITFAILED);
-                return SNMP_ERR_COMMITFAILED;	/* Shouldn't happen! */
-            }
+            if (!logh)
+                continue;
             table_info  =                 netsnmp_extract_table_info(request);
+            if (!table_info || !table_info->indexes)
+                continue;
 
             switch (table_info->colnum) {
             case NSLOGGING_MAXLEVEL:
@@ -464,9 +487,16 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     case RS_CREATEANDWAIT:
                         netsnmp_disable_this_loghandler(logh);
                         break;
-		    case RS_DESTROY:
+		    case RS_DESTROY: {
+                        netsnmp_request_info *req;
+                        for (req = requests; req; req = req->next) {
+                            if (netsnmp_extract_iterator_context(req) == logh)
+                                netsnmp_request_remove_list_data(
+                                    req, TABLE_ITERATOR_NAME);
+                        }
 		        netsnmp_remove_loghandler( logh );
                         break;
+                    }
 		}
 	        break;
 	    }
