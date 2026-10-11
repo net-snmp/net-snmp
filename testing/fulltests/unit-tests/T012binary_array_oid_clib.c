@@ -69,6 +69,19 @@ for (i = 0; i < sizeof(a)/sizeof(a[0]); ++i) {
                   a[i]->oids[0]));
 }
 
+{
+    netsnmp_iterator *it = CONTAINER_ITERATOR(c);
+
+    OK(it != NULL, "Iterator created");
+    if (it) {
+        for (ip = ITERATOR_FIRST(it); ip; ip = ITERATOR_NEXT(it))
+            ;
+        OK(ITERATOR_REMOVE(it) < 0,
+           "ITERATOR_REMOVE at end of iterator fails safely");
+        ITERATOR_RELEASE(it);
+    }
+}
+
 while ((ip = CONTAINER_FIRST(c))) {
     OK(CONTAINER_REMOVE(c, ip) == 0, "Removing succeeded");
 }

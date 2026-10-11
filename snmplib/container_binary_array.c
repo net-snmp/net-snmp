@@ -361,7 +361,7 @@ netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
     /*
      * if there is no data, return NULL;
      */
-    if (!t->count)
+    if (!t->count || index >= t->count)
         return -1;
 
     /*
@@ -968,6 +968,7 @@ _ba_iterator_remove(netsnmp_iterator *nit)
 {
     binary_array_iterator *it = (void *)nit;
     binary_array_table* t = _ba_it2cont(it);
+    int rc;
 
     if(NULL == t) {
         netsnmp_assert(NULL != t);
@@ -979,8 +980,12 @@ _ba_iterator_remove(netsnmp_iterator *nit)
      * the container. Also, back up one so that next will be the position
      * that was just removed.
      */
-    ++it->base.sync;
-    return netsnmp_binary_array_remove_at(it->base.container, it->pos--, NULL);
+    rc = netsnmp_binary_array_remove_at(it->base.container, it->pos, NULL);
+    if (rc == 0) {
+        it->base.sync = it->base.container->sync;
+        --it->pos;
+    }
+    return rc;
 
 }
 
