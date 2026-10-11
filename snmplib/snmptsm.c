@@ -253,6 +253,11 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                object is set to true, then use the transportDomain to
                look up the corresponding prefix. */
             const char *prefix;
+            if (!parms->session || !parms->session->peername) {
+                snmp_increment_statistic(STAT_TSM_SNMPTSMUNKNOWNPREFIXES);
+                SNMP_FREE(tmStateRef);
+                return SNMPERR_GENERR;
+            }
             if (strncmp("ssh:",parms->session->peername,4) == 0)
                 prefix = "ssh:";
             else if (strncmp("dtls:",parms->session->peername,5) == 0)
@@ -277,8 +282,11 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                snmpTsmInvalidPrefixes counter is incremented, an error
                indication is returned to the calling module, and
                message processing stops. */
-            if (strchr(parms->secName, ':') == 0 ||
+            if (!parms->secName ||
+                memchr(parms->secName, ':', parms->secNameLen) == NULL ||
                 strlen(prefix)+1 >= parms->secNameLen ||
+                parms->secNameLen - strlen(prefix) - 1 >=
+                    sizeof(tmStateRef->securityName) ||
                 strncmp(parms->secName, prefix, strlen(prefix)) != 0 ||
                 parms->secName[strlen(prefix)] != ':') {
                 /* Note: since we're assigning the prefixes above the
@@ -300,6 +308,11 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             /* 4.2, step 2: If the snmpTsmConfigurationUsePrefix object is
                set to false, then set tmSecurityName to the value
                of securityName. */
+            if (!parms->secName ||
+                parms->secNameLen >= sizeof(tmStateRef->securityName)) {
+                SNMP_FREE(tmStateRef);
+                return SNMPERR_GENERR;
+            }
             memcpy(tmStateRef->securityName, parms->secName,
                    parms->secNameLen);
             tmStateRef->securityNameLen = parms->secNameLen;
@@ -307,6 +320,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
 
     /* truncate the security name with a '\0' for safety */
+    if (tmStateRef->securityNameLen >= sizeof(tmStateRef->securityName))
+        tmStateRef->securityNameLen = sizeof(tmStateRef->securityName) - 1;
     tmStateRef->securityName[tmStateRef->securityNameLen] = '\0';
 
     /* 4.2, step 3: Set securityParameters to a zero-length OCTET
