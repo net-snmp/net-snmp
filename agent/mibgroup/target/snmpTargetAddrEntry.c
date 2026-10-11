@@ -262,8 +262,10 @@ write_snmpTargetAddrTDomain(int action,
     struct targetAddrTable_struct *target = NULL;
     static oid      old_oid[MAX_OID_LEN];
     static size_t   old_oid_len;
+    static int      resetOnFail;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OBJECT_ID) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrTDomain not ASN_OBJECT_ID\n"));
@@ -307,6 +309,7 @@ write_snmpTargetAddrTDomain(int action,
 
             memcpy((u_char *) target->tDomain, var_val, var_val_len);
             target->tDomainLen = var_val_len / sizeof(oid);
+            resetOnFail = 1;
 
             /*
              * If row is new, check if its status can be updated.  
@@ -317,11 +320,13 @@ write_snmpTargetAddrTDomain(int action,
             }
         }
     } else if (action == COMMIT) {
+        resetOnFail = 0;
         snmp_store_needed(NULL);
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRTDOMAINCOLUMN;
         if ((target =
@@ -354,8 +359,10 @@ write_snmpTargetAddrTAddress(int action,
     struct targetAddrTable_struct *target = NULL;
     static char    *old_addr = NULL;
     static size_t   old_len = 0;
+    static int      resetOnFail;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrTAddress not ASN_OCTET_STR\n"));
@@ -389,10 +396,13 @@ write_snmpTargetAddrTAddress(int action,
             old_len = target->tAddressLen;
             target->tAddress = malloc(var_val_len);
             if (target->tAddress == NULL) {
+                target->tAddress = old_addr;
+                old_addr = NULL;
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
             memcpy(target->tAddress, var_val, var_val_len);
             target->tAddressLen = var_val_len;
+            resetOnFail = 1;
 
             /*
              * If row is new, check if its status can be updated.  
@@ -405,11 +415,13 @@ write_snmpTargetAddrTAddress(int action,
     } else if (action == COMMIT) {
         SNMP_FREE(old_addr);
         old_addr = NULL;
+        resetOnFail = 0;
         snmp_store_needed(NULL);
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRTADDRESSCOLUMN;
         if ((target =
@@ -421,12 +433,14 @@ write_snmpTargetAddrTAddress(int action,
                 SNMP_FREE(target->tAddress);
                 target->tAddress = old_addr;
                 target->tAddressLen = old_len;
+                old_addr = NULL;
                 if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     snmpTargetAddr_rowStatusCheck(target) == 0) {
                     target->rowStatus = SNMP_ROW_NOTREADY;
                 }
             }
         }
+        SNMP_FREE(old_addr);
     }
 
     return SNMP_ERR_NOERROR;
@@ -453,7 +467,7 @@ write_snmpTargetAddrTimeout(int action,
                         "write to snmpTargetAddrTimeout not ASN_INTEGER\n"));
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len > (size = sizeof(long_ret))) {
+        if (var_val_len != (size = sizeof(long_ret))) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrTimeout: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
@@ -628,8 +642,10 @@ write_snmpTargetAddrTagList(int action,
     struct targetAddrTable_struct *target = NULL;
     static char    *old_tlist = NULL;
     static int      old_tlist_len;
+    static int      resetOnFail;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrTagList not ASN_OCTET_STR\n"));
@@ -669,15 +685,20 @@ write_snmpTargetAddrTagList(int action,
             target->tagListData = netsnmp_memdup_nt(var_val, var_val_len,
                                                     &target->tagListLen);
             if (target->tagListData == NULL) {
+                target->tagListData = old_tlist;
+                target->tagListLen = old_tlist_len;
+                old_tlist = NULL;
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
+            resetOnFail = 1;
         }
     } else if (action == COMMIT) {
         SNMP_FREE(old_tlist);
         old_tlist = NULL;
+        resetOnFail = 0;
         snmp_store_needed(NULL);
-    } else if (action == FREE || action == UNDO) {
-        old_tlist = NULL;
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
+        resetOnFail = 0;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRTAGLISTCOLUMN;
         if ((target =
@@ -688,8 +709,10 @@ write_snmpTargetAddrTagList(int action,
                 SNMP_FREE(target->tagListData);
                 target->tagListData = old_tlist;
                 target->tagListLen = old_tlist_len;
+                old_tlist = NULL;
             }
         }
+        SNMP_FREE(old_tlist);
     }
 
     return SNMP_ERR_NOERROR;
@@ -706,8 +729,10 @@ write_snmpTargetAddrParams(int action,
     struct targetAddrTable_struct *target = NULL;
     static char    *old_params = NULL;
     static size_t   old_params_len;
+    static int      resetOnFail;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrParams not ASN_OCTET_STR\n"));
@@ -747,8 +772,12 @@ write_snmpTargetAddrParams(int action,
             target->paramsData = netsnmp_memdup_nt(var_val, var_val_len,
                                                    &target->paramsLen);
             if (target->paramsData == NULL) {
+                target->paramsData = old_params;
+                target->paramsLen = old_params_len;
+                old_params = NULL;
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
+            resetOnFail = 1;
 
             /*
              * If row is new, check if its status can be updated.  
@@ -761,11 +790,13 @@ write_snmpTargetAddrParams(int action,
     } else if (action == COMMIT) {
         SNMP_FREE(old_params);
         old_params = NULL;
+        resetOnFail = 0;
         snmp_store_needed(NULL);
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRPARAMSCOLUMN;
         if ((target =
@@ -784,6 +815,7 @@ write_snmpTargetAddrParams(int action,
                 }
             }
         }
+        SNMP_FREE(old_params);
     }
 
     return SNMP_ERR_NOERROR;
@@ -797,7 +829,7 @@ write_snmpTargetAddrStorageType(int action,
                                 u_char * statP,
                                 oid * name, size_t name_len)
 {
-    long            long_ret = *((long *) var_val);
+    static long     long_ret;
     struct targetAddrTable_struct *target;
 
     if (action == RESERVE1) {
@@ -811,6 +843,7 @@ write_snmpTargetAddrStorageType(int action,
                         "write to snmpTargetAddrStorageType: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        long_ret = *((long *) var_val);
         if (long_ret != SNMP_STORAGE_OTHER &&
             long_ret != SNMP_STORAGE_VOLATILE &&
             long_ret != SNMP_STORAGE_NONVOLATILE) {
@@ -878,7 +911,7 @@ snmpTargetAddr_createNewRow(oid * name, size_t name_len)
     if (newNameLen > 0) {
         temp_struct = snmpTargetAddrTable_create();
         if (!temp_struct)
-            return SNMP_ERR_GENERR;
+            return 0;
         temp_struct->nameData = (char *) malloc(newNameLen+1);
         if (temp_struct->nameData == NULL) {
             snmpTargetAddrTable_dispose(temp_struct);
@@ -913,10 +946,11 @@ write_snmpTargetAddrRowStatus(int action,
                               u_char * statP, oid * name, size_t name_len)
 {
     static long     value;
+    static int      row_created;
     struct targetAddrTable_struct *target = NULL;
 
     if (action == RESERVE1) {
-        value = *((long *) var_val);
+        row_created = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrRowStatus not ASN_INTEGER\n"));
@@ -927,6 +961,7 @@ write_snmpTargetAddrRowStatus(int action,
                         "write to snmpTargetAddrRowStatus: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        value = *((long *) var_val);
         if (value == RS_NOTREADY || value < 1 || value > 6) {
             return SNMP_ERR_WRONGVALUE;
         }
@@ -979,6 +1014,7 @@ write_snmpTargetAddrRowStatus(int action,
                                 "couldn't malloc() new row\n"));
                     return SNMP_ERR_RESOURCEUNAVAILABLE;
                 }
+                row_created = 1;
             }
         }
     } else if (action == ACTION) {
@@ -1023,6 +1059,7 @@ write_snmpTargetAddrRowStatus(int action,
             }
         }
     } else if (action == COMMIT) {
+        row_created = 0;
         snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
             SNMPTARGETADDRROWSTATUSCOLUMN;
         target =
@@ -1042,17 +1079,19 @@ write_snmpTargetAddrRowStatus(int action,
         }
         snmp_store_needed(NULL);
     } else if (action == UNDO || action == FREE) {
-        snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
-            SNMPTARGETADDRROWSTATUSCOLUMN;
-        target =
-            search_snmpTargetAddrTable(snmpTargetAddrOID,
-                                       snmpTargetAddrOIDLen, name,
-                                       &name_len, 1);
-        if (value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) {
+        if ((value == RS_CREATEANDGO || value == RS_CREATEANDWAIT) &&
+            row_created) {
+            snmpTargetAddrOID[snmpTargetAddrOIDLen - 1] =
+                SNMPTARGETADDRROWSTATUSCOLUMN;
+            target =
+                search_snmpTargetAddrTable(snmpTargetAddrOID,
+                                           snmpTargetAddrOIDLen, name,
+                                           &name_len, 1);
             if (target != NULL) {
                 snmpTargetAddrTable_remove(target);
             }
         }
+        row_created = 0;
     }
     return SNMP_ERR_NOERROR;
 }                               /* write_snmpTargetAddrRowStatus */

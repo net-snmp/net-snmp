@@ -509,11 +509,13 @@ write_snmpTargetParamsMPModel(int action,
                               size_t var_val_len,
                               u_char * statP, oid * name, size_t name_len)
 {
-    long            long_ret = *((long *) var_val);
+    static long     long_ret;
     static long     old_mp;
+    static int      resetOnFail;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsMPModel: not ASN_INTEGER\n"));
@@ -524,6 +526,7 @@ write_snmpTargetParamsMPModel(int action,
                         "write to snmpTargetParamsMPModel: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        long_ret = *((long *) var_val);
         if (long_ret < 0) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsMPModel: MP Model out of range\n"));
@@ -559,6 +562,7 @@ write_snmpTargetParamsMPModel(int action,
 
             old_mp = params->mpModel;
             params->mpModel = long_ret;
+            resetOnFail = 1;
 
             if (params->rowStatus == SNMP_ROW_NOTREADY &&
                 snmpTargetParams_rowStatusCheck(params)) {
@@ -566,6 +570,7 @@ write_snmpTargetParamsMPModel(int action,
             }
         }
     } else if (action == COMMIT) {
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSMPMODELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -574,10 +579,11 @@ write_snmpTargetParamsMPModel(int action,
                                                    1)) != NULL) {
             update_timestamp(params);
         }
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSMPMODELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -608,11 +614,13 @@ write_snmpTargetParamsSecModel(int action,
                                size_t var_val_len,
                                u_char * statP, oid * name, size_t name_len)
 {
-    long            long_ret = *((long *) var_val);
+    static long     long_ret;
     static long     old_sec;
+    static int      resetOnFail;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecModel: not ASN_INTEGER\n"));
@@ -623,6 +631,7 @@ write_snmpTargetParamsSecModel(int action,
                         "write to snmpTargetParamsSecModel: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        long_ret = *((long *) var_val);
         if (long_ret <= 0) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecModel: secModel out of range\n"));
@@ -665,6 +674,7 @@ write_snmpTargetParamsSecModel(int action,
 
             old_sec = params->secModel;
             params->secModel = long_ret;
+            resetOnFail = 1;
 
             if (params->rowStatus == SNMP_ROW_NOTREADY &&
                 snmpTargetParams_rowStatusCheck(params)) {
@@ -672,6 +682,7 @@ write_snmpTargetParamsSecModel(int action,
             }
         }
     } else if (action == COMMIT) {
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYMODELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -680,10 +691,11 @@ write_snmpTargetParamsSecModel(int action,
                                                    1)) != NULL) {
             update_timestamp(params);
         }
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYMODELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -714,11 +726,13 @@ write_snmpTargetParamsSecLevel(int action,
                                size_t var_val_len,
                                u_char * statP, oid * name, size_t name_len)
 {
-    long            long_ret = *((long *) var_val);
+    static long     long_ret;
     static long     old_level;
+    static int      resetOnFail;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecLevel: not ASN_INTEGER\n"));
@@ -729,6 +743,7 @@ write_snmpTargetParamsSecLevel(int action,
                         "write to snmpTargetParamsSecLevel: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        long_ret = *((long *) var_val);
         if (long_ret <= 0 || long_ret > 3) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecLevel: security level is not noAuthNoPriv(1), authNopriv(2) or authPriv(3)\n"));
@@ -764,6 +779,7 @@ write_snmpTargetParamsSecLevel(int action,
 
             old_level = params->secLevel;
             params->secLevel = long_ret;
+            resetOnFail = 1;
 
             if (params->rowStatus == SNMP_ROW_NOTREADY &&
                 snmpTargetParams_rowStatusCheck(params)) {
@@ -771,6 +787,7 @@ write_snmpTargetParamsSecLevel(int action,
             }
         }
     } else if (action == COMMIT) {
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYLEVELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -779,10 +796,11 @@ write_snmpTargetParamsSecLevel(int action,
                                                    1)) != NULL) {
             update_timestamp(params);
         }
-    } else if (action == FREE || action == UNDO) {
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYLEVELCOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -814,11 +832,13 @@ write_snmpTargetParamsStorageType(int action,
                                   u_char * statP,
                                   oid * name, size_t name_len)
 {
-    long            long_ret = *((long *) var_val);
+    static long     long_ret;
     static long     old_st;
+    static int      resetOnFail;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsStorageType: not ASN_INTEGER\n"));
@@ -829,6 +849,7 @@ write_snmpTargetParamsStorageType(int action,
                         "write to snmpTargetParamsStorageType: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
+        long_ret = *((long *) var_val);
         if (long_ret != SNMP_STORAGE_OTHER &&
             long_ret != SNMP_STORAGE_VOLATILE &&
             long_ret != SNMP_STORAGE_NONVOLATILE) {
@@ -864,11 +885,15 @@ write_snmpTargetParamsStorageType(int action,
 
             old_st = params->storageType;
             params->storageType = long_ret;
+            resetOnFail = 1;
         }
-    } else if (action == FREE || action == UNDO) {
+    } else if (action == COMMIT) {
+        resetOnFail = 0;
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSTORAGETYPECOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -897,9 +922,11 @@ write_snmpTargetParamsSecName(int action,
 {
     static char    *old_name = NULL;
     static size_t   old_name_len;
+    static int      resetOnFail;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecName: not ASN_OCTET_STR\n"));
@@ -948,8 +975,12 @@ write_snmpTargetParamsSecName(int action,
             params->secNameData = netsnmp_memdup_nt(var_val, var_val_len,
                                                     &params->secNameLen);
             if (params->secNameData == NULL) {
+                params->secNameData = old_name;
+                params->secNameLen = old_name_len;
+                old_name = NULL;
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
+            resetOnFail = 1;
 
             if (params->rowStatus == SNMP_ROW_NOTREADY &&
                 snmpTargetParams_rowStatusCheck(params)) {
@@ -957,6 +988,7 @@ write_snmpTargetParamsSecName(int action,
             }
         }
     } else if (action == COMMIT) {
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYNAMECOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -964,13 +996,14 @@ write_snmpTargetParamsSecName(int action,
                                                    name, &name_len,
                                                    1)) != NULL) {
             update_timestamp(params);
-            SNMP_FREE(old_name);
-            old_name = NULL;
         }
-    } else if (action == FREE || action == UNDO) {
+        SNMP_FREE(old_name);
+        old_name = NULL;
+    } else if ((action == FREE || action == UNDO) && resetOnFail) {
         /*
          * Try to undo the SET here (abnormal usage of FREE clause)  
          */
+        resetOnFail = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSSECURITYNAMECOLUMN;
         if ((params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -982,12 +1015,14 @@ write_snmpTargetParamsSecName(int action,
                 SNMP_FREE(params->secNameData);
                 params->secNameData = old_name;
                 params->secNameLen = old_name_len;
+                old_name = NULL;
                 if (params->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     !snmpTargetParams_rowStatusCheck(params)) {
                     params->rowStatus = SNMP_ROW_NOTREADY;
                 }
             }
         }
+        SNMP_FREE(old_name);
         old_name = NULL;
     }
 
@@ -1016,6 +1051,10 @@ snmpTargetParams_createNewRow(oid * name, size_t name_len)
         if (NULL == temp_struct)
             return 0;
         temp_struct->paramNameData = (char *) malloc(pNameLen + 1);
+        if (temp_struct->paramNameData == NULL) {
+            snmpTargetParamTable_dispose(temp_struct);
+            return 0;
+        }
 
         for (i = 0; i < pNameLen; i++) {
             temp_struct->paramNameData[i] =
@@ -1047,9 +1086,11 @@ write_snmpTargetParamsRowStatus(int action,
                                 oid * name, size_t name_len)
 {
     static long     value;
+    static int      row_created;
     struct targetParamTable_struct *params = NULL;
 
     if (action == RESERVE1) {
+        row_created = 0;
         if (var_val_type != ASN_INTEGER) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsRowStatus not ASN_INTEGER\n"));
@@ -1110,6 +1151,7 @@ write_snmpTargetParamsRowStatus(int action,
                                 "couldn't malloc() new row\n"));
                     return SNMP_ERR_RESOURCEUNAVAILABLE;
                 }
+                row_created = 1;
             }
         }
     } else if (action == ACTION) {
@@ -1152,6 +1194,7 @@ write_snmpTargetParamsRowStatus(int action,
             }
         }
     } else if (action == COMMIT) {
+        row_created = 0;
         snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
             SNMPTARGETPARAMSROWSTATUSCOLUMN;
         params = search_snmpTargetParamsTable(snmpTargetParamsOID,
@@ -1166,17 +1209,18 @@ write_snmpTargetParamsRowStatus(int action,
             }
         }
     } else if (action == UNDO || action == FREE) {
-        snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
-            SNMPTARGETPARAMSROWSTATUSCOLUMN;
-        params = search_snmpTargetParamsTable(snmpTargetParamsOID,
-                                              snmpTargetParamsOIDLen,
-                                              name, &name_len, 1);
-        if (value == SNMP_ROW_CREATEANDGO
-            || value == SNMP_ROW_CREATEANDWAIT) {
+        if ((value == SNMP_ROW_CREATEANDGO
+             || value == SNMP_ROW_CREATEANDWAIT) && row_created) {
+            snmpTargetParamsOID[snmpTargetParamsOIDLen - 1] =
+                SNMPTARGETPARAMSROWSTATUSCOLUMN;
+            params = search_snmpTargetParamsTable(snmpTargetParamsOID,
+                                                  snmpTargetParamsOIDLen,
+                                                  name, &name_len, 1);
             if (params != NULL) {
                 snmpTargetParamTable_remove(params);
             }
         }
+        row_created = 0;
     }
     return SNMP_ERR_NOERROR;
 }
