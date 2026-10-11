@@ -4649,6 +4649,12 @@ _snmp_parse(struct session_list *slp,
 
                 /* set up the response */
                 pdu2 = snmp_clone_pdu(pdu);
+                if (NULL == pdu2) {
+                    snmp_log(LOG_ERR, "failed to clone PDU for rfc5343 probe\n");
+                    if (pdu->securityStateRef)
+                        free_securityStateRef(pdu);
+                    return result;
+                }
 
                 /* free the current varbind */
                 snmp_free_varbind(pdu2->variables);
@@ -4689,6 +4695,8 @@ _snmp_parse(struct session_list *slp,
                 snmp_log(LOG_WARNING,
                          "received an odd context engineID probe\n");
             }
+            if (pdu->securityStateRef)
+                free_securityStateRef(pdu);
         }
 
         break;
