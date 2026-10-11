@@ -1956,10 +1956,14 @@ smux_peer_cleanup(NETSNMP_SOCKET sd)
                 if (reg == NULL) {
                     snmp_log(LOG_ERR, "SMUX: cannot create new smux peer "
                             "registration\n");
+                    free(nrptr);
+                    free(rptr);
                     continue;
                 }
                 if (netsnmp_register_handler(reg) != MIB_REGISTERED_OK) {
                     snmp_log(LOG_ERR, "SMUX: cannot register new smux peer\n");
+                    free(nrptr);
+                    free(rptr);
                     continue;
                 }
                 nrptr->reginfo = reg;
