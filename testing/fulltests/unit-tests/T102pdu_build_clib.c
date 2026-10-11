@@ -103,6 +103,13 @@ OKF((rc == SNMPERR_SUCCESS),
 }
 #endif
 
+{
+    void *dst = NULL;
+    const char src = 'x';
+    OK(snmp_clone_mem(&dst, &src, UINT_MAX) == 1 && dst == NULL,
+       "snmp_clone_mem rejects UINT_MAX");
+}
+
 free(packet);
 netsnmp_cleanup_session(&session);
 snmp_shutdown("testing");

@@ -316,6 +316,8 @@ snmp_clone_mem(void **dstPtr, const void *srcPtr, unsigned len)
 {
     *dstPtr = NULL;
     if (srcPtr) {
+        if (len == UINT_MAX)
+            return 1;
         *dstPtr = malloc(len + 1);
         if (!*dstPtr) {
             return 1;
