@@ -937,7 +937,7 @@ smux_open_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len, int *fail)
     if (!(ptr = asn_parse_int(ptr, len, &type, &version, sizeof(version)))) {
         DEBUGMSGTL(("smux", "[smux_open_process] version parse failed\n"));
         *fail = TRUE;
-        return ((ptr += *len));
+        return NULL;
     }
     DEBUGMSGTL(("smux",
                 "[smux_open_process] version %ld, len %" NETSNMP_PRIz
@@ -948,7 +948,7 @@ smux_open_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len, int *fail)
                                &oid_name_len)) == NULL) {
         DEBUGMSGTL(("smux", "[smux_open_process] oid parse failed\n"));
         *fail = TRUE;
-        return ((ptr += *len));
+        return NULL;
     }
     snprint_objid(oid_print, sizeof(oid_print), oid_name, oid_name_len);
 
@@ -959,12 +959,12 @@ smux_open_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len, int *fail)
                     "u, type %d\n", *len, (int) type));
     }
 
-    string_len = SMUXMAXSTRLEN;
+    string_len = sizeof(descr) - 1;
     if ((ptr = asn_parse_string(ptr, len, &type, (u_char *) descr,
                                 &string_len)) == NULL) {
         DEBUGMSGTL(("smux", "[smux_open_process] descr parse failed\n"));
         *fail = TRUE;
-        return ((ptr += *len));
+        return NULL;
     }
 
     if (snmp_get_do_debugging()) {
@@ -977,12 +977,12 @@ smux_open_process(NETSNMP_SOCKET sock, u_char * ptr, size_t * len, int *fail)
     }
     descr[string_len] = 0;
 
-    string_len = SMUXMAXSTRLEN;
+    string_len = sizeof(passwd) - 1;
     if ((ptr = asn_parse_string(ptr, len, &type, (u_char *) passwd,
                                 &string_len)) == NULL) {
         DEBUGMSGTL(("smux", "[smux_open_process] passwd parse failed\n"));
         *fail = TRUE;
-        return ((ptr += *len));
+        return NULL;
     }
 
     if (snmp_get_do_debugging()) {
