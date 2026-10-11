@@ -1617,10 +1617,10 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     } else {
 #ifndef NETSNMP_USE_KERBEROS_HEIMDAL
         DEBUGMSGTL(("ksm", "Unknown Kerberos message type (%02x)\n",
-                    ap_req.data[0]));
+                    ap_req.length ? (unsigned char)ap_req.data[0] : 0));
 #else 				/* NETSNMP_USE_KERBEROS_HEIMDAL */
 	 DEBUGMSGTL(("ksm", "Unknown Kerberos message type (%02x)\n",
-                    ((char *)ap_req.data)[0]));
+                    ap_req.length ? ((unsigned char *)ap_req.data)[0] : 0));
 #endif
         retval = SNMPERR_KRB5;
         snmp_set_detail("Unknown Kerberos message type");
