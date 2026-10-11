@@ -7985,6 +7985,12 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
+        while ((size_t)tint > buf_len) {
+            if (!snmp_realloc(&buf, &buf_len)) {
+                result = SNMPERR_MALLOC;
+                goto err;
+            }
+        }
 
 	vp = strdup(value);
         if (!vp)
@@ -8018,18 +8024,20 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
             }
 
-            ix = ltmp / 8;
-            if (ix >= INT_MAX) {
+            if (ltmp / 8 >= INT_MAX) {
                 goto value_error;
             }
+            ix = ltmp / 8;
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
-            if (ix >= (int)buf_len && !snmp_realloc(&buf, &buf_len)) {
-                result = SNMPERR_MALLOC;
-                break;
+            while ((size_t)ix >= buf_len) {
+                if (!snmp_realloc(&buf, &buf_len)) {
+                    result = SNMPERR_MALLOC;
+                    goto err;
+                }
             }
-            if (ix < 0 || ix >= buf_len) {
+            if (ix < 0 || (size_t)ix >= buf_len) {
                result = SNMPERR_RANGE;
                snmp_set_detail(cp);
                goto err;

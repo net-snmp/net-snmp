@@ -72,6 +72,17 @@ snmp_free_pdu(pdu);
 OKF((rc == SNMPERR_SUCCESS),
     ("Building an INFORM PDU/packet should have succeed: %d", rc));
 
+{
+    oid test_oid[] = { 1, 3, 6, 1, 2, 1, 1, 1, 0 };
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_DONT_CHECK_RANGE, 1);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    rc = snmp_add_var(pdu, test_oid, OID_LENGTH(test_oid), 'b', "0,4096");
+    OKF(rc == 0 && pdu->variables != NULL && pdu->variables->val_len == 513,
+        ("snmp_add_var bitstring with bit 4096 succeeded (rc=%d)", rc));
+    snmp_free_pdu(pdu);
+}
+
 free(packet);
 netsnmp_cleanup_session(&session);
 snmp_shutdown("testing");
