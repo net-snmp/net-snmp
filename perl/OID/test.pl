@@ -10,7 +10,7 @@ use Test;
 
 BEGIN {
     $ENV{MIBS} = '+SNMP-NOTIFICATION-MIB';
-    plan tests => 38;
+    plan tests => 41;
 }
 
 require "../SNMP/t/readsnmptest.pl";
@@ -140,5 +140,10 @@ else {
   ok(0);
 }
 
-
-
+# verify that appending past MAX_OID_LEN (128) does not overflow
+my $longoid = new NetSNMP::OID(".1" x 100);
+ok($longoid->length() == 100);
+$longoid += ".1" x 30;
+ok($longoid->length() == 100);
+$longoid += new NetSNMP::OID(".1" x 30);
+ok($longoid->length() == 100);

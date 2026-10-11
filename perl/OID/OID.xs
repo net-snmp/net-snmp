@@ -399,11 +399,9 @@ nsop_append(oid1, string)
     int i;
     CODE: 
     {
-        if (!snmp_parse_oid(string, (oid *) name, &name_len)) {
-            /* XXX */
-        }
-        if (oid1->len + name_len > MAX_OID_LEN) {
-            /* XXX: illegal */
+        if (!snmp_parse_oid(string, (oid *) name, &name_len) ||
+            oid1->len + name_len > MAX_OID_LEN) {
+            return;
         }
         for(i = 0; i < (int)name_len; i++) {
             oid1->name[i+oid1->len] = name[i];
@@ -420,7 +418,7 @@ nsop_append_oid(oid1, oid2)
     CODE: 
     {
         if (oid1->len + oid2->len > MAX_OID_LEN) {
-            /* XXX: illegal */
+            return;
         }
         for(i = 0; i < (int)oid2->len; i++) {
             oid1->name[i+oid1->len] = oid2->name[i];
