@@ -31,6 +31,7 @@ static const struct read_config_testcase test_input[] = {
     { &read_config_read_octet_string_const, "0x010002",   4, -1, obuf1, 3 },
     { &read_config_read_octet_string_const, "0x010002 0", 4,  9, obuf1, 3 },
     { &read_config_read_octet_string_const, "0x010002",   0, -1, obuf1, 3 },
+    { &read_config_read_octet_string_const, "0x01zz",     0, -1, NULL,  0 },
 
     { &read_config_read_octet_string_const, "abc",        1, -1, NULL,  0 },
     { &read_config_read_octet_string_const, "abc z",      1,  4, NULL,  0 },

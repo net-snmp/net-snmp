@@ -2034,6 +2034,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     const char     *cptr1;
     u_int           tmp;
     size_t          i, ilen;
+    int             allocated = 0;
 
     if (len == NULL)
         return NULL;
@@ -2067,6 +2068,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             *str = malloc(ilen + 1);
             if (!*str)
                 goto err;
+            allocated = 1;
         } else {
             /*
              * require caller to have +1, and bail if not enough space.
@@ -2091,9 +2093,6 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             if (1 == sscanf(readfrom, "%2x", &tmp))
                 *cptr++ = (u_char) tmp;
             else {
-                /*
-                 * we may lose memory, but don't know caller's buffer XX free(cptr); 
-                 */
                 goto err;
             }
             readfrom += 2;
@@ -2130,6 +2129,8 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     return readfrom;
 
 err:
+    if (allocated)
+        SNMP_FREE(*str);
     *len = 0;
     return NULL;
 }
@@ -2170,6 +2171,7 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
 const char     *
 read_config_read_objid_const(const char *readfrom, oid ** objid, size_t * len)
 {
+    int             allocated = 0;
 
     if (objid == NULL || readfrom == NULL || len == NULL)
         return NULL;
@@ -2179,6 +2181,7 @@ read_config_read_objid_const(const char *readfrom, oid ** objid, size_t * len)
         if ((*objid = (oid *) malloc(MAX_OID_LEN * sizeof(oid))) == NULL)
             return NULL;
         *len = MAX_OID_LEN;
+        allocated = 1;
     }
 
     if (strncmp(readfrom, "NULL", 4) == 0) {
@@ -2195,6 +2198,8 @@ read_config_read_objid_const(const char *readfrom, oid ** objid, size_t * len)
 
         if (!read_objid(buf, *objid, len)) {
             DEBUGMSGTL(("read_config_read_objid", "Invalid OID\n"));
+            if (allocated)
+                SNMP_FREE(*objid);
             *len = 0;
             return NULL;
         }
