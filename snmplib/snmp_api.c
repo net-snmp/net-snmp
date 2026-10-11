@@ -2445,7 +2445,9 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
                 "Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
                 ((session->securityName) ? (char *) session->securityName :
                  ((pdu->securityName) ? (char *) pdu->securityName :
-                  "ERROR: undefined")), secLevelName[pdu->securityLevel]));
+                  "ERROR: undefined")),
+                (pdu->securityLevel >= 0 && pdu->securityLevel < 4) ?
+                secLevelName[pdu->securityLevel] : "ERROR: invalid"));
 
     DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING
@@ -4551,7 +4553,9 @@ _snmp_parse(struct session_list *slp,
         result = snmpv3_parse(pdu, data, &length, NULL, session);
         DEBUGMSGTL(("snmp_parse",
                     "Parsed SNMPv3 message (secName:%s, secLevel:%s): %s\n",
-                    pdu->securityName, secLevelName[pdu->securityLevel],
+                    pdu->securityName,
+                    (pdu->securityLevel >= 0 && pdu->securityLevel < 4) ?
+                    secLevelName[pdu->securityLevel] : "ERROR: invalid",
                     snmp_api_errstring(result)));
 
         if (result == SNMPERR_USM_UNKNOWNSECURITYNAME) {
