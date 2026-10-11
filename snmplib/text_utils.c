@@ -330,7 +330,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
     /*
      * static buf, or does the user want the memory?
      */
-    if (flags & PMLP_FLAG_ALLOC_LINE) {
+    if (lpi->flags & PMLP_FLAG_ALLOC_LINE) {
         if (0 != lpi->line_max)
             li.line_max =  lpi->line_max;
         else
@@ -427,6 +427,8 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
             break;
         }
     }
+    if (lpi->flags & PMLP_FLAG_ALLOC_LINE)
+        SNMP_FREE(li.line);
     SNMP_FREE(mem);
 }
 
