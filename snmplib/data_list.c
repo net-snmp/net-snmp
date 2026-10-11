@@ -372,8 +372,10 @@ netsnmp_read_data_callback(const char *token, char *line) {
         read_config_read_data(ASN_OCTET_STR, line,
                               &dataname, &dataname_len);
 
-    if (!line || !dataname)
+    if (!line || !dataname) {
+        free(dataname);
         return;
+    }
 
     /* call the sub-parser to read the rest */
     data = (info->data_list_read_ptr)(line, strlen(line));
@@ -387,6 +389,7 @@ netsnmp_read_data_callback(const char *token, char *line) {
     netsnmp_add_list_data(info->datalist,
                           netsnmp_create_data_list(dataname, data,
                                                    info->data_list_free_ptr));
+    free(dataname);
 
     return;
 }
