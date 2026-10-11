@@ -1097,12 +1097,8 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
                     authlen, privlen, ret;
 
     /*
-     * If doing authentication, msgAuthParmLen = 12 else msgAuthParmLen = 0.
-     * If doing encryption,     msgPrivParmLen = 8  else msgPrivParmLen = 0.
+     * If doing encryption, msgPrivParmLen = 8 else msgPrivParmLen = 0.
      */
-    *msgAuthParmLen = (secLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
-                       || secLevel == SNMP_SEC_LEVEL_AUTHPRIV) ? 12 : 0;
-
     *msgPrivParmLen = (secLevel == SNMP_SEC_LEVEL_AUTHPRIV) ? 8 : 0;
 
 
@@ -1626,6 +1622,10 @@ usm_generate_out_msg(int msgProcModel,  /* (UNUSED) */
     /*
      * Set up the Offsets.
      */
+    msgAuthParmLen = (theSecLevel == SNMP_SEC_LEVEL_AUTHNOPRIV
+                      || theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV) ?
+        sc_get_auth_maclen(sc_get_authtype(theAuthProtocol,
+                                           theAuthProtocolLength)) : 0;
     if (usm_calc_offsets(globalDataLen, theSecLevel, theEngineIDLength,
                          theNameLength, scopedPduLen, boots_long,
                          time_long, &theTotalLength, &authParamsOffset,

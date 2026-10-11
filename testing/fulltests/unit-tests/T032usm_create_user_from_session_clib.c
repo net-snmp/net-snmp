@@ -292,5 +292,66 @@
            "encode_keychange rejects oversized key length");
     }
 
+#ifdef NETSNMP_USMAUTH_HMAC192SHA256
+    {
+        struct snmp_secmod_def *sptr = find_sec_mod(USM_SEC_MODEL_NUMBER);
+        struct snmp_secmod_outgoing_params parms;
+        struct usmUser *sha256_user = usm_create_user();
+        u_char sha256_key[32];
+        u_char msg_buf[512];
+        u_char *whole_msg = msg_buf;
+        size_t whole_msg_len = sizeof(msg_buf);
+        size_t sec_params_len = sizeof(msg_buf) - 10;
+        u_char scoped_pdu[] = { ASN_SEQUENCE | ASN_CONSTRUCTOR, 2, 4, 0 };
+
+        memset(sha256_key, 0x5a, sizeof(sha256_key));
+        memset(msg_buf, 0, sizeof(msg_buf));
+        msg_buf[0] = ASN_SEQUENCE | ASN_CONSTRUCTOR;
+        msg_buf[1] = 0x82;
+        if (sha256_user) {
+            sha256_user->engineID = netsnmp_memdup(engineID, engineIDLen);
+            sha256_user->engineIDLen = engineIDLen;
+            sha256_user->name = strdup("sha256user");
+            sha256_user->secName = strdup("sha256user");
+            SNMP_FREE(sha256_user->authProtocol);
+            sha256_user->authProtocol = snmp_duplicate_objid(
+                usmHMAC192SHA256AuthProtocol,
+                OID_LENGTH(usmHMAC192SHA256AuthProtocol));
+            sha256_user->authProtocolLen =
+                OID_LENGTH(usmHMAC192SHA256AuthProtocol);
+            sha256_user->authKey = netsnmp_memdup(sha256_key, sizeof(sha256_key));
+            sha256_user->authKeyLen = sizeof(sha256_key);
+        }
+        snmp_sess_init(&session);
+        session.sessUser = sha256_user;
+        memset(&parms, 0, sizeof(parms));
+        parms.msgProcModel = SNMP_VERSION_3;
+        parms.globalData = msg_buf;
+        parms.globalDataLen = 10;
+        parms.maxMsgSize = sizeof(msg_buf);
+        parms.secModel = SNMP_SEC_MODEL_USM;
+        parms.secEngineID = engineID;
+        parms.secEngineIDLen = engineIDLen;
+        parms.secName = "sha256user";
+        parms.secNameLen = 10;
+        parms.secLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        parms.scopedPdu = scoped_pdu;
+        parms.scopedPduLen = sizeof(scoped_pdu);
+        parms.session = &session;
+        parms.secParams = msg_buf + 10;
+        parms.secParamsLen = &sec_params_len;
+        parms.wholeMsg = &whole_msg;
+        parms.wholeMsgLen = &whole_msg_len;
+        OK(sptr != NULL && sptr->encode_forward != NULL,
+           "USM encode_forward callback registered");
+        if (sptr && sptr->encode_forward) {
+            ret = sptr->encode_forward(&parms);
+            OKF(ret == SNMPERR_SUCCESS,
+                ("usm_generate_out_msg with HMAC-SHA256 succeeded (ret=%d)", ret));
+        }
+        usm_free_user(sha256_user);
+    }
+#endif
+
     snmp_shutdown("T032usm");
 }
