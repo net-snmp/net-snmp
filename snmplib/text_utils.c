@@ -424,6 +424,8 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         else {
             if (PMLP_RC_STOP_PROCESSING != rc )
                 snmp_log(LOG_ERR, "unknown rc %d from text processor\n", rc);
+            if (lpi->flags & PMLP_FLAG_STRDUP_LINE)
+                free(li.start);
             break;
         }
     }
