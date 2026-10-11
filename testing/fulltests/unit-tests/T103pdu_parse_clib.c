@@ -12,6 +12,10 @@ size_t data_length=sizeof(data);
 
 pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
 rc = snmp_pdu_parse(pdu, data, &data_length);
+if (rc == 0) {
+    data_length = sizeof(data);
+    rc = snmp_pdu_parse(pdu, data, &data_length);
+}
 snmp_free_pdu(pdu);
 
 OKF((rc == 0), ("Parsing of a generic PDU failed"));

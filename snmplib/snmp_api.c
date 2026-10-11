@@ -4077,6 +4077,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * securtityParameters OCTET STRING begins after msgGlobalData 
      */
     sec_params = data;
+    SNMP_FREE(pdu->contextEngineID);
     pdu->contextEngineID = calloc(1, SNMP_MAX_ENG_SIZE);
     pdu->contextEngineIDLen = SNMP_MAX_ENG_SIZE;
 
@@ -4086,8 +4087,10 @@ snmpv3_parse(netsnmp_pdu *pdu,
      * limit).  We'll use double that here to be on the safe side.  
      */
 
+    SNMP_FREE(pdu->securityEngineID);
     pdu->securityEngineID = calloc(1, SNMP_MAX_ENG_SIZE * 2);
     pdu->securityEngineIDLen = SNMP_MAX_ENG_SIZE * 2;
+    SNMP_FREE(pdu->securityName);
     pdu->securityName = calloc(1, SNMP_MAX_SEC_NAME_SIZE);
     pdu->securityNameLen = SNMP_MAX_SEC_NAME_SIZE;
 
@@ -4778,6 +4781,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                                &pdu->enterprise_length);
         if (data == NULL)
             return -1;
+        SNMP_FREE(pdu->enterprise);
         pdu->enterprise = netsnmp_memdup(objid,
                                          pdu->enterprise_length * sizeof(oid));
         if (pdu->enterprise == NULL) {
@@ -4888,6 +4892,9 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
                               "varbinds");
     if (data == NULL)
         goto fail;
+
+    snmp_free_varbind(pdu->variables);
+    pdu->variables = NULL;
 
     /*
      * get each varBind sequence 
