@@ -965,8 +965,7 @@ netsnmp_tlstcp_open_client(netsnmp_transport *t)
 
 err_free_ssl:
 err_free_tlsdata:
-    netsnmp_tlsbase_free_tlsdata(tlsdata);
-    t->data = NULL;
+    netsnmp_tlstcp_close(t);
     return NULL;
 }
 
@@ -990,6 +989,7 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     /* create the OpenSSL TLS context */
     tlsdata->ssl_context = sslctx_server_setup(TLS_method());
     if (NULL == tlsdata->ssl_context) {
+        netsnmp_tlstcp_close(t);
         return NULL;
     }
 
@@ -1003,6 +1003,7 @@ netsnmp_tlstcp_open_server(netsnmp_transport *t)
     }
     t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
+    netsnmp_tlstcp_close(t);
     return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
 
