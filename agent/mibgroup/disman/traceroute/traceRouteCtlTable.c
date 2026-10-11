@@ -3900,6 +3900,28 @@ write_traceRouteCtlRowStatus(int action,
         /*
          * Release any resources that have been allocated 
          */
+        if (StorageNew != NULL) {
+            SNMP_FREE(StorageNew->traceRouteCtlOwnerIndex);
+            SNMP_FREE(StorageNew->traceRouteCtlTestName);
+            SNMP_FREE(StorageNew->traceRouteCtlTargetAddress);
+            SNMP_FREE(StorageNew->traceRouteCtlSourceAddress);
+            SNMP_FREE(StorageNew->traceRouteCtlMiscOptions);
+            SNMP_FREE(StorageNew->traceRouteCtlDescr);
+            SNMP_FREE(StorageNew->traceRouteCtlTrapGeneration);
+            SNMP_FREE(StorageNew->traceRouteCtlType);
+            SNMP_FREE(StorageNew);
+        }
+        if (StorageDel != NULL) {
+            SNMP_FREE(StorageDel->traceRouteCtlOwnerIndex);
+            SNMP_FREE(StorageDel->traceRouteCtlTestName);
+            SNMP_FREE(StorageDel->traceRouteCtlTargetAddress);
+            SNMP_FREE(StorageDel->traceRouteCtlSourceAddress);
+            SNMP_FREE(StorageDel->traceRouteCtlMiscOptions);
+            SNMP_FREE(StorageDel->traceRouteCtlDescr);
+            SNMP_FREE(StorageDel->traceRouteCtlTrapGeneration);
+            SNMP_FREE(StorageDel->traceRouteCtlType);
+            SNMP_FREE(StorageDel);
+        }
         break;
 
     case ACTION:
@@ -3961,22 +3983,28 @@ write_traceRouteCtlRowStatus(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        if (StorageTmp == NULL) {
-            if (set_value == RS_DESTROY) {
-                return SNMP_ERR_NOERROR;
-            }
+        if (StorageNew != NULL) {
             /*
              * row creation, so remove it again 
              */
             hciptr =
                 header_complex_find_entry(traceRouteCtlTableStorage,
-                                          StorageTmp);
+                                          StorageNew);
             StorageDel =
                 header_complex_extract_entry(&traceRouteCtlTableStorage,
                                              hciptr);
-            /*
-             * XXX: free it 
-             */
+            if (StorageDel != NULL) {
+                SNMP_FREE(StorageDel->traceRouteCtlOwnerIndex);
+                SNMP_FREE(StorageDel->traceRouteCtlTestName);
+                SNMP_FREE(StorageDel->traceRouteCtlTargetAddress);
+                SNMP_FREE(StorageDel->traceRouteCtlSourceAddress);
+                SNMP_FREE(StorageDel->traceRouteCtlMiscOptions);
+                SNMP_FREE(StorageDel->traceRouteCtlDescr);
+                SNMP_FREE(StorageDel->traceRouteCtlTrapGeneration);
+                SNMP_FREE(StorageDel->traceRouteCtlType);
+                SNMP_FREE(StorageDel);
+            }
+            StorageNew = NULL;
         } else if (StorageDel != NULL) {
             /*
              * row deletion, so add it again 
@@ -3985,7 +4013,8 @@ write_traceRouteCtlRowStatus(int action,
             traceRouteResultsTable_add(StorageDel);
             traceRouteProbeHistoryTable_addall(StorageDel);
             traceRouteHopsTable_addall(StorageDel);
-        } else {
+            StorageDel = NULL;
+        } else if (StorageTmp != NULL && set_value != RS_DESTROY) {
             StorageTmp->traceRouteCtlRowStatus = old_value;
         }
         break;
@@ -3998,11 +4027,7 @@ write_traceRouteCtlRowStatus(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        if (StorageTmp == NULL) {
-            if (set_value == RS_DESTROY) {
-                return SNMP_ERR_NOERROR;
-            }
-        }
+        StorageNew = NULL;
         if (StorageDel != NULL) {
             free(StorageDel->traceRouteCtlOwnerIndex);
             StorageDel->traceRouteCtlOwnerIndex = NULL;
@@ -4026,16 +4051,16 @@ write_traceRouteCtlRowStatus(int action,
             /*
              * XXX: free it, its dead 
              */
-        } else {
-            if (StorageTmp
-                && StorageTmp->traceRouteCtlRowStatus == RS_CREATEANDGO) {
+        } else if (StorageTmp != NULL) {
+            if (StorageTmp->traceRouteCtlRowStatus == RS_CREATEANDGO) {
                 StorageTmp->traceRouteCtlRowStatus = RS_ACTIVE;
-            } else if (StorageTmp &&
-                       StorageTmp->traceRouteCtlRowStatus ==
+            } else if (StorageTmp->traceRouteCtlRowStatus ==
                        RS_CREATEANDWAIT) {
 
                 StorageTmp->traceRouteCtlRowStatus = RS_NOTINSERVICE;
             }
+        } else if (set_value == RS_DESTROY) {
+            return SNMP_ERR_NOERROR;
         }
         if (StorageTmp && StorageTmp->traceRouteCtlRowStatus == RS_ACTIVE) {
 #if 1

@@ -1299,6 +1299,18 @@ write_lookupCtlRowStatus(int action,
         /*
          * Release any resources that have been allocated 
          */
+        if (StorageNew != NULL) {
+            SNMP_FREE(StorageNew->lookupCtlOwnerIndex);
+            SNMP_FREE(StorageNew->lookupCtlOperationName);
+            SNMP_FREE(StorageNew->lookupCtlTargetAddress);
+            SNMP_FREE(StorageNew);
+        }
+        if (StorageDel != NULL) {
+            SNMP_FREE(StorageDel->lookupCtlOwnerIndex);
+            SNMP_FREE(StorageDel->lookupCtlOperationName);
+            SNMP_FREE(StorageDel->lookupCtlTargetAddress);
+            SNMP_FREE(StorageDel);
+        }
         break;
 
     case ACTION:
@@ -1354,29 +1366,32 @@ write_lookupCtlRowStatus(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        if (StorageTmp == NULL) {
+        if (StorageNew != NULL) {
             /*
              * row creation, so remove it again 
              */
             hciptr =
                 header_complex_find_entry(lookupCtlTableStorage,
-                                          StorageTmp);
+                                          StorageNew);
             StorageDel =
                 header_complex_extract_entry(&lookupCtlTableStorage,
                                              hciptr);
-
-            lookupResultsTable_del(StorageTmp);
-
-            /*
-             * XXX: free it 
-             */
+            lookupResultsTable_del(StorageNew);
+            if (StorageDel != NULL) {
+                SNMP_FREE(StorageDel->lookupCtlOwnerIndex);
+                SNMP_FREE(StorageDel->lookupCtlOperationName);
+                SNMP_FREE(StorageDel->lookupCtlTargetAddress);
+                SNMP_FREE(StorageDel);
+            }
+            StorageNew = NULL;
         } else if (StorageDel != NULL) {
             /*
              * row deletion, so add it again 
              */
             lookupCtlTable_add(StorageDel);
             lookupResultsTable_add(StorageDel);
-        } else {
+            StorageDel = NULL;
+        } else if (StorageTmp != NULL && set_value != RS_DESTROY) {
             StorageTmp->lookupCtlRowStatus = old_value;
         }
         break;
@@ -1386,30 +1401,26 @@ write_lookupCtlRowStatus(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-        if (StorageTmp == NULL) {
-            if (set_value == RS_DESTROY) {
-                return SNMP_ERR_NOERROR;
-            }
-        }
-
+        StorageNew = NULL;
         if (StorageDel != NULL) {
             SNMP_FREE(StorageDel->lookupCtlOwnerIndex);
             SNMP_FREE(StorageDel->lookupCtlOperationName);
             SNMP_FREE(StorageDel->lookupCtlTargetAddress);
             SNMP_FREE(StorageDel);
+            StorageDel = NULL;
             /*
              * XXX: free it, its dead 
              */
-        } else {
-            if (StorageTmp
-                && StorageTmp->lookupCtlRowStatus == RS_CREATEANDGO) {
+        } else if (StorageTmp != NULL) {
+            if (StorageTmp->lookupCtlRowStatus == RS_CREATEANDGO) {
                 StorageTmp->lookupCtlRowStatus = RS_ACTIVE;
-            } else if (StorageTmp &&
-                       StorageTmp->lookupCtlRowStatus ==
+            } else if (StorageTmp->lookupCtlRowStatus ==
                        RS_CREATEANDWAIT) {
 
                 StorageTmp->lookupCtlRowStatus = RS_NOTINSERVICE;
             }
+        } else if (set_value == RS_DESTROY) {
+            return SNMP_ERR_NOERROR;
         }
         if (StorageTmp && StorageTmp->lookupCtlRowStatus == RS_ACTIVE) {
             DEBUGMSGTL(("lookupCtlTable",

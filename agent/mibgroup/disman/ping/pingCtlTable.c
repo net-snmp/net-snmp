@@ -586,6 +586,7 @@ parse_pingCtlTable(const char *token, char *line)
     /* pingCtlTable_cleaner(pingCtlTableStorage); */
 
     DEBUGMSGTL(("pingCtlTable", "done.\n"));
+    return;
 
 out:
     SNMP_FREE(StorageTmp->pingCtlOwnerIndex);
@@ -1227,9 +1228,10 @@ send_ping_trap(struct pingCtlTable_data *item,
                               item->pingCtlTestName,
                               item->pingCtlTestNameLen);
     StorageTmp = header_complex_get(pingResultsTableStorage, vars);
-    snmp_free_varbind(vars);
-    if (!StorageTmp)
+    if (!StorageTmp) {
+        snmp_free_varbind(vars);
         return;
+    }
 
     /*
      * snmpTrap oid 
@@ -4341,9 +4343,10 @@ write_pingCtlRowStatus(int action,
          * Release any resources that have been allocated 
          */
 
-        if (set_value == RS_DESTROY && StorageNew)
+        if (StorageNew) {
             free_pingCtlTable_data(StorageNew);
-        StorageNew = NULL;
+            StorageNew = NULL;
+        }
 
         if (StorageDel) {
             free_pingCtlTable_data(StorageDel);
@@ -4408,10 +4411,7 @@ write_pingCtlRowStatus(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        if (StorageTmp == NULL) {
-            if (set_value == RS_DESTROY) {
-                return SNMP_ERR_NOERROR;
-            }
+        if (StorageNew != NULL) {
             /*
              * row creation, so remove it again 
              */
@@ -4421,6 +4421,7 @@ write_pingCtlRowStatus(int action,
                 header_complex_extract_entry(&pingCtlTableStorage, hciptr);
             free_pingCtlTable_data(StorageDel);
             StorageDel = NULL;
+            StorageNew = NULL;
         } else if (StorageDel != NULL) {
             /*
              * row deletion, so add it again 
@@ -4429,7 +4430,7 @@ write_pingCtlRowStatus(int action,
             pingResultsTable_add(StorageDel);
             pingProbeHistoryTable_addall(StorageDel);
             StorageDel = NULL;
-        } else {
+        } else if (StorageTmp != NULL && set_value != RS_DESTROY) {
             StorageTmp->pingCtlRowStatus = old_value;
         }
         break;
@@ -4442,28 +4443,22 @@ write_pingCtlRowStatus(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
-        if (StorageTmp == NULL) {
-            if (set_value == RS_DESTROY) {
-                return SNMP_ERR_NOERROR;
-            }
-        }
-
+        StorageNew = NULL;
         if (StorageDel != NULL) {
             free_pingCtlTable_data(StorageDel);
             StorageDel = NULL;
-        } else {
-            if (StorageTmp
-                && StorageTmp->pingCtlRowStatus == RS_CREATEANDGO) {
+        } else if (StorageTmp != NULL) {
+            if (StorageTmp->pingCtlRowStatus == RS_CREATEANDGO) {
                 StorageTmp->pingCtlRowStatus = RS_ACTIVE;
-            } else if (StorageTmp &&
-                       StorageTmp->pingCtlRowStatus == RS_CREATEANDWAIT) {
+            } else if (StorageTmp->pingCtlRowStatus == RS_CREATEANDWAIT) {
                 DEBUGMSGTL(("pingCtlTable",
                             "write_pingCtlRowStatus entering pingCtlRowStatus=%ld...  \n",
                             StorageTmp->pingCtlRowStatus));
 
                 StorageTmp->pingCtlRowStatus = RS_NOTINSERVICE;
             }
+        } else if (set_value == RS_DESTROY) {
+            return SNMP_ERR_NOERROR;
         }
         if (StorageTmp && StorageTmp->pingCtlRowStatus == RS_ACTIVE) {
 #if 1
