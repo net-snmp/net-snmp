@@ -166,8 +166,13 @@ optProc(int argc, char *const *argv, int opt)
                 dflag = 1;
                 break;
             case 'f':
-                if (!*optarg)
+                if (!*optarg) {
+                    if (optind >= argc) {
+                        usage();
+                        exit(1);
+                    }
                     optarg = argv[optind++];
+                }
                 if (strcmp(optarg, "inet") == 0)
                     af = AF_INET;
                 else if (strcmp(optarg, "inet6") == 0)
@@ -198,8 +203,13 @@ optProc(int argc, char *const *argv, int opt)
                 break;
             case 'I':
                 iflag = 1;
-                if (!*optarg)
+                if (!*optarg) {
+                    if (optind >= argc) {
+                        usage();
+                        exit(1);
+                    }
                     optarg = argv[optind++];
+                }
                 intrface = optarg;
                 return;
             case 'i':
@@ -241,8 +251,13 @@ optProc(int argc, char *const *argv, int opt)
                  * OpenBSD: dump PCB block
                  */
             case 'p':
-                if (!*optarg)
+                if (!*optarg) {
+                    if (optind >= argc) {
+                        usage();
+                        exit(1);
+                    }
                     optarg = argv[optind++];
+                }
                 if ((tp = name2protox(optarg)) == NULL) {
                     (void) fprintf(stderr,
                                    "%s: %s: unknown protocol\n",
@@ -300,8 +315,13 @@ optProc(int argc, char *const *argv, int opt)
                 vflag = 1;
                 break;
             case 'w':
-                if (!*optarg)
+                if (!*optarg) {
+                    if (optind >= argc) {
+                        usage();
+                        exit(1);
+                    }
                     optarg = argv[optind++];
+                }
                 interval = atoi(optarg);
                 iflag = 1;
                 return;
