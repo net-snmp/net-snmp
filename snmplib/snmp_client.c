@@ -1853,7 +1853,7 @@ _row_status_state_all_values_createAndGo(netsnmp_state_machine_input *input,
     /*
      * make sure row stats is createAndGo
      */
-    rs_var = _get_vb_num(vars, ctx->row_status_index + 1);
+    rs_var = _get_vb_num(vars, ctx->row_status_index);
     if (NULL == rs_var) {
         snmp_free_varbind(vars);
         return SNMPERR_GENERR;
