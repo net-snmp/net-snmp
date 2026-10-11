@@ -979,7 +979,7 @@ netsnmp_add_loghandler( netsnmp_log_handler *logh )
     /*
      * Also tweak the relevant priority-'index' array.
      */
-    for (i=LOG_EMERG; i<=logh->priority; i++)
+    for (i=LOG_EMERG; i<=logh->priority && i<=LOG_DEBUG; i++)
         if (!logh_priorities[i] ||
              logh_priorities[i]->priority >= logh->priority)
              logh_priorities[i] = logh;
@@ -1086,7 +1086,7 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
     if (logh->next)
         logh->next->prev = logh->prev;
 
-    for (i=LOG_EMERG; i<=logh->priority; i++)
+    for (i=LOG_EMERG; i<=logh->priority && i<=LOG_DEBUG; i++)
         if (logh == logh_priorities[i])
             logh_priorities[i] = logh->next;
     free(NETSNMP_REMOVE_CONST(char*, logh->token));
@@ -1327,7 +1327,9 @@ snmp_log_string(int priority, const char *str)
     /*
      * Start at the given priority, and work "upwards"....
      */
-    if (priority > LOG_DEBUG)
+    if (priority < LOG_EMERG)
+        priority = LOG_EMERG;
+    else if (priority > LOG_DEBUG)
         priority = LOG_DEBUG;
     logh = logh_priorities[priority];
     for ( ; logh; logh = logh->next ) {
