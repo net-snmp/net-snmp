@@ -1844,7 +1844,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
             goto error;
         }
 
-        if (strlen(cname) > *parms->secNameLen + 1) {
+        if (strlen(cname) >= *parms->secNameLen) {
             DEBUGMSGTL(("ksm",
                         "KSM: Principal length (%d) is too long (%d)\n",
                         (int)strlen(cname), (int)*parms->secNameLen));
@@ -1885,7 +1885,12 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
          * remember?)
          */
 
+        if (entry->secNameLen >= *parms->secNameLen) {
+            retval = SNMPERR_TOO_LONG;
+            goto error;
+        }
         memcpy(parms->secName, entry->secName, entry->secNameLen);
+        parms->secName[entry->secNameLen] = '\0';
         *parms->secNameLen = entry->secNameLen;
     }
 
