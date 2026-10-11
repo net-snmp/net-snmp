@@ -497,6 +497,12 @@ netsnmp_ssh_close(netsnmp_transport *t)
             addr_pair->channel = NULL;
         }
 
+        if (addr_pair->agent) {
+            libssh2_agent_disconnect(addr_pair->agent);
+            libssh2_agent_free(addr_pair->agent);
+            addr_pair->agent = NULL;
+        }
+
         if (addr_pair->session) {
             libssh2_session_disconnect(addr_pair->session, "Normal Shutdown");
             libssh2_session_free(addr_pair->session);
