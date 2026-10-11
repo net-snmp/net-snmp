@@ -245,10 +245,17 @@ netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
     DEBUGMSGTL(("transport_callback", "hook_send enter\n"));
 
     cp = SNMP_MALLOC_TYPEDEF(netsnmp_callback_pass);
-    if (!cp)
+    if (!cp) {
+        SNMP_FREE(*opaque);
         return -1;
+    }
 
     cp->pdu = snmp_clone_pdu(pdu);
+    if (!cp->pdu) {
+        SNMP_FREE(cp);
+        SNMP_FREE(*opaque);
+        return -1;
+    }
     if (cp->pdu->transport_data) {
         /*
          * not needed and not properly freed later 
@@ -275,6 +282,7 @@ netsnmp_callback_send(netsnmp_transport *t, const void *buf, int size,
         if (!other_side) {
             snmp_free_pdu(cp->pdu);
             SNMP_FREE(cp);
+            SNMP_FREE(*opaque);
             return -1;
         }
 
