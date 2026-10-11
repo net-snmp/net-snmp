@@ -795,6 +795,7 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
     } else {
         DEBUGMSGTL(("get_thisaddr",
                     "Failed to resolve IPv4 hostname\n"));
+        return -1;
     }
     return 0;
 
