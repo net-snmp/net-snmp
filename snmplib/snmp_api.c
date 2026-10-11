@@ -4106,6 +4106,8 @@ snmpv3_parse(netsnmp_pdu *pdu,
          * space needed is larger than we have in the default buffer 
          */
         mallocbuf = calloc(1, msg_len);
+        if (mallocbuf == NULL)
+            return SNMPERR_MALLOC;
         pdu_buf_len = msg_len;
         cp = mallocbuf;
     } else {
