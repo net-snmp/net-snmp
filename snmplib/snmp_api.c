@@ -1827,6 +1827,8 @@ _sess_open(netsnmp_session * in_session)
             in_session->s_errno = errno;
 
             DEBUGMSGTL(("_sess_open", "couldn't enable UDP_BROADCAST\n"));
+            transport->f_close(transport);
+            netsnmp_transport_free(transport);
             return NULL;
         }
     }
