@@ -473,6 +473,10 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     }
 
     /* Section 5.2, step 3: Copy the tmSecurityName to securityName. */
+    if (*parms->secNameLen == 0) {
+        SNMP_FREE(tmStateRef);
+        return SNMPERR_GENERR;
+    }
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
         /* Section 5.2, step 3:
@@ -556,7 +560,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
                  "%s:%s", prefix, tmStateRef->securityName);
     } else {
         /* if the use prefix flag wasn't set, do a straight copy */
-        strncpy(parms->secName, tmStateRef->securityName, *parms->secNameLen);
+        strlcpy(parms->secName, tmStateRef->securityName, *parms->secNameLen);
     }
 
     /* set the length of the security name */
