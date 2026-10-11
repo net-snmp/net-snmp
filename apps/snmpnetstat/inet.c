@@ -112,6 +112,8 @@ tcpprotoprint_line(const char *name, const netsnmp_variable_list *vp,
     oid             localPort, remotePort;
     struct in_addr  localAddr, remoteAddr;
 
+    if (!vp->val.integer || vp->name_length < 20)
+        return;
     state = *vp->val.integer;
     if (!aflag && state == MIB_TCPCONNSTATE_LISTEN) {
         return;
@@ -222,6 +224,8 @@ udpprotopr(const char *name)
     printf("Active Internet (%s) Connections\n", name);
     printf("%-5.5s %-27.27s\n", "Proto", "Local Address");
     for (vp = var; vp; vp = vp->next_variable) {
+        if (vp->name_length < 15)
+            continue;
         printf("%-5.5s", name);
         /*
          * Extract the local port from the index values, but take
@@ -377,7 +381,9 @@ _dump_stats(const char *name, oid *oid_buf, size_t buf_len,
 
     printf("%s:\n", name);
     sp = stable;
-    for (vp = var; vp; vp = vp->next_variable, sp++) {
+    for (vp = var; vp && sp->entry; vp = vp->next_variable, sp++) {
+        if (vp->name_length < buf_len - 1)
+            continue;
         /*
          * Match the returned results against
          *   the original stats table.
@@ -388,6 +394,8 @@ _dump_stats(const char *name, oid *oid_buf, size_t buf_len,
             if (sp->entry == 0)
                 break;
         }
+        if (sp->entry == 0)
+            break;
         if (sp->entry > stat)
             continue;
 

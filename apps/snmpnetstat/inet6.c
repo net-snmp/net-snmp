@@ -122,6 +122,8 @@ tcp6protopr(const char *name)
         return;
 
     for (vp = var; vp; vp = vp->next_variable) {
+        if (!vp->val.integer || vp->name_length < 45)
+            continue;
         state = *vp->val.integer;
         if (!aflag && state == MIB_TCPCONNSTATE_LISTEN)
             continue;
@@ -188,6 +190,9 @@ udp6protopr(const char *name)
     printf("Active Internet Connections\n");
     printf("%-5.5s %-27.27s %4s\n", "Proto", "Local Address", "I/F");
     for (vp = var; vp; vp = vp->next_variable) {
+        if (!vp->val.string || vp->val_len < sizeof(struct in6_addr) ||
+            vp->name_length < 2)
+            continue;
         printf("%-5.5s", name);
         /*
          * Extract the local port from the index values, but take
@@ -236,6 +241,10 @@ _dump_v6stats(const char *name, oid * oid_buf, size_t buf_len,
     }
     oid_buf[buf_len - 1] = stable[0].entry;
     stats = calloc(max_stat + 1, sizeof(long));
+    if (!stats) {
+        snmp_free_varbind(var);
+        return;
+    }
 
     /*
      * Walk the specified column(s), and total the individual statistics
@@ -249,8 +258,11 @@ _dump_v6stats(const char *name, oid * oid_buf, size_t buf_len,
             break;              /* End of Table */
 
         for (vp = var; vp; vp = vp->next_variable) {
+            if (vp->name_length < buf_len || !vp->val.integer)
+                continue;
             stat = vp->name[buf_len - 1];
-            stats[stat] += *vp->val.integer;
+            if (stat <= max_stat)
+                stats[stat] += *vp->val.integer;
         }
         active = 1;
     }

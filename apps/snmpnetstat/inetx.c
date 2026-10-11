@@ -504,10 +504,10 @@ statsprint(const char *name, const systemstats_t * st, int proto,
             }
         }
         if (vb) {
-            if (vb->type == ASN_COUNTER) {
+            if (vb->type == ASN_COUNTER && vb->val.integer) {
                 if (*vb->val.integer > 0 || sflag == 1)
                     printf("%14lu %s\n", *vb->val.integer, st->str);
-            } else if (vb->type == ASN_COUNTER64) {
+            } else if (vb->type == ASN_COUNTER64 && vb->val.counter64) {
                 char            a64buf[I64CHARSZ + 1];
                 printU64(a64buf, vb->val.counter64);
                 if (strcmp(a64buf, "0") != 0 || sflag == 1)
@@ -543,7 +543,8 @@ prhisto(const char *name, const oid * var, size_t len, int ver,
         int             found = 0;
         vp = vb;
         while (vp && found != 2) {
-            if (vp->name[11] == code && vp->name[10] == ver) {
+            if (vp->name_length >= 12 && vp->val.integer &&
+                vp->name[11] == code && vp->name[10] == ver) {
                 if (vp->name[9] == 3)
                     inp = *vp->val.integer;
                 else
