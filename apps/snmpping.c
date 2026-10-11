@@ -416,21 +416,21 @@ wait_for_completion(netsnmp_session *ss, oid * index, size_t indexlen)
         }
 
         vlp = response->variables;
-        if (vlp->type == SNMP_NOSUCHINSTANCE) {
+        if (!vlp || vlp->type == SNMP_NOSUCHINSTANCE || !vlp->val.integer) {
             DEBUGMSGTL(("ping", "no-such-instance for pingResultsOperStatus\n"));
             goto retry;
         }
         pingStatus = *vlp->val.integer;
 
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHINSTANCE) {
+        if (!vlp || vlp->type == SNMP_NOSUCHINSTANCE || !vlp->val.integer) {
             DEBUGMSGTL(("ping", "no-such-instance for pingResultsSentProbes\n"));
             goto retry;
         }
         sent = *vlp->val.integer;
 
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHINSTANCE) {
+        if (!vlp || vlp->type == SNMP_NOSUCHINSTANCE || !vlp->val.integer) {
             DEBUGMSGTL(("ping", "no-such-instance for pingResultsProbeResponses\n"));
             goto retry;
         }
@@ -513,25 +513,25 @@ overall_stats(netsnmp_session *ss, oid * index, size_t indexlen)
     }
 
     vlp = response->variables;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsOperStatus = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsMinRtt = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsMaxRtt = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsAverageRtt = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsProbeResponses = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsSentProbes = *vlp->val.integer;
     vlp = vlp->next_variable;
-    if (vlp->type == SNMP_NOSUCHOBJECT) goto parseerr;
+    if (!vlp || vlp->type == SNMP_NOSUCHOBJECT || !vlp->val.integer) goto parseerr;
     result.pingResultsRttSumOfSquares = *vlp->val.integer;
     vlp = vlp->next_variable;
 
@@ -628,11 +628,13 @@ int main(int argc, char **argv)
     }
 
     if (session.securityModel == SNMP_SEC_MODEL_USM) {
-        strncpy(username, session.securityName, sizeof(username) - 1);
+        const char *secname = session.securityName ? session.securityName : "";
+        strncpy(username, secname, sizeof(username) - 1);
         username[32] = '\0';
         usernameLen = strlen(username); /* TODO session.securityNameLen */
     } else {
-        strncpy(username, getlogin(), sizeof(username) - 1);
+        const char *login = getlogin();
+        strncpy(username, login ? login : "unknown", sizeof(username) - 1);
         username[32] = '\0';
         usernameLen = strlen(username);
     }
