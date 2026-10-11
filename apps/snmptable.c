@@ -392,6 +392,7 @@ print_table(void)
         else
             snprintf(string_buf, sizeof string_buf, "%s%%s",
                      field_separator);
+        SNMP_FREE(column[field].fmt);
         column[field].fmt = strdup(string_buf);
     }
     if (show_index) {
@@ -402,6 +403,7 @@ print_table(void)
                      left_justify_flag, index_width);
         else
             snprintf(string_buf, sizeof string_buf, "%%s");
+        SNMP_FREE(index_fmt);
         index_fmt = strdup(string_buf);
     }
 
@@ -562,6 +564,7 @@ get_field_names(void)
         column[fields - 1].label = strdup(name_p);
         column[fields - 1].width = strlen(name_p);
         column[fields - 1].subid = root[rootlen];
+        column[fields - 1].fmt = NULL;
     }
     if (fields == 0) {
         fprintf(stderr, "Was that a table? %s\n", table_name);
@@ -685,7 +688,8 @@ get_table_entries(netsnmp_session * ss)
                 end_of_table = 1;       /* assume end of table */
                 have_current_index = 0;
                 name_length = rootlen + 1;
-                for (vars = response->variables; vars;
+                for (vars = response->variables;
+                     vars && col + 1 < fields;
                      vars = vars->next_variable) {
                     col++;
                     name[rootlen] = column[col].subid;
@@ -738,8 +742,16 @@ get_table_entries(netsnmp_session * ss)
                                 case NETSNMP_OID_OUTPUT_NUMERIC:
 				case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                                 case NETSNMP_OID_OUTPUT_UCD:
-                                    name_p = buf + strlen(table_name)+1;
-                                    name_p = strchr(name_p, '.')+1;
+                                    if (strncmp(buf, table_name,
+                                                strlen(table_name)) == 0 &&
+                                        buf[strlen(table_name)] != '\0') {
+                                        name_p = buf + strlen(table_name) + 1;
+                                        name_p = strchr(name_p, '.');
+                                        if (name_p)
+                                            name_p++;
+                                    } else {
+                                        name_p = NULL;
+                                    }
                                     break;
 				default:
 				    fprintf(stderr, "Unrecognized -O option: %d\n",
@@ -747,7 +759,15 @@ get_table_entries(netsnmp_session * ss)
 							      NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
 				    exit(1);
                                 }
-                                name_p = strchr(name_p, '.') + 1;
+                                if (name_p) {
+                                    name_p = strchr(name_p, '.');
+                                    if (name_p)
+                                        name_p++;
+                                }
+                            }
+                            if (name_p == NULL) {
+                                running = 0;
+                                break;
                             }
                         }
                         if (localdebug) {
@@ -888,6 +908,7 @@ getbulk_table_entries(netsnmp_session * ss)
                     sprint_realloc_objid((u_char **)&buf, &buf_len, &out_len, 1,
                                          vars->name, vars->name_length);
                     if (vars->type == SNMP_ENDOFMIBVIEW ||
+                        vars->name_length < rootlen + 1 ||
                         memcmp(vars->name, name,
                                rootlen * sizeof(oid)) != 0) {
                         if (localdebug) {
@@ -922,7 +943,9 @@ getbulk_table_entries(netsnmp_session * ss)
                                                   NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
                         case NETSNMP_OID_OUTPUT_MODULE:
 			case 0:
-                            name_p = strchr(buf, ':')+1;
+                            name_p = strchr(buf, ':');
+                            if (name_p)
+                                name_p++;
                             break;
                         case NETSNMP_OID_OUTPUT_SUFFIX:
                             name_p = buf;
@@ -931,8 +954,16 @@ getbulk_table_entries(netsnmp_session * ss)
                         case NETSNMP_OID_OUTPUT_NUMERIC:
 			case NETSNMP_OID_OUTPUT_FULL_AND_NUMERIC:
                         case NETSNMP_OID_OUTPUT_UCD:
-                            name_p = buf + strlen(table_name)+1;
-                            name_p = strchr(name_p, '.')+1;
+                            if (strncmp(buf, table_name,
+                                        strlen(table_name)) == 0 &&
+                                buf[strlen(table_name)] != '\0') {
+                                name_p = buf + strlen(table_name) + 1;
+                                name_p = strchr(name_p, '.');
+                                if (name_p)
+                                    name_p++;
+                            } else {
+                                name_p = NULL;
+                            }
                             break;
 			default:
 			    fprintf(stderr, "Unrecognized -O option: %d\n",
@@ -940,7 +971,8 @@ getbulk_table_entries(netsnmp_session * ss)
 					              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
 			    exit(1);
                         }
-                        name_p = strchr(name_p, '.');
+                        if (name_p)
+                            name_p = strchr(name_p, '.');
                         if ( name_p == NULL ) {
                             /* The 'strchr' call above failed, i.e. the results
                              * don't seem to include instance subidentifiers! */
