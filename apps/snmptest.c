@@ -471,22 +471,22 @@ input_variable(netsnmp_variable_list * vp)
                 if (!snmp_decimal_to_binary(&(vp->val.string), &buf_len,
                                             &val_len, 1, buf)) {
                     printf("Bad value or no sub-identifier > 255\n");
-                    free(vp->val.string);
+                    SNMP_FREE(vp->val.string);
                     goto getValue;
                 }
                 vp->val_len = val_len;
             } else if (ch == 's') {
-                /*
-                 * -1 to omit trailing newline  
-                 */
-                vp->val.string = (u_char *) malloc(strlen(buf) - 1);
+                size_t len = strlen(buf);
+                if (len > 0 && buf[len - 1] == '\n')
+                    len--;
+                vp->val.string = (u_char *) malloc(len + 1);
                 if (vp->val.string == NULL) {
                     printf("malloc failure\n");
                     goto getValue;
                 }
-                memcpy(vp->val.string, buf, strlen(buf) - 1);
-                vp->val.string[sizeof(vp->val.string)-1] = 0;
-                vp->val_len = strlen(buf) - 1;
+                memcpy(vp->val.string, buf, len);
+                vp->val.string[len] = 0;
+                vp->val_len = len;
             } else if (ch == 'x') {
                 size_t          buf_len = 256;
                 val_len = 0;
@@ -497,7 +497,7 @@ input_variable(netsnmp_variable_list * vp)
                 if (!snmp_hex_to_binary(&(vp->val.string), &buf_len,
                                         &val_len, 1, buf)) {
                     printf("Bad value (need pairs of hex digits)\n");
-                    free(vp->val.string);
+                    SNMP_FREE(vp->val.string);
                     goto getValue;
                 }
                 vp->val_len = val_len;
@@ -508,18 +508,18 @@ input_variable(netsnmp_variable_list * vp)
             vp->val.string = NULL;
             break;
         case ASN_OBJECT_ID:
-            if ('\n' == buf[strlen(buf) - 1])
+            if (buf[0] != '\0' && '\n' == buf[strlen(buf) - 1])
                 buf[strlen(buf) - 1] = '\0';
-	    else {
-		oid value[MAX_OID_LEN];
-		vp->val_len = MAX_OID_LEN;
-		if (0 == read_objid(buf, value, &vp->val_len)) {
-		    printf("Unrecognised OID value\n");
-		    goto getValue;
-		}
-		vp->val.objid = snmp_duplicate_objid(value, vp->val_len);
-		vp->val_len *= sizeof(oid);
-	    }
+            {
+                oid value[MAX_OID_LEN];
+                vp->val_len = MAX_OID_LEN;
+                if (0 == read_objid(buf, value, &vp->val_len)) {
+                    printf("Unrecognised OID value\n");
+                    goto getValue;
+                }
+                vp->val.objid = snmp_duplicate_objid(value, vp->val_len);
+                vp->val_len *= sizeof(oid);
+            }
             break;
         case ASN_TIMETICKS:
             vp->val.integer = (long *) malloc(sizeof(long));
