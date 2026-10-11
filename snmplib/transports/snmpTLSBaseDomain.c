@@ -282,7 +282,10 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
             /* RFC 6353: convert their_hostname to lowercase */
             lower_hostname = calloc(their_hostname_len + 1, sizeof(char));
             if (NULL == lower_hostname) {
-                LOGANDDIE("Failed to allocate memory to convert hostname to lowercase");
+                snmp_log(LOG_ERR,
+                         "Failed to allocate memory to convert hostname to lowercase\n");
+                rv = SNMPERR_GENERR;
+                goto out;
             }
             for (i = 0; i < their_hostname_len; ++i) {
                 lower_hostname[i] = tolower((unsigned char) their_hostname[i]);
