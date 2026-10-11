@@ -5562,7 +5562,7 @@ _add_strings_to_oid(void *tp, char *cp,
                     if (cp2)
                         *cp2++ = 0;
                     len = strtoul(cp, &ecp, 0);
-                    if (*ecp)
+                    if (len < 0 || *ecp)
                         goto bad_id;
                     if (*objidlen + len + 1 >= maxlen)
                         goto bad_id;
@@ -5575,6 +5575,8 @@ _add_strings_to_oid(void *tp, char *cp,
                     cp2 = strchr(cp, '.');
                     if (cp2)
                         *cp2++ = 0;
+                    if (*objidlen >= maxlen)
+                        goto bad_id;
                     objid[*objidlen] = strtoul(cp, &ecp, 0);
                     if (*ecp)
                         goto bad_id;
@@ -5671,9 +5673,13 @@ _add_strings_to_oid(void *tp, char *cp,
              * insert length if requested 
              */
             if (doingquote == '"') {
+                char *endq;
                 if (*objidlen >= maxlen)
                     goto bad_id;
-                objid[*objidlen] = len = strchr(cp, doingquote) - cp;
+                endq = strchr(cp, doingquote);
+                if (!endq)
+                    goto bad_id;
+                objid[*objidlen] = len = endq - cp;
                 (*objidlen)++;
             }
 

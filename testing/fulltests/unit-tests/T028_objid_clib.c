@@ -118,3 +118,11 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
     }
     
 }
+
+{
+    oid out_oid[MAX_OID_LEN];
+    size_t out_len = MAX_OID_LEN;
+
+    OK(snmp_parse_oid(".1.3.6.1.\"unclosed", out_oid, &out_len) == NULL,
+       "snmp_parse_oid rejects unclosed quote");
+}
