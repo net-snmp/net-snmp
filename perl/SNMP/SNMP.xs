@@ -2390,6 +2390,9 @@ _bulkwalk_finish(walk_context *context, int okay)
       if (!async) {
 	 XPUSHs(&sv_undef);
 	 npushed = 1;
+	 for (i = 0; i < context->nreq_oids; i++) {
+	    SvREFCNT_dec((SV *) (context->req_oids[i].vars));
+	 }
       } else {
           for (i = 0; i < context->nreq_oids; i++) {
               sv_2mortal((SV *) (context->req_oids[i].vars));
@@ -2421,6 +2424,8 @@ _bulkwalk_finish(walk_context *context, int okay)
        perl_cb = __push_cb_args(perl_cb, (SvTRUE(rv) ? sv_2mortal(rv) : rv));
 
        __call_callback(perl_cb, G_DISCARD);
+   } else if (context->perl_cb) {
+       SvREFCNT_dec(context->perl_cb);
    }
    sv_2mortal(context->sess_ref);
 
@@ -4239,7 +4244,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 
 	      if (pdu == NULL) {
 		 DBPRT(1,(DBOUT "Initial asynchronous send failed...\n"));
-		 XSRETURN_UNDEF;
+		 goto err;
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
@@ -4302,10 +4307,15 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	/* Handle error cases and clean up after ourselves. */
         err:
 	   if (context) {
+	      _context_del(context);
+	      if (context->perl_cb)
+	         SvREFCNT_dec(context->perl_cb);
+	      if (context->sess_ref)
+	         SvREFCNT_dec(context->sess_ref);
 	      if (context->req_oids && context->nreq_oids) {
 	         bt_entry = context->req_oids;
 	         for (i = 0; i < context->nreq_oids; i++, bt_entry++)
-		    av_clear(bt_entry->vars);
+		    SvREFCNT_dec((SV *)bt_entry->vars);
 	      }
 	      if (context->req_oids)
 	         Safefree(context->req_oids);
