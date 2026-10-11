@@ -4204,6 +4204,8 @@ _get_realloc_symbol_octet_string(size_t numids, const oid * objid,
   u_char		buffer[1024];
   size_t		i;
 
+  if (numids > sizeof(buffer))
+    numids = sizeof(buffer);
   for (i = 0; i < numids; i++)
     buffer[i] = (u_char) objid[i];
   var.type = ASN_OCTET_STR;
