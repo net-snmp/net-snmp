@@ -355,6 +355,8 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (netsnmp_tdata_extract_entry(request))
+                        break;
                     if (tinfo->indexes->val_len > SCHED_STR1_LEN ||
                         tinfo->indexes->next_variable->val_len > SCHED_STR1_LEN) {
                         netsnmp_set_request_error(reqinfo, request,
@@ -403,6 +405,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & SCHEDULE_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
+                        netsnmp_remove_tdata_row(request, row);
                         schedTable_removeEntry(row);
                     }
                 }
@@ -412,9 +415,15 @@ schedTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_ACTION:
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
+            tinfo = netsnmp_extract_table_info(request);
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
             if (!entry) {
+                if (tinfo && tinfo->colnum == COLUMN_SCHEDROWSTATUS &&
+                    *request->requestvb->val.integer == RS_DESTROY)
+                    continue;
                 /*
                  * New rows must be created via the RowStatus column
                  */
@@ -442,6 +451,8 @@ schedTable_handler(netsnmp_mib_handler *handler,
 
             entry = (struct schedTable_entry *)
                     netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info( request);
 
             switch (tinfo->colnum) {
@@ -539,6 +550,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
+                    netsnmp_remove_tdata_row(request, row);
                     schedTable_removeEntry(row);
                     entry = NULL;
                     break;

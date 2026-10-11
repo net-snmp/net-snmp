@@ -238,6 +238,8 @@ mteEventNotificationTable_handler(netsnmp_mib_handler *handler,
                 continue;
 
             entry = (struct mteEvent *) netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {

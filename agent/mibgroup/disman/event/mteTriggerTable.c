@@ -308,6 +308,8 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (netsnmp_tdata_extract_entry(request))
+                        break;
                     if (tinfo->indexes->val_len > MTE_STR1_LEN ||
                         tinfo->indexes->next_variable->val_len > MTE_STR1_LEN) {
                         netsnmp_set_request_error(reqinfo, request,
@@ -358,6 +360,7 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & MTE_TRIGGER_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
+                        netsnmp_remove_tdata_row(request, row);
                         mteTrigger_removeEntry( row );
                     }
                 }
@@ -373,6 +376,9 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
             tinfo = netsnmp_extract_table_info(request);
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
             if (!entry) {
+                if (tinfo && tinfo->colnum == COLUMN_MTETRIGGERENTRYSTATUS &&
+                    *request->requestvb->val.integer == RS_DESTROY)
+                    continue;
                 /*
                  * New rows must be created via the RowStatus column
                  */
@@ -398,6 +404,8 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 continue;
 
             entry = (struct mteTrigger *) netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -496,6 +504,17 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
+                    if (reqinfo && reqinfo->asp && reqinfo->asp->requests) {
+                        int i;
+                        for (i = 0; i < reqinfo->asp->vbcount; i++) {
+                            if (netsnmp_tdata_extract_row(
+                                    &reqinfo->asp->requests[i]) == row)
+                                netsnmp_request_remove_list_data(
+                                    &reqinfo->asp->requests[i],
+                                    TABLE_CONTAINER_ROW);
+                        }
+                    }
+                    netsnmp_remove_tdata_row(request, row);
                     mteTrigger_removeEntry(row);
                 }
                 break;

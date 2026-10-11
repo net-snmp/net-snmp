@@ -248,6 +248,8 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (netsnmp_tdata_extract_entry(request))
+                        break;
                     if (tinfo->indexes->val_len > EXP_STR1_LEN ||
                         tinfo->indexes->next_variable->val_len > EXP_STR1_LEN ||
                         *tinfo->indexes->next_variable->next_variable->val.integer < 1) {
@@ -301,6 +303,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & EXP_OBJ_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
+                        netsnmp_remove_tdata_row(request, row);
                         expObject_removeEntry( row );
                     }
                 }
@@ -316,8 +319,8 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
             tinfo = netsnmp_extract_table_info(request);
             entry = (struct expObject *)
                     netsnmp_tdata_extract_entry(request);
-            if (!entry && tinfo->colnum != COLUMN_EXPOBJECTENTRYSTATUS &&
-                *request->requestvb->val.integer != RS_DESTROY) {
+            if (!entry && (tinfo->colnum != COLUMN_EXPOBJECTENTRYSTATUS ||
+                           *request->requestvb->val.integer != RS_DESTROY)) {
                 /*
                  * New rows must be created via the RowStatus column
                  */
@@ -344,6 +347,8 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 continue;
 
             entry = (struct expObject *) netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -382,9 +387,11 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 if ( entry->flags & EXP_OBJ_FLAG_PREFIX ) {
                     exp = expExpression_getEntry( entry->expOwner,
                                                   entry->expName );
-                    memcpy( exp->expPrefix, entry->expObjDeltaD,
-                            MAX_OID_LEN*sizeof(oid));
-                    exp->expPrefix_len = entry->expObjDeltaD_len;
+                    if (exp) {
+                        memcpy( exp->expPrefix, entry->expObjDeltaD,
+                                MAX_OID_LEN*sizeof(oid));
+                        exp->expPrefix_len = entry->expObjDeltaD_len;
+                    }
                 }
                 break;
             case COLUMN_EXPOBJECTDISCONTINUITYIDWILDCARD:
@@ -403,8 +410,10 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                     if ( entry->flags & EXP_OBJ_FLAG_PREFIX ) {
                         exp = expExpression_getEntry( entry->expOwner,
                                                       entry->expName );
-                        memset( exp->expPrefix, 0, MAX_OID_LEN*sizeof(oid));
-                        exp->expPrefix_len = 0;
+                        if (exp) {
+                            memset( exp->expPrefix, 0, MAX_OID_LEN*sizeof(oid));
+                            exp->expPrefix_len = 0;
+                        }
                         ret = 1;   /* Need a new prefix OID */
                     }
                     entry->flags &= ~EXP_OBJ_FLAG_DWILD;
@@ -445,6 +454,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
+                    netsnmp_remove_tdata_row(request, row);
                     expObject_removeEntry(row);
                 }
             }
@@ -454,7 +464,11 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
          * Need to check for changes in expExpressionPrefix handling
          */
         for (request = requests; request; request = request->next) {
+            if (request->processed)
+                continue;
             entry = (struct expObject *) netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -466,7 +480,7 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 if (*request->requestvb->val.integer == TV_TRUE) {
                     exp = expExpression_getEntry( entry->expOwner,
                                                   entry->expName );
-                    if ( exp->expPrefix_len == 0 ) {
+                    if ( exp && exp->expPrefix_len == 0 ) {
                         memcpy( exp->expPrefix, entry->expObjDeltaD,
                                 MAX_OID_LEN*sizeof(oid));
                         exp->expPrefix_len = entry->expObjDeltaD_len;

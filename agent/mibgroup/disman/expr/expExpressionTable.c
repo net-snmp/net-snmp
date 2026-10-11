@@ -243,6 +243,8 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (netsnmp_tdata_extract_entry(request))
+                        break;
                     if (tinfo->indexes->val_len > EXP_STR1_LEN ||
                         tinfo->indexes->next_variable->val_len > EXP_STR1_LEN) {
                         netsnmp_set_request_error(reqinfo, request,
@@ -293,6 +295,7 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & EXP_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
+                        netsnmp_remove_tdata_row(request, row);
                         expExpression_removeEntry( row );
                     }
                 }
@@ -308,8 +311,8 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
             tinfo = netsnmp_extract_table_info(request);
             entry = (struct expExpression *)
                     netsnmp_tdata_extract_entry(request);
-            if (!entry && tinfo->colnum != COLUMN_EXPEXPRESSIONENTRYSTATUS &&
-                *request->requestvb->val.integer != RS_DESTROY) {
+            if (!entry && (tinfo->colnum != COLUMN_EXPEXPRESSIONENTRYSTATUS ||
+                           *request->requestvb->val.integer != RS_DESTROY)) {
                 /*
                  * New rows must be created via the RowStatus column
                  */
@@ -336,6 +339,8 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
 
             entry = (struct expExpression *)
                 netsnmp_tdata_extract_entry(request);
+            if (!entry)
+                continue;
             tinfo = netsnmp_extract_table_info(request);
 
             switch (tinfo->colnum) {
@@ -383,6 +388,7 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
+                    netsnmp_remove_tdata_row(request, row);
                     expExpression_removeEntry(row);
                 }
             }
