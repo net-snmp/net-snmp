@@ -3268,8 +3268,10 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             }
 
             end_of_overhead = value_ptr;
+            iv_length = BYTESIZE(USM_DES_SALT_LENGTH);
 
-            if ( !user->privKey ) {
+            if (!user->privKey || user->privKeyLen < 2 * iv_length ||
+                salt_length < iv_length) {
                 DEBUGMSGTL(("usm", "No privacy pass phrase for %s\n", user->secName));
                 snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
                 usm_free_usmStateReference(*secStateRef);
@@ -3282,7 +3284,6 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
              * XOR the salt with the last (iv_length) bytes
              * of the priv_key to obtain the IV.
              */
-            iv_length = BYTESIZE(USM_DES_SALT_LENGTH);
             for (i = 0; i < (int) iv_length; i++)
                 iv[i] = salt[i] ^ user->privKey[iv_length + i];
         }
