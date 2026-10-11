@@ -143,6 +143,8 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
     cinfo = (netsnmp_stash_cache_info *) cache->magic;
+    if (!cinfo)
+        return SNMP_ERR_GENERR;
 
     switch (reqinfo->mode) {
 
@@ -151,8 +153,8 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         for(request = requests; request; request = request->next) {
             cdata = (netsnmp_variable_list*)
                 netsnmp_oid_stash_get_data(cinfo->cache,
-                                           requests->requestvb->name,
-                                           requests->requestvb->name_length);
+                                           request->requestvb->name,
+                                           request->requestvb->name_length);
             if (cdata && cdata->val.string && cdata->val_len) {
                 DEBUGMSGTL(("helper:stash_cache", "Found cached GET varbind\n"));
                 DEBUGMSGOID(("helper:stash_cache", cdata->name, cdata->name_length));
@@ -168,8 +170,8 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         for(request = requests; request; request = request->next) {
             cnode =
                 netsnmp_oid_stash_getnext_node(cinfo->cache,
-                                               requests->requestvb->name,
-                                               requests->requestvb->name_length);
+                                               request->requestvb->name,
+                                               request->requestvb->name_length);
             if (cnode && cnode->thedata) {
                 cdata =  (netsnmp_variable_list*)cnode->thedata;
                 if (cdata->val.string && cdata->name && cdata->name_length) {
@@ -209,6 +211,8 @@ _netsnmp_stash_cache_load( netsnmp_cache *cache, void *magic )
 
     if (!cinfo) {
         cinfo = netsnmp_get_new_stash_cache();
+        if (!cinfo)
+            return -1;
         cache->magic = cinfo;
     }
 
@@ -236,6 +240,8 @@ _netsnmp_stash_cache_free( netsnmp_cache *cache, void *magic )
 {
     netsnmp_stash_cache_info *cinfo = magic;
 
+    if (!cinfo)
+        return;
     netsnmp_oid_stash_free(&cinfo->cache, netsnmp_free_var);
 }
 
