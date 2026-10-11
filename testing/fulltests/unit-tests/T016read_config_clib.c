@@ -80,3 +80,14 @@ for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
     if (str)
         free(str);
 }
+
+{
+    oid             oid_buf[4] = { 0, 0, 0xdeadbeef, 0xdeadbeef };
+    size_t          oid_bytes = 2 * sizeof(oid);
+    char            input_oid[] = ".1.3.6.1.2.1";
+
+    read_config_read_memory(ASN_OBJECT_ID, input_oid, (char *)oid_buf,
+                            &oid_bytes);
+    OKF(oid_buf[2] == 0xdeadbeef && oid_buf[3] == 0xdeadbeef,
+        ("read_config_read_memory(ASN_OBJECT_ID) respects byte buffer size"));
+}

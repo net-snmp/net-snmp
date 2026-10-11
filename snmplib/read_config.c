@@ -2331,6 +2331,7 @@ read_config_read_memory(int type, char *readfrom,
 
     case ASN_PRIV_IMPLIED_OBJECT_ID:
     case ASN_OBJECT_ID:
+        *len /= sizeof(oid);
         readfrom =
             read_config_read_objid(readfrom, (oid **) & dataptr, len);
         *len *= sizeof(oid);
