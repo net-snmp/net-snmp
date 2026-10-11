@@ -130,6 +130,7 @@ netsnmp_std_close(netsnmp_transport *t)
             sleep(1);
             kill(data->childpid, SIGKILL);
         }
+        SNMP_FREE(data->prog);
         /* XXX: set an alarm to kill harder the child */
     } else {
         /* close stdout/in */
