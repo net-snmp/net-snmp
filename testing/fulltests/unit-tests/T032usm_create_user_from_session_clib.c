@@ -353,5 +353,32 @@
     }
 #endif
 
+    {
+        u_char eid1[4] = { 0x80, 0x00, 0x00, 0x01 };
+        u_char eid2[4] = { 0x80, 0x00, 0x00, 0x02 };
+        u_int boots = 0, etime = 0, cand;
+        int h1 = hash_engineID(eid1, sizeof(eid1));
+
+        for (cand = 2; cand < 256; cand++) {
+            eid2[3] = (u_char)cand;
+            if (hash_engineID(eid2, sizeof(eid2)) == h1)
+                break;
+        }
+        OK(hash_engineID(eid2, sizeof(eid2)) == h1,
+           "found two engineIDs hashing to same etimelist bucket");
+        OK(set_enginetime(eid1, sizeof(eid1), 5, 100, TRUE) == SNMPERR_SUCCESS,
+           "set_enginetime eid1 succeeded");
+        OK(set_enginetime(eid2, sizeof(eid2), 7, 200, TRUE) == SNMPERR_SUCCESS,
+           "set_enginetime eid2 succeeded");
+        free_enginetime(eid1, sizeof(eid1));
+        OK(get_enginetime(eid1, sizeof(eid1), &boots, &etime, TRUE) !=
+           SNMPERR_SUCCESS,
+           "free_enginetime removed eid1");
+        OK(get_enginetime(eid2, sizeof(eid2), &boots, &etime, TRUE) ==
+           SNMPERR_SUCCESS && boots == 7,
+           "free_enginetime preserved colliding eid2 in same bucket");
+        free_enginetime(eid2, sizeof(eid2));
+    }
+
     snmp_shutdown("T032usm");
 }
