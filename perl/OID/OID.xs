@@ -68,10 +68,10 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
    } else {
      switch (var->type) {
         case ASN_INTEGER:
-           if (flag == USE_ENUMS) {
+           if (flag == USE_ENUMS && tp) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
-                    strcpy(buf, ep->label);
+                    strlcpy(buf, ep->label, buf_len);
                     len = strlen(buf);
                     break;
                  }
@@ -93,8 +93,8 @@ __snprint_value(char *buf, size_t buf_len, netsnmp_variable_list *var,
 
         case ASN_OCTET_STR:
         case ASN_OPAQUE:
-           memcpy(buf, (char*)var->val.string, var->val_len);
-           len = var->val_len;
+           len = (int)(var->val_len < buf_len - 1 ? var->val_len : buf_len - 1);
+           memcpy(buf, (char*)var->val.string, len);
            break;
 
         case ASN_IPADDRESS:

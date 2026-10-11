@@ -237,7 +237,7 @@ __snprint_value(char **buf, size_t *buf_len, const netsnmp_variable_list *var,
    } else {
      switch (var->type) {
         case ASN_INTEGER:
-           if (flag == USE_ENUMS) {
+           if (flag == USE_ENUMS && tp) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
                     strlcpy(*buf, ep->label, *buf_len);
@@ -1374,7 +1374,7 @@ static int build_python_varbind(PyObject *varbind, netsnmp_variable_list *vars,
         getlabel_flag |= NON_LEAF_NAME;
         type = __translate_asn_type(vars->type);
         if (_debug_level)
-            printf("%s:!is_leaf:%d\n", __func__, tp->type);
+            printf("%s:!is_leaf:%d\n", __func__, tp ? tp->type : TYPE_UNKNOWN);
     }
     __get_label_iid(*str_buf, &tag, &iid, getlabel_flag);
 
