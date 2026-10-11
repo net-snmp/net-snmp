@@ -88,6 +88,10 @@ SOFTWARE.
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 
+#ifndef NI_MAXHOST
+#define NI_MAXHOST 1025
+#endif
+
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -597,8 +601,8 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
 static
 void convert_agent_addr(struct in_addr agent_addr, char *name, size_t size)
 {
-    const int numeric = !netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                                NETSNMP_DS_APP_NUMERIC_IP);
+    const int numeric = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                               NETSNMP_DS_APP_NUMERIC_IP);
     struct sockaddr_in sin;
 
     memset(&sin, 0, sizeof(sin));
@@ -606,7 +610,7 @@ void convert_agent_addr(struct in_addr agent_addr, char *name, size_t size)
     sin.sin_addr = agent_addr;
     if (getnameinfo((struct sockaddr *)&sin, sizeof(sin), name, size, NULL, 0,
                     numeric ? NI_NUMERICHOST : 0) < 0)
-        strlcpy(name, "?", sizeof(size));
+        strlcpy(name, "?", size);
 }
 
 static int
@@ -630,7 +634,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
       */
 {
     struct in_addr *agent_inaddr = (struct in_addr *) pdu->agent_addr;
-    char            host[16];                   /* corresponding host name */
+    char            host[NI_MAXHOST];           /* corresponding host name */
     char            fmt_cmd = options->cmd;     /* what we're formatting */
     u_char         *temp_buf = NULL;
     size_t          temp_buf_len = 64, temp_out_len = 0;
@@ -1312,7 +1316,7 @@ realloc_format_plain_trap(u_char ** buf, size_t * buf_len,
     struct tm      *now_parsed; /* time in struct format */
     char            safe_bfr[200];      /* holds other strings */
     struct in_addr *agent_inaddr = (struct in_addr *) pdu->agent_addr;
-    char host[16];                      /* host name */
+    char host[NI_MAXHOST];              /* host name */
     netsnmp_variable_list *vars;        /* variables assoc with trap */
 
     if (buf == NULL) {
