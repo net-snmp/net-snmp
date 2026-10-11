@@ -723,6 +723,8 @@ _tlstcp_drain(netsnmp_transport *t)
             tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE)
             break;
 
+        if (t->sock < 0 || t->sock >= FD_SETSIZE)
+            break;
         FD_ZERO(&readfs);
         FD_SET(t->sock, &readfs);
         tv.tv_sec = 0;
