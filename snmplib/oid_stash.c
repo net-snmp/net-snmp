@@ -115,6 +115,8 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
              */
             tmpp = curnode->children[lookup[i] % curnode->children_size] =
                 netsnmp_oid_stash_create_node();
+            if (!tmpp)
+                return SNMPERR_MALLOC;
             tmpp->value = lookup[i];
             tmpp->parent = curnode;
         } else {
@@ -129,6 +131,8 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
                  * none exists.  Create it 
                  */
                 loopp = netsnmp_oid_stash_create_node();
+                if (!loopp)
+                    return SNMPERR_MALLOC;
                 loopp->value = lookup[i];
                 loopp->next_sibling = tmpp;
                 loopp->parent = curnode;
