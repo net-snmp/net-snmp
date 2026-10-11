@@ -625,6 +625,7 @@ nari_setValue(me, type, value)
 	size_t myoid_len;
         STRLEN stringlen;
         char * stringptr;
+        char * endptr;
     CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
         switch(type) {
@@ -668,8 +669,9 @@ nari_setValue(me, type, value)
 	      else if (SvPOK(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
-		  ltmp = strtol( stringptr, NULL, 0 );
-		  if (errno == EINVAL) {
+		  errno = 0;
+		  ltmp = strtol( stringptr, &endptr, 0 );
+		  if (errno != 0 || endptr == stringptr || *endptr != '\0') {
 			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 			RETVAL = 0;
 			break;
@@ -718,8 +720,9 @@ nari_setValue(me, type, value)
 	      else if (SvPOK(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
-		  utmp = strtoul( stringptr, NULL, 0 );
-		  if (errno == EINVAL) {
+		  errno = 0;
+		  utmp = strtoul( stringptr, &endptr, 0 );
+		  if (errno != 0 || endptr == stringptr || *endptr != '\0') {
 			snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 			RETVAL = 0;
 			break;
@@ -762,8 +765,8 @@ nari_setValue(me, type, value)
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
 	          errno = 0;
-		  ulltmp = strtoull( stringptr, NULL, 0 );
-		  if (errno != 0) {
+		  ulltmp = strtoull( stringptr, &endptr, 0 );
+		  if (errno != 0 || endptr == stringptr || *endptr != '\0') {
 		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'\n", stringptr);
 		      RETVAL = 0;
 		  } else
