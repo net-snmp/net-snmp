@@ -1581,7 +1581,7 @@ read_config_store(const char *type, const char *line)
     if (mkdirhier(filep, NETSNMP_AGENT_DIRECTORY_MODE, 1)) {
         snmp_log(LOG_ERR,
                  "Failed to create the persistent directory for %s\n",
-                 file);
+                 filep);
     }
     if ((fout = fopen(filep, "a")) != NULL) {
         fprintf(fout, "%s", line);
