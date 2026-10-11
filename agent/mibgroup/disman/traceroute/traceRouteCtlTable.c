@@ -4609,13 +4609,12 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
         for (probe = 0; probe < nprobes; ++probe) {
             int    cc;
             struct timeval  t1, t2;
-            struct timezone tz;
             struct ip *ip = NULL;
             unsigned long Rtt = 0;
 
             if (sentfirst && pausemsecs > 0)
                 usleep(pausemsecs * 1000);
-            (void) gettimeofday(&t1, &tz);
+            netsnmp_get_monotonic_clock(&t1);
             send_probe(to, ++seq, ttl, &t1, outip, outudp, packlen,
                        optlen, hostname, ident, sndsock, port,
                        outdata);
@@ -4623,7 +4622,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
             while ((cc =
                     wait_for_reply(s, from, &t1, packet,
                                    waittime)) != 0) {
-                (void) gettimeofday(&t2, &tz);
+                netsnmp_get_monotonic_clock(&t2);
                 timep = 0;
                 time(&timep);
                 i = packet_ok(packet, cc, from, seq, ident, pmtu,
@@ -5323,12 +5322,11 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
         for (probe = 0; probe < nprobes; ++probe) {
             int             cc = 0, reset_timer = 0;
             struct timeval  t1, t2;
-            struct timezone tz;
             unsigned long Rtt = 0;
 
-            gettimeofday(&t1, &tz);
+            netsnmp_get_monotonic_clock(&t1);
 
-            send_probe_v6(++seq, ttl, sendbuff, ident, &tz, sndsock,
+            send_probe_v6(++seq, ttl, sendbuff, ident, NULL, sndsock,
                           datalen, &whereto, hostname);
             reset_timer = 1;
 
@@ -5336,7 +5334,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                     wait_for_reply_v6(icmp_sock, &from, reset_timer,
                                       waittime, icmp_sock,
                                       packet)) != 0) {
-                gettimeofday(&t2, &tz);
+                netsnmp_get_monotonic_clock(&t2);
                 timep = 0;
                 time(&timep);
                 if ((i =
@@ -5552,6 +5550,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 current->traceRouteHopsSentProbes = probe + 1;
                 current->traceRouteHopsProbeResponses = responseProbe;
                 current->traceRouteHopsLastGoodProbe_time = timep;
+                SNMP_FREE(current->traceRouteHopsLastGoodProbe);
                 current->traceRouteHopsLastGoodProbe = 
                     netsnmp_memdup(date_n_time(&timep,
                                                &current->traceRouteHopsLastGoodProbeLen), 11);
@@ -5577,6 +5576,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 StorageResults->traceRouteResultsTestSuccesses =
                     StorageResults->traceRouteResultsTestSuccesses + 1;
                 StorageResults->traceRouteResultsLastGoodPath_time = timep;
+                SNMP_FREE(StorageResults->traceRouteResultsLastGoodPath);
                 StorageResults->traceRouteResultsLastGoodPath =
                     netsnmp_memdup(date_n_time(&timep,
                                                &StorageResults->
@@ -5675,7 +5675,6 @@ wait_for_reply(int sock, struct sockaddr_in *fromp,
 {
     fd_set          fds;
     struct timeval  now, wait;
-    struct timezone tz;
     int    cc = 0;
     socklen_t       fromlen = sizeof(*fromp);
 
@@ -5683,7 +5682,7 @@ wait_for_reply(int sock, struct sockaddr_in *fromp,
     FD_SET(sock, &fds);
     wait.tv_sec = tp->tv_sec + waittime;
     wait.tv_usec = tp->tv_usec;
-    (void) gettimeofday(&now, &tz);
+    netsnmp_get_monotonic_clock(&now);
     tvsub(&wait, &now);
     if (select(sock + 1, &fds, NULL, NULL, &wait) > 0)
         cc = recvfrom(sock, (char *) packet, 512, 0,
@@ -5851,7 +5850,7 @@ send_probe_v6(int seq, int ttl, char *sendbuff, pid_t ident,
 
     pkt->ident = htonl(ident);
     pkt->seq = htonl(seq);
-    gettimeofday(&pkt->tv, tz);
+    netsnmp_get_monotonic_clock(&pkt->tv);
 
     i = setsockopt(sndsock, SOL_IPV6, IPV6_UNICAST_HOPS, &ttl,
                    sizeof(int));

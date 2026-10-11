@@ -4799,16 +4799,6 @@ setup(int icmp_sock, int options, int uid, int timeout, int preload,
         setsockopt(icmp_sock, SOL_SOCKET, SO_DONTROUTE, (char *) &hold,
                    sizeof(hold));
 
-#ifdef SO_TIMESTAMP
-    if (!(options & F_LATENCY)) {
-        int             on = 1;
-        if (setsockopt
-            (icmp_sock, SOL_SOCKET, SO_TIMESTAMP, &on, sizeof(on)))
-            fprintf(stderr,
-                    "Warning: no SO_TIMESTAMP support, falling back to SIOCGSTAMP\n");
-    }
-#endif
-
     /*
      * Set some SNDTIMEO to prevent blocking forever
      * * on sends, when device is too slow or stalls. Just put limit
@@ -4948,7 +4938,6 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
     char            ans_data[4096];
     struct iovec    iov;
     struct msghdr   msg;
-    struct cmsghdr *c;
     int             cc = 0;
     int             next = 0;
     int             polling = 0;
@@ -5192,23 +5181,8 @@ main_loop(struct pingCtlTable_data *item, int icmp_sock, int preload,
                 }
             } else {
                 DEBUGMSGTL(("pingCtlTable", "cc>=0,else\n"));
-#ifdef SO_TIMESTAMP
-                for (c = CMSG_FIRSTHDR(&msg); c; c = CMSG_NXTHDR(&msg, c)) {
-                    if (c->cmsg_level != SOL_SOCKET ||
-                        c->cmsg_type != SO_TIMESTAMP)
-                        continue;
-                    if (c->cmsg_len < CMSG_LEN(sizeof(struct timeval)))
-                        continue;
-                    recv_timep = (struct timeval *) CMSG_DATA(c);
-                }
-#endif
-
-                if ((options & F_LATENCY) || recv_timep == NULL) {
-                    if ((options & F_LATENCY) ||
-                        ioctl(icmp_sock, SIOCGSTAMP, &recv_time))
-                        netsnmp_get_monotonic_clock(&recv_time);
-                    recv_timep = &recv_time;
-                }
+                netsnmp_get_monotonic_clock(&recv_time);
+                recv_timep = &recv_time;
 
                 not_ours =
                     parse_reply(&series, item, &msg, cc, addrbuf,
@@ -5726,8 +5700,7 @@ send_v6(int icmp_sock, int cmsglen, char *cmsgbuf,
     CLR(icmph->icmp6_seq % mx_dup_ck);
 
     if (timing)
-        gettimeofday((struct timeval *) &outpack[8],
-                     (struct timezone *) NULL);
+        netsnmp_get_monotonic_clock((struct timeval *) &outpack[8]);
 
     cc = datalen + 8;           /* skips ICMP portion */
 
