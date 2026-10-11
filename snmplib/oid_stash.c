@@ -365,7 +365,8 @@ netsnmp_oid_stash_store(netsnmp_oid_stash_node *root,
                                           NETSNMP_DS_LIB_APPTYPE);
     int i;
     
-    if (!tokenname || !root || !curoid || !dumpfn)
+    if (!tokenname || !root || !curoid || !dumpfn ||
+        curoid_len >= MAX_OID_LEN)
         return;
 
     for (i = 0; i < (int)root->children_size; i++) {
@@ -400,6 +401,9 @@ oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix)
     netsnmp_oid_stash_node *tmpp;
     int             prefix_len = strlen(prefix) + 1;    /* actually it's +2 */
     unsigned int    i;
+
+    if ((size_t)prefix_len >= sizeof(myprefix))
+        return;
 
     memset(myprefix, ' ', MAX_OID_LEN * 4);
     myprefix[prefix_len] = '\0';
