@@ -1191,8 +1191,9 @@ snmp_input(int op, netsnmp_session *session,
             vars = pdu->variables;
             if (vars)
                 vars = vars->next_variable;
-            if (!vars || snmp_oid_compare(vars->name, vars->name_length,
-                                          snmpTrapOid, OID_LENGTH(snmpTrapOid))) {
+            if (!vars || vars->type != ASN_OBJECT_ID ||
+                snmp_oid_compare(vars->name, vars->name_length,
+                                 snmpTrapOid, OID_LENGTH(snmpTrapOid))) {
 	        /*
 		 * Didn't find it!
 		 * Let's look through the full list....
@@ -1212,6 +1213,10 @@ snmp_input(int op, netsnmp_session *session,
 		    return 1;		/* ??? */
 		}
 	    }
+            if (!vars->val.objid) {
+                snmp_log(LOG_ERR, "Empty TrapOID in TRAP2 PDU\n");
+                return 1;
+            }
             trapOidLen = SNMP_MIN(sizeof(trapOid), vars->val_len) / sizeof(oid);
             memcpy(trapOid, vars->val.objid, trapOidLen * sizeof(oid));
             break;
