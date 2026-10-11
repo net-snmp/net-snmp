@@ -203,12 +203,19 @@ dlmod_load_module(struct dlmod *dlm)
         }
     } else {
         char *st, *p, *tmp_path = NULL;
+        char *path_copy = strdup(dlmod_path);
 
-        for (p = strtok_r(dlmod_path, ENV_SEPARATOR, &st); p;
+        if (!path_copy) {
+            dlm->status = DLMOD_ERROR;
+            return;
+        }
+        for (p = strtok_r(path_copy, ENV_SEPARATOR, &st);
+             p && dlm->handle == NULL;
              p = strtok_r(NULL, ENV_SEPARATOR, &st)) {
             free(tmp_path);
             if (asprintf(&tmp_path, "%s/%s.%s", p, dlm->path, dlmod_dl_suffix)
                 < 0) {
+                free(path_copy);
                 dlm->status = DLMOD_ERROR;
                 return;
             }
@@ -222,10 +229,14 @@ dlmod_load_module(struct dlmod *dlm)
                 dlm->status = DLMOD_ERROR;
             }
         }
-        strlcpy(dlm->path, tmp_path, sizeof(dlm->path));
+        free(path_copy);
+        if (dlm->handle != NULL && tmp_path)
+            strlcpy(dlm->path, tmp_path, sizeof(dlm->path));
         free(tmp_path);
-        if (dlm->status == DLMOD_ERROR)
+        if (dlm->handle == NULL) {
+            dlm->status = DLMOD_ERROR;
             return;
+        }
     }
     {
         char sym_init[64 + sizeof("init_")];
@@ -235,6 +246,7 @@ dlmod_load_module(struct dlmod *dlm)
         dl_init = (dl_function_ptr)dlmod_dlsym(dlm->handle, sym_init);
         if (dl_init == NULL) {
             dlmod_dlclose(dlm->handle);
+            dlm->handle = NULL;
             free(dlm->error);
             if (asprintf(&dlm->error, "dlsym failed: can't find \'%s\'",
                          sym_init) < 0)
@@ -271,6 +283,7 @@ dlmod_unload_module(struct dlmod *dlm)
         DEBUGMSGTL(("dlmod", "No destructor for %s\n", dlm->name));
     }
     dlmod_dlclose(dlm->handle);
+    dlm->handle = NULL;
     dlm->status = DLMOD_UNLOADED;
     DEBUGMSGTL(("dlmod", "Module %s unloaded\n", dlm->name));
 }
@@ -503,7 +516,7 @@ write_dlmodStatus(int action,
         snmp_log(LOG_ERR, "write to dlmodStatus not ASN_INTEGER\n");
         return SNMP_ERR_WRONGTYPE;
     }
-    if (var_val_len > sizeof(long)) {
+    if (var_val_len != sizeof(long)) {
         snmp_log(LOG_ERR, "write to dlmodStatus: bad length\n");
         return SNMP_ERR_WRONGLENGTH;
     }
