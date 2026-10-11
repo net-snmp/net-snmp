@@ -747,5 +747,15 @@ class HexStringSet(unittest.TestCase):
         print("second SNMP set result:", res)
         self.assertEqual(res, 0)
 
+class NonStringAttrTest(unittest.TestCase):
+    def testNonStringCommunity(self):
+        sess = setup_v1()
+        sess.Community = 12345
+        varlist = netsnmp.VarList(netsnmp.Varbind('sysDescr.0'))
+        sess.Timeout = 100000
+        sess.Retries = 0
+        sess.get(varlist)
+
+
 if __name__ == '__main__':
     unittest.main()

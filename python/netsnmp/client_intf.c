@@ -865,12 +865,24 @@ py_netsnmp_attr_string(PyObject *obj, const char *attr_name, const char **val,
                        Py_ssize_t *len)
 {
   *val = NULL;
+  if (len)
+    *len = 0;
   if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
+      if (attr == Py_None) {
+        Py_DECREF(attr);
+        return 0;
+      }
+      if (!PyUnicode_Check(attr)) {
+        Py_DECREF(attr);
+        return -1;
+      }
       *val = PyUnicode_AsUTF8AndSize(attr, len);
+      if (!*val)
+        PyErr_Clear();
       Py_DECREF(attr);
-      return 0;
+      return *val ? 0 : -1;
     }
   }
 
