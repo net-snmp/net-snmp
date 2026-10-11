@@ -859,17 +859,19 @@ py_netsnmp_construct_varbind(void)
   PyObject *module;
   PyObject *dict;
   PyObject *callable;
+  PyObject *res = NULL;
 
   module = PyImport_ImportModule("netsnmp");
   if (!module)
       return NULL;
   dict = PyModule_GetDict(module);
-  if (!dict)
-      return NULL;
-  callable = PyDict_GetItemString(dict, "Varbind");
-  if (!callable)
-      return NULL;
-  return PyObject_CallFunction(callable, "");
+  if (dict) {
+      callable = PyDict_GetItemString(dict, "Varbind");
+      if (callable)
+          res = PyObject_CallFunction(callable, "");
+  }
+  Py_DECREF(module);
+  return res;
 }
 
 /*
