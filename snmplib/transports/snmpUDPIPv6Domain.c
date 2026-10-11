@@ -244,7 +244,7 @@ netsnmp_udp6_sendto(NETSNMP_SOCKET sock, const struct in6_addr *srcip,
          */
         if (use_sendto) {
             rc = sendto(sock, data, len, MSG_DONTWAIT, remote,
-                        sizeof(struct sockaddr));
+                        sizeof(struct sockaddr_in6));
         } else {
             rc = sendmsg(sock, &m, MSG_DONTWAIT);
         }
