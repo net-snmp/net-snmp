@@ -669,10 +669,10 @@ sub update {
    # Force UseLongNames if UseNumeric is in use.
    $this->{UseLongNames}++  if $this->{UseNumeric};
 
-   SNMP::_update_session($this->{Version},
+   SNMP::_update_session($this,
+		 $this->{Version},
 		 $this->{Community},
 		 $this->{DestHost},
-		 $this->{RemotePort},
 		 $this->{LocalPort},
 		 $this->{Retries},
 		 $this->{Timeout},
