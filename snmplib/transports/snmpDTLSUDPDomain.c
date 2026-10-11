@@ -895,7 +895,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                 /* (what would we do differently?) */
             }
 
-            rc = -1; /* XXX: it's ok, but what's the right return? */
+            t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
+            rc = 0;
         }
         else
             _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
@@ -909,10 +910,13 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGMSGTL(("dtlsudp", "received %d decoded bytes from dtls\n", rc));
 
-    if ((0 == rc) && (SSL_get_shutdown(tlsdata->ssl) & SSL_RECEIVED_SHUTDOWN)) {
-        DEBUGMSGTL(("dtlsudp", "peer disconnected\n"));
-        cachep->flags |= NETSNMP_BIO_DISCONNECTED;
-        remove_and_free_bio_cache(cachep);
+    if (0 == rc) {
+        if (SSL_get_shutdown(tlsdata->ssl) & SSL_RECEIVED_SHUTDOWN) {
+            DEBUGMSGTL(("dtlsudp", "peer disconnected\n"));
+            cachep->flags |= NETSNMP_BIO_DISCONNECTED;
+            remove_and_free_bio_cache(cachep);
+        }
+        t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
         SNMP_FREE(tmStateRef);
         return rc;
     }
