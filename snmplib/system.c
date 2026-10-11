@@ -1224,8 +1224,7 @@ strcasestr(const char *haystack, const char *needle)
                 cp2++;
             }
             while (1);
-            if (*cp1)
-                cp1++;
+            cp1 = cx + 1;
         }
     /*
      * printf("\n"); 
