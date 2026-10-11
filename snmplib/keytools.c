@@ -183,15 +183,16 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     ctx = EVP_MD_CTX_create();
 #elif defined(HAVE_VOID_EVP_MD_CTX_INIT)
     ctx = malloc(sizeof(*ctx));
-    EVP_MD_CTX_init(ctx);
+    if (ctx)
+        EVP_MD_CTX_init(ctx);
 #else
     ctx = malloc(sizeof(*ctx));
-    if (!EVP_MD_CTX_init(ctx)) {
+    if (!ctx || !EVP_MD_CTX_init(ctx)) {
         rval = SNMPERR_GENERR;
         goto generate_Ku_quit;
     }
 #endif
-    if (!EVP_DigestInit(ctx, hashfn)) {
+    if (!ctx || !EVP_DigestInit(ctx, hashfn)) {
         rval = SNMPERR_GENERR;
         goto generate_Ku_quit;
     }
@@ -221,7 +222,10 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
             *bufp++ = P[pindex++ % pplen];
         }
 #ifdef NETSNMP_USE_OPENSSL
-        EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
+        if (!EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK)) {
+            rval = SNMPERR_USM_ENCRYPTIONERROR;
+            goto generate_Ku_quit;
+        }
 #elif defined(NETSNMP_USE_INTERNAL_CRYPTO)
         if (TYPE_SHA1 == cryptotype) {
             rval = !SHA1_Update(&csha1, buf, USM_LENGTH_KU_HASHBLOCK);
@@ -245,7 +249,10 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     unsigned int    tmp_len;
 
     tmp_len = *kulen;
-    EVP_DigestFinal(ctx, (unsigned char *) Ku, &tmp_len);
+    if (!EVP_DigestFinal(ctx, (unsigned char *) Ku, &tmp_len)) {
+        rval = SNMPERR_USM_ENCRYPTIONERROR;
+        goto generate_Ku_quit;
+    }
     *kulen = tmp_len;
     /*
      * what about free() 

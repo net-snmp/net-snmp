@@ -1010,22 +1010,27 @@ sc_hash_type(int auth_type, const u_char * buf, size_t buf_len, u_char * MAC,
 #else
     cptr = malloc(sizeof(*cptr));
 #if defined(OLD_DES)
-    memset(cptr, 0, sizeof(*cptr));
+    if (cptr)
+        memset(cptr, 0, sizeof(*cptr));
 #else
-    EVP_MD_CTX_init(cptr);
+    if (cptr)
+        EVP_MD_CTX_init(cptr);
 #endif
 #endif
+    if (!cptr)
+        return SNMPERR_GENERR;
     if (!EVP_DigestInit(cptr, hashfn)) {
         /* requested hash function is not available */
         rval = SNMPERR_SC_NOT_CONFIGURED;
         goto sc_hash_type_quit;
     }
 
-/** pass the data */
-    EVP_DigestUpdate(cptr, buf, buf_len);
-
-/** do the final pass */
-    EVP_DigestFinal(cptr, MAC, &tmp_len);
+/** pass the data and do the final pass */
+    if (!EVP_DigestUpdate(cptr, buf, buf_len) ||
+        !EVP_DigestFinal(cptr, MAC, &tmp_len)) {
+        rval = SNMPERR_GENERR;
+        goto sc_hash_type_quit;
+    }
     *MAC_len = tmp_len;
 
 sc_hash_type_quit:
