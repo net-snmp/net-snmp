@@ -1030,6 +1030,8 @@ netsnmp_ocert_get(netsnmp_cert *cert)
                             cert->key = key;
                             cert->info.allowed_uses |= NS_CERT_IDENTITY;
                         }
+                    } else {
+                        EVP_PKEY_free(okey);
                     }
                 } /* null return from read */
             } /* null key */
