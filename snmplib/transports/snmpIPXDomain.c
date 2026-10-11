@@ -238,6 +238,7 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
         t->local_length = sizeof(*addr);
         t->local = netsnmp_memdup(addr, sizeof(*addr));
         if (t->local == NULL) {
+            netsnmp_ipx_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -257,12 +258,15 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
         t->data = NULL;
         t->data_length = 0;
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
+        netsnmp_ipx_close(t);
+        netsnmp_transport_free(t);
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         t->remote_length = sizeof(*addr);
         t->remote = netsnmp_memdup(addr, sizeof(*addr));
         if (t->remote == NULL) {
+            netsnmp_ipx_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -274,6 +278,7 @@ netsnmp_ipx_transport(const struct sockaddr_ipx *addr, int local)
 
         t->data = malloc(sizeof(struct sockaddr_ipx));
         if (t->data == NULL) {
+            netsnmp_ipx_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }

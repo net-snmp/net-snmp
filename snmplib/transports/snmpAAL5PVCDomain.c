@@ -252,6 +252,7 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
         t->local_length = sizeof(*addr);
         t->local = netsnmp_memdup(addr, sizeof(*addr));
         if (t->local == NULL) {
+            netsnmp_aal5pvc_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -265,12 +266,15 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
             return NULL;
         }
 #else /* NETSNMP_NO_LISTEN_SUPPORT */
+        netsnmp_aal5pvc_close(t);
+        netsnmp_transport_free(t);
         return NULL;
 #endif /* NETSNMP_NO_LISTEN_SUPPORT */
     } else {
         t->remote_length = sizeof(*addr);
         t->remote = netsnmp_memdup(addr, sizeof(*addr));
         if (t->remote == NULL) {
+            netsnmp_aal5pvc_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -287,6 +291,7 @@ netsnmp_aal5pvc_transport(const struct sockaddr_atmpvc *addr, int local)
 
     t->data = malloc(sizeof(struct sockaddr_atmpvc));
     if (t->data == NULL) {
+        netsnmp_aal5pvc_close(t);
         netsnmp_transport_free(t);
         return NULL;
     }
