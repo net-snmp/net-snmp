@@ -4626,12 +4626,14 @@ usm_set_user_password(struct usmUser *user, const char *token, char *line)
         }
         /* save master key */
         if (user->flags & USMUSER_FLAG_KEEP_MASTER_KEY) {
-            if (userKey == user->privKey) {
+            if (key == &user->privKey) {
+                SNMP_FREE(user->privKeyKu);
                 user->privKeyKu = netsnmp_memdup(userKey, userKeyLen);
-                user->privKeyKuLen = userKeyLen;
-            } else if (userKey == user->authKey) {
+                user->privKeyKuLen = user->privKeyKu ? userKeyLen : 0;
+            } else if (key == &user->authKey) {
+                SNMP_FREE(user->authKeyKu);
                 user->authKeyKu = netsnmp_memdup(userKey, userKeyLen);
-                user->authKeyKuLen = userKeyLen;
+                user->authKeyKuLen = user->authKeyKu ? userKeyLen : 0;
             }
         }
     } else if (type == 1) {
