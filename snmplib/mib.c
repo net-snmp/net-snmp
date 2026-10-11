@@ -6207,6 +6207,8 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
     int repeats = 0;
     int repeat_fixup = ph->result_len;
     
+    if (ph->length <= 0)
+	return 0;
     if (ph->repeat) {
 	if (!parse_hints_add_result_octet(ph, 0)) {
 	    return 0;
@@ -6220,7 +6222,10 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 	case 'o': base += 8;
 	    {
 		int i;
-		unsigned long number = strtol(v, &nv, base);
+		unsigned long number;
+		if (ph->length > (int)sizeof(unsigned long))
+		    return 0;
+		number = strtol(v, &nv, base);
 		if (nv == v) return 0;
 		v = nv;
 		for (i = 0; i < ph->length; i++) {
@@ -6235,7 +6240,6 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 	case 'a':
 	    {
 		int i;
-		    
 		for (i = 0; i < ph->length && *v; i++) {
 		    if (!parse_hints_add_result_octet(ph, *v++)) {
 			return 0;	/* failed */
@@ -6243,6 +6247,8 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 		}
 	    }
 	    break;
+	default:
+	    return 0;
 	}
 
 	repeats++;
@@ -6272,8 +6278,12 @@ static int parse_hints_parse(struct parse_hints *ph, const char **v_in_out)
 
 static void parse_hints_length_add_digit(struct parse_hints *ph, int digit)
 {
-    ph->length *= 10;
-    ph->length += digit - '0';
+    int d = digit - '0';
+
+    if (ph->length <= (INT_MAX - d) / 10)
+        ph->length = ph->length * 10 + d;
+    else
+        ph->length = INT_MAX;
 }
 
 const char *parse_octet_hint(const char *hint, const char *value, unsigned char **new_val, int *new_val_len)
