@@ -2512,6 +2512,7 @@ asn_parse_float(u_char * data,
 
     *datalength -= (int) asn_length + (bufp - data);
     memcpy(&fu.c[0], bufp, asn_length);
+    bufp += asn_length;
 
     /*
      * correct for endian differences 
@@ -2702,6 +2703,7 @@ asn_parse_double(u_char * data,
     }
     *datalength -= (int) asn_length + (bufp - data);
     memcpy(&fu.c[0], bufp, asn_length);
+    bufp += asn_length;
 
     /*
      * correct for endian differences 
