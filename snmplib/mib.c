@@ -5511,7 +5511,10 @@ _add_strings_to_oid(void *tp, char *cp,
 		    if (parsed_hint) {
 			int i;
 			for (i = 0; i < new_val_len; i++) {
-			    if (*objidlen >= maxlen) goto bad_id;
+			    if (*objidlen >= maxlen) {
+				SNMP_FREE(new_val);
+				goto bad_id;
+			    }
 			    objid[ *objidlen ] = new_val[i];
 			    (*objidlen)++;
 			    pos++;
