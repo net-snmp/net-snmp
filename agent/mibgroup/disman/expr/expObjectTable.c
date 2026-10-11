@@ -248,6 +248,13 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 switch (*request->requestvb->val.integer) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (tinfo->indexes->val_len > EXP_STR1_LEN ||
+                        tinfo->indexes->next_variable->val_len > EXP_STR1_LEN ||
+                        *tinfo->indexes->next_variable->next_variable->val.integer < 1) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_NOCREATION);
+                        return SNMP_ERR_NOERROR;
+                    }
                     /*
                      * Create an (empty) new row structure
                      */
