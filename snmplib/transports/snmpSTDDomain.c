@@ -124,10 +124,12 @@ netsnmp_std_close(netsnmp_transport *t)
         close(t->sock);
 
         /* kill the child too */
-        DEBUGMSGTL(("domain:std"," killing %d\n", data->childpid));
-        kill(data->childpid, SIGTERM);
-        sleep(1);
-        kill(data->childpid, SIGKILL);
+        if (data->childpid > 0) {
+            DEBUGMSGTL(("domain:std"," killing %d\n", data->childpid));
+            kill(data->childpid, SIGTERM);
+            sleep(1);
+            kill(data->childpid, SIGKILL);
+        }
         /* XXX: set an alarm to kill harder the child */
     } else {
         /* close stdout/in */
@@ -190,17 +192,30 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
     }
 
     if (instring_len != 0) {
-        int infd[2], outfd[2];  /* sockets to and from the client */
+        int infd[2] = { -1, -1 }, outfd[2];  /* sockets to and from the client */
         int childpid;
 
         if (pipe(infd) || pipe(outfd)) {
             snmp_log(LOG_ERR,
                      "Failed to create needed pipes for a STD transport");
+            if (infd[0] != -1) {
+                close(infd[0]);
+                close(infd[1]);
+            }
             netsnmp_transport_free(t);
             return NULL;
         }
 
         childpid = fork();
+        if (childpid < 0) {
+            snmp_log_perror("netsnmp_std_transport: fork");
+            close(infd[0]);
+            close(infd[1]);
+            close(outfd[0]);
+            close(outfd[1]);
+            netsnmp_transport_free(t);
+            return NULL;
+        }
         /* parentpid => childpid */
         /* infd[1]   => infd[0] */
         /* outfd[0]  <= outfd[1] */
@@ -215,6 +230,9 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
             data = SNMP_MALLOC_TYPEDEF(netsnmp_std_data);
             if (!data) {
                 snmp_log(LOG_ERR, "snmpSTDDomain: malloc failed");
+                close(infd[1]);
+                close(outfd[0]);
+                kill(childpid, SIGTERM);
                 netsnmp_transport_free(t);
                 return NULL;
             }
