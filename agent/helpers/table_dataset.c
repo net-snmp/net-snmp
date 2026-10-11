@@ -554,10 +554,8 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 #ifndef NETSNMP_NO_WRITE_SUPPORT
         netsnmp_table_data_set *datatable =
             (netsnmp_table_data_set *) handler->myvoid;
-        const oid * const suffix =
-            requests->requestvb->name + reginfo->rootoid_len + 2;
-        const size_t suffix_len =
-            requests->requestvb->name_length - (reginfo->rootoid_len + 2);
+        const oid *suffix = NULL;
+        size_t suffix_len = 0;
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
         if (request->processed)
@@ -571,6 +569,14 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
         if (MODE_IS_SET(reqinfo->mode)) {
+            if (request->requestvb->name_length < reginfo->rootoid_len + 2) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_NOCREATION);
+                continue;
+            }
+            suffix = request->requestvb->name + reginfo->rootoid_len + 2;
+            suffix_len =
+                request->requestvb->name_length - (reginfo->rootoid_len + 2);
 
             /*
              * use a cached copy of the row for modification 
@@ -803,8 +809,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_strdup_and_null(request->requestvb->val.string,
                                         request->requestvb->val_len);
             if (!data->data.string) {
-                netsnmp_set_request_error(reqinfo, requests,
+                netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_RESOURCEUNAVAILABLE);
+                continue;
             }
             data->data_len = request->requestvb->val_len;
 
