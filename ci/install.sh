@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 scriptdir="$(cd "$(dirname "$0")" && pwd)"
 
 install_android_ndk() {
@@ -45,7 +47,7 @@ case "$(uname)" in
 	esac
 	apt-get update
 	for p in ${packages}; do
-	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p"
+	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p" || true
 	done
 	true
 	;;
@@ -72,10 +74,10 @@ esac
 
 case "$(uname -a)" in
     MSYS*|MINGW*)
-	pacman --noconfirm --remove mingw-w64-x86_64-gcc-ada
-	pacman --noconfirm --remove mingw-w64-x86_64-gcc-fortran
-	pacman --noconfirm --remove mingw-w64-x86_64-gcc-libgfortran
-	pacman --noconfirm --remove mingw-w64-x86_64-gcc-objc
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-ada || true
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-fortran || true
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-libgfortran || true
+	pacman --noconfirm --remove mingw-w64-x86_64-gcc-objc || true
 	pacman --noconfirm --sync --refresh
 	pacman --noconfirm --sync --needed coreutils
 	pacman --noconfirm --sync --needed diffutils

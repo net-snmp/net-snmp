@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 scriptdir="$(dirname "$0")"
 
 case "$MODE" in

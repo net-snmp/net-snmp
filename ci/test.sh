@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 case "$(uname)" in
     Darwin)
 	# Instead of relying on the hosts file provided by the CI host, replace
