@@ -1935,9 +1935,9 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   int maxrepetitions;
   PyObject *session;
   PyObject *varlist;
-  PyObject *varbinds;
+  PyObject *varbinds = NULL;
   PyObject *varbind;
-  PyObject *varbinds_iter;
+  PyObject *varbinds_iter = NULL;
   PyObject *val_tuple = NULL;
   int varbind_ind;
   struct session_list *ss;
@@ -2025,8 +2025,6 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	/* release reference when done */
 	Py_DECREF(varbind);
       }
-
-      Py_DECREF(varbinds_iter);
 
       if (PyErr_Occurred()) {
 	/* propagate error */
@@ -2127,8 +2125,6 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
       if (response)
          snmp_free_pdu(response);
 
-      Py_DECREF(varbinds);
-
     }
 
     if (PyErr_Occurred()) {
@@ -2142,9 +2138,15 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   }
 
  done:
+  Py_XDECREF(varbinds_iter);
+  Py_XDECREF(varbinds);
   free(oid_arr);
   if (str_buf != NULL)
      netsnmp_free(str_buf);
+  if (PyErr_Occurred()) {
+     Py_XDECREF(val_tuple);
+     return NULL;
+  }
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
