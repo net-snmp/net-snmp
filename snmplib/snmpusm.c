@@ -2591,7 +2591,8 @@ usm_parse_security_parameters(u_char * secParams,
 
     *time_uint = (u_int) time_long;
 
-    if (*boots_uint > ENGINEBOOT_MAX || *time_uint > ENGINETIME_MAX) {
+    if (boots_long < 0 || boots_long > ENGINEBOOT_MAX ||
+        time_long < 0 || time_long > ENGINETIME_MAX) {
         return -1;
     }
 
