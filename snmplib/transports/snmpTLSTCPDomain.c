@@ -657,7 +657,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, const void *buf, int size,
         }
         if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_IN_PROGRESS)
             _tlstcp_step_handshake(t);
-        else if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE)
+        if (tlsdata->handshake_state == NETSNMP_TLS_HANDSHAKE_COMPLETE)
             _tlstcp_flush_buffered_data(t);
         return size;
     }
