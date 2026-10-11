@@ -45,6 +45,9 @@ void
 parse_alias_config(const char *token, char *line) {
     char aliasname[SPRINT_MAX_LEN];
     char transportdef[SPRINT_MAX_LEN];
+
+    aliasname[0] = '\0';
+    transportdef[0] = '\0';
     /* copy the first word (the alias) out and then assume the rest is
        transport */
     line = copy_nword(line, aliasname, sizeof(aliasname));
