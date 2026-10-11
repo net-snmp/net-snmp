@@ -549,10 +549,8 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     if (rc <= 0) {
         if ((err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) &&
             !got_eof) {
-            if (err == SSL_ERROR_WANT_READ) {
-                tlsdata->want_read = 1;
-                DEBUGMSGTL(("tlstcp", "SSL_read wanted read (want_read=1)\n"));
-            }
+            tlsdata->want_read = 1;
+            DEBUGMSGTL(("tlstcp", "SSL_read wanted read/write (want_read=1)\n"));
             t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
             SNMP_FREE(tmStateRef);
             return 0;
