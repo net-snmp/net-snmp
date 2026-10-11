@@ -856,6 +856,9 @@ read_config(const char *filename,
                     netsnmp_config_error("Failed to allocate memory\n");
                     free(line);
                     fclose(ifile);
+                    linecount = prev_linecount;
+                    curfilename = prev_filename;
+                    --depth;
                     return SNMPERR_GENERR;
                 }
             }
