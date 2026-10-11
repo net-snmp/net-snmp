@@ -91,3 +91,16 @@ for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
     OKF(oid_buf[2] == 0xdeadbeef && oid_buf[3] == 0xdeadbeef,
         ("read_config_read_memory(ASN_OBJECT_ID) respects byte buffer size"));
 }
+
+{
+    const u_char    raw[] = { 0xde, 0xad, 0xbe, 0xef };
+    size_t          hex_len = 2;
+    u_char         *hex_buf = malloc(hex_len);
+    u_int           olen;
+
+    olen = netsnmp_binary_to_hex(&hex_buf, &hex_len, 1, raw, sizeof(raw));
+    OKF(olen == 9 && hex_buf != NULL &&
+        strcmp((char *)hex_buf, "deadbeef") == 0,
+        ("netsnmp_binary_to_hex reallocates small buffer"));
+    free(hex_buf);
+}

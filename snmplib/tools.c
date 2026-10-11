@@ -395,17 +395,18 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
         s = calloc(1, olen);
         if (s == NULL)
             return 0;
+        *dest = s;
         *dest_len = olen;
-    }
-    else
+    } else {
+        if (*dest_len < olen) {
+            if (!allow_realloc)
+                return 0;
+            while (*dest_len < olen) {
+                if (!snmp_realloc(dest, dest_len))
+                    return 0;
+            }
+        }
         s = *dest;
-
-    if (*dest_len < olen) {
-        if (!allow_realloc)
-            return 0;
-        *dest_len = olen;
-        if (snmp_realloc(dest, dest_len))
-            return 0;
     }
 
     op = s;
@@ -416,8 +417,6 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
     }
     *op = '\0';
 
-    if (s != *dest)
-        *dest = s;
     *dest_len = olen;
 
     return olen;
