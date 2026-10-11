@@ -422,4 +422,11 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
     }
 
 #endif
+    {
+        u_char huge_pkt[] = {
+            ASN_SEQUENCE | ASN_CONSTRUCTOR, 0x84, 0x80, 0x00, 0x00, 0x00
+        };
+        OK(asn_check_packet(huge_pkt, sizeof(huge_pkt)) <= 0,
+           "asn_check_packet rejects BER length >= 2^31");
+    }
 }

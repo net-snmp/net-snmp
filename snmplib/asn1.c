@@ -494,10 +494,12 @@ asn_check_packet(u_char * pkt, size_t len)
         /*
          * long length 
          */
-        if ((int) len < (int) (*(pkt + 1) & ~0x80) + 2)
+        if (len < (size_t)(*(pkt + 1) & ~0x80) + 2)
             return 0;           /* still to short, incomplete length */
         if (NULL == asn_parse_length(pkt + 1, &asn_length))
             return 0;           /* propagate error from asn_parse_length() */
+        if (asn_length > (u_long)(INT_MAX - 2 - (*(pkt + 1) & ~0x80)))
+            return -1;
         return (asn_length + 2 + (*(pkt + 1) & ~0x80));
     } else {
         /*
