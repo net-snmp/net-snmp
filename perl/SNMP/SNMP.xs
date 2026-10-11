@@ -298,7 +298,7 @@ int *block;
 
    if (!timerisset(itvp)) return;  /* interval zero means loop forever */
    *block = 0;
-   gettimeofday(&now,(struct timezone *)0);
+   netsnmp_get_monotonic_clock(&now);
 
    if (ctvp->tv_sec < 0) { /* first time or callback just fired */
       timersub(&now,ltvp,ctvp);
@@ -5053,7 +5053,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback,ss=(SnmpSession*)NULL)
         ctvp->tv_sec = -1;
         ctvp->tv_usec = 0;
         ltvp = &last_time;
-        gettimeofday(ltvp, NULL);
+        netsnmp_get_monotonic_clock(ltvp);
 	timersub(ltvp, itvp, ltvp);
         while (1) {
            if (api_mode == SNMP_API_SINGLE)
