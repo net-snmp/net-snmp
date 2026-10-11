@@ -22,7 +22,10 @@ static const char* mibs[] = {
     "--\n"
     "--\n"
     "-68--------------------1844674407370954460124----DD-IIIIIIIIIII0NZe9223300000446069494I32768g-I2768g-I3gg-I4g-55I420RPRISEOONOAO:\x001\0\0---::=\0||231\0\0\0\x001=O",
-    "102H::={1365\x93""-72}1H::={1\x93""1}0H::={0\x93""0}"
+    "102H::={1365\x93""-72}1H::={1\x93""1}0H::={0\x93""0}",
+    "TEST-EOF-MIB DEFINITIONS ::= BEGIN\n"
+    "grp OBJECT-GROUP OBJECTS { obj } STATUS current DESCRIPTION \"d\" ::= { 1 1 }\n",
+    "TEST-MULTI-MIB DEFINITIONS ::= BEGIN\nEND\nEND\n"
 };
 
 char *path;

@@ -4450,14 +4450,17 @@ parse(FILE * fp)
 #define IN_MIB                2
     int             state = BETWEEN_MIBS;
     struct node    *np = NULL, *root = NULL;
-    struct objgroup *oldgroups = NULL, *oldobjects = NULL, *oldnotifs =
-        NULL;
+    struct objgroup *oldgroups = objgroups, *oldobjects = objects,
+                    *oldnotifs = notifs;
 
     DEBUGMSGTL(("parse-file", "Parsing file:  %s...\n", File));
 
     if (last_err_module)
         free(last_err_module);
     last_err_module = NULL;
+    objgroups = NULL;
+    objects = NULL;
+    notifs = NULL;
 
     while (type != ENDOFFILE) {
         struct node *nnp;
@@ -4485,9 +4488,9 @@ parse(FILE * fp)
                 scan_objlist(root, mp, objgroups, "Undefined OBJECT-GROUP");
                 scan_objlist(root, mp, objects, "Undefined OBJECT");
                 scan_objlist(root, mp, notifs, "Undefined NOTIFICATION");
-                objgroups = oldgroups;
-                objects = oldobjects;
-                notifs = oldnotifs;
+                objgroups = NULL;
+                objects = NULL;
+                notifs = NULL;
                 do_linkup(mp, root);
                 np = root = NULL;
             }
@@ -4571,11 +4574,11 @@ parse(FILE * fp)
             }
             state = IN_MIB;
             current_module = which_module(name);
-            oldgroups = objgroups;
+            free_objgroup(objgroups);
             objgroups = NULL;
-            oldobjects = objects;
+            free_objgroup(objects);
             objects = NULL;
-            oldnotifs = notifs;
+            free_objgroup(notifs);
             notifs = NULL;
             if (current_module == -1) {
                 new_module(name, File);
@@ -4746,6 +4749,12 @@ parse(FILE * fp)
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
+    free_objgroup(objgroups);
+    objgroups = oldgroups;
+    free_objgroup(objects);
+    objects = oldobjects;
+    free_objgroup(notifs);
+    notifs = oldnotifs;
     return root;
 
 free_mib:
@@ -4754,11 +4763,11 @@ free_mib:
         free_node(root);
     }
     free_objgroup(objgroups);
-    objgroups = NULL;
+    objgroups = oldgroups;
     free_objgroup(objects);
-    objects = NULL;
+    objects = oldobjects;
     free_objgroup(notifs);
-    notifs = NULL;
+    notifs = oldnotifs;
     return NULL;
 }
 
