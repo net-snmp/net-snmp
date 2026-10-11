@@ -1332,7 +1332,6 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
     EVP_PKEY     *okey = NULL;
     netsnmp_cert *cert = NULL;
     netsnmp_key  *key = NULL;
-    char          certfile[SNMP_MAXPATH];
     int           type;
     int           offset = 0;
 
@@ -1447,7 +1446,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
     BIO_vfree(certbio);
 
     if ((NULL == ocert) && (NULL == okey)) {
-        snmp_log(LOG_ERR, "certificate file '%s' contained neither certificate nor key, ignoring\n", certfile);
+        snmp_log(LOG_ERR, "certificate file '%s' contained neither certificate nor key, ignoring\n", filename);
         return -1;
     }
 
