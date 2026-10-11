@@ -943,6 +943,11 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                     }
                     break;
                 case RS_DESTROY:
+                    if (extension && (extension->flags & NS_EXTEND_FLAGS_CONFIG)) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_INCONSISTENTVALUE);
+                        return SNMP_ERR_INCONSISTENTVALUE;
+                    }
                     break;
                 default:
                     netsnmp_set_request_error(reqinfo, request,
@@ -965,6 +970,8 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 switch (i) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
+                    if (extension)
+                        break;
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
                     extension = _new_extension( (char *) table_info->indexes->val.string,
@@ -975,6 +982,10 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                         return SNMP_ERR_RESOURCEUNAVAILABLE;
                     }
                     netsnmp_insert_table_row( request, extension->row );
+                    netsnmp_request_add_list_data(
+                        request,
+                        netsnmp_create_data_list("extend:created",
+                                                 extension, NULL));
                 }
             }
             break;
@@ -982,10 +993,14 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
         case MODE_SET_FREE:
             switch (table_info->colnum) {
             case COLUMN_EXTCFG_STATUS:
-                i = *request->requestvb->val.integer;
-                switch (i) {
-                case RS_CREATEANDGO:
-                case RS_CREATEANDWAIT:
+                if (extension &&
+                    netsnmp_request_get_list_data(request, "extend:created")) {
+                    netsnmp_request_info *req;
+                    for (req = requests; req; req = req->next) {
+                        if (netsnmp_extract_table_row_data(req) == extension)
+                            netsnmp_request_remove_list_data(req,
+                                                             TABLE_DATA_ROW);
+                    }
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
                     _free_extension( extension, eptr );
@@ -994,21 +1009,39 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
             break;
 
         case MODE_SET_ACTION:
+            if (!extension) {
+                if (table_info->colnum == COLUMN_EXTCFG_STATUS &&
+                    request->requestvb->val.integer &&
+                    *request->requestvb->val.integer == RS_DESTROY)
+                    break;
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_NOCREATION);
+                return SNMP_ERR_NOCREATION;
+            }
             switch (table_info->colnum) {
             case COLUMN_EXTCFG_COMMAND:
-                extension->old_command = extension->command;
+                if (extension->old_command)
+                    SNMP_FREE(extension->command);
+                else
+                    extension->old_command = extension->command;
                 extension->command = netsnmp_strdup_and_null(
                     request->requestvb->val.string,
                     request->requestvb->val_len);
                 break;
             case COLUMN_EXTCFG_ARGS:
-                extension->old_args = extension->args;
+                if (extension->old_args)
+                    SNMP_FREE(extension->args);
+                else
+                    extension->old_args = extension->args;
                 extension->args = netsnmp_strdup_and_null(
                     request->requestvb->val.string,
                     request->requestvb->val_len);
                 break;
             case COLUMN_EXTCFG_INPUT:
-                extension->old_input = extension->input;
+                if (extension->old_input)
+                    SNMP_FREE(extension->input);
+                else
+                    extension->old_input = extension->input;
                 extension->input = netsnmp_strdup_and_null(
                     request->requestvb->val.string,
                     request->requestvb->val_len);
@@ -1027,31 +1060,35 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
         case MODE_SET_UNDO:
             switch (table_info->colnum) {
             case COLUMN_EXTCFG_COMMAND:
-                if ( extension && extension->old_command ) {
+                if ( extension ) {
                     SNMP_FREE(extension->command);
                     extension->command     = extension->old_command;
                     extension->old_command = NULL;
                 }
                 break;
             case COLUMN_EXTCFG_ARGS:
-                if ( extension && extension->old_args ) {
+                if ( extension ) {
                     SNMP_FREE(extension->args);
                     extension->args     = extension->old_args;
                     extension->old_args = NULL;
                 }
                 break;
             case COLUMN_EXTCFG_INPUT:
-                if ( extension && extension->old_input ) {
+                if ( extension ) {
                     SNMP_FREE(extension->input);
                     extension->input     = extension->old_input;
                     extension->old_input = NULL;
                 }
                 break;
             case COLUMN_EXTCFG_STATUS:
-                i = *request->requestvb->val.integer;
-                switch (i) {
-                case RS_CREATEANDGO:
-                case RS_CREATEANDWAIT:
+                if (extension &&
+                    netsnmp_request_get_list_data(request, "extend:created")) {
+                    netsnmp_request_info *req;
+                    for (req = requests; req; req = req->next) {
+                        if (netsnmp_extract_table_row_data(req) == extension)
+                            netsnmp_request_remove_list_data(req,
+                                                             TABLE_DATA_ROW);
+                    }
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
                     _free_extension( extension, eptr );
@@ -1061,7 +1098,21 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
             break;
 
         case MODE_SET_COMMIT:
+            if (!extension)
+                break;
             switch (table_info->colnum) {
+            case COLUMN_EXTCFG_COMMAND:
+                SNMP_FREE(extension->old_command);
+                break;
+
+            case COLUMN_EXTCFG_ARGS:
+                SNMP_FREE(extension->old_args);
+                break;
+
+            case COLUMN_EXTCFG_INPUT:
+                SNMP_FREE(extension->old_input);
+                break;
+
             case COLUMN_EXTCFG_CACHETIME:
                 i = *request->requestvb->val.integer;
                 extension->cache->timeout = i;
@@ -1101,11 +1152,18 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 case RS_CREATEANDWAIT:
                     extension->flags &= ~NS_EXTEND_FLAGS_ACTIVE;
                     break;
-                case RS_DESTROY:
+                case RS_DESTROY: {
+                    netsnmp_request_info *req;
+                    for (req = requests; req; req = req->next) {
+                        if (netsnmp_extract_table_row_data(req) == extension)
+                            netsnmp_request_remove_list_data(req,
+                                                             TABLE_DATA_ROW);
+                    }
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
                     _free_extension( extension, eptr );
                     break;
+                }
                 }
             }
             break;
@@ -1292,6 +1350,8 @@ _extend_find_entry( netsnmp_request_info       *request,
      *  GET handling - find the exact entry being requested
      ***/
     if ( mode == MODE_GET ) {
+        if (!table_info->indexes->val_len || !table_info->indexes->val.string)
+            return NULL;
         DEBUGMSGTL(( "nsExtendTable:output2", "GET: %s / %ld\n ",
                       table_info->indexes->val.string,
                      *table_info->indexes->next_variable->val.integer));
