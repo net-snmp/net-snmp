@@ -634,10 +634,11 @@ sc_random(u_char * buf, size_t * buflen)
     DEBUGTRACE;
 
 #ifdef NETSNMP_USE_OPENSSL
-    RAND_bytes(buf, *buflen);   /* will never fail */
+    if (RAND_bytes(buf, *buflen) != 1)
+        return SNMPERR_GENERR;
     MAKE_MEM_DEFINED(buf, *buflen);
 #elif defined(NETSNMP_USE_PKCS11)  /* NETSNMP_USE_PKCS11 */
-    pkcs_random(buf, *buflen);
+    rval = pkcs_random(buf, *buflen);
 #else                           /* NETSNMP_USE_INTERNAL_MD5 */
     /*
      * fill the buffer with random integers.  Note that random()
