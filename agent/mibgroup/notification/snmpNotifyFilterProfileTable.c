@@ -213,6 +213,7 @@ write_snmpNotifyFilterProfileName(int action,
                                   oid * name, size_t name_len)
 {
     static char    *tmpvar;
+    static int      allocated;
     struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen = name_len - table_offset;
@@ -221,7 +222,7 @@ write_snmpNotifyFilterProfileName(int action,
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",
                 "write_snmpNotifyFilterProfileName entering action=%d...  \n",
                 action));
-    if (action != RESERVE1 &&
+    if (action != RESERVE1 && action != FREE && action != UNDO &&
         (StorageTmp = snmpNotifyFilterProfileTable_oldapi_find(
             NULL, &name[table_offset], &newlen, 1, NULL, NULL)) == NULL) {
         if ((StorageTmp = StorageNew) == NULL)
@@ -231,6 +232,9 @@ write_snmpNotifyFilterProfileName(int action,
 
     switch (action) {
     case RESERVE1:
+        tmpvar = NULL;
+        tmplen = 0;
+        allocated = 0;
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -247,15 +251,34 @@ write_snmpNotifyFilterProfileName(int action,
         tmpvar = StorageTmp->snmpNotifyFilterProfileName;
         tmplen = StorageTmp->snmpNotifyFilterProfileNameLen;
         StorageTmp->snmpNotifyFilterProfileName = calloc(1, var_val_len + 1);
-        if (NULL == StorageTmp->snmpNotifyFilterProfileName)
+        if (NULL == StorageTmp->snmpNotifyFilterProfileName) {
+            StorageTmp->snmpNotifyFilterProfileName = tmpvar;
+            tmpvar = NULL;
             return SNMP_ERR_RESOURCEUNAVAILABLE;
+        }
+        allocated = 1;
         break;
 
 
     case FREE:
+    case UNDO:
         /*
          * Release any resources that have been allocated 
          */
+        if (allocated) {
+            if ((StorageTmp = snmpNotifyFilterProfileTable_oldapi_find(
+                     NULL, &name[table_offset], &newlen, 1,
+                     NULL, NULL)) != NULL ||
+                (StorageTmp = StorageNew) != NULL) {
+                SNMP_FREE(StorageTmp->snmpNotifyFilterProfileName);
+                StorageTmp->snmpNotifyFilterProfileName = tmpvar;
+                StorageTmp->snmpNotifyFilterProfileNameLen = tmplen;
+            } else {
+                SNMP_FREE(tmpvar);
+            }
+            tmpvar = NULL;
+            allocated = 0;
+        }
         break;
 
 
@@ -270,22 +293,13 @@ write_snmpNotifyFilterProfileName(int action,
         break;
 
 
-    case UNDO:
-        /*
-         * Back out any changes made in the ACTION case 
-         */
-        SNMP_FREE(StorageTmp->snmpNotifyFilterProfileName);
-        StorageTmp->snmpNotifyFilterProfileName = tmpvar;
-        StorageTmp->snmpNotifyFilterProfileNameLen = tmplen;
-        break;
-
-
     case COMMIT:
         /*
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        allocated = 0;
         snmp_store_needed(NULL);
         break;
     }
@@ -303,7 +317,7 @@ write_snmpNotifyFilterProfileStorType(int action,
                                       oid * name, size_t name_len)
 {
     static int      tmpvar;
-    long            value = *((long *) var_val);
+    long            value;
     struct snmpNotifyFilterProfileTable_data *StorageTmp = NULL;
     size_t          newlen = name_len - table_offset;
 
@@ -311,7 +325,7 @@ write_snmpNotifyFilterProfileStorType(int action,
     DEBUGMSGTL(("snmpNotifyFilterProfileTable",
                 "write_snmpNotifyFilterProfileStorType entering action=%d...  \n",
                 action));
-    if (action != RESERVE1 &&
+    if (action != RESERVE1 && action != FREE && action != UNDO &&
         (StorageTmp = snmpNotifyFilterProfileTable_oldapi_find(
             NULL, &name[table_offset], &newlen, 1, NULL, NULL)) == NULL) {
         if ((StorageTmp = StorageNew) == NULL)
@@ -326,6 +340,7 @@ write_snmpNotifyFilterProfileStorType(int action,
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        value = *((long *) var_val);
         if (value != SNMP_STORAGE_OTHER && value != SNMP_STORAGE_VOLATILE
             && value != SNMP_STORAGE_NONVOLATILE) {
             return SNMP_ERR_WRONGVALUE;
@@ -362,7 +377,12 @@ write_snmpNotifyFilterProfileStorType(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        StorageTmp->snmpNotifyFilterProfileStorType = tmpvar;
+        if ((StorageTmp = snmpNotifyFilterProfileTable_oldapi_find(
+                 NULL, &name[table_offset], &newlen, 1,
+                 NULL, NULL)) != NULL ||
+            (StorageTmp = StorageNew) != NULL) {
+            StorageTmp->snmpNotifyFilterProfileStorType = tmpvar;
+        }
         break;
 
 
@@ -394,7 +414,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
     static struct snmpNotifyFilterProfileTable_data *StorageDel;
     size_t          newlen = name_len - table_offset;
     static int      old_value;
-    int             set_value = *((long *) var_val);
+    static int      set_value;
     netsnmp_variable_list *vars;
 
 
@@ -412,6 +432,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        set_value = *((long *) var_val);
         if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY) {
             return SNMP_ERR_WRONGVALUE;
         }
@@ -478,8 +499,10 @@ write_snmpNotifyFilterProfileRowStatus(int action,
 
             StorageNew =
                 SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-            if (StorageNew == NULL)
+            if (StorageNew == NULL) {
+                snmp_free_var(vars);
                 return SNMP_ERR_GENERR;
+            }
             StorageNew->snmpTargetParamsName =
                 netsnmp_memdup(vars->val.string, vars->val_len);
             StorageNew->snmpTargetParamsNameLen = vars->val_len;
@@ -556,7 +579,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        if (StorageTmp == NULL &&
+        if (StorageNew != NULL &&
             (set_value == RS_CREATEANDGO ||
              set_value == RS_CREATEANDWAIT)) {
             /*
@@ -564,9 +587,11 @@ write_snmpNotifyFilterProfileRowStatus(int action,
              */
             StorageDel =
                 snmpNotifyFilterProfileTable_extract(StorageNew);
-            /*
-             * XXX: free it 
-             */
+            if (StorageDel != NULL) {
+                snmpNotifyFilterProfileTable_free(StorageDel);
+                StorageDel = NULL;
+            }
+            StorageNew = NULL;
         } else if (StorageDel != NULL) {
             /*
              * row deletion, so add it again 
@@ -594,12 +619,11 @@ write_snmpNotifyFilterProfileRowStatus(int action,
         if (StorageTmp && set_value == RS_CREATEANDGO) {
             if (StorageTmp->snmpNotifyFilterProfileNameLen)
                 StorageTmp->snmpNotifyFilterProfileRowStatus = RS_ACTIVE;
-            StorageNew = NULL;
         } else if (StorageTmp && set_value == RS_CREATEANDWAIT) {
             if (StorageTmp->snmpNotifyFilterProfileNameLen)
                 StorageTmp->snmpNotifyFilterProfileRowStatus = RS_NOTINSERVICE;
-            StorageNew = NULL;
         }
+        StorageNew = NULL;
         snmp_store_needed(NULL);
         break;
     }

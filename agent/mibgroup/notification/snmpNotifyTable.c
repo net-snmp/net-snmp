@@ -327,6 +327,7 @@ write_snmpNotifyTag(int action,
                     u_char * statP, oid * name, size_t name_len)
 {
     static char    *tmpvar;
+    static int      allocated;
     struct snmpNotifyTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen = name_len - snmpNotifyTable_offset;
@@ -334,7 +335,7 @@ write_snmpNotifyTag(int action,
 
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyTag entering action=%d...  \n", action));
-    if (action != RESERVE1 &&
+    if (action != RESERVE1 && action != FREE && action != UNDO &&
         (StorageTmp = find_row_notifyTable(NULL, &name[snmpNotifyTable_offset],
                                            &newlen, 1, NULL, NULL)) == NULL) {
         if ((StorageTmp = StorageNew) == NULL)
@@ -344,6 +345,9 @@ write_snmpNotifyTag(int action,
 
     switch (action) {
     case RESERVE1:
+        tmpvar = NULL;
+        tmplen = 0;
+        allocated = 0;
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -363,15 +367,34 @@ write_snmpNotifyTag(int action,
         tmpvar = StorageTmp->snmpNotifyTag;
         tmplen = StorageTmp->snmpNotifyTagLen;
         StorageTmp->snmpNotifyTag = calloc(1, var_val_len + 1);
-        if (NULL == StorageTmp->snmpNotifyTag)
+        if (NULL == StorageTmp->snmpNotifyTag) {
+            StorageTmp->snmpNotifyTag = tmpvar;
+            tmpvar = NULL;
             return SNMP_ERR_RESOURCEUNAVAILABLE;
+        }
+        allocated = 1;
         break;
 
 
     case FREE:
+    case UNDO:
         /*
          * Release any resources that have been allocated 
          */
+        if (allocated) {
+            if ((StorageTmp = find_row_notifyTable(
+                     NULL, &name[snmpNotifyTable_offset], &newlen, 1,
+                     NULL, NULL)) != NULL ||
+                (StorageTmp = StorageNew) != NULL) {
+                SNMP_FREE(StorageTmp->snmpNotifyTag);
+                StorageTmp->snmpNotifyTag = tmpvar;
+                StorageTmp->snmpNotifyTagLen = tmplen;
+            } else {
+                SNMP_FREE(tmpvar);
+            }
+            tmpvar = NULL;
+            allocated = 0;
+        }
         break;
 
 
@@ -381,23 +404,13 @@ write_snmpNotifyTag(int action,
         break;
 
 
-    case UNDO:
-        /*
-         * Back out any changes made in the ACTION case 
-         */
-        SNMP_FREE(StorageTmp->snmpNotifyTag);
-        StorageTmp->snmpNotifyTag = tmpvar;
-        StorageTmp->snmpNotifyTagLen = tmplen;
-        tmpvar = NULL;
-        break;
-
-
     case COMMIT:
         /*
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        allocated = 0;
         snmp_store_needed(NULL);
         break;
     }
@@ -416,13 +429,13 @@ write_snmpNotifyType(int action,
 {
     static int      tmpvar;
     struct snmpNotifyTable_data *StorageTmp = NULL;
-    long            value = *((long *) var_val);
+    long            value;
     size_t          newlen = name_len - snmpNotifyTable_offset;
 
 
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyType entering action=%d...  \n", action));
-    if (action != RESERVE1 &&
+    if (action != RESERVE1 && action != FREE && action != UNDO &&
         (StorageTmp = find_row_notifyTable(NULL, &name[snmpNotifyTable_offset],
                                            &newlen, 1, NULL, NULL)) == NULL) {
         if ((StorageTmp = StorageNew) == NULL)
@@ -437,12 +450,14 @@ write_snmpNotifyType(int action,
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        value = *((long *) var_val);
         if (value < 1 || value > 2) {
             return SNMP_ERR_WRONGVALUE;
         }
         break;
 
     case ACTION:
+        value = *((long *) var_val);
         tmpvar = StorageTmp->snmpNotifyType;
         StorageTmp->snmpNotifyType = value;
         break;
@@ -451,7 +466,12 @@ write_snmpNotifyType(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        StorageTmp->snmpNotifyType = tmpvar;
+        if ((StorageTmp = find_row_notifyTable(
+                 NULL, &name[snmpNotifyTable_offset], &newlen, 1,
+                 NULL, NULL)) != NULL ||
+            (StorageTmp = StorageNew) != NULL) {
+            StorageTmp->snmpNotifyType = tmpvar;
+        }
         break;
     }
 
@@ -468,7 +488,7 @@ write_snmpNotifyStorageType(int action,
                             u_char * statP, oid * name, size_t name_len)
 {
     static int      tmpvar;
-    long            value = *((long *) var_val);
+    long            value;
     struct snmpNotifyTable_data *StorageTmp = NULL;
     size_t          newlen = name_len - snmpNotifyTable_offset;
 
@@ -476,7 +496,7 @@ write_snmpNotifyStorageType(int action,
     DEBUGMSGTL(("snmpNotifyTable",
                 "write_snmpNotifyStorageType entering action=%d...  \n",
                 action));
-    if (action != RESERVE1 &&
+    if (action != RESERVE1 && action != FREE && action != UNDO &&
         (StorageTmp = find_row_notifyTable(NULL, &name[snmpNotifyTable_offset],
                                            &newlen, 1, NULL, NULL)) == NULL) {
         if ((StorageTmp = StorageNew) == NULL)
@@ -492,6 +512,7 @@ write_snmpNotifyStorageType(int action,
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        value = *((long *) var_val);
         if (value != SNMP_STORAGE_OTHER && value != SNMP_STORAGE_VOLATILE
             && value != SNMP_STORAGE_NONVOLATILE) {
             return SNMP_ERR_WRONGVALUE;
@@ -499,12 +520,18 @@ write_snmpNotifyStorageType(int action,
         break;
 
     case ACTION:
+        value = *((long *) var_val);
         tmpvar = StorageTmp->snmpNotifyStorageType;
         StorageTmp->snmpNotifyStorageType = value;
         break;
 
     case UNDO:
-        StorageTmp->snmpNotifyStorageType = tmpvar;
+        if ((StorageTmp = find_row_notifyTable(
+                 NULL, &name[snmpNotifyTable_offset], &newlen, 1,
+                 NULL, NULL)) != NULL ||
+            (StorageTmp = StorageNew) != NULL) {
+            StorageTmp->snmpNotifyStorageType = tmpvar;
+        }
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -523,7 +550,7 @@ write_snmpNotifyRowStatus(int action,
     static struct snmpNotifyTable_data *StorageDel;
     size_t          newlen = name_len - snmpNotifyTable_offset;
     static int      old_value;
-    int             set_value = *((long *) var_val);
+    static int      set_value;
     static netsnmp_variable_list *vars, *vp;
 
     DEBUGMSGTL(("snmpNotifyTable",
@@ -540,6 +567,7 @@ write_snmpNotifyRowStatus(int action,
         if (var_val_len != sizeof(long)) {
             return SNMP_ERR_WRONGLENGTH;
         }
+        set_value = *((long *) var_val);
         if (set_value < 1 || set_value > 6 || set_value == RS_NOTREADY) {
             return SNMP_ERR_WRONGVALUE;
         }
@@ -598,10 +626,14 @@ write_snmpNotifyRowStatus(int action,
 
             StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
             if (StorageNew == NULL) {
+                snmp_free_var(vars);
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
             StorageNew->snmpNotifyName = calloc( 1, vp->val_len + 1 );
             if (StorageNew->snmpNotifyName == NULL) {
+                free(StorageNew);
+                StorageNew = NULL;
+                snmp_free_var(vars);
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
             memcpy(StorageNew->snmpNotifyName, vp->val.string, vp->val_len);
@@ -616,6 +648,10 @@ write_snmpNotifyRowStatus(int action,
             StorageNew->snmpNotifyTagLen = 0;
             StorageNew->snmpNotifyTag = calloc(1, sizeof(char));
             if (StorageNew->snmpNotifyTag == NULL) {
+                SNMP_FREE(StorageNew->snmpNotifyName);
+                free(StorageNew);
+                StorageNew = NULL;
+                snmp_free_var(vars);
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
 
@@ -667,20 +703,23 @@ write_snmpNotifyRowStatus(int action,
         /*
          * Back out any changes made in the ACTION case 
          */
-        if (StorageTmp == NULL && (set_value == RS_CREATEANDGO ||
+        if (StorageNew != NULL && (set_value == RS_CREATEANDGO ||
                                    set_value == RS_CREATEANDWAIT)) {
             /*
              * row creation, so remove it again 
              */
             StorageDel = snmpNotifyTable_extract(StorageNew);
-            /*
-             * XXX: free it 
-             */
+            if (StorageDel != NULL) {
+                snmpNotifyTable_dispose(StorageDel);
+                StorageDel = NULL;
+            }
+            StorageNew = NULL;
         } else if (StorageDel != NULL) {
             /*
              * row deletion, so add it again 
              */
             snmpNotifyTable_add(StorageDel);
+            StorageDel = NULL;
         } else if (set_value != RS_DESTROY) {
             if (StorageTmp)
                 StorageTmp->snmpNotifyRowStatus = old_value;
@@ -695,12 +734,11 @@ write_snmpNotifyRowStatus(int action,
         if (StorageTmp
             && StorageTmp->snmpNotifyRowStatus == RS_CREATEANDGO) {
             StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
-            StorageNew = NULL;
         } else if (StorageTmp &&
                    StorageTmp->snmpNotifyRowStatus == RS_CREATEANDWAIT) {
             StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
-            StorageNew = NULL;
         }
+        StorageNew = NULL;
         snmp_store_needed(NULL);
         break;
     }
