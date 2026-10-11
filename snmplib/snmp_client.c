@@ -197,8 +197,14 @@ snmp_synch_input(int op,
              * clone the pdu to return to snmp_synch_response 
              */
             state->pdu = snmp_clone_pdu(pdu);
-            state->status = STAT_SUCCESS;
-            session->s_snmp_errno = SNMPERR_SUCCESS;
+            if (state->pdu == NULL) {
+                state->status = STAT_ERROR;
+                session->s_snmp_errno = SNMPERR_MALLOC;
+                SET_SNMP_ERROR(SNMPERR_MALLOC);
+            } else {
+                state->status = STAT_SUCCESS;
+                session->s_snmp_errno = SNMPERR_SUCCESS;
+            }
         }
         else {
             char msg_buf[50];
