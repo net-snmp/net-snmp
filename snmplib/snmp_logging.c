@@ -435,6 +435,8 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             optind++;
             if (optind < argc)
                 optarg = argv[optind];
+            else
+                optarg = NULL;
         }
         NETSNMP_FALLTHROUGH;
     case 's':
