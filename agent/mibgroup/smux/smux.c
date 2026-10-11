@@ -404,7 +404,7 @@ var_smux_write(int action,
     smux_reg       *rptr;
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
-    size_t          var_len, datalen, name_length, packet_len;
+    size_t          datalen, name_length, packet_len;
     size_t          len;
     ssize_t         tmp_len;
     long            reqid, errsts, erridx;
@@ -414,7 +414,6 @@ var_smux_write(int action,
 
     len = SMUXMAXPKTSIZE;
     reterr = SNMP_ERR_NOERROR;
-    var_len = var_val_len;
     name_length = name_len;
 
     /*
@@ -434,12 +433,6 @@ var_smux_write(int action,
     switch (action) {
     case RESERVE1:
         DEBUGMSGTL(("smux", "[var_smux_write] entering RESERVE1\n"));
-
-        /*
-         * length might be long 
-         */
-        var_len += (*(var_val + 1) & ASN_LONG_LEN) ?
-            var_len + ((*(var_val + 1) & 0x7F) + 2) : 2;
 
         switch (var_val_type) {
         case ASN_INTEGER:
