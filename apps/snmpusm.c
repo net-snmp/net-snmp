@@ -158,6 +158,11 @@ setup_oid(oid * it, size_t * len, u_char * id, size_t idlen,
 {
     int             i, itIndex = *len;
 
+    if (itIndex + 1 + idlen + 1 + strlen(user) > MAX_OID_LEN) {
+        fprintf(stderr, "OID length exceeds MAX_OID_LEN\n");
+        exit(1);
+    }
+
     *len = itIndex + 1 + idlen + 1 + strlen(user);
 
     it[itIndex++] = idlen;
@@ -189,6 +194,9 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
+
+    if (!vars || !vars->val.string || !dhvar || !dhvar->val.string)
+        return SNMPERR_GENERR;
             
     dhkeychange = (u_char *) malloc(2 * vars->val_len * sizeof(char));
     if (!dhkeychange)
@@ -205,17 +213,20 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
         DH_get0_pqg(dh, &p, NULL, &g);
 
     if (!dh || !g || !p) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
     if (!DH_generate_key(dh)) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
     DH_get0_key(dh, &pub_key, NULL);
     if (vars->val_len != (unsigned int)BN_num_bytes(pub_key)) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         fprintf(stderr,"incorrect diffie-helman lengths (%lu != %d)\n",
                 (unsigned long)vars->val_len, BN_num_bytes(pub_key));
@@ -225,30 +236,41 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     BN_bn2bin(pub_key, dhkeychange + vars->val_len);
 
     key_len = DH_size(dh);
-    if (!key_len) {
+    if (!key_len || key_len < outkey_len) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
     key = (u_char *) malloc(key_len * sizeof(u_char));
 
     if (!key) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         return SNMPERR_GENERR;
     }
 
     other_pub = BN_bin2bn(vars->val.string, vars->val_len, NULL);
     if (!other_pub) {
+        DH_free(dh);
         SNMP_FREE(dhkeychange);
         SNMP_FREE(key);
         return SNMPERR_GENERR;
     }
 
-    if (DH_compute_key(key, other_pub, dh)) {
+    {
+        int computed_len = DH_compute_key(key, other_pub, dh);
         u_char *kp;
 
+        if (computed_len < (int)outkey_len) {
+            DH_free(dh);
+            SNMP_FREE(dhkeychange);
+            BN_free(other_pub);
+            SNMP_FREE(key);
+            return SNMPERR_GENERR;
+        }
         printf("new %s key: 0x", keyname);
-        for(kp = key + key_len - outkey_len;
-            kp - key < (int)key_len;  kp++) {
+        for (kp = key + computed_len - outkey_len;
+             kp - key < computed_len; kp++) {
             printf("%02x", (unsigned char) *kp);
         }
         printf("\n");
@@ -258,8 +280,9 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
                           ASN_OCTET_STR, dhkeychange,
                           2 * vars->val_len);
 
+    DH_free(dh);
     SNMP_FREE(dhkeychange);
-    SNMP_FREE(other_pub);
+    BN_free(other_pub);
     SNMP_FREE(key);
 
     return SNMPERR_SUCCESS;
@@ -444,12 +467,15 @@ main(int argc, char *argv[])
          * XXX:  Uses the auth type of the calling user, a MD5 user can't
          *       change a SHA user's key.
          */
-        const char *passwd_user;
+        const char *passwd_user = NULL;
 
         command = CMD_PASSWD;
-        oldpass = argv[++arg];
-        newpass = argv[++arg];
-        passwd_user = argv[++arg];
+        if (++arg < argc)
+            oldpass = argv[arg];
+        if (++arg < argc)
+            newpass = argv[arg];
+        if (++arg < argc)
+            passwd_user = argv[arg];
 
         if (doprivkey == 0 && doauthkey == 0)
             doprivkey = doauthkey = 1;
@@ -879,7 +905,7 @@ main(int argc, char *argv[])
         name_length = DH_USM_OID_LEN;
         name_length2 = DH_USM_OID_LEN;
 
-        passwd_user = argv[++arg];
+        passwd_user = (++arg < argc) ? argv[arg] : NULL;
 
         if (doprivkey == 0 && doauthkey == 0)
             doprivkey = doauthkey = 1;
@@ -938,6 +964,7 @@ main(int argc, char *argv[])
 
         if (status != SNMPERR_SUCCESS || dhresponse == NULL ||
             dhresponse->errstat != SNMP_ERR_NOERROR ||
+            !dhresponse->variables ||
             dhresponse->variables->type != ASN_OCTET_STR) {
             snmp_sess_perror("snmpusm", ss);
             if (dhresponse && dhresponse->variables &&
@@ -948,6 +975,8 @@ main(int argc, char *argv[])
                         "  (maybe it doesn't support the SNMP-USM-DH-OBJECTS-MIB MIB)\n");
             }
             exitval = 1;
+            if (dhresponse)
+                snmp_free_pdu(dhresponse);
             goto begone;
         }
         
@@ -959,8 +988,10 @@ main(int argc, char *argv[])
                                sc_get_properlength(ss->securityAuthProto,
                                                    ss->securityAuthProtoLen),
                                pdu, "auth",
-                               dhauthKeyChange, name_length) != SNMPERR_SUCCESS)
+                               dhauthKeyChange, name_length) != SNMPERR_SUCCESS) {
+                snmp_free_pdu(dhresponse);
                 goto begone;
+            }
             vars = vars->next_variable;
         }
         if (doprivkey) {
@@ -974,11 +1005,13 @@ main(int argc, char *argv[])
                                dhprivKeyLen,
                                pdu, "priv",
                                dhprivKeyChange, name_length2)
-                != SNMPERR_SUCCESS)
+                != SNMPERR_SUCCESS) {
+                snmp_free_pdu(dhresponse);
                 goto begone;
+            }
             vars = vars->next_variable;
         }
-        /* snmp_free_pdu(dhresponse); */ /* parts still in use somewhere */
+        snmp_free_pdu(dhresponse);
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
     } else {
         fprintf(stderr, "Unknown command\n");
@@ -1003,10 +1036,12 @@ main(int argc, char *argv[])
      * do the request 
      */
     status = snmp_synch_response(ss, pdu, &response);
+    pdu = NULL;
     if (status == STAT_SUCCESS) {
         if (response) {
             if (response->errstat == SNMP_ERR_NOERROR) {
                 fprintf(stdout, "%s\n", successNotes[command - 1]);
+                exitval = 0;
             } else {
                 fprintf(stderr, "Error in packet.\nReason: %s\n",
                         snmp_errstring(response->errstat));
@@ -1035,7 +1070,6 @@ main(int argc, char *argv[])
         exitval = 1;
     }
 
-    exitval = 0;
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
   begone:
 #endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
@@ -1043,6 +1077,8 @@ main(int argc, char *argv[])
         snmp_free_pdu(response);
 
 close_session:
+    if (pdu)
+        snmp_free_pdu(pdu);
     snmp_close(ss);
 
 out:
