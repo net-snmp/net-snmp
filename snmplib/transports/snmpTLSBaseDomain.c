@@ -634,12 +634,18 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     if (NULL != crlFile) {
         cert_store = SSL_CTX_get_cert_store(the_ctx);
         DEBUGMSGTL(("sslctx_common", "loading CRL: %s\n", crlFile));
-        if (!cert_store)
+        if (!cert_store) {
+            SSL_CTX_free(the_ctx);
             LOGANDDIE("failed to find certificate store");
-        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
+        }
+        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file()))) {
+            SSL_CTX_free(the_ctx);
             LOGANDDIE("failed to create a lookup function for the CRL file");
-        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
+        }
+        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1) {
+            SSL_CTX_free(the_ctx);
             LOGANDDIE("failed to load the CRL file");
+        }
         /* tell openssl to check CRLs */
         X509_STORE_set_flags(cert_store,
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
@@ -648,15 +654,18 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     method = SSL_CTX_get_ssl_method(the_ctx);
     if ((method == TLS_method() || method == TLS_client_method() ||
          method == TLS_server_method()) &&
-        _sslctx_set_tls_version(the_ctx) == 0)
+        _sslctx_set_tls_version(the_ctx) == 0) {
+        SSL_CTX_free(the_ctx);
         return NULL;
+    }
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
     if (NULL != cipherList) {
-        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
+        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1) {
+            SSL_CTX_free(the_ctx);
             LOGANDDIE("failed to set the cipher list to the requested value");
-        else
+        } else
             snmp_log(LOG_INFO,"set SSL cipher list to '%s'\n", cipherList);
     }
     SSL_CTX_set_session_cache_mode(the_ctx, SSL_SESS_CACHE_OFF);
@@ -734,6 +743,7 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
             ocert = X509_dup(id_cert->ocert);
             DEBUGMSGTL(("sslctx_client", "adding cert-chain certificate %p", ocert));
             if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert)) {
+                X509_free(ocert);
                 msg = "failed to add intermediate client certificate";
                 goto err;
             }
@@ -829,6 +839,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
             ocert = X509_dup(id_cert->ocert);
             DEBUGMSGTL(("sslctx_server", "adding cert-chain certificate %p", ocert));
             if (!ocert || !SSL_CTX_add_extra_chain_cert(the_ctx, ocert)) {
+                X509_free(ocert);
                 msg = "failed to add intermediate server certificate";
                 goto err;
             }
