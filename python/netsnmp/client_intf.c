@@ -1398,6 +1398,7 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 {
   PyObject *session;
   PyObject *varlist;
+  PyObject *varlist_iter = NULL;
   PyObject *varbind;
   PyObject *val_tuple = NULL;
   int varlist_len = 0;
@@ -1461,7 +1462,7 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
     pdu = snmp_pdu_create(pdu_type);
 
     if (varlist) {
-      PyObject *varlist_iter = PyObject_GetIter(varlist);
+      varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
 	const char *tag = NULL;
@@ -1493,8 +1494,6 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
 	/* release reference when done */
 	Py_DECREF(varbind);
       }
-
-      Py_DECREF(varlist_iter);
 
       if (PyErr_Occurred()) {
 	/* propagate error */
@@ -1585,9 +1584,14 @@ netsnmp_get_or_getnext(PyObject *self, PyObject *args, int pdu_type,
   }
 
  done:
+  Py_XDECREF(varlist_iter);
   free(oid_arr);
   if (str_buf != NULL)
      netsnmp_free(str_buf);
+  if (PyErr_Occurred()) {
+     Py_XDECREF(val_tuple);
+     return NULL;
+  }
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
@@ -1608,7 +1612,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
 {
   PyObject *session;
   PyObject *varlist;
-  PyObject *varlist_iter;
+  PyObject *varlist_iter = NULL;
   PyObject *varbind;
   PyObject *val_tuple = NULL;
   PyObject *varbinds  = NULL;
@@ -1688,8 +1692,10 @@ netsnmp_walk(PyObject *self, PyObject *args)
     varlist_len = 0;
     while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
         varlist_len++;
+        Py_DECREF(varbind);
     }
-    Py_DECREF(varlist_iter);
+    Py_XDECREF(varlist_iter);
+    varlist_iter = NULL;
 
     oid_arr_len              = calloc(varlist_len, sizeof(*oid_arr_len));
     oid_arr_broken_check_len = calloc(varlist_len,
@@ -1739,9 +1745,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
       Py_DECREF(varbind);
       varlist_ind++;
     }
-
-    if (varlist_iter)
-        Py_DECREF(varlist_iter);
 
     if (PyErr_Occurred()) {
       /* propagate error */
@@ -1923,6 +1926,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   }
 
  done:
+  Py_XDECREF(varlist_iter);
   Py_XDECREF(varbinds);
   free(oid_arr_len);
   free(oid_arr_broken_check_len);
@@ -1934,6 +1938,10 @@ netsnmp_walk(PyObject *self, PyObject *args)
   free(oid_arr_broken_check);
   if (str_buf != NULL)
      netsnmp_free(str_buf);
+  if (PyErr_Occurred()) {
+     Py_XDECREF(val_tuple);
+     return NULL;
+  }
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
