@@ -757,5 +757,16 @@ class NonStringAttrTest(unittest.TestCase):
         sess.get(varlist)
 
 
+class OversizedOidTest(unittest.TestCase):
+    def testOversizedNumericOidAndIid(self):
+        sess = setup_v1()
+        varlist = netsnmp.VarList(
+            netsnmp.Varbind('.1' * 135),
+            netsnmp.Varbind('sysDescr', '1.' * 130 + '1'),
+        )
+        res = sess.get(varlist)
+        self.assertEqual(res, None)
+
+
 if __name__ == '__main__':
     unittest.main()

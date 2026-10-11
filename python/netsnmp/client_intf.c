@@ -348,6 +348,8 @@ __scan_num_objid(const char *buf, oid *objid, size_t *len)
    cp = buf;
    while (*buf) {
       if (*buf++ == '.') {
+         if (*len >= MAX_OID_LEN)
+            return FAILURE;
          sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
          /* *objid++ = atoi(cp); */
          (*len)++;
@@ -358,6 +360,8 @@ __scan_num_objid(const char *buf, oid *objid, size_t *len)
          }
       }
    }
+   if (*len >= MAX_OID_LEN)
+      return FAILURE;
    sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
    /* *objid++ = atoi(cp); */
    (*len)++;
@@ -495,6 +499,10 @@ __concat_oid_str(oid *doid_arr, size_t *doid_arr_len, const char *soid_str)
        return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
+     if (*doid_arr_len >= MAX_OID_LEN) {
+       free(soid_buf);
+       return FAILURE;
+     }
      sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
@@ -542,12 +550,16 @@ __tag2oid(const char *tag, const char *iid, oid *oid_arr, size_t *oid_arr_len,
        if (best_guess == 2) {		/* Random search -IR */
          if (get_node(tag, newname, &newname_len)) {
 	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         } else {
+           newname_len = 0;
          }
        }
        else if (best_guess == 1) {	/* Regex search -Ib */
 	 clear_tree_flags(get_tree_head());
          if (get_wild_node(tag, newname, &newname_len)) {
 	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         } else {
+           newname_len = 0;
          }
        }
      }
@@ -611,8 +623,12 @@ __tag2oid(const char *tag, const char *iid, oid *oid_arr, size_t *oid_arr_len,
       }
    }
  done:
-   if (iid && *iid && oid_arr_len)
-       __concat_oid_str(oid_arr, oid_arr_len, iid);
+   if (iid && *iid && oid_arr_len) {
+       if (__concat_oid_str(oid_arr, oid_arr_len, iid) == FAILURE) {
+           *oid_arr_len = 0;
+           return NULL;
+       }
+   }
    return(rtp);
 }
 
