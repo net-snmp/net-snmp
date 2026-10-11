@@ -632,6 +632,8 @@ size_t *len;
    cp = buf;
    while (*buf) {
       if (*buf++ == '.') {
+         if (*len >= MAX_OID_LEN)
+            return FAILURE;
          sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
          /* *objid++ = atoi(cp); */
          (*len)++;
@@ -642,6 +644,8 @@ size_t *len;
          }
       }
    }
+   if (*len >= MAX_OID_LEN)
+      return FAILURE;
    sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
    /* *objid++ = atoi(cp); */
    (*len)++;
@@ -893,12 +897,16 @@ int    best_guess;
        if (best_guess == 2) {		/* Random search -IR */
          if (get_node(tag, newname, &newname_len)) {
 	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         } else {
+           newname_len = 0;
          }
        }
        else if (best_guess == 1) {	/* Regex search -Ib */
 	 clear_tree_flags(get_tree_head()); 
          if (get_wild_node(tag, newname, &newname_len)) {
 	   rtp = tp = get_tree(newname, newname_len, get_tree_head());
+         } else {
+           newname_len = 0;
          }
        }
      }
@@ -921,6 +929,8 @@ int    best_guess;
 	newname_len = MAX_OID_LEN;
 	if (read_objid(tag, newname, &newname_len)) {	/* long name */
 	  rtp = tp = get_tree(newname, newname_len, get_tree_head());
+	} else {
+	  newname_len = 0;
 	}
       }
       else {
@@ -953,7 +963,12 @@ int    best_guess;
       }
    }
  done:
-   if (iid && *iid && oid_arr_len) __concat_oid_str(oid_arr, oid_arr_len, iid);
+   if (iid && *iid && oid_arr_len) {
+      if (__concat_oid_str(oid_arr, oid_arr_len, iid) == FAILURE) {
+         *oid_arr_len = 0;
+         return NULL;
+      }
+   }
    return(rtp);
 }
 
@@ -982,6 +997,10 @@ char * soid_str;
        return FAILURE;
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
+     if (*doid_arr_len >= MAX_OID_LEN) {
+       netsnmp_free(soid_buf);
+       return FAILURE;
+     }
      sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);

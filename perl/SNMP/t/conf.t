@@ -14,7 +14,7 @@ BEGIN {
 
 use Config;
 use Test;
-BEGIN {plan tests => 3}
+BEGIN {plan tests => 4}
 
 SNMP::setenv('SNMPCONFPATH', '.' . $Config{path_sep} . 't', 1);
 
@@ -49,3 +49,6 @@ if ($myint != 1) {
     --enable-shared)\n" . "*" x 75 . "\n\n\n\n";
 }
 
+
+# Oversized numeric OID must not overflow MAX_OID_LEN buffer
+ok(defined(SNMP::translateObj(".1" x 135)) && !defined(SNMP::getType(".1" x 135)));
