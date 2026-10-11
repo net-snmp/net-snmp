@@ -3724,6 +3724,9 @@ snmp_pdu_realloc_rbuild(u_char ** pkt, size_t * pkt_len, size_t * offset,
                                      (u_char) (ASN_SEQUENCE |
                                                ASN_CONSTRUCTOR),
                                      *offset - start_offset);
+    if (rc == 0) {
+        return 0;
+    }
 
     /*
      * Store fields in the PDU preceding the variable-bindings sequence.

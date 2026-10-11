@@ -83,6 +83,26 @@ OKF((rc == SNMPERR_SUCCESS),
     snmp_free_pdu(pdu);
 }
 
+#ifdef NETSNMP_USE_REVERSE_ASNENCODING
+{
+    u_char tiny_buf[2];
+    u_char *tiny_pkt = tiny_buf;
+    size_t tiny_len = 1, tiny_offset = 0;
+
+    rc = asn_realloc_rbuild_sequence(&tiny_pkt, &tiny_len, &tiny_offset, 0,
+                                     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                                     0);
+    OKF(rc == 0, ("asn_realloc_rbuild_sequence fails when buffer is too small"));
+
+    tiny_len = 0;
+    tiny_offset = 0;
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    rc = snmp_pdu_realloc_rbuild(NULL, &tiny_len, &tiny_offset, pdu);
+    OKF(rc == 0, ("snmp_pdu_realloc_rbuild fails when sequence header fails"));
+    snmp_free_pdu(pdu);
+}
+#endif
+
 free(packet);
 netsnmp_cleanup_session(&session);
 snmp_shutdown("testing");
