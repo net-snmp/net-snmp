@@ -147,7 +147,7 @@ netsnmp_file_release(netsnmp_file * filei)
     if (NULL == filei)
         return -1;
 
-    if ((filei->fd > 0) && NS_FI_AUTOCLOSE(filei->ns_flags))
+    if ((filei->fd >= 0) && NS_FI_AUTOCLOSE(filei->ns_flags))
         rc = close(filei->fd);
 
     if (NULL != filei->name)
@@ -219,7 +219,7 @@ netsnmp_file_close(netsnmp_file * filei)
     /*
      * basic sanity checks
      */
-    if ((NULL == filei) || (NULL != filei->name))
+    if ((NULL == filei) || (NULL == filei->name))
         return -1;
 
     /*
