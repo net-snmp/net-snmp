@@ -116,11 +116,16 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     netsnmp_pdu * v2pdu = NULL;
 
     dSP;
-    ENTER;
-    SAVETMPS;
 
     if (!pdu || !handler)
         return 0;
+
+    cb_data = handler->handler_data;
+    if (!cb_data || !cb_data->perl_cb)
+        return 0;
+
+    ENTER;
+    SAVETMPS;
 
     /* nuke v1 PDUs */
     if (pdu->command == SNMP_MSG_TRAP) {
@@ -132,10 +137,6 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         }
         pdu = v2pdu;
     }
-
-    cb_data = handler->handler_data;
-    if (!cb_data || !cb_data->perl_cb)
-        return 0;
 
     pcallback = cb_data->perl_cb;
 
