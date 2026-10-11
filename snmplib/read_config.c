@@ -1750,13 +1750,13 @@ snmp_clean_persistent(const char *type)
 static void
 config_vlog(int level, const char *levelmsg, const char *str, va_list args)
 {
-    char *buf;
+    char *msg = NULL;
 
-    if (asprintf(&buf, "%s: line %d: %s: %s\n",
-                 curfilename, linecount, levelmsg, str) < 0)
+    if (vasprintf(&msg, str, args) < 0)
         return;
-    snmp_vlog(level, buf, args);
-    free(buf);
+    snmp_log(level, "%s: line %d: %s: %s\n",
+             curfilename, linecount, levelmsg, msg);
+    free(msg);
 }
 
 void
