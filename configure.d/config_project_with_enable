@@ -1156,7 +1156,7 @@ NETSNMP_ARG_WITH(server-recv-buf,
 
 NETSNMP_ARG_WITH(client-send-buf,
 [  --with-client-send-buf[=ARG]    Similar as previous options, but for the
-                                  receive buffer of client sockets],[
+                                  send buffer of client sockets],[
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the client send buffer ])
   fi
@@ -1164,7 +1164,8 @@ NETSNMP_ARG_WITH(client-send-buf,
   AC_MSG_RESULT([using OS default send buffer size for client sockets]) )
 
 NETSNMP_ARG_WITH(client-recv-buf,
-[  --with-client-recv-buf[=ARG]    Similar as previous options, but for the send buffer],[
+[  --with-client-recv-buf[=ARG]    Similar as previous options, but for the
+                                  receive buffer of client sockets],[
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a positive number for the client recv buffer ])
   fi

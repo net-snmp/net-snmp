@@ -2093,8 +2093,9 @@ Network Buffers:
                                   The ARG should be the size in bytes
   --with-server-recv-buf=ARG    Similar as previous option, but for receive buffer
   --with-client-send-buf=ARG    Similar as previous options, but for the
+                                  send buffer of client sockets
+  --with-client-recv-buf=ARG    Similar as previous options, but for the
                                   receive buffer of client sockets
-  --with-client-recv-buf=ARG    Similar as previous options, but for the send buffer
   --without-elf           use elf libraries
   --with-nl               use libnl to get netlink data (linux only).
   --with-libwrap=LIBPATH  Compile in libwrap (tcp_wrappers) support.
