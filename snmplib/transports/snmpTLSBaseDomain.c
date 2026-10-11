@@ -1062,7 +1062,6 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
     /* allocate our TLS specific data */
     tlsdata = SNMP_MALLOC_TYPEDEF(_netsnmpTLSBaseData);
     if (NULL == tlsdata) {
-        SNMP_FREE(t);
         return NULL;
     }
 

@@ -1546,10 +1546,14 @@ _transport_common(netsnmp_transport *t, int local)
         t->data = tmp;
         t->data_length = tmp_len;
     }
+    if (NULL == t->base_transport)
+        return NULL;
     if (NULL != t->data &&
         t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         _netsnmpTLSBaseData *tlsdata =
             netsnmp_tlsbase_allocate_tlsdata(t, local);
+        if (NULL == tlsdata)
+            return NULL;
         tlsdata->addr = t->data;
         t->data = tlsdata;
         t->data_length = sizeof(_netsnmpTLSBaseData);
@@ -1587,6 +1591,7 @@ netsnmp_dtlsudp_transport(const struct netsnmp_ep *ep, int local)
 
     t2 = _transport_common(t, local);
     if (!t2) {
+        netsnmp_socketbase_close(t);
         netsnmp_transport_free(t);
         return NULL;
     }
@@ -1631,6 +1636,7 @@ netsnmp_dtlsudp6_transport(const struct netsnmp_ep *ep, int local)
 
     t2 = _transport_common(t, local);
     if (!t2) {
+        netsnmp_socketbase_close(t);
         netsnmp_transport_free(t);
         return NULL;
     }

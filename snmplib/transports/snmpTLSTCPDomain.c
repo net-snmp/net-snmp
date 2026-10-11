@@ -1085,10 +1085,21 @@ _tlstcp_transport_common(netsnmp_transport *t, int local)
         t->data_length = tmp_len;
     }
 
+    if (NULL == t->base_transport) {
+        netsnmp_socketbase_close(t);
+        netsnmp_transport_free(t);
+        return NULL;
+    }
+
     if (NULL != t->data &&
         t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         _netsnmpTLSBaseData *tlsdata =
             netsnmp_tlsbase_allocate_tlsdata(t, local);
+        if (NULL == tlsdata) {
+            netsnmp_socketbase_close(t);
+            netsnmp_transport_free(t);
+            return NULL;
+        }
         tlsdata->addr = (netsnmp_indexed_addr_pair *) t->data;
         t->data = tlsdata;
         t->data_length = sizeof(_netsnmpTLSBaseData);
