@@ -468,6 +468,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         tmStateRef->securityName[0] == '\0'
         ) {
         snmp_increment_statistic(STAT_TSM_SNMPTSMINVALIDCACHES);
+        SNMP_FREE(tmStateRef);
         return SNMPERR_GENERR;
     }
 
@@ -526,6 +527,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         */
         if (prefix == NULL) {
             snmp_increment_statistic(STAT_TSM_SNMPTSMUNKNOWNPREFIXES);
+            SNMP_FREE(tmStateRef);
             return SNMPERR_GENERR;
         }
 
@@ -541,6 +543,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
            happen. */
         if (strlen(prefix) < 1 || strlen(prefix) > 4) {
             /* XXX: snmpTsmInvalidPrefixes++ */
+            SNMP_FREE(tmStateRef);
             return SNMPERR_GENERR;
         }
 #endif
@@ -576,6 +579,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     if (parms->secLevel > tmStateRef->transportSecurityLevel) {
         snmp_increment_statistic(STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS);
         DEBUGMSGTL(("tsm", "inadequate security level: %d\n", parms->secLevel));
+        SNMP_FREE(tmStateRef);
         /* net-snmp returns error codes not OIDs, which are dealt with later */
         return SNMPERR_UNSUPPORTED_SEC_LEVEL;
     }
@@ -592,9 +596,14 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         tsmSecRef = *parms->secStateRef;
     }
 
-    netsnmp_assert_or_return(NULL != tsmSecRef, SNMPERR_GENERR);
+    if (NULL == tsmSecRef) {
+        SNMP_FREE(tmStateRef);
+        return SNMPERR_GENERR;
+    }
 
     *parms->secStateRef = tsmSecRef;
+    if (tsmSecRef->tmStateRef != tmStateRef)
+        SNMP_FREE(tsmSecRef->tmStateRef);
     tsmSecRef->tmStateRef = tmStateRef;
 
     /* If this did not come through a tunneled connection, this
