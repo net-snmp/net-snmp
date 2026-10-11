@@ -2789,7 +2789,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                    session.securityPrivLocalKeyLen = priv_localized_key_len;
                } else if (priv_master_key_len) {
                    session.securityPrivKeyLen =
-                       SNMP_MIN(auth_master_key_len,
+                       SNMP_MIN(priv_master_key_len,
                                 sizeof(session.securityPrivKey));
                    memcpy(session.securityPrivKey, priv_master_key,
                           session.securityPrivKeyLen);
