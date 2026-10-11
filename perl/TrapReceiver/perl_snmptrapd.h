@@ -10,7 +10,7 @@ typedef int (Netsnmp_Trap_Handler)(netsnmp_pdu           *pdu,
                                    netsnmp_trapd_handler *handler);
 
 struct netsnmp_trapd_handler_s {
-     int  *trapoid;
+     oid  *trapoid;
      int   trapoid_len;
      char *token;		/* Or an array of tokens? */
      char *format;		/* Formatting string */
