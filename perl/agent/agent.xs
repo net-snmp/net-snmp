@@ -945,10 +945,16 @@ narqi_getSourceIp(me)
 
     CODE:
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
+        if (!reqinfo || !reqinfo->asp || !reqinfo->asp->pdu ||
+            !reqinfo->asp->pdu->transport_data ||
+            reqinfo->asp->pdu->transport_data_length != sizeof(*addr_pair))
+            XSRETURN_UNDEF;
 
         /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (netsnmp_udp_addr_pair *) (reqinfo->asp->pdu->transport_data);
 	from = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        if (from->sin_family != AF_INET)
+            XSRETURN_UNDEF;
         rarg = newSVpv((const char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
         RETVAL = rarg;
     OUTPUT:
@@ -966,9 +972,15 @@ narqi_getDestIp(me)
 
     CODE:
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
+        if (!reqinfo || !reqinfo->asp || !reqinfo->asp->pdu ||
+            !reqinfo->asp->pdu->transport_data ||
+            reqinfo->asp->pdu->transport_data_length != sizeof(*addr_pair))
+            XSRETURN_UNDEF;
 
         /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (netsnmp_udp_addr_pair *) (reqinfo->asp->pdu->transport_data);
+        if (addr_pair->local_addr.sa.sa_family != AF_INET)
+            XSRETURN_UNDEF;
 	to = (struct in_addr *) &(addr_pair->local_addr);
         rarg = newSVpv((const char *)(&to->s_addr), sizeof(to->s_addr));
         RETVAL = rarg;
