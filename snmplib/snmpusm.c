@@ -3967,6 +3967,7 @@ static int usm_discover_engineid(struct session_list *slp,
                     session->s_snmp_errno));
         break;
     }
+    snmp_free_pdu(response);
 
     if (slp->session->securityEngineIDLen == 0) {
         DEBUGMSGTL(("snmp_api",
