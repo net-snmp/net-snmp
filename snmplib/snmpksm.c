@@ -301,7 +301,7 @@ ksm_insert_cache(long msgid, krb5_auth_context auth_context,
 
     entry->secNameLen = secNameLen;
 
-    bucket = msgid % HASHSIZE;
+    bucket = (unsigned long)msgid % HASHSIZE;
 
     entry->next = ksm_hash_table[bucket];
     ksm_hash_table[bucket] = entry;
@@ -315,7 +315,7 @@ ksm_get_cache(long msgid)
     struct ksm_cache_entry *entry;
     int             bucket;
 
-    bucket = msgid % HASHSIZE;
+    bucket = (unsigned long)msgid % HASHSIZE;
 
     for (entry = ksm_hash_table[bucket]; entry != NULL;
          entry = entry->next)
@@ -331,7 +331,7 @@ ksm_decrement_ref_count(long msgid)
     struct ksm_cache_entry *entry, *entry1;
     int             bucket;
 
-    bucket = msgid % HASHSIZE;
+    bucket = (unsigned long)msgid % HASHSIZE;
 
     if (ksm_hash_table[bucket] && ksm_hash_table[bucket]->msgid == msgid) {
         entry = ksm_hash_table[bucket];
