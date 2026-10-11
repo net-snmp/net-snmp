@@ -715,6 +715,17 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                  * the RowStatus object (essentially duplicating the
                  * steps followed earlier in the 'allow_creation' case)
                  */
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    continue;
+                }
+                if (!request->requestvb->val.integer ||
+                    request->requestvb->val_len != sizeof(long)) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGLENGTH);
+                    continue;
+                }
                 switch (*(request->requestvb->val.integer)) {
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
@@ -753,7 +764,23 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                           SNMP_ERR_NOTWRITABLE);
                 continue;
             }
+            if (data && request->requestvb->type != data->type) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_WRONGTYPE);
+                continue;
+            }
             if (datatable->rowstatus_column == table_info->colnum) {
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    continue;
+                }
+                if (!request->requestvb->val.integer ||
+                    request->requestvb->val_len != sizeof(long)) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGLENGTH);
+                    continue;
+                }
                 switch (*(request->requestvb->val.integer)) {
                 case RS_ACTIVE:
                 case RS_NOTINSERVICE:

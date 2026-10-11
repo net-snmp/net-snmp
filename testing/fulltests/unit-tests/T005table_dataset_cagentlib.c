@@ -52,6 +52,45 @@ for (i = 1; i <= 2; i++) {
     }
 }
 
+{
+    /*
+     * Verify that netsnmp_table_data_set_helper_handler() rejects an invalid
+     * ASN.1 type on a RowStatus column with SNMP_ERR_WRONGTYPE rather than
+     * dereferencing val.integer as an integer pointer.
+     */
+    netsnmp_agent_request_info reqinfo;
+    netsnmp_request_info       request;
+    netsnmp_table_request_info tbl_req;
+    netsnmp_variable_list      vb;
+    oid                        req_oid[] = { 1, 3, 6, 1, 3, 277, 1, COL3, 99, 99 };
+
+    tds->rowstatus_column = COL3;
+    memset(&reqinfo, 0, sizeof(reqinfo));
+    memset(&request, 0, sizeof(request));
+    memset(&tbl_req, 0, sizeof(tbl_req));
+    memset(&vb, 0, sizeof(vb));
+
+    reqinfo.mode = MODE_SET_RESERVE1;
+    vb.name = req_oid;
+    vb.name_length = OID_LENGTH(req_oid);
+    vb.type = ASN_OCTET_STR;
+    vb.val.string = (u_char *) "bad";
+    vb.val_len = 3;
+    request.requestvb = &vb;
+    tbl_req.colnum = COL3;
+    netsnmp_request_add_list_data(
+        &request, netsnmp_create_data_list(TABLE_HANDLER_NAME, &tbl_req, NULL));
+
+    netsnmp_mib_handler *tds_h = netsnmp_get_table_data_set_handler(tds);
+    netsnmp_table_data_set_helper_handler(tds_h, th, &reqinfo, &request);
+    netsnmp_handler_free(tds_h);
+    OKF(request.status == SNMP_ERR_WRONGTYPE,
+        ("RowStatus SET with ASN_OCTET_STR status (%d == %d)",
+         request.status, SNMP_ERR_WRONGTYPE));
+    netsnmp_free_request_data_sets(&request);
+    netsnmp_free_agent_data_sets(&reqinfo);
+}
+
 netsnmp_delete_table_data_set(tds);
 
 snmp_shutdown("snmpd");
