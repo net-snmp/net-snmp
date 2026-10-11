@@ -2112,6 +2112,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 	    /* not sure why making varbind failed - should not happen*/
 	    PyList_Append(varbinds, none); /* increments ref */
 	    /* Return None for this variable. */
+	    _PyTuple_Resize(&val_tuple, varbind_ind+1);
 	    PyTuple_SetItem(val_tuple, varbind_ind, none); /* steals ref */
 	    Py_XDECREF(varbind);
 	  }
