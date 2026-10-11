@@ -518,6 +518,8 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
 
     internal_pdu = snmp_clone_pdu(pdu);
     if (!internal_pdu) {
+        if (smagic)
+            snmp_free_varbind(smagic->ovars);
         free(smagic);
         return 1;
     }
@@ -530,6 +532,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
                     retmagic);
     if (result == 0) {
         snmp_free_pdu( internal_pdu );
+        if (smagic) {
+            snmp_free_varbind(smagic->ovars);
+            free(smagic);
+        }
     }
     return 1;
 }
@@ -545,7 +551,7 @@ _invalid_op_and_magic(int op, ns_subagent_magic *smagic)
             snmp_free_varbind(smagic->ovars);
         }
         free(smagic);
-        invalid = 1;
+        return 1;
     }
 
     if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || smagic == NULL)
@@ -567,8 +573,12 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     }
 
     pdu = snmp_clone_pdu(pdu);
-    if (!pdu)
+    if (!pdu) {
+        if (smagic->ovars != NULL)
+            snmp_free_varbind(smagic->ovars);
+        free(smagic);
         return 1;
+    }
     DEBUGMSGTL(("agentx/subagent",
                 "handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)"
                 " (req=0x%x,trans=0x%x,sess=0x%x)\n",
