@@ -331,6 +331,7 @@ netsnmp_save_all_data(netsnmp_data_list *head,
             cp = read_config_save_octet_string(cp, (u_char*)head->name,
                                                strlen(head->name));
             *cp++ = ' ';
+            *cp = '\0';
 
             /* call registered function to save the rest */
             if (!(data_list_save_ptr)(cp,
