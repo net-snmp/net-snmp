@@ -1369,6 +1369,11 @@ _sess_copy(netsnmp_session * in_session)
             return NULL;
         }
         session->sessUser = usm_cloneFrom_user(in_session->sessUser, user);
+        if (session->sessUser == NULL) {
+            usm_free_user(user);
+            snmp_sess_close(slp);
+            return NULL;
+        }
     }
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
