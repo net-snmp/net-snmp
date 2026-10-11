@@ -151,12 +151,13 @@ _set_address(struct _if_info *cur_if)
     /*
      * Find the address row relevant to this interface
      */
-    for (vp = addr_if_var, vp2 = addr_mask_var; vp;
+    for (vp = addr_if_var, vp2 = addr_mask_var; vp && vp2;
          vp = vp->next_variable, vp2 = vp2->next_variable) {
         if (vp->val.integer && *vp->val.integer == (int) cur_if->ifindex)
             break;
     }
-    if (vp2) {
+    if (vp && vp2 && vp2->name_length >= 14 &&
+        vp2->val.string && vp2->val_len >= 4) {
         /*
          * Always want a numeric interface IP address
          */
@@ -291,7 +292,8 @@ intpr(int interval)
         if ((var->type & 0xF0) == 0x80) /* Exception */
             break;
         ifcol_oid[ifcol_len - 1] = 2;   /* ifDescr */
-        if (snmp_oid_compare(ifcol_oid, ifcol_len,
+        if (var->name_length < ifcol_len + 1 ||
+            snmp_oid_compare(ifcol_oid, ifcol_len,
                              var->name, ifcol_len) != 0)
             break;              /* End of Table */
         cur_if = SNMP_MALLOC_TYPEDEF(struct _if_info);
@@ -301,9 +303,9 @@ intpr(int interval)
         for (vp = var; vp; vp = vp->next_variable) {
             if ((vp->type & 0xF0) == 0x80)      /* Exception */
                 continue;
-            if (!vp->val.integer)
+            if (!vp->val.integer || vp->name_length < ifcol_len + 1)
                 continue;
-            if (var->name[var->name_length - 1] != cur_if->ifindex) {
+            if (vp->name[vp->name_length - 1] != cur_if->ifindex) {
                 /*
                  * Inconsistent index information
                  * XXX - Try to recover ?
@@ -311,7 +313,7 @@ intpr(int interval)
                 SNMP_FREE(cur_if);
                 break;          /* not for now, no */
             }
-            switch (vp->name[var->name_length - 2]) {
+            switch (vp->name[vp->name_length - 2]) {
             case 2:            /* ifDescr */
                 if (vp->val_len >= sizeof(cur_if->name))
                     vp->val_len = sizeof(cur_if->name) - 1;
@@ -413,7 +415,7 @@ intpr(int interval)
          *   the varbind list).  But performing this test here
          *   means we can recognise ifXTable names as well)
          */
-        if (intrface && strcmp(cur_if->name, intrface) != 0
+        if (intrface && cur_if && strcmp(cur_if->name, intrface) != 0
             && strcmp(cur_if->descr, intrface) != 0) {
             SNMP_FREE(cur_if);
         }
@@ -575,7 +577,8 @@ sidewaysintpr(unsigned int interval)
         i = strlen(intrface);
         netsnmp_query_walk(var, ss);
         for (vp = var; vp; vp = vp->next_variable) {
-            if (strncmp(intrface, (char *) vp->val.string, i) == 0 &&
+            if (vp->val.string &&
+                strncmp(intrface, (char *) vp->val.string, i) == 0 &&
                 i == vp->val_len)
                 break;          /* found requested interface */
         }
@@ -593,7 +596,8 @@ sidewaysintpr(unsigned int interval)
             i = strlen(intrface);
             netsnmp_query_walk(var, ss);
             for (vp = var; vp; vp = vp->next_variable) {
-                if (strncmp(intrface, (char *) vp->val.string, i) == 0 &&
+                if (vp->val.string &&
+                    strncmp(intrface, (char *) vp->val.string, i) == 0 &&
                     i == vp->val_len)
                     break;      /* found requested interface */
             }
@@ -609,12 +613,13 @@ sidewaysintpr(unsigned int interval)
             i = strlen(intrface);
             netsnmp_query_walk(var, ss);
             for (vp = var; vp; vp = vp->next_variable) {
-                if (strncmp(intrface, (char *) vp->val.string, i) == 0 &&
+                if (vp->val.string &&
+                    strncmp(intrface, (char *) vp->val.string, i) == 0 &&
                     i == vp->val_len)
                     break;      /* found requested interface */
             }
         }
-        if (!vp) {
+        if (!vp || vp->name_length < ifcol_len) {
             fprintf(stderr, "%s: unknown interface\n", intrface);
             exit(1);
         }
@@ -692,11 +697,11 @@ sidewaysintpr(unsigned int interval)
         cur_if->ift_oe = 0;
         cur_if->ift_co = 0;
         cur_if->ift_dr = 0;
-        cur_if->ifIndex = var->name[ifcol_len - 1];
+        cur_if->ifIndex = var->name_length >= ifcol_len ? var->name[ifcol_len - 1] : 0;
         for (vp = var; vp; vp = vp->next_variable) {
-            if ((var->type & 0xF0) == 0x80)     /* Exception */
+            if ((vp->type & 0xF0) == 0x80)      /* Exception */
                 continue;
-            if (!vp->val.integer)
+            if (!vp->val.integer || vp->name_length < ifcol_len)
                 continue;
             switch (vp->name[ifcol_len - 2]) {
             case 10:           /* ifInOctets */
@@ -794,14 +799,15 @@ sidewaysintpr(unsigned int interval)
                 break;
             if ((var->type & 0xF0) == 0x80)     /* Exception */
                 break;
-            if (snmp_oid_compare(ifcol_oid, ifcol_len - 2,
+            if (var->name_length < ifcol_len - 2 ||
+                snmp_oid_compare(ifcol_oid, ifcol_len - 2,
                                  var->name, ifcol_len - 2) != 0)
                 break;          /* End of Table */
 
             for (vp = var; vp; vp = vp->next_variable) {
                 if ((vp->type & 0xF0) == 0x80)  /* Exception */
                     continue;
-                if (!vp->val.integer)
+                if (!vp->val.integer || vp->name_length < ifcol_len)
                     continue;
                 switch (vp->name[ifcol_len - 2]) {
                 case 10:       /* ifInOctets */
