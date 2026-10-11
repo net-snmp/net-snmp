@@ -991,7 +991,7 @@ static void _parse_server_cert(const char *tok, char *line)
         char buf[SNMP_MAXBUF];
         copy_nword(line, buf, sizeof(buf));
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
-                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
+                              NETSNMP_DS_LIB_X509_SERVER_PUB, buf);
     } else
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_X509_SERVER_PUB, line);
