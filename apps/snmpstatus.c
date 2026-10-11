@@ -258,6 +258,9 @@ main(int argc, char *argv[])
         goto out;
     }
 
+    if (!response)
+        goto out;
+
     exitval = 0;
 
     transport = snmp_sess_transport(snmp_sess_pointer(ss));
@@ -267,12 +270,13 @@ main(int argc, char *argv[])
                                                  response->
                                                  transport_data_length);
         if (addr_string != NULL) {
-            printf("[%s]=>[%s] Up: %s\n", addr_string, sysdescr,
+            printf("[%s]=>[%s] Up: %s\n", addr_string,
+                   sysdescr ? sysdescr : "",
                    uptime_string(uptime, buf));
             free(addr_string);
         }
     } else {
-        printf("[<UNKNOWN>]=>[%s] Up: %s\n", sysdescr,
+        printf("[<UNKNOWN>]=>[%s] Up: %s\n", sysdescr ? sysdescr : "",
                uptime_string(uptime, buf));
     }
 
