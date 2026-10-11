@@ -1102,7 +1102,7 @@ as_oct:
             vars->val.integer = netsnmp_memdup(&addr, sizeof(addr));
         } else {
             ret = FAILURE;
-            *(vars->val.integer) = 0;
+            vars->val.integer = netsnmp_calloc(1, sizeof(in_addr_t));
         }
         vars->val_len = sizeof(in_addr_t);
         break;

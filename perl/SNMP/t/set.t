@@ -43,7 +43,7 @@ BEGIN {
     eval "use Cwd qw(abs_path)";
 }
 use Test;
-BEGIN { plan tests => 7 }
+BEGIN { plan tests => 8 }
 use SNMP;
 require "t/startagent.pl";
 use vars qw($agent_host $agent_port $comm);
@@ -247,6 +247,10 @@ $s1->set('ifmyData.0', $junk_data);
 ok( $s1->{ErrorStr} =~ /^Unknown/ );
 
 ##############################################
+
+# Setting TYPE_IPADDR with undef value must not dereference NULL
+$s1->set(new SNMP::Varbind(['ipAdEntAddr', '127.0.0.1', undef, 'IPADDR']));
+ok(1);
 
 snmptest_cleanup();
 
