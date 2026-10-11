@@ -253,5 +253,19 @@
         usm_remove_user(user);
         usm_free_user(user);
     }
+    {
+        u_char short_key[12] = { 0 };
+        u_char msg[8] = "testmsg";
+        u_char mac[64];
+        size_t mac_len = sizeof(mac);
+
+        OK(sc_generate_keyed_hash(usmHMACSHA1AuthProtocol,
+                                  OID_LENGTH(usmHMACSHA1AuthProtocol),
+                                  short_key, sizeof(short_key),
+                                  msg, sizeof(msg),
+                                  mac, &mac_len) != SNMPERR_SUCCESS,
+           "sc_generate_keyed_hash rejects key shorter than full hash length");
+    }
+
     snmp_shutdown("T032usm");
 }

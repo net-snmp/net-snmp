@@ -809,8 +809,8 @@ sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
     }
 
     auth_type = sc_get_authtype(authtypeOID, authtypeOIDlen);
-    iproperlength = sc_get_auth_maclen(auth_type);
-    if (iproperlength == SNMPERR_GENERR)
+    iproperlength = sc_get_proper_auth_length_bytype(auth_type);
+    if (iproperlength <= 0)
         return SNMPERR_GENERR;
     properlength = (size_t)iproperlength;
     if (keylen < properlength) {
@@ -827,9 +827,9 @@ sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 
-    HMAC(hashfn, key, keylen, message, msglen, buf, &buf_len);
-    if (buf_len != properlength) {
-        QUITFUN(rval, sc_generate_keyed_hash_quit);
+    if (HMAC(hashfn, key, keylen, message, msglen, buf, &buf_len) == NULL ||
+        buf_len != properlength) {
+        QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
     if (*maclen > buf_len)
         *maclen = buf_len;
@@ -855,7 +855,7 @@ sc_generate_keyed_hash(const oid * authtypeOID, size_t authtypeOIDlen,
     }
 
     if (buf_len != properlength) {
-        QUITFUN(rval, sc_generate_keyed_hash_quit);
+        QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
     if (*maclen > buf_len)
         *maclen = buf_len;
