@@ -356,7 +356,7 @@ allocate_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
      */
     for (vp = pdu->variables; vp != NULL; vp = next) {
         next = vp->next_variable;
-        res = register_index(vp, flags, session);
+        res = register_index(vp, flags, sp);
         if (res == NULL) {
             /*
              *  If any allocations fail, we need to *fully* release
@@ -364,7 +364,7 @@ allocate_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
              *      from the index registry)
              */
             for (vp2 = pdu->variables; vp2 != vp; vp2 = vp2->next_variable) {
-                remove_index(vp2, session);
+                remove_index(vp2, sp);
             }
             return AGENTX_ERR_INDEX_NONE_AVAILABLE;     /* XXX */
         } else {
@@ -388,14 +388,14 @@ release_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
         return AGENTX_ERR_NOT_OPEN;
 
     for (vp = pdu->variables; vp != NULL; vp = vp->next_variable) {
-        res = unregister_index(vp, TRUE, session);
+        res = unregister_index(vp, TRUE, sp);
         /*
          *  If any releases fail,
          *      we need to reinstate all previous ones.
          */
         if (res != SNMP_ERR_NOERROR) {
             for (vp2 = pdu->variables; vp2 != vp; vp2 = vp2->next_variable) {
-                rv = register_index(vp2, ALLOCATE_THIS_INDEX, session);
+                rv = register_index(vp2, ALLOCATE_THIS_INDEX, sp);
                 free(rv);
             }
             return AGENTX_ERR_INDEX_NOT_ALLOCATED;      /* Probably */

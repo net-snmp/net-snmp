@@ -509,7 +509,9 @@ unregister_index_by_session(netsnmp_session * ss)
          idxptr = idxptr->next_oid)
         for (idxptr2 = idxptr; idxptr2 != NULL;
              idxptr2 = idxptr2->next_idx)
-            if (idxptr2->session == ss) {
+            if (idxptr2->session == ss ||
+                (ss && !(ss->flags & SNMP_FLAGS_SUBSESSION) &&
+                 idxptr2->session && idxptr2->session->subsession == ss)) {
                 idxptr2->allocated = 0;
                 idxptr2->session = NULL;
             }
