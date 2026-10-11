@@ -370,5 +370,56 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
         free (rbuild_result);
     }
 
+    {
+        u_char buf[128], *p = buf;
+        size_t rem = sizeof(buf), total_len;
+        u_char type = 0;
+        struct counter64 u64_in = { 0x12345678U, 0x9abcdef0U }, u64_out = { 0, 0 };
+        struct counter64 i64_in = { 0xffffffffU, 0xffffff80U }, i64_out = { 0, 0 };
+        float f_in = 1.5f, f_out = 0.0f;
+        double d_in = -2.25, d_out = 0.0;
+        u_char padded_i64[] = {
+            ASN_OPAQUE, 5, ASN_OPAQUE_TAG1, ASN_OPAQUE_I64, 1, 0xff, 0x00
+        };
+        size_t padded_len = sizeof(padded_i64);
+
+        p = asn_build_unsigned_int64(p, &rem, ASN_OPAQUE_U64, &u64_in,
+                                     sizeof(u64_in));
+        OK(p != NULL, "asn_build_unsigned_int64 sequential");
+        p = asn_build_signed_int64(p, &rem, ASN_OPAQUE_I64, &i64_in,
+                                   sizeof(i64_in));
+        OK(p != NULL, "asn_build_signed_int64 sequential");
+        p = asn_build_float(p, &rem, ASN_OPAQUE_FLOAT, &f_in, sizeof(f_in));
+        OK(p != NULL, "asn_build_float sequential");
+        p = asn_build_double(p, &rem, ASN_OPAQUE_DOUBLE, &d_in, sizeof(d_in));
+        OK(p != NULL, "asn_build_double sequential");
+
+        total_len = sizeof(buf) - rem;
+        p = buf;
+        p = asn_parse_unsigned_int64(p, &total_len, &type, &u64_out,
+                                     sizeof(u64_out));
+        OK(p != NULL && type == ASN_OPAQUE_U64 &&
+           u64_out.high == u64_in.high && u64_out.low == u64_in.low,
+           "asn_parse_unsigned_int64 sequential");
+        p = asn_parse_signed_int64(p, &total_len, &type, &i64_out,
+                                   sizeof(i64_out));
+        OK(p != NULL && type == ASN_OPAQUE_I64 &&
+           i64_out.high == i64_in.high && i64_out.low == i64_in.low,
+           "asn_parse_signed_int64 sequential negative sign extension");
+        p = asn_parse_float(p, &total_len, &type, &f_out, sizeof(f_out));
+        OK(p != NULL && type == ASN_OPAQUE_FLOAT && f_out == f_in,
+           "asn_parse_float sequential");
+        p = asn_parse_double(p, &total_len, &type, &d_out, sizeof(d_out));
+        OK(p != NULL && type == ASN_OPAQUE_DOUBLE && d_out == d_in &&
+           total_len == 0,
+           "asn_parse_double sequential and datalength == 0");
+
+        p = asn_parse_signed_int64(padded_i64, &padded_len, &type, &i64_out,
+                                   sizeof(i64_out));
+        OK(p == padded_i64 + sizeof(padded_i64) && padded_len == 0 &&
+           i64_out.high == 0xffffffffU && i64_out.low == 0xffffffffU,
+           "asn_parse_signed_int64 consumes outer opaque trailing bytes");
+    }
+
 #endif
 }

@@ -2299,7 +2299,7 @@ asn_parse_signed_int64(u_char * data,
     *datalength -= endp - data;
     if ((asn_length > 0) && (*bufp & 0x80)) {
         low = 0xFFFFFFFFU;   /* first byte bit 1 means start the data with 1s */
-        high = 0xFFFFFF;
+        high = 0xFFFFFFFFU;
     }
 
     for ( ; asn_length; asn_length--) {
