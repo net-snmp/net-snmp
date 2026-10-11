@@ -74,7 +74,7 @@ void *af_get_null_terminated(const uint8_t **data, size_t *size) {
 }
 
 void *af_gb_get_random_data(const uint8_t **data, size_t *size, size_t to_get) {
-  if (*size < to_get || (int)*size < 0) {
+  if (pointer_idx >= GB_SIZE || *size < to_get || (int)*size < 0) {
     return NULL;
   }
 
@@ -90,6 +90,9 @@ void *af_gb_get_random_data(const uint8_t **data, size_t *size, size_t to_get) {
 }
 
 void *af_gb_get_null_terminated(const uint8_t **data, size_t *size) {
+  if (pointer_idx >= GB_SIZE) {
+    return NULL;
+  }
 
   void *nstr = af_get_null_terminated(data, size);
   if (nstr == NULL) {
@@ -100,6 +103,9 @@ void *af_gb_get_null_terminated(const uint8_t **data, size_t *size) {
 }
 
 void *af_gb_alloc_data(size_t len) {
+  if (pointer_idx >= GB_SIZE) {
+    return NULL;
+  }
   void *ptr = calloc(1, len);
   pointer_arr[pointer_idx++] = ptr;
   
