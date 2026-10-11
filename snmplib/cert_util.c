@@ -2989,7 +2989,7 @@ netsnmp_certToTSN_parse_common(char **line)
     DEBUGMSGT(("cert:util:config", "parsing %s\n", *line));
 
     /* read the priority */
-    len = sizeof(buf);
+    len = sizeof(buf) - 1;
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
@@ -3006,7 +3006,7 @@ netsnmp_certToTSN_parse_common(char **line)
     map->priority = atoi(buf);
 
     /* read the flag or the fingerprint */
-    len = sizeof(buf);
+    len = sizeof(buf) - 1;
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
@@ -3018,7 +3018,7 @@ netsnmp_certToTSN_parse_common(char **line)
         }
 
         /** set up for fingerprint */
-        len = sizeof(buf);
+        len = sizeof(buf) - 1;
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
         tmp[len] = 0;
@@ -3043,7 +3043,7 @@ netsnmp_certToTSN_parse_common(char **line)
     }
 
     /* read the mapping type */
-    len = sizeof(buf);
+    len = sizeof(buf) - 1;
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
@@ -3056,7 +3056,7 @@ netsnmp_certToTSN_parse_common(char **line)
             netsnmp_config_error("must specify secName for --sn");
             goto end;
         }
-        len = sizeof(buf);
+        len = sizeof(buf) - 1;
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
         tmp[len] = 0;
@@ -3310,7 +3310,7 @@ netsnmp_tlstmParams_restore_common(char **line)
         return NULL;
 
     /** name */
-    len = sizeof(buf);
+    len = sizeof(buf) - 1;
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
@@ -3326,7 +3326,7 @@ netsnmp_tlstmParams_restore_common(char **line)
     }
 
     /** fingerprint hash type*/
-    len = sizeof(buf);
+    len = sizeof(buf) - 1;
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
@@ -3334,7 +3334,7 @@ netsnmp_tlstmParams_restore_common(char **line)
         stp->hashType = netsnmp_cert_parse_hash_type(&buf[2]);
 
         /** set up for fingerprint */
-        len = sizeof(buf);
+        len = sizeof(buf) - 1;
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
         tmp[len] = 0;
