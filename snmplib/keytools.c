@@ -424,7 +424,9 @@ generate_kul(const oid * hashtype, u_int hashtype_len,
 
     properlength = (size_t) iproperlength;
 
-    if ((*kul_len < properlength) || (ku_len < properlength)) {
+    if ((*kul_len < properlength) || (ku_len < properlength) ||
+        (engineID_len > sizeof(buf)) ||
+        (2 * properlength > sizeof(buf) - engineID_len)) {
         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
     }
 
