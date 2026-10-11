@@ -135,7 +135,7 @@ routexpr(int af)
      * Now walk the inetCidrRouteTable, reporting the various route entries
      */
     while (1) {
-        oid            *op;
+        oid            *op, *ep;
         unsigned char  *cp;
         int             i;
 
@@ -150,6 +150,9 @@ routexpr(int af)
             var->type == SNMP_ENDOFMIBVIEW)
             break;
         memset(&route, 0, sizeof(struct route_entry));
+        ep = var->name + var->name_length;
+        if (var->name_length <= rtcol_len + 2)
+            break;
         /*
          * Extract inetCidrRouteDest, inetCidrRoutePfxLen,
          * * inetCidrRouteNextHop from index
@@ -163,14 +166,22 @@ routexpr(int af)
                 route.af = AF_INET;
                 sin->sin_family = AF_INET;
                 op = var->name + rtcol_len + 1;
+                if (*op > sizeof(sin->sin_addr) || op + 1 + *op + 2 >= ep)
+                    continue;
                 len = *op++;
                 cp = (unsigned char *) &sin->sin_addr;
                 for (i = 0; i < len; i++)
                     *cp++ = *op++;
                 route.mask = *op++;
+                if (*op > (size_t)(ep - op - 1))
+                    continue;
                 op += *op + 1;
+                if (op + 2 > ep)
+                    continue;
                 op++;           /* addrType */
-                op++;           /* addrLen */
+                len = *op++;    /* addrLen */
+                if (len < 0 || len > (int)sizeof(sin->sin_addr) || op + len > ep)
+                    continue;
                 sin = (struct sockaddr_in *) &route.hop;
                 sin->sin_family = AF_INET;
                 cp = (unsigned char *) &sin->sin_addr;
@@ -186,14 +197,22 @@ routexpr(int af)
                 route.af = AF_INET6;
                 sin6->sin6_family = AF_INET6;
                 op = var->name + rtcol_len + 1;
+                if (*op > sizeof(sin6->sin6_addr) || op + 1 + *op + 2 >= ep)
+                    continue;
                 len = *op++;
                 cp = (unsigned char *) &sin6->sin6_addr;
                 for (i = 0; i < len; i++)
                     *cp++ = *op++;
                 route.mask = *op++;
+                if (*op > (size_t)(ep - op - 1))
+                    continue;
                 op += *op + 1;
+                if (op + 2 > ep)
+                    continue;
                 op++;           /* addrType */
-                op++;           /* addrLen */
+                len = *op++;    /* addrLen */
+                if (len < 0 || len > (int)sizeof(sin6->sin6_addr) || op + len > ep)
+                    continue;
                 sin6 = (struct sockaddr_in6 *) &route.hop;
                 sin6->sin6_family = AF_INET6;
                 cp = (unsigned char *) &sin6->sin6_addr;
@@ -211,6 +230,8 @@ routexpr(int af)
          */
 
         for (vp = var; vp; vp = vp->next_variable) {
+            if (vp->name_length < rtcol_len || !vp->val.integer)
+                continue;
             switch (vp->name[rtcol_len - 1]) {
             case 7:            /* inetCidrRouteIfIndex */
                 rp->ifNumber = *vp->val.integer;
@@ -303,6 +324,8 @@ route6pr(int af)
             var->type == SNMP_NOSUCHINSTANCE ||
             var->type == SNMP_ENDOFMIBVIEW)
             break;
+        if (var->name_length < rtcol_len + 17)
+            break;
         memset(&route, 0, sizeof(struct route_entry));
         rp->af = AF_INET6;
         sin6->sin6_family = AF_INET6;
@@ -313,6 +336,8 @@ route6pr(int af)
         route.mask = *op++;
 
         for (vp = var; vp; vp = vp->next_variable) {
+            if (vp->name_length < rtcol_len || !vp->val.integer)
+                continue;
             switch (vp->name[rtcol_len - 1]) {
             case 4:            /* ipv6RouteIfIndex  */
                 rp->ifNumber = *vp->val.integer;
@@ -327,6 +352,8 @@ route6pr(int af)
                 rp->set_bits |= SET_IFNO;
                 break;
             case 5:            /* ipv6RouteNextHop  */
+                if (!vp->val.string || vp->val_len < 16)
+                    break;
                 cp1 = (unsigned char *) vp->val.string;
                 sin6 = (struct sockaddr_in6 *) &rp->hop;
                 sin6->sin6_family = AF_INET6;

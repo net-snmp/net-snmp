@@ -238,28 +238,43 @@ tcpxprotopr(const char *name)
 
     for (vp = var; vp; vp = vp->next_variable) {
         char            lname[5];
+        if (!vp->val.integer)
+            continue;
         state = *vp->val.integer;
         inx = tcpConnectionState_len;
         pvar = NULL;
+        memset(&localAddr, 0, sizeof(localAddr));
+        memset(&remoteAddr, 0, sizeof(remoteAddr));
+
+        /*
+         * Extract the local/remote information from the index values
+         */
+        if (inx + 2 >= vp->name_length ||
+            vp->name[inx + 1] > sizeof(localAddr.sin6_addr.s6_addr) ||
+            inx + 2 + vp->name[inx + 1] + 2 >= vp->name_length) {
+            continue;
+        }
 
         vp->name[inx - 1] = 8;
         snmp_varlist_add_variable(&pvar, vp->name, vp->name_length,
                                   ASN_NULL, NULL, 0);
         if (netsnmp_query_get(pvar, ss) != SNMP_ERR_NOERROR) {
             snmp_free_var(pvar);
+            snmp_free_varbind(var);
             return;
         }
-        if ((pvar->type & 0xF0) != 0x80)        /* Exception */
+        if ((pvar->type & 0xF0) != 0x80 && pvar->val.integer)   /* Exception */
             pid = *pvar->val.integer;
-
-        /*
-         * Extract the local/remote information from the index values
-         */
         localType = vp->name[inx++];
         for (i = 0; i < vp->name[inx]; i++)
             localAddr.sin6_addr.s6_addr[i] = vp->name[inx + i + 1];
         inx += vp->name[inx] + 1;
         localPort = vp->name[inx++];
+        if (vp->name[inx + 1] > sizeof(remoteAddr.sin6_addr.s6_addr) ||
+            inx + 2 + vp->name[inx + 1] >= vp->name_length) {
+            snmp_free_varbind(pvar);
+            continue;
+        }
         remoteType = vp->name[inx++];
         for (i = 0; i < vp->name[inx]; i++)
             remoteAddr.sin6_addr.s6_addr[i] = vp->name[inx + i + 1];
@@ -333,7 +348,14 @@ listenxprotopr(const char *name)
     printf("%-5.5s %-27.27s %5s\n", "Proto", "Local Address", "PID");
     for (vp = var; vp; vp = vp->next_variable) {
         char            lname[5];
+        if (!vp->val.integer)
+            continue;
+        memset(&localAddr, 0, sizeof(localAddr));
         inx = tcpListenerProcess_len;
+        if (inx + 2 >= vp->name_length ||
+            vp->name[inx + 1] > sizeof(localAddr.sin6_addr.s6_addr) ||
+            inx + 2 + vp->name[inx + 1] >= vp->name_length)
+            continue;
         /*
          * Extract the local port from the index values, but take
          *   the IP address from the varbind value, (which is why
@@ -404,7 +426,15 @@ udpxprotopr(const char *name)
            "Remote Address", "PID");
     for (vp = var; vp; vp = vp->next_variable) {
         char            lname[5];
+        if (!vp->val.integer)
+            continue;
+        memset(&localAddr, 0, sizeof(localAddr));
+        memset(&remoteAddr, 0, sizeof(remoteAddr));
         inx = udpEndpointProcess_len;
+        if (inx + 2 >= vp->name_length ||
+            vp->name[inx + 1] > sizeof(localAddr.sin6_addr.s6_addr) ||
+            inx + 2 + vp->name[inx + 1] + 2 >= vp->name_length)
+            continue;
         /*
          * Extract the local port from the index values, but take
          *   the IP address from the varbind value, (which is why
@@ -419,6 +449,9 @@ udpxprotopr(const char *name)
             localAddr.sin6_addr.s6_addr[i] = vp->name[inx + i + 1];
         inx += vp->name[inx] + 1;
         localPort = vp->name[inx++];
+        if (vp->name[inx + 1] > sizeof(remoteAddr.sin6_addr.s6_addr) ||
+            inx + 2 + vp->name[inx + 1] >= vp->name_length)
+            continue;
         remoteType = vp->name[inx++];
         for (i = 0; i < vp->name[inx]; i++)
             remoteAddr.sin6_addr.s6_addr[i] = vp->name[inx + i + 1];
@@ -613,5 +646,5 @@ inetxprint(int proto, struct sockaddr_in6 in6, int port, const char *name,
     else if (proto == 0)
         unknownprint();
     else
-        abort();
+        unknownprint();
 }
