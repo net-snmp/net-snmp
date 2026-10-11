@@ -635,10 +635,14 @@ snmp_config_when(char *line, int when)
         for (; ctmp != NULL && lptr == NULL; ctmp = ctmp->next)
             lptr = read_config_find_handler(ctmp->start, cptr);
     }
-    if (lptr == NULL && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-					  NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
-	netsnmp_config_warn("Unknown token: %s.", cptr);
-        return SNMPERR_GENERR;
+    if (lptr == NULL) {
+        if (when != PREMIB_CONFIG &&
+            !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
+            netsnmp_config_warn("Unknown token: %s.", cptr);
+            return SNMPERR_GENERR;
+        }
+        return SNMPERR_SUCCESS;
     }
 
     /*
