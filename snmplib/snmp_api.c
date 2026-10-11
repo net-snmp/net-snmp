@@ -6450,9 +6450,10 @@ _sess_read_accept(struct session_list *slp)
         /** Tell the new session about its existence if possible. */
         DEBUGMSGTL(("sess_read",
                     "perform callback with op=CONNECT\n"));
-        (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
-                                      nslp->session, 0, NULL,
-                                      sp->callback_magic);
+        if (nslp->session->callback)
+            (void)nslp->session->callback(NETSNMP_CALLBACK_OP_CONNECT,
+                                          nslp->session, 0, NULL,
+                                          sp->callback_magic);
     }
 
     return 0;
