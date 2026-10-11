@@ -125,4 +125,23 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
 
     OK(snmp_parse_oid(".1.3.6.1.\"unclosed", out_oid, &out_len) == NULL,
        "snmp_parse_oid rejects unclosed quote");
+#ifndef NETSNMP_DISABLE_MIB_LOADING
+    {
+        unsigned char *new_val = (unsigned char *)1;
+        int new_val_len = -1;
+
+        OK(parse_octet_hint("1z", "abc", &new_val, &new_val_len) != NULL &&
+           new_val == NULL && new_val_len == 0,
+           "parse_octet_hint rejects invalid format 1z");
+        OK(parse_octet_hint("0a", "abc", &new_val, &new_val_len) != NULL &&
+           new_val == NULL && new_val_len == 0,
+           "parse_octet_hint rejects zero-length 0a");
+        OK(parse_octet_hint("10x", "1234", &new_val, &new_val_len) != NULL &&
+           new_val == NULL && new_val_len == 0,
+           "parse_octet_hint rejects oversized integer length 10x");
+        OK(parse_octet_hint("1x:1x", "aa-bb", &new_val, &new_val_len) != NULL &&
+           new_val == NULL && new_val_len == 0,
+           "parse_octet_hint frees result on mismatched separator");
+    }
+#endif
 }

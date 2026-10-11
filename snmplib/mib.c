@@ -6183,12 +6183,13 @@ static void parse_hints_ctor(struct parse_hints *ph)
 static int parse_hints_add_result_octet(struct parse_hints *ph, unsigned char octet)
 {
     if (!(ph->result_len < ph->result_max)) {
+	unsigned char *new_res;
 	ph->result_max = ph->result_len + 32;
-	if (!ph->result) {
-	    ph->result = (unsigned char *)malloc(ph->result_max);
-	} else {
-	    ph->result = (unsigned char *)realloc(ph->result, ph->result_max);
+	new_res = (unsigned char *)realloc(ph->result, ph->result_max);
+	if (!new_res) {
+	    return 0;		/* failed */
 	}
+	ph->result = new_res;
     }
     
     if (!ph->result) {
@@ -6300,6 +6301,8 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 	HINT_1_2_5
     } state = HINT_1_2;
 
+    *new_val = NULL;
+    *new_val_len = 0;
     parse_hints_ctor(&ph);
     while (*h && *v && retval) {
 	switch (state) {
@@ -6311,6 +6314,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 		parse_hints_length_add_digit(&ph, *h);
 		state = HINT_2_3;
 	    } else {
+		SNMP_FREE(ph.result);
 		return v;	/* failed */
 	    }
 	    break;
@@ -6323,6 +6327,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 		ph.format = *h;
 		state = HINT_1_2_4;
 	    } else {
+		SNMP_FREE(ph.result);
 		return v;	/* failed */
 	    }
 	    break;
