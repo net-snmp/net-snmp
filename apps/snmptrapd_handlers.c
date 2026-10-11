@@ -106,7 +106,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
         format = strdup( buf );
         cptr = copy_nword(cptr, buf, sizeof(buf));
     }
-    if ( !cptr ) {
+    if (!cptr || !*cptr) {
         netsnmp_config_error("Missing traphandle command (%s)", buf);
         free(format);
         return;
@@ -118,16 +118,19 @@ snmptrapd_parse_traphandle(const char *token, char *line)
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
                                                command_handler );
     } else {
-        cp = buf+strlen(buf)-1;
-        if ( *cp == '*' ) {
-            flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
-            *(cp--) = '\0';
-            if ( *cp == '.' ) {
-                /* 
-                 * Distinguish between 'oid.*' & 'oid*'
-                 */
-                flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
+        size_t len = strlen(buf);
+        if (len > 0) {
+            cp = buf + len - 1;
+            if (*cp == '*') {
+                flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
                 *(cp--) = '\0';
+                if (cp >= buf && *cp == '.') {
+                    /* 
+                     * Distinguish between 'oid.*' & 'oid*'
+                     */
+                    flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
+                    *(cp--) = '\0';
+                }
             }
         }
         if (!read_objid(buf, obuf, &olen)) {
@@ -175,6 +178,11 @@ parse_forward(const char *token, char *line)
         format = strdup( buf );
         cptr = copy_nword(cptr, buf, sizeof(buf));
     }
+    if (!cptr || !*cptr) {
+        netsnmp_config_error("Missing forward destination (%s)", buf);
+        free(format);
+        return;
+    }
     DEBUGMSGTL(("read_config:forward", "registering forward for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:forward", "default"));
@@ -185,16 +193,19 @@ parse_forward(const char *token, char *line)
             traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
                                             forward_handler );
     } else {
-        cp = buf+strlen(buf)-1;
-        if ( *cp == '*' ) {
-            flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
-            *(cp--) = '\0';
-            if ( *cp == '.' ) {
-                /* 
-                 * Distinguish between 'oid.*' & 'oid*'
-                 */
-                flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
+        size_t len = strlen(buf);
+        if (len > 0) {
+            cp = buf + len - 1;
+            if (*cp == '*') {
+                flags |= NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE;
                 *(cp--) = '\0';
+                if (cp >= buf && *cp == '.') {
+                    /* 
+                     * Distinguish between 'oid.*' & 'oid*'
+                     */
+                    flags |= NETSNMP_TRAPHANDLER_FLAG_STRICT_SUBTREE;
+                    *(cp--) = '\0';
+                }
             }
         }
 
@@ -297,6 +308,7 @@ parse_format(const char *token, char *line)
 static void
 parse_trap1_fmt(const char *token, char *line)
 {
+    free_trap1_fmt();
     print_format1 = strdup(line);
 }
 
@@ -313,6 +325,7 @@ free_trap1_fmt(void)
 static void
 parse_trap2_fmt(const char *token, char *line)
 {
+    free_trap2_fmt();
     print_format2 = strdup(line);
 }
 
@@ -536,6 +549,7 @@ free_non_builtin_handlers(netsnmp_trapd_handler **list_head)
             /* Free */
             if (traph->free_handler_data)
                 traph->free_handler_data(traph->handler_data);
+            SNMP_FREE(traph->format);
             SNMP_FREE(traph->token);
             SNMP_FREE(traph);
         } else {
@@ -570,6 +584,7 @@ snmptrapd_free_traphandle(void)
 	    nexth = traph->nexth;
             if (traph->free_handler_data)
                 traph->free_handler_data(traph->handler_data);
+            SNMP_FREE(traph->format);
 	    SNMP_FREE(traph->token);
 	    SNMP_FREE(traph->trapoid);
 	    SNMP_FREE(traph);
@@ -873,6 +888,10 @@ int   command_handler( netsnmp_pdu           *pdu,
 	 */
         if ((rbuf = calloc(r_len, 1)) == NULL) {
             snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_QUICK_PRINT, oldquick);
+            if (pdu->command == SNMP_MSG_TRAP)
+                snmp_free_pdu(v2_pdu);
             return NETSNMPTRAPD_HANDLER_FAIL;	/* Failed but keep going */
         }
 
@@ -1004,7 +1023,7 @@ static int add_forwarder_info(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
                     last_snmpTrapAddress_index = my_snmpTrapAddress_index;
 
                 /* Detect forwarding loop. */
-                if (var->val_len < 4) {
+                if (!var->val.string || var->val_len < 4) {
                     snmp_log(LOG_ERR, "Length of IP address of OID .1.3.6.1.6.3.18.1.3.%d in PDU is less than %d bytes = %d\n",
                              my_snmpTrapAddress_index, 4,
                              (int)var->val_len);
@@ -1075,6 +1094,10 @@ int   forward_handler( netsnmp_pdu           *pdu,
        INFORMS which may require engineID probing */
 
     pdu2 = snmp_clone_pdu(pdu);
+    if (!pdu2) {
+        snmp_close(ss);
+        return NETSNMPTRAPD_HANDLER_FAIL;
+    }
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_ADD_FORWARDER_INFO) &&
