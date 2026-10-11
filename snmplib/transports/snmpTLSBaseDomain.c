@@ -1392,6 +1392,7 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
                      location, rc, sslnum, reason, errno, strerror(errno));
             snmp_log(LOG_ERR, "TLS Error: %s\n",
                      ERR_reason_error_string(ERR_get_error()));
+            ERR_clear_error();
             return;
 
         case SSL_ERROR_ZERO_RETURN:
