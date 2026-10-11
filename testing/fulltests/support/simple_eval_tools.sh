@@ -381,12 +381,14 @@ CHECKAGENTCOUNT() {
 ISRUNNING() {
     [ -n "$1" ] && [ "$1" -eq "$1" ] 2>/dev/null || return 1
     if [ "x$OSTYPE" = "xmsys" ]; then
-	pslist.exe "$1" 2>&1 | while read name pspid rest; do
-	    if [ "$1" = "$pspid" ]; then
-		return 0
-	    fi
-	done
-	return 1
+	pslist.exe "$1" 2>&1 | (
+	    while read name pspid rest; do
+		if [ "$1" = "$pspid" ]; then
+		    exit 0
+		fi
+	    done
+	    exit 1
+	)
     else
         kill -0 "$1" 2>/dev/null
     fi
