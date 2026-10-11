@@ -22,6 +22,15 @@
 #include <net-snmp/agent/instance.h>
 
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
+#if defined(_MSC_VER) && !defined(ftruncate)
+#define ftruncate(fd, len) _chsize((fd), (len))
+#endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -683,11 +692,15 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         if (requests->requestvb->type != nfi->type)
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_WRONGTYPE);
+        else if (!requests->requestvb->val.integer ||
+                 requests->requestvb->val_len != sizeof(long))
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_WRONGLENGTH);
         break;
 
     case MODE_SET_RESERVE2:
         netsnmp_assert(NULL == nfi->filep);
-        nfi->filep = fopen(nfi->file_name, "w+");
+        nfi->filep = fopen(nfi->file_name, "r+");
         if (NULL == nfi->filep) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_NOTWRITABLE);
@@ -725,7 +738,8 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         rewind(nfi->filep); /* rewind to make sure we are at the beginning */
         rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
                      it);
-        if (rc < 0) {
+        if (rc < 0 || fflush(nfi->filep) != 0 ||
+            ftruncate(fileno(nfi->filep), ftell(nfi->filep)) < 0) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_GENERR);
             return SNMP_ERR_NOERROR;
@@ -733,14 +747,18 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_SET_UNDO:
-        it =
-            *((u_int *) netsnmp_request_get_list_data(requests,
-                                                      INSTANCE_HANDLER_NAME));
-        rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
-                     it);
-        if (rc < 0)
-            netsnmp_set_request_error(reqinfo, requests,
-                                      SNMP_ERR_UNDOFAILED);
+        it_save = (u_long *) netsnmp_request_get_list_data(requests,
+                                                           INSTANCE_HANDLER_NAME);
+        if (it_save != NULL && nfi->filep != NULL) {
+            it = *it_save;
+            rewind(nfi->filep);
+            rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
+                         it);
+            if (rc < 0 || fflush(nfi->filep) != 0 ||
+                ftruncate(fileno(nfi->filep), ftell(nfi->filep)) < 0)
+                netsnmp_set_request_error(reqinfo, requests,
+                                          SNMP_ERR_UNDOFAILED);
+        }
         NETSNMP_FALLTHROUGH;
     case MODE_SET_COMMIT:
     case MODE_SET_FREE:
