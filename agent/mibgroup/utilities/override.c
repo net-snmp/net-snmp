@@ -86,6 +86,8 @@ override_handler(netsnmp_mib_handler *handler,
         SNMP_FREE(data->value);
         data->value = data->set_space;
         data->value_len = data->set_len;
+        data->set_space = NULL;
+        data->set_len = 0;
         break;
 
     case MODE_SET_COMMIT:
