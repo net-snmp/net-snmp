@@ -511,7 +511,7 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
         default:
             snmp_log(LOG_ERR,"unsupported value type %d\n",
                      (int)(intptr_t)lpi->user_context);
-            break;
+            return PMLP_RC_STOP_PROCESSING;
     }
     
     /*
