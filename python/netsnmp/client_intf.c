@@ -1897,7 +1897,11 @@ netsnmp_walk(PyObject *self, PyObject *args)
               snmp_add_null_var(newpdu, vars->name,
                                 vars->name_length);
           }
-          pdu = newpdu;
+          if (notdone) {
+              pdu = newpdu;
+          } else {
+              snmp_free_pdu(newpdu);
+          }
       }
       if (response)
 	snmp_free_pdu(response);
