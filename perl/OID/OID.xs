@@ -318,6 +318,11 @@ nsop_get_indexes(oid1)
                 i++;
             }
 
+            if (oid1->len < (size_t)nodecount) {
+                netsnmp_free(buf);
+                RETVAL = NULL;
+                return;
+            }
             myret = (AV *) sv_2mortal((SV *) newAV());
 
             oidp = oid1->name + nodecount;
