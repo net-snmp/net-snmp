@@ -748,12 +748,12 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
     if (NULL == t || NULL == t->data)
         return -1;
 
-    if (t->flags & NETSNMP_TLSBASE_IS_CLIENT)
+    tlsdata = t->data;
+
+    if (tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT)
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONCLIENTCLOSES);
     else
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONSERVERCLOSES);
-
-    tlsdata = t->data;
 
     _tlstcp_sync_socks(t);
 
