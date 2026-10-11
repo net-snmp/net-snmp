@@ -226,4 +226,24 @@
     OK(vacm_getAccessEntry("grpuser_name_1", "ctx", SNMP_SEC_MODEL_USM,
                            SNMP_SEC_LEVEL_AUTHNOPRIV) == NULL,
        "sanitized access entry removed by netsnmp_vacm_simple_usm_del");
+    {
+        struct vacm_viewEntry *vp;
+        oid probe_oid[] = { 1, 3, 6, 1 };
+
+        vp = vacm_createViewEntry("v0", probe_oid, OID_LENGTH(probe_oid));
+        OK(vp != NULL, "vacm_createViewEntry succeeded");
+        if (vp) {
+            vp->viewSubtreeLen = 0;
+            vp->viewType = SNMP_VIEW_INCLUDED;
+            vp->viewStatus = SNMP_ROW_ACTIVE;
+
+            OK(vacm_getViewEntry("v0", probe_oid, OID_LENGTH(probe_oid),
+                                 VACM_MODE_FIND) == NULL,
+               "netsnmp_view_get ignores entry with viewSubtreeLen == 0");
+            OK(vacm_checkSubtree("v0", probe_oid,
+                                 OID_LENGTH(probe_oid)) == VACM_NOTINVIEW,
+               "netsnmp_view_subtree_check ignores entry with viewSubtreeLen == 0");
+            vacm_destroyAllViewEntries();
+        }
+    }
 }

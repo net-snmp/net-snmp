@@ -482,7 +482,8 @@ netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
     view[0] = glen;
     strlcpy(view + 1, viewName, sizeof(view) - 1);
     for (vp = head; vp; vp = vp->next) {
-        if (!memcmp(view, vp->viewName, glen + 1)
+        if (vp->viewSubtreeLen > 0
+            && !memcmp(view, vp->viewName, glen + 1)
             && viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
             int             mask = 0x80;
             unsigned int    oidpos, maskpos = 0;
@@ -598,7 +599,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
     strlcpy(view + 1, viewName, sizeof(view) - 1);
     DEBUGMSGTL(("9:vacm:checkSubtree", "view %s\n", viewName));
     for (vp = head; vp; vp = vp->next) {
-        if (!memcmp(view, vp->viewName, glen + 1)) {
+        if (vp->viewSubtreeLen > 0 && !memcmp(view, vp->viewName, glen + 1)) {
             /*
              * If the subtree defined in the view is shorter than or equal
              * to the subtree we are comparing, then it might envelop the
