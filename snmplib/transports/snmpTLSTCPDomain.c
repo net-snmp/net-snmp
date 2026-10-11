@@ -864,6 +864,8 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
 
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
 
+    if (tlsdata->ssl)
+        SSL_free(tlsdata->ssl);
     tlsdata->ssl = ssl;
 
     return newsock;
