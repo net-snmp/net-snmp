@@ -83,7 +83,7 @@ fuzz_fake_pcap(const u_char * buf, size_t len)
 int
 LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
-    netsnmp_session *ss;
+    netsnmp_session *ss, *active_ss;
     netsnmp_transport *transport;
 
     u_char         *fuzz_buf = malloc(size + 1);
@@ -114,11 +114,14 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     /*
      * Use snmp_add() to specify transport explicitly
      */
-    snmp_add(ss, transport, NULL, NULL);
+    active_ss = snmp_add(ss, transport, NULL, NULL);
 
     fuzz_fake_pcap(fuzz_buf, size);
 
-    snmp_close(ss);
+    if (active_ss)
+        snmp_close(active_ss);
+    else
+        netsnmp_transport_free(transport);
     /* To do: register session 'ss' properly and remove the call below. */
     netsnmp_cleanup_session(ss);
     free(ss);
