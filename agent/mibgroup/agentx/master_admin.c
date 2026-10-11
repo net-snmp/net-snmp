@@ -368,8 +368,9 @@ allocate_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
             }
             return AGENTX_ERR_INDEX_NONE_AVAILABLE;     /* XXX */
         } else {
+            snmp_free_var_internals(vp);
             (void) snmp_clone_var(res, vp);
-            free(res);
+            snmp_free_var(res);
         }
         vp->next_variable = next;
     }
@@ -396,7 +397,7 @@ release_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
         if (res != SNMP_ERR_NOERROR) {
             for (vp2 = pdu->variables; vp2 != vp; vp2 = vp2->next_variable) {
                 rv = register_index(vp2, ALLOCATE_THIS_INDEX, sp);
-                free(rv);
+                snmp_free_var(rv);
             }
             return AGENTX_ERR_INDEX_NOT_ALLOCATED;      /* Probably */
         }
