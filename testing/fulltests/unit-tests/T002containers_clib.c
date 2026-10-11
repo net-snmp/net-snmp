@@ -48,4 +48,15 @@ OK(snmp_call_callbacks(-1, 0, NULL) == SNMPERR_GENERR &&
    netsnmp_callback_clear_client_arg(NULL, -1, 0) == SNMPERR_GENERR,
    "callback functions reject negative major and minor indices");
 
+#ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
+{
+    size_t rand_sz = 16;
+    u_char *rand_buf = malloc_random(&rand_sz);
+
+    OK(rand_buf != NULL && rand_sz == 16,
+       "malloc_random preserves requested byte count on success");
+    free(rand_buf);
+}
+#endif
+
 snmp_shutdown("container-test");

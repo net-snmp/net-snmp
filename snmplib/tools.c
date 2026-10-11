@@ -256,8 +256,7 @@ malloc_random(size_t * size)
         if (rval < 0) {
             free_zero(buf, *size);
             buf = NULL;
-        } else {
-            *size = rval;
+            *size = 0;
         }
     }
 
