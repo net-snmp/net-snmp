@@ -48,7 +48,7 @@ test_start()
 
 test_finish()
 {
-	if [ x$1 == x"PASS" ];then
+	if [ x"$1" = x"PASS" ];then
 		pass_num=`expr $pass_num + 1`
 		pass_info "PASS\n"
 	else
