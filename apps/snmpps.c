@@ -327,17 +327,15 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
 #endif
             exit(1);
         }
-        if (response->errstat != SNMP_ERR_NOERROR) {
-            vlp = vlp->next_variable;
-            continue;
-        }
-
         memset(&proc, 0, sizeof(proc));
+        if (response->errstat != SNMP_ERR_NOERROR)
+            goto next;
 
         proc.hrSWRunIndex = vlp->name[base_length];
 
         vlp2 = response->variables;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.string ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         len = vlp2->val_len;
         proc.hrSWRunName = malloc(len+1);
@@ -345,12 +343,14 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         proc.hrSWRunName[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.integer ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         proc.hrSWRunID = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.string ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         len = vlp2->val_len;
         proc.hrSWRunPath = malloc(len+1);
@@ -358,7 +358,8 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         proc.hrSWRunPath[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.string ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         len = vlp2->val_len;
         proc.hrSWRunParameters = malloc(len+1);
@@ -366,34 +367,38 @@ collect_perf(netsnmp_session *ss, struct hrSWRunTable **fproc)
         proc.hrSWRunParameters[len] = '\0';
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.integer ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         proc.hrSWRunType = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.integer ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         proc.hrSWRunStatus = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.integer ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         proc.hrSWRunPerfCPU = *vlp2->val.integer;
 
         vlp2 = vlp2->next_variable;
-        if (vlp2->type == SNMP_NOSUCHINSTANCE ||
+        if (!vlp2 || !vlp2->val.integer ||
+            vlp2->type == SNMP_NOSUCHINSTANCE ||
             vlp2->type == SNMP_NOSUCHOBJECT) goto next;
         proc.hrSWRunPerfMem = *vlp2->val.integer;
 
-        count++;
         {
             struct hrSWRunTable *tmp_procs;
 
-            tmp_procs = realloc(procs, count * sizeof(procs[0]));
-            if (tmp_procs) {
-                procs = tmp_procs;
-                procs[count - 1] = proc;
-            }
+            tmp_procs = realloc(procs, (count + 1) * sizeof(procs[0]));
+            if (!tmp_procs)
+                goto next;
+            procs = tmp_procs;
+            procs[count] = proc;
+            count++;
         }
         snmp_free_pdu(response);
         vlp2 = vlp;
@@ -456,40 +461,40 @@ int collect_cpu(netsnmp_session *ss, struct cpuStats *cpu)
     }
     else {
         netsnmp_variable_list *vlp = response->variables;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->user = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->nice = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->system = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->idle = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->wait = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->kernel = *vlp->val.integer;
         vlp = vlp->next_variable;
 
         ret = 1;
 
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->intr = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->softintr = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->steal = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->guest = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         cpu->guestnice = *vlp->val.integer;
     }
 out:
@@ -522,28 +527,28 @@ int collect_mem(netsnmp_session *ss, struct memStats *mem)
     }
     else {
         netsnmp_variable_list *vlp = response->variables;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->totalSwap = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->availSwap = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->totalReal = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->availReal = *vlp->val.integer;
         vlp = vlp->next_variable;
 
         ret = 1;
 
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->shared = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->buffer = *vlp->val.integer;
         vlp = vlp->next_variable;
-        if (vlp->type == SNMP_NOSUCHOBJECT) goto out;
+        if (!vlp || !vlp->val.integer || vlp->type == SNMP_NOSUCHOBJECT) goto out;
         mem->cached = *vlp->val.integer;
     }
 out:
@@ -617,28 +622,32 @@ char *format_humanmem(char *buf, size_t len, unsigned long mem)
 int cpucomp(const void *v1, const void *v2)
 {
     const struct hrSWRunTable *p1 = v1, *p2 = v2;
-    return p2->hrSWRunPerfCPUInc - p1->hrSWRunPerfCPUInc;
+    return (p2->hrSWRunPerfCPUInc > p1->hrSWRunPerfCPUInc) -
+           (p2->hrSWRunPerfCPUInc < p1->hrSWRunPerfCPUInc);
 }
 
 
 int memcomp(const void *v1, const void *v2)
 {
     const struct hrSWRunTable *p1 = v1, *p2 = v2;
-    return p2->hrSWRunPerfMem - p1->hrSWRunPerfMem;
+    return (p2->hrSWRunPerfMem > p1->hrSWRunPerfMem) -
+           (p2->hrSWRunPerfMem < p1->hrSWRunPerfMem);
 }
 
 
 int totcomp(const void *v1, const void *v2)
 {
     const struct hrSWRunTable *p1 = v1, *p2 = v2;
-    return p2->hrSWRunPerfCPU - p1->hrSWRunPerfCPU;
+    return (p2->hrSWRunPerfCPU > p1->hrSWRunPerfCPU) -
+           (p2->hrSWRunPerfCPU < p1->hrSWRunPerfCPU);
 }
 
 
 int pidcomp(const void *v1, const void *v2)
 {
     const struct hrSWRunTable *p1 = v1, *p2 = v2;
-    return p1->hrSWRunIndex - p2->hrSWRunIndex;
+    return (p1->hrSWRunIndex > p2->hrSWRunIndex) -
+           (p1->hrSWRunIndex < p2->hrSWRunIndex);
 }
 
 
@@ -843,7 +852,7 @@ int snmptop(int argc, char **argv)
                 ninx++;
                 oinx++;
             }
-            else if (nproc[oinx].hrSWRunIndex < oproc[ninx].hrSWRunIndex)
+            else if (oproc[oinx].hrSWRunIndex < nproc[ninx].hrSWRunIndex)
                 oinx++;
             else {
                 nproc[ninx].hrSWRunPerfCPUInc = nproc[ninx].hrSWRunPerfCPU;
@@ -879,8 +888,10 @@ int snmptop(int argc, char **argv)
         }
         else {
             netsnmp_variable_list *vlp = response->variables;
-            if (vlp->type == SNMP_NOSUCHINSTANCE) abort();
-            uptime_string_n(*vlp->val.integer, uptime, sizeof(uptime));
+            if (!vlp || vlp->type == SNMP_NOSUCHINSTANCE || !vlp->val.integer)
+                uptime[0] = '\0';
+            else
+                uptime_string_n(*vlp->val.integer, uptime, sizeof(uptime));
         }
         snmp_free_pdu(response);
 
@@ -917,6 +928,8 @@ int snmptop(int argc, char **argv)
                 + deltaCpu.wait + deltaCpu.kernel + deltaCpu.steal
                 + deltaCpu.intr + deltaCpu.softintr
                 + deltaCpu.guest + deltaCpu.guestnice;
+            if (sumCpu == 0)
+                sumCpu = 1;
 
             printw("\nCPU%%: %4.1fUs %4.1fSy %4.1fId %3.1fWa %3.1fNi %3.1fKe %3.1fHi %3.1fSi %3.1fSt %3.1fGu %3.1fGN",
                 (float)deltaCpu.user*100/sumCpu,
