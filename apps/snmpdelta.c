@@ -139,12 +139,24 @@ optProc(int argc, char *const *argv, int opt)
 					  NETSNMP_DS_APP_DONT_FIX_PDUS);
                 break;
             case 'p':
+                if (optind >= argc) {
+                    fprintf(stderr, "Bad -Cp option: no argument given\n");
+                    exit(1);
+                }
                 period = atoi(argv[optind++]);
                 break;
             case 'P':
+                if (optind >= argc) {
+                    fprintf(stderr, "Bad -CP option: no argument given\n");
+                    exit(1);
+                }
                 peaks = atoi(argv[optind++]);
                 break;
             case 'v':
+                if (optind >= argc) {
+                    fprintf(stderr, "Bad -Cv option: no argument given\n");
+                    exit(1);
+                }
                 varbindsPerPacket = atoi(argv[optind++]);
                 break;
             case 't':
@@ -160,12 +172,20 @@ optProc(int argc, char *const *argv, int opt)
                 printmax = 1;
                 break;
             case 'F':
+                if (optind >= argc) {
+                    fprintf(stderr, "Bad -CF option: no argument given\n");
+                    exit(1);
+                }
                 processFileArgs(argv[optind++]);
                 break;
             case 'l':
                 fileout = 1;
                 break;
             case 'L':
+                if (optind >= argc) {
+                    fprintf(stderr, "Bad -CL option: no argument given\n");
+                    exit(1);
+                }
                 SumFile = argv[optind++];
                 break;
             case 'k':
