@@ -1348,6 +1348,7 @@ netsnmp_vacm_simple_usm_del(const char *user, int authLevel,
 {
     char                     localContext[VACMSTRINGLEN];
     char                     group[VACMSTRINGLEN];
+    char                    *tmp;
 
     if (NULL == user)
         return SNMPERR_GENERR;
@@ -1365,6 +1366,9 @@ netsnmp_vacm_simple_usm_del(const char *user, int authLevel,
     vacm_destroyGroupEntry(SNMP_SEC_MODEL_USM, user);
 
     snprintf(group, sizeof(group)-2, "grp%.28s", user);
+    for (tmp = group; *tmp; tmp++)
+        if (!isalnum((unsigned char)(*tmp)))
+            *tmp = '_';
     if (NULL == context) {
         localContext[0] = 0;
         context = localContext;

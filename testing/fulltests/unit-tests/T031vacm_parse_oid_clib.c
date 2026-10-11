@@ -212,4 +212,18 @@
                                    "v1", view_oid, OID_LENGTH(view_oid),
                                    "") == SNMPERR_SUCCESS,
        "netsnmp_vacm_simple_usm_del accepts empty context");
+    OK(netsnmp_vacm_simple_usm_add("user.name-1", 1, SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v2", view_oid, OID_LENGTH(view_oid),
+                                   "ctx*") == SNMPERR_SUCCESS,
+       "netsnmp_vacm_simple_usm_add with non-alnum user and wildcard context");
+    OK(vacm_getAccessEntry("grpuser_name_1", "ctx", SNMP_SEC_MODEL_USM,
+                           SNMP_SEC_LEVEL_AUTHNOPRIV) != NULL,
+       "access entry created for sanitized group name");
+    OK(netsnmp_vacm_simple_usm_del("user.name-1", SNMP_SEC_LEVEL_AUTHNOPRIV,
+                                   "v2", view_oid, OID_LENGTH(view_oid),
+                                   "ctx*") == SNMPERR_SUCCESS,
+       "netsnmp_vacm_simple_usm_del with non-alnum user");
+    OK(vacm_getAccessEntry("grpuser_name_1", "ctx", SNMP_SEC_MODEL_USM,
+                           SNMP_SEC_LEVEL_AUTHNOPRIV) == NULL,
+       "sanitized access entry removed by netsnmp_vacm_simple_usm_del");
 }
