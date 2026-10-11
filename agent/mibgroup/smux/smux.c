@@ -406,7 +406,7 @@ var_smux_write(int action,
     int             reterr;
     size_t          datalen, name_length, packet_len;
     size_t          len;
-    ssize_t         tmp_len;
+    ssize_t         tmp_len, rcvlen;
     long            reqid, errsts, erridx;
     u_char          *dataptr;
 
@@ -477,9 +477,10 @@ var_smux_write(int action,
             /*
              * peek at what's received 
              */
-            if ((len = recvfrom(rptr->sr_fd, (void *) buf,
-                            SMUXMAXPKTSIZE, MSG_PEEK, NULL, NULL)) <= 0) {
-                if ((len == -1) && ((errno == EINTR) || (errno == EAGAIN)))
+            rcvlen = recvfrom(rptr->sr_fd, (void *) buf,
+                              SMUXMAXPKTSIZE, MSG_PEEK, NULL, NULL);
+            if (rcvlen <= 0) {
+                if ((rcvlen == -1) && ((errno == EINTR) || (errno == EAGAIN)))
                 {
                    continue;
                 }
@@ -492,6 +493,7 @@ var_smux_write(int action,
                 smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
+            len = (size_t)rcvlen;
 
             DEBUGMSGTL(("smux", "[var_smux_write] Peeked at %" NETSNMP_PRIz
                         "d bytes\n", len));
@@ -505,7 +507,7 @@ var_smux_write(int action,
             if (ptr == NULL)
                 return SNMP_ERR_GENERR;
             packet_len += (ptr - buf);
-            if (len > (ssize_t)packet_len) {
+            if (len > packet_len) {
                 /*
                  * set length to receive only the first packet 
                  */
@@ -518,18 +520,19 @@ var_smux_write(int action,
             tmp_len = len;
             do
             {
-               len = tmp_len;
-               len = recvfrom(rptr->sr_fd, (void *) buf, len, 0, NULL, NULL);
+               rcvlen = recvfrom(rptr->sr_fd, (void *) buf, tmp_len, 0, NULL,
+                                 NULL);
             }
-            while((len == -1) && ((errno == EINTR) || (errno == EAGAIN)));
+            while((rcvlen == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
-            if (len <= 0) {
+            if (rcvlen <= 0) {
                 DEBUGMSGTL(("smux",
                             "[var_smux_write] recv failed or timed out\n"));
                 smux_peer_cleanup(rptr->sr_fd);
                 smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
+            len = (size_t)rcvlen;
 
             DEBUGMSGTL(("smux", "[var_smux_write] Received %" NETSNMP_PRIz
                         "d bytes\n", len));
