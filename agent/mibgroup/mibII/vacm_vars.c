@@ -737,7 +737,8 @@ sec2group_parse_groupEntry(oid * name, size_t name_len)
     /*
      * get the name and engineID out of the incoming oid 
      */
-    if (sec2group_parse_oid
+    if (name_len <= SEC2GROUP_MIB_LENGTH ||
+        sec2group_parse_oid
         (&name[SEC2GROUP_MIB_LENGTH], name_len - SEC2GROUP_MIB_LENGTH,
          &model, (u_char **) & newName, &nameLen))
         return NULL;
@@ -867,7 +868,8 @@ write_vacmSecurityToGroupStatus(int action,
          * See if we can parse the oid for model/name first.  
          */
 
-        if (sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+        if (name_len <= SEC2GROUP_MIB_LENGTH ||
+            sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
                                 name_len - SEC2GROUP_MIB_LENGTH,
                                 &model, (u_char **) & newName, &nameLen)) {
             return SNMP_ERR_INCONSISTENTNAME;
@@ -918,9 +920,12 @@ write_vacmSecurityToGroupStatus(int action,
         }
         free(newName);
     } else if (action == ACTION) {
-        sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
-                            name_len - SEC2GROUP_MIB_LENGTH,
-                            &model, (u_char **) & newName, &nameLen);
+        if (name_len <= SEC2GROUP_MIB_LENGTH ||
+            sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+                                name_len - SEC2GROUP_MIB_LENGTH,
+                                &model, (u_char **) & newName, &nameLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
 
         geptr = vacm_getGroupEntry(model, newName);
 
@@ -950,9 +955,12 @@ write_vacmSecurityToGroupStatus(int action,
         }
         free(newName);
     } else if (action == COMMIT) {
-        sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
-                            name_len - SEC2GROUP_MIB_LENGTH,
-                            &model, (u_char **) & newName, &nameLen);
+        if (name_len <= SEC2GROUP_MIB_LENGTH ||
+            sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+                                name_len - SEC2GROUP_MIB_LENGTH,
+                                &model, (u_char **) & newName, &nameLen)) {
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
 
         geptr = vacm_getGroupEntry(model, newName);
 
@@ -964,9 +972,12 @@ write_vacmSecurityToGroupStatus(int action,
         free(newName);
     } else if (action == UNDO) {
         if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-            sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
-                                name_len - SEC2GROUP_MIB_LENGTH,
-                                &model, (u_char **) & newName, &nameLen);
+            if (name_len <= SEC2GROUP_MIB_LENGTH ||
+                sec2group_parse_oid(&name[SEC2GROUP_MIB_LENGTH],
+                                    name_len - SEC2GROUP_MIB_LENGTH,
+                                    &model, (u_char **) & newName, &nameLen)) {
+                return SNMP_ERR_INCONSISTENTNAME;
+            }
 
             geptr = vacm_getGroupEntry(model, newName);
 
@@ -1073,7 +1084,8 @@ access_parse_accessEntry(oid * name, size_t name_len)
     /*
      * get the name and engineID out of the incoming oid 
      */
-    if (access_parse_oid
+    if (name_len <= ACCESS_MIB_LENGTH ||
+        access_parse_oid
         (&name[ACCESS_MIB_LENGTH], name_len - ACCESS_MIB_LENGTH,
          (u_char **) & newGroupName, &groupNameLen,
          (u_char **) & newContextPrefix, &contextPrefixLen, &model,
@@ -1120,7 +1132,8 @@ write_vacmAccessStatus(int action,
         /*
          * See if we can parse the oid for model/name first.  
          */
-        if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
+        if (name_len <= ACCESS_MIB_LENGTH ||
+            access_parse_oid(&name[ACCESS_MIB_LENGTH],
                              name_len - ACCESS_MIB_LENGTH,
                              (u_char **) & newGroupName, &groupNameLen,
                              (u_char **) & newContextPrefix,
@@ -1180,7 +1193,8 @@ write_vacmAccessStatus(int action,
         free(newGroupName);
         free(newContextPrefix);
     } else if (action == ACTION) {
-        if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
+        if (name_len <= ACCESS_MIB_LENGTH ||
+            access_parse_oid(&name[ACCESS_MIB_LENGTH],
                              name_len - ACCESS_MIB_LENGTH,
                              (u_char **) & newGroupName, &groupNameLen,
                              (u_char **) & newContextPrefix, &contextPrefixLen,
@@ -1208,7 +1222,8 @@ write_vacmAccessStatus(int action,
         free(newGroupName);
         free(newContextPrefix);
     } else if (action == COMMIT) {
-        if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
+        if (name_len <= ACCESS_MIB_LENGTH ||
+            access_parse_oid(&name[ACCESS_MIB_LENGTH],
                              name_len - ACCESS_MIB_LENGTH,
                              (u_char **) & newGroupName, &groupNameLen,
                              (u_char **) & newContextPrefix, &contextPrefixLen,
@@ -1228,7 +1243,8 @@ write_vacmAccessStatus(int action,
         free(newContextPrefix);
     } else if (action == UNDO) {
         if (long_ret == RS_CREATEANDGO || long_ret == RS_CREATEANDWAIT) {
-            if (access_parse_oid(&name[ACCESS_MIB_LENGTH],
+            if (name_len <= ACCESS_MIB_LENGTH ||
+                access_parse_oid(&name[ACCESS_MIB_LENGTH],
                                  name_len - ACCESS_MIB_LENGTH,
                                  (u_char **) & newGroupName, &groupNameLen,
                                  (u_char **) & newContextPrefix, &contextPrefixLen,
@@ -1540,14 +1556,26 @@ view_parse_viewEntry(oid * name, size_t name_len)
     oid            *newViewSubtree;
     size_t          viewNameLen, viewSubtreeLen;
 
+    if (name_len <= VIEW_MIB_LENGTH)
+        return NULL;
     if (view_parse_oid(&name[VIEW_MIB_LENGTH], name_len - VIEW_MIB_LENGTH,
                        (u_char **) & newViewName, &viewNameLen,
                        (oid **) & newViewSubtree, &viewSubtreeLen))
         return NULL;
+    if (viewSubtreeLen < 2 || newViewSubtree[0] != viewSubtreeLen - 1) {
+        free(newViewName);
+        free(newViewSubtree);
+        return NULL;
+    }
 
     vptr =
         vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                           VACM_MODE_IGNORE_MASK);
+    if (vptr &&
+        netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                           newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+        vptr = NULL;
+    }
     free(newViewName);
     free(newViewSubtree);
 
@@ -1581,6 +1609,10 @@ write_vacmViewStatus(int action,
             return SNMP_ERR_WRONGVALUE;
         }
 
+        if (name_len <= VIEW_MIB_LENGTH) {
+            return SNMP_ERR_INCONSISTENTNAME;
+        }
+
         /*
          * See if we can parse the oid for model/name first.  
          */
@@ -1596,6 +1628,12 @@ write_vacmViewStatus(int action,
             free(newViewName);
             free(newViewSubtree);
             return SNMP_ERR_NOCREATION;
+        }
+
+        if (viewSubtreeLen < 2 || newViewSubtree[0] != viewSubtreeLen - 1) {
+            free(newViewName);
+            free(newViewSubtree);
+            return SNMP_ERR_INCONSISTENTNAME;
         }
 
         /*
@@ -1658,6 +1696,11 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                               VACM_MODE_IGNORE_MASK);
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
 
         if (vptr != NULL) {
             if (long_ret == RS_CREATEANDGO || long_ret == RS_ACTIVE) {
@@ -1684,6 +1727,11 @@ write_vacmViewStatus(int action,
         vptr =
             vacm_getViewEntry(newViewName, &newViewSubtree[1], viewSubtreeLen-1,
                               VACM_MODE_IGNORE_MASK);
+        if (vptr &&
+            netsnmp_oid_equals(vptr->viewSubtree + 1, vptr->viewSubtreeLen - 1,
+                               newViewSubtree + 1, viewSubtreeLen - 1) != 0) {
+            vptr = NULL;
+        }
 
         if (vptr != NULL) {
             if (long_ret == RS_DESTROY) {
@@ -1702,6 +1750,13 @@ write_vacmViewStatus(int action,
 
             vptr = vacm_getViewEntry(newViewName, &newViewSubtree[1],
                                      viewSubtreeLen-1, VACM_MODE_IGNORE_MASK);
+            if (vptr &&
+                netsnmp_oid_equals(vptr->viewSubtree + 1,
+                                   vptr->viewSubtreeLen - 1,
+                                   newViewSubtree + 1,
+                                   viewSubtreeLen - 1) != 0) {
+                vptr = NULL;
+            }
 
             if (vptr != NULL) {
                 vacm_destroyViewEntry(newViewName, newViewSubtree,
