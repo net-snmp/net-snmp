@@ -4855,24 +4855,18 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 if ((current =
                      header_complex_get(traceRouteHopsTableStorage,
                                         vars_hops)) == NULL) {
+                    snmp_free_varbind(vars_hops);
                     goto out;
                 }
                 snmp_free_varbind(vars_hops);
                 vars_hops = NULL;
 
                 current->traceRouteHopsIpTgtAddressType = 1;
-                current->traceRouteHopsIpTgtAddress =
-                    (char *) malloc(strlen(inet_ntoa(from->sin_addr)) +
-                                    1);
+                SNMP_FREE(current->traceRouteHopsIpTgtAddress);
                 current->traceRouteHopsIpTgtAddress =
                     strdup(inet_ntoa(from->sin_addr));
-                current->
-                    traceRouteHopsIpTgtAddress[strlen
-                                               (inet_ntoa
-                                                (from->sin_addr))] =
-                    '\0';
                 current->traceRouteHopsIpTgtAddressLen =
-                    strlen(inet_ntoa(from->sin_addr));
+                    strlen(current->traceRouteHopsIpTgtAddress);
                 if (count != 0) {
                     if (strcmp
                         (old_HopsAddress[index - 1],
@@ -4880,8 +4874,6 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                         flag = 1;
                 }
 
-                current->traceRouteHopsIpTgtAddressLen =
-                    strlen(inet_ntoa(from->sin_addr));
                 current->traceRouteHopsMinRtt = minRtt;
                 current->traceRouteHopsMaxRtt = maxRtt;
                 current->traceRouteHopsAverageRtt = averageRtt;
@@ -4889,6 +4881,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                 current->traceRouteHopsSentProbes = probe + 1;
                 current->traceRouteHopsProbeResponses = responseProbe;
                 current->traceRouteHopsLastGoodProbe_time = timep;
+                SNMP_FREE(current->traceRouteHopsLastGoodProbe);
                 current->traceRouteHopsLastGoodProbe =
                     netsnmp_memdup(date_n_time(&timep,
                                                &current->traceRouteHopsLastGoodProbeLen),
@@ -4912,6 +4905,7 @@ run_traceRoute_ipv4(struct traceRouteCtlTable_data *item)
                     StorageResults->traceRouteResultsTestSuccesses + 1;
 
                 StorageResults->traceRouteResultsLastGoodPath_time = timep;
+                SNMP_FREE(StorageResults->traceRouteResultsLastGoodPath);
                 StorageResults->traceRouteResultsLastGoodPath =
                     netsnmp_memdup(date_n_time(&timep,
                                                &StorageResults->
@@ -5452,22 +5446,10 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
 
                 temp_his->traceRouteProbeHistoryHAddrType = 2;
                 temp_his->traceRouteProbeHistoryHAddr =
-                    (char *)
-                    malloc(strlen
-                           (inet_ntop
-                            (AF_INET6, &from.sin6_addr, pa, 64)) + 1);
-                temp_his->traceRouteProbeHistoryHAddr =
                     strdup(inet_ntop
                            (AF_INET6, &from.sin6_addr, pa, 64));
-                temp_his->
-                    traceRouteProbeHistoryHAddr[strlen
-                                                (inet_ntop
-                                                 (AF_INET6,
-                                                  &from.sin6_addr, pa,
-                                                  64))] = '\0';
                 temp_his->traceRouteProbeHistoryHAddrLen =
-                    strlen(inet_ntop
-                           (AF_INET6, &from.sin6_addr, pa, 64));
+                    strlen(temp_his->traceRouteProbeHistoryHAddr);
 
                 temp_his->traceRouteProbeHistoryResponse = Rtt;
                 temp_his->traceRouteProbeHistoryStatus = 1;
@@ -5515,23 +5497,15 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 snmp_varlist_add_variable(&vars_hops, NULL, 0, ASN_UNSIGNED, (char *) &index, sizeof(index));       /*  traceRouteHopsIndex  */
                 if ((current =
                      header_complex_get(traceRouteHopsTableStorage,
-                                        vars_hops)) == NULL)
+                                        vars_hops)) == NULL) {
+                    snmp_free_varbind(vars_hops);
                     goto out;
+                }
                 current->traceRouteHopsIpTgtAddressType = 2;
-                current->traceRouteHopsIpTgtAddress =
-                    (char *)
-                    malloc(strlen
-                           (inet_ntop
-                            (AF_INET6, &from.sin6_addr, pa, 64)) + 1);
+                SNMP_FREE(current->traceRouteHopsIpTgtAddress);
                 current->traceRouteHopsIpTgtAddress =
                     strdup(inet_ntop
                            (AF_INET6, &from.sin6_addr, pa, 64));
-                current->
-                    traceRouteHopsIpTgtAddress[strlen
-                                               (inet_ntop
-                                                (AF_INET6,
-                                                 &from.sin6_addr, pa,
-                                                 64))] = '\0';
 
                 if (count != 0) {
                     if (strcmp
@@ -5541,8 +5515,7 @@ run_traceRoute_ipv6(struct traceRouteCtlTable_data *item)
                 }
 
                 current->traceRouteHopsIpTgtAddressLen =
-                    strlen(inet_ntop
-                           (AF_INET6, &from.sin6_addr, pa, 64));
+                    strlen(current->traceRouteHopsIpTgtAddress);
                 current->traceRouteHopsMinRtt = minRtt;
                 current->traceRouteHopsMaxRtt = maxRtt;
                 current->traceRouteHopsAverageRtt = averageRtt;
