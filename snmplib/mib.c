@@ -5933,16 +5933,18 @@ print_parent_oid(FILE * f, struct tree *tp)
 static void print_parent_mibchildoid(FILE * f, struct tree *tp)
 {
     static struct tree *temp;
-    unsigned long elems[100];
+    unsigned long elems[MAX_OID_LEN];
     int elem_cnt = 0;
     int i = 0;
     temp = tp;
     if (temp) {
-        while (temp->parent) {
+        while (temp->parent &&
+               elem_cnt < (int)(sizeof(elems) / sizeof(elems[0])) - 1) {
                 elems[elem_cnt++] = temp->subid;
                 temp = temp->parent;
         }
-        elems[elem_cnt++] = temp->subid;
+        if (elem_cnt < (int)(sizeof(elems) / sizeof(elems[0])))
+            elems[elem_cnt++] = temp->subid;
     }
     for (i = elem_cnt - 1; i >= 0; i--) {
         if (i == elem_cnt - 1) {
