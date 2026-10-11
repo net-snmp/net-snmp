@@ -1480,7 +1480,7 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
                                                netsnmp_transport *t,
                                                const void *data, int len))
 {
-    if (!data) {
+    if (t && !data) {
         data = t->data;
         len = t->data_length;
     }
@@ -1491,7 +1491,7 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
     case sizeof(netsnmp_tmStateReference): {
         const netsnmp_tmStateReference *r = data;
         const netsnmp_indexed_addr_pair *p = &r->addresses;
-        netsnmp_transport *bt = t->base_transport;
+        netsnmp_transport *bt = t ? t->base_transport : NULL;
 
         if (r->have_addresses) {
             return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
