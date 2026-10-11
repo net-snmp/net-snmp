@@ -168,14 +168,14 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
 #if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)
             && (file->d_type == DT_DIR)
 #elif defined(S_ISDIR)
-            && (stat(file->d_name, &statbuf) != 0) && (S_ISDIR(statbuf.st_mode))
+            && (stat(path, &statbuf) == 0) && (S_ISDIR(statbuf.st_mode))
 #endif
             ) {
             /** xxx add the dir as well? not for now.. maybe another flag? */
             netsnmp_directory_container_read(container, path, flags);
         }
         else if (flags & NETSNMP_DIR_NSFILE) {
-            if (_insert_nsfile( container, file->d_name,
+            if (_insert_nsfile( container, path,
                                 filter ? &statbuf : NULL, flags ) < 0)
                 break;
         }
