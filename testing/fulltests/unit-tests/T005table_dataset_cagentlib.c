@@ -1,4 +1,5 @@
 /* HEADER Testing table_dataset */
+#include <net-snmp/net-snmp-features.h>
 
 /*
  * Note: the primary purpose of this unit test is to verify whether all memory
@@ -52,6 +53,7 @@ for (i = 1; i <= 2; i++) {
     }
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 {
     /*
      * Verify that netsnmp_table_data_set_helper_handler() rejects an invalid
@@ -90,6 +92,173 @@ for (i = 1; i <= 2; i++) {
     netsnmp_free_request_data_sets(&request);
     netsnmp_free_agent_data_sets(&reqinfo);
 }
+
+{
+    /*
+     * Verify multi-varbind SET handling in netsnmp_table_data_set_helper_handler():
+     * 1) suffix and suffix_len are computed per request->requestvb rather than
+     *    requests->requestvb, and errors on request2 set request2.status rather
+     *    than only request.status.
+     * 2) a short OID (< rootoid_len + 2) on request2 is rejected with
+     *    SNMP_ERR_NOCREATION on request2.
+     */
+    netsnmp_agent_request_info reqinfo;
+    netsnmp_request_info       request, request2;
+    netsnmp_table_request_info tbl_req1, tbl_req2;
+    netsnmp_variable_list      vb1, vb2;
+    oid                        oid1[] = { 1, 3, 6, 1, 3, 277, 1, COL5, 1, 1 };
+    oid                        oid2[] = { 1, 3, 6, 1, 3, 277, 1, COL5, 1, 2 };
+    oid                        short_oid[] = { 1, 3, 6, 1, 3, 277, 1 };
+    oid                        suffix1[] = { 1, 1 };
+    oid                        suffix2[] = { 1, 2 };
+    netsnmp_table_row         *row1, *row2;
+    netsnmp_oid_stash_node   **stashp;
+    long                       bad_int = 123;
+    netsnmp_mib_handler       *tds_h;
+
+    row1 = netsnmp_table_data_get_from_oid(tds->table, suffix1,
+                                           OID_LENGTH(suffix1));
+    row2 = netsnmp_table_data_get_from_oid(tds->table, suffix2,
+                                           OID_LENGTH(suffix2));
+    OK(row1 != NULL && row2 != NULL, "existing rows (1,1) and (1,2) found");
+    netsnmp_mark_row_column_writable(row1, COL5, 1);
+    netsnmp_mark_row_column_writable(row2, COL5, 1);
+
+    memset(&reqinfo, 0, sizeof(reqinfo));
+    memset(&request, 0, sizeof(request));
+    memset(&request2, 0, sizeof(request2));
+    memset(&tbl_req1, 0, sizeof(tbl_req1));
+    memset(&tbl_req2, 0, sizeof(tbl_req2));
+    memset(&vb1, 0, sizeof(vb1));
+    memset(&vb2, 0, sizeof(vb2));
+
+    reqinfo.mode = MODE_SET_RESERVE1;
+    request.next = &request2;
+
+    vb1.name = oid1;
+    vb1.name_length = OID_LENGTH(oid1);
+    vb1.type = ASN_OCTET_STR;
+    vb1.val.string = (u_char *) "ok";
+    vb1.val_len = 2;
+    request.requestvb = &vb1;
+    tbl_req1.colnum = COL5;
+    netsnmp_request_add_list_data(
+        &request, netsnmp_create_data_list(TABLE_HANDLER_NAME, &tbl_req1, NULL));
+    netsnmp_request_add_list_data(
+        &request, netsnmp_create_data_list(TABLE_DATA_NAME, row1, NULL));
+
+    vb2.name = oid2;
+    vb2.name_length = OID_LENGTH(oid2);
+    vb2.type = ASN_INTEGER;
+    vb2.val.integer = &bad_int;
+    vb2.val_len = sizeof(bad_int);
+    request2.requestvb = &vb2;
+    tbl_req2.colnum = COL5;
+    netsnmp_request_add_list_data(
+        &request2, netsnmp_create_data_list(TABLE_HANDLER_NAME, &tbl_req2, NULL));
+    netsnmp_request_add_list_data(
+        &request2, netsnmp_create_data_list(TABLE_DATA_NAME, row2, NULL));
+
+    tds_h = netsnmp_get_table_data_set_handler(tds);
+    netsnmp_table_data_set_helper_handler(tds_h, th, &reqinfo, &request);
+    OKF(request.status == SNMP_ERR_NOERROR,
+        ("first varbind status unchanged (%d == %d)",
+         request.status, SNMP_ERR_NOERROR));
+    OKF(request2.status == SNMP_ERR_WRONGTYPE,
+        ("second varbind status set to SNMP_ERR_WRONGTYPE (%d == %d)",
+         request2.status, SNMP_ERR_WRONGTYPE));
+
+    stashp = netsnmp_table_dataset_get_or_create_stash(&reqinfo, tds, &tbl_req1);
+    OK(stashp != NULL &&
+       netsnmp_oid_stash_get_data(*stashp, suffix1, OID_LENGTH(suffix1)) != NULL &&
+       netsnmp_oid_stash_get_data(*stashp, suffix2, OID_LENGTH(suffix2)) != NULL &&
+       netsnmp_oid_stash_get_data(*stashp, suffix1, OID_LENGTH(suffix1)) !=
+       netsnmp_oid_stash_get_data(*stashp, suffix2, OID_LENGTH(suffix2)),
+       "per-varbind suffix stashes distinct row entries for request1 and request2");
+
+    reqinfo.mode = MODE_SET_FREE;
+    request.processed = 0;
+    request2.processed = 0;
+    netsnmp_table_data_set_helper_handler(tds_h, th, &reqinfo, &request);
+    netsnmp_free_request_data_sets(&request);
+    netsnmp_free_request_data_sets(&request2);
+    netsnmp_free_agent_data_sets(&reqinfo);
+
+    /* Test short OID on request2 in a multi-varbind SET */
+    memset(&reqinfo, 0, sizeof(reqinfo));
+    memset(&request, 0, sizeof(request));
+    memset(&request2, 0, sizeof(request2));
+    reqinfo.mode = MODE_SET_RESERVE1;
+    request.next = &request2;
+    request.requestvb = &vb1;
+    netsnmp_request_add_list_data(
+        &request, netsnmp_create_data_list(TABLE_HANDLER_NAME, &tbl_req1, NULL));
+    netsnmp_request_add_list_data(
+        &request, netsnmp_create_data_list(TABLE_DATA_NAME, row1, NULL));
+
+    vb2.name = short_oid;
+    vb2.name_length = OID_LENGTH(short_oid);
+    vb2.type = ASN_OCTET_STR;
+    vb2.val.string = (u_char *) "ok";
+    vb2.val_len = 2;
+    request2.requestvb = &vb2;
+    netsnmp_request_add_list_data(
+        &request2, netsnmp_create_data_list(TABLE_HANDLER_NAME, &tbl_req2, NULL));
+
+    netsnmp_table_data_set_helper_handler(tds_h, th, &reqinfo, &request);
+    OKF(request.status == SNMP_ERR_NOERROR &&
+        request2.status == SNMP_ERR_NOCREATION,
+        ("short OID on second varbind rejected with SNMP_ERR_NOCREATION (%d, %d)",
+         request.status, request2.status));
+    reqinfo.mode = MODE_SET_FREE;
+    request.processed = 0;
+    request2.processed = 0;
+    netsnmp_table_data_set_helper_handler(tds_h, th, &reqinfo, &request);
+    netsnmp_handler_free(tds_h);
+    netsnmp_free_request_data_sets(&request);
+    netsnmp_free_request_data_sets(&request2);
+    netsnmp_free_agent_data_sets(&reqinfo);
+}
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_CLONE_ROW
+{
+    /*
+     * Exercise netsnmp_table_data_clone_row() on a row with multiple index
+     * varbinds and verify the cloned row and its indexes are properly
+     * duplicated and freed via netsnmp_table_data_delete_row().
+     */
+    int32_t            idx1 = 2, idx2 = 1;
+    netsnmp_table_row *orig_row, *cloned_row;
+
+    orig_row = netsnmp_create_table_data_row();
+    OK(orig_row != NULL, "created multi-index row (2,1) to clone");
+    netsnmp_table_row_add_index(orig_row, ASN_INTEGER, &idx1, sizeof(idx1));
+    netsnmp_table_row_add_index(orig_row, ASN_INTEGER, &idx2, sizeof(idx2));
+    netsnmp_table_data_generate_index_oid(orig_row);
+
+    cloned_row = netsnmp_table_data_clone_row(orig_row);
+    OK(cloned_row != NULL && cloned_row != orig_row,
+       "netsnmp_table_data_clone_row returns distinct row");
+    OK(cloned_row->indexes != NULL &&
+       cloned_row->indexes != orig_row->indexes &&
+       cloned_row->indexes->next_variable != NULL &&
+       cloned_row->indexes->next_variable != orig_row->indexes->next_variable &&
+       *cloned_row->indexes->val.integer == 2 &&
+       *cloned_row->indexes->next_variable->val.integer == 1,
+       "cloned row duplicates full multi-varbind index chain");
+    OK(cloned_row->index_oid != NULL &&
+       cloned_row->index_oid != orig_row->index_oid &&
+       cloned_row->index_oid_len == orig_row->index_oid_len &&
+       snmp_oid_compare(cloned_row->index_oid, cloned_row->index_oid_len,
+                        orig_row->index_oid, orig_row->index_oid_len) == 0,
+       "cloned row duplicates index_oid");
+    netsnmp_table_data_delete_row(cloned_row);
+    netsnmp_table_data_delete_row(orig_row);
+    OK(netsnmp_table_data_clone_row(NULL) == NULL,
+       "netsnmp_table_data_clone_row(NULL) returns NULL");
+}
+#endif /* !NETSNMP_FEATURE_REMOVE_TABLE_DATA_CLONE_ROW */
 
 netsnmp_delete_table_data_set(tds);
 
