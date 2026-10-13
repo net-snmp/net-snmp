@@ -1,0 +1,57 @@
+#!/bin/sh
+
+SNMP_TEST_TIMEOUT=180
+
+. ../support/simple_eval_tools.sh
+
+HEADER TLS-TCP quoted serverCert/clientCert config and multi-varbind query
+
+SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+
+SNMP_TRANSPORT_SPEC=tlstcp
+
+. ./STlsVars
+
+# Create a CA
+CAPTURE $NSCERT genca --cn ca-net-snmp.org $NSCERTARGS
+CAFP=`$NSCERT showcas --fingerprint --brief ca-net-snmp.org $NSCERTARGS`
+CHECKVALUEISNT "$CAFP" "" "generated fingerprint for ca-net-snmp.org certificate"
+
+# Create a server certificate using the CA certificate
+CAPTURE $NSCERT gencert -t snmpd --with-ca ca-net-snmp.org --cn a.b.example.com $NSCERTARGS
+SNMPDFP=`$NSCERT showcert --fingerprint --brief snmpd $NSCERTARGS`
+CHECKVALUEISNT "$SNMPDFP" "" "generated fingerprint for snmpd certificate"
+
+# Exercise _parse_server_cert() quoted string handling (*line == '"')
+CONFIGAGENT '[snmp]' serverCert "\"$SNMPDFP\""
+
+# Create a user certificate
+CAPTURE $NSCERT gencert -t snmpapp --cn 'testuser' $NSCERTARGS
+TESTUSERFP=`$NSCERT showcerts --fingerprint --brief snmpapp $NSCERTARGS`
+CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
+
+CONFIGAGENT certSecName 10 $TESTUSERFP --cn
+CONFIGAGENT rwuser -s tsm testuser authpriv
+
+# Exercise _parse_client_cert() quoted string handling (*line == '"')
+CONFIGAPP clientCert "\"$TESTUSERFP\""
+
+STARTAGENT
+
+FLAGS="$FLAGS -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+# Verify SET and GET work with quoted serverCert and clientCert
+DOSETTEST quotedCertIdentity "-T their_identity=$SNMPDFP $FLAGS"
+
+# Verify multi-varbind GET over TLS-TCP (Memory BIO read/write handling)
+CAPTURE "snmpget -T their_identity=$SNMPDFP $FLAGS .1.3.6.1.2.1.1.1.0 .1.3.6.1.2.1.1.3.0 .1.3.6.1.2.1.1.4.0 .1.3.6.1.2.1.1.5.0 .1.3.6.1.2.1.1.6.0"
+CHECKVALUEIS "$?" "0" "multi-varbind snmpget over tlstcp succeeds"
+CHECK "\.1\.3\.6\.1\.2\.1\.1\.1\.0 = STRING:"
+CHECK "\.1\.3\.6\.1\.2\.1\.1\.3\.0 = Timeticks:"
+CHECK "\.1\.3\.6\.1\.2\.1\.1\.6\.0 = STRING:.*quotedCertIdentity"
+
+STOPAGENT
+
+FINISHED
