@@ -40,6 +40,11 @@ snmp_version=v2c
 # Begin test
 #
 
+# Verify -CR bounds check when no interval argument is given
+CAPTURE "$SNMPNETSTAT -CR"
+CHECKVALUEISNT "$?" "0" "snmpnetstat -CR without argument fails"
+CHECK "Bad -CR option: no argument given"
+
 STARTAGENT
 
 CAPTURE "$SNMPNETSTAT -Cn -Cp $proto -$snmp_version -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
@@ -50,6 +55,21 @@ if [ "$snmp_last_test_result" != 0 ] ; then
 else
     return_value=1
 fi
+
+# Protocol statistics (-Cs)
+CAPTURE "$SNMPNETSTAT -Cs -$snmp_version -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CHECKVALUEIS "$?" "0" "snmpnetstat -Cs exits with 0"
+CHECKCOUNT atleastone "$proto:"
+
+# Interface table (-Ci)
+CAPTURE "$SNMPNETSTAT -Ci -$snmp_version -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CHECKVALUEIS "$?" "0" "snmpnetstat -Ci exits with 0"
+CHECK "Name"
+
+# Routing table (-Cr)
+CAPTURE "$SNMPNETSTAT -Cr -Cn -$snmp_version -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+CHECKVALUEIS "$?" "0" "snmpnetstat -Cr exits with 0"
+CHECKCOUNT atleastone "Routing tables"
 
 STOPAGENT
 FINISHED
