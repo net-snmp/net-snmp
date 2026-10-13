@@ -117,5 +117,42 @@
         netsnmp_cleanup_session(&session);
     }
 
+    /*
+     * Test 5: RFC 5343 contextEngineID probe (80:00:00:00:06) via snmp_parse
+     * with debugging enabled for recv and snmp_parse tokens (exercises secLevelName
+     * bounds check and free_securityStateRef on SNMPERR_JUST_A_CONTEXT_PROBE).
+     */
+    {
+        static const u_char ctx_probe_pkt[] = {
+            0x30, 0x4b, 0x02, 0x01, 0x03, 0x30, 0x0e, 0x02, 0x01, 0x01,
+            0x02, 0x03, 0x00, 0xff, 0xe3, 0x04, 0x01, 0x00, 0x02, 0x01,
+            0x03, 0x04, 0x10, 0x30, 0x0e, 0x04, 0x00, 0x02, 0x01, 0x00,
+            0x02, 0x01, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x30,
+            0x24, 0x04, 0x05, 0x80, 0x00, 0x00, 0x00, 0x06, 0x04, 0x00,
+            0xa0, 0x19, 0x02, 0x01, 0x01, 0x02, 0x01, 0x00, 0x02, 0x01,
+            0x00, 0x30, 0x0e, 0x30, 0x0c, 0x06, 0x08, 0x2b, 0x06, 0x01,
+            0x02, 0x01, 0x01, 0x01, 0x00, 0x05, 0x00
+        };
+        u_char *probe_buf = netsnmp_memdup(ctx_probe_pkt, sizeof(ctx_probe_pkt));
+        memset(&session, 0, sizeof(session));
+        snmp_sess_init(&session);
+        pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+        snmp_set_do_debugging(1);
+        debug_register_tokens("recv,snmp_parse,snmpv3_contextid");
+        pdu->securityLevel = 99;
+        rc = snmp_parse(NULL, &session, pdu, probe_buf, 20);
+        OKF(rc != SNMPERR_SUCCESS,
+            ("snmp_parse logs out-of-range securityLevel safely on parse error: rc=%d", rc));
+        free(probe_buf);
+        probe_buf = netsnmp_memdup(ctx_probe_pkt, sizeof(ctx_probe_pkt));
+        rc = snmp_parse(NULL, &session, pdu, probe_buf, sizeof(ctx_probe_pkt));
+        snmp_set_do_debugging(0);
+        OKF(rc == SNMPERR_JUST_A_CONTEXT_PROBE && pdu->securityStateRef == NULL,
+            ("snmp_parse handles RFC 5343 contextEngineID probe and frees securityStateRef: rc=%d", rc));
+        snmp_free_pdu(pdu);
+        free(probe_buf);
+        netsnmp_cleanup_session(&session);
+    }
+
     snmp_shutdown("T109snmpv3_parse");
 }
