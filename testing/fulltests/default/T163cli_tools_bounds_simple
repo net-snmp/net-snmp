@@ -1,0 +1,142 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER CLI tools argument bounds and agent query tests
+
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIFNOT USING_MIBII_SYSORTABLE_MODULE
+
+#
+# Part 1: Missing trailing CLI arguments bounds checking
+#
+
+# snmpusm option and subcommand bounds
+if [ -x "${SNMP_UPDIR}/apps/snmpusm" ]; then
+  CAPTURE "snmpusm -Cp"
+  CHECKVALUEISNT "$?" "0" "snmpusm -Cp without arg fails"
+  CHECK "Bad -Cp option: no argument given"
+
+  CAPTURE "snmpusm -CE"
+  CHECKVALUEISNT "$?" "0" "snmpusm -CE without arg fails"
+  CHECK "Bad -CE option: no argument given"
+
+  CAPTURE "snmpusm -v 2c -c testcommunity 127.0.0.1"
+  CHECKVALUEISNT "$?" "0" "snmpusm without command fails"
+  CHECK "Please specify an operation to perform"
+
+  CAPTURE "snmpusm -v 2c -c testcommunity 127.0.0.1 create"
+  CHECKVALUEISNT "$?" "0" "snmpusm create without user fails"
+  CHECK "You must specify the user name to create"
+
+  CAPTURE "snmpusm -v 2c -c testcommunity 127.0.0.1 cloneFrom user1"
+  CHECKVALUEISNT "$?" "0" "snmpusm cloneFrom with 1 user fails"
+  CHECK "You must specify the user name to clone from"
+
+  CAPTURE "snmpusm -v 2c -c testcommunity 127.0.0.1 passwd"
+  CHECKVALUEISNT "$?" "0" "snmpusm passwd without passphrases fails"
+  CHECK "New passphrase must be greater than"
+fi
+
+# snmpvacm subcommand bounds
+if [ -x "${SNMP_UPDIR}/apps/snmpvacm" ]; then
+  CAPTURE "snmpvacm -v 2c -c testcommunity 127.0.0.1"
+  CHECKVALUEISNT "$?" "0" "snmpvacm without command fails"
+  CHECK "Please specify a operation to perform"
+
+  CAPTURE "snmpvacm -v 2c -c testcommunity 127.0.0.1 createView view1"
+  CHECKVALUEISNT "$?" "0" "snmpvacm createView missing subtree fails"
+  CHECK "You must specify name, subtree and mask"
+
+  CAPTURE "snmpvacm -v 2c -c testcommunity 127.0.0.1 createSec2Group 1 sec1"
+  CHECKVALUEISNT "$?" "0" "snmpvacm createSec2Group missing group fails"
+  CHECK "You must specify model, security name and group name"
+
+  CAPTURE "snmpvacm -v 2c -c testcommunity 127.0.0.1 createAccess grp1 1 1"
+  CHECKVALUEISNT "$?" "0" "snmpvacm createAccess missing args fails"
+  CHECK "You must specify the access entry to create"
+
+  CAPTURE "snmpvacm -v 2c -c testcommunity 127.0.0.1 createAuth grp1 1 1"
+  CHECKVALUEISNT "$?" "0" "snmpvacm createAuth missing args fails"
+  CHECK "You must specify the authAccess entry to create"
+fi
+
+# snmpstatus, snmptable, snmpdelta bounds
+CAPTURE "snmpstatus"
+CHECKVALUEISNT "$?" "0" "snmpstatus without host fails"
+CHECK "USAGE: snmpstatus"
+
+CAPTURE "snmptable -v 2c -c testcommunity 127.0.0.1"
+CHECKVALUEISNT "$?" "0" "snmptable without table OID fails"
+CHECK "USAGE: snmptable"
+
+if [ -x "${SNMP_UPDIR}/apps/snmpdelta" ]; then
+  CAPTURE "snmpdelta -Cp"
+  CHECKVALUEISNT "$?" "0" "snmpdelta -Cp without arg fails"
+  CHECK "Bad -Cp option: no argument given"
+fi
+
+# snmptls option and subcommand bounds (if built)
+if [ -x "${SNMP_UPDIR}/apps/snmptls" ]; then
+  CAPTURE "${SNMP_UPDIR}/apps/snmptls -Cm"
+  CHECKVALUEISNT "$?" "0" "snmptls -Cm without arg fails"
+  CHECK "Bad -Cm option: no argument given"
+
+  CAPTURE "${SNMP_UPDIR}/apps/snmptls -v 2c -c testcommunity 127.0.0.1 certToSecName add 1"
+  CHECKVALUEISNT "$?" "0" "snmptls certToSecName add missing args fails"
+  CHECK "missing certToSecName arguments"
+
+  CAPTURE "${SNMP_UPDIR}/apps/snmptls -v 2c -c testcommunity 127.0.0.1 targetParamsFingerprint add param1"
+  CHECKVALUEISNT "$?" "0" "snmptls targetParamsFingerprint add missing args fails"
+  CHECK "missing targetParamsFingerprint arguments"
+
+  CAPTURE "${SNMP_UPDIR}/apps/snmptls -v 2c -c testcommunity 127.0.0.1 targetAddr add"
+  CHECKVALUEISNT "$?" "0" "snmptls targetAddr add missing args fails"
+  CHECK "missing targetAddr arguments"
+fi
+
+#
+# Part 2: Live agent queries via snmpstatus, snmptable, and snmptest
+#
+
+snmp_version=v2c
+. ./Sv2cconfig
+
+STARTAGENT
+
+AGENT_TARGET="-$snmp_version -c testcommunity $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+# snmpstatus against running agent
+CAPTURE "snmpstatus $AGENT_TARGET"
+CHECKVALUEIS "$?" "0" "snmpstatus succeeds against agent"
+CHECK "Up:"
+
+# snmptable with GETNEXT (-CB) and field/width options (-Cf, -Cw)
+CAPTURE "snmptable -CB $AGENT_TARGET .1.3.6.1.2.1.1.9"
+CHECKVALUEIS "$?" "0" "snmptable -CB succeeds on sysORTable"
+CHECK "SNMP table:"
+
+CAPTURE "snmptable -Cf , -Cw 200 $AGENT_TARGET .1.3.6.1.2.1.1.9"
+CHECKVALUEIS "$?" "0" "snmptable -Cf , -Cw 200 succeeds on sysORTable"
+CHECK "sysORID,sysORDescr,sysORUpTime"
+
+# snmptest interactive commands via stdin ($G default GET, $N GETNEXT, $Q quit)
+SNMPTEST_INPUT="${SNMP_TMPDIR}/snmptest_input.txt"
+cat <<EOF > "$SNMPTEST_INPUT"
+.1.3.6.1.2.1.1.1.0
+
+\$N
+.1.3.6.1.2.1.1.1.0
+
+\$Q
+EOF
+CAPTURE "snmptest $AGENT_TARGET" < "$SNMPTEST_INPUT"
+CHECKVALUEIS "$?" "0" "snmptest interactive session exits with 0"
+CHECK "Request type is Getnext Request"
+CHECKCOUNT 2 "Received Get Response"
+CHECK "Goodbye"
+
+STOPAGENT
+
+FINISHED
