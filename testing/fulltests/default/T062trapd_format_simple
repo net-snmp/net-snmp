@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# "inline" trap handler invoked by snmptrapd
+if [ "x$1" = "xtraphandle" ]; then
+  cat - >>"$2"
+  exit 0
+fi
+
+. ../support/simple_eval_tools.sh
+
+HEADER snmptrapd log and execute format specifiers and bounds
+
+SKIPIF NETSNMP_DISABLE_SNMPV1
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIFNOT USING_UTILITIES_EXECUTE_MODULE
+SKIPIFNOT USING_MIBII_VACM_CONF_MODULE
+
+TRAPHANDLE_LOGFILE=${SNMP_TMPDIR}/traphandle_fmt.log
+
+# Resolve path to this script for traphandle execution
+if [ -n "$testscript" ] && [ "`echo $testscript | cut -c1`" = "/" ]; then
+  traphandle_arg="$testscript"
+elif [ "`echo $1 | cut -c1`" = "/" ]; then
+  traphandle_arg="$1"
+else
+  NETSNMPDIR="`pwd`"
+  NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+  NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+  NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+  traphandle_arg="${NETSNMPDIR}/$1"
+fi
+
+TESTCOMMUNITY=testcommunity
+
+# Leave format1 unset so SNMPv1 traps exercise realloc_format_plain_trap()
+# and convert_agent_addr() (NI_MAXHOST buffer sizing).
+# Set format2 to exercise:
+# - %08.4y-%02.2m-%02.2l: zero-padding and width/precision in realloc_output_temp_bfr()
+# - %8.6y: numeric precision > length without leading-zero flag
+# - %-15A %-15b: left-justification width padding and realloc_handle_ip_fmt()
+# - %V|----------------------------------------%v: >31-char separator truncation
+#   and consumption in PARSE_GET_SEPARATOR (31 chars: |------------------------------)
+CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
+CONFIGTRAPD [snmp] tempFilePattern /tmp/snmpd-tmp-XXXXXX
+CONFIGTRAPD authcommunity log,execute $TESTCOMMUNITY
+CONFIGTRAPD format2 "FMT2:[%08.4y-%02.2m-%02.2l][%8.6y][%-15A][%-15b]%V|----------------------------------------%v\n"
+CONFIGTRAPD format execute "EXEC:[%B][%b]%V;%v\n"
+if [ "x$OSTYPE" = "xmsys" ]; then
+  CONFIGTRAPD traphandle default $MSYS_SH -c "'" $traphandle_arg traphandle $TRAPHANDLE_LOGFILE "'"
+else
+  CONFIGTRAPD traphandle default /bin/sh $traphandle_arg traphandle $TRAPHANDLE_LOGFILE
+fi
+CONFIGTRAPD agentxsocket /dev/null
+
+STARTTRAPD
+
+# 1) Send an SNMPv2c trap with two varbinds to test format2 and format execute
+CAPTURE "snmptrap -Ci -t $SNMP_SLEEP -v 2c -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT 42 .1.3.6.1.6.3.1.1.5.1 .1.3.6.1.2.1.1.4.0 s first_var .1.3.6.1.2.1.1.6.0 s second_var"
+
+WAITFOR "second_var" $SNMP_SNMPTRAPD_LOG_FILE
+WAITFOR "second_var" $TRAPHANDLE_LOGFILE
+
+# Verify %08.4y-%02.2m-%02.2l zero-padded width > precision formatting
+CHECKTRAPD "FMT2:\[0000[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\]"
+
+# Verify %8.6y precision > value length without leading-zero flag ("[00  YYYY]")
+CHECKTRAPD "\[00[ ][ ][0-9][0-9][0-9][0-9]\]"
+
+# Verify %V separator truncated to 31 bytes ("|------------------------------") between varbinds
+CHECKTRAPD "first_var\|------------------------------[^-].*second_var"
+
+# Verify format execute output in traphandle log file
+CHECKFILE $TRAPHANDLE_LOGFILE "EXEC:\[.*\]\[.*\]"
+CHECKFILE $TRAPHANDLE_LOGFILE "first_var;.*second_var"
+
+# 2) Send an SNMPv1 enterprise-specific trap to exercise realloc_format_plain_trap()
+# and convert_agent_addr()
+CAPTURE "snmptrap -v 1 -c $TESTCOMMUNITY $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPTRAPD_PORT .1.3.6.1.4.1.8072.3.2.10 127.0.0.1 6 99 12345 .1.3.6.1.2.1.1.4.0 s v1_plain_trap_val"
+
+WAITFOR "v1_plain_trap_val" $SNMP_SNMPTRAPD_LOG_FILE
+CHECKTRAPD "Enterprise Specific Trap \(.99\)"
+CHECKTRAPD "v1_plain_trap_val"
+
+STOPTRAPD
+
+FINISHED
