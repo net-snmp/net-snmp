@@ -768,5 +768,122 @@ class OversizedOidTest(unittest.TestCase):
         self.assertEqual(res, None)
 
 
+class CExtensionRegressionTests(unittest.TestCase):
+    """Regression tests for python/netsnmp/client_intf.c and client.py"""
+
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
+    def test_use_enums_and_unmapped_oid(self):
+        """Test UseEnums=1 on ASN_INTEGER responses where tp is NULL or has no enums (commit 58b4f656ed82)"""
+        sess = setup_v2()
+        sess.UseEnums = 1
+        sess.UseNumeric = 1
+
+        # snmpEngineBoots.0 (.1.3.6.1.6.3.10.2.1.2.0) returns ASN_INTEGER without enums.
+        var = netsnmp.Varbind('.1.3.6.1.6.3.10.2.1.2', '0')
+        res = sess.get(netsnmp.VarList(var))
+        self.assertEqual(len(res), 1)
+        self.assertIsNotNone(res[0])
+        self.assertEqual(var.type, 'INTEGER')
+
+        # Also exercise getnext and getbulk with UseEnums=1 returning ASN_INTEGER
+        var_next = netsnmp.Varbind('.1.3.6.1.6.3.10.2.1.1', '0')
+        res_next = sess.getnext(netsnmp.VarList(var_next))
+        self.assertEqual(len(res_next), 1)
+        self.assertEqual(var_next.type, 'INTEGER')
+
+        varlist_bulk = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.6.3.10.2.1.1', '0'))
+        res_bulk = sess.getbulk(0, 1, varlist_bulk)
+        self.assertEqual(len(res_bulk), 1)
+        self.assertEqual(varlist_bulk[0].type, 'INTEGER')
+
+        # Also run in a child interpreter with MIBDIRS=/dev/null and MIBS="" so
+        # tree_head is NULL and netsnmp_sprint_realloc_objid_tree() returns tp == NULL
+        # for ASN_INTEGER responses with UseEnums=1.
+        import subprocess
+        import sys
+        env = dict(os.environ)
+        env['MIBS'] = ''
+        env['MIBDIRS'] = '/dev/null'
+        code = (
+            "import os, netsnmp; "
+            "port = int(os.environ.get('SNMP_SNMPD_PORT', 161)); "
+            "s = netsnmp.Session(Version=2, DestHost=f'localhost:{port}', Community='public', UseEnums=1, UseNumeric=1); "
+            "v = netsnmp.Varbind('.1.3.6.1.6.3.10.2.1.2', '0'); "
+            "r = s.get(netsnmp.VarList(v)); "
+            "assert r and r[0] is not None and v.type == 'INTEGER', (r, v.type)"
+        )
+        subprocess.check_call([sys.executable, '-c', code], env=env)
+
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
+    def test_invalid_oid_error_cleanup(self):
+        """Test error cleanup paths when an invalid OID tag is passed (commits 98b3143cf636, 4b5a9058958f)"""
+        sess = setup_v2()
+        bad_var = netsnmp.Varbind('__invalid_oid_tag_xyz__', '0', 'val', 'OCTETSTR')
+
+        res_get = sess.get(netsnmp.VarList(bad_var))
+        self.assertIsNone(res_get)
+
+        res_getnext = sess.getnext(netsnmp.VarList(bad_var))
+        self.assertIsNone(res_getnext)
+
+        res_walk = sess.walk(netsnmp.VarList(bad_var))
+        self.assertIsNone(res_walk)
+
+        res_bulk = sess.getbulk(0, 4, netsnmp.VarList(bad_var))
+        self.assertIsNone(res_bulk)
+
+        if not set_support_disabled():
+            res_set = sess.set(netsnmp.VarList(bad_var))
+            self.assertIsNone(res_set)
+
+    @unittest.skipIf(set_support_disabled() or vacm_or_system_support_disabled(), "SET or VACM/system MIB support is disabled")
+    def test_varbind_ipaddr_and_invalid_type(self):
+        """Test TYPE_IPADDR and unknown type handling in set() (commits cea9c6406cc3, a0c43934bc81)"""
+        sess = setup_v2()
+        ip_var = netsnmp.Varbind('.1.3.6.1.4.1.99999.2', '0', '127.0.0.1', 'IPADDR')
+        res_ip = sess.set(netsnmp.VarList(ip_var))
+        self.assertEqual(res_ip, 0)
+
+        null_ip_var = netsnmp.Varbind('.1.3.6.1.4.1.99999.2', '0', None, 'IPADDR')
+        res_null_ip = sess.set(netsnmp.VarList(null_ip_var))
+        self.assertEqual(res_null_ip, 0)
+
+        bad_type_var = netsnmp.Varbind('.1.3.6.1.4.1.99999.2', '0', 'test', 'INVALID_ASN_TYPE')
+        res_bad_type = sess.set(netsnmp.VarList(bad_type_var))
+        self.assertIsNone(res_bad_type)
+
+    @unittest.skipIf(vacm_or_system_support_disabled(), "VACM or system MIB support is disabled")
+    def test_long_error_str_truncation(self):
+        """Test ErrorStr > STR_BUF_SIZE truncation in get/getnext/walk/getbulk/set (commit bebd73df7817)"""
+        sess = setup_v2()
+        long_err = 'E' * 5000
+
+        sess.ErrorStr = long_err
+        var = netsnmp.Varbind('sysDescr', '0')
+        res = sess.get(netsnmp.VarList(var))
+        self.assertEqual(len(res), 1)
+
+        sess.ErrorStr = long_err
+        var = netsnmp.Varbind('sysDescr', '0')
+        res = sess.getnext(netsnmp.VarList(var))
+        self.assertEqual(len(res), 1)
+
+        sess.ErrorStr = long_err
+        var = netsnmp.Varbind('sysDescr')
+        res = sess.walk(netsnmp.VarList(var))
+        self.assertEqual(len(res), 1)
+
+        sess.ErrorStr = long_err
+        var = netsnmp.Varbind('sysDescr', '0')
+        res = sess.getbulk(0, 1, netsnmp.VarList(var))
+        self.assertEqual(len(res), 1)
+
+        if not set_support_disabled():
+            sess.ErrorStr = long_err
+            var = netsnmp.Varbind('sysName', '0', 'restored_name')
+            res = sess.set(netsnmp.VarList(var))
+            self.assertEqual(res, 1)
+
+
 if __name__ == '__main__':
     unittest.main()
