@@ -380,5 +380,71 @@
         free_enginetime(eid2, sizeof(eid2));
     }
 
+    /*
+     * 7. Test usm_set_user_password() error path (frees existing authKey and sets authKeyLen=0),
+     * usm_parse_security_parameters() with 64-bit engineBoots/engineTime,
+     * and sc_encrypt() debug logging with ptlen < ctlen.
+     */
+    {
+        void usm_set_user_password(struct usmUser *user, const char *token,
+                                   char *line);
+        struct usmUser *pw_user = usm_create_user();
+
+        if (pw_user) {
+            pw_user->authKey = (u_char *)strdup("0123456789abcdef");
+            pw_user->authKeyLen = 16;
+            usm_set_user_password(pw_user, "userSetAuthPass", NULL);
+            OK(pw_user->authKey == NULL && pw_user->authKeyLen == 0,
+               "usm_set_user_password frees authKey and resets authKeyLen on error");
+            usm_free_user(pw_user);
+        }
+    }
+
+    {
+        /* Incoming USM packet with 5-byte BER integer for msgAuthoritativeEngineBoots (> ENGINEBOOT_MAX) */
+        static const u_char big_boots_pkt[] = {
+            0x30, 0x32,
+            0x02, 0x01, 0x03,
+            0x30, 0x0e, 0x02, 0x01, 0x01, 0x02, 0x03, 0x00, 0xff, 0xe3,
+                        0x04, 0x01, 0x00, 0x02, 0x01, 0x03,
+            0x04, 0x14, 0x30, 0x12,
+                        0x04, 0x04, 0x80, 0x00, 0x00, 0x01,
+                        0x02, 0x05, 0x00, 0x80, 0x00, 0x00, 0x00, /* 2147483648 */
+                        0x02, 0x01, 0x01,
+                        0x04, 0x00, 0x04, 0x00, 0x04, 0x00,
+            0x30, 0x07, 0x04, 0x00, 0x04, 0x00, 0xa0, 0x01, 0x00
+        };
+        u_char *pkt_copy = netsnmp_memdup(big_boots_pkt, sizeof(big_boots_pkt));
+        size_t rem = sizeof(big_boots_pkt);
+        netsnmp_pdu *pdu = SNMP_MALLOC_TYPEDEF(netsnmp_pdu);
+
+        snmp_sess_init(&session);
+        ret = snmpv3_parse(pdu, pkt_copy, &rem, NULL, &session);
+        OK(ret != SNMPERR_SUCCESS,
+           "usm_parse_security_parameters rejects engineBoots > ENGINEBOOT_MAX");
+        snmp_free_pdu(pdu);
+        free(pkt_copy);
+        netsnmp_cleanup_session(&session);
+    }
+
+    {
+        /* Test sc_encrypt with scapi debug token enabled and ptlen < ctlen */
+        u_char key[16] = "0123456789abcdef";
+        u_char iv[16] = "fedcba9876543210";
+        u_char pt[5] = "hello";
+        u_char ct[64];
+        size_t ct_len = sizeof(ct);
+
+        memset(ct, 0, sizeof(ct));
+        snmp_set_do_debugging(1);
+        debug_register_tokens("scapi");
+        ret = sc_encrypt(usmAESPrivProtocol, OID_LENGTH(usmAESPrivProtocol),
+                         key, sizeof(key), iv, sizeof(iv),
+                         pt, sizeof(pt), ct, &ct_len);
+        snmp_set_do_debugging(0);
+        OK(ret == SNMPERR_SUCCESS,
+           "sc_encrypt with scapi debugging logs safely when ptlen < ctlen");
+    }
+
     snmp_shutdown("T032usm");
 }
