@@ -378,10 +378,32 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
         struct counter64 i64_in = { 0xffffffffU, 0xffffff80U }, i64_out = { 0, 0 };
         float f_in = 1.5f, f_out = 0.0f;
         double d_in = -2.25, d_out = 0.0;
+        u_char padded_u64[] = {
+            ASN_OPAQUE, 5, ASN_OPAQUE_TAG1, ASN_OPAQUE_U64, 1, 0x2a, 0x00
+        };
+        size_t padded_u64_len = sizeof(padded_u64);
         u_char padded_i64[] = {
             ASN_OPAQUE, 5, ASN_OPAQUE_TAG1, ASN_OPAQUE_I64, 1, 0xff, 0x00
         };
         size_t padded_len = sizeof(padded_i64);
+        u_char trunc_u64[] = {
+            ASN_OPAQUE, 4, ASN_OPAQUE_TAG1, ASN_OPAQUE_U64, 5, 0x01
+        };
+        size_t trunc_u64_len = sizeof(trunc_u64);
+        u_char trunc_i64[] = {
+            ASN_OPAQUE, 4, ASN_OPAQUE_TAG1, ASN_OPAQUE_I64, 5, 0x01
+        };
+        size_t trunc_i64_len = sizeof(trunc_i64);
+        u_char trunc_float[] = {
+            ASN_OPAQUE, ASN_OPAQUE_FLOAT_BER_LEN - 2,
+            ASN_OPAQUE_TAG1, ASN_OPAQUE_FLOAT, 6, 0, 0, 0, 0
+        };
+        size_t trunc_float_len = sizeof(trunc_float);
+        u_char trunc_double[] = {
+            ASN_OPAQUE, ASN_OPAQUE_DOUBLE_BER_LEN - 2,
+            ASN_OPAQUE_TAG1, ASN_OPAQUE_DOUBLE, 10, 0, 0, 0, 0, 0, 0, 0, 0
+        };
+        size_t trunc_double_len = sizeof(trunc_double);
 
         p = asn_build_unsigned_int64(p, &rem, ASN_OPAQUE_U64, &u64_in,
                                      sizeof(u64_in));
@@ -414,11 +436,30 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
            total_len == 0,
            "asn_parse_double sequential and datalength == 0");
 
+        p = asn_parse_unsigned_int64(padded_u64, &padded_u64_len, &type,
+                                     &u64_out, sizeof(u64_out));
+        OK(p == padded_u64 + sizeof(padded_u64) && padded_u64_len == 0 &&
+           u64_out.high == 0 && u64_out.low == 0x2aU,
+           "asn_parse_unsigned_int64 consumes outer opaque trailing bytes");
+
         p = asn_parse_signed_int64(padded_i64, &padded_len, &type, &i64_out,
                                    sizeof(i64_out));
         OK(p == padded_i64 + sizeof(padded_i64) && padded_len == 0 &&
            i64_out.high == 0xffffffffU && i64_out.low == 0xffffffffU,
            "asn_parse_signed_int64 consumes outer opaque trailing bytes");
+
+        OK(asn_parse_unsigned_int64(trunc_u64, &trunc_u64_len, &type,
+                                    &u64_out, sizeof(u64_out)) == NULL,
+           "asn_parse_unsigned_int64 rejects inner length > outer length");
+        OK(asn_parse_signed_int64(trunc_i64, &trunc_i64_len, &type,
+                                  &i64_out, sizeof(i64_out)) == NULL,
+           "asn_parse_signed_int64 rejects inner length > outer length");
+        OK(asn_parse_float(trunc_float, &trunc_float_len, &type,
+                           &f_out, sizeof(f_out)) == NULL,
+           "asn_parse_float rejects inner length > outer length");
+        OK(asn_parse_double(trunc_double, &trunc_double_len, &type,
+                            &d_out, sizeof(d_out)) == NULL,
+           "asn_parse_double rejects inner length > outer length");
     }
 
 #endif
