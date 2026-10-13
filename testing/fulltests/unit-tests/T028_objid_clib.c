@@ -125,10 +125,12 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
 
     OK(snmp_parse_oid(".1.3.6.1.\"unclosed", out_oid, &out_len) == NULL,
        "snmp_parse_oid rejects unclosed quote");
+
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     {
         unsigned char *new_val = (unsigned char *)1;
         int new_val_len = -1;
+        char mibdir[PATH_MAX];
 
         OK(parse_octet_hint("1z", "abc", &new_val, &new_val_len) != NULL &&
            new_val == NULL && new_val_len == 0,
@@ -142,6 +144,70 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         OK(parse_octet_hint("1x:1x", "aa-bb", &new_val, &new_val_len) != NULL &&
            new_val == NULL && new_val_len == 0,
            "parse_octet_hint frees result on mismatched separator");
+
+        snprintf(mibdir, sizeof(mibdir), "%s/%s", ABS_SRCDIR, "mibs");
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS,
+                              mibdir);
+        netsnmp_init_mib();
+        out_len = MAX_OID_LEN;
+        OK(read_objid(".1.3.6.1.99999.\"hi\"", out_oid, &out_len) == 1 &&
+           out_len == 8 && out_oid[5] == 2 && out_oid[6] == 'h' &&
+           out_oid[7] == 'i',
+           "read_objid encodes double-quoted string length and bytes");
+        out_len = MAX_OID_LEN;
+        OK(read_objid(".1.3.6.1.99999.'hi'", out_oid, &out_len) == 1 &&
+           out_len == 7 && out_oid[5] == 'h' && out_oid[6] == 'i',
+           "read_objid encodes single-quoted fixed string bytes");
+        out_len = MAX_OID_LEN;
+        OK(read_objid("SNMP-VIEW-BASED-ACM-MIB::vacmSecurityToGroupStatus.3.120.65",
+                      out_oid, &out_len) == 0,
+           "read_objid rejects index length exceeding MAX_OID_LEN in _add_strings_to_oid");
+        out_len = MAX_OID_LEN;
+        OK(read_objid("SNMP-VIEW-BASED-ACM-MIB::vacmSecurityToGroupStatus.3.1.300",
+                      out_oid, &out_len) == 0,
+           "read_objid rejects string index subid > 255 in _add_strings_to_oid");
+        unload_all_mibs();
+        shutdown_mib();
+        netsnmp_ds_shutdown();
     }
 #endif
+
+    /* Test parse_one_oid_index and build_oid_noalloc bounds */
+    {
+        oid idx_oids[MAX_OID_LEN + 4];
+        oid *oid_ptr;
+        size_t oid_rem;
+        netsnmp_variable_list var;
+        oid prefix[MAX_OID_LEN - 4];
+        char long_str[16] = "0123456789abcde";
+
+        memset(&var, 0, sizeof(var));
+        memset(idx_oids, 0, sizeof(idx_oids));
+        idx_oids[0] = MAX_OID_LEN + 1;
+        oid_ptr = idx_oids;
+        oid_rem = MAX_OID_LEN + 2;
+        var.type = ASN_OCTET_STR;
+        OK(parse_one_oid_index(&oid_ptr, &oid_rem, &var, 0) == SNMPERR_GENERR,
+           "parse_one_oid_index rejects ASN_OCTET_STR with uitmp > MAX_OID_LEN");
+        snmp_reset_var_buffers(&var);
+
+        idx_oids[0] = MAX_OID_LEN + 1;
+        oid_ptr = idx_oids;
+        oid_rem = MAX_OID_LEN + 2;
+        var.type = ASN_OBJECT_ID;
+        OK(parse_one_oid_index(&oid_ptr, &oid_rem, &var, 0) == SNMPERR_GENERR,
+           "parse_one_oid_index rejects ASN_OBJECT_ID with uitmp > MAX_OID_LEN");
+        snmp_reset_var_buffers(&var);
+
+        memset(prefix, 1, sizeof(prefix));
+        memset(&var, 0, sizeof(var));
+        snmp_set_var_objid(&var, prefix, 2);
+        snmp_set_var_typed_value(&var, ASN_OCTET_STR, long_str,
+                                 sizeof(long_str) - 1);
+        out_len = MAX_OID_LEN;
+        OK(build_oid_noalloc(out_oid, MAX_OID_LEN, &out_len,
+                             prefix, OID_LENGTH(prefix), &var) == SNMPERR_GENERR,
+           "build_oid_noalloc rejects index overflowing MAX_OID_LEN");
+        snmp_reset_var_buffers(&var);
+    }
 }
