@@ -360,8 +360,12 @@ main(int argc, char *argv[])
                         good_var++;
                     }
                 }
-                if (good_var == 5)
+                if (good_var == 5) {
                     interfaces++;
+                } else {
+                    snmp_free_pdu(pdu);
+                    pdu = NULL;
+                }
             } else {
                 fprintf(stderr, "Error in packet.\nReason: %s\n",
                         snmp_errstring(response->errstat));
