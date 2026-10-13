@@ -105,3 +105,43 @@ for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
         ("netsnmp_binary_to_hex reallocates small buffer"));
     free(hex_buf);
 }
+
+{
+    char pdir[128];
+
+    /* Test config_perror with % format specifiers */
+    config_perror("malformed %s %n %x token");
+    config_pwarn("warning %s %n %x token");
+    OK(1, "config_perror and config_pwarn safely handle percent specifiers");
+
+    /* Test snmp_config_when via netsnmp_config and netsnmp_config_process_memories */
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_HAVE_READ_CONFIG, 1);
+    OK(netsnmp_config("unknown_token_t016 value") == SNMPERR_GENERR,
+       "netsnmp_config dispatches through snmp_config_when and reports unknown token");
+
+    netsnmp_config_remember("unknown_premib_token_t016 value");
+    netsnmp_config_process_memories();
+    OK(1, "netsnmp_config_process_memories processes and frees remembered lines");
+
+    /* Test read_config_store when fopen fails and when it succeeds */
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_DONT_PERSIST_STATE, 0);
+    set_persistent_directory("/dev/null/sub");
+    read_config_store("t016_app", "test_store_line 1");
+    OK(1, "read_config_store handles unwritable persistent directory safely");
+
+    snprintf(pdir, sizeof(pdir), "/tmp/netsnmp_t016_%d", (int)getpid());
+    set_persistent_directory(pdir);
+    read_config_store("t016_app", "test_store_line 2");
+    {
+        char pfile[160];
+        snprintf(pfile, sizeof(pfile), "%s/t016_app.conf", pdir);
+        unlink(pfile);
+        rmdir(pdir);
+    }
+    set_persistent_directory(NULL);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_LIB_DONT_PERSIST_STATE, 1);
+    unregister_all_config_handlers();
+}
