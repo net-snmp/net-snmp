@@ -691,6 +691,7 @@ main(int argc, char *argv[])
      * do the request 
      */
     status = snmp_synch_response(ss, pdu, &response);
+    pdu = NULL;
     if (status == STAT_SUCCESS) {
         if (response) {
             if (response->errstat == SNMP_ERR_NOERROR) {
@@ -725,6 +726,7 @@ main(int argc, char *argv[])
         snmp_free_pdu(response);
 
 close_session:
+    snmp_free_pdu(pdu);
     snmp_close(ss);
 
 out:
