@@ -284,3 +284,28 @@ netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
     return check_storage_transition(old_value, *var->val.integer);
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_STORAGETYPE */
+
+/**
+ * Check that every string index of a table row fits in size bytes.
+ *
+ * Table helpers accept string indexes up to the maximum OID length, which
+ * is longer than the SIZE limit of most string indexes. A SET handler that
+ * creates rows should call this before it uses the index values.
+ *
+ * @return SNMP_ERR_NOERROR, or SNMP_ERR_NOCREATION if a string index is
+ *         longer than size (no such row can exist or be created).
+ */
+int
+netsnmp_check_vb_indexes_max_size(const netsnmp_variable_list *indexes,
+                                  size_t size)
+{
+    const netsnmp_variable_list *idx;
+
+    for (idx = indexes; idx; idx = idx->next_variable) {
+        if ((idx->type == ASN_OCTET_STR ||
+             idx->type == ASN_PRIV_IMPLIED_OCTET_STR) && idx->val_len > size)
+            return SNMP_ERR_NOCREATION;
+    }
+
+    return SNMP_ERR_NOERROR;
+}

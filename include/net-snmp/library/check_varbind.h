@@ -36,6 +36,10 @@ extern          "C" {
                                    int high);
 
     NETSNMP_IMPORT
+    int netsnmp_check_vb_indexes_max_size(const netsnmp_variable_list *indexes,
+                                          size_t size);
+
+    NETSNMP_IMPORT
     int netsnmp_check_vb_truthvalue(const netsnmp_variable_list *var);
 
     NETSNMP_IMPORT

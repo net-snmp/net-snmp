@@ -182,6 +182,12 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
             entry = (struct expExpression *)
                 netsnmp_tdata_extract_entry(request);
             tinfo = netsnmp_extract_table_info(request);
+            ret = netsnmp_check_vb_indexes_max_size(tinfo->indexes,
+                                                    EXP_STR1_LEN);
+            if (ret != SNMP_ERR_NOERROR) {
+                netsnmp_set_request_error(reqinfo, request, ret);
+                return SNMP_ERR_NOERROR;
+            }
 
             switch (tinfo->colnum) {
             case COLUMN_EXPEXPRESSION:
