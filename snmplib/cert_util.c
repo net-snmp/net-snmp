@@ -3233,6 +3233,12 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
 static void _parse_params(const char *token, char *line);
 
 static void
+_tlstmParams_free(void *item, void *context)
+{
+    netsnmp_tlstmParams_free((snmpTlstmParams *)item);
+}
+
+static void
 _init_tlstmParams(void)
 {
     const char *params_help = 
@@ -3245,8 +3251,10 @@ _init_tlstmParams(void)
     if (NULL == _tlstmParams)
         snmp_log(LOG_ERR,
                  "error creating sub-container for tlstmParamsTable\n");
-    else
+    else {
         _tlstmParams->container_name = strdup("tlstmParams");
+        _tlstmParams->free_item = _tlstmParams_free;
+    }
 
     register_config_handler(NULL, PARAMS_CONFIG_TOKEN, _parse_params, NULL,
                                 params_help);
@@ -3447,6 +3455,12 @@ _find_tlstmParams_fingerprint(const char *name)
 static void _parse_addr(const char *token, char *line);
 
 static void
+_tlstmAddr_free(void *item, void *context)
+{
+    netsnmp_tlstmAddr_free((snmpTlstmAddr *)item);
+}
+
+static void
 _init_tlstmAddr(void)
 {
     const char *addr_help = 
@@ -3459,8 +3473,10 @@ _init_tlstmAddr(void)
     if (NULL == _tlstmAddr)
         snmp_log(LOG_ERR,
                  "error creating sub-container for tlstmAddrTable\n");
-    else
+    else {
         _tlstmAddr->container_name = strdup("tlstmAddr");
+        _tlstmAddr->free_item = _tlstmAddr_free;
+    }
 
     register_config_handler(NULL, ADDR_CONFIG_TOKEN, _parse_addr, NULL,
                             addr_help);
