@@ -154,12 +154,12 @@ netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
 {
     netsnmp_data_list *node;
     if (!name) {
-        snmp_log(LOG_ERR,"no name provided.");
+        snmp_log(LOG_ERR, "no name provided.\n");
         return NULL;
     }
     node = netsnmp_create_data_list(name, data, beer);
     if(NULL == node) {
-        snmp_log(LOG_ERR,"could not allocate memory for node.");
+        snmp_log(LOG_ERR, "could not allocate memory for node.\n");
         return NULL;
     }
     
@@ -260,7 +260,7 @@ netsnmp_register_save_list(netsnmp_data_list **datalist,
     info = SNMP_MALLOC_TYPEDEF(netsnmp_data_list_saveinfo);
 
     if (!info) {
-        snmp_log(LOG_ERR, "couldn't malloc a netsnmp_data_list_saveinfo typedef");
+        snmp_log(LOG_ERR, "couldn't malloc a netsnmp_data_list_saveinfo typedef\n");
         return;
     }
 
@@ -305,7 +305,7 @@ netsnmp_save_all_data_callback(int major, int minor,
     netsnmp_data_list_saveinfo *info = (netsnmp_data_list_saveinfo *)clientarg;
 
     if (!clientarg) {
-        snmp_log(LOG_WARNING, "netsnmp_save_all_data_callback called with no passed data");
+        snmp_log(LOG_WARNING, "netsnmp_save_all_data_callback called with no passed data\n");
         return SNMP_ERR_NOERROR;
     }
 
@@ -363,7 +363,7 @@ netsnmp_read_data_callback(const char *token, char *line) {
     /* find the stashed information about what we're parsing */
     info = (netsnmp_data_list_saveinfo *) netsnmp_get_list_data(saveHead, token);
     if (!info) {
-        snmp_log(LOG_WARNING, "netsnmp_read_data_callback called without previously registered subparser");
+        snmp_log(LOG_WARNING, "netsnmp_read_data_callback called without previously registered subparser\n");
         return;
     }
 
