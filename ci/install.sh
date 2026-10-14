@@ -62,9 +62,11 @@ case "$(uname)" in
 	if [ ! -e /usr/bin/perl ]; then
 	    ln -s /usr/local/bin/perl /usr/bin/perl
 	fi
+	git config --global --add safe.directory "$(dirname "$scriptdir")"
 	;;
     OpenBSD)
 	pkg_add bash gawk git libssh2
+	git config --global --add safe.directory "$(dirname "$scriptdir")"
 	;;
 esac
 
