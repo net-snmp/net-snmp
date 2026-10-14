@@ -495,7 +495,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
 char *
 snmp_log_syslogname(const char *pstr)
 {
-  if (pstr)
+  if (pstr && pstr != syslogname)
     strlcpy (syslogname, pstr, sizeof(syslogname));
 
   return syslogname;
