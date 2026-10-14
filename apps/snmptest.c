@@ -70,6 +70,11 @@ int             command = SNMP_MSG_GET;
 
 static int      input_variable(netsnmp_variable_list *);
 
+static void
+optProc(int argc, char *const *argv, int opt)
+{
+}
+
 void
 usage(void)
 {
@@ -97,7 +102,7 @@ main(int argc, char *argv[])
     /*
      * get the common command line arguments 
      */
-    switch (snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    switch (snmp_parse_args(argc, argv, &session, NULL, optProc)) {
     case NETSNMP_PARSE_ARGS_ERROR:
         goto out;
     case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
