@@ -225,12 +225,15 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
         ss->version       = version;
         ss->securityModel = secModel;
         ss->securityLevel = secLevel;
+        SNMP_FREE(ss->securityEngineID);
         ss->securityEngineID = netsnmp_memdup(engineID, engIDLen);
         ss->securityEngineIDLen = engIDLen;
         if ( version == SNMP_VERSION_3 ) {
+            SNMP_FREE(ss->securityName);
             ss->securityNameLen = strlen(secName);
             ss->securityName = netsnmp_memdup(secName, ss->securityNameLen + 1);
         } else {
+            SNMP_FREE(ss->community);
             ss->community = netsnmp_memdup(secName, strlen(secName));
             ss->community_len = strlen(secName);
         }
