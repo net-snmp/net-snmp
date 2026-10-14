@@ -33,6 +33,7 @@ netsnmp_feature_child_of(table_tdata_delete_table, table_tdata_all);
 netsnmp_feature_child_of(table_tdata_extract_table, table_tdata_all);
 netsnmp_feature_child_of(table_tdata_remove_row, table_tdata_all);
 netsnmp_feature_child_of(table_tdata_insert_row, table_tdata_all);
+netsnmp_feature_child_of(table_tdata_remove_row_on_completion, table_tdata_all);
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA
 netsnmp_feature_require(table_container_row_insert);
@@ -487,7 +488,7 @@ netsnmp_insert_tdata_row(netsnmp_request_info *request,
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_INSERT_ROW */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW
-/** inserts a newly created tdata row into a request */
+/** removes a tdata row from a request */
 NETSNMP_INLINE void
 netsnmp_remove_tdata_row(netsnmp_request_info *request,
                          netsnmp_tdata_row *row)
@@ -496,6 +497,74 @@ netsnmp_remove_tdata_row(netsnmp_request_info *request,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW */
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW_ON_COMPLETION
+struct tdata_pending_removal {
+    netsnmp_tdata     *table;
+    netsnmp_tdata_row *row;
+    void             (*remove_row)(netsnmp_tdata_row *);
+};
+
+static void
+_tdata_run_pending_removal(void *data)
+{
+    struct tdata_pending_removal *pending = data;
+    netsnmp_tdata_row            *row;
+
+    /*
+     * Only remove the row if it is still part of the table, e.g. the table
+     * may have been emptied while the agent was shutting down.
+     */
+    for (row = netsnmp_tdata_row_first(pending->table); row;
+         row = netsnmp_tdata_row_next(pending->table, row)) {
+        if (row == pending->row) {
+            pending->remove_row(row);
+            break;
+        }
+    }
+    free(pending);
+}
+
+/** removes a row from a table once processing of the current request has
+ *  finished
+ *
+ *  SET handlers must use this function instead of removing a row while
+ *  processing a SET request, e.g. when a RowStatus column is set to
+ *  destroy(6), because other varbinds of the same request, including
+ *  varbinds handled by other handlers sharing the row, keep using the row
+ *  until all SET modes have finished. Asking more than once for the removal
+ *  of the same row is harmless.
+ *  See also netsnmp_agent_call_on_completion().
+ *
+ *  @param reqinfo    the agent request information of the SET request
+ *  @param table      the table that contains the row
+ *  @param row        the row to remove
+ *  @param remove_row removes the row from the table and frees it
+ */
+void
+netsnmp_tdata_remove_row_on_completion(netsnmp_agent_request_info *reqinfo,
+                                       netsnmp_tdata *table,
+                                       netsnmp_tdata_row *row,
+                                       void (*remove_row)(netsnmp_tdata_row *))
+{
+    struct tdata_pending_removal *pending;
+
+    if (!table || !row || !remove_row)
+        return;
+
+    pending = malloc(sizeof(*pending));
+    if (!pending) {
+        snmp_log(LOG_ERR, "could not schedule the removal of a tdata row\n");
+        return;
+    }
+    pending->table      = table;
+    pending->row        = row;
+    pending->remove_row = remove_row;
+    if (netsnmp_agent_call_on_completion(reqinfo, row,
+                                         _tdata_run_pending_removal,
+                                         pending) != 1)
+        free(pending);
+}
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA_REMOVE_ROW_ON_COMPLETION */
 
 /* ==================================
  *

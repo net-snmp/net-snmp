@@ -96,6 +96,11 @@ typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 
     void netsnmp_insert_tdata_row(netsnmp_request_info *, netsnmp_tdata_row *);
     void netsnmp_remove_tdata_row(netsnmp_request_info *, netsnmp_tdata_row *);
+    void netsnmp_tdata_remove_row_on_completion(
+                               netsnmp_agent_request_info *reqinfo,
+                               netsnmp_tdata *table,
+                               netsnmp_tdata_row *row,
+                               void (*remove_row)(netsnmp_tdata_row *));
 
 
 /* ============================

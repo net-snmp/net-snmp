@@ -678,6 +678,65 @@ extend_parse_config(const char *token, char *cptr)
          *
          *************************/
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+struct extension_removal {
+    netsnmp_extend            *extension;
+    extend_registration_block *ereg;
+};
+
+static void
+_run_extension_removal( void *data )
+{
+    struct extension_removal *removal = (struct extension_removal *)data;
+    extend_registration_block *eptr;
+    netsnmp_extend            *extension = NULL;
+
+    /*
+     * Only free the extension if it is still registered, e.g. the
+     * configuration may have been reloaded in the meantime.
+     */
+    for ( eptr = ereg_head; eptr; eptr = eptr->next ) {
+        if ( eptr == removal->ereg ) {
+            for ( extension = eptr->ehead; extension;
+                  extension = extension->next )
+                if ( extension == removal->extension )
+                    break;
+            break;
+        }
+    }
+    if ( extension )
+        _free_extension( extension, eptr );
+    free( removal );
+}
+
+/*
+ * Other varbinds of the same request keep using the extension until the
+ * request has been processed, so free it only then.
+ */
+static void
+_free_extension_on_completion( netsnmp_agent_request_info *reqinfo,
+                               netsnmp_extend *extension,
+                               extend_registration_block *ereg )
+{
+    struct extension_removal *removal;
+
+    if (!extension)
+        return;
+
+    removal = SNMP_MALLOC_TYPEDEF( struct extension_removal );
+    if (!removal) {
+        snmp_log(LOG_ERR, "extend: could not schedule removal of an entry\n");
+        return;
+    }
+    removal->extension = extension;
+    removal->ereg      = ereg;
+    if (netsnmp_agent_call_on_completion( reqinfo, extension,
+                                          _run_extension_removal,
+                                          removal ) != 1)
+        free( removal );
+}
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 int
 handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                      netsnmp_handler_registration *reginfo,
@@ -988,7 +1047,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 case RS_CREATEANDWAIT:
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
-                    _free_extension( extension, eptr );
+                    _free_extension_on_completion( reqinfo, extension, eptr );
                 }
             }
             break;
@@ -1054,7 +1113,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 case RS_CREATEANDWAIT:
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
-                    _free_extension( extension, eptr );
+                    _free_extension_on_completion( reqinfo, extension, eptr );
                 }
                 break;
             }
@@ -1104,7 +1163,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 case RS_DESTROY:
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
-                    _free_extension( extension, eptr );
+                    _free_extension_on_completion( reqinfo, extension, eptr );
                     break;
                 }
             }

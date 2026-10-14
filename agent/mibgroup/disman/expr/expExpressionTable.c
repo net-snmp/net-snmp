@@ -19,6 +19,7 @@ netsnmp_feature_require(table_tdata);
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_feature_require(check_vb_type_and_max_size);
 netsnmp_feature_require(table_tdata_insert_row);
+netsnmp_feature_require(table_tdata_remove_row_on_completion);
 netsnmp_feature_require(iquery_pdu_session);
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
@@ -287,7 +288,9 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & EXP_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
-                        expExpression_removeEntry( row );
+                        netsnmp_tdata_remove_row_on_completion(reqinfo,
+                                expr_table_data, row,
+                                expExpression_removeEntry);
                     }
                 }
             }
@@ -377,7 +380,8 @@ expExpressionTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
-                    expExpression_removeEntry(row);
+                    netsnmp_tdata_remove_row_on_completion(reqinfo,
+                            expr_table_data, row, expExpression_removeEntry);
                 }
             }
         }

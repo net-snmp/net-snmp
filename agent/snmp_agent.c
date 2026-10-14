@@ -309,6 +309,73 @@ netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
     return NULL;
 }
 
+struct agent_completion_call {
+    void          (*fn)(void *);
+    void           *arg;
+};
+
+static void
+_agent_run_completion_call(void *data)
+{
+    struct agent_completion_call *call = data;
+
+    call->fn(call->arg);
+    free(call);
+}
+
+/**
+ * Calls fn(arg) once processing of a request has finished.
+ *
+ * Each varbind of a request keeps the pointers that the handlers attached to
+ * it, e.g. a table row, until all processing modes of the request have
+ * finished, and other varbinds of the same request may refer to the same
+ * object. A SET handler therefore must not free such an object while it is
+ * processing a request, e.g. when a RowStatus column is set to destroy(6),
+ * but should defer freeing the object with this function.
+ *
+ * @param ari Agent request information.
+ * @param key Identifies the object that fn(arg) frees. If a call has already
+ *            been scheduled for the same key, fn(arg) is not scheduled again.
+ * @param fn  Function to call.
+ * @param arg Argument to pass to fn.
+ *
+ * @return 1 if fn(arg) has been scheduled, 0 if a call had already been
+ *         scheduled for key and -1 upon failure.
+ */
+int
+netsnmp_agent_call_on_completion(netsnmp_agent_request_info *ari,
+                                 const void *key, void (*fn)(void *),
+                                 void *arg)
+{
+    struct agent_completion_call *call;
+    netsnmp_data_list            *node;
+    char                          name[64];
+
+    if (!ari || !key || !fn)
+        return -1;
+
+    snprintf(name, sizeof(name), "call_on_completion_%p", key);
+    if (netsnmp_get_list_data(ari->agent_data, name))
+        return 0;
+
+    call = malloc(sizeof(*call));
+    if (!call)
+        goto err;
+    call->fn  = fn;
+    call->arg = arg;
+    node = netsnmp_create_data_list(name, call, _agent_run_completion_call);
+    if (!node) {
+        free(call);
+        goto err;
+    }
+    netsnmp_agent_add_list_data(ari, node);
+    return 1;
+
+err:
+    snmp_log(LOG_ERR, "could not defer a call until request completion\n");
+    return -1;
+}
+
 NETSNMP_INLINE void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {

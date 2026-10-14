@@ -18,6 +18,7 @@ netsnmp_feature_require(table_tdata);
 netsnmp_feature_require(check_vb_oid);
 netsnmp_feature_require(check_vb_truthvalue);
 netsnmp_feature_require(table_tdata_insert_row);
+netsnmp_feature_require(table_tdata_remove_row_on_completion);
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_handler_registration *object_table_reg;
@@ -294,7 +295,9 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & EXP_OBJ_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
-                        expObject_removeEntry( row );
+                        netsnmp_tdata_remove_row_on_completion(reqinfo,
+                                expObject_table_data, row,
+                                expObject_removeEntry);
                     }
                 }
             }
@@ -438,7 +441,8 @@ expObjectTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
-                    expObject_removeEntry(row);
+                    netsnmp_tdata_remove_row_on_completion(reqinfo,
+                            expObject_table_data, row, expObject_removeEntry);
                 }
             }
         }

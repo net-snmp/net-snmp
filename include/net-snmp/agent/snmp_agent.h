@@ -310,6 +310,11 @@ extern          "C" {
             netsnmp_agent_get_list_data(netsnmp_agent_request_info
                                         *agent, const char *name);
 
+    int
+        netsnmp_agent_call_on_completion(netsnmp_agent_request_info *ari,
+                                         const void *key,
+                                         void (*fn)(void *), void *arg);
+
     void
             netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 

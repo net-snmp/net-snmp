@@ -22,6 +22,7 @@ netsnmp_feature_require(check_vb_type_and_max_size);
 netsnmp_feature_require(mteevent_removeentry);
 netsnmp_feature_require(check_vb_truthvalue);
 netsnmp_feature_require(table_tdata_insert_row);
+netsnmp_feature_require(table_tdata_remove_row_on_completion);
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static netsnmp_table_registration_info *table_info;
@@ -285,7 +286,8 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
                       !(entry->flags & MTE_EVENT_FLAG_VALID)) {
                         row = (netsnmp_tdata_row *)
                                 netsnmp_tdata_extract_row(request);
-                        mteEvent_removeEntry( row );
+                        netsnmp_tdata_remove_row_on_completion(reqinfo,
+                                event_table_data, row, mteEvent_removeEntry);
                     }
                 }
             }
@@ -364,7 +366,8 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
-                    mteEvent_removeEntry(row);
+                    netsnmp_tdata_remove_row_on_completion(reqinfo,
+                            event_table_data, row, mteEvent_removeEntry);
                 }
             }
         }

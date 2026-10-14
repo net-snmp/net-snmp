@@ -126,6 +126,36 @@ get_next_logging_entry(void **loop_context, void **data_context,
     return index;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+static void
+remove_loghandler(void *data)
+{
+    netsnmp_log_handler *logh;
+
+    /*
+     * Only remove the log handler if it still exists, e.g. the log handlers
+     * may have been removed while the agent was shutting down.
+     */
+    for (logh = get_logh_head(); logh; logh = logh->next) {
+        if (logh == data) {
+            netsnmp_remove_loghandler(logh);
+            break;
+        }
+    }
+}
+
+/*
+ * Other varbinds of the same request keep using the log handler until the
+ * request has been processed, so remove it only then.
+ */
+static void
+remove_loghandler_on_completion(netsnmp_agent_request_info *reqinfo,
+                                netsnmp_log_handler *logh)
+{
+    netsnmp_agent_call_on_completion(reqinfo, logh, remove_loghandler, logh);
+}
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 
 int
 handle_nsLoggingTable(netsnmp_mib_handler *handler,
@@ -424,7 +454,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                 temp = *request->requestvb->val.integer;
                 if ( logh && ( temp == RS_CREATEANDGO ||
                                temp == RS_CREATEANDWAIT)) {
-		    netsnmp_remove_loghandler( logh );
+		    remove_loghandler_on_completion( reqinfo, logh );
 		}
 	        break;
             /*
@@ -465,7 +495,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                         netsnmp_disable_this_loghandler(logh);
                         break;
 		    case RS_DESTROY:
-		        netsnmp_remove_loghandler( logh );
+		        remove_loghandler_on_completion( reqinfo, logh );
                         break;
 		}
 	        break;
