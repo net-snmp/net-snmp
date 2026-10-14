@@ -4432,6 +4432,154 @@ static void free_objgroup(struct objgroup *o)
 }
 
 /*
+ * Hash table that maps node labels onto the nodes that have been parsed so
+ * far by parse(). Used to detect duplicate objects in O(1) instead of
+ * scanning the entire list of parsed nodes for every new node.
+ *
+ * For each label, two nodes are stored: the first node with that label and
+ * the first node with that label whose subid differs from the subid of the
+ * first node. This is sufficient to determine whether a node with a given
+ * label and subid exists that has a different subid.
+ */
+struct label_entry {
+    struct label_entry *next;
+    unsigned int    hash;
+    struct node    *first;
+    struct node    *other;
+};
+
+struct label_table {
+    struct label_entry **buckets;
+    size_t          size;
+    size_t          count;
+};
+
+static unsigned int
+label_hash(const char *label)
+{
+    unsigned int    h = 2166136261u;
+
+    for (; *label; label++) {
+        h ^= (unsigned char)*label;
+        h *= 16777619u;
+    }
+    return h;
+}
+
+static struct label_entry *
+label_table_find(const struct label_table *lt, const char *label,
+                 unsigned int hash)
+{
+    struct label_entry *le;
+
+    if (!lt->size)
+        return NULL;
+    for (le = lt->buckets[hash & (lt->size - 1)]; le; le = le->next)
+        if (le->hash == hash && strcmp(le->first->label, label) == 0)
+            return le;
+    return NULL;
+}
+
+static int
+label_table_grow(struct label_table *lt)
+{
+    size_t          new_size = lt->size ? 2 * lt->size : 64;
+    struct label_entry **new_buckets;
+    size_t          i;
+
+    new_buckets = calloc(new_size, sizeof(*new_buckets));
+    if (!new_buckets)
+        return -1;
+    for (i = 0; i < lt->size; i++) {
+        struct label_entry *le, *next;
+
+        for (le = lt->buckets[i]; le; le = next) {
+            struct label_entry **head =
+                &new_buckets[le->hash & (new_size - 1)];
+
+            next = le->next;
+            le->next = *head;
+            *head = le;
+        }
+    }
+    free(lt->buckets);
+    lt->buckets = new_buckets;
+    lt->size = new_size;
+    return 0;
+}
+
+/*
+ * Returns a node with label @np->label and a subid that differs from
+ * @np->subid or NULL if no such node has been added to @lt.
+ */
+static struct node *
+label_table_find_dup(const struct label_table *lt, const struct node *np)
+{
+    struct label_entry *le;
+
+    if (!np->label)
+        return NULL;
+    le = label_table_find(lt, np->label, label_hash(np->label));
+    if (!le)
+        return NULL;
+    if (le->first->subid != np->subid)
+        return le->first;
+    return le->other;
+}
+
+/*
+ * Adds @np to @lt. If memory allocation fails, @np is not added. The only
+ * consequence of this is that a duplicate object warning may be missed.
+ */
+static void
+label_table_add(struct label_table *lt, struct node *np)
+{
+    struct label_entry *le, **head;
+    unsigned int    hash;
+
+    if (!np->label)
+        return;
+    hash = label_hash(np->label);
+    le = label_table_find(lt, np->label, hash);
+    if (le) {
+        if (!le->other && le->first->subid != np->subid)
+            le->other = np;
+        return;
+    }
+    if (lt->count >= lt->size && label_table_grow(lt) < 0)
+        return;
+    le = malloc(sizeof(*le));
+    if (!le)
+        return;
+    le->hash = hash;
+    le->first = np;
+    le->other = NULL;
+    head = &lt->buckets[hash & (lt->size - 1)];
+    le->next = *head;
+    *head = le;
+    lt->count++;
+}
+
+static void
+label_table_clear(struct label_table *lt)
+{
+    size_t          i;
+
+    for (i = 0; i < lt->size; i++) {
+        struct label_entry *le, *next;
+
+        for (le = lt->buckets[i]; le; le = next) {
+            next = le->next;
+            free(le);
+        }
+    }
+    free(lt->buckets);
+    lt->buckets = NULL;
+    lt->size = 0;
+    lt->count = 0;
+}
+
+/*
  * Parses a mib file and returns a linked list of nodes found in the file.
  * Returns NULL on error.
  */
@@ -4450,6 +4598,7 @@ parse(FILE * fp)
 #define IN_MIB                2
     int             state = BETWEEN_MIBS;
     struct node    *np = NULL, *root = NULL;
+    struct label_table labels = { NULL, 0, 0 };
     struct objgroup *oldgroups = objgroups, *oldobjects = objects,
                     *oldnotifs = notifs;
 
@@ -4493,6 +4642,7 @@ parse(FILE * fp)
                 notifs = NULL;
                 do_linkup(mp, root);
                 np = root = NULL;
+                label_table_clear(&labels);
             }
             state = BETWEEN_MIBS;
 #ifdef TEST
@@ -4714,23 +4864,15 @@ parse(FILE * fp)
             goto free_mib;
         }
         if (nnp) {
-            struct node *op = root;
-            int is_duplicate = 0;
+            struct node *op = label_table_find_dup(&labels, nnp);
 
-            while (op) {
-                if (strcmp(nnp->label, op->label) == 0 && nnp->subid != op->subid) {
-                    snmp_log(LOG_ERR, 
-                        "Duplicate Object '%s' at line %d in %s. First at line %d\n",
-                        op->label, mibLine, File, op->lineno);
-		    erroneousMibs++;
-                    is_duplicate = 1;
-                    break;
-		}
-                op = op->next;
-            }
-            if (is_duplicate) {
+            if (op) {
                 struct node *next_node;
 
+                snmp_log(LOG_ERR, 
+                    "Duplicate Object '%s' at line %d in %s. First at line %d\n",
+                    op->label, mibLine, File, op->lineno);
+                erroneousMibs++;
                 while (nnp) {
                     next_node = nnp->next;
                     free_node(nnp);
@@ -4741,14 +4883,18 @@ parse(FILE * fp)
                     np->next = nnp;
                 else
                     np = root = nnp;
-                while (np->next)
+                label_table_add(&labels, np);
+                while (np->next) {
                     np = np->next;
+                    label_table_add(&labels, np);
+                }
                 if (np->type == TYPE_OTHER)
                     np->type = type;
             }
         }
     }
     DEBUGMSGTL(("parse-file", "End of file (%s)\n", File));
+    label_table_clear(&labels);
     free_objgroup(objgroups);
     objgroups = oldgroups;
     free_objgroup(objects);
@@ -4758,6 +4904,7 @@ parse(FILE * fp)
     return root;
 
 free_mib:
+    label_table_clear(&labels);
     for (; root; root = np) {
         np = root->next;
         free_node(root);
