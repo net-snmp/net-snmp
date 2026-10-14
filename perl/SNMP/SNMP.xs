@@ -4923,33 +4923,34 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 		__concat_oid_str(oid_arr, &oid_arr_len, var);
 		snprint_objid(str_buf_temp, sizeof(str_buf_temp), oid_arr, oid_arr_len);
 
-		if (!use_long) {
-                  label = NULL; iid = NULL;
-		  if (((status=__get_label_iid(str_buf_temp,
-		       &label, &iid, NO_FLAGS)) == SUCCESS)
-		      && label) {
-		     strlcpy(str_buf_temp, label, sizeof(str_buf_temp));
-		     if (iid && *iid) {
-		       strlcat(str_buf_temp, ".", sizeof(str_buf_temp));
-		       strlcat(str_buf_temp, iid, sizeof(str_buf_temp));
-		     }
- 	          }
-	        }
-		
 		/* Prepend modulename:: if enabled */
 		if (include_module_name) {
 		  module_tree = get_tree (oid_arr, oid_arr_len, get_tree_head());
 		  if (module_tree) {
 		    if (strcmp(module_name(module_tree->modid, modbuf), "#-1") ) {
-		      strcat(str_buf, modbuf);
-		      strcat(str_buf, "::");
+		      strlcat(str_buf, modbuf, sizeof(str_buf));
+		      strlcat(str_buf, "::", sizeof(str_buf));
 		    }
 		    else {
-		      strcat(str_buf, "UNKNOWN::");
+		      strlcat(str_buf, "UNKNOWN::", sizeof(str_buf));
 		    }
 		  }
 		}
-		strcat(str_buf, str_buf_temp);
+
+		if (!use_long) {
+                  label = NULL; iid = NULL;
+		  if (((status=__get_label_iid(str_buf_temp,
+		       &label, &iid, NO_FLAGS)) == SUCCESS)
+		      && label) {
+		     strlcat(str_buf, label, sizeof(str_buf));
+		     if (iid && *iid) {
+		       strlcat(str_buf, ".", sizeof(str_buf));
+		       strlcat(str_buf, iid, sizeof(str_buf));
+		     }
+		     break;
+ 	          }
+	        }
+		strlcat(str_buf, str_buf_temp, sizeof(str_buf));
 
 		break;
              default:
