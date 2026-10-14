@@ -25,6 +25,9 @@ cat >>"$2.c" <<EOF
 #else
 #include <strings.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 int
 main(int argc, char *argv[]) {
