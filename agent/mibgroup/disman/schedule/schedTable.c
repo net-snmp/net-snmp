@@ -536,12 +536,18 @@ schedTable_handler(netsnmp_mib_handler *handler,
                 case RS_CREATEANDGO:
                     entry->flags |= SCHEDULE_FLAG_ACTIVE;
                     entry->flags |= SCHEDULE_FLAG_VALID;
+                    if (entry->session &&
+                        entry->session != netsnmp_query_get_default_session_unchecked())
+                        snmp_close(entry->session);
                     entry->session =
                         netsnmp_iquery_pdu_session(reqinfo->asp->pdu);
                     recalculate = 1;
                     break;
                 case RS_CREATEANDWAIT:
                     entry->flags |= SCHEDULE_FLAG_VALID;
+                    if (entry->session &&
+                        entry->session != netsnmp_query_get_default_session_unchecked())
+                        snmp_close(entry->session);
                     entry->session =
                         netsnmp_iquery_pdu_session(reqinfo->asp->pdu);
                     recalculate = 1;

@@ -520,6 +520,11 @@ schedTable_removeEntry(netsnmp_tdata_row *row)
                                      entry->schedOwner, entry->schedName));
         if (entry->schedCallbackID)
             snmp_alarm_unregister(entry->schedCallbackID);
+        if (entry->session &&
+            entry->session != netsnmp_query_get_default_session_unchecked()) {
+            snmp_close(entry->session);
+            entry->session = NULL;
+        }
         SNMP_FREE(entry);
     }
 }
