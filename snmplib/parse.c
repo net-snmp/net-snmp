@@ -565,6 +565,9 @@ static void     init_tree_roots(void);
 static void     merge_anon_children(struct tree *, struct tree *);
 static void     unlink_tbucket(struct tree *);
 static void     unlink_tree(struct tree *);
+struct child_index;
+static void     child_index_modified(const struct tree *,
+                                     const struct child_index *);
 static struct node *parse_objectid(FILE *, char *);
 static int      get_tc(const char *, int, int *, struct enum_list **,
                        struct range_list **, char **);
@@ -852,6 +855,7 @@ unlink_tree(struct tree *tp)
         DEBUGMSGTL(("unlink_tree", "Tree node %s has no parent\n",
                     tp->label));
     } else {
+        child_index_modified(ntp, NULL);
         ntp = ntp->child_list;
 
         while (ntp && ntp != tp) {
@@ -1385,6 +1389,8 @@ merge_anon_children(struct tree *tp1, struct tree *tp2)
 {
     struct tree    *child1, *child2, *previous;
 
+    child_index_modified(tp1, NULL);
+    child_index_modified(tp2, NULL);
     for (child1 = tp1->child_list; child1;) {
 
         for (child2 = tp2->child_list, previous = NULL;
@@ -1437,6 +1443,8 @@ merge_anon_children(struct tree *tp1, struct tree *tp2)
                      * 'child2' adopts the children of 'child1'
                      */
 
+                    child_index_modified(child1, NULL);
+                    child_index_modified(child2, NULL);
                     if (child2->child_list) {
                         for (previous = child2->child_list; previous->next_peer; previous = previous->next_peer);       /* Find the end of the list */
                         previous->next_peer = child1->child_list;
@@ -1468,6 +1476,184 @@ merge_anon_children(struct tree *tp1, struct tree *tp2)
     }
 }
 
+/*
+ * Index of the child list of a tree node, used by do_subtree() to look up
+ * children by subid in O(1) instead of scanning the entire child list for
+ * every node that is added to the tree. For each subid, the first child
+ * with that subid and its predecessor in the child list are stored.
+ *
+ * do_subtree() updates its own index for the modifications it makes to the
+ * indexed child list. Child lists may also be modified by recursive
+ * do_subtree() calls and by merge_anon_children(). Hence, all active
+ * indexes are kept on a stack and child_index_modified() invalidates the
+ * indexes of a child list that has been modified. An invalidated index is
+ * rebuilt the next time it is used.
+ */
+struct child_entry {
+    struct child_entry *next;
+    struct tree    *first;
+    struct tree    *pred;
+};
+
+struct child_index {
+    struct child_index *up;
+    struct tree    *parent;
+    struct child_entry **buckets;
+    size_t          size;
+    size_t          count;
+    struct tree    *tail;
+    int             valid;
+};
+
+static struct child_index *active_child_indexes;
+
+/*
+ * Invalidate all active indexes of the child list of @parent except @except.
+ */
+static void
+child_index_modified(const struct tree *parent,
+                     const struct child_index *except)
+{
+    struct child_index *ci;
+
+    for (ci = active_child_indexes; ci; ci = ci->up)
+        if (ci->parent == parent && ci != except)
+            ci->valid = 0;
+}
+
+static size_t
+child_hash(const struct child_index *ci, u_long subid)
+{
+    return (size_t)((subid ^ (subid >> 17)) * 2654435761u) & (ci->size - 1);
+}
+
+static void
+child_index_clear(struct child_index *ci)
+{
+    size_t          i;
+
+    for (i = 0; i < ci->size; i++) {
+        struct child_entry *ce, *next;
+
+        for (ce = ci->buckets[i]; ce; ce = next) {
+            next = ce->next;
+            free(ce);
+        }
+    }
+    free(ci->buckets);
+    ci->buckets = NULL;
+    ci->size = 0;
+    ci->count = 0;
+    ci->tail = NULL;
+    ci->valid = 0;
+}
+
+static struct child_entry *
+child_index_find(const struct child_index *ci, u_long subid)
+{
+    struct child_entry *ce;
+
+    for (ce = ci->buckets[child_hash(ci, subid)]; ce; ce = ce->next)
+        if (ce->first->subid == subid)
+            return ce;
+    return NULL;
+}
+
+static int
+child_index_grow(struct child_index *ci)
+{
+    struct child_index new_ci = *ci;
+    size_t          i;
+
+    new_ci.size = ci->size ? 2 * ci->size : 64;
+    new_ci.buckets = calloc(new_ci.size, sizeof(*new_ci.buckets));
+    if (!new_ci.buckets)
+        return -1;
+    for (i = 0; i < ci->size; i++) {
+        struct child_entry *ce, *next;
+
+        for (ce = ci->buckets[i]; ce; ce = next) {
+            struct child_entry **head =
+                &new_ci.buckets[child_hash(&new_ci, ce->first->subid)];
+
+            next = ce->next;
+            ce->next = *head;
+            *head = ce;
+        }
+    }
+    free(ci->buckets);
+    ci->buckets = new_ci.buckets;
+    ci->size = new_ci.size;
+    return 0;
+}
+
+/*
+ * Record that @tp, the first child with subid @tp->subid, has predecessor
+ * @pred. Returns 0 upon success and -1 if memory allocation failed.
+ */
+static int
+child_index_add(struct child_index *ci, struct tree *tp, struct tree *pred)
+{
+    struct child_entry *ce, **head;
+
+    if (ci->count >= ci->size / 2 && child_index_grow(ci) < 0)
+        return -1;
+    ce = malloc(sizeof(*ce));
+    if (!ce)
+        return -1;
+    ce->first = tp;
+    ce->pred = pred;
+    head = &ci->buckets[child_hash(ci, tp->subid)];
+    ce->next = *head;
+    *head = ce;
+    ci->count++;
+    return 0;
+}
+
+/*
+ * (Re)build the index of the child list of ci->parent. Leaves ci->valid
+ * zero if memory allocation fails.
+ */
+static void
+child_index_build(struct child_index *ci)
+{
+    struct tree    *tp, *pred = NULL;
+
+    child_index_clear(ci);
+    if (child_index_grow(ci) < 0)
+        return;
+    for (tp = ci->parent->child_list; tp; pred = tp, tp = tp->next_peer) {
+        if (!child_index_find(ci, tp->subid) &&
+            child_index_add(ci, tp, pred) < 0) {
+            child_index_clear(ci);
+            return;
+        }
+    }
+    ci->tail = pred;
+    ci->valid = 1;
+}
+
+/*
+ * Unlink @tp from the tree and update index @ci, if not NULL, if @tp is the
+ * first of multiple children of ci->parent with the same subid.
+ */
+static void
+unlink_indexed_tree(struct child_index *ci, struct tree *tp)
+{
+    struct tree    *next = tp->next_peer;
+    int             keep = ci && ci->valid && ci->parent == tp->parent;
+    struct child_entry *ce;
+
+    unlink_tree(tp);
+    if (!keep || !next || next->subid != tp->subid)
+        return;
+    ce = child_index_find(ci, tp->subid);
+    if (ce && ce->first == tp) {
+        ce->first = next;
+        ci->valid = 1;
+    }
+}
+
 
 /*
  * Find all the children of root in the list of nodes.  Link them into the
@@ -1484,6 +1670,7 @@ do_subtree(struct tree *root, struct node **nodes)
     int            *int_p;
     int             depth = 0;
     struct tree    *p;
+    struct child_index *ci = NULL;
 
     for (p = root; p; p = p->parent) {
         depth++;
@@ -1529,12 +1716,24 @@ do_subtree(struct tree *root, struct node **nodes)
     }
     if (childp)
         childp->next = NULL;
+    if (child_list) {
+        /*
+         * If this allocation fails, fall back to linear child list scans.
+         */
+        ci = calloc(1, sizeof(*ci));
+        if (ci) {
+            ci->parent = xroot;
+            ci->up = active_child_indexes;
+            active_child_indexes = ci;
+        }
+    }
     /*
      * Take each element in the child list and place it into the tree.
      */
     for (np = child_list; np; np = np->next) {
         struct tree    *otp = NULL;
         struct tree    *xxroot = xroot;
+        int             indexed = 0;
         anon_tp = NULL;
         tp = xroot->child_list;
 
@@ -1545,14 +1744,30 @@ do_subtree(struct tree *root, struct node **nodes)
             np->subid = xroot->subid;
             tp = xroot;
             xxroot = xroot->parent;
+        } else if (ci) {
+            if (!ci->valid)
+                child_index_build(ci);
+            indexed = ci->valid;
         }
 
-        while (tp) {
-            if (tp->subid == np->subid)
-                break;
-            else {
-                otp = tp;
-                tp = tp->next_peer;
+        if (indexed) {
+            struct child_entry *ce = child_index_find(ci, np->subid);
+
+            if (ce) {
+                tp = ce->first;
+                otp = ce->pred;
+            } else {
+                tp = NULL;
+                otp = ci->tail;
+            }
+        } else {
+            while (tp) {
+                if (tp->subid == np->subid)
+                    break;
+                else {
+                    otp = tp;
+                    tp = tp->next_peer;
+                }
             }
         }
         if (tp) {
@@ -1613,6 +1828,22 @@ do_subtree(struct tree *root, struct node **nodes)
             otp->next_peer = tp;
         else
             xxroot->child_list = tp;
+        child_index_modified(xxroot, ci);
+        if (indexed) {
+            struct child_entry *ce = child_index_find(ci, tp->subid);
+
+            /*
+             * tp has been inserted in front of the first child with the
+             * same subid or has been appended to the child list.
+             */
+            if (ce) {
+                ce->first = tp;
+            } else {
+                ci->tail = tp;
+                if (child_index_add(ci, tp, otp) < 0)
+                    child_index_clear(ci);
+            }
+        }
         hash = NBUCKET(name_hash(tp->label));
         tp->next = tbuckets[hash];
         tbuckets[hash] = tp;
@@ -1629,7 +1860,7 @@ do_subtree(struct tree *root, struct node **nodes)
                 /*
                  * unlink and destroy tp 
                  */
-                unlink_tree(tp);
+                unlink_indexed_tree(ci, tp);
                 free_tree(tp);
             } else if (!strncmp(anon_tp->label, ANON, ANON_LEN)) {
                 struct tree    *ntp;
@@ -1654,6 +1885,7 @@ do_subtree(struct tree *root, struct node **nodes)
                  * put in the current information 
                  */
                 anon_tp->label = tp->label;
+                child_index_modified(anon_tp, NULL);
                 anon_tp->child_list = tp->child_list;
                 anon_tp->modid = tp->modid;
                 anon_tp->tc_index = tp->tc_index;
@@ -1692,7 +1924,7 @@ do_subtree(struct tree *root, struct node **nodes)
                  * unlink and destroy tp 
                  */
                 unlink_tbucket(tp);
-                unlink_tree(tp);
+                unlink_indexed_tree(ci, tp);
                 free(tp);
             } else {
                 /*
@@ -1709,6 +1941,12 @@ do_subtree(struct tree *root, struct node **nodes)
         }
     }
 cleanup:
+    if (ci) {
+        netsnmp_assert(active_child_indexes == ci);
+        active_child_indexes = ci->up;
+        child_index_clear(ci);
+        free(ci);
+    }
     /*
      * free all nodes that were copied into tree 
      */
