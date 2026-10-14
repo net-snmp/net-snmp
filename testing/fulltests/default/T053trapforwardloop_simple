@@ -35,6 +35,8 @@ CAPTURE "snmpset -On $SNMP_FLAGS $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_D
 
 STOPAGENT
 
+WAITFORCOND "[ `grep -c 'Forwarding loop detected' \"\$SNMP_SNMPTRAPD_LOG_FILE\" 2>/dev/null` -ge 3 ]"
+
 STOPTRAPD
 
 CHECKAGENT "write_exampletrap trap sent"
