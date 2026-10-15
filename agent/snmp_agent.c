@@ -369,6 +369,8 @@ static agent_nsap *agent_nsap_list = NULL;
 netsnmp_agent_session *netsnmp_processing_set = NULL;
 netsnmp_agent_session *agent_delegated_list = NULL;
 netsnmp_agent_session *netsnmp_agent_queued_list = NULL;
+/* all agent sessions not yet freed, see netsnmp_agent_session_closed() */
+static netsnmp_agent_session *agent_live_list = NULL;
 
 
 int             handle_pdu(netsnmp_agent_session *asp);
@@ -1624,6 +1626,9 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p created\n",
                 asp, asp->reqinfo));
 
+    asp->live_next = agent_live_list;
+    agent_live_list = asp;
+
     return asp;
 
 err:
@@ -1645,6 +1650,17 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
                         asp);
 
     netsnmp_remove_from_delegated(asp);
+
+    {
+        netsnmp_agent_session **pp;
+
+        for (pp = &agent_live_list; *pp; pp = &(*pp)->live_next) {
+            if (*pp == asp) {
+                *pp = asp->live_next;
+                break;
+            }
+        }
+    }
     
     DEBUGMSGTL(("verbose:asp", "asp %p reqinfo %p freed\n",
                 asp, asp->reqinfo));
@@ -1804,6 +1820,39 @@ netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess)
     return total_count;
 }
 
+/*
+ * netsnmp_agent_session_closed
+ *
+ * called when a session that requests arrive on is being closed (e.g. a
+ * stream connection was shut down by the peer). Requests that arrived on it
+ * and are still being processed (delegated, queued, or in a handler that
+ * is waiting for something else) keep being processed, but nobody is left
+ * to receive the response: forget the session so that
+ * netsnmp_wrap_up_request drops the response instead of using the freed
+ * session.
+ */
+int
+netsnmp_agent_session_closed(netsnmp_session *sess)
+{
+    netsnmp_agent_session *asp;
+    int count = 0;
+
+    if (sess == NULL)
+        return 0;
+
+    for (asp = agent_live_list; asp; asp = asp->live_next) {
+        if (asp->session == sess) {
+            asp->session = NULL;
+            ++count;
+        }
+    }
+
+    if (count)
+        DEBUGMSGTL(("snmp_agent", "session %8p closed with %d request(s) "
+                    "pending\n", sess, count));
+    return count;
+}
+
 #if 0
 int
 netsnmp_check_queued_chain_for(netsnmp_agent_session *asp)
@@ -1942,6 +1991,17 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         DEBUGMSGTL(("snmp_agent", "SET request complete, asp = %8p\n",
                     asp));
         netsnmp_processing_set = NULL;
+    }
+
+    /*
+     * the session this request arrived on has been closed (see
+     * netsnmp_agent_session_closed): there is nobody to respond to.
+     */
+    if (asp->session == NULL) {
+        DEBUGMSGTL(("snmp_agent", "session closed, dropping response for "
+                    "asp %8p\n", asp));
+        free_agent_snmp_session(asp);
+        return 1;
     }
 
     if (asp->pdu) {
@@ -2168,6 +2228,11 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
 {
     netsnmp_agent_session *asp;
     int             status, access_ret, rc;
+
+    if (op == NETSNMP_CALLBACK_OP_DISCONNECT) {
+        netsnmp_agent_session_closed(session);
+        return 1;
+    }
 
     /*
      * We only support receiving here.  

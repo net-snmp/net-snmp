@@ -303,7 +303,7 @@ smux_handler(netsnmp_mib_handler *handler,
     /* Increment the reqid of outgoing SMUX messages only when processing
      * new incoming SNMP message, i.e. when reqid or session id chamges */
     new_reqid = reqinfo->asp->pdu->reqid;
-    new_sessid = reqinfo->asp->session->sessid;
+    new_sessid = reqinfo->asp->session ? reqinfo->asp->session->sessid : -1;
     DEBUGMSGTL(("smux", "smux_handler: incoming reqid=%ld, sessid=%ld\n",
             new_reqid, new_sessid));
     if (old_reqid != new_reqid || old_sessid != new_sessid) {
