@@ -129,6 +129,9 @@ handle_ipForwarding(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
         case MODE_SET_RESERVE1:
+            rc = netsnmp_check_vb_int(requests->requestvb);
+            if (rc != SNMP_ERR_NOERROR)
+                netsnmp_set_request_error(reqinfo, requests, rc);
             break;
 
         case MODE_SET_RESERVE2:
@@ -228,6 +231,9 @@ handle_ipDefaultTTL(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
         case MODE_SET_RESERVE1:
+            rc = netsnmp_check_vb_int(requests->requestvb);
+            if (rc != SNMP_ERR_NOERROR)
+                netsnmp_set_request_error(reqinfo, requests, rc);
             break;
 
         case MODE_SET_RESERVE2:
@@ -331,6 +337,9 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
     case MODE_SET_RESERVE1:
+        rc = netsnmp_check_vb_int(requests->requestvb);
+        if (rc != SNMP_ERR_NOERROR)
+            netsnmp_set_request_error(reqinfo, requests, rc);
         break;
 
     case MODE_SET_RESERVE2:
@@ -405,6 +414,7 @@ handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
 {
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     long   value;
+    int    rc;
 #endif
 
     /* We are never called for a GETNEXT if it's registered as a
@@ -430,7 +440,12 @@ handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
          */
         case MODE_SET_RESERVE1:
         case MODE_SET_RESERVE2:
-            /* just check the value */
+            /* just check the type and the value */
+            rc = netsnmp_check_vb_int(requests->requestvb);
+            if (rc != SNMP_ERR_NOERROR) {
+                netsnmp_set_request_error(reqinfo, requests, rc);
+                break;
+            }
             value =  *(requests->requestvb->val.integer);
             if (value != ipAddressSpinLockValue)
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);

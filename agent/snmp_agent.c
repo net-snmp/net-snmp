@@ -3711,12 +3711,18 @@ check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
     netsnmp_variable_list *v = NULL;
 
     for (i = 1, v = asp->pdu->variables; v != NULL; i++, v = v->next_variable) {
-	if (v->type == ASN_NULL) {
+	switch (v->type) {
+	case ASN_NULL:
+	case SNMP_NOSUCHOBJECT:
+	case SNMP_NOSUCHINSTANCE:
+	case SNMP_ENDOFMIBVIEW:
 	    /*
-	     * Protect SET implementations that do not protect themselves
-	     * against wrong type.
+	     * These types carry no value (val is NULL). Protect SET
+	     * implementations that do not protect themselves against
+	     * wrong type.
 	     */
-	    DEBUGMSGTL(("snmp_agent", "disallowing SET with NULL var for varbind %d\n", i));
+	    DEBUGMSGTL(("snmp_agent", "disallowing SET with value-less type 0x%02x for varbind %d\n",
+			v->type, i));
 	    asp->index = i;
 	    return SNMP_ERR_WRONGTYPE;
 	}
@@ -3733,7 +3739,7 @@ handle_pdu(netsnmp_agent_session *asp)
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
-     * Check for ASN_NULL in SET request
+     * Check for value-less varbinds in SET request
      */
     if (asp->pdu->command == SNMP_MSG_SET) {
 	status = check_set_pdu_for_null_varbind(asp);
