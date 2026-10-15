@@ -504,7 +504,7 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 case RS_DESTROY:
                     row = (netsnmp_tdata_row *)
                                netsnmp_tdata_extract_row(request);
-                    if (reqinfo && reqinfo->asp && reqinfo->asp->requests) {
+                    if (reqinfo->asp && reqinfo->asp->requests) {
                         int i;
                         for (i = 0; i < reqinfo->asp->vbcount; i++) {
                             if (netsnmp_tdata_extract_row(
