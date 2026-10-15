@@ -38,6 +38,26 @@ netsnmp_feature_want(netsnmp_tlstmAddr_get_serverId);
 
 #define MAX_TAGS 128
 
+/*
+ * The library frees a stream session after its peer has closed the
+ * connection, so forget it here. The next notification for this target
+ * opens a new session.
+ */
+static int
+target_session_callback(int operation, netsnmp_session *session, int reqid,
+                        netsnmp_pdu *pdu, void *magic)
+{
+    struct targetAddrTable_struct *targaddrs = magic;
+
+    if (operation == NETSNMP_CALLBACK_OP_DISCONNECT && targaddrs &&
+        targaddrs->sess == session) {
+        DEBUGMSGTL(("target_sessions", "session of %s closed by peer\n",
+                    targaddrs->nameData));
+        targaddrs->sess = NULL;
+    }
+    return 1;
+}
+
 netsnmp_session *
 get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                     void *filterArg)
@@ -291,6 +311,8 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
 #endif
                             }
 
+                            thissess.callback = target_session_callback;
+                            thissess.callback_magic = targaddrs;
                             thissess.flags |= SNMP_FLAGS_DONT_PROBE;
                             targaddrs->sess = snmp_add(&thissess, t,
                                                        NULL, NULL);
