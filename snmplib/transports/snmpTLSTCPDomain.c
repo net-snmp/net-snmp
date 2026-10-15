@@ -195,9 +195,12 @@ netsnmp_tlstcp_copy(const netsnmp_transport *oldt, netsnmp_transport *newt)
         newtlsdata->their_hostname = strdup(oldtlsdata->their_hostname);
     if (oldtlsdata->trust_cert)
         newtlsdata->trust_cert = strdup(oldtlsdata->trust_cert);
-    if (oldtlsdata->addr)
+    if (oldtlsdata->addr) {
         newtlsdata->addr = netsnmp_memdup(oldtlsdata->addr,
                                           sizeof(*oldtlsdata->addr));
+        if (newtlsdata->addr)
+            newtlsdata->addr_len = sizeof(*newtlsdata->addr);
+    }
 
     return 0;
 }
@@ -822,6 +825,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         if (tlsdata->addr) {
             memcpy(tlsdata->addr, t->base_transport->data,
                    sizeof(netsnmp_indexed_addr_pair));
+            tlsdata->addr_len = sizeof(netsnmp_indexed_addr_pair);
             _tlstcp_format_addr_string(tlsdata);
         }
     }
@@ -1104,6 +1108,7 @@ _tlstcp_transport_common(netsnmp_transport *t, int local)
             return NULL;
         }
         tlsdata->addr = (netsnmp_indexed_addr_pair *) t->data;
+        tlsdata->addr_len = t->data_length;
         t->data = tlsdata;
         t->data_length = sizeof(_netsnmpTLSBaseData);
 

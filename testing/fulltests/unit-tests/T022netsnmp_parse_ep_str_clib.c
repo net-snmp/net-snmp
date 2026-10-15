@@ -95,6 +95,99 @@ SOCK_STARTUP;
                   sizeof(in6addr_loopback)) == 0 &&
            ep6.a.sin6.sin6_port == htons(2161),
            "netsnmp_sockaddr_in6_3 preserves default_target addr on port override");
+
+        OK(netsnmp_sockaddr_in6_3(&ep6, "[fe80::2%1]@vrf0:1161", NULL) == 1,
+           "netsnmp_sockaddr_in6_3 scoped address with interface");
+        OK(strcmp(ep6.scope, "1") == 0 && strcmp(ep6.iface, "vrf0") == 0 &&
+           ep6.a.sin6.sin6_port == htons(1161),
+           "netsnmp_sockaddr_in6_3 separates scope and iface");
+        {
+            char long_scope[NETSNMP_IF_NAMESIZE + 16];
+            char peer[sizeof(long_scope) + 32];
+
+            memset(long_scope, 'a', sizeof(long_scope) - 1);
+            long_scope[sizeof(long_scope) - 1] = '\0';
+            snprintf(peer, sizeof(peer), "[fe80::2%%%s]:1161", long_scope);
+            OK(netsnmp_sockaddr_in6_3(&ep6, peer, NULL) == 0,
+               "netsnmp_sockaddr_in6_3 rejects a scope name that is too long");
+        }
+        OK(netsnmp_if_nametoindex("10g0") == 0,
+           "netsnmp_if_nametoindex rejects absent digit-prefixed interface");
+        OK(netsnmp_if_nametoindex("-1") == 0 &&
+           netsnmp_if_nametoindex("+1") == 0 &&
+           netsnmp_if_nametoindex(" 1") == 0 &&
+           netsnmp_if_nametoindex("4294967297") == 0,
+           "netsnmp_if_nametoindex rejects signed, padded and out-of-range indices");
+        OK(netsnmp_if_nametoindex("4294967295") == 4294967295U,
+           "netsnmp_if_nametoindex accepts UINT_MAX");
+#if defined(NETSNMP_TRANSPORT_UDPIPV6_DOMAIN) && \
+    defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+        {
+            netsnmp_transport *t;
+
+            OK(netsnmp_sockaddr_in6_3(&ep6, "[::1%1]:1161", NULL) == 1,
+               "netsnmp_sockaddr_in6_3 [::1%1]:1161");
+            t = netsnmp_udp6_transport(&ep6, 0);
+            if (t) {
+                netsnmp_scoped_addr_pair *scoped_pair = t->data;
+                char *fmt;
+                int rc;
+
+                OK(t->data_length == sizeof(*scoped_pair) &&
+                   strcmp(scoped_pair->remote_scope, "1") == 0 &&
+                   scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id == 1,
+                   "netsnmp_udp6_transport stores remote_scope");
+
+                /* Numeric scopes are not re-resolved. */
+                scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id = 9999;
+                (void)t->f_send(t, "x", 1, NULL, NULL);
+                OK(scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id == 9999,
+                   "netsnmp_udp6_send does not re-resolve a numeric scope");
+
+#if defined(HAVE_IF_INDEXTONAME) && defined(HAVE_IF_NAMETOINDEX)
+                {
+                    char ifname[NETSNMP_IF_NAMESIZE];
+
+                    if (if_indextoname(1, ifname)) {
+                        /*
+                         * Simulate interface recreation assigning a new
+                         * ifindex.
+                         */
+                        scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id =
+                            9999;
+                        ((struct sockaddr_in6 *)t->remote)->sin6_scope_id =
+                            9999;
+                        strlcpy(scoped_pair->remote_scope, ifname,
+                                sizeof(scoped_pair->remote_scope));
+                        (void)t->f_send(t, "x", 1, NULL, NULL);
+                        OK(scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id == 1 &&
+                           ((struct sockaddr_in6 *)t->remote)->sin6_scope_id == 1,
+                           "netsnmp_udp6_send refreshes stale sin6_scope_id from remote_scope");
+                    }
+                }
+#endif
+
+                /* Simulate missing scoped interface. */
+                strlcpy(scoped_pair->remote_scope, "nonexistent0",
+                        sizeof(scoped_pair->remote_scope));
+                errno = 0;
+                rc = t->f_send(t, "x", 1, NULL, NULL);
+                OK(rc == -1 && errno == EINVAL &&
+                   scoped_pair->addr_pair.remote_addr.sin6.sin6_scope_id == 0 &&
+                   ((struct sockaddr_in6 *)t->remote)->sin6_scope_id == 0,
+                   "netsnmp_udp6_send fails with EINVAL when remote_scope does not exist");
+
+                fmt = t->f_fmtaddr(t, NULL, 0);
+                OK(fmt != NULL &&
+                   strstr(fmt, "[::1%nonexistent0]:1161") != NULL,
+                   "netsnmp_udp6_fmtaddr formats unresolved remote_scope");
+                free(fmt);
+
+                t->f_close(t);
+                netsnmp_transport_free(t);
+            }
+        }
+#endif
     }
 #endif
 }

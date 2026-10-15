@@ -48,6 +48,7 @@ typedef struct _netsnmpTLSBaseData_s {
     char                      *securityName;
     char                      *addr_string;
     netsnmp_indexed_addr_pair *addr;
+    int                        addr_len;
     char                      *our_identity;
     char                      *their_identity;
     char                      *their_fingerprint;

@@ -24,6 +24,10 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <errno.h>
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -68,25 +72,30 @@ static const struct in6_addr in6addr_any; /*IN6ADDR_ANY_INIT*/
 #endif
 
 
-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
-static unsigned
+unsigned
 netsnmp_if_nametoindex(const char *ifname)
 {
-#if defined(WIN32)
-    return atoi(ifname);
-#elif defined(HAVE_IF_NAMETOINDEX)
-    int res;
+    char *endp;
+    unsigned long val;
 
-    res = if_nametoindex(ifname);
-    if (res == 0)
-        res = atoi(ifname);
-
-    return res;
-#else
-    return 0;
+    if (!ifname || !ifname[0])
+        return 0;
+#if !defined(WIN32) && defined(HAVE_IF_NAMETOINDEX)
+    val = if_nametoindex(ifname);
+    if (val != 0)
+        return val;
 #endif
+    /* Reject leading whitespace and signs, which strtoul() accepts. */
+    if (ifname[0] < '0' || ifname[0] > '9')
+        return 0;
+    errno = 0;
+    val = strtoul(ifname, &endp, 10);
+    if (*endp != '\0' || errno == ERANGE || val > UINT_MAX)
+        return 0;
+    return val;
 }
 
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 static char *
 netsnmp_if_indextoname(unsigned ifindex, char *ifname)
 {
@@ -105,8 +114,9 @@ char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                      const void *data, int len)
 {
+    const netsnmp_scoped_addr_pair *scoped_pair = NULL;
     const struct sockaddr_in6 *to;
-    char scope_id[IF_NAMESIZE + 1] = "";
+    char scope_id[NETSNMP_IF_NAMESIZE + 1] = "";
     char addr[INET6_ADDRSTRLEN];
     char *tmp;
 
@@ -128,6 +138,10 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
         to = (const struct sockaddr_in6 *)&addr_pair->remote_addr;
         break;
     }
+    case sizeof(netsnmp_scoped_addr_pair):
+        scoped_pair = data;
+        to = (const struct sockaddr_in6 *)&scoped_pair->addr_pair.remote_addr;
+        break;
     default:
         if (asprintf(&tmp, "%s: unknown", prefix) < 0)
             tmp = NULL;
@@ -144,8 +158,12 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     } else {
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
 	if (to->sin6_scope_id &&
-            netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1]))
+            netsnmp_if_indextoname(to->sin6_scope_id, &scope_id[1])) {
             scope_id[0] = '%';
+	} else if (scoped_pair && scoped_pair->remote_scope[0]) {
+            snprintf(scope_id, sizeof(scope_id), "%%%s",
+                     scoped_pair->remote_scope);
+        }
 #endif
         inet_ntop(AF_INET6, &to->sin6_addr, addr, sizeof(addr));
         if (asprintf(&tmp, "%s: [%s%s]:%hu", prefix, addr, scope_id,
@@ -317,8 +335,15 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
         scope_id = strchr(ep_str.addr, '%');
         if (scope_id) {
             *scope_id = '\0';
+            if (strlcpy(ep->scope, scope_id + 1, sizeof(ep->scope)) >=
+                sizeof(ep->scope)) {
+                DEBUGMSGTL(("netsnmp_sockaddr_in6",
+                            "scope name %s is too long\n", scope_id + 1));
+                free(ep_str.addr);
+                return 0;
+            }
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
-            addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
+            addr->sin6_scope_id = netsnmp_if_nametoindex(ep->scope);
 #endif
         }
         if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&

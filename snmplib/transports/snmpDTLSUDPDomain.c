@@ -510,6 +510,7 @@ _extract_addr_pair(netsnmp_transport *t, const void *opaque, int olen)
     if (t && t->data) {
         switch (t->data_length) {
         case sizeof(netsnmp_indexed_addr_pair):
+        case sizeof(netsnmp_scoped_addr_pair):
             return t->data;
         case sizeof(_netsnmpTLSBaseData): {
             _netsnmpTLSBaseData *tlsdata = t->data;
@@ -1487,7 +1488,8 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
 
     switch (data ? len : 0) {
     case sizeof(netsnmp_indexed_addr_pair):
-        return netsnmp_ipv4_fmtaddr(pfx, t, data, len);
+    case sizeof(netsnmp_scoped_addr_pair):
+        return fmt_base_addr(pfx, t, data, len);
     case sizeof(netsnmp_tmStateReference): {
         const netsnmp_tmStateReference *r = data;
         const netsnmp_indexed_addr_pair *p = &r->addresses;
@@ -1497,9 +1499,8 @@ netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, const void *data, int len,
             return fmt_base_addr("DTLSUDP", t, p, sizeof(*p));
         } else if (bt && t->data_length == sizeof(_netsnmpTLSBaseData)) {
             _netsnmpTLSBaseData *tlsdata = t->data;
-            netsnmp_indexed_addr_pair *tls_addr = tlsdata->addr;
 
-            return bt->f_fmtaddr(bt, tls_addr, sizeof(*tls_addr));
+            return bt->f_fmtaddr(bt, tlsdata->addr, tlsdata->addr_len);
         } else if (bt) {
             return bt->f_fmtaddr(bt, t->data, t->data_length);
         } else {
@@ -1565,12 +1566,14 @@ _transport_common(netsnmp_transport *t, int local)
     if (NULL == t->base_transport)
         return NULL;
     if (NULL != t->data &&
-        t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
+        (t->data_length == sizeof(netsnmp_indexed_addr_pair) ||
+         t->data_length == sizeof(netsnmp_scoped_addr_pair))) {
         _netsnmpTLSBaseData *tlsdata =
             netsnmp_tlsbase_allocate_tlsdata(t, local);
         if (NULL == tlsdata)
             return NULL;
         tlsdata->addr = t->data;
+        tlsdata->addr_len = t->data_length;
         t->data = tlsdata;
         t->data_length = sizeof(_netsnmpTLSBaseData);
     }
