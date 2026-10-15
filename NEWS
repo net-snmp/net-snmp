@@ -3,7 +3,63 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.10*:
+*5.10.pre3*:
+
+    snmpd:
+      - SECURITY: Fix a SMUX denial of service caused by blocking peer
+        handshakes (CVE-2026-89147)
+      - SECURITY: Fix newline injection in persistent configuration storage
+        (CWE-93)
+      - AgentX: Enforce session ownership on unregistration and validate
+        registration ranges/OID lengths
+      - Log listening addresses and ports for snmpd and AgentX at startup
+      - Remove global return_buf[] from the public Net-SNMP API
+      - Numerous crash, memory leak, and bounds-check fixes across AgentX,
+        VACM, USM, trap conversion, and MIB modules
+      - IF-MIB: Fix ifLastChange timestamps and linkUpDown traps on BSD,
+        anchor include_ifmib_iface_prefix regexes, and read stored ifXTable
+        config at startup
+      - UCD-SNMP-MIB: Fix dskTable crash when includeAllDisks is set
+      - HOST-RESOURCES-MIB: Fix crashes in macOS disk/partition/software
+        tables
+      - DISMAN-PING-MIB: Fix IPv6 ping support and timeout loops
+
+    snmptrapd:
+      - Treat setgid() and setuid() failures as fatal errors when dropping
+        privileges
+      - Log listening addresses and ports at startup
+      - Fix TLS-TCP session polling and malformed SNMPv1 trap crashes
+
+    snmplib:
+      - Make the TLS-TCP transport fully asynchronous and non-blocking, and
+        derive TLSTM securityName from the verified certificate chain
+      - Port DES support to the OpenSSL EVP API and load OpenSSL 3.0+
+        legacy/default providers
+      - Add per-peer connection limits and frame timeouts for TCP/Unix
+        stream transports, and enable TCP_NODELAY
+      - Add support for IPV6_RECVPKTINFO
+      - Split snmp_sess_poll() into snmp_poll() and snmp_sess_poll()
+      - Significantly speed up MIB parsing for large MIB trees
+      - Update credentials when re-adding existing USM users from a session
+      - Fix priority range filtering in -L* logging options
+      - Numerous memory leak, buffer overflow, and crash fixes across ASN.1,
+        MIB parsing, transports, and security models
+
+    perl & python:
+      - python: Add DontCheckOrdering and Cc session options to walk()
+      - perl: Fix Windows Winsock compatibility and select() busy-loops
+      - Numerous memory leak, buffer overflow, and crash fixes in both
+        bindings
+
+    building:
+      - Generate compiler dependency files dynamically during the build
+        (removing static Makefile.depend files; add
+        --disable-dependency-tracking)
+      - Fix 64-bit Windows SOCKET handling and add Visual Studio 2026
+        support
+      - Install FreeBSD 15 and 16 system headers
+
+*5.10.pre2*:
 
     snmptrapd:
       - fixed a critical vulnerability triggered by a specially crafted trap
