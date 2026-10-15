@@ -216,6 +216,9 @@ extern          "C" {
         netsnmp_cachemap *cache_store;
         int             vbcount;
         int             flags;
+        /** list of all agent sessions not yet freed */
+        struct netsnmp_agent_session_s *live_prev;
+        struct netsnmp_agent_session_s *live_next;
     } netsnmp_agent_session;
 
     /*
@@ -285,6 +288,7 @@ extern          "C" {
     int             netsnmp_allocate_globalcacheid(void);
 
     int netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess);
+    int netsnmp_agent_session_closed(netsnmp_session *sess);
 
     /*
      * Register and de-register agent NSAPs.  
