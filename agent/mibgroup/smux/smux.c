@@ -487,10 +487,9 @@ var_smux_write(int action,
                 DEBUGMSGTL(("smux",
                             "[var_smux_write] peek failed or timed out\n"));
                 /*
-                 * do we need to do a peer cleanup in this case?? 
+                 * The peer is cleaned up by smux_process(); see
+                 * smux_peer_cleanup().
                  */
-                smux_peer_cleanup(rptr->sr_fd);
-                smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
             len = (size_t)rcvlen;
@@ -528,8 +527,6 @@ var_smux_write(int action,
             if (rcvlen <= 0) {
                 DEBUGMSGTL(("smux",
                             "[var_smux_write] recv failed or timed out\n"));
-                smux_peer_cleanup(rptr->sr_fd);
-                smux_snmp_select_list_del(rptr->sr_fd);
                 return SNMP_ERR_GENERR;
             }
             len = (size_t)rcvlen;
@@ -709,6 +706,9 @@ smux_process(NETSNMP_SOCKET sock)
     if (!smux_peer_is_authenticated(sock)) {
         /*
          * Unauthenticated peer: read OpenPDU non-blockingly.
+         * A configuration reload forgets which peers are authenticated,
+         * so on failure use smux_peer_cleanup() to also remove the
+         * registrations of a peer that was authenticated before.
          */
         do {
             length = recvfrom(sock, (char *) data, SMUXMAXPKTSIZE, 0, NULL, NULL);
@@ -721,14 +721,14 @@ smux_process(NETSNMP_SOCKET sock)
             DEBUGMSGTL(("smux",
                         "[smux_process] recvfrom failed on unauthenticated fd %"
                         NETSNMP_FMT_SKT "\n", sock));
-            close(sock);
+            smux_peer_cleanup(sock);
             return -1;
         }
         if (length == 0) {
             DEBUGMSGTL(("smux",
                         "[smux_process] peer on fd %" NETSNMP_FMT_SKT
                         " closed connection before auth\n", sock));
-            close(sock);
+            smux_peer_cleanup(sock);
             return -1;
         }
 
@@ -739,14 +739,14 @@ smux_process(NETSNMP_SOCKET sock)
         len = length;
         if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
             smux_send_close(sock, SMUXC_PACKETFORMAT);
-            close(sock);
+            smux_peer_cleanup(sock);
             DEBUGMSGTL(("smux",
                         "[smux_process] peer on %" NETSNMP_FMT_SKT " sent bad open\n",
                         sock));
             return -1;
         } else if (type != (u_char) SMUX_OPEN) {
             smux_send_close(sock, SMUXC_PROTOCOLERROR);
-            close(sock);
+            smux_peer_cleanup(sock);
             DEBUGMSGTL(("smux",
                         "[smux_process] peer on %" NETSNMP_FMT_SKT " did not send open: (%d)\n",
                         sock, type));
@@ -755,7 +755,7 @@ smux_process(NETSNMP_SOCKET sock)
         ptr = smux_open_process(sock, ptr, &len, &fail);
         if (fail) {
             smux_send_close(sock, SMUXC_AUTHENTICATIONFAILURE);
-            close(sock);
+            smux_peer_cleanup(sock);
             DEBUGMSGTL(("smux",
                         "[smux_process] peer on %" NETSNMP_FMT_SKT " failed authentication\n",
                         sock));
@@ -1555,8 +1555,10 @@ smux_snmp_process(int exact,
             else
             {
                snmp_log_perror("[smux_snmp_process] peek failed");
-               smux_peer_cleanup(sd);
-               smux_snmp_select_list_del(sd);
+               /*
+                * The peer is cleaned up by smux_process(); see
+                * smux_peer_cleanup().
+                */
                return NULL;
             }
         }
@@ -1593,8 +1595,6 @@ smux_snmp_process(int exact,
 
         if (length <= 0) {
            snmp_log_perror("[smux_snmp_process] recv failed");
-           smux_peer_cleanup(sd);
-           smux_snmp_select_list_del(sd);
            return NULL;
         }
 
@@ -1910,6 +1910,13 @@ smux_build(u_char type,
     return 0;
 }
 
+/*
+ * Close a peer's socket and remove its registrations.  This unregisters
+ * the peer's smux_handler() registrations, so it must not be called while
+ * smux_handler() is running (smux_snmp_process(), var_smux_write()): a
+ * peer that fails during a request is left in place, its socket stays
+ * readable and smux_process() cleans it up from the main loop.
+ */
 static void
 smux_peer_cleanup(NETSNMP_SOCKET sd)
 {
