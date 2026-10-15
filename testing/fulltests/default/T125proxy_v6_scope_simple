@@ -1,0 +1,103 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER Proxy UDP/IPv6 link-local scope ID refresh after interface recreation
+
+SKIPIFNOT USING_UCD_SNMP_PROXY_MODULE
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIFNOT NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+SKIPIFNOT HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+
+if [ -z "$NETSNMP_IN_NETNS" ]; then
+    UNSHARE_FLAGS=""
+    for flags in -n -rn; do
+        if unshare $flags /bin/sh -c \
+            'test -r "$1" && ip link set lo up && ip link add v0 type veth peer name v1' \
+            /bin/sh "$testscript" >/dev/null 2>&1; then
+            UNSHARE_FLAGS=$flags
+            break
+        fi
+    done
+    if [ -z "$UNSHARE_FLAGS" ]; then
+        SKIP "unshare with veth creation is not available"
+    fi
+    NETSNMP_IN_NETNS=1
+    export NETSNMP_IN_NETNS builddir srcdir testscript \
+        SNMP_CONFIG_FILE SNMPTRAPD_CONFIG_FILE SNMPAPP_CONFIG_FILE \
+        AGENTX_CONFIG_FILE SNMP_SNMPTRAPD_LOG_FILE SNMP_SNMPTRAPD_PID_FILE \
+        SNMP_SNMPD_PID_FILE SNMP_SNMPD_LOG_FILE SNMP_AGENTX_PID_FILE \
+        SNMP_AGENTX_LOG_FILE SNMP_TRANSPORT_SPEC SNMP_TEST_DEST
+    unshare $UNSHARE_FLAGS /bin/sh "$testscript"
+    exit $?
+fi
+
+mklink() {
+    ip link add v0 type veth peer name v1 &&
+    ip addr add fe80::1/64 dev v0 nodad &&
+    ip addr add fe80::2/64 dev v1 nodad &&
+    ip link set v0 up &&
+    ip link set v1 up &&
+    WAITFORCOND "! ip -6 addr show dev v1 tentative | grep -q fe80::2"
+}
+
+ip link set lo up
+mklink
+ifindex1=$(ip -o link show v0 | cut -d: -f1)
+
+# Start the target agent listening on udp6:[::]:0
+SNMP_SNMPD_PID_FILE_ORIG=$SNMP_SNMPD_PID_FILE
+SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
+SNMP_CONFIG_FILE_ORIG=$SNMP_CONFIG_FILE
+ORIG_AGENT_FLAGS="$AGENT_FLAGS"
+
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.target
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.target
+SNMP_CONFIG_FILE="$SNMP_TMPDIR/target.conf"
+CONFIGAGENT rocommunity6 pub default
+CONFIGAGENT sysName WROX-TARGET
+SNMP_TRANSPORT_SPEC=udp6
+SNMP_TEST_DEST="[::]:"
+SNMP_SNMPD_PORT=0
+STARTAGENT
+TARGET_PORT=$SNMP_SNMPD_PORT
+
+# Start the proxy agent listening on udp:127.0.0.1:0
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
+SNMP_CONFIG_FILE=$SNMP_CONFIG_FILE_ORIG
+SNMP_TRANSPORT_SPEC=udp
+SNMP_TEST_DEST="127.0.0.1:"
+SNMP_SNMPD_PORT=0
+CONFIGAGENT rocommunity front 127.0.0.1
+CONFIGAGENT "proxy -v 2c -c pub udp6:[fe80::2%v0]:${TARGET_PORT} .1.3.6.1.4.1.99999.1 .1.3.6.1.2.1.1"
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -Dproxy,netsnmp_udp6"
+STARTAGENT
+PROXY_PORT=$SNMP_SNMPD_PORT
+
+# Query before recreating v0
+CAPTURE "snmpget -On $SNMP_FLAGS -v2c -c front -t 2 -r 1 udp:127.0.0.1:${PROXY_PORT} .1.3.6.1.4.1.99999.1.5.0"
+CHECK '.1.3.6.1.4.1.99999.1.5.0 = STRING: "WROX-TARGET"'
+
+# Recreate v0 <-> v1 so that v0 receives a new kernel ifindex
+ip link del v0
+mklink
+ifindex2=$(ip -o link show v0 | cut -d: -f1)
+CHECKVALUEISNT "$ifindex1" "$ifindex2" "v0 ifindex changed after recreate ($ifindex1 -> $ifindex2)"
+
+# Query after recreating v0
+CAPTURE "snmpget -On $SNMP_FLAGS -v2c -c front -t 2 -r 1 udp:127.0.0.1:${PROXY_PORT} .1.3.6.1.4.1.99999.1.5.0"
+CHECK '.1.3.6.1.4.1.99999.1.5.0 = STRING: "WROX-TARGET"'
+
+# Stop the proxy agent
+STOPAGENT
+
+# Stop the target agent
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG.target
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG.target
+STOPAGENT
+SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE_ORIG
+SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE_ORIG
+
+FINISHED
