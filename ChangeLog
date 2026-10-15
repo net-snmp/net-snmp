@@ -10666,8 +10666,14 @@ ABI CHANGES
    - struct netsnmp_factory_s
    - struct request_list
  * The following data structures have been modified for all operating systems:
+   - netsnmp_agent_session
    - netsnmp_transport
+   - struct netsnmp_agent_session_s
    - struct netsnmp_transport_s
+ * The session member of netsnmp_agent_session (reqinfo->asp->session in a
+   MIB handler) is NULL once the session that the request arrived on has been
+   closed, e.g. because the peer of a TCP or Unix domain connection closed it
+   before the request had been answered.
  * The argument types of the following functions have been modified on 64-bit
    Windows systems:
    - _netsnmp_udp_sockopt_set()

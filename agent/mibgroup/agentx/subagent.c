@@ -245,6 +245,26 @@ free_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
     }
 }
 
+/*
+ * Remove @asi itself from the saved SET list and free it. After the master
+ * session has been closed, @asi->sess is NULL and transaction IDs of
+ * several sessions may be pending, so do not look it up by its key.
+ */
+static void
+free_set_info(struct agent_netsnmp_set_info *asi)
+{
+    struct agent_netsnmp_set_info **pp;
+
+    for (pp = &Sets; *pp != NULL; pp = &(*pp)->next) {
+        if (*pp == asi) {
+            *pp = asi->next;
+            snmp_free_varbind(asi->var_list);
+            free(asi);
+            return;
+        }
+    }
+}
+
 static void
 send_agentx_error(netsnmp_session *session, netsnmp_pdu *pdu, int errstat, int errindex)
 {
@@ -314,6 +334,15 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) session);
         agentx_unregister_callbacks(session);
         remove_trap_session(session);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        /*
+         * SET requests still being processed must not answer on the
+         * session being closed (see handle_subagent_set_response).
+         */
+        for (asi = Sets; asi != NULL; asi = asi->next)
+            if (asi->sess == session)
+                asi->sess = NULL;
+#endif
         register_mib_detach();
         main_session = NULL;
         if (period != 0) {
@@ -702,7 +731,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
         if (asi->mode == SNMP_MSG_INTERNAL_SET_FREE ||
             asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
             asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT) {
-            free_set_vars(retsess, pdu);
+            free_set_info(asi);
         }
         snmp_free_varbind(pdu->variables);
         pdu->variables = NULL;  /* the variables were added by us */
