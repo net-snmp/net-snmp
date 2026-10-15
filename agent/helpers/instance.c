@@ -634,6 +634,27 @@ static void free_wrapper(void * p)
 #define free_wrapper free
 #endif
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+/*
+ * Overwrite the contents of @f with @it and truncate the file at the end
+ * of the new contents. Returns 0 upon success and -1 upon failure.
+ */
+static int
+instance_num_file_write(FILE *f, u_char type, u_long it)
+{
+    long            pos;
+
+    rewind(f);
+    if (fprintf(f, type == ASN_INTEGER ? "%ld" : "%lu", it) < 0 ||
+        fflush(f) != 0)
+        return -1;
+    pos = ftell(f);
+    if (pos < 0 || ftruncate(fileno(f), pos) < 0)
+        return -1;
+    return 0;
+}
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
 int
 netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
                                   netsnmp_handler_registration *reginfo,
@@ -735,11 +756,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         DEBUGMSGTL(("helper:instance", "updated %s -> %ld\n", nfi->file_name,
                     *(requests->requestvb->val.integer)));
         it = *(requests->requestvb->val.integer);
-        rewind(nfi->filep); /* rewind to make sure we are at the beginning */
-        rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
-                     it);
-        if (rc < 0 || fflush(nfi->filep) != 0 ||
-            ftruncate(fileno(nfi->filep), ftell(nfi->filep)) < 0) {
+        if (instance_num_file_write(nfi->filep, nfi->type, it) < 0) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_GENERR);
             return SNMP_ERR_NOERROR;
@@ -750,12 +767,8 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         it_save = (u_long *) netsnmp_request_get_list_data(requests,
                                                            INSTANCE_HANDLER_NAME);
         if (it_save != NULL && nfi->filep != NULL) {
-            it = *it_save;
-            rewind(nfi->filep);
-            rc = fprintf(nfi->filep, (nfi->type == ASN_INTEGER) ? "%ld" : "%lu",
-                         it);
-            if (rc < 0 || fflush(nfi->filep) != 0 ||
-                ftruncate(fileno(nfi->filep), ftell(nfi->filep)) < 0)
+            if (instance_num_file_write(nfi->filep, nfi->type,
+                                        *it_save) < 0)
                 netsnmp_set_request_error(reqinfo, requests,
                                           SNMP_ERR_UNDOFAILED);
         }
