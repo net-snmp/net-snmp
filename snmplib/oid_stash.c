@@ -148,13 +148,12 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
         curnode = tmpp;
     }
     /*
-     * tmpp now points to the exact match 
+     * curnode now points to the exact match. lookup_len > 0 guarantees
+     * that the loop body has been executed at least once.
      */
     if (curnode->thedata)
         return SNMPERR_GENERR;
-    if (NULL == tmpp)
-        return SNMPERR_GENERR;
-    tmpp->thedata = mydata;
+    curnode->thedata = mydata;
     return SNMPERR_SUCCESS;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_ADD_DATA */
