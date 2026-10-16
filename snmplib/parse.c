@@ -2936,6 +2936,7 @@ parse_objecttype(FILE * fp, char *name)
             }
             if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
+                free(np->description);
                 np->description = strdup(quoted_string_buffer);
             }
             break;
@@ -2947,6 +2948,7 @@ parse_objecttype(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
+            free(np->reference);
             np->reference = strdup(quoted_string_buffer);
             break;
         case INDEX:
@@ -2976,6 +2978,7 @@ parse_objecttype(FILE * fp, char *name)
                 free_node(np);
                 return NULL;
             }
+            free(np->augments);
             np->augments = strdup(np->indexes->ilabel);
             free_indexes(&np->indexes);
             break;
@@ -3030,6 +3033,7 @@ parse_objecttype(FILE * fp, char *name)
                     return NULL;
                 }
                 defbuf[strlen(defbuf) - 1] = 0;
+                free(np->defaultValue);
                 np->defaultValue = strdup(defbuf);
             }
 
@@ -3261,12 +3265,14 @@ parse_trapDefinition(FILE * fp, char *name)
                     print_error("Bad Trap Format", token, type);
                     goto free_node;
                 }
+                free(np->parent);
                 np->parent = strdup(token);
                 /*
                  * Get right bracket 
                  */
                 type = get_token(fp, token, MAXTOKEN);
             } else if (type == LABEL) {
+                free(np->parent);
                 np->parent = strdup(token);
             } else {
                 goto free_node;
