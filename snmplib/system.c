@@ -881,6 +881,16 @@ netsnmp_getaddrinfo(const char *name, const char *service,
         memcpy(&hint, hints, sizeof hint);
     }
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    /*
+     * Fuzz targets must not perform network I/O. Without network access,
+     * DNS queries block until they time out. Hence, only allow lookups
+     * that can be resolved without querying a DNS server.
+     */
+    if (name && strcmp(name, "localhost") != 0)
+        hint.ai_flags |= AI_NUMERICHOST;
+#endif
+
 #ifndef DNSSEC_LOCAL_VALIDATION
     err = getaddrinfo(name, NULL, &hint, &addrs);
 #else /* DNSSEC_LOCAL_VALIDATION */
@@ -961,6 +971,24 @@ netsnmp_gethostbyname(const char *name)
 
     DEBUGMSGTL(("dns:gethostbyname", "looking up %s\n", name));
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    /* See also netsnmp_getaddrinfo(). */
+    {
+        struct in_addr  a4;
+#ifdef AF_INET6
+        struct in6_addr a6;
+#endif
+
+        if (strcmp(name, "localhost") != 0 &&
+            inet_pton(AF_INET, name, &a4) != 1
+#ifdef AF_INET6
+            && inet_pton(AF_INET6, name, &a6) != 1
+#endif
+            )
+            return NULL;
+    }
+#endif
+
 #ifdef DNSSEC_LOCAL_VALIDATION
     hp  = val_gethostbyname(netsnmp_validator_context(), name, &val_status);
     DEBUGMSGTL(("dns:sec:val", "val_status %d / %s; trusted: %d\n",
@@ -1028,6 +1056,11 @@ netsnmp_gethostbyaddr(const void *addr, socklen_t len, int type)
 
     DEBUGMSGTL(("dns:gethostbyaddr", "resolving %s\n",
                 inet_ntop(type, addr, buf, sizeof(buf))));
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    /* Reverse DNS lookups require network access. */
+    return NULL;
+#endif
 
 #ifdef DNSSEC_LOCAL_VALIDATION
     val_status_t val_status;
