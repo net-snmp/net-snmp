@@ -80,6 +80,38 @@ OKF((rc == SNMPERR_SUCCESS),
     rc = snmp_add_var(pdu, test_oid, OID_LENGTH(test_oid), 'b', "0,4096");
     OKF(rc == 0 && pdu->variables != NULL && pdu->variables->val_len == 513,
         ("snmp_add_var bitstring with bit 4096 succeeded (rc=%d)", rc));
+    if (rc == 0 && pdu->variables != NULL &&
+        pdu->variables->val_len == 513) {
+        const u_char *bits = pdu->variables->val.string;
+        size_t i, nonzero = 0;
+
+        for (i = 1; i < 512; i++)
+            if (bits[i])
+                nonzero++;
+        OKF(bits[0] == 0x80 && bits[512] == 0x80 && nonzero == 0,
+            ("snmp_add_var bitstring has only bits 0 and 4096 set"));
+    }
+    snmp_free_pdu(pdu);
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    rc = snmp_add_var(pdu, test_oid, OID_LENGTH(test_oid), 'b', "524279");
+    OKF(rc == 0 && pdu->variables != NULL &&
+        pdu->variables->val_len == 65535 &&
+        pdu->variables->val.string[65534] == 0x01,
+        ("snmp_add_var bitstring with bit 524279 succeeded (rc=%d)", rc));
+    snmp_free_pdu(pdu);
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    rc = snmp_add_var(pdu, test_oid, OID_LENGTH(test_oid), 'b', "524280");
+    OKF(rc == SNMPERR_RANGE && pdu->variables == NULL,
+        ("snmp_add_var bitstring with bit 524280 fails (rc=%d)", rc));
+    snmp_free_pdu(pdu);
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    rc = snmp_add_var(pdu, test_oid, OID_LENGTH(test_oid), 'b',
+                      "17179869000");
+    OKF(rc == SNMPERR_RANGE && pdu->variables == NULL,
+        ("snmp_add_var bitstring with bit 17179869000 fails (rc=%d)", rc));
     snmp_free_pdu(pdu);
 }
 

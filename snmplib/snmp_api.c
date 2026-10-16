@@ -7716,7 +7716,40 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     return vars;
 }
 
+/*
+ * BITS values are encoded as an OCTET STRING and the size of an OCTET STRING
+ * is limited to 65535 octets (RFC 2578, section 7.1.2).
+ */
+#define NETSNMP_MAX_BITS_OCTETS 65535
 
+/*
+ * Make sure that the BITS buffer *buf is at least @needed bytes large and
+ * zero-initialize any newly allocated bytes. Grow the buffer geometrically
+ * to avoid quadratic behavior. Returns 1 upon success and 0 upon failure.
+ */
+static int
+_bits_buf_grow(u_char **buf, size_t *buf_len, size_t needed)
+{
+    u_char         *new_buf;
+    size_t          new_len;
+
+    if (needed <= *buf_len)
+        return 1;
+    if (needed > NETSNMP_MAX_BITS_OCTETS)
+        return 0;
+    new_len = *buf_len * 2;
+    if (new_len < needed)
+        new_len = needed;
+    if (new_len > NETSNMP_MAX_BITS_OCTETS)
+        new_len = NETSNMP_MAX_BITS_OCTETS;
+    new_buf = realloc(*buf, new_len);
+    if (!new_buf)
+        return 0;
+    memset(new_buf + *buf_len, 0, new_len - *buf_len);
+    *buf = new_buf;
+    *buf_len = new_len;
+    return 1;
+}
 
 /*
  * Add a variable with the requested name to the end of the list of
@@ -8039,11 +8072,14 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
-        while ((size_t)tint > buf_len) {
-            if (!snmp_realloc(&buf, &buf_len)) {
-                result = SNMPERR_MALLOC;
-                goto err;
-            }
+        if (tint > NETSNMP_MAX_BITS_OCTETS) {
+            result = SNMPERR_RANGE;
+            snmp_set_detail(value);
+            goto err;
+        }
+        if (!_bits_buf_grow(&buf, &buf_len, tint)) {
+            result = SNMPERR_MALLOC;
+            goto err;
         }
 
 	vp = strdup(value);
@@ -8078,23 +8114,18 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
             }
 
-            if (ltmp / 8 >= INT_MAX) {
-                goto value_error;
+            if (ltmp < 0 || ltmp / 8 >= NETSNMP_MAX_BITS_OCTETS) {
+                result = SNMPERR_RANGE;
+                snmp_set_detail(cp);
+                goto err;
             }
             ix = ltmp / 8;
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
-            while ((size_t)ix >= buf_len) {
-                if (!snmp_realloc(&buf, &buf_len)) {
-                    result = SNMPERR_MALLOC;
-                    goto err;
-                }
-            }
-            if (ix < 0 || (size_t)ix >= buf_len) {
-               result = SNMPERR_RANGE;
-               snmp_set_detail(cp);
-               goto err;
+            if (!_bits_buf_grow(&buf, &buf_len, ix + 1)) {
+                result = SNMPERR_MALLOC;
+                goto err;
             }
             bit = 0x80 >> ltmp % 8;
             buf[ix] |= bit;
