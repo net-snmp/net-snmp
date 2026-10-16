@@ -5,14 +5,22 @@ printf("1..0 # skip SMUX not enabled\n");
 __did_plan = 1;
 return 0;
 #else
+#include <signal.h>
 #include "smux/smux.h"
 
 extern void smux_parse_peer_auth(const char *token, char *cptr);
 extern void smux_free_peer_auth(void);
 extern int var_smux_write(int action, u_char *var_val, u_char var_val_type,
                           size_t var_val_len, oid *name, size_t name_len);
+extern u_char *var_smux_get(oid *root, size_t root_len, oid *name,
+                            size_t *length, int exact, size_t *var_len,
+                            u_char *var_type);
 
 SOCK_STARTUP;
+
+#ifdef SIGPIPE
+signal(SIGPIPE, SIG_IGN);
+#endif
 
 init_agent("snmpd");
 init_snmp("snmpd");
@@ -329,14 +337,120 @@ init_snmp("snmpd");
         }
 
         /*
-         * 5. Close peer socket sv[1] and call smux_process(sv[0]) to trigger
-         *    smux_peer_cleanup(sv[0]), verifying ActiveRegs and MIB registration
-         *    are cleaned up without leaks.
+         * 5. With the peer gone, var_smux_write() and var_smux_get() fail
+         *    but leave the registration in place: they run inside
+         *    smux_handler(), which uses that registration.
          */
-        close(sv[1]);
+        {
+            oid instance[MAX_OID_LEN];
+            size_t instance_len = OID_LENGTH(subtree_oid) + 1;
+            size_t var_len = 0;
+            u_char var_type = 0;
+            long value = 1;
+            netsnmp_subtree *tp;
+
+            memcpy(instance, subtree_oid, sizeof(subtree_oid));
+            instance[OID_LENGTH(subtree_oid)] = 0;
+
+            shutdown(sv[1], SHUT_WR);
+
+            OK(var_smux_write(RESERVE1, (u_char *) &value, ASN_INTEGER,
+                              sizeof(value), instance,
+                              OID_LENGTH(subtree_oid) + 1) == SNMP_ERR_GENERR,
+               "var_smux_write(RESERVE1) returns SNMP_ERR_GENERR when the peer has closed");
+            tp = netsnmp_subtree_find(instance, OID_LENGTH(subtree_oid) + 1,
+                                      NULL, "");
+            OK(tp && tp->reginfo && tp->reginfo->handlerName &&
+               strcmp(tp->reginfo->handlerName, "smux") == 0,
+               "var_smux_write keeps the peer's registration");
+
+            OK(var_smux_get(subtree_oid, OID_LENGTH(subtree_oid), instance,
+                            &instance_len, 1, &var_len, &var_type) == NULL,
+               "var_smux_get returns NULL when the peer has closed");
+            tp = netsnmp_subtree_find(instance, OID_LENGTH(subtree_oid) + 1,
+                                      NULL, "");
+            OK(tp && tp->reginfo && tp->reginfo->handlerName &&
+               strcmp(tp->reginfo->handlerName, "smux") == 0,
+               "var_smux_get keeps the peer's registration");
+        }
+
+        /*
+         * 6. smux_process(sv[0]) on the closed peer triggers
+         *    smux_peer_cleanup(sv[0]), verifying ActiveRegs and MIB
+         *    registration are cleaned up without leaks.
+         */
         OK(smux_process(sv[0]) == -1,
            "smux_process on closed peer triggers smux_peer_cleanup and returns -1");
+        {
+            oid instance[MAX_OID_LEN];
+            netsnmp_subtree *tp;
+
+            memcpy(instance, subtree_oid, sizeof(subtree_oid));
+            instance[OID_LENGTH(subtree_oid)] = 0;
+            tp = netsnmp_subtree_find(instance, OID_LENGTH(subtree_oid) + 1,
+                                      NULL, "");
+            OK(!tp || !tp->reginfo || !tp->reginfo->handlerName ||
+               strcmp(tp->reginfo->handlerName, "smux") != 0,
+               "smux_peer_cleanup removes the peer's registration");
+        }
+        close(sv[1]);
         close(sv[0]);
+    }
+
+    /*
+     * 7. A peer that closes after a configuration reload (which forgets
+     *    the authenticated peers) still has its registration removed.
+     */
+    rc = socketpair(AF_UNIX, SOCK_STREAM, 0, sv);
+    OK(rc == 0, "socketpair for SMUX peer across a reload");
+    if (rc == 0) {
+        char reload_cfg[] = ".1.3.6.1.4.1.99999.111 secret";
+        u_char pkt[256];
+        u_char *p;
+        size_t rem;
+        long ver = 0, prio = 0, op = SMUX_REGOP_REGISTER_RW;
+        oid peer_oid[] = { 1, 3, 6, 1, 4, 1, 99999, 111 };
+        oid subtree_oid[] = { 1, 3, 6, 1, 4, 1, 99999, 111, 2 };
+        oid instance[] = { 1, 3, 6, 1, 4, 1, 99999, 111, 2, 0 };
+        u_char rrsp_buf[16];
+        netsnmp_subtree *tp;
+
+        p = pkt + 2;
+        rem = sizeof(pkt) - 2;
+        p = asn_build_int(p, &rem, ASN_INTEGER, &ver, sizeof(ver));
+        p = asn_build_objid(p, &rem, ASN_OBJECT_ID, peer_oid,
+                            OID_LENGTH(peer_oid));
+        p = asn_build_string(p, &rem, ASN_OCTET_STR, (u_char *) "testpeer", 8);
+        p = asn_build_string(p, &rem, ASN_OCTET_STR, (u_char *) "secret", 6);
+        pkt[0] = SMUX_OPEN;
+        pkt[1] = (u_char) (p - (pkt + 2));
+        (void) write(sv[1], pkt, (size_t) (p - pkt));
+        OK(smux_process(sv[0]) == 0, "second SMUX peer authenticated");
+
+        p = pkt + 2;
+        rem = sizeof(pkt) - 2;
+        p = asn_build_objid(p, &rem, ASN_OBJECT_ID, subtree_oid,
+                            OID_LENGTH(subtree_oid));
+        p = asn_build_int(p, &rem, ASN_INTEGER, &prio, sizeof(prio));
+        p = asn_build_int(p, &rem, ASN_INTEGER, &op, sizeof(op));
+        pkt[0] = SMUX_RREQ;
+        pkt[1] = (u_char) (p - (pkt + 2));
+        (void) write(sv[1], pkt, (size_t) (p - pkt));
+        OK(smux_process(sv[0]) == 0 &&
+           read(sv[1], rrsp_buf, sizeof(rrsp_buf)) >= 3 &&
+           rrsp_buf[0] == SMUX_RRSP && rrsp_buf[2] == 0x00,
+           "second SMUX peer registered its subtree");
+
+        smux_free_peer_auth();
+        smux_parse_peer_auth("smuxpeer", reload_cfg);
+
+        close(sv[1]);
+        OK(smux_process(sv[0]) == -1,
+           "smux_process on a peer closed after a reload returns -1");
+        tp = netsnmp_subtree_find(instance, OID_LENGTH(instance), NULL, "");
+        OK(!tp || !tp->reginfo || !tp->reginfo->handlerName ||
+           strcmp(tp->reginfo->handlerName, "smux") != 0,
+           "smux_process removes the registration of a peer closed after a reload");
     }
 
     smux_free_peer_auth();
