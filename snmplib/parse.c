@@ -1274,6 +1274,45 @@ find_tree_node(const char *name, int modid)
  */
 #define MAX_BAD 0xffffff
 
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+/*
+ * Maximum parenthesis nesting depth accepted in a regular expression.
+ * glibc's regcomp() recurses once per nesting level, so deeply nested
+ * patterns cause a stack overflow.
+ */
+#define MAX_REGEX_NESTING_DEPTH 32
+
+/*
+ * Returns 1 if the parenthesis nesting depth of @key exceeds
+ * MAX_REGEX_NESTING_DEPTH. Parentheses inside bracket expressions are
+ * counted too, which can only make this check more conservative.
+ */
+static int
+regex_nesting_too_deep(const char *key)
+{
+    int             depth = 0;
+
+    for (; *key; key++) {
+        switch (*key) {
+        case '\\':
+            if (!key[1])
+                return 0;
+            key++;
+            break;
+        case '(':
+            if (++depth > MAX_REGEX_NESTING_DEPTH)
+                return 1;
+            break;
+        case ')':
+            if (depth > 0)
+                depth--;
+            break;
+        }
+    }
+    return 0;
+}
+#endif
+
 static          u_int
 compute_match(const char *search_base, const char *key)
 {
@@ -1281,6 +1320,9 @@ compute_match(const char *search_base, const char *key)
     int             rc;
     regex_t         parsetree;
     regmatch_t      pmatch;
+
+    if (regex_nesting_too_deep(key))
+        return MAX_BAD;
     rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
     if (rc == 0)
         rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
