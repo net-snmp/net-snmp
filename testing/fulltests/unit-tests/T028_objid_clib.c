@@ -166,6 +166,13 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         OK(read_objid("SNMP-VIEW-BASED-ACM-MIB::vacmSecurityToGroupStatus.3.1.300",
                       out_oid, &out_len) == 0,
            "read_objid rejects string index subid > 255 in _add_strings_to_oid");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("8++++++++++++++++++++++++++s(", out_oid,
+                          &out_len) == NULL,
+           "snmp_parse_oid rejects regex with excessive '+' quantifiers");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("a{32767}{32767}", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with interval quantifiers");
         unload_all_mibs();
         shutdown_mib();
         netsnmp_ds_shutdown();

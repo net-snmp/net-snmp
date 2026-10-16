@@ -602,8 +602,6 @@ static void     free_enums(struct enum_list **);
 static struct range_list *copy_ranges(struct range_list *);
 static struct enum_list *copy_enums(struct enum_list *);
 
-static u_int    compute_match(const char *search_base, const char *key);
-
 void
 snmp_mib_toggle_options_usage(const char *lead, FILE * outf)
 {
@@ -1276,28 +1274,38 @@ find_tree_node(const char *name, int modid)
 
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
 /*
- * Maximum parenthesis nesting depth accepted in a regular expression.
- * glibc's regcomp() recurses once per nesting level, so deeply nested
- * patterns cause a stack overflow.
+ * Limits on regular expressions passed to regcomp():
+ * - MAX_REGEX_LEN: MIB identifiers are at most 64 characters (RFC 2578,
+ *   section 3.1), so bound pattern length.
+ * - MAX_REGEX_NESTING_DEPTH: glibc's regcomp() recurses once per parenthesis
+ *   nesting level, so deeply nested patterns cause a stack overflow.
+ * - MAX_REGEX_PLUS: glibc's parse_dup_op() clones the preceding AST subtree
+ *   via duplicate_tree() for each '+' quantifier, so k '+' operators can
+ *   grow the AST by up to 2^k nodes and exhaust memory.
+ * - '{' interval quantifiers are rejected because duplicate_tree() clones
+ *   the preceding subtree up to RE_DUP_MAX (32767) times per interval.
  */
+#define MAX_REGEX_LEN           256
 #define MAX_REGEX_NESTING_DEPTH 32
+#define MAX_REGEX_PLUS          8
 
-/*
- * Returns 1 if the parenthesis nesting depth of @key exceeds
- * MAX_REGEX_NESTING_DEPTH. Parentheses inside bracket expressions are
- * counted too, which can only make this check more conservative.
- */
 static int
-regex_nesting_too_deep(const char *key)
+regex_too_complex(const char *key)
 {
     int             depth = 0;
+    int             plus_count = 0;
+    size_t          len = 0;
 
     for (; *key; key++) {
+        if (++len > MAX_REGEX_LEN)
+            return 1;
         switch (*key) {
         case '\\':
             if (!key[1])
                 return 0;
             key++;
+            if (++len > MAX_REGEX_LEN)
+                return 1;
             break;
         case '(':
             if (++depth > MAX_REGEX_NESTING_DEPTH)
@@ -1307,33 +1315,30 @@ regex_nesting_too_deep(const char *key)
             if (depth > 0)
                 depth--;
             break;
+        case '+':
+            if (++plus_count > MAX_REGEX_PLUS)
+                return 1;
+            break;
+        case '{':
+            return 1;
         }
     }
     return 0;
 }
-#endif
 
+static          u_int
+compute_match(const char *search_base, const regex_t *parsetree)
+{
+    regmatch_t      pmatch;
+
+    if (regexec(parsetree, search_base, 1, &pmatch, 0) == 0)
+        return pmatch.rm_so;
+    return MAX_BAD;
+}
+#else                           /* use our own wildcard matcher */
 static          u_int
 compute_match(const char *search_base, const char *key)
 {
-#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
-    int             rc;
-    regex_t         parsetree;
-    regmatch_t      pmatch;
-
-    if (regex_nesting_too_deep(key))
-        return MAX_BAD;
-    rc = regcomp(&parsetree, key, REG_ICASE | REG_EXTENDED);
-    if (rc == 0)
-        rc = regexec(&parsetree, search_base, 1, &pmatch, 0);
-    regfree(&parsetree);
-    if (rc == 0) {
-        /*
-         * found 
-         */
-        return pmatch.rm_so;
-    }
-#else                           /* use our own wildcard matcher */
     /*
      * first find the longest matching substring (ick) 
      */
@@ -1362,13 +1367,13 @@ compute_match(const char *search_base, const char *key)
     free(newkey);
     if (result)
         return (first - search_base);
-#endif
 
     /*
      * not found 
      */
     return MAX_BAD;
 }
+#endif
 
 /*
  * Find the tree node that best matches the pattern string.
@@ -1382,22 +1387,25 @@ compute_match(const char *search_base, const char *key)
  * to ensure that the entire tree is traversed.
  */
 
-struct tree    *
-find_best_tree_node(const char *pattrn, struct tree *tree_top,
-                    u_int * match)
+static struct tree *
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+find_best_tree_node_r(const regex_t *parsetree, struct tree *tree_top,
+                      u_int * match)
+#else
+find_best_tree_node_r(const char *pattrn, struct tree *tree_top,
+                      u_int * match)
+#endif
 {
     struct tree    *tp, *best_so_far = NULL, *retptr;
     u_int           old_match = MAX_BAD, new_match = MAX_BAD;
 
-    if (!pattrn || !*pattrn)
-        return (NULL);
-
-    if (!tree_top)
-        tree_top = get_tree_head();
-
     for (tp = tree_top; tp; tp = tp->next_peer) {
         if (!tp->reported && tp->label)
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+            new_match = compute_match(tp->label, parsetree);
+#else
             new_match = compute_match(tp->label, pattrn);
+#endif
         tp->reported = 1;
 
         if (new_match < old_match) {
@@ -1408,7 +1416,11 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top,
             break;              /* this is the best result we can get */
         if (tp->child_list) {
             retptr =
-                find_best_tree_node(pattrn, tp->child_list, &new_match);
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+                find_best_tree_node_r(parsetree, tp->child_list, &new_match);
+#else
+                find_best_tree_node_r(pattrn, tp->child_list, &new_match);
+#endif
             if (new_match < old_match) {
                 best_so_far = retptr;
                 old_match = new_match;
@@ -1420,6 +1432,37 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top,
     if (match)
         *match = old_match;
     return (best_so_far);
+}
+
+struct tree    *
+find_best_tree_node(const char *pattrn, struct tree *tree_top,
+                    u_int * match)
+{
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    regex_t         parsetree;
+    struct tree    *best_so_far;
+#endif
+
+    if (match)
+        *match = MAX_BAD;
+
+    if (!pattrn || !*pattrn)
+        return (NULL);
+
+    if (!tree_top)
+        tree_top = get_tree_head();
+
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    if (regex_too_complex(pattrn))
+        return (NULL);
+    if (regcomp(&parsetree, pattrn, REG_ICASE | REG_EXTENDED) != 0)
+        return (NULL);
+    best_so_far = find_best_tree_node_r(&parsetree, tree_top, match);
+    regfree(&parsetree);
+    return best_so_far;
+#else
+    return find_best_tree_node_r(pattrn, tree_top, match);
+#endif
 }
 
 
