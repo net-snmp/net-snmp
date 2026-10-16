@@ -57,6 +57,16 @@ snmpfuzz_recv(netsnmp_transport *t, void *buf, int bufsiz, void **opaque,
 }
 
 static int
+snmpfuzz_close(netsnmp_transport *t)
+{
+    /*
+     * FAKE_FD is not a real socket and hence must not be closed.
+     */
+    t->sock = NETSNMP_INVALID_SOCKET;
+    return 0;
+}
+
+static int
 snmpfuzz_callback(int op, netsnmp_session *sess, int reqid,
                   netsnmp_pdu *pdu, void *magic)
 {
@@ -110,6 +120,7 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     transport = netsnmp_transport_alloc();
     transport->sock = FAKE_FD;
     transport->f_recv = snmpfuzz_recv;
+    transport->f_close = snmpfuzz_close;
 
     ss->callback = snmpfuzz_callback;
     ss->callback_magic = (void *) NULL;
@@ -117,7 +128,8 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
     create_user_from_session(ss);
 
     /*
-     * Use snmp_add() to specify transport explicitly
+     * Use snmp_add() to specify transport explicitly. snmp_add() closes and
+     * frees the transport if it fails.
      */
     active_ss = snmp_add(ss, transport, NULL, NULL);
 
@@ -125,8 +137,6 @@ LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 
     if (active_ss)
         snmp_close(active_ss);
-    else
-        netsnmp_transport_free(transport);
     /* To do: register session 'ss' properly and remove the call below. */
     netsnmp_cleanup_session(ss);
     free(ss);
