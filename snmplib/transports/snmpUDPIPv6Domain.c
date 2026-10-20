@@ -695,6 +695,19 @@ netsnmp_udp6_transport_with_source(const struct netsnmp_ep *ep,
     if (NULL == bind_addr)
         return t;
 
+    /* for Linux VRF Traps we try to bind the iface if clientaddr is not set */
+    if (ep && ep->iface[0]) {
+        rc = netsnmp_bindtodevice(t->sock, ep->iface);
+        if (rc)
+            DEBUGMSGTL(("netsnmp_udp6",
+                        "VRF: Could not bind socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
+        else
+            DEBUGMSGTL(("netsnmp_udp6",
+                        "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
+                        t->sock, ep->iface));
+    }
+
     rc = netsnmp_udp6_transport_bind(t, bind_addr, flags);
     if (rc) {
         netsnmp_transport_free(t);
