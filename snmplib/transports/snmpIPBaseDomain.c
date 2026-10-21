@@ -128,6 +128,32 @@ int netsnmp_bindtodevice(NETSNMP_SOCKET sock, const char *iface)
 #endif
 }
 
+/**
+ * Bind a socket to the network interface of an endpoint, if any.
+ * @sock: Socket to bind.
+ * @ep: Endpoint, e.g. the destination address of a client session. May be
+ *   NULL.
+ * @token: Debug token.
+ *
+ * Binding a client socket to the interface specified in its destination
+ * address, e.g. a Linux VRF device ("addr@vrf"), makes the kernel use the
+ * routing table of that VRF even if no clientaddr has been configured.
+ * Failures are logged but are not fatal.
+ */
+void netsnmp_bind_ep_iface(NETSNMP_SOCKET sock, const struct netsnmp_ep *ep,
+                           const char *token)
+{
+    if (!ep || ep->iface[0] == '\0')
+        return;
+
+    if (netsnmp_bindtodevice(sock, ep->iface))
+        DEBUGMSGTL((token, "VRF: Could not bind socket %" NETSNMP_FMT_SKT
+                    " to %s\n", sock, ep->iface));
+    else
+        DEBUGMSGTL((token, "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
+                    sock, ep->iface));
+}
+
 int netsnmp_ipbase_session_init(struct netsnmp_transport_s *transport,
                             struct snmp_session *sess) {
     union {

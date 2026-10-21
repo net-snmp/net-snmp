@@ -194,18 +194,8 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
 
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
-    /* for Linux VRF Traps we try to bind the iface if clientaddr is not set */
-    if (local == 0 && ep) {
-        rc = netsnmp_bindtodevice(t->sock, ep->iface);
-        if (rc)
-            DEBUGMSGTL(("netsnmp_tcp",
-                        "VRF: Could not bind socket %" NETSNMP_FMT_SKT " to %s\n",
-                        t->sock, ep->iface));
-        else
-            DEBUGMSGTL(("netsnmp_tcp",
-                        "VRF: Bound socket %" NETSNMP_FMT_SKT " to %s\n",
-                        t->sock, ep->iface));
-    }
+    if (!local)
+        netsnmp_bind_ep_iface(t->sock, ep, "netsnmp_tcp");
 
     if (local) {
 #ifndef NETSNMP_NO_LISTEN_SUPPORT

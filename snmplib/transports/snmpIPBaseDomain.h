@@ -39,6 +39,8 @@ struct netsnmp_transport_s;
 
 int netsnmp_parse_ep_str(struct netsnmp_ep_str *ep_str, const char *endpoint);
 int netsnmp_bindtodevice(NETSNMP_SOCKET sock, const char *iface);
+void netsnmp_bind_ep_iface(NETSNMP_SOCKET sock, const struct netsnmp_ep *ep,
+                           const char *token);
 int netsnmp_ipbase_session_init(struct netsnmp_transport_s *transport,
                                 struct snmp_session *sess);
 
