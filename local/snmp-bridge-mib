@@ -319,6 +319,7 @@ sub createmacs()
         my $start_oid = $oid = ".1.3.6.1.2.1.17.4.3.1";
 
 	foreach my $mac (sort {$a cmp $b} keys %macs) {
+		next unless(defined($macs{$mac}{$bridge}));
 		my $mac_oid=mac2oid($mac);
 		unless(defined($first_mac_oid)){
 			$first_mac_oid=$mac_oid;
@@ -830,10 +831,11 @@ sub dot1qfdb()
 			$oid_next{$oid.".2.3"}=$oid.".2.3.".$vmac_oid;
 		}
 
-		my $port=$macs{$mac}{$bridge};
+		my $vbridge=$bridge."_vlan".$vlan;
+		my $port=$macs{$mac}{$vbridge};
 		my $baseport=$baseports{$bridge}{$port};
-		my $status=$locals{$mac}{$bridge};
-		my $age=$ages{$mac}{$bridge};
+		my $status=$locals{$mac}{$vbridge};
+		my $age=$ages{$mac}{$vbridge};
 
 		print "VLAN $vlan: $mac -> $port:$baseport ($status, $age)\n"; 
 
