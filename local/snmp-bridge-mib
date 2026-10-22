@@ -982,10 +982,9 @@ sub readforwards()
 		$age=$age/100;
 		$macs{$mac}{$bridge}=$port;
 		$ages{$mac}{$bridge}=$age;
-		$locals{$mac}{$bridge}=FDB_STATUS_LEARNED;
-		next if ($local);
-		$macs{$mac}{$bridge}=$bridge;
 		$locals{$mac}{$bridge}=FDB_STATUS_SELF;
+		next if ($local);
+		$locals{$mac}{$bridge}=FDB_STATUS_LEARNED;
 	}
 	close(FWD);
 }
@@ -1099,13 +1098,11 @@ sub tracevlan{
 		 $macs{$mac}{$vbridge}=$port;
 		 #$ages{$mac}{$bridge}=$age;
 		 $ages{$mac}{$vbridge}=$age;
-		 #$locals{$mac}{$bridge}=FDB_STATUS_LEARNED;
-		 $locals{$mac}{$vbridge}=FDB_STATUS_LEARNED;
-		 next if ($local);
-		 #$macs{$mac}{$bridge}=$bridge;
-		 $macs{$mac}{$vbridge}=$bridge;
 		 #$locals{$mac}{$bridge}=FDB_STATUS_SELF;
 		 $locals{$mac}{$vbridge}=FDB_STATUS_SELF;
+		 next if ($local);
+		 #$locals{$mac}{$bridge}=FDB_STATUS_LEARNED;
+		 $locals{$mac}{$vbridge}=FDB_STATUS_LEARNED;
 	}
 	close(FWD);
 }
