@@ -195,7 +195,8 @@ _add_connection(void *p, void *q)
         return;
     }
     if (CONTAINER_INSERT(container, rowreq_ctx) < 0) {
-        snmp_log(LOG_ERR, "tcpListenerTable insert failed.\n");
+        DEBUGMSGTL(("tcpListenerTable:access",
+                    "container insert failed for new entry\n"));
         tcpListenerTable_release_rowreq_ctx(rowreq_ctx);
     }
 }
