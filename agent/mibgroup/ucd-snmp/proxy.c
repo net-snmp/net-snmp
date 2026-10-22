@@ -77,6 +77,25 @@ proxyOptProc(int argc, char *const *argv, int opt)
     }
 }
 
+/*
+ * The library frees a stream session after its peer has closed the
+ * connection, so forget it here. Requests for this proxy fail from then on.
+ */
+static int
+proxy_session_callback(int operation, netsnmp_session *session, int reqid,
+                       netsnmp_pdu *pdu, void *magic)
+{
+    struct simple_proxy *sp = magic;
+
+    if (operation == NETSNMP_CALLBACK_OP_DISCONNECT && sp &&
+        sp->sess == session) {
+        snmp_log(LOG_WARNING,
+                 "proxy: session closed by the proxied agent; re-opening of TCP connection is not supported.\n");
+        sp->sess = NULL;
+    }
+    return 1;
+}
+
 void
 proxy_parse_config(const char *token, char *line)
 {
@@ -204,6 +223,9 @@ proxy_parse_config(const char *token, char *line)
     }
     if ( context_string )
         newp->context = strdup(context_string);
+
+    ss->callback = proxy_session_callback;
+    ss->callback_magic = newp;
 
     DEBUGMSGTL(("proxy_init", "registering at: "));
     DEBUGMSGOID(("proxy_init", newp->name, newp->name_len));
@@ -440,7 +462,7 @@ proxy_handler(netsnmp_mib_handler *handler,
 
     sp = (struct simple_proxy *) handler->myvoid;
 
-    if (!pdu || !sp) {
+    if (!pdu || !sp || !sp->sess) {
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
         if (pdu)
             snmp_free_pdu(pdu);
