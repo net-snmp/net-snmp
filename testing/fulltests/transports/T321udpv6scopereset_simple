@@ -19,6 +19,13 @@ if ! unshare -r -n sh -c \
     SKIP "cannot create a veth pair in a rootless network namespace"
 fi
 
+# Entering another network namespace can prohibit execution independently
+# of whether creating a veth pair is permitted (for example under an LSM).
+if ! unshare -r -n sh -c 'nsenter -t "$$" -n snmpd -v' \
+    >/dev/null 2>&1; then
+    SKIP "cannot execute snmpd after entering a rootless network namespace"
+fi
+
 helper="$SNMP_TMPDIR/udpv6-scope-reset.sh"
 cat > "$helper" <<'HELPER'
 #!/bin/sh
@@ -45,8 +52,15 @@ export MIBS=
 export SNMPCONFPATH="$tmp/conf"
 export SNMP_PERSISTENT_DIR="$tmp/persist"
 
-unshare -n sleep 120 &
+unshare -n sh -c 'touch "$1"; exec sleep 120' sh "$tmp/target-ready" &
 target_ns_pid=$!
+count=0
+while [ ! -f "$tmp/target-ready" ]; do
+    kill -0 "$target_ns_pid" 2>/dev/null || exit 1
+    count=$((count + 1))
+    [ "$count" -lt 100 ] || exit 1
+    sleep 0.1
+done
 ip link add v0 type veth peer name v1
 ip link set v1 netns "$target_ns_pid"
 ip link set lo up
