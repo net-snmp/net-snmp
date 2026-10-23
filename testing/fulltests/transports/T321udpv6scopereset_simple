@@ -1,0 +1,155 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER UDP6 scope follows a recreated interface
+
+SKIPIFNOT NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+SKIPIFNOT USING_UCD_SNMP_PROXY_MODULE
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+
+for tool in ip nsenter unshare; do
+    command -v "$tool" >/dev/null 2>&1 || SKIP "$tool is not installed"
+done
+
+if ! unshare -r -n sh -c \
+    'ip link add nsmp-test0 type veth peer name nsmp-test1 && ip link del nsmp-test0' \
+    >/dev/null 2>&1; then
+    SKIP "cannot create a veth pair in a rootless network namespace"
+fi
+
+# Entering another network namespace can prohibit execution independently
+# of whether creating a veth pair is permitted (for example under an LSM).
+if ! unshare -r -n sh -c 'nsenter -t "$$" -n snmpd -v' \
+    >/dev/null 2>&1; then
+    SKIP "cannot execute snmpd after entering a rootless network namespace"
+fi
+
+helper="$SNMP_TMPDIR/udpv6-scope-reset.sh"
+cat > "$helper" <<'HELPER'
+#!/bin/sh
+set -eu
+
+tmp="$SNMP_TMPDIR/udpv6-scope-reset.$$"
+mkdir -p "$tmp/conf" "$tmp/persist"
+target_ns_pid=
+target_pid=
+proxy_pid=
+
+cleanup() {
+    [ -z "$proxy_pid" ] || kill "$proxy_pid" 2>/dev/null || true
+    [ -z "$target_pid" ] || kill "$target_pid" 2>/dev/null || true
+    [ -z "$target_ns_pid" ] || kill "$target_ns_pid" 2>/dev/null || true
+    [ -z "$proxy_pid" ] || wait "$proxy_pid" 2>/dev/null || true
+    [ -z "$target_pid" ] || wait "$target_pid" 2>/dev/null || true
+    [ -z "$target_ns_pid" ] || wait "$target_ns_pid" 2>/dev/null || true
+    rm -rf "$tmp"
+}
+trap cleanup EXIT HUP INT TERM
+
+export MIBS=
+export SNMPCONFPATH="$tmp/conf"
+export SNMP_PERSISTENT_DIR="$tmp/persist"
+
+unshare -n sh -c 'touch "$1"; exec sleep 120' sh "$tmp/target-ready" &
+target_ns_pid=$!
+count=0
+while [ ! -f "$tmp/target-ready" ]; do
+    kill -0 "$target_ns_pid" 2>/dev/null || exit 1
+    count=$((count + 1))
+    [ "$count" -lt 100 ] || exit 1
+    sleep 0.1
+done
+ip link add v0 type veth peer name v1
+ip link set v1 netns "$target_ns_pid"
+ip link set lo up
+ip -6 addr add fe80::1/64 dev v0 nodad
+ip link set v0 up
+nsenter -t "$target_ns_pid" -n ip link set lo up
+nsenter -t "$target_ns_pid" -n ip -6 addr add fe80::2/64 dev v1 nodad
+nsenter -t "$target_ns_pid" -n ip link set v1 up
+
+cat > "$tmp/target.conf" <<CONFIG
+agentaddress udp6:[::]:1161
+rocommunity6 public
+CONFIG
+cat > "$tmp/proxy.conf" <<CONFIG
+agentaddress udp:127.0.0.1:1610
+rocommunity front 127.0.0.1
+proxy -t 1 -r 0 -v 2c -c public udp6:[fe80::2%v0]:1161 .1.3.6.1.2.1.1
+CONFIG
+
+nsenter -t "$target_ns_pid" -n snmpd -f -Lo -C -c "$tmp/target.conf" \
+    -r -U -p "$tmp/target.pid" >"$tmp/target.log" 2>&1 &
+target_pid=$!
+snmpd -f -Lo -C -c "$tmp/proxy.conf" -I -system_mib \
+    -r -U -p "$tmp/proxy.pid" >"$tmp/proxy.log" 2>&1 &
+proxy_pid=$!
+
+query_target() {
+    snmpget -On -v2c -c public -r 0 -t 1 \
+        "udp6:[fe80::2%v0]:1161" .1.3.6.1.2.1.1.3.0
+}
+query_proxy() {
+    snmpget -On -v2c -c front -r 0 -t 1 \
+        127.0.0.1:1610 .1.3.6.1.2.1.1.3.0
+}
+
+wait_for_timeticks() {
+    count=0
+    while [ "$count" -lt 20 ]; do
+        if output=$("$@" 2>&1) && echo "$output" | grep -q "Timeticks:"; then
+            return 0
+        fi
+        count=$((count + 1))
+        sleep 0.1
+    done
+    echo "$output"
+    return 1
+}
+
+wait_for_timeticks query_target || {
+    cat "$tmp/target.log"
+    exit 1
+}
+wait_for_timeticks query_proxy || {
+    cat "$tmp/proxy.log"
+    exit 1
+}
+
+old_ifindex=$(ip -o link show dev v0 | cut -d: -f1)
+ip link del v0
+ip link add pad0 type dummy
+ip link set pad0 up
+ip link add v0 type veth peer name v1
+ip link set v1 netns "$target_ns_pid"
+ip -6 addr add fe80::1/64 dev v0 nodad
+ip link set v0 up
+nsenter -t "$target_ns_pid" -n ip -6 addr add fe80::2/64 dev v1 nodad
+nsenter -t "$target_ns_pid" -n ip link set v1 up
+new_ifindex=$(ip -o link show dev v0 | cut -d: -f1)
+
+if [ "$old_ifindex" = "$new_ifindex" ]; then
+    echo "veth ifindex did not change"
+    exit 1
+fi
+
+wait_for_timeticks query_target || {
+    echo "backend stopped responding after veth recreation"
+    exit 1
+}
+wait_for_timeticks query_proxy || {
+    echo "proxy did not recover after veth recreation (ifindex $old_ifindex -> $new_ifindex)"
+    cat "$tmp/proxy.log"
+    exit 1
+}
+
+echo "scope-reset: ok (ifindex $old_ifindex -> $new_ifindex)"
+HELPER
+chmod +x "$helper"
+
+CAPTURE "unshare -r -n $helper"
+CHECK "scope-reset: ok"
+
+FINISHED

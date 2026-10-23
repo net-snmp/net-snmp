@@ -10,6 +10,7 @@
  * SNMP endpoint specification.
  * @param a     Address family, network address and port number.
  * @param iface Network interface name in ASCII format. May be empty.
+ * @param scope_iface Interface name from an IPv6 address scope. May be empty.
  */
 struct netsnmp_ep {
     union {
@@ -20,6 +21,7 @@ struct netsnmp_ep {
 #endif
     } a;
     char iface[16];
+    char scope_iface[16];
 };
 
 /**

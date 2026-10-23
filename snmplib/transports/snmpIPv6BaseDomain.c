@@ -319,6 +319,17 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
             *scope_id = '\0';
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
             addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
+#if defined(HAVE_IF_NAMETOINDEX)
+            if (strspn(scope_id + 1, "0123456789") !=
+                strlen(scope_id + 1)) {
+                if (strlcpy(ep->scope_iface, scope_id + 1,
+                            sizeof(ep->scope_iface)) >=
+                    sizeof(ep->scope_iface)) {
+                    free(ep_str.addr);
+                    return 0;
+                }
+            }
+#endif
 #endif
         }
         if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&
