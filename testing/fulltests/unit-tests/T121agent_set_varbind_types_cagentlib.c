@@ -15,6 +15,9 @@ extern void init_ip_scalars(void);
 #ifdef USING_TSM_MIB_SNMPTSMCONFIGURATIONUSEPREFIX_MODULE
 extern void init_snmpTsmConfigurationUsePrefix(void);
 #endif
+#ifdef USING_SNMP_USM_DH_OBJECTS_MIB_USMDHPARAMETERS_USMDHPARAMETERS_MODULE
+extern Netsnmp_Node_Handler handle_usmDHParameters;
+#endif
 
 SOCK_STARTUP;
 
@@ -170,6 +173,39 @@ init_snmp("snmpd");
              "STRING varbind with wrongType (%d)", request.status));
         free(short_buf);
     }
+}
+#endif
+
+#ifdef USING_SNMP_USM_DH_OBJECTS_MIB_USMDHPARAMETERS_USMDHPARAMETERS_MODULE
+{
+    oid                           instance[] = { 1, 3, 6, 1, 3, 101, 1, 1, 1, 0 };
+    netsnmp_agent_request_info    reqinfo;
+    netsnmp_request_info          request;
+    netsnmp_variable_list         vb;
+    long                          int_val = 1;
+
+    memset(&reqinfo, 0, sizeof(reqinfo));
+    memset(&request, 0, sizeof(request));
+    memset(&vb, 0, sizeof(vb));
+    vb.name = instance;
+    vb.name_length = OID_LENGTH(instance);
+    vb.type = SNMP_NOSUCHOBJECT;
+    request.requestvb = &vb;
+    reqinfo.mode = MODE_SET_RESERVE1;
+    handle_usmDHParameters(NULL, NULL, &reqinfo, &request);
+    OKF(request.status == SNMP_ERR_WRONGTYPE,
+        ("usmDHParameters RESERVE1 refuses a noSuchObject varbind with "
+         "wrongType (%d)", request.status));
+
+    memset(&request, 0, sizeof(request));
+    vb.type = ASN_INTEGER;
+    vb.val.integer = &int_val;
+    vb.val_len = sizeof(int_val);
+    request.requestvb = &vb;
+    handle_usmDHParameters(NULL, NULL, &reqinfo, &request);
+    OKF(request.status == SNMP_ERR_WRONGTYPE,
+        ("usmDHParameters RESERVE1 refuses an INTEGER varbind with "
+         "wrongType (%d)", request.status));
 }
 #endif
 

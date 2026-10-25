@@ -87,16 +87,22 @@ handle_usmDHParameters(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
     case MODE_SET_RESERVE1:
+    {
+        int rc = netsnmp_check_vb_type(requests->requestvb, ASN_OCTET_STR);
+        if (rc != SNMP_ERR_NOERROR)
+            netsnmp_set_request_error(reqinfo, requests, rc);
         break;
+    }
 
     case MODE_SET_RESERVE2:
-        cp = requests->requestvb->val.string;
-        dh_tmpp = d2i_DHparams(NULL, (const unsigned char **) (void *)&cp,
-                               requests->requestvb->val_len);
+    {
+        const unsigned char *p = requests->requestvb->val.string;
+        dh_tmpp = d2i_DHparams(NULL, &p, requests->requestvb->val_len);
         if ( !dh_tmpp) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+            break;
         }
-        if (cp - requests->requestvb->val.string !=
+        if (p - requests->requestvb->val.string !=
             requests->requestvb->val_len) {
             /* value too long; we didn't parse the whole thing */
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
@@ -104,6 +110,7 @@ handle_usmDHParameters(netsnmp_mib_handler *handler,
             dh_tmpp = NULL;
         }
         break;
+    }
 
     case MODE_SET_FREE:
     case MODE_SET_COMMIT:
