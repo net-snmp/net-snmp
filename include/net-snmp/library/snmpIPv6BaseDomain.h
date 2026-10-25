@@ -15,6 +15,11 @@ config_require(IPBase);
 extern          "C" {
 #endif
 
+typedef struct netsnmp_udp6_transport_data_s {
+    netsnmp_indexed_addr_pair addresses;
+    char scope_iface[16];
+} netsnmp_udp6_transport_data;
+
 /*
  * Prototypes
  */
