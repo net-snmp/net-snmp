@@ -3705,7 +3705,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
-check_set_pdu_for_null_varbind(netsnmp_agent_session *asp)
+check_set_pdu_for_valueless_varbind(netsnmp_agent_session *asp)
 {
     int i;
     netsnmp_variable_list *v = NULL;
@@ -3741,8 +3741,10 @@ handle_pdu(netsnmp_agent_session *asp)
     /*
      * Check for value-less varbinds in SET request
      */
-    if (asp->pdu->command == SNMP_MSG_SET) {
-	status = check_set_pdu_for_null_varbind(asp);
+    if (asp->pdu->command == SNMP_MSG_SET ||
+        asp->pdu->command == SNMP_MSG_INTERNAL_SET_BEGIN ||
+        asp->pdu->command == SNMP_MSG_INTERNAL_SET_RESERVE1) {
+	status = check_set_pdu_for_valueless_varbind(asp);
 	if (status != SNMP_ERR_NOERROR) {
 	    return status;
 	}

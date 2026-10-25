@@ -22,6 +22,11 @@ init_snmp("snmpd");
  * 1. handle_pdu() refuses SET varbinds whose type carries no value.
  */
 {
+    static const int              commands[] = {
+        SNMP_MSG_SET,
+        SNMP_MSG_INTERNAL_SET_BEGIN,
+        SNMP_MSG_INTERNAL_SET_RESERVE1
+    };
     static const u_char           types[] = {
         ASN_NULL, SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE, SNMP_ENDOFMIBVIEW
     };
@@ -31,28 +36,30 @@ init_snmp("snmpd");
     netsnmp_pdu                  *pdu;
     netsnmp_variable_list        *var;
     netsnmp_agent_session        *asp;
-    int                           i, status;
+    int                           c, i, status;
 
-    for (i = 0; i < (int) sizeof(types); i++) {
-        pdu = snmp_pdu_create(SNMP_MSG_SET);
-        snmp_pdu_add_variable(pdu, int_oid, OID_LENGTH(int_oid), ASN_INTEGER,
-                              &val, sizeof(val));
-        var = snmp_pdu_add_variable(pdu, val_oid, OID_LENGTH(val_oid),
-                                    types[i], NULL, 0);
-        /* As decoded by snmp_pdu_parse(): no value */
-        var->val.string = NULL;
-        var->val_len = 0;
-        asp = init_agent_snmp_session(NULL, pdu);
-        OK(asp != NULL, "init_agent_snmp_session succeeded");
-        if (asp) {
-            status = handle_pdu(asp);
-            OKF(status == SNMP_ERR_WRONGTYPE && asp->index == 2,
-                ("handle_pdu refuses SET varbind of type 0x%02x with wrongType "
-                 "at index 2 (status %d, index %d)", types[i], status,
-                 asp->index));
-            free_agent_snmp_session(asp);
+    for (c = 0; c < (int) (sizeof(commands) / sizeof(commands[0])); c++) {
+        for (i = 0; i < (int) sizeof(types); i++) {
+            pdu = snmp_pdu_create(commands[c]);
+            snmp_pdu_add_variable(pdu, int_oid, OID_LENGTH(int_oid),
+                                  ASN_INTEGER, &val, sizeof(val));
+            var = snmp_pdu_add_variable(pdu, val_oid, OID_LENGTH(val_oid),
+                                        types[i], NULL, 0);
+            /* As decoded by snmp_pdu_parse(): no value */
+            var->val.string = NULL;
+            var->val_len = 0;
+            asp = init_agent_snmp_session(NULL, pdu);
+            OK(asp != NULL, "init_agent_snmp_session succeeded");
+            if (asp) {
+                status = handle_pdu(asp);
+                OKF(status == SNMP_ERR_WRONGTYPE && asp->index == 2,
+                    ("handle_pdu (cmd %d) refuses SET varbind of type 0x%02x "
+                     "with wrongType at index 2 (status %d, index %d)",
+                     commands[c], types[i], status, asp->index));
+                free_agent_snmp_session(asp);
+            }
+            snmp_free_pdu(pdu);
         }
-        snmp_free_pdu(pdu);
     }
 }
 
