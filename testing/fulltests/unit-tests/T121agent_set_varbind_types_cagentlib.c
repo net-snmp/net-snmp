@@ -12,6 +12,9 @@ extern int handle_pdu(netsnmp_agent_session *asp);
 #ifdef USING_IP_MIB_IP_SCALARS_MODULE
 extern void init_ip_scalars(void);
 #endif
+#ifdef USING_TSM_MIB_SNMPTSMCONFIGURATIONUSEPREFIX_MODULE
+extern void init_snmpTsmConfigurationUsePrefix(void);
+#endif
 
 SOCK_STARTUP;
 
@@ -120,6 +123,52 @@ init_snmp("snmpd");
         OKF(request.status == SNMP_ERR_WRONGTYPE,
             ("%s RESERVE1 refuses an OCTET STRING varbind with wrongType (%d)",
              scalars[i].name, request.status));
+    }
+}
+#endif
+
+#ifdef USING_TSM_MIB_SNMPTSMCONFIGURATIONUSEPREFIX_MODULE
+{
+    oid                           instance[] = { 1, 3, 6, 1, 2, 1, 190, 1, 2, 1, 0 };
+    netsnmp_subtree              *st;
+    netsnmp_mib_handler          *h = NULL;
+    netsnmp_agent_request_info    reqinfo;
+    netsnmp_request_info          request;
+    netsnmp_variable_list         vb;
+    u_char                       *short_buf;
+
+    init_snmpTsmConfigurationUsePrefix();
+
+    st = netsnmp_subtree_find(instance, OID_LENGTH(instance), NULL, "");
+    if (st && st->reginfo)
+        h = netsnmp_find_handler_by_name(st->reginfo,
+                                         "snmpTsmConfigurationUsePrefix");
+    OK(h != NULL, "found the snmpTsmConfigurationUsePrefix handler");
+    if (h) {
+        memset(&reqinfo, 0, sizeof(reqinfo));
+        memset(&request, 0, sizeof(request));
+        memset(&vb, 0, sizeof(vb));
+        vb.name = instance;
+        vb.name_length = OID_LENGTH(instance);
+        vb.type = SNMP_NOSUCHOBJECT;
+        request.requestvb = &vb;
+        reqinfo.mode = MODE_SET_RESERVE1;
+        h->access_method(h, st->reginfo, &reqinfo, &request);
+        OKF(request.status == SNMP_ERR_WRONGTYPE,
+            ("snmpTsmConfigurationUsePrefix RESERVE1 refuses a noSuchObject "
+             "varbind with wrongType (%d)", request.status));
+
+        short_buf = calloc(1, 1);
+        memset(&request, 0, sizeof(request));
+        vb.type = ASN_BIT_STR;
+        vb.val.bitstring = short_buf;
+        vb.val_len = 1;
+        request.requestvb = &vb;
+        h->access_method(h, st->reginfo, &reqinfo, &request);
+        OKF(request.status == SNMP_ERR_WRONGTYPE,
+            ("snmpTsmConfigurationUsePrefix RESERVE1 refuses a 1-byte BIT "
+             "STRING varbind with wrongType (%d)", request.status));
+        free(short_buf);
     }
 }
 #endif

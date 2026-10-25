@@ -62,16 +62,16 @@ handle_snmpTsmConfigurationUsePrefix(netsnmp_mib_handler *handler,
          * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
          */
     case MODE_SET_RESERVE1:
-        /*
-         * or you could use netsnmp_check_vb_type_and_size instead 
-         */
-        ret = netsnmp_check_vb_type(requests->requestvb, ASN_INTEGER);
+        ret = netsnmp_check_vb_int(requests->requestvb);
         if (ret != SNMP_ERR_NOERROR) {
             netsnmp_set_request_error(reqinfo, requests, ret);
+            break;
         }
         if (*(requests->requestvb->val.integer) != 2 &&
-            *(requests->requestvb->val.integer) != 1)
+            *(requests->requestvb->val.integer) != 1) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+            break;
+        }
         original_value = current_value;
         break;
 
