@@ -238,7 +238,7 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request = requests; request; request = request->next) {
-            int pid;
+            int pid, ret;
             if (request->processed)
                continue;
             table_entry = (netsnmp_swrun_entry *)
@@ -254,6 +254,11 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
 
             switch (table_info->colnum) {
             case COLUMN_HRSWRUNSTATUS:
+                ret = netsnmp_check_vb_int(request->requestvb);
+                if (ret != SNMP_ERR_NOERROR) {
+                    netsnmp_set_request_error(reqinfo, request, ret);
+                    return SNMP_ERR_NOERROR;
+                }
                 if (*request->requestvb->val.integer != HRSWRUNSTATUS_INVALID) {
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_ERR_WRONGVALUE);
