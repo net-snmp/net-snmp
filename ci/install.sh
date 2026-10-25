@@ -45,6 +45,7 @@ case "$(uname)" in
 		"
 		;;
 	esac
+	rm -f /etc/apt/sources.list.d/microsoft-prod.list
 	apt-get update
 	for p in ${packages}; do
 	    apt-get install -qq -o=Dpkg::Use-Pty=0 -y "$p" || true
