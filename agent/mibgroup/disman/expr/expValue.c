@@ -15,6 +15,7 @@
 #include "disman/expr/expValue.h"
 
 #include <ctype.h>
+#include <limits.h>
 
 void _expValue_setError( struct expExpression *exp, int reason,
                          oid *suffix, size_t suffix_len,
@@ -23,9 +24,41 @@ void _expValue_setError( struct expExpression *exp, int reason,
 
 #define ASN_PRIV_OPERATOR    (ASN_PRIVATE | 0x0f)
 #define ASN_PRIV_FUNCTION    (ASN_PRIVATE | 0x0e)
+#define MAX_EXPR_DEPTH       32
 
-int ops[128];   /* mapping from operator characters to numeric
+int ops[160];   /* mapping from operator characters to numeric
                    tokens (ordered by priority). */
+
+static void
+_expValue_freeVarbind(netsnmp_variable_list *var)
+{
+    netsnmp_variable_list *vp;
+
+    for (vp = var; vp; vp = vp->next_variable)
+        vp->data = NULL;
+    snmp_free_varbind(var);
+}
+
+/*
+ * Build an error varbind, allocating one if the caller does not have a
+ * spare varbind on hand.
+ */
+static netsnmp_variable_list *
+_expValue_errorVar(netsnmp_variable_list *var, int code, void *pos)
+{
+    if (!var) {
+        var = SNMP_MALLOC_TYPEDEF(netsnmp_variable_list);
+        if (!var)
+            return NULL;
+    } else if (var->next_variable) {
+        _expValue_freeVarbind(var->next_variable);
+        var->next_variable = NULL;
+    }
+    snmp_set_var_typed_integer(var, ASN_INTEGER, code);
+    var->type = ASN_NULL;
+    var->data = pos;
+    return var;
+}
 
 void
 init_expValue(void)
@@ -249,69 +282,107 @@ netsnmp_variable_list *
 _expValue_evalOperator(netsnmp_variable_list *left, 
                        netsnmp_variable_list *op, 
                        netsnmp_variable_list *right) {
-    int n;
+    long lval, rval, n;
 
-    if (left->val.integer == NULL || right->val.integer == NULL) {
-	return right;
+    if (!left || !op || !right ||
+        left->type == ASN_NULL || right->type == ASN_NULL ||
+        left->val.integer == NULL || right->val.integer == NULL) {
+        if (left) {
+            left->next_variable = NULL;
+            _expValue_freeVarbind(left);
+        }
+        if (op) {
+            op->next_variable = NULL;
+            _expValue_freeVarbind(op);
+        }
+        return _expValue_errorVar(right, EXPERRCODE_SYNTAX, NULL);
     }
+    lval = *left->val.integer;
+    rval = *right->val.integer;
     switch( *op->val.integer ) {
     case EXP_OPERATOR_ADD:
-        n = *left->val.integer + *right->val.integer; break;
+        n = (long)((u_long)lval + (u_long)rval); break;
     case EXP_OPERATOR_SUBTRACT:
-        n = *left->val.integer - *right->val.integer; break;
+        n = (long)((u_long)lval - (u_long)rval); break;
     case EXP_OPERATOR_MULTIPLY:
-        n = *left->val.integer * *right->val.integer; break;
+        n = (long)((u_long)lval * (u_long)rval); break;
     case EXP_OPERATOR_DIVIDE:
-        n = *left->val.integer / *right->val.integer; break;
+        if (rval == 0) {
+            left->next_variable = NULL;
+            _expValue_freeVarbind(left);
+            op->next_variable = NULL;
+            _expValue_freeVarbind(op);
+            return _expValue_errorVar(right, EXPERRCODE_DIVZERO, NULL);
+        }
+        if (lval == LONG_MIN && rval == -1)
+            n = LONG_MIN;
+        else
+            n = lval / rval;
+        break;
     case EXP_OPERATOR_REMAINDER:
-        n = *left->val.integer % *right->val.integer; break;
+        if (rval == 0) {
+            left->next_variable = NULL;
+            _expValue_freeVarbind(left);
+            op->next_variable = NULL;
+            _expValue_freeVarbind(op);
+            return _expValue_errorVar(right, EXPERRCODE_DIVZERO, NULL);
+        }
+        if (lval == LONG_MIN && rval == -1)
+            n = 0;
+        else
+            n = lval % rval;
+        break;
     case EXP_OPERATOR_BITXOR:
-        n = *left->val.integer ^ *right->val.integer; break;
+        n = lval ^ rval; break;
     case EXP_OPERATOR_BITNEGATE:
         n = 99; /* *left->val.integer ~ *right->val.integer; */ break;
     case EXP_OPERATOR_BITOR:
-        n = *left->val.integer | *right->val.integer; break;
+        n = lval | rval; break;
     case EXP_OPERATOR_BITAND:
-        n = *left->val.integer & *right->val.integer; break;
+        n = lval & rval; break;
     case EXP_OPERATOR_NOT:
         n = 99; /* *left->val.integer ! *right->val.integer; */ break;
     case EXP_OPERATOR_LESS:
-        n = *left->val.integer < *right->val.integer; break;
+        n = lval < rval; break;
     case EXP_OPERATOR_GREAT:
-        n = *left->val.integer > *right->val.integer; break;
+        n = lval > rval; break;
     case EXP_OPERATOR_EQUAL:
-        n = *left->val.integer == *right->val.integer; break;
+        n = lval == rval; break;
     case EXP_OPERATOR_NOTEQ:
-        n = *left->val.integer != *right->val.integer; break;
+        n = lval != rval; break;
     case EXP_OPERATOR_LESSEQ:
-        n = *left->val.integer <= *right->val.integer; break;
+        n = lval <= rval; break;
     case EXP_OPERATOR_GREATEQ:
-        n = *left->val.integer >= *right->val.integer; break;
+        n = lval >= rval; break;
     case EXP_OPERATOR_OR:
-        n = *left->val.integer || *right->val.integer; break;
+        n = lval || rval; break;
     case EXP_OPERATOR_AND:
-        n = *left->val.integer && *right->val.integer; break;
+        n = lval && rval; break;
     case EXP_OPERATOR_LSHIFT:
-        n = *left->val.integer << *right->val.integer; break;
+        if (rval < 0 || rval >= (long)(sizeof(u_long) * 8))
+            n = 0;
+        else
+            n = (long)((u_long)lval << rval);
+        break;
     case EXP_OPERATOR_RSHIFT:
-        n = *left->val.integer >> *right->val.integer; break;
+        if (rval < 0 || rval >= (long)(sizeof(u_long) * 8))
+            n = 0;
+        else
+            n = (long)((u_long)lval >> rval);
         break;
     default:
         left->next_variable = NULL;
-        snmp_free_var(left);
+        _expValue_freeVarbind(left);
         right->next_variable = NULL;
-        snmp_free_var(right);
-
-        snmp_set_var_typed_integer( op, ASN_INTEGER, EXPERRCODE_OPERATOR );
-        op->type = ASN_NULL;
-        return op;
+        _expValue_freeVarbind(right);
+        return _expValue_errorVar(op, EXPERRCODE_OPERATOR, NULL);
     }
 
     /* XXX */
     left->next_variable = NULL;
-    snmp_free_var(left);
+    _expValue_freeVarbind(left);
     op->next_variable = NULL;
-    snmp_free_var(op);
+    _expValue_freeVarbind(op);
     snmp_set_var_typed_integer( right, ASN_INTEGER, n );
     return right;
 }
@@ -320,29 +391,37 @@ netsnmp_variable_list *
 _expValue_evalFunction(netsnmp_variable_list *func) {
     netsnmp_variable_list *params = func->next_variable;
     /* XXX */
-	func->next_variable = params->next_variable;
+    if (!params || params->type == ASN_PRIV_OPERATOR ||
+        params->type == ASN_PRIV_FUNCTION) {
+        return _expValue_errorVar(func, EXPERRCODE_FUNCTION, NULL);
+    }
+    func->next_variable = params->next_variable;
     params->next_variable = NULL;
-    snmp_free_var(params);
+    _expValue_freeVarbind(params);
     snmp_set_var_typed_integer( func, ASN_INTEGER, 99 );
     return func;
 }
 
 netsnmp_variable_list *_expValue_evalExpr2(netsnmp_variable_list *exprAlDente);
-netsnmp_variable_list *
-_expValue_evalExpr(  netsnmp_variable_list *expIdx,
-                     char *exprRaw, char **exprEnd,
-                     oid *suffix, size_t suffix_len )
+
+static netsnmp_variable_list *
+_expValue_evalExpr_impl(netsnmp_variable_list *expIdx,
+                        char *exprRaw, char **exprEnd,
+                        oid *suffix, size_t suffix_len,
+                        int depth)
 {
     netsnmp_variable_list *exprAlDente = NULL;
     netsnmp_variable_list *vtail = NULL;
-    char *cp1, *cp2;
+    char *cp1, *cp2 = NULL;
     netsnmp_variable_list *var = NULL;
     int   i, n;
     int   neg = 0;
     oid   oid_buf[MAX_OID_LEN];
 
     DEBUGMSGTL(("disman:expr:eval1", "Evaluating '%s'\n", exprRaw));
-    if (!expIdx || !exprRaw)
+    if (exprEnd)
+        *exprEnd = exprRaw;
+    if (!expIdx || !exprRaw || !exprEnd)
         return NULL;
 
     /*
@@ -362,12 +441,16 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
              */
             n   = _expParse_integer( cp1+1, &cp1 );
             var = _expValue_evalParam( expIdx, n, suffix, suffix_len );
-            if ( var && var->type == ASN_NULL ) {
+            if ( !var ) {
+                _expValue_freeVarbind(exprAlDente);
+                *exprEnd = cp1;
+                return NULL;
+            } else if ( var->type == ASN_NULL ) {
                 DEBUGMSGTL(("disman:expr:eval", "Invalid parameter '%d'\n", n));
                 /* Note position of failure in expression */
                 var->data = (void *)(cp1 - exprRaw);
-                snmp_free_var(exprAlDente);
-		*exprEnd = cp1;
+                _expValue_freeVarbind(exprAlDente);
+                *exprEnd = cp1;
                 return var;
             } else {
                 if (vtail)
@@ -382,20 +465,33 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
             /*
              * Recursively evaluate the sub-expression
              */
-            var = _expValue_evalExpr( expIdx, cp1+1, &cp2,
-                                      suffix, suffix_len );
+            if (depth >= MAX_EXPR_DEPTH) {
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar(NULL, EXPERRCODE_SYNTAX,
+                                         (void *)(cp1 - exprRaw));
+                *exprEnd = cp1;
+                return var;
+            }
+            var = _expValue_evalExpr_impl(expIdx, cp1+1, &cp2,
+                                          suffix, suffix_len, depth + 1);
             if ( var && var->type == ASN_NULL ) {
                 /* Adjust position of failure */
+                _expValue_freeVarbind(exprAlDente);
                 var->data = (void *)(cp1 - exprRaw + (uintptr_t)var->data);
+                *exprEnd = cp2;
                 return var;
-            } else if (*cp2 != ')') {
-                snmp_free_var(exprAlDente);
+            } else if (!cp2 || *cp2 != ')') {
+                _expValue_freeVarbind(exprAlDente);
                 DEBUGMSGTL(("disman:expr:eval", "Unbalanced parenthesis\n"));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_PARENTHESIS );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp2 - exprRaw);
-		*exprEnd = cp1;
+                var = _expValue_errorVar( var, EXPERRCODE_PARENTHESIS,
+                                          (void *)((cp2 ? cp2 : cp1) - exprRaw) );
+                *exprEnd = cp1;
+                return var;
+            } else if (!var) {
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( NULL, EXPERRCODE_SYNTAX,
+                                          (void *)(cp2 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             } else {
                 if (vtail)
@@ -425,12 +521,25 @@ _expValue_evalExpr(  netsnmp_variable_list *expIdx,
             while ( cp1 && *cp1 == '.' ) {
                 n = _expParse_integer( cp1+1, &cp2 );
 OID:
+                if ( i >= MAX_OID_LEN ) {
+                    /*
+                     * The expression contains an OID with more
+                     * sub-identifiers than a varbind can hold.
+                     */
+                    _expValue_freeVarbind(exprAlDente);
+                    var = _expValue_errorVar( NULL, EXPERRCODE_SYNTAX,
+                                              (void *)(cp1 - exprRaw) );
+                    *exprEnd = cp1;
+                    return var;
+                }
                 oid_buf[i++] = n;
                 cp1 = cp2;
             }
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_OBJECT_ID,
                                              (u_char*)oid_buf, i*sizeof(oid));
+            vtail = var;
+            var   = NULL;
             break;
 DIGIT:
         case '0':
@@ -444,13 +553,13 @@ DIGIT:
         case '8':
         case '9':
             n = _expParse_integer( cp1, &cp2 );
-            if ( cp2 && *cp2 == '.' ) {
+            if ( !neg && cp2 && *cp2 == '.' ) {
                 i = 0;
                 memset( oid_buf, 0, sizeof(oid_buf));
                 goto OID;
             }
             if ( neg )
-                n = -n;
+                n = -(unsigned int)n;
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_INTEGER,
                                              (u_char*)&n, sizeof(n));
@@ -472,18 +581,19 @@ DIGIT:
                  * Unterminated string
                  */
                 DEBUGMSGTL(("disman:expr:eval", "Unterminated string\n"));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp2 - exprRaw);
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_SYNTAX,
+                                          (void *)(cp2 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             }
-            n = cp2 - cp1;  
+            n = cp2 - (cp1 + 1);
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_OCTET_STR,
                                              (u_char*)cp1+1, n);
             vtail = var;
             var   = NULL;
+            cp1   = cp2 + 1;
             break;
 
 
@@ -492,8 +602,10 @@ DIGIT:
             /*
              * Could be a unary minus....
              */
-            if (!vtail || vtail->type == ASN_PRIV_OPERATOR) {
+            if ((!vtail || vtail->type == ASN_PRIV_OPERATOR) &&
+                isdigit((unsigned char)cp1[1])) {
                 neg = 1;
+                cp1++;
                 goto DIGIT;
             }
             /* 
@@ -511,20 +623,25 @@ DIGIT:
                  * Can't start an expression with a binary operator
                  */
                 DEBUGMSGTL(("disman:expr:eval", "Initial binary operator\n"));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp1 - exprRaw);
-		*exprEnd = cp1;
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_SYNTAX,
+                                          (void *)(cp1 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             }
-            n = ops[ *cp1 & 0xFF ];
+            n = ops[ *cp1 & 0x7F ];
             DEBUGMSGTL(("disman:expr:eval", "Binary operator %c (%d)\n", *cp1, n));
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_INTEGER,
                                              (u_char*)&n, sizeof(n));
+            if ( !var ) {
+                _expValue_freeVarbind(exprAlDente);
+                *exprEnd = cp1;
+                return NULL;
+            }
             var->type = ASN_PRIV_OPERATOR;
             vtail = var;
+            var   = NULL;
             cp1++;
             break;
 
@@ -542,24 +659,37 @@ DIGIT:
                  * Can't start an expression with a binary operator
                  */
                 DEBUGMSGTL(("disman:expr:eval", "Initial binary operator\n"));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp1 - exprRaw);
-		*exprEnd = cp1;
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_SYNTAX,
+                                          (void *)(cp1 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             }
             if ( *(cp1+1) == '=' )
-                n = ops[ *cp1++ + 20];
+                n = ops[ (*cp1++ & 0x7F) + 20];
             else if ( *(cp1+1) == *cp1 )
-                n = ops[ *cp1++ - 30];
+                n = ops[ (*cp1++ & 0x7F) - 30];
             else
-                n = ops[ *cp1 & 0xFF ];
+                n = ops[ *cp1 & 0x7F ];
+            if ( n == 0 ) {
+                DEBUGMSGTL(("disman:expr:eval", "Unrecognised operator\n"));
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_OPERATOR,
+                                          (void *)(cp1 - exprRaw) );
+                *exprEnd = cp1;
+                return var;
+            }
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_INTEGER,
                                              (u_char*)&n, sizeof(n));
+            if ( !var ) {
+                _expValue_freeVarbind(exprAlDente);
+                *exprEnd = cp1;
+                return NULL;
+            }
             var->type = ASN_PRIV_OPERATOR;
             vtail = var;
+            var   = NULL;
             cp1++;
             break;
 
@@ -570,14 +700,21 @@ DIGIT:
         case 'm':    /* maximum/minimum      */
         case 'o':    /* oidBegins/Ends/Contains    */
         case 's':    /* sum / string{B,E,C}  */
+            for ( cp2 = cp1; *cp2 >= 'a' && *cp2 <= 'z'; cp2++ )
+                ;
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_OCTET_STR,
-                                             (u_char*)cp1, 3 );
+                                             (u_char*)cp1, cp2 - cp1 );
+            if ( !var ) {
+                _expValue_freeVarbind(exprAlDente);
+                *exprEnd = cp1;
+                return NULL;
+            }
                                                    /* XXX */
             var->type = ASN_PRIV_FUNCTION;
             vtail = var;
-            while (*cp1 >= 'a' && *cp1 <= 'z')
-              cp1++;
+            var   = NULL;
+            cp1   = cp2;
             break;
 
         default:
@@ -586,11 +723,10 @@ DIGIT:
                  * Unrecognised function call ?
                  */
                 DEBUGMSGTL(("disman:expr:eval", "Unrecognised function '%s'\n", cp1));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_FUNCTION );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp1 - exprRaw);
-		*exprEnd = cp1;
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_FUNCTION,
+                                          (void *)(cp1 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             }
             else if (!isspace( *cp1 & 0xFF )) {
@@ -598,11 +734,10 @@ DIGIT:
                  * Unrecognised operator ?
                  */
                 DEBUGMSGTL(("disman:expr:eval", "Unrecognised operator '%c'\n", *cp1));
-                snmp_set_var_typed_integer( var, ASN_INTEGER,
-                                            EXPERRCODE_OPERATOR );
-                var->type = ASN_NULL;
-                var->data = (void *)(cp1 - exprRaw);
-		*exprEnd = cp1;
+                _expValue_freeVarbind(exprAlDente);
+                var = _expValue_errorVar( var, EXPERRCODE_OPERATOR,
+                                          (void *)(cp1 - exprRaw) );
+                *exprEnd = cp1;
                 return var;
             }
             cp1++;
@@ -621,6 +756,15 @@ DIGIT:
     DEBUGMSG((   "disman:expr:eval1", "\n"));
 /*  snmp_free_var(exprAlDente); XXX - Crashes */
     return var;
+}
+
+netsnmp_variable_list *
+_expValue_evalExpr(  netsnmp_variable_list *expIdx,
+                     char *exprRaw, char **exprEnd,
+                     oid *suffix, size_t suffix_len )
+{
+    return _expValue_evalExpr_impl(expIdx, exprRaw, exprEnd,
+                                   suffix, suffix_len, 0);
 }
 
 netsnmp_variable_list *
@@ -651,11 +795,10 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
         if ( vp->type == ASN_PRIV_OPERATOR ) {
             /* Must *always* follow a value */
             if ( !stack || stack->type == ASN_PRIV_OPERATOR ) {
-                snmp_set_var_typed_integer( vp, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                vp->type = ASN_NULL;
-                snmp_free_var( stack );
-                return vp;
+                _expValue_freeVarbind( vp1 );
+                vp->next_variable = NULL;
+                _expValue_freeVarbind( stack );
+                return _expValue_errorVar( vp, EXPERRCODE_SYNTAX, NULL );
             }
             /*
              * Evaluate any higher priority operators
@@ -667,9 +810,21 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
                  rval = stack;
                  op   = stack->next_variable;
                  lval = op->next_variable;
+                 if ( !lval || lval->type == ASN_PRIV_OPERATOR ) {
+                     _expValue_freeVarbind( vp );
+                     return _expValue_errorVar( rval, EXPERRCODE_SYNTAX, NULL );
+                 }
                  stack = lval->next_variable;
+                 rval->next_variable = NULL;
+                 op->next_variable   = NULL;
+                 lval->next_variable = NULL;
 
                  rval = _expValue_evalOperator( lval, op, rval );
+                 if ( !rval || rval->type == ASN_NULL ) {
+                     _expValue_freeVarbind( vp );
+                     _expValue_freeVarbind( stack );
+                     return rval;
+                 }
                  rval->next_variable = stack;
                  stack = rval;
             }
@@ -681,11 +836,10 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
         } else if ( vp->type == ASN_PRIV_FUNCTION ) {
             /* Must be first, or follow an operator */
             if ( stack && stack->type != ASN_PRIV_OPERATOR ) {
-                snmp_set_var_typed_integer( vp, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                vp->type = ASN_NULL;
-                snmp_free_var( stack );
-                return vp;
+                _expValue_freeVarbind( vp1 );
+                vp->next_variable = NULL;
+                _expValue_freeVarbind( stack );
+                return _expValue_errorVar( vp, EXPERRCODE_SYNTAX, NULL );
             }
             /*
              * Evaluate this function (consuming the
@@ -693,17 +847,26 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
              *   list), and push the result onto the stack.
              */
             vp = _expValue_evalFunction( vp );
+            if ( !vp ) {
+                _expValue_freeVarbind( stack );
+                return NULL;
+            }
             vp1 = vp->next_variable;
+            if ( vp->type == ASN_NULL ) {
+                _expValue_freeVarbind( vp1 );
+                vp->next_variable = NULL;
+                _expValue_freeVarbind( stack );
+                return vp;
+            }
             vp->next_variable = stack;
             stack = vp;
         } else {
             /* Must be first, or follow an operator */
             if ( stack && stack->type != ASN_PRIV_OPERATOR ) {
-                snmp_set_var_typed_integer( vp, ASN_INTEGER,
-                                            EXPERRCODE_SYNTAX );
-                vp->type = ASN_NULL;
-                snmp_free_var( stack );
-                return vp;
+                _expValue_freeVarbind( vp1 );
+                vp->next_variable = NULL;
+                _expValue_freeVarbind( stack );
+                return _expValue_errorVar( vp, EXPERRCODE_SYNTAX, NULL );
             }
             /*
              * Push this value onto the stack
@@ -721,11 +884,30 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
         rval = stack;
         op   = stack->next_variable;
         lval = op->next_variable;
+        if ( rval->type == ASN_PRIV_OPERATOR ||
+             op->type != ASN_PRIV_OPERATOR ||
+             !lval || lval->type == ASN_PRIV_OPERATOR ) {
+            /*
+             * Malformed token sequence - e.g. a trailing binary
+             * operator with no left-hand operand.
+             */
+            return _expValue_errorVar( rval, EXPERRCODE_SYNTAX, NULL );
+        }
         stack = lval->next_variable;
+        rval->next_variable = NULL;
+        op->next_variable   = NULL;
+        lval->next_variable = NULL;
 
         rval = _expValue_evalOperator( lval, op, rval );
+        if ( !rval || rval->type == ASN_NULL ) {
+            _expValue_freeVarbind( stack );
+            return rval;
+        }
         rval->next_variable = stack;
         stack = rval;
+    }
+    if ( stack && stack->type == ASN_PRIV_OPERATOR ) {
+        return _expValue_errorVar( stack, EXPERRCODE_SYNTAX, NULL );
     }
     return stack;
 }
@@ -741,7 +923,7 @@ expValue_evaluateExpression( struct expExpression *exp,
     netsnmp_variable_list *var;
     netsnmp_variable_list owner_var, name_var, param_var;
     int n;
-    char *cp;
+    char *cp = NULL;
 
     if (!exp)
         return NULL;
@@ -776,11 +958,19 @@ expValue_evaluateExpression( struct expExpression *exp,
      */
     memset(exprRaw, 0,                  sizeof(exprRaw));
     memcpy(exprRaw, exp->expExpression, sizeof(exprRaw));
+    exprRaw[EXP_STR3_LEN] = '\0';
 
     var = _expValue_evalExpr( &owner_var, exprRaw, &cp, suffix, suffix_len );
     /*
      * Check for any problems, and record the appropriate error
      */
+    if (var && var->type == ASN_NULL) {
+        /*
+         * Error explicitly reported from the evaluation routines.
+         */
+        _expValue_setError( exp, *(var->val.integer), suffix, suffix_len, var );
+        return NULL;
+    }
     if (!cp || *cp != '\0') {
         /*
          * When we had finished, there was a lot
@@ -792,13 +982,6 @@ expValue_evaluateExpression( struct expExpression *exp,
     if (!var) {
         /* Shouldn't happen */
         _expValue_setError( exp, EXPERRCODE_RESOURCE, suffix, suffix_len, NULL );
-        return NULL;
-    }
-    if (var->type == ASN_NULL) {
-        /*
-         * Error explicitly reported from the evaluation routines.
-         */
-        _expValue_setError( exp, *(var->val.integer), suffix, suffix_len, var );
         return NULL;
     }
     if (0 /* COMPARE var->type WITH exp->expValueType */ ) {
@@ -819,15 +1002,22 @@ _expValue_setError( struct expExpression *exp, int reason,
                     oid *suffix, size_t suffix_len,
                     netsnmp_variable_list *var)
 {
-    if (!exp)
+    if (!exp) {
+        _expValue_freeVarbind( var );
         return;
+    }
     exp->expErrorCount++;
  /* exp->expErrorTime  = NOW; */
     exp->expErrorIndex = ( var && var->data ? (uintptr_t)var->data : 0 );
     exp->expErrorCode  = reason;
     memset( exp->expErrorInstance, 0, sizeof(exp->expErrorInstance));
-    memcpy( exp->expErrorInstance, suffix, suffix_len * sizeof(oid));
+    if (suffix && suffix_len > 0) {
+        if (suffix_len > MAX_OID_LEN)
+            suffix_len = MAX_OID_LEN;
+        memcpy( exp->expErrorInstance, suffix, suffix_len * sizeof(oid));
+    } else {
+        suffix_len = 0;
+    }
     exp->expErrorInst_len = suffix_len;
-    if (var) var->data = NULL;
-    snmp_free_var( var );
+    _expValue_freeVarbind( var );
 }
