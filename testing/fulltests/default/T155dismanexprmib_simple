@@ -97,6 +97,81 @@ capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
 
 CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 15"
 
+# Valid OID comparison and unary minus expressions. Note: the OID
+# comparison only verifies that OID constants are tokenized correctly.
+# The binary operators currently compare only the first sub-identifier
+# of OID operands.
+capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}" \
+    s "1.3.6.1.2.1.1.0==1.3.6.1.2.1.1.0"
+CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
+capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
+CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 1"
+
+capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}" \
+    s "10+-3"
+CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
+capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
+CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 7"
+
+# Integer constants that do not fit in an int saturate at INT_MAX
+capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}" \
+    s "99999999999999999999-2147483600"
+CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
+capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
+CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 47"
+
+# Malformed expressions (GitHub issue #1156 and related edge cases)
+dots32="................................"
+dots160="${dots32}${dots32}${dots32}${dots32}${dots32}"
+deep_parens="((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))"
+for bad_expr in \
+    "${dots160}" \
+    "1+${dots160}" \
+    "sum" \
+    "avg" \
+    "1+sum" \
+    "sum+1" \
+    "1/0" \
+    "1%0" \
+    "1+2/0" \
+    "1/0+1" \
+    "1/(11-1/0)" \
+    "+1" \
+    '=1' \
+    '"abc' \
+    '1+"abc' \
+    '"abc"+' \
+    "1+" \
+    "1+2+" \
+    "-" \
+    "1|=2" \
+    "1@2" \
+    "1=2" \
+    "foo(1)" \
+    "1+foo" \
+    "(1+2" \
+    "(" \
+    "()" \
+    "1+()" \
+    "${deep_parens}"
+do
+    capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}" \
+        s "${bad_expr}"
+    CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
+    capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
+    CHECK "No Such Instance currently exists at this OID"
+done
+
+# Verify that the agent is still alive and evaluates a valid expression
+capture_snmpset DISMAN-EXPRESSION-MIB::expExpression."${on}" \
+    s "42"
+CHECK "^DISMAN-EXPRESSION-MIB::expExpression.${on} = STRING: "
+capture_snmpget DISMAN-EXPRESSION-MIB::expValueCounter32Val."${on}".0.0.0
+CHECK "^DISMAN-EXPRESSION-MIB::expValueCounter32Val.${on}.0.0.0 = Counter32: 42"
+
 STOPAGENT
+
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "Sanitizer"
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "runtime error"
 
 FINISHED
