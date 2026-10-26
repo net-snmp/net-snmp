@@ -1565,7 +1565,11 @@ _transport_common(netsnmp_transport *t, int local)
     if (NULL == t->base_transport)
         return NULL;
     if (NULL != t->data &&
-        t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
+        (t->data_length == sizeof(netsnmp_indexed_addr_pair)
+#ifdef NETSNMP_ENABLE_IPV6
+         || t->data_length == sizeof(netsnmp_udp6_transport_data)
+#endif
+        )) {
         _netsnmpTLSBaseData *tlsdata =
             netsnmp_tlsbase_allocate_tlsdata(t, local);
         if (NULL == tlsdata)

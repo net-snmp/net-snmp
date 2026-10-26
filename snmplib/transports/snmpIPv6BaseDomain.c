@@ -122,6 +122,7 @@ netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
     case sizeof(struct sockaddr_in6):
         to = data;
         break;
+    case sizeof(netsnmp_udp6_transport_data):
     case sizeof(netsnmp_indexed_addr_pair): {
         const netsnmp_indexed_addr_pair *addr_pair = data;
 
@@ -319,6 +320,17 @@ netsnmp_sockaddr_in6_3(struct netsnmp_ep *ep,
             *scope_id = '\0';
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
             addr->sin6_scope_id = netsnmp_if_nametoindex(scope_id + 1);
+#if defined(HAVE_IF_NAMETOINDEX)
+            if (strspn(scope_id + 1, "0123456789") !=
+                strlen(scope_id + 1)) {
+                if (strlcpy(ep->scope_iface, scope_id + 1,
+                            sizeof(ep->scope_iface)) >=
+                    sizeof(ep->scope_iface)) {
+                    free(ep_str.addr);
+                    return 0;
+                }
+            }
+#endif
 #endif
         }
         if (!inet_pton(AF_INET6, ep_str.addr, &addr->sin6_addr) &&
