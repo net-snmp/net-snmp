@@ -82,6 +82,7 @@ struct agent_netsnmp_set_info {
     int             transID;
     int             mode;
     int             errstat;
+    int             in_progress;   /* a phase awaits its answer */
     time_t          uptime;
     netsnmp_session *sess;
     netsnmp_variable_list *var_list;
@@ -192,6 +193,7 @@ save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
     ptr->transID = pdu->transid;
     ptr->sess = ss;
     ptr->mode = SNMP_MSG_INTERNAL_SET_RESERVE1;
+    ptr->in_progress = 0;
     ptr->uptime = netsnmp_get_agent_uptime();
 
     ptr->var_list = snmp_clone_varbind(pdu->variables);
@@ -263,6 +265,77 @@ free_set_info(struct agent_netsnmp_set_info *asi)
             return;
         }
     }
+}
+
+/*
+ * The master agent that sent the SET request @asi has gone away and will not
+ * send its next phase, so end the request as one that failed: FREE what
+ * RESERVE1 and RESERVE2 reserved, UNDO an ACTION. handle_subagent_set_response
+ * frees @asi once that phase is done. Like the CleanupSet and UndoSet PDUs it
+ * stands for, which carry no context (RFC 2741, 6.2.9), that phase has no
+ * context name.
+ */
+static void
+end_set_of_closed_session(struct agent_netsnmp_set_info *asi)
+{
+    netsnmp_pdu    *pdu;
+
+    switch (asi->mode) {
+    case SNMP_MSG_INTERNAL_SET_RESERVE1:
+    case SNMP_MSG_INTERNAL_SET_RESERVE2:
+        asi->mode = SNMP_MSG_INTERNAL_SET_FREE;
+        break;
+    case SNMP_MSG_INTERNAL_SET_ACTION:
+        asi->mode = SNMP_MSG_INTERNAL_SET_UNDO;
+        break;
+    default:
+        free_set_info(asi);
+        return;
+    }
+    DEBUGMSGTL(("agentx/subagent", "ending set (trans=0x%x) of a closed "
+                "session with mode %d\n", (unsigned)asi->transID, asi->mode));
+
+    pdu = snmp_pdu_create(asi->mode);
+    if (pdu) {
+        pdu->version = AGENTX_VERSION_1;
+        pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
+        pdu->transid = asi->transID;
+        pdu->variables = snmp_clone_varbind(asi->var_list);
+    }
+    if (!pdu || !pdu->variables ||
+        !snmp_async_send(agentx_callback_sess, pdu,
+                         handle_subagent_set_response, asi)) {
+        snmp_free_pdu(pdu);
+        free_set_info(asi);
+        return;
+    }
+    asi->in_progress = 1;
+}
+
+/*
+ * The current phase of the SET request @asi ended without an answer: it could
+ * not be passed to the agent, its answer could not be passed on, or it timed
+ * out. So the master agent gets no answer either. After a FREE, UNDO or COMMIT
+ * the master agent sends nothing more, so free @asi; after another phase a
+ * connected master agent ends the request once its own wait times out, and the
+ * request of one that has disconnected is ended here.
+ *
+ * A phase that timed out may still wait in the callback transport's queue or
+ * in the agent's queue of requests. Both are first in, first out, so the FREE
+ * or UNDO is processed after it and finds the state it saved. If that phase
+ * is still being processed (it delegated a request), the FREE or UNDO finds
+ * no saved state (get_set_cache()) and fails without calling any handler.
+ */
+static void
+end_unanswered_phase(struct agent_netsnmp_set_info *asi)
+{
+    asi->in_progress = 0;
+    if (asi->mode == SNMP_MSG_INTERNAL_SET_FREE ||
+        asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
+        asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT)
+        free_set_info(asi);
+    else if (!asi->sess)
+        end_set_of_closed_session(asi);
 }
 
 static void
@@ -337,11 +410,21 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
 #ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * SET requests still being processed must not answer on the
-         * session being closed (see handle_subagent_set_response).
+         * session being closed (see handle_subagent_set_response), and
+         * those waiting for the master agent's next phase are ended here.
          */
-        for (asi = Sets; asi != NULL; asi = asi->next)
-            if (asi->sess == session)
+        {
+            struct agent_netsnmp_set_info *next;
+
+            for (asi = Sets; asi != NULL; asi = next) {
+                next = asi->next;
+                if (asi->sess != session)
+                    continue;
                 asi->sess = NULL;
+                if (!asi->in_progress)
+                    end_set_of_closed_session(asi);
+            }
+        }
 #endif
         register_mib_detach();
         main_session = NULL;
@@ -550,6 +633,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         if (smagic)
             snmp_free_varbind(smagic->ovars);
         free(smagic);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        if (asi)
+            end_unanswered_phase(asi);
+#endif
         return 1;
     }
     free(internal_pdu->contextName);
@@ -566,6 +653,14 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
             free(smagic);
         }
     }
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    if (asi) {
+        if (result != 0)
+            asi->in_progress = 1;
+        else
+            end_unanswered_phase(asi);
+    }
+#endif
     return 1;
 }
 
@@ -692,9 +787,22 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     struct agent_netsnmp_set_info *asi;
     int result;
 
-    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+    if (magic == NULL)
+        return 1;
+
+    asi = (struct agent_netsnmp_set_info *) magic;
+    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+        /*
+         * RESEND only tells that the phase was passed on again. SEND_FAILED
+         * tells that it could not be passed on, which snmp_async_send() also
+         * reports by returning 0: its caller ends the phase then.
+         */
+        if (op != NETSNMP_CALLBACK_OP_RESEND &&
+            op != NETSNMP_CALLBACK_OP_SEND_FAILED)
+            end_unanswered_phase(asi);
         return 1;
     }
+    asi->in_progress = 0;
 
     DEBUGMSGTL(("agentx/subagent",
                 "handling agentx subagent set response (mode=%d,req=0x%x,"
@@ -702,10 +810,11 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
                 (unsigned)pdu->command, (unsigned)pdu->reqid,
 		(unsigned)pdu->transid, (unsigned)pdu->sessid));
     pdu = snmp_clone_pdu(pdu);
-    if (!pdu)
+    if (!pdu) {
+        end_unanswered_phase(asi);
         return 1;
+    }
 
-    asi = (struct agent_netsnmp_set_info *) magic;
     retsess = asi->sess;
     asi->errstat = pdu->errstat;
 
@@ -722,6 +831,9 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
                             handle_subagent_set_response, asi);
             if (result == 0) {
                 snmp_free_pdu( pdu );
+                end_unanswered_phase(asi);
+            } else {
+                asi->in_progress = 1;
             }
             DEBUGMSGTL(("agentx/subagent",
                         "  going from RESERVE1 -> RESERVE2\n"));
@@ -732,6 +844,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
             asi->mode == SNMP_MSG_INTERNAL_SET_UNDO ||
             asi->mode == SNMP_MSG_INTERNAL_SET_COMMIT) {
             free_set_info(asi);
+            asi = NULL;
         }
         snmp_free_varbind(pdu->variables);
         pdu->variables = NULL;  /* the variables were added by us */
@@ -746,6 +859,11 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     } else if (pdu) {
         snmp_free_pdu(pdu);
     }
+    /*
+     * The master agent disconnected while this phase was being processed.
+     */
+    if (!retsess && asi)
+        end_set_of_closed_session(asi);
     DEBUGMSGTL(("agentx/subagent", "  FINISHED\n"));
     return 1;
 }
