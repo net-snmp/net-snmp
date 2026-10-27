@@ -115,7 +115,7 @@ static smux_reg *ActiveRegs;    /* Active registrations                 */
 static smux_reg *PassiveRegs;   /* Currently unused registrations       */
 
 static smux_peer_auth *Auths[SMUX_MAX_PEERS];   /* Configured peers */
-static int      nauths, npeers = 0;
+static int      nauths;
 
 
 
@@ -632,6 +632,24 @@ smux_peer_is_authenticated(NETSNMP_SOCKET sd)
     return 0;
 }
 
+/*
+ * The number of authenticated peers. A configuration reload forgets them
+ * (smux_free_peer_auth()), so they are counted from Auths[] rather than
+ * by a counter that a peer authenticated before a reload would never
+ * decrement.
+ */
+static int
+smux_count_peers(void)
+{
+    int i, n = 0;
+
+    for (i = 0; i < nauths; i++)
+        if (NETSNMP_IS_VALID_SOCKET(Auths[i]->sa_active_fd))
+            n++;
+
+    return n;
+}
+
 static void
 smux_auth_timeout_cb(unsigned int clientreg, void *clientarg)
 {
@@ -680,7 +698,7 @@ smux_accept(NETSNMP_SOCKET sd)
     DEBUGMSGTL(("smux", "[smux_accept] accepted fd %" NETSNMP_FMT_SKT " from %s:%d\n",
              fd, inet_ntoa(in_socket.sin_addr),
              ntohs(in_socket.sin_port)));
-    if (npeers + 1 >= SMUXMAXPEERS ||
+    if (smux_count_peers() + 1 >= SMUXMAXPEERS ||
         smux_snmp_select_list_get_length() >= NUM_SOCKETS) {
         snmp_log(LOG_ERR,
                  "[smux_accept] denied peer on fd %" NETSNMP_FMT_SKT ", limit %d reached",
@@ -762,7 +780,6 @@ smux_process(NETSNMP_SOCKET sock)
             return -1;
         }
 
-        npeers++;
         DEBUGMSGTL(("smux", "[smux_process] authenticated peer on fd %" NETSNMP_FMT_SKT "\n", sock));
 
         /*
@@ -1990,8 +2007,6 @@ smux_peer_cleanup(NETSNMP_SOCKET sd)
             snprint_objid(oid_name, sizeof(oid_name), Auths[i]->sa_oid,
                           Auths[i]->sa_oid_len);
             DEBUGMSGTL(("smux", "peer disconnected: %s\n", oid_name));
-            if (npeers > 0)
-                npeers--;
         }
     }
 }
