@@ -2019,8 +2019,9 @@ smux_send_rrsp(NETSNMP_SOCKET sd, int pri)
     int             intsize = sizeof(int);
     u_int           mask = ((u_int) 0xFF) << (8 * (sizeof(int) - 1));
     /*
-     * e.g. mask is 0xFF000000 on a 32-bit machine 
+     * e.g. mask is 0xFF000000 on a 32-bit machine
      */
+    u_int           upri = (u_int) pri;  /* shifting pri < 0 is undefined */
     int             sent;
 
     /*
@@ -2035,8 +2036,8 @@ smux_send_rrsp(NETSNMP_SOCKET sd, int pri)
      * Copy each byte, most significant first. 
      */
     while (intsize--) {
-        *ptr++ = (u_char) ((pri & mask) >> (8 * (sizeof(int) - 1)));
-        pri <<= 8;
+        *ptr++ = (u_char) ((upri & mask) >> (8 * (sizeof(int) - 1)));
+        upri <<= 8;
     }
 
     sent = sendto(sd, (char *) outdata, sizeof outdata, 0, NULL, 0);
