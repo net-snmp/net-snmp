@@ -448,6 +448,82 @@ init_snmp("snmpd");
            "smux_process removes the registration of a peer closed after a reload");
     }
 
+    /*
+     * 8. Peers that close after a configuration reload do not use up the
+     *    SMUXMAXPEERS peers that smux_accept() admits.
+     */
+    {
+        u_char pkt[256];
+        u_char *p;
+        size_t rem;
+        long ver = 0;
+        oid peer_oid[] = { 1, 3, 6, 1, 4, 1, 99999, 111 };
+        int i, cycled = 0;
+
+        for (i = 0; i < SMUXMAXPEERS; i++) {
+            char reload_cfg[] = ".1.3.6.1.4.1.99999.111 secret";
+
+            if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) != 0)
+                break;
+            p = pkt + 2;
+            rem = sizeof(pkt) - 2;
+            p = asn_build_int(p, &rem, ASN_INTEGER, &ver, sizeof(ver));
+            p = asn_build_objid(p, &rem, ASN_OBJECT_ID, peer_oid,
+                                OID_LENGTH(peer_oid));
+            p = asn_build_string(p, &rem, ASN_OCTET_STR,
+                                 (u_char *) "testpeer", 8);
+            p = asn_build_string(p, &rem, ASN_OCTET_STR,
+                                 (u_char *) "secret", 6);
+            pkt[0] = SMUX_OPEN;
+            pkt[1] = (u_char) (p - (pkt + 2));
+            (void) write(sv[1], pkt, (size_t) (p - pkt));
+            rc = smux_process(sv[0]);
+
+            smux_free_peer_auth();
+            smux_parse_peer_auth("smuxpeer", reload_cfg);
+
+            close(sv[1]);
+            if (rc == 0 && smux_process(sv[0]) == -1)
+                cycled++;
+        }
+        OK(cycled == SMUXMAXPEERS,
+           "peers authenticated, then closed after a reload");
+
+#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
+        {
+            netsnmp_transport *listener, *client = NULL;
+            struct sockaddr_in sin;
+            socklen_t sinlen = sizeof(sin);
+            char addr[64];
+            NETSNMP_SOCKET fd = NETSNMP_INVALID_SOCKET;
+
+            memset(&sin, 0, sizeof(sin));
+            listener = netsnmp_tdomain_transport("tcp:127.0.0.1:0", 1, "tcp");
+            if (listener &&
+                getsockname(listener->sock, (struct sockaddr *) &sin,
+                            &sinlen) == 0) {
+                snprintf(addr, sizeof(addr), "tcp:127.0.0.1:%d",
+                         ntohs(sin.sin_port));
+                client = netsnmp_tdomain_transport(addr, 0, "tcp");
+            }
+            if (client)
+                fd = smux_accept(listener->sock);
+            OK(NETSNMP_IS_VALID_SOCKET(fd),
+               "smux_accept admits a peer after peers closed after reloads");
+            if (NETSNMP_IS_VALID_SOCKET(fd))
+                close(fd);
+            if (client) {
+                client->f_close(client);
+                netsnmp_transport_free(client);
+            }
+            if (listener) {
+                listener->f_close(listener);
+                netsnmp_transport_free(listener);
+            }
+        }
+#endif
+    }
+
     smux_free_peer_auth();
 }
 
