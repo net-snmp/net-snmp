@@ -162,6 +162,14 @@ init_snmp("snmpd");
             nread = read(sv[1], rrsp_buf, sizeof(rrsp_buf));
             OK(nread >= 3 && rrsp_buf[0] == SMUX_RRSP && rrsp_buf[2] == 0xff,
                "smux_rreq_process sends RRSP(-1) on truncated OID");
+            {
+                int i, all_ff = nread == 2 + (ssize_t) sizeof(int) &&
+                                rrsp_buf[1] == sizeof(int);
+
+                for (i = 2; all_ff && i < nread; i++)
+                    all_ff = rrsp_buf[i] == 0xff;
+                OK(all_ff, "smux_send_rrsp encodes -1 in all sizeof(int) bytes");
+            }
         }
 
         /* 2c. Malformed SMUX_RREQ: priority < -1 (e.g. -2) */
