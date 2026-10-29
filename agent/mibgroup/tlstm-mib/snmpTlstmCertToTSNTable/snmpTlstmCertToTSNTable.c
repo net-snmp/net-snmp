@@ -1194,7 +1194,9 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
                 continue;
             _save_map(map, RS_ACTIVE, type);
         }
-        ITERATOR_RELEASE(map_itr);
+        if (NULL != map_itr) {
+            ITERATOR_RELEASE(map_itr);
+        }
     }
 
     /*
