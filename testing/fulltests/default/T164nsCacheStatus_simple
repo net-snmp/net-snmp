@@ -1,0 +1,74 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER nsCacheStatus empty SET for the memory cache
+
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIFNOT USING_AGENT_NSCACHE_MODULE
+SKIPIFNOT USING_HARDWARE_MEMORY_HW_MEM_MODULE
+
+# Allow the requested community to write to this isolated test agent.
+CONFIGAGENT "rwcommunity public"
+
+STARTAGENT
+
+# Use the harness-selected transport and port rather than hard-coding 1161.
+target="$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+# NET-SNMP-AGENT-MIB::nsCacheStatus, indexed by the memory cache root OID.
+status_name="NET-SNMP-AGENT-MIB::nsCacheStatus.1.3.6.1.4.1.8072.1.31"
+status_oid=".1.3.6.1.4.1.8072.1.5.3.1.3.1.3.6.1.4.1.8072.1.31"
+
+capture_snmpget()
+{
+    CAPTURE "snmpget $SNMP_FLAGS -v2c -c public -On -Oe \
+        $target $*"
+}
+
+capture_snmpset()
+{
+    CAPTURE "snmpset $SNMP_FLAGS -v2c -c public -On -Oe \
+        $target $*"
+}
+
+# Confirm that the exact cache row is present.
+# Numeric output avoids dependence on enumeration display settings.
+capture_snmpget "$status_oid"
+rc=$?
+CHECKVALUEIS "$rc" 0 "Memory cache status GET succeeds"
+CHECK "^${status_oid} = INTEGER: [1-5]$"
+
+# A missing row must fail the test, not silently bypass the regression.
+if ! grep -q "^${status_oid} = INTEGER: [1-5]$" "$junkoutputfile"; then
+    BAD "Required memory cache row is unavailable"
+    FINISHED
+fi
+
+# Reproduce:
+# snmpset -v2c -c public <agent> \
+#     NET-SNMP-AGENT-MIB::nsCacheStatus.1.3.6.1.4.1.8072.1.31 i 3
+#
+# The memory cache has no free callback. Processing empty(3) must not
+# dereference that NULL callback.
+capture_snmpset "$status_name" i 3
+rc=$?
+CHECKVALUEIS "$rc" 0 "Setting memory cache status to empty succeeds"
+CHECK "^${status_oid} = INTEGER: 3$"
+
+# A successful follow-up request verifies that the agent survived.
+# Do not require a particular status: another consumer could reload
+# the memory cache between the SET and this GET.
+capture_snmpget "$status_oid"
+rc=$?
+CHECKVALUEIS "$rc" 0 "Agent responds after the memory cache SET"
+CHECK "^${status_oid} = INTEGER: [1-5]$"
+
+STOPAGENT
+
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "Sanitizer"
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "runtime error"
+
+FINISHED

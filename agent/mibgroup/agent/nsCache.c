@@ -414,7 +414,9 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
                         cache_entry->enabled = 0;
                         break;
 		    case NSCACHE_STATUS_EMPTY:
-                        cache_entry->free_cache(cache_entry, cache_entry->magic);
+                        if (cache_entry->free_cache) {
+                            cache_entry->free_cache(cache_entry, cache_entry->magic);
+                        }
                         free(cache_entry->timestampM);
                         cache_entry->timestampM = NULL;
                         break;
