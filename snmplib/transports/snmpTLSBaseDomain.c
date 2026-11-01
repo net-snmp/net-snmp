@@ -88,6 +88,29 @@ static unsigned long ERR_get_error_all(const char **file, int *line,
 }
 #endif
 
+/* Returns the number of objects in @store. */
+static int
+_x509_store_num_objects(X509_STORE *store)
+{
+#ifdef HAVE_X509_STORE_GET1_OBJECTS
+    /*
+     * X509_STORE_get0_objects() has been deprecated in OpenSSL 4.0 because
+     * it is not thread-safe. X509_STORE_get1_objects() is available since
+     * OpenSSL 3.3.
+     */
+    STACK_OF(X509_OBJECT) *objs = X509_STORE_get1_objects(store);
+    int             num;
+
+    if (!objs)
+        return 0;
+    num = sk_X509_OBJECT_num(objs);
+    sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+    return num;
+#else
+    return sk_X509_OBJECT_num(X509_STORE_get0_objects(store));
+#endif
+}
+
 /* this is called during negotiation */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
@@ -135,7 +158,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
         SNMP_FREE(leaf_fp);
         if (cert && ssl && !SSL_is_server(ssl)) {
             X509_STORE *certstore = X509_STORE_CTX_get0_store(ctx);
-            int store_num = certstore ? sk_X509_OBJECT_num(X509_STORE_get0_objects(certstore)) : 0;
+            int store_num = certstore ? _x509_store_num_objects(certstore) : 0;
             if (store_num == 0) {
                 cert = NULL;
             }
