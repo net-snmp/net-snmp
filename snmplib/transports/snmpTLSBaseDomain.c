@@ -772,13 +772,15 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         SSL_CTX_free(the_ctx);
         return NULL;
     }
-#if defined(SSL_CTX_set_max_proto_version) && defined(DTLS1_2_VERSION)
+#if !defined(HAVE_BIO_S_DGRAM_MEM) && \
+    defined(SSL_CTX_set_max_proto_version) && defined(DTLS1_2_VERSION)
     /*
-     * The DTLS/UDP transport passes DTLS records to and from OpenSSL through
-     * stream-oriented memory BIOs and sends all pending records in a single
-     * UDP datagram. That works for DTLS 1.2 but DTLS 1.3 handshakes, which
-     * OpenSSL supports since version 4.1, do not complete. Hence restrict
-     * DTLS to version 1.2 or older.
+     * Without datagram memory BIO, the DTLS/UDP transport passes DTLS records
+     * to and from OpenSSL through stream-oriented memory BIOs and sends all
+     * pending records in a single UDP datagram. That works for DTLS 1.2 but
+     * not for DTLS 1.3. Hence restrict DTLS to version 1.2 or older if no
+     * datagram memory BIO is available. Datagram memory BIOs are available
+     * in all OpenSSL versions that support DTLS 1.3.
      */
     if ((method == DTLS_method() || method == DTLS_client_method() ||
          method == DTLS_server_method()) &&

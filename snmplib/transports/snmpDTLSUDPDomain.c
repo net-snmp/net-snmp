@@ -251,6 +251,30 @@ static void remove_and_free_bio_cache(bio_cache *cachep)
 /* XXX: lots of malloc/state cleanup needed */
 #define DIEHERE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return NULL; } while(0)
 
+/*
+ * Creates a memory BIO for passing DTLS records between OpenSSL and the UDP
+ * socket. A datagram memory BIO preserves datagram boundaries: each
+ * BIO_write() call adds one datagram and each BIO_read() call returns one
+ * datagram. That is required for DTLS 1.3 (RFC 9147). Datagram memory BIOs
+ * are available since OpenSSL 3.2. Fall back to a regular memory BIO for
+ * older OpenSSL versions. The DTLS version is restricted to DTLS 1.2 or older
+ * if no datagram memory BIO is available (see _sslctx_common_setup()).
+ */
+static BIO *
+_netsnmp_dtls_mem_bio_new(void)
+{
+    BIO *bio;
+
+#ifdef HAVE_BIO_S_DGRAM_MEM
+    bio = BIO_new(BIO_s_dgram_mem());
+#else
+    bio = BIO_new(BIO_s_mem());
+    if (bio)
+        BIO_set_mem_eof_return(bio, -1);
+#endif
+    return bio;
+}
+
 static bio_cache *
 start_new_cached_connection(netsnmp_transport *t,
                             const netsnmp_sockaddr_storage *remote_addr,
@@ -345,23 +369,20 @@ start_new_cached_connection(netsnmp_transport *t,
 
     /* create caching memory bios for OpenSSL to read and write to */
 
-    cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
+    cachep->read_bio = _netsnmp_dtls_mem_bio_new(); /* openssl reads from */
     if (!cachep->read_bio) {
         netsnmp_tlsbase_free_tlsdata(tlsdata);
         SNMP_FREE(cachep);
         DIEHERE("failed to create the openssl read_bio");
     }
 
-    cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
+    cachep->write_bio = _netsnmp_dtls_mem_bio_new(); /* openssl writes to */
     if (!cachep->write_bio) {
         BIO_free(cachep->read_bio);
         netsnmp_tlsbase_free_tlsdata(tlsdata);
         SNMP_FREE(cachep);
         DIEHERE("failed to create the openssl write_bio");
     }
-
-    BIO_set_mem_eof_return(cachep->read_bio, -1);
-    BIO_set_mem_eof_return(cachep->write_bio, -1);
 
     if (we_are_client) {
         /* we're the client */
@@ -415,6 +436,18 @@ start_new_cached_connection(netsnmp_transport *t,
     /* set the bios that openssl should read from and write to */
     /* (and we'll do the opposite) */
     SSL_set_bio(tlsdata->ssl, cachep->read_bio, cachep->write_bio);
+
+#ifdef HAVE_BIO_S_DGRAM_MEM
+    /*
+     * OpenSSL cannot query the path MTU through a datagram memory BIO and
+     * hence would fall back to its minimum MTU, which results in DTLS
+     * handshake messages being split into many small datagrams. Use the
+     * largest UDP payload that fits in a 1500 byte Ethernet frame instead.
+     */
+    SSL_set_options(tlsdata->ssl, SSL_OP_NO_QUERY_MTU);
+    SSL_set_mtu(tlsdata->ssl, cachep->sas.sa.sa_family == AF_INET ?
+                1500 - 20 - 8 : 1500 - 40 - 8);
+#endif
 
     /* RFC5953: section 5.3.1, step 1:
        3)  Using the destTransportDomain and destTransportAddress values,
@@ -543,49 +576,74 @@ _find_remote_sockaddr(netsnmp_transport *t, const void *opaque, int olen,
 
 
 /*
+ * Reads data from our internal openssl outgoing BIO and sends it out the UDP
+ * port. Each chunk that is read from the BIO is sent as a separate UDP
+ * datagram. A datagram memory BIO returns one datagram per BIO_read() call
+ * while a regular memory BIO returns all pending data at once. Sends the
+ * data to @dest if @dest != NULL and otherwise to the address associated
+ * with @t, or to the address in @cachep if @t has no associated address.
+ * Returns the number of bytes that have been sent or -1 if sending failed.
+ */
+static int
+_netsnmp_send_dtls_bio_data(netsnmp_transport *t, bio_cache *cachep,
+                            struct sockaddr *dest)
+{
+    int total = 0;
+
+    for (;;) {
+        int outsize, rc2, socksize;
+        void *outbuf, *sa;
+
+        outsize = BIO_ctrl_pending(cachep->write_bio);
+        if (outsize <= 0)
+            break;
+        outbuf = malloc(outsize);
+        if (!outbuf) {
+            DEBUGMSGTL(("9:dtlsudp", "buffer allocation failed\n"));
+            return total > 0 ? total : -1;
+        }
+
+        DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
+
+        outsize = BIO_read(cachep->write_bio, outbuf, outsize);
+        if (outsize <= 0) {
+            free(outbuf);
+            break;
+        }
+        MAKE_MEM_DEFINED(outbuf, outsize);
+        sa = dest;
+        if (NULL == sa)
+            sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
+                                      _find_remote_sockaddr(t, NULL, 0,
+                                                            &socksize));
+        if (NULL == sa)
+            sa = &cachep->sas.sa;
+        socksize = netsnmp_sockaddr_size(sa);
+        rc2 = t->base_transport->f_send(t, outbuf, outsize, &sa, &socksize);
+        free(outbuf);
+        if (rc2 == -1) {
+            snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
+            return -1;
+        }
+        total += outsize;
+    }
+
+    if (total == 0)
+        DEBUGMSGTL(("9:dtlsudp", "have 0 bytes to send\n"));
+
+    return total;
+}
+
+/*
  * Reads data from our internal openssl outgoing BIO and sends any
  * queued packets out the UDP port
  */
 static int
 _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep)
 {
-    int outsize, rc2;
-    void *outbuf;
-    
     DEBUGTRACETOK("9:dtlsudp");
 
-    /* for memory bios, we now read from openssl's write
-       buffer (ie, the packet to go out) and send it out
-       the udp port manually */
-
-    outsize = BIO_ctrl_pending(cachep->write_bio);
-    outbuf = malloc(outsize);
-    if (outsize > 0 && outbuf) {
-        int socksize;
-        void *sa;
-
-        DEBUGMSGTL(("dtlsudp", "have %d bytes to send\n", outsize));
-
-        outsize = BIO_read(cachep->write_bio, outbuf, outsize);
-        MAKE_MEM_DEFINED(outbuf, outsize);
-        sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
-                                  _find_remote_sockaddr(t, NULL, 0, &socksize));
-        if (NULL == sa)
-            sa = &cachep->sas.sa;
-        socksize = netsnmp_sockaddr_size(sa);
-        rc2 = t->base_transport->f_send(t, outbuf, outsize, &sa, &socksize);
-        if (rc2 == -1) {
-            snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
-        }
-    } else if (outsize == 0) {
-        DEBUGMSGTL(("9:dtlsudp", "have 0 bytes to send\n"));
-    } else {
-        DEBUGMSGTL(("9:dtlsudp", "buffer allocation failed\n"));
-    }
-
-    free(outbuf);
-
-    return outsize;
+    return _netsnmp_send_dtls_bio_data(t, cachep, NULL);
 }
 
 /*
@@ -921,6 +979,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         SNMP_FREE(tmStateRef);
         return rc;
     }
+    if (!(cachep->flags & NETSNMP_BIO_CONNECTED))
+        DEBUGMSGTL(("dtlsudp", "connection established using %s\n",
+                    SSL_get_version(tlsdata->ssl)));
     cachep->flags |= NETSNMP_BIO_CONNECTED;
 
     /* Until we've locally assured ourselves that all is well in
@@ -1122,10 +1183,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
     const netsnmp_indexed_addr_pair *addr_pair = NULL;
     bio_cache *cachep = NULL;
     const netsnmp_tmStateReference *tmStateRef = NULL;
-    void *outbuf;
     _netsnmpTLSBaseData *tlsdata = NULL;
-    int socksize;
-    void *sa;
     
     DEBUGTRACETOK("9:dtlsudp");
     DEBUGMSGTL(("dtlsudp", "sending %d bytes\n", size));
@@ -1325,22 +1383,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
 
     /* for memory bios, we now read from openssl's write buffer (ie,
        the packet to go out) and send it out the udp port manually */
-    rc = BIO_ctrl_pending(cachep->write_bio);
-    if (rc <= 0) {
-        /* in theory an ok thing */
-        return 0;
-    }
-    outbuf = malloc(rc);
-    if (!outbuf)
-        return -1;
-    rc = BIO_read(cachep->write_bio, outbuf, rc);
-    MAKE_MEM_DEFINED(outbuf, rc);
-    socksize = netsnmp_sockaddr_size(&cachep->sas.sa);
-    sa = &cachep->sas.sa;
-    rc = t->base_transport->f_send(t, outbuf, rc, &sa, &socksize);
-    free(outbuf);
-
-    return rc;
+    return _netsnmp_send_dtls_bio_data(t, cachep, &cachep->sas.sa);
 }
 
 
@@ -1394,7 +1437,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 
     /* if we have any remaining packets to send, try to send them */
     if (cachep->write_cache_len > 0) {
-        int i = 0;
+        int i = 0, j;
         char buf[8192];
         int rc;
         void *opaque = NULL;
@@ -1429,7 +1472,11 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                 tv.tv_sec = 0;
                 tv.tv_usec = 50000;
                 rc = select(t->sock + 1, &readfs, NULL, NULL, &tv);
-                if (rc > 0) {
+                /*
+                 * A DTLS handshake flight may consist of multiple datagrams.
+                 * Process all datagrams that have already been received.
+                 */
+                for (j = 0; rc > 0 && j < 64; j++) {
                     /* junk recv for catching negotiations still in play */
                     opaque_len = 0;
                     rc = netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
@@ -1437,8 +1484,19 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                     DEBUGMSGTL(("dtlsudp:close",
                                 "netsnmp_dtlsudp_recv() returned %d\n", rc));
                     SNMP_FREE(opaque);
+                    if (rc < 0)
+                        break;
+                    FD_ZERO(&readfs);
+                    FD_SET(t->sock, &readfs);
+                    tv.tv_sec = 0;
+                    tv.tv_usec = 0;
+                    rc = select(t->sock + 1, &readfs, NULL, NULL, &tv);
                 }
             } /* for loop */
+
+            /* the handshake may have completed during the last iteration */
+            if (cachep->write_cache_len != 0)
+                _netsnmp_bio_try_and_write_buffered(t, cachep);
         }
 
         /** dump anything that wasn't sent */
