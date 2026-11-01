@@ -882,7 +882,15 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     */
 
     /* write the received buffer to the memory-based input bio */
-    BIO_write(cachep->read_bio, buf, rc);
+    if (BIO_write(cachep->read_bio, buf, rc) != rc) {
+        /*
+         * Drop the datagram. DTLS retransmits handshake messages and SNMP
+         * applications retry requests.
+         */
+        DEBUGMSGTL(("dtlsudp", "failed to pass %d bytes to OpenSSL\n", rc));
+        SNMP_FREE(tmStateRef);
+        return -1;
+    }
 
     /* RFC5953: section 5.1, step 3:
        3)  The incomingMessage and incomingMessageLength are assigned values
