@@ -452,6 +452,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 
         AC_MSG_CHECKING([whether the first argument of X509_NAME_get_text_by_NID() is a const pointer])
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+          /*
+           * Match include/net-snmp/library/openssl_config.h such that the
+           * deprecation of X509_NAME_get_text_by_NID() in OpenSSL 4.0 does
+           * not cause this check to fail.
+           */
+          #ifndef OPENSSL_API_COMPAT
+          #define OPENSSL_API_COMPAT 0x10000000L
+          #endif
           #ifdef HAVE_OPENSSL_X509_H
           #include <openssl/x509.h>
           #endif
