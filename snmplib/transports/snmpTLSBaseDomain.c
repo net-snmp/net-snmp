@@ -694,6 +694,21 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
         SSL_CTX_free(the_ctx);
         return NULL;
     }
+#if defined(SSL_CTX_set_max_proto_version) && defined(DTLS1_2_VERSION)
+    /*
+     * The DTLS/UDP transport passes DTLS records to and from OpenSSL through
+     * stream-oriented memory BIOs and sends all pending records in a single
+     * UDP datagram. That works for DTLS 1.2 but DTLS 1.3 handshakes, which
+     * OpenSSL supports since version 4.1, do not complete. Hence restrict
+     * DTLS to version 1.2 or older.
+     */
+    if ((method == DTLS_method() || method == DTLS_client_method() ||
+         method == DTLS_server_method()) &&
+        SSL_CTX_set_max_proto_version(the_ctx, DTLS1_2_VERSION) != 1) {
+        SSL_CTX_free(the_ctx);
+        LOGANDDIE("failed to set the maximum DTLS version");
+    }
+#endif
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
