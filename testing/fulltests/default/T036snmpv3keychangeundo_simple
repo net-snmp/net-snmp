@@ -1,0 +1,102 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER SNMPv3 agent USM key change undo with duplicate varbinds
+
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIFNOT USING_SNMPV3_USMUSER_MODULE
+SKIPIFNOT NETSNMP_CAN_DO_CRYPTO
+SKIPIFNOT NETSNMP_ENABLE_SCAPI_AUTHPRIV
+
+#
+# Regression test for https://github.com/net-snmp/net-snmp/issues/1164.
+# A SET request with two key change varbinds for the same user followed
+# by a varbind that fails in the ACTION phase used to leave a dangling
+# key pointer behind in the usmUserTable entry of that user.
+#
+
+# standard SNMPv3 USM agent configuration
+DEFSECURITYLEVEL=authPriv
+. ./Sv3usmconfigagent
+
+NEWUSER=newtestuser
+AGENT_ENGINEID=0x8000b85c03049081004b00
+# Length-prefixed OID representation of $AGENT_ENGINEID.
+ENGINEID_OID=11.128.0.184.92.3.4.144.129.0.75.0
+
+CONFIGAGENT exactEngineID $AGENT_ENGINEID
+CONFIGAGENT rwuser $NEWUSER
+
+STARTAGENT
+
+AGENT_ADDR=$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT
+
+# Convert a user name into a length-prefixed OID. Some od implementations,
+# e.g. the OpenBSD one, zero-pad the decimal byte values. Hence the "+ 0".
+user_oid() {
+    printf '%s' "$1" | od -An -tu1 |
+        awk -v len="${#1}" '{ for (i = 1; i <= NF; i++) s = s "." ($i + 0) }
+                            END { print len s }'
+}
+
+# Print a hex string with $1 zero bytes.
+zero_hex() {
+    zh=""
+    i=0
+    while [ $i -lt $1 ]; do
+        zh="${zh}00"
+        i=$((i + 1))
+    done
+    echo "$zh"
+}
+
+USMUSERENTRY=.1.3.6.1.6.3.15.1.2.2.1
+NEWIDX=$ENGINEID_OID.`user_oid $NEWUSER`
+ADMINIDX=$ENGINEID_OID.`user_oid $TESTPRIVUSER`
+
+case "$DEFAUTHTYPE" in
+    MD5) AUTHKC=`zero_hex 32` ;;
+    *)   AUTHKC=`zero_hex 40` ;;
+esac
+
+# Create a new user by cloning the template user.
+CAPTURE "snmpusm $SNMP_FLAGS $TESTPRIVARGS $AGENT_ADDR create $NEWUSER $TESTPRIVUSER2"
+CHECKORDIE "User successfully created"
+
+NEWUSERARGS="-v 3 -u $NEWUSER -l ap -a $DEFAUTHTYPE -A $TESTAUTHPASS2 -x $DEFPRIVTYPE -X $TESTPRIVPASS2"
+
+CAPTURE "snmpget -On $SNMP_FLAGS $NEWUSERARGS $AGENT_ADDR .1.3.6.1.2.1.1.3.0"
+CHECKORDIE ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+# Two key changes for the new user followed by a key change that fails in
+# the ACTION phase because $TESTPRIVUSER has not been cloned. This causes
+# the whole request to be undone.
+VARBINDS="$USMUSERENTRY.6.$NEWIDX x $AUTHKC $USMUSERENTRY.6.$NEWIDX x $AUTHKC"
+if [ "x$DEFPRIVTYPE" = "xAES" ]; then
+    PRIVKC=`zero_hex 32`
+    VARBINDS="$VARBINDS $USMUSERENTRY.9.$NEWIDX x $PRIVKC"
+    VARBINDS="$VARBINDS $USMUSERENTRY.9.$NEWIDX x $PRIVKC"
+fi
+VARBINDS="$VARBINDS $USMUSERENTRY.6.$ADMINIDX x $AUTHKC"
+CAPTURE "snmpset -On $SNMP_FLAGS $TESTPRIVARGS $AGENT_ADDR $VARBINDS"
+CHECKORDIE "Error in packet"
+
+# The keys of the new user must have been restored.
+CAPTURE "snmpget -On $SNMP_FLAGS $NEWUSERARGS $AGENT_ADDR .1.3.6.1.2.1.1.3.0"
+CHECKORDIE ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+# A subsequent key change must succeed.
+CAPTURE "snmpset -On $SNMP_FLAGS $TESTPRIVARGS $AGENT_ADDR $USMUSERENTRY.6.$NEWIDX x $AUTHKC"
+CHECKORDIE "$USMUSERENTRY.6.$NEWIDX = Hex-STRING:"
+
+# The agent must still be running.
+CAPTURE "snmpget -On $SNMP_FLAGS $TESTPRIVARGS $AGENT_ADDR .1.3.6.1.2.1.1.3.0"
+CHECKORDIE ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+STOPAGENT
+
+CHECKANDDIE "AddressSanitizer" "$SNMP_SNMPD_LOG_FILE.stdout"
+
+FINISHED
