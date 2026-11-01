@@ -236,6 +236,66 @@ _cert_has_dns_san(X509 *cert)
     return found;
 }
 
+/*
+ * Verification callback for _cert_matches_name(): only report host name and
+ * IP address mismatches and ignore all other verification errors since the
+ * certificate chain has already been verified during the (D)TLS handshake.
+ */
+static int
+_name_check_verify_cb(int ok, X509_STORE_CTX *ctx)
+{
+    switch (X509_STORE_CTX_get_error(ctx)) {
+    case X509_V_ERR_HOSTNAME_MISMATCH:
+    case X509_V_ERR_IP_ADDRESS_MISMATCH:
+        return 0;
+    default:
+        return 1;
+    }
+}
+
+/*
+ * Returns 1 if @cert matches the host name (@is_ip == 0) or IP address
+ * (@is_ip != 0) @name and 0 otherwise. @hostflags are X509_CHECK_FLAG_*
+ * flags that are only used for host name checks.
+ *
+ * X509_check_host() and X509_check_ip_asc() have been deprecated in OpenSSL
+ * 4.1. The recommended alternative is to pass the reference identity to
+ * X509_verify_cert() via the verification parameters. Hence verify @cert
+ * with @cert as the only trust anchor and with a verification callback that
+ * only reports name mismatches. X509_verify_cert() checks the reference
+ * identity with the same code as X509_check_host() and X509_check_ip_asc().
+ */
+static int
+_cert_matches_name(X509 *cert, const char *name, int is_ip,
+                   unsigned int hostflags)
+{
+    X509_STORE        *store = X509_STORE_new();
+    X509_STORE_CTX    *ctx = X509_STORE_CTX_new();
+    X509_VERIFY_PARAM *param;
+    int                rc = 0;
+
+    if (!store || !ctx || !X509_STORE_add_cert(store, cert) ||
+        !X509_STORE_CTX_init(ctx, store, cert, NULL))
+        goto out;
+    param = X509_STORE_CTX_get0_param(ctx);
+    X509_VERIFY_PARAM_set_flags(param, X509_V_FLAG_PARTIAL_CHAIN);
+    if (is_ip) {
+        if (!X509_VERIFY_PARAM_set1_ip_asc(param, name))
+            goto out;
+    } else {
+        X509_VERIFY_PARAM_set_hostflags(param, hostflags);
+        if (!X509_VERIFY_PARAM_set1_host(param, name, 0))
+            goto out;
+    }
+    X509_STORE_CTX_set_verify_cb(ctx, _name_check_verify_cb);
+    rc = X509_verify_cert(ctx) == 1;
+
+out:
+    X509_STORE_CTX_free(ctx);
+    X509_STORE_free(store);
+    return rc;
+}
+
 static int
 _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
                                            _netsnmpTLSBaseData *tlsdata,
@@ -351,13 +411,10 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                Disable support for "w*.example.com" and "*w.example.com"
                multilevel wildcards
             */
-            if (1 == X509_check_host(remote_cert,
-                                   lower_hostname,
-                                   their_hostname_len,
+            if (_cert_matches_name(remote_cert, lower_hostname, 0,
                                    X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS |
                                    (_cert_has_dns_san(remote_cert) ? 0 :
-                                    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT),
-                                   NULL)) {
+                                    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT))) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
                 free(lower_hostname);
                 rv = SNMPERR_SUCCESS;
@@ -371,9 +428,7 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                 goto out;
             }
             free(lower_hostname);
-            if (1 == X509_check_ip_asc(remote_cert,
-                                      their_hostname,
-                                      0)) {
+            if (_cert_matches_name(remote_cert, their_hostname, 1, 0)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of IP: %s\n", their_hostname));
                 rv = SNMPERR_SUCCESS;
                 goto out;
