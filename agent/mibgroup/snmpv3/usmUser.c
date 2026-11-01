@@ -750,6 +750,180 @@ write_usmUserAuthProtocol(int action,
     return SNMP_ERR_NOERROR;
 }                               /* end write_usmUserAuthProtocol() */
 
+/*
+ * Undo information for key changes. A single SET request may contain
+ * multiple key change varbinds, possibly for the same user. Hence, the undo
+ * information is stored per (user index, key type) pair in the agent request
+ * information instead of in static variables. The first ACTION for a
+ * (user index, key type) pair saves the original key. Subsequent ACTION
+ * calls for the same pair free the intermediate key. COMMIT frees the
+ * original key and UNDO restores the original key.
+ */
+struct usm_key_undo {
+    struct usm_key_undo *next;
+    oid            *index;      /* engineID and user name part of the OID. */
+    size_t          index_len;
+    int             priv;       /* 0 for the auth key; 1 for the priv key. */
+    int             done;       /* Whether COMMIT or UNDO has been processed. */
+    u_char         *old_key;
+    size_t          old_key_len;
+};
+
+struct usm_key_undo_list {
+    struct usm_key_undo *head;
+};
+
+#define USM_KEY_UNDO_NAME "usmUser_key_undo"
+
+static void
+usm_free_key_undo_list(void *data)
+{
+    struct usm_key_undo_list *list = data;
+    struct usm_key_undo *u, *next;
+
+    if (!list)
+        return;
+    for (u = list->head; u; u = next) {
+        next = u->next;
+        /*
+         * If neither COMMIT nor UNDO has been processed, the user no
+         * longer refers to old_key.
+         */
+        SNMP_FREE(u->old_key);
+        SNMP_FREE(u->index);
+        free(u);
+    }
+    free(list);
+}
+
+static struct usm_key_undo_list *
+usm_get_key_undo_list(int create)
+{
+    netsnmp_agent_session *asp = netsnmp_get_current_agent_session();
+    struct usm_key_undo_list *list;
+    netsnmp_data_list *node;
+
+    if (!asp || !asp->reqinfo)
+        return NULL;
+    list = netsnmp_agent_get_list_data(asp->reqinfo, USM_KEY_UNDO_NAME);
+    if (list || !create)
+        return list;
+    list = SNMP_MALLOC_TYPEDEF(struct usm_key_undo_list);
+    if (!list)
+        return NULL;
+    node = netsnmp_create_data_list(USM_KEY_UNDO_NAME, list,
+                                    usm_free_key_undo_list);
+    if (!node) {
+        free(list);
+        return NULL;
+    }
+    netsnmp_agent_add_list_data(asp->reqinfo, node);
+    return list;
+}
+
+/*
+ * Look up the undo information for the user identified by the usmUserEntry
+ * column instance OID @name. The callers guarantee that
+ * @name_len >= USM_MIB_LENGTH.
+ *
+ * Note: this function relies on each user having exactly one index OID.
+ * usm_parse_oid() rejects index OIDs that do not have the exact length and
+ * index OIDs with sub-identifiers above 255. usm_get_user2() compares both
+ * the length and the contents of the engineID and the user name. The only
+ * exception is the empty user name, for which noNameUser is returned for
+ * any engineID. Since noNameUser has not been cloned, key changes for that
+ * user fail before the key is modified.
+ */
+static struct usm_key_undo *
+usm_find_key_undo(const oid *name, size_t name_len, int priv)
+{
+    struct usm_key_undo_list *list = usm_get_key_undo_list(0);
+    struct usm_key_undo *u;
+
+    for (u = list ? list->head : NULL; u; u = u->next)
+        if (u->priv == priv &&
+            snmp_oid_compare(u->index, u->index_len,
+                             name + USM_MIB_LENGTH,
+                             name_len - USM_MIB_LENGTH) == 0)
+            return u;
+    return NULL;
+}
+
+/*
+ * Called after a new key has been stored in the user identified by @name
+ * and @old_key has been removed from that user. Takes ownership of
+ * @old_key.
+ */
+static int
+usm_save_old_key(const oid *name, size_t name_len, int priv,
+                 u_char *old_key, size_t old_key_len)
+{
+    struct usm_key_undo_list *list;
+    struct usm_key_undo *u = usm_find_key_undo(name, name_len, priv);
+
+    if (u) {
+        /*
+         * @old_key has been allocated by an earlier ACTION for the same
+         * user in the same request. Keep the original key.
+         */
+        SNMP_FREE(old_key);
+        return SNMP_ERR_NOERROR;
+    }
+    list = usm_get_key_undo_list(1);
+    u = list ? SNMP_MALLOC_TYPEDEF(struct usm_key_undo) : NULL;
+    if (!u)
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    u->index_len = name_len - USM_MIB_LENGTH;
+    u->index = snmp_duplicate_objid(name + USM_MIB_LENGTH, u->index_len);
+    if (!u->index && u->index_len) {
+        free(u);
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    }
+    u->priv = priv;
+    u->old_key = old_key;
+    u->old_key_len = old_key_len;
+    u->next = list->head;
+    list->head = u;
+    return SNMP_ERR_NOERROR;
+}
+
+static void
+usm_commit_key_change(oid *name, size_t name_len, int priv)
+{
+    struct usm_key_undo *u = usm_find_key_undo(name, name_len, priv);
+
+    if (!u || u->done)
+        return;
+    /* The user, if it still exists, no longer refers to old_key. */
+    SNMP_FREE(u->old_key);
+    u->done = 1;
+}
+
+static void
+usm_undo_key_change(oid *name, size_t name_len, int priv)
+{
+    struct usm_key_undo *u = usm_find_key_undo(name, name_len, priv);
+    struct usmUser *uptr;
+
+    if (!u || u->done)
+        return;
+    uptr = usm_parse_user(name, name_len);
+    if (!uptr)
+        return;
+    if (priv) {
+        SNMP_FREE(uptr->privKey);
+        uptr->privKey = u->old_key;
+        uptr->privKeyLen = u->old_key_len;
+    } else {
+        SNMP_FREE(uptr->authKey);
+        uptr->authKey = u->old_key;
+        uptr->authKeyLen = u->old_key_len;
+    }
+    u->old_key = NULL;
+    u->old_key_len = 0;
+    u->done = 1;
+}
+
 /*******************************************************************-o-******
  * write_usmUserAuthKeyChange
  *
@@ -775,8 +949,6 @@ write_usmUserAuthProtocol(int action,
  *       calling module to verify when and if we should be called.  To
  *       change this would require a change in the mib module API to
  *       pass in the securityName requesting the change.
- *
- * XXX:  should handle action=UNDO's.
  */
 int
 write_usmUserAuthKeyChange(int action,
@@ -789,9 +961,9 @@ write_usmUserAuthKeyChange(int action,
     unsigned char   buf[SNMP_MAXBUF_SMALL];
     size_t          buflen = SNMP_MAXBUF_SMALL;
     const char     *fname;
-    static unsigned char *oldkey;
-    static size_t   oldkeylen;
-    static int      resetOnFail;
+    u_char         *newkey, *oldkey;
+    size_t          oldkeylen;
+    int             res;
 
     if (name_len < USM_MIB_LENGTH)
         return SNMP_ERR_INCONSISTENTNAME;
@@ -810,7 +982,6 @@ write_usmUserAuthKeyChange(int action,
     }
 
     if (action == RESERVE1) {
-        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("usmUser", "write to %s not ASN_OCTET_STR\n",
                         fname));
@@ -878,22 +1049,25 @@ write_usmUserAuthKeyChange(int action,
             return SNMP_ERR_GENERR;
         }
         DEBUGMSGTL(("usmUser", "%s: ... succeeded\n", fname));
-        resetOnFail = 1;
-        oldkey = uptr->authKey;
-        oldkeylen = uptr->authKeyLen;
-        uptr->authKey = netsnmp_memdup(buf, buflen);
-        if (uptr->authKey == NULL) {
+        newkey = netsnmp_memdup(buf, buflen);
+        if (newkey == NULL) {
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
+        oldkey = uptr->authKey;
+        oldkeylen = uptr->authKeyLen;
+        uptr->authKey = newkey;
         uptr->authKeyLen = buflen;
-    } else if (action == COMMIT) {
-        SNMP_FREE(oldkey);
-    } else if (action == UNDO) {
-        if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
-            SNMP_FREE(uptr->authKey);
+        res = usm_save_old_key(name, name_len, 0, oldkey, oldkeylen);
+        if (res != SNMP_ERR_NOERROR) {
             uptr->authKey = oldkey;
             uptr->authKeyLen = oldkeylen;
+            SNMP_FREE(newkey);
+            return res;
         }
+    } else if (action == COMMIT) {
+        usm_commit_key_change(name, name_len, 0);
+    } else if (action == UNDO) {
+        usm_undo_key_change(name, name_len, 0);
     }
 
     return SNMP_ERR_NOERROR;
@@ -1049,9 +1223,8 @@ write_usmUserPrivKeyChange(int action,
 {
     struct usmUser *uptr;
     const char     *fname;
-    static unsigned char *oldkey;
-    static size_t   oldkeylen;
-    static int      resetOnFail;
+    u_char         *curkey, *oldkey;
+    size_t          oldkeylen;
 
     if (name_len < USM_MIB_LENGTH)
         return SNMP_ERR_INCONSISTENTNAME;
@@ -1070,7 +1243,6 @@ write_usmUserPrivKeyChange(int action,
     }
 
     if (action == RESERVE1) {
-        resetOnFail = 0;
         if (var_val_type != ASN_OCTET_STR) {
             DEBUGMSGTL(("usmUser", "write to %s not ASN_OCTET_STR\n",
                         fname));
@@ -1108,7 +1280,7 @@ write_usmUserPrivKeyChange(int action,
             }
         }
     } else if (action == ACTION) {
-        int res;
+        int res, save_res;
 
         if ((uptr = usm_parse_user(name, name_len)) == NULL) {
             return SNMP_ERR_INCONSISTENTNAME;
@@ -1131,19 +1303,28 @@ write_usmUserPrivKeyChange(int action,
             return SNMP_ERR_NOERROR;
         }
 
+        curkey = uptr->privKey;
+        oldkey = NULL;
+        oldkeylen = 0;
         res = usm_set_priv_key(uptr, fname, &oldkey, &oldkeylen, var_val,
                                var_val_len);
-        if (res != SNMP_ERR_NOERROR)
+        if (uptr->privKey == curkey) {
+            /* The private key has not been modified. */
             return res;
-        resetOnFail = 1;
-    } else if (action == COMMIT) {
-        SNMP_FREE(oldkey);
-    } else if (action == UNDO) {
-        if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
+        }
+        save_res = usm_save_old_key(name, name_len, 1, oldkey,
+                                    oldkeylen);
+        if (save_res != SNMP_ERR_NOERROR) {
             SNMP_FREE(uptr->privKey);
             uptr->privKey = oldkey;
             uptr->privKeyLen = oldkeylen;
+            return save_res;
         }
+        return res;
+    } else if (action == COMMIT) {
+        usm_commit_key_change(name, name_len, 1);
+    } else if (action == UNDO) {
+        usm_undo_key_change(name, name_len, 1);
     }
 
     return SNMP_ERR_NOERROR;
