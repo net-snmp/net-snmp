@@ -56,6 +56,15 @@ netsnmp_feature_require(cert_util);
 #ifndef X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS
 #define X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS 0
 #endif
+/*
+ * Since OpenSSL 4.1, X509_check_host() only matches the subject commonName
+ * if this flag is set. Older OpenSSL versions match the commonName if the
+ * certificate has no DNS subjectAltName, and also if it has one when this
+ * flag is set.
+ */
+#ifndef X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT
+#define X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT 0
+#endif
 
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
@@ -179,6 +188,31 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 #define NO_FINGERPRINT_AVAILABLE  1
 #define FAILED_FINGERPRINT_VERIFY 2
 
+/*
+ * Returns 1 if @cert has at least one DNS subjectAltName and 0 otherwise.
+ * Used to only match the subject commonName against the expected host name
+ * if the certificate has no DNS subjectAltName (RFC 6125, section 6.4.4),
+ * independent of the OpenSSL version.
+ */
+static int
+_cert_has_dns_san(X509 *cert)
+{
+    GENERAL_NAMES *gens;
+    int            i, found = 0;
+
+    gens = X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL);
+    for (i = 0; gens && i < sk_GENERAL_NAME_num(gens); i++) {
+        const GENERAL_NAME *gen = sk_GENERAL_NAME_value(gens, i);
+
+        if (gen->type == GEN_DNS) {
+            found = 1;
+            break;
+        }
+    }
+    GENERAL_NAMES_free(gens);
+    return found;
+}
+
 static int
 _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
                                            _netsnmpTLSBaseData *tlsdata,
@@ -297,7 +331,9 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
             if (1 == X509_check_host(remote_cert,
                                    lower_hostname,
                                    their_hostname_len,
-                                   X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS,
+                                   X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS | X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS |
+                                   (_cert_has_dns_san(remote_cert) ? 0 :
+                                    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT),
                                    NULL)) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns or a common name: %s\n", lower_hostname));
                 free(lower_hostname);
