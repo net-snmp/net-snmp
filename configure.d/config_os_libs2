@@ -308,6 +308,8 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 	    [Define to 1 if you have the `AES_cfb128_encrypt' function.])
 	AH_TEMPLATE([HAVE_ASN1_STRING_GET0_DATA],
 	    [Define to 1 if you have the `ASN1_STRING_get0_data' function.])
+	AH_TEMPLATE([HAVE_BIO_S_DGRAM_MEM],
+	    [Define to 1 if you have the `BIO_s_dgram_mem' function.])
 	AH_TEMPLATE([HAVE_DH_GET0_KEY],
 	    [Define to 1 if you have the `DH_get0_key' function.])
 	AH_TEMPLATE([HAVE_DH_GET0_PQG],
@@ -360,11 +362,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 	    [Define to 1 if you have the `X509_NAME_ENTRY_get_data' function.])
 	AH_TEMPLATE([HAVE_X509_NAME_ENTRY_GET_OBJECT],
 	    [Define to 1 if you have the `X509_NAME_ENTRY_get_object' function.])
+	AH_TEMPLATE([HAVE_X509_STORE_GET1_OBJECTS],
+	    [Define to 1 if you have the `X509_STORE_get1_objects' function.])
 	AH_TEMPLATE([HAVE_X509_GET_SIGNATURE_NID],
 	    [Define to 1 if you have the `X509_get_signature_nid' function.])
 	for symbol in				\
 	    AES_cfb128_encrypt			\
 	    ASN1_STRING_get0_data		\
+	    BIO_s_dgram_mem			\
 	    DH_get0_key				\
 	    DH_get0_pqg				\
 	    DH_set0_pqg				\
@@ -391,6 +396,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
 	    TLSv1_method			\
 	    X509_NAME_ENTRY_get_data		\
 	    X509_NAME_ENTRY_get_object		\
+	    X509_STORE_get1_objects		\
 	    X509_get_signature_nid		\
 	; do
             [have_symbol=$(echo "HAVE_${symbol}" | tr '[:lower:]' '[:upper:]')]

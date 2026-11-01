@@ -111,6 +111,9 @@
 /* Define to 1 if you have the 'asprintf' function. */
 #undef HAVE_ASPRINTF
 
+/* Define to 1 if you have the `BIO_s_dgram_mem' function. */
+#undef HAVE_BIO_S_DGRAM_MEM
+
 /* Define to 1 if you have the 'CFURLCopyResourcePropertiesForKeys' function.
    */
 #undef HAVE_CFURLCOPYRESOURCEPROPERTIESFORKEYS
@@ -1601,6 +1604,9 @@
 
 /* Define to 1 if you have the `X509_NAME_ENTRY_get_object' function. */
 #undef HAVE_X509_NAME_ENTRY_GET_OBJECT
+
+/* Define to 1 if you have the `X509_STORE_get1_objects' function. */
+#undef HAVE_X509_STORE_GET1_OBJECTS
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
