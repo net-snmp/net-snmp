@@ -365,24 +365,29 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
         if (*olength == sizeof(netsnmp_scoped_addr_pair)) {
             scoped_pair = *opaque;
             addr_pair = &scoped_pair->addr_pair;
-        } else if (*olength == sizeof(netsnmp_indexed_addr_pair) ||
-                   *olength == sizeof(struct sockaddr_in6)) {
+            to = &addr_pair->remote_addr.sa;
+        } else if (*olength == sizeof(netsnmp_indexed_addr_pair)) {
             addr_pair = *opaque;
+            to = &addr_pair->remote_addr.sa;
+        } else if (*olength == sizeof(struct sockaddr_in6)) {
+            to = *opaque;
         }
     }
     /*
      * Fall back to the transport data if no opaque address has been
      * provided or if its length is not recognized.
      */
-    if (!addr_pair && t && t->data) {
+    if (!to && t && t->data) {
         if (t->data_length == sizeof(netsnmp_scoped_addr_pair)) {
             scoped_pair = t->data;
             addr_pair = &scoped_pair->addr_pair;
+            to = &addr_pair->remote_addr.sa;
         } else if (t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
             addr_pair = t->data;
+            to = &addr_pair->remote_addr.sa;
         }
     }
-    if (!addr_pair) {
+    if (!to) {
         int len = -1;
 
         if (opaque && *opaque && olength)
@@ -392,8 +397,6 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
         snmp_log(LOG_ERR, "unknown addr type of size %d\n", len);
         return SNMPERR_GENERR;
     }
-
-    to = &addr_pair->remote_addr.sa;
 
 #if defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
     /*
@@ -424,11 +427,19 @@ netsnmp_udp6_send(netsnmp_transport *t, const void *buf, int size,
     }
 #endif
 
-    if (to && t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
+    if (t && NETSNMP_IS_VALID_SOCKET(t->sock)) {
         DEBUGIF("netsnmp_udp6") {
-            char *str = netsnmp_udp6_fmtaddr(
-                NULL, scoped_pair ? (const void *)scoped_pair : addr_pair,
-                scoped_pair ? sizeof(*scoped_pair) : sizeof(*addr_pair));
+            char *str;
+
+            if (scoped_pair)
+                str = netsnmp_udp6_fmtaddr(NULL, scoped_pair,
+                                           sizeof(*scoped_pair));
+            else if (addr_pair)
+                str = netsnmp_udp6_fmtaddr(NULL, addr_pair,
+                                           sizeof(*addr_pair));
+            else
+                str = netsnmp_udp6_fmtaddr(NULL, to,
+                                           sizeof(struct sockaddr_in6));
             DEBUGMSGTL(("netsnmp_udp6",
                         "send %d bytes from %p to %s on fd %" NETSNMP_FMT_SKT "\n",
                         size, buf, str, t->sock));

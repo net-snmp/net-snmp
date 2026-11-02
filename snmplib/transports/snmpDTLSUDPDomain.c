@@ -106,6 +106,9 @@ typedef struct bio_cache_s {
    BIO *read_bio;  /* OpenSSL will read its incoming SSL packets from here */
    BIO *write_bio; /* OpenSSL will write its outgoing SSL packets to here */
    netsnmp_sockaddr_storage sas;
+   /* Local address and interface index to send from. May be zero. */
+   netsnmp_sockaddr_storage local_addr;
+   int if_index;
    u_int flags;
    struct bio_cache_s *next;
    int msgnum;
@@ -524,6 +527,19 @@ find_or_create_bio_cache(netsnmp_transport *t,
     return cachep;
 }
 
+/*
+ * Remember the local address and the interface index from @addr_pair such
+ * that DTLS records for the peer of @cachep are sent from the local address
+ * that the peer has sent its datagrams to.
+ */
+static void
+_netsnmp_bio_cache_set_local(bio_cache *cachep,
+                             const netsnmp_indexed_addr_pair *addr_pair)
+{
+    cachep->local_addr = addr_pair->local_addr;
+    cachep->if_index = addr_pair->if_index;
+}
+
 static const netsnmp_indexed_addr_pair *
 _extract_addr_pair(netsnmp_transport *t, const void *opaque, int olen)
 {
@@ -559,19 +575,15 @@ _extract_addr_pair(netsnmp_transport *t, const void *opaque, int olen)
 }
 
 static const struct sockaddr *
-_find_remote_sockaddr(netsnmp_transport *t, const void *opaque, int olen,
-                      int *socklen)
+_find_remote_sockaddr(netsnmp_transport *t, const void *opaque, int olen)
 {
     const netsnmp_indexed_addr_pair *addr_pair;
-    const struct sockaddr *sa = NULL;
 
     addr_pair = _extract_addr_pair(t, opaque, olen);
     if (NULL == addr_pair)
         return NULL;
 
-    sa = &addr_pair->remote_addr.sa;
-    *socklen = netsnmp_sockaddr_size(sa);
-    return sa;
+    return &addr_pair->remote_addr.sa;
 }
 
 
@@ -582,17 +594,20 @@ _find_remote_sockaddr(netsnmp_transport *t, const void *opaque, int olen,
  * while a regular memory BIO returns all pending data at once. Sends the
  * data to @dest if @dest != NULL and otherwise to the address associated
  * with @t, or to the address in @cachep if @t has no associated address.
+ * Sends the data from the local address and interface stored in @cachep.
  * Returns the number of bytes that have been sent or -1 if sending failed.
  */
 static int
 _netsnmp_send_dtls_bio_data(netsnmp_transport *t, bio_cache *cachep,
-                            struct sockaddr *dest)
+                            const struct sockaddr *dest)
 {
     int total = 0;
 
     for (;;) {
-        int outsize, rc2, socksize;
-        void *outbuf, *sa;
+        netsnmp_indexed_addr_pair addr_pair;
+        const struct sockaddr *sa;
+        void *outbuf, *opaque = &addr_pair;
+        int outsize, rc2, socksize, olen = sizeof(addr_pair);
 
         outsize = BIO_ctrl_pending(cachep->write_bio);
         if (outsize <= 0)
@@ -613,13 +628,26 @@ _netsnmp_send_dtls_bio_data(netsnmp_transport *t, bio_cache *cachep,
         MAKE_MEM_DEFINED(outbuf, outsize);
         sa = dest;
         if (NULL == sa)
-            sa = NETSNMP_REMOVE_CONST(struct sockaddr *,
-                                      _find_remote_sockaddr(t, NULL, 0,
-                                                            &socksize));
+            sa = _find_remote_sockaddr(t, NULL, 0);
         if (NULL == sa)
             sa = &cachep->sas.sa;
         socksize = netsnmp_sockaddr_size(sa);
-        rc2 = t->base_transport->f_send(t, outbuf, outsize, &sa, &socksize);
+        if (socksize == 0) {
+            snmp_log(LOG_ERR, "%s: unsupported address family %d\n",
+                     NETSNMP_FUNCTION, sa->sa_family);
+            free(outbuf);
+            return -1;
+        }
+        /*
+         * Pass an address pair instead of a bare socket address such that
+         * the base transport sends the data from the local address that the
+         * peer has sent its datagrams to.
+         */
+        memset(&addr_pair, 0, sizeof(addr_pair));
+        memcpy(&addr_pair.remote_addr, sa, socksize);
+        addr_pair.local_addr = cachep->local_addr;
+        addr_pair.if_index = cachep->if_index;
+        rc2 = t->base_transport->f_send(t, outbuf, outsize, &opaque, &olen);
         free(outbuf);
         if (rc2 == -1) {
             snmp_log(LOG_ERR, "failed to send a DTLS specific packet\n");
@@ -861,6 +889,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         SNMP_FREE(tmStateRef);
         return -1;
     }
+    _netsnmp_bio_cache_set_local(cachep, addr_pair);
     tlsdata = cachep->tlsdata;
     if (NULL == tlsdata->ssl) {
         /*
@@ -1287,6 +1316,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, const void *buf, int size,
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         return -1;
     }
+    _netsnmp_bio_cache_set_local(cachep, addr_pair);
 
     tlsdata = cachep->tlsdata;
     if (NULL == tlsdata || NULL == tlsdata->ssl) {

@@ -183,6 +183,24 @@ SOCK_STARTUP;
                    "netsnmp_udp6_fmtaddr formats unresolved remote_scope");
                 free(fmt);
 
+                {
+                    struct sockaddr_in6 *sin6 = calloc(1, sizeof(*sin6));
+                    void *opaque = sin6;
+                    int olen = sizeof(*sin6);
+
+                    if (sin6) {
+                        sin6->sin6_family = AF_INET6;
+                        sin6->sin6_addr = in6addr_loopback;
+                        sin6->sin6_port = htons(1161);
+                        errno = 0;
+                        rc = t->f_send(t, "x", 1, &opaque, &olen);
+                        OK(rc == 1 ||
+                           (rc == -1 && errno != 0 && errno != EINVAL),
+                           "netsnmp_udp6_send accepts struct sockaddr_in6 opaque");
+                        free(sin6);
+                    }
+                }
+
                 t->f_close(t);
                 netsnmp_transport_free(t);
             }
