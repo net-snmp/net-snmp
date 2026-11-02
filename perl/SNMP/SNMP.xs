@@ -1209,6 +1209,17 @@ retry:
    return(status);
 }
 
+/*
+ * NETSNMP_CALLBACK_OP_RESEND only reports that a request was
+ * retransmitted. The request stays outstanding and the
+ * callback is invoked again later with its final result.
+ */
+static int
+__is_final_callback_op(int op)
+{
+   return op != NETSNMP_CALLBACK_OP_RESEND;
+}
+
 static int
 __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
              void *cb_data)
@@ -1244,8 +1255,7 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
   SV **err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
   SV **err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
 
-  /* These are purely informative; only act on the final callback. */
-  if (op == NETSNMP_CALLBACK_OP_RESEND)
+  if (!__is_final_callback_op(op))
     return 1;
 
   ENTER;
@@ -1676,6 +1686,9 @@ _bulkwalk_async_cb(int		op,
 	     op, reqid, context_ptr));
 
    context = (walk_context *)context_ptr;
+
+   if (!__is_final_callback_op(op))
+      return 1;
 
    /* Make certain this is a valid context pointer.  This pdu may
    ** have been retransmitted after the bulkwalk was completed
