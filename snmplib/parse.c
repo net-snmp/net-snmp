@@ -1284,43 +1284,123 @@ find_tree_node(const char *name, int modid)
  *   grow the AST by up to 2^k nodes and exhaust memory.
  * - '{' interval quantifiers are rejected because duplicate_tree() clones
  *   the preceding subtree up to RE_DUP_MAX (32767) times per interval.
+ * - glibc's regcomp() run time can grow exponentially with the number of
+ *   epsilon transitions in the NFA it builds. One example is
+ *   calc_eclosure_iter(), which recomputes the incomplete epsilon closures
+ *   of nodes that are part of a cycle of epsilon transitions. Another
+ *   example is the duplication of nodes for each combination of anchor
+ *   constraints. Hence the following restrictions:
+ *   - The quantifiers '*', '+' and '?' are only accepted directly after an
+ *     atom that always consumes exactly one character: an ordinary
+ *     character, '.', an escaped punctuation character or a bracket
+ *     expression. Quantifying a group or another quantifier is rejected.
+ *   - '^' is only accepted at the start and '$' only at the end of the
+ *     pattern.
+ *   - Escaped alphanumeric characters (GNU extensions like \b and \w, and
+ *     back-references) and the GNU anchors \<, \>, \` and \' are rejected.
+ *   Examples of short patterns for which regcomp() takes minutes or longer
+ *   without these restrictions are "(()|())(()|())...*",
+ *   "(((((((^|$)*)*)*)*)*)*)*", "$a++*?*+++**" and "(.*|^|$)(.*|^|$)...".
  */
 #define MAX_REGEX_LEN           256
 #define MAX_REGEX_NESTING_DEPTH 32
 #define MAX_REGEX_PLUS          8
 
+/*
+ * Skip a bracket expression. @p points at the opening '['. Returns a pointer
+ * to the closing ']' or NULL if the bracket expression is not terminated.
+ */
+static const char *
+skip_bracket_expr(const char *p)
+{
+    p++;
+    if (*p == '^')
+        p++;
+    if (*p == ']')
+        p++;
+    for (; *p; p++) {
+        if (*p == ']')
+            return p;
+        if (*p == '[' && (p[1] == ':' || p[1] == '=' || p[1] == '.')) {
+            const char      delim = p[1];
+
+            for (p += 2; *p && !(p[0] == delim && p[1] == ']'); p++)
+                ;
+            if (!*p)
+                return NULL;
+            p++;
+        }
+    }
+    return NULL;
+}
+
 static int
 regex_too_complex(const char *key)
 {
+    const char     *const start = key;
     int             depth = 0;
     int             plus_count = 0;
-    size_t          len = 0;
+    int             quantifiable = 0;
+    const char     *end;
+
+    if (memchr(key, '\0', MAX_REGEX_LEN + 1) == NULL)
+        return 1;
 
     for (; *key; key++) {
-        if (++len > MAX_REGEX_LEN)
-            return 1;
         switch (*key) {
         case '\\':
             if (!key[1])
-                return 0;
-            key++;
-            if (++len > MAX_REGEX_LEN)
                 return 1;
+            key++;
+            if (isalnum((unsigned char)*key) || strchr("<>`'", *key))
+                return 1;
+            quantifiable = 1;
+            break;
+        case '[':
+            end = skip_bracket_expr(key);
+            if (!end)
+                return 1;
+            key = end;
+            quantifiable = 1;
             break;
         case '(':
             if (++depth > MAX_REGEX_NESTING_DEPTH)
                 return 1;
+            quantifiable = 0;
             break;
         case ')':
             if (depth > 0)
                 depth--;
+            quantifiable = 0;
             break;
         case '+':
             if (++plus_count > MAX_REGEX_PLUS)
                 return 1;
+            /* FALL THROUGH */
+        case '*':
+        case '?':
+            if (!quantifiable)
+                return 1;
+            quantifiable = 0;
             break;
         case '{':
             return 1;
+        case '^':
+            if (key != start)
+                return 1;
+            quantifiable = 0;
+            break;
+        case '$':
+            if (key[1])
+                return 1;
+            quantifiable = 0;
+            break;
+        case '|':
+            quantifiable = 0;
+            break;
+        default:
+            quantifiable = 1;
+            break;
         }
     }
     return 0;

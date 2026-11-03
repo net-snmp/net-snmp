@@ -173,6 +173,80 @@ for (i = 0; i < sizeof(testdata) / sizeof(testdata[0]); i++) {
         out_len = MAX_OID_LEN;
         OK(snmp_parse_oid("a{32767}{32767}", out_oid, &out_len) == NULL,
            "snmp_parse_oid rejects regex with interval quantifiers");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("(()|())(()|())(()|())(()|())(()|())(()|())"
+                          "(()|())(()|())(()|())(()|())(()|())(()|())"
+                          "(()|())(()|())(()|())(()|())(()|())(()|())"
+                          "(()|())(()|())(()|())(()|())(()|())(()|())*",
+                          out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with a quantified group");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("a++*?*+++**", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with stacked quantifiers");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)"
+                          "(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)"
+                          "(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)"
+                          "(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)(.*|^|$)",
+                          out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with anchors in the middle");
+        /*
+         * glibc's regcomp() accepts the patterns below and they match
+         * "sysUpTime". Hence, these tests fail if regex_too_complex() does
+         * not reject them.
+         */
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("sys(Up)?Time", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with a quantified group");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("sysUpTime$|noSuchNode", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with '$' before end");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("noSuchNode|^sysUpTime", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects regex with '^' after start");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("sysUpTim\\w", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects escaped alphanumeric character");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("(sysUpTime)\\1*", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects back-reference");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("\\<sysUpTime\\>", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects GNU word anchors");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("\\`sysUpTime\\'", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects GNU buffer anchors");
+        /*
+         * glibc's regcomp() rejects the patterns below. Verify that
+         * regex_too_complex() rejects these too such that its parser does
+         * not get out of sync with the regcomp() parser.
+         */
+        out_len = MAX_OID_LEN;
+        clear_tree_flags(get_tree_head());
+        OK(get_wild_node("[[:x]a{32767}{32767}", out_oid, &out_len) == 0,
+           "get_wild_node rejects unterminated character class");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("[[=x]a{32767}{32767}", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects unterminated equivalence class");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("sysUpTime\\", out_oid, &out_len) == NULL,
+           "snmp_parse_oid rejects trailing backslash");
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("sysUp.*Ti[m]e", out_oid, &out_len) != NULL &&
+           out_len == 8 && out_oid[7] == 3,
+           "snmp_parse_oid accepts a simple regex");
+        out_len = MAX_OID_LEN;
+        clear_tree_flags(get_tree_head());
+        OK(get_wild_node("^sysUp[[:alpha:]]+e$", out_oid, &out_len) == 1 &&
+           out_len == 8 && out_oid[7] == 3,
+           "get_wild_node accepts anchors and POSIX character classes");
+        out_len = MAX_OID_LEN;
+        OK(snmp_parse_oid("^(sysUpTime|noSuchNode)$", out_oid,
+                          &out_len) != NULL &&
+           out_len == 8 && out_oid[7] == 3,
+           "snmp_parse_oid accepts unquantified groups and alternation");
+#endif
         unload_all_mibs();
         shutdown_mib();
         netsnmp_ds_shutdown();
