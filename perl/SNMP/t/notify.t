@@ -55,7 +55,7 @@ if (defined($s1)) {
 		     [['sysContact', 0, 'root@localhost'],
 		      ['sysLocation', 0, 'here']] );
 }
-ok($res =~ /^0 but true/);
+ok(defined($res) && $res =~ /^0 but true/);
 
 ########################  3  ############################
 # test with wrong varbind
@@ -83,7 +83,7 @@ if (defined($s2)) {
 		      ['sysLocation', 0, 'here']] );
   #print("res is $res\n");
 }
-ok($res =~ /^0 but true/);
+ok(defined($res) && $res =~ /^0 but true/);
 ########################  6  ############################
 # no trapoid and uptime given. Should take defaults...
 my $ret;
@@ -111,6 +111,7 @@ my $s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap
 ok(defined($s3));
 
 ########################  9  ############################
+undef $res;
 if (defined($s3)) {
     $res = $s3->inform(uptime=>111, trapoid=>'coldStart',
 		       [['sysContact', 0, 'root@localhost'],
