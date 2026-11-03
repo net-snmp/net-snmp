@@ -63,9 +63,9 @@ sub delay {
 
 sub wait_for_log {
   my ($filename, $regexp) = @_;
-  # Wait at most 3 seconds for file to appear
+  # Wait at most 10 seconds for file to appear
   my $fh;
-  for (my $i = 0; $i < 30; ++$i) {
+  for (my $i = 0; $i < 100; ++$i) {
     if (open($fh, "<$filename")) {
       last;
     }
@@ -73,7 +73,7 @@ sub wait_for_log {
   }
   return 0 if (!$fh);
   my $timecount = 0;
-  while ($timecount < 50) { # Max 5 seconds
+  while ($timecount < 300) { # Max 30 seconds
     my $line = <$fh>;
     if (!defined($line) || $line eq "") {
       seek($fh, 0, 1);
@@ -99,12 +99,14 @@ sub run_async {
     } else {
       system "$cmd @args 2>&1";
     }
-    # Wait at most three seconds for the pid file to appear.
-    for (my $i = 0; ($i < 30) && ! (-r "$pidfile"); ++$i) {
+    # Wait at most ten seconds for the pid file to appear.
+    for (my $i = 0; ($i < 100) && ! (-r "$pidfile"); ++$i) {
       delay 0.1;
     }
+    return 1;
   } else {
     warn "Couldn't run $cmd\n";
+    return 0;
   }
 }
 
@@ -115,6 +117,13 @@ sub snmptest_cleanup {
   unlink($snmpd_pid);
   kill_by_pid_file($snmptrapd_pid, $ignore_failures);
   unlink($snmptrapd_pid);
+}
+
+sub abort_startup {
+  my ($msg) = @_;
+
+  snmptest_cleanup(1);
+  die $msg;
 }
 
 sub kill_by_pid_file {
@@ -173,33 +182,39 @@ my $snmptrapd_log = "t/snmptrapd-$scriptname.log";
 unlink($snmpd_log);
 unlink($snmptrapd_log);
 
-if ($snmpd_cmd) {
-  run_async($snmpd_pid, "$snmpd_cmd", "-r -d -Lf $snmpd_log -M+$mibdir -C -c t/snmptest.conf -p $snmpd_pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
-  if (wait_for_log($snmpd_log, qr/NET-SNMP version/)) {
-    if (open(my $fh, "<$snmpd_log")) {
-      while (my $line = <$fh>) {
-        if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
-          $agent_port = $1;
-          last;
-        }
+if ($snmpd_cmd &&
+    run_async($snmpd_pid, "$snmpd_cmd", "-r -d -Lf $snmpd_log -M+$mibdir -C -c t/snmptest.conf -p $snmpd_pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr")) {
+  wait_for_log($snmpd_log, qr/NET-SNMP version/)
+    or abort_startup("Timed out waiting for snmpd to start (see $snmpd_log)\n");
+  my $port;
+  if (open(my $fh, "<$snmpd_log")) {
+    while (my $line = <$fh>) {
+      if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
+        $port = $1;
+        last;
       }
-      close($fh);
     }
+    close($fh);
   }
+  $port or abort_startup("Failed to determine agent port from $snmpd_log\n");
+  $agent_port = $port;
 }
-if ($snmptrapd_cmd) {
-  run_async($snmptrapd_pid, "$snmptrapd_cmd", "-d -Lf $snmptrapd_log -p $snmptrapd_pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
-  if (wait_for_log($snmptrapd_log, qr/NET-SNMP version/)) {
-    if (open(my $fh, "<$snmptrapd_log")) {
-      while (my $line = <$fh>) {
-        if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
-          $trap_port = $1;
-          last;
-        }
+if ($snmptrapd_cmd &&
+    run_async($snmptrapd_pid, "$snmptrapd_cmd", "-d -Lf $snmptrapd_log -p $snmptrapd_pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr")) {
+  wait_for_log($snmptrapd_log, qr/NET-SNMP version/)
+    or abort_startup("Timed out waiting for snmptrapd to start (see $snmptrapd_log)\n");
+  my $port;
+  if (open(my $fh, "<$snmptrapd_log")) {
+    while (my $line = <$fh>) {
+      if ($line =~ /Listening on address (?:.*:)?(\d+)/) {
+        $port = $1;
+        last;
       }
-      close($fh);
     }
+    close($fh);
   }
+  $port or abort_startup("Failed to determine trap port from $snmptrapd_log\n");
+  $trap_port = $port;
 }
 
 1;
