@@ -5,9 +5,17 @@ use warnings;
 use Exporter;
 use Cwd qw(abs_path);
 
+my $scriptname = "snmptest";
+if ($0 =~ /^t[\/\\](.*)\.t$/) {
+  $scriptname = $1;
+}
+
+# Use per-script pid files such that test scripts that run concurrently
+# (e.g. HARNESS_OPTIONS=j<n>) do not stop each other's daemons and do not
+# overwrite each other's pid files.
 my $t_dir = abs_path("t");
-my $snmpd_pid = "$t_dir/snmpd.pid";
-my $snmptrapd_pid = "$t_dir/snmptrapd.pid";
+my $snmpd_pid = "$t_dir/snmpd-$scriptname.pid";
+my $snmptrapd_pid = "$t_dir/snmptrapd-$scriptname.pid";
 
 #Open the snmptest.cmd file and get the info
 require "t/readsnmptest.pl";
@@ -170,11 +178,6 @@ snmptest_cleanup(1);
 # Start snmpd and snmptrapd.
 
 #warn "\nStarting agents for test script $0\n";
-
-my $scriptname = "snmptest";
-if ($0 =~ /^t[\/\\](.*)\.t$/) {
-  $scriptname = $1;
-}
 
 my $snmpd_log = "t/snmpd-$scriptname.log";
 my $snmptrapd_log = "t/snmptrapd-$scriptname.log";
