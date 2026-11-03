@@ -115,10 +115,11 @@ my $originalLocation = $s1->get('sysLocation.0');
 my $value = 'Router Management Labs';
 $s1->set('sysLocation.0', $value);
 my $finalvalue = $s1->get('sysLocation.0');
-ok($originalLocation ne $finalvalue);
+ok(defined($originalLocation) && defined($finalvalue) &&
+   $originalLocation ne $finalvalue);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
 #print("set value is: $finalvalue\n\n");
-$s1->set('sysLocation.0', $originalLocation);
+$s1->set('sysLocation.0', $originalLocation) if defined($originalLocation);
 
 ########################   3   #######################################
 
@@ -148,9 +149,10 @@ $s1->set('sysServices.0', $junk_service);
 $finalvalue = $s1->get('sysServices.0');
 #print("services is: $finalvalue\n");
 #print("Services is: $originalservice\n");
-ok($originalservice eq $finalvalue);
+ok(defined($originalservice) && defined($finalvalue) &&
+   $originalservice eq $finalvalue);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
-$s1->set('sysServices.0',$originalservice);
+$s1->set('sysServices.0', $originalservice) if defined($originalservice);
 #print("\n");
 
 ##################   5   ######################
@@ -165,10 +167,11 @@ my $junk_trap = "Nortel Networks";
 $s1->set('snmpEnableAuthenTraps.0', $junk_trap);
 $finalvalue = $s1->get('snmpEnableAuthenTraps.0');
 #print("final trap is: $finalvalue\n");
-ok($finalvalue ne $junk_trap);
+ok(defined($originalTrap) && defined($finalvalue) &&
+   $finalvalue ne $junk_trap);
 # Should the error be 'Value out of range: SNMPERR_RANGE ?
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
-$s1->set('snmpEnableAuthenTraps.0',$originalTrap);
+$s1->set('snmpEnableAuthenTraps.0', $originalTrap) if defined($originalTrap);
 #print("\n");
 ###################  6  #######################
 # Test for a TimeTicks (is this advisable? )
@@ -234,7 +237,7 @@ my $junk_OID = ".1.6.6.6.6.6";
 $s1->set('sysORID.1', $junk_OID);
 my $newOID = $s1->get("sysORID.1");
 #print("new oid is $newOID\n");
-ok($oldoid eq $newOID);
+ok(defined($oldoid) && defined($newOID) && $oldoid eq $newOID);
 #print STDERR "Error string = $s1->{ErrorStr}:$s1->{ErrorInd}\n";
 #print("\n");
 ################  14  ##########################
