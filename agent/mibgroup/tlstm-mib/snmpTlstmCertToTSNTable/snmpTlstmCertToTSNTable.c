@@ -794,6 +794,10 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             info = netsnmp_extract_table_info(request);
             entry = (certToTSN_entry *) netsnmp_tdata_extract_entry(request);
 
+            if (!entry || !entry->undo) {
+                continue;
+            }
+
             if ((RS_NOTREADY == entry->rowStatus) && entry->undo->is_consistent)
                 entry->rowStatus = RS_NOTINSERVICE;
             else if ((RS_NOTINSERVICE == entry->rowStatus) &&
