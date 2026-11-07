@@ -3261,12 +3261,14 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
                 goto skip;
             }
             o = (struct objgroup *) malloc(sizeof(struct objgroup));
-            if (!o) {
+            if (o)
+                o->name = strdup(token);
+            if (!o || !o->name) {
+                free(o);
                 print_error("Resource failure", token, type);
                 goto skip;
             }
             o->line = mibLine;
-            o->name = strdup(token);
             o->next = *ol;
             *ol = o;
             type = get_token(fp, token, MAXTOKEN);
@@ -4197,8 +4199,10 @@ parse_imports(FILE * fp)
             }
             mp->imports = (struct module_import *)
                 calloc(import_count, sizeof(struct module_import));
-            if (mp->imports == NULL)
+            if (mp->imports == NULL) {
+                mp->no_imports = 0;
                 goto out;
+            }
             for (i = 0; i < import_count; ++i) {
                 mp->imports[i].label = import_list[i].label;
                 import_list[i].label = NULL;
@@ -4796,39 +4800,6 @@ new_module(const char *name, const char *file)
 }
 
 
-static void
-scan_objlist(struct node *root, struct module *mp, struct objgroup *list, const char *error)
-{
-    int             oLine = mibLine;
-
-    while (list) {
-        struct objgroup *gp = list;
-        struct node    *np;
-        list = list->next;
-        np = root;
-        while (np)
-            if (label_compare(np->label, gp->name))
-                np = np->next;
-            else
-                break;
-        if (!np) {
-	    int i;
-	    struct module_import *mip;
-	    /* if not local, check if it was IMPORTed */
-	    for (i = 0, mip = mp->imports; i < mp->no_imports; i++, mip++)
-		if (strcmp(mip->label, gp->name) == 0)
-		    break;
-	    if (i == mp->no_imports) {
-		mibLine = gp->line;
-		print_error(error, gp->name, QUOTESTRING);
-	    }
-        }
-        free(gp->name);
-        free(gp);
-    }
-    mibLine = oLine;
-}
-
 static void free_objgroup(struct objgroup *o)
 {
     while (o) {
@@ -4937,29 +4908,34 @@ label_table_find_dup(const struct label_table *lt, const struct node *np)
 }
 
 /*
- * Adds @np to @lt. If memory allocation fails, @np is not added. The only
- * consequence of this is that a duplicate object warning may be missed.
+ * Adds @np to @lt. Returns 0 upon success or -1 if memory allocation failed.
+ * scan_objlist() relies on @lt holding every node of the current module, so
+ * a failure must abort parsing of the module.
  */
-static void
+static int
 label_table_add(struct label_table *lt, struct node *np)
 {
     struct label_entry *le, **head;
     unsigned int    hash;
 
     if (!np->label)
-        return;
+        return 0;
     hash = label_hash(np->label);
     le = label_table_find(lt, np->label, hash);
     if (le) {
         if (!le->other && le->first->subid != np->subid)
             le->other = np;
-        return;
+        return 0;
     }
-    if (lt->count >= lt->size && label_table_grow(lt) < 0)
-        return;
+    /*
+     * The buckets are chained, so if growing the table fails, the entry can
+     * still be added to the existing buckets.
+     */
+    if (lt->count >= lt->size && label_table_grow(lt) < 0 && !lt->size)
+        return -1;
     le = malloc(sizeof(*le));
     if (!le)
-        return;
+        return -1;
     le->hash = hash;
     le->first = np;
     le->other = NULL;
@@ -4967,6 +4943,7 @@ label_table_add(struct label_table *lt, struct node *np)
     le->next = *head;
     *head = le;
     lt->count++;
+    return 0;
 }
 
 static void
@@ -4986,6 +4963,63 @@ label_table_clear(struct label_table *lt)
     lt->buckets = NULL;
     lt->size = 0;
     lt->count = 0;
+}
+
+/*
+ * Returns nonzero if a node with label @name has been parsed in the current
+ * module. @labels holds the nodes of the current module and @root is the list
+ * of those nodes. The hash table is case-sensitive, so it can only be used if
+ * label_compare() is strcmp().
+ */
+static int
+label_is_local(const struct label_table *labels, const struct node *root,
+               const char *name)
+{
+#ifdef STRICT_MIB_PARSEING
+    const struct node *np;
+
+    for (np = root; np; np = np->next)
+        if (np->label && !label_compare(np->label, name))
+            return 1;
+    return 0;
+#else
+    return label_table_find(labels, name, label_hash(name)) != NULL;
+#endif
+}
+
+/*
+ * Reports the members of @list that are neither defined in the current module
+ * nor imported. @labels and @root hold the nodes of the current module.
+ * Frees @list.
+ */
+static void
+scan_objlist(const struct label_table *labels, const struct node *root,
+             const struct module *mp, struct objgroup *list,
+             const char *error)
+{
+    int             oLine = mibLine;
+
+    while (list) {
+        struct objgroup *gp = list;
+
+        list = list->next;
+        netsnmp_assert(gp->name);
+        if (!label_is_local(labels, root, gp->name)) {
+            int             i;
+
+            /* if not local, check if it was IMPORTed */
+            for (i = 0; i < mp->no_imports; i++)
+                if (strcmp(mp->imports[i].label, gp->name) == 0)
+                    break;
+            if (i == mp->no_imports) {
+                mibLine = gp->line;
+                print_error(error, gp->name, QUOTESTRING);
+            }
+        }
+        free(gp->name);
+        free(gp);
+    }
+    mibLine = oLine;
 }
 
 /*
@@ -5043,9 +5077,12 @@ parse(FILE * fp)
                 for (mp = module_head; mp; mp = mp->next)
                     if (mp->modid == current_module)
                         break;
-                scan_objlist(root, mp, objgroups, "Undefined OBJECT-GROUP");
-                scan_objlist(root, mp, objects, "Undefined OBJECT");
-                scan_objlist(root, mp, notifs, "Undefined NOTIFICATION");
+                scan_objlist(&labels, root, mp, objgroups,
+                             "Undefined OBJECT-GROUP");
+                scan_objlist(&labels, root, mp, objects,
+                             "Undefined OBJECT");
+                scan_objlist(&labels, root, mp, notifs,
+                             "Undefined NOTIFICATION");
                 objgroups = NULL;
                 objects = NULL;
                 notifs = NULL;
@@ -5292,10 +5329,12 @@ parse(FILE * fp)
                     np->next = nnp;
                 else
                     np = root = nnp;
-                label_table_add(&labels, np);
+                if (label_table_add(&labels, np) < 0)
+                    goto out_of_memory;
                 while (np->next) {
                     np = np->next;
-                    label_table_add(&labels, np);
+                    if (label_table_add(&labels, np) < 0)
+                        goto out_of_memory;
                 }
                 if (np->type == TYPE_OTHER)
                     np->type = type;
@@ -5312,6 +5351,9 @@ parse(FILE * fp)
     notifs = oldnotifs;
     return root;
 
+out_of_memory:
+    print_error("Resource failure", np->label, QUOTESTRING);
+    gMibError = MODULE_SYNTAX_ERROR;
 free_mib:
     label_table_clear(&labels);
     for (; root; root = np) {
