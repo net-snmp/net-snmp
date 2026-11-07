@@ -3650,15 +3650,20 @@ parse_compliance(FILE * fp, char *name)
         int             modid = -1;
         char            modname[MAXTOKEN];
         type = get_token(fp, token, MAXTOKEN);
-        if (type == LABEL
-            && strcmp(token, module_name(current_module, modname))) {
-            modid = read_module_internal(token);
-            if (modid != MODULE_LOADED_OK
-                && modid != MODULE_ALREADY_LOADED) {
-                print_error("Unknown module", token, type);
-                goto skip;
+        if (type == LABEL) {
+            /*
+             * A MODULE clause that names the current module is equivalent
+             * to one without a module name.
+             */
+            if (strcmp(token, module_name(current_module, modname))) {
+                modid = read_module_internal(token);
+                if (modid != MODULE_LOADED_OK
+                    && modid != MODULE_ALREADY_LOADED) {
+                    print_error("Unknown module", token, type);
+                    goto skip;
+                }
+                modid = which_module(token);
             }
-            modid = which_module(token);
             type = get_token(fp, token, MAXTOKEN);
         }
         if (type == MANDATORYGROUPS) {
