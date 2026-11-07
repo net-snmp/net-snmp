@@ -3277,7 +3277,7 @@ parse_objectgroup(FILE * fp, char *name, int what, struct objgroup **ol)
             print_error("Expected \"}\" after list", token, type);
             goto skip;
         }
-        type = get_token(fp, token, type);
+        type = get_token(fp, token, MAXTOKEN);
     }
     if (type != STATUS) {
         print_error("Expected STATUS", token, type);
