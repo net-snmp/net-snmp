@@ -3,7 +3,7 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.10.pre3*:
+*5.10.rc1*:
 
     snmpd:
       - SECURITY: Fix a SMUX denial of service caused by blocking peer
@@ -44,6 +44,7 @@ listing of all changes made to the code.
       - Fix priority range filtering in -L* logging options
       - Numerous memory leak, buffer overflow, and crash fixes across ASN.1,
         MIB parsing, transports, and security models
+      - Improvements to TLS and DTLS support, including 1.3
 
     perl & python:
       - python: Add DontCheckOrdering and Cc session options to walk()
