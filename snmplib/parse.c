@@ -5334,12 +5334,15 @@ parse(FILE * fp)
                     np->next = nnp;
                 else
                     np = root = nnp;
-                if (label_table_add(&labels, np) < 0)
-                    goto out_of_memory;
-                while (np->next) {
-                    np = np->next;
+                /*
+                 * The previous tail of the list has already been added to
+                 * the label table.
+                 */
+                for (np = nnp; ; np = np->next) {
                     if (label_table_add(&labels, np) < 0)
                         goto out_of_memory;
+                    if (!np->next)
+                        break;
                 }
                 if (np->type == TYPE_OTHER)
                     np->type = type;
