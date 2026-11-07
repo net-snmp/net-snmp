@@ -1,5 +1,1149 @@
 # -*- text -*-
 
+Changes: V5.10.pre3 -> V5.10.rc1
+
+commit bf617292870115097f3579037daa27c922ef3026
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Sat Nov 7 09:53:34 2026 -0800
+
+    Release Candidate for master
+
+commit 046fedabc37401da72324f491ebf0a9def98c69d
+Author: Wes Hardaker <opensource@hardakers.net>
+Date:   Sat Nov 7 09:53:31 2026 -0800
+
+    Version number update: 5.10.rc1
+
+commit 313df5b1c80cce70edf754e6b040591393fffd21
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Nov 3 09:49:54 2026 -0800
+
+    Perl/testing: Use per-script pid files in startagent.pl
+    
+    Include the test script name in the snmpd and snmptrapd pid file names
+    and determine the script name before the pid file names are derived
+    from it.
+    
+    All test scripts use the same t/snmpd.pid and t/snmptrapd.pid files.
+    When the test scripts run concurrently, e.g. with HARNESS_OPTIONS=j10,
+    each script stops the daemons started by other scripts during startup,
+    the daemons overwrite each other's pid files and only the daemon whose
+    pid was written last is stopped during cleanup. All other daemons keep
+    running after the tests have finished. A parallel run leaked nine snmpd
+    and nine snmptrapd processes while all tests passed. Concurrent test
+    runs became possible when commit dd0ca19f00ef ("Perl/testing: Allocate
+    snmpd and snmptrapd ports dynamically") switched to dynamic ports.
+    Make concurrent test runs safe by using per-script pid files.
+
+commit 88d4433e1763e60f1e36c2a04ddc4bfec8dd6692
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Nov 3 08:47:42 2026 -0800
+
+    Perl/testing: Guard against undefined results in t/notify.t
+    
+    Defensively verify that $res is defined before matching against regular
+    expressions in subtests 2 and 5, and clear $res before subtest 9.
+    
+    Avoid Perl warnings about uninitialized variables if session creation or
+    trap PDU construction fails and leaves $res undefined, align subtests 2
+    and 5 with the definedness checks already present in subtests 7, 9 and
+    11, and prevent subtest 9 from reusing subtest 7's result if session
+    creation in subtest 8 fails.
+
+commit 6f36c04c7dd7eaeb684cecb99d1682b99ab2ee6f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Nov 3 08:47:34 2026 -0800
+
+    Perl/testing: Guard against uninitialized variables in t/set.t
+    
+    Verify in subtests 2, 4, 5 and 13 that values retrieved from the agent
+    (including the initial snmpEnableAuthenTraps.0 value in subtest 5) are
+    defined before evaluating subtest assertions with string operators (ne,
+    eq) and before restoring previous settings via $s1->set().
+    
+    Avoid Perl warnings about uninitialized variables when an SNMP get
+    request fails or times out. Prevent failed queries from falsely passing
+    subtests where undef eq undef or undef ne $junk evaluates to true.
+    
+    Fixes: 0904ccdbcda6 ("Checking in SNMP-3.1.0b1")
+    Fixes: f253df86c456 ("Perl tests: Enable 'use strict' and 'use warnings'")
+
+commit 705e625d6e88b48e21ab07abde6682d257f98138
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Nov 3 08:47:27 2026 -0800
+
+    Perl/testing: Make daemon startup in startagent.pl more robust
+    
+    Increase the timeout when waiting for the daemon startup banner from 5
+    seconds to 30 seconds and increase the wait time for log and pid file
+    creation from 3 seconds to 10 seconds. When a daemon binary is launched
+    by run_async(), clean up any started daemons and terminate immediately
+    with an error if the daemon fails to start within the timeout or if the
+    listening port cannot be parsed from the log file.
+    
+    Prevent test scripts from sending SNMP requests to port 0 when snmpd or
+    snmptrapd takes longer than 5 seconds to initialize under sanitizers or
+    heavy system load. Check the return value of wait_for_log(), verify into
+    a local variable that the listening port was found in the log file even
+    if AGENT_PORT was set in snmptest.cmd, and avoid leaking daemon
+    processes or failing when an optional daemon binary was not built.
+    
+    Fixes: 7bd3ddcbd0a2 ("testing: Fix sporadic failures in Perl tests t/set.t and t/notify.t")
+    Fixes: dd0ca19f00ef ("Perl/testing: Allocate snmpd and snmptrapd ports dynamically")
+
+commit 2f035be11e7c7a0c29886d29052c3f3efdbdd03a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Nov 3 07:48:59 2026 -0800
+
+    libsnmp: Fix regcomp() timeout in find_best_tree_node()
+    
+    Prevent exponential regcomp() run times in glibc on patterns with
+    epsilon cycles (e.g. in calc_eclosure_iter() for quantified nullable
+    groups or stacked quantifiers) or anchors in the middle of a pattern,
+    such as "(()|())...*", "$a++*?*+++**" and "(.*|^|$)...". In
+    regex_too_complex(), bound the length check with memchr(), reject
+    trailing backslashes and unterminated bracket expressions, accept
+    quantifiers only directly after single-character atoms, accept '^' only
+    at the start and '$' only at the end of the pattern, and reject escaped
+    alphanumeric characters and GNU anchors. Add regression tests in
+    T028_objid_clib.c.
+    
+    Fixes: 1352bc39c93f ("- (parse.c): make best matching (-b) use regex when available.")
+    Fixes: 16b5d160edeb ("- (parse.c): turn on REGEX_EXTENDED.")
+    Fixes: https://issues.oss-fuzz.com/issues/581220750
+
+commit dd4d72e12adb081b07cab852f22fd465b3159653
+Author: Moshe Kaplan <mosheekaplan@gmail.com>
+Date:   Thu Oct 29 20:43:01 2026 -0400
+
+    nsCacheTable: Avoid NULL function pointer call
+
+commit 3b4860cfcd68f47d88be8c6a14ec2203f0d04000
+Author: Sebastian Bugge <sbugge@proton.me>
+Date:   Mon Nov 2 19:35:00 2026 +0100
+
+    Fix retry bug with bulkwalk in async context.
+    
+    Similarly to __snmp_xs_cb, _bulkwalk_async_cb also gets called on retry,
+    even though the asnyc call has not completed. This commit fixes async
+    retries when using the bulkwalk method in an async context.
+
+commit 4ad051810b2a0f7eaaea9fb075e82ad4e9e9cbad
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Nov 2 09:36:26 2026 -0800
+
+    libsnmp: Fix UDP/IPv6 opaque address handling and DTLS source address
+    
+    Set 'to' to *opaque instead of setting addr_pair in netsnmp_udp6_send()
+    when *olength == sizeof(struct sockaddr_in6), matching
+    netsnmp_udpbase_send(). Avoid reading local_addr and if_index past the end
+    of a struct sockaddr_in6 buffer (e.g. when sending DTLS/UDP packets over
+    IPv6), and make the NULL and 0 fallback arguments to netsnmp_udp6_sendto()
+    reachable, fixing Coverity CID 507142 (DEADCODE).
+    
+    Check 'to' instead of addr_pair when falling back to t->data and when
+    verifying that a destination address is available, drop the redundant null
+    check on 'to' before sending, and format 'to' directly in the debug path
+    when neither scoped_pair nor addr_pair is set. Add a unit test in
+    T022netsnmp_parse_ep_str_clib.c that passes a struct sockaddr_in6 opaque
+    address to netsnmp_udp6_send().
+    
+    Since the base transport only selects a source address if it receives an
+    address pair, make the DTLS/UDP transport pass a netsnmp_indexed_addr_pair
+    instead of a bare struct sockaddr to the base transport f_send() callback.
+    Remember the local address and the interface index on which datagrams
+    from a DTLS/UDP peer have been received in the bio_cache entry for that
+    peer via the new helper function _netsnmp_bio_cache_set_local(), called
+    from netsnmp_dtlsudp_recv() and netsnmp_dtlsudp_send(). Otherwise a
+    DTLS/UDP server bound to a wildcard address on a multihomed host could
+    send DTLS handshake records and SNMP responses from another local address
+    than the one the client sent its datagrams to, causing the client to drop
+    these datagrams. A zero local address makes the base transport let the
+    kernel select the source address, so behavior does not change if no
+    packet information is available. Fail instead of sending to a zeroed
+    destination address if the address family is not supported, and remove
+    the unused socklen argument from _find_remote_sockaddr().
+    
+    The Fixes: tag refers to the commit that introduced the out-of-bounds
+    read in netsnmp_udp6_send(). DTLS/UDP over IPv4 has never passed a source
+    address to the base transport.
+    
+    Fixes: 43c52bb8d730 ("libsnmp: Add support for IPV6_RECVPKTINFO")
+
+commit 5c631bdfe0fb3b301ff5f384108902fe36cfd22c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:53:17 2026 -0800
+
+    libsnmp: Check the BIO_write() return value in netsnmp_dtlsudp_recv()
+    
+    netsnmp_dtlsudp_recv() ignores the return value of the BIO_write() call
+    that passes a received datagram to OpenSSL. If the datagram cannot be
+    stored in the memory BIO, e.g. because memory allocation fails, it is
+    dropped silently and SSL_read() reports that more data is needed. Check
+    the BIO_write() return value, log a debug message if not all data could
+    be passed to OpenSSL and return an error. Use DEBUGMSGTL() instead of
+    snmp_log() since remote peers can trigger this path. Do not retry since
+    DTLS retransmits handshake messages and SNMP applications retry
+    requests.
+    
+    Fixes: 08fb959b06f7 ("An early experimental implementation of the DTLS over UDP transport from the IETF ISMS working group")
+
+commit 1f9122f29d10ddea0b50c241138b945f94408cac
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:53:16 2026 -0800
+
+    libsnmp: Do not redefine OPENSSL_API_COMPAT
+    
+    include/net-snmp/library/openssl_config.h defines OPENSSL_API_COMPAT
+    unconditionally. Hence, if OPENSSL_API_COMPAT is passed on the compiler
+    command line, e.g. through CPPFLAGS, building scapi.c, snmp_openssl.c
+    and snmpusm.c triggers a macro redefinition warning. Only define
+    OPENSSL_API_COMPAT if it has not yet been defined such that a value
+    that has been specified by the user takes precedence. The configure
+    check for the X509_NAME_get_text_by_NID() argument type follows the
+    same approach.
+    
+    Fixes: d9be7344eeec ("libsnmp: Declare OpenSSL API version")
+
+commit 7163f4edb6e4e99b1c56084b71861068a64aad51
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:12:46 2026 -0800
+
+    libsnmp: Add DTLS 1.3 support
+    
+    The DTLS/UDP transport passes DTLS records between OpenSSL and the UDP
+    socket through memory BIOs. Regular memory BIOs are stream-oriented:
+    BIO_read() returns all pending data at once, and the transport sends
+    everything that OpenSSL wrote into its write BIO as a single UDP
+    datagram. That works for DTLS 1.2 but DTLS 1.3 handshakes do not
+    complete that way, which is why DTLS has been restricted to DTLS 1.2.
+    
+    Add DTLS 1.3 support as follows:
+    - Use datagram memory BIOs, available since OpenSSL 3.2, if available.
+      These preserve datagram boundaries: each BIO_write() call adds one
+      datagram and each BIO_read() call returns one datagram.
+    - Send each chunk read from the write BIO as a separate UDP datagram.
+      Share that code between _netsnmp_send_queued_dtls_pkts() and
+      netsnmp_dtlsudp_send().
+    - Set the DTLS MTU explicitly. OpenSSL cannot query the path MTU
+      through a datagram memory BIO and would otherwise fall back to its
+      minimum MTU, which splits handshake messages into many small
+      datagrams.
+    - Make netsnmp_dtlsudp_close() process all datagrams that have already
+      been received instead of only one datagram per iteration, and retry
+      sending buffered data once more after the last iteration. A DTLS
+      handshake flight may consist of multiple datagrams. Without this
+      change, applications that close the session right after sending, e.g.
+      snmptrap, close the session before the handshake has completed.
+    - Only restrict DTLS to version 1.2 if no datagram memory BIO is
+      available. All OpenSSL versions that support DTLS 1.3 also support
+      datagram memory BIOs.
+    - Log the negotiated protocol version if dtlsudp debugging is enabled.
+    
+    With OpenSSL 4.1, DTLS sessions now use DTLS 1.3. With OpenSSL 3.0, and
+    between OpenSSL 3.x and OpenSSL 4.1, DTLS 1.2 is used.
+
+commit 39bae283d77529c01a0f7596fcd84b5cd3d36068
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:12:33 2026 -0800
+
+    libsnmp: Stop using X509_check_host() and X509_check_ip_asc()
+    
+    X509_check_host() and X509_check_ip_asc() have been deprecated in
+    OpenSSL 4.1. Building against OpenSSL 4.1 triggers the following
+    warnings:
+    
+      snmpTLSBaseDomain.c:297:22: warning: 'X509_check_host' is deprecated:
+      Since OpenSSL 4.1 [-Wdeprecated-declarations]
+      snmpTLSBaseDomain.c:315:22: warning: 'X509_check_ip_asc' is
+      deprecated: Since OpenSSL 4.1 [-Wdeprecated-declarations]
+    
+    Follow the recommendation from the OpenSSL change log: pass the expected
+    host name or IP address to X509_verify_cert() through the verification
+    parameters. Since the certificate chain has already been verified during
+    the (D)TLS handshake, verify the server certificate with itself as the
+    only trust anchor and with a verification callback that only reports
+    host name and IP address mismatches. X509_verify_cert() matches the
+    reference identity with the same code as X509_check_host() and
+    X509_check_ip_asc() and the X509_VERIFY_PARAM functions used are
+    available in all supported OpenSSL versions, so the matching behavior
+    does not change.
+
+commit 5a6c57d1db422a8bf64bf1c88d076fa768587011
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:12:33 2026 -0800
+
+    libsnmp: Use X509_STORE_get1_objects() if available
+    
+    X509_STORE_get0_objects() has been deprecated in OpenSSL 4.0 because it
+    is not thread-safe. Building against OpenSSL 4 triggers the following
+    warning:
+    
+      snmpTLSBaseDomain.c:129:60: warning: 'X509_STORE_get0_objects' is
+      deprecated: Since OpenSSL 4.0; use X509_STORE_get1_objects()
+      [-Wdeprecated-declarations]
+    
+    Use X509_STORE_get1_objects(), which is available since OpenSSL 3.3, if
+    it is available, and keep using X509_STORE_get0_objects() for older
+    OpenSSL versions.
+
+commit 836aecdfb6a0dd4dc17a844d9137d93819d69e40
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 08:12:13 2026 -0800
+
+    configure: Fix the X509_NAME_get_text_by_NID() const check for OpenSSL 4
+    
+    OpenSSL 4.0 deprecated X509_NAME_get_text_by_NID(). Since the check
+    whether its first argument is a const pointer is compiled with -Werror,
+    the deprecation warning makes that check fail. Hence, with OpenSSL 4,
+    X509_NAME_GET_TEXT_BY_NID_ARG1_IS_CONST is not defined and building
+    snmp_openssl.c triggers the following warning:
+    
+      snmp_openssl.c:161:16: warning: assignment discards 'const' qualifier
+      from pointer target type [-Wdiscarded-qualifiers]
+    
+    Define OPENSSL_API_COMPAT in the test program, unless it has already been
+    defined, like include/net-snmp/library/openssl_config.h does, which is
+    included by snmp_openssl.c, such that the deprecation does not affect the
+    result of this check. Regenerate configure.
+
+commit fde40db92750a296ff8b6185f2030410ffdfad5f
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 07:55:16 2026 -0800
+
+    configure: Check for BIO_s_dgram_mem() and X509_STORE_get1_objects()
+    
+    Prepare for using the datagram memory BIO that is available since
+    OpenSSL 3.2 in the DTLS/UDP transport and for replacing
+    X509_STORE_get0_objects(), which has been deprecated in OpenSSL 4.0, by
+    X509_STORE_get1_objects(), which is available since OpenSSL 3.3.
+    Regenerate configure and include/net-snmp/net-snmp-config.h.in.
+
+commit f8478fbe673cc74c5966c648fad8f2b36fecf56d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 07:43:20 2026 -0800
+
+    libsnmp: Restrict DTLS to version 1.2
+    
+    OpenSSL 4.1 added DTLS 1.3 support and DTLS_method() negotiates DTLS
+    1.3 by default. The DTLS/UDP transport passes DTLS records to and from
+    OpenSSL through stream-oriented memory BIOs and sends all records that
+    are pending in the write BIO in a single UDP datagram. DTLS 1.3
+    handshakes do not complete with that transport: the server sends its
+    entire handshake flight as a single datagram and the client never
+    sends its final flight. As a result, all DTLS/UDP requests time out
+    with OpenSSL 4.1, e.g. in the T111DtlsServer, T113DtlsSan, T141DtlsCrl,
+    T151DtlsCiphers and T401DtlsTsmPrefix tests.
+    
+    Restrict the client and server DTLS contexts to DTLS 1.2 or older until
+    the DTLS/UDP transport has been reworked to support DTLS 1.3.
+
+commit 2e3ee03e483970d3052af1da13aa9eba61ee8677
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Nov 1 07:43:20 2026 -0800
+
+    libsnmp: Keep matching the commonName of TLS server certificates
+    
+    Since OpenSSL 4.1, X509_check_host() no longer matches the subject
+    commonName of a certificate unless X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT
+    is set. Older OpenSSL versions match the commonName if the certificate
+    has no DNS subjectAltName. Hence, with OpenSSL 4.1, an snmpd server
+    certificate without subjectAltName can no longer be verified through
+    its expected host name. This makes e.g. the hostnameIdentity checks of
+    the T111DtlsServer and T112TlsServer tests fail.
+    
+    Restore the previous behavior by setting
+    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT if the server certificate has no
+    DNS subjectAltName. Do not set that flag if the certificate has a DNS
+    subjectAltName because older OpenSSL versions would then also match the
+    commonName, which they do not do today (RFC 6125, section 6.4.4).
+
+commit 46d111e1ffc7e2434662957314937c049ee5aeeb
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 13:46:32 2026 -0700
+
+    testing: Add UDP/IPv6 proxy scope ID refresh regression test
+    
+    Add T125proxy_v6_scope_simple to verify that an snmpd proxy session
+    forwarding requests over a link-local UDP/IPv6 endpoint
+    (udp6:[fe80::2%v0]:<port>) continues to reach the target agent after the
+    scoped veth interface is destroyed and recreated with a new kernel
+    interface index inside an unprivileged network namespace.
+    
+    Prevent regressions of GitHub issue #1147, where caching sin6_scope_id
+    at transport creation time caused subsequent proxy requests to fail with
+    ENETUNREACH after interface recreation.
+
+commit 489748627e7893b07cd314c03897371d45218267
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 08:45:58 2026 -0700
+
+    libsnmp: Refresh UDP/IPv6 client scope ID on send
+    
+    Preserve the IPv6 scope interface name (%<ifname>) in struct netsnmp_ep
+    when parsing endpoints in netsnmp_sockaddr_in6_3(), and store it in a
+    netsnmp_scoped_addr_pair structure in t->data when initializing UDP/IPv6
+    client transports in netsnmp_udp6_transport_init(). Re-resolve
+    sin6_scope_id from remote_scope via netsnmp_if_nametoindex() in
+    netsnmp_udp6_send() before transmitting each packet, and fail with
+    EINVAL if a configured remote_scope cannot be resolved.
+    
+    Avoid caching a stale interface index across the lifetime of a UDP/IPv6
+    client transport when the scoped network interface is destroyed and
+    recreated with a new kernel ifindex (or does not exist yet at startup),
+    preventing subsequent sendmsg() and sendto() calls from failing with
+    ENETUNREACH until the session is reopened.
+    
+    Parse numeric scope IDs strictly in netsnmp_if_nametoindex(): reject
+    leading signs and whitespace, trailing characters, and values that do not
+    fit in an unsigned int, so that absent digit-prefixed interface names are
+    not treated as numeric indices. Record the size of the address pair in
+    _netsnmpTLSBaseData.addr_len, and update netsnmp_ipv6_fmtaddr() and the
+    DTLS/UDP transport helpers to handle sizeof(netsnmp_scoped_addr_pair). Add
+    unit tests in T022netsnmp_parse_ep_str_clib.c and include
+    <net-snmp/library/snmpUDPIPv6Domain.h> in the clib test template in
+    clib_build such that unit tests can call netsnmp_udp6_transport() without
+    declaring it themselves.
+    
+    Size the scope name buffers with IF_NAMESIZE instead of 16 bytes and make
+    netsnmp_sockaddr_in6_3() fail if a scope name does not fit such that scope
+    names are never truncated silently. Skip the per-packet if_nametoindex()
+    call for numeric scopes since these do not depend on interface names. If an
+    opaque address with an unrecognized length is passed to
+    netsnmp_udp6_send(), fall back to the transport data as before instead of
+    failing.
+    
+    Fixes: https://github.com/net-snmp/net-snmp/issues/1147
+    Fixes: 093bde2f173c ("Patch #572394 from Katsuhisa ABE:   - support link local addresses   - bind to ipv6 only if IPV6_V6ONLY is defined.")
+
+commit 553d8058637354a65bae87cb60a2aed6eb0a8d8b
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 11:28:45 2026 -0700
+
+    libsnmp: Remove dead code from netsnmp_oid_stash_add_data()
+    
+    Remove the tmpp NULL check at the end of netsnmp_oid_stash_add_data().
+    Since the function returns early if lookup_len == 0, the loop body is
+    executed at least once. Each loop iteration either returns
+    SNMPERR_MALLOC or leaves tmpp non-NULL and assigns tmpp to curnode.
+    Hence tmpp cannot be NULL after the loop and tmpp == curnode. Store
+    the data pointer via curnode, which is also the pointer that is used
+    to check whether data has already been stored, and update the comment
+    accordingly. This addresses Coverity CID 506700 (DEADCODE).
+
+commit f3c5ece012bf56a37b29d2a1c464a7de4da5c9a1
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 11:28:43 2026 -0700
+
+    DISMAN-EVENT-MIB: Remove superfluous reqinfo NULL checks
+    
+    Remove the reqinfo NULL check from the RS_DESTROY code in
+    mteEventTable_handler() and mteTriggerTable_handler(). Both handlers
+    dereference reqinfo unconditionally before this code is reached, e.g.
+    in switch (reqinfo->mode) and in the RS_CREATEANDWAIT case, and the
+    agent never invokes a MIB handler with a NULL reqinfo pointer. Keep
+    the reqinfo->asp and reqinfo->asp->requests checks. This addresses
+    Coverity CIDs 506701 and 506702 (REVERSE_INULL).
+
+commit cfbf1b0e746d71efc8b34a68e7ea43dfc192d739
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 11:28:41 2026 -0700
+
+    snmpd: Check the ftell() return value in instance_num_file_handler
+    
+    Introduce instance_num_file_write() and use it in both the
+    MODE_SET_ACTION and the MODE_SET_UNDO cases of
+    netsnmp_instance_num_file_handler() instead of duplicating the
+    rewind(), fprintf(), fflush() and ftruncate() sequence.
+    
+    Do not pass the return value of ftell() directly to ftruncate().
+    ftell() returns -1 upon failure and passing a negative length to
+    ftruncate() is not allowed. Store the ftell() result in a local
+    variable and report an error if it is negative. This addresses
+    Coverity CID 506703 (NEGATIVE_RETURNS).
+    
+    Fixes: 63004c114c6e ("snmpd: Fix file truncation and UNDO handling in instance_num_file_handler")
+
+commit 47349f46e0e23d0ee0c868fcc1779237f1fa87e3
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 16 15:01:20 2026 -0700
+
+    testing/fuzzing: Initialize the MIB tree in snmp_parse_oid_fuzzer
+    
+    Set NETSNMP_DS_LIB_MIBDIRS relative to argv[0] and call
+    netsnmp_init_mib() in LLVMFuzzerInitialize() so that tree_head is
+    populated before the first input is processed. Without this
+    initialization, tree_head remains NULL until an input containing ':'
+    triggers netsnmp_read_module(), preventing single-input reproduction
+    of issues in get_wild_node() and find_best_tree_node().
+    
+    Fixes: 86b50af93c4d ("migrate fuzzers from oss-fuzz repo.")
+    Fixes: 2391dec2dc0d ("testing/fuzzing: Set MIBDIRS dynamically relative to argv[0]")
+
+commit bb11b1912cb8f473b3bfed587fddf7f1b6d6a217
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 16 15:01:19 2026 -0700
+
+    libsnmp: Fix out-of-memory error in find_best_tree_node()
+    
+    Replace regex_nesting_too_deep() with regex_too_complex() and reject
+    regular expressions that exceed 256 characters, contain more than 8 '+'
+    quantifiers, or contain '{' interval quantifiers. In glibc's regcomp(),
+    parse_dup_op() clones the preceding syntax subtree via duplicate_tree()
+    for each '+' quantifier (growing the AST by up to 2^k nodes for k '+'
+    operators) and for each '{m,n}' interval quantifier (cloning up to
+    RE_DUP_MAX = 32767 times per interval), causing out-of-memory errors on
+    fuzzer-generated OID strings.
+    
+    Compile and free the regular expression once in find_best_tree_node()
+    and pass the compiled regex_t to find_best_tree_node_r() and
+    compute_match() instead of calling regcomp() and regfree() for every
+    node in the MIB tree. Avoid calling regfree() when regcomp() fails. Add
+    regression tests in T028_objid_clib.c.
+    
+    Fixes: bf30e78bbf27 ("- (snmptranslate.c, parse.c): hack to do wild card searches for a mib node.")
+    Fixes: d2d2112feb29 ("libsnmp: Fix stack overflow in compute_match()")
+
+commit d309c4eb1db482faba9a1470233d0bde08ad4e16
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Oct 31 21:26:59 2026 -0700
+
+    testing: Add a USM key change undo regression test
+    
+    Add a test that clones a user and sends a single SET request with two
+    authentication key changes and, if AES is supported, two privacy key
+    changes for that user, followed by a key change for a user that has not
+    been cloned. The last varbind fails in the ACTION phase and hence causes
+    the entire request to be undone. Verify that the cloned user can still
+    authenticate with its original passphrases, that a subsequent key change
+    succeeds, that the agent is still running and that the agent did not
+    report any AddressSanitizer errors.
+    
+    Without the fix for the USM key change undo state, this test triggers
+    the heap use-after-free in snmpd that has been reported in
+    https://github.com/net-snmp/net-snmp/issues/1164.
+
+commit 51ab2cbc204e19fc980c7bd87ed22890d3451edf
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sat Oct 31 21:26:59 2026 -0700
+
+    snmpd: Fix USM key change undo for multiple varbinds per PDU
+    
+    write_usmUserAuthKeyChange() and write_usmUserPrivKeyChange() save the
+    key that has to be restored if a SET fails in static variables. The
+    agent runs the RESERVE1, RESERVE2, ACTION and COMMIT or UNDO phases for
+    all varbinds of a PDU before moving on to the next phase. Hence, if a
+    PDU contains multiple key change varbinds, each ACTION overwrites the
+    saved key of the previous one. If the request is undone, the same key
+    buffer is freed twice and a usmUser entry is left with a dangling
+    authKey or privKey pointer. A later key change or an authentication
+    attempt for that user then triggers a heap use-after-free and a double
+    free. Any principal with write access to usmUserTable can trigger this
+    remotely.
+    
+    Keeping the old key per varbind is not sufficient since UNDO processes
+    varbinds in forward order: with two key changes for the same user, the
+    second UNDO would free the key restored by the first UNDO.
+    
+    Fix this by storing the undo information per (user index, key type) pair in
+    the agent request information instead of in static variables. Identify
+    users by the engineID and user name part of the OID instead of by usmUser
+    pointer such that no pointer to a user that may have been freed is
+    compared. This works because each user has exactly one index OID. Save the
+    original key during the first ACTION for a pair and free intermediate keys
+    during subsequent ACTION calls for the same pair. Free the original key
+    once during COMMIT and restore it once during UNDO. Any undo information
+    that is left over is freed together with the request.
+    
+    Remove the stale comment that says that write_usmUserAuthKeyChange()
+    should handle UNDO.
+    
+    Also allocate the new authentication key before detaching the old key
+    such that a memory allocation failure does not leave the user with a
+    NULL key.
+    
+    Fixes: 63e73e01d1c5 ("  - closer adherence to state machines described in RFC 2574")
+    Fixes: https://github.com/net-snmp/net-snmp/issues/1164
+
+commit 1ed2eb4b76ee658cec7ca969e70aad61577eeb77
+Author: Moshe Kaplan <mosheekaplan@gmail.com>
+Date:   Wed Oct 28 23:51:02 2026 -0400
+
+    Avoid potential NULL deref from ITERATOR_RELEASE
+
+commit d6630a95ee2666fa19b32f9b511358d8557731dd
+Author: Moshe Kaplan <mosheekaplan@gmail.com>
+Date:   Sun Jul 19 22:02:51 2026 -0400
+
+    SNMP-TLS-TM-MIB: Fix potential NULL dereference in _tlstmAddrTable_save_rows()
+    
+    ITERATOR_RELEASE() dereferences its argument. Only call it if
+    CONTAINER_ITERATOR() returned a non-NULL iterator. Detected by
+    Coverity (CID 85485).
+    
+    Fix coverity 85485 - only release iterator if it is set
+
+commit 009177f3e66d10e7e9c180d54e12c1f2be771405
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Tue Oct 27 18:17:50 2026 +0100
+
+    smux: Do not left-shift a negative priority in smux_send_rrsp()
+    
+    smux_send_rrsp() encodes the priority of an RRSP byte by byte by
+    shifting the int priority left. The priority is -1 for every refused
+    registration, and shifting a negative int left is undefined behaviour,
+    which UBSan reports. Shift an unsigned copy instead: its bytes are the
+    same, so what is sent does not change.
+    
+    Test: T111smux checks that the RRSP(-1) of a refused registration
+    carries 0xff in all of its sizeof(int) bytes.
+
+commit 7f7c99d2d0b81e4958ed9bce8b6838d21b368a18
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Tue Oct 27 17:17:12 2026 +0100
+
+    smux: Do not leak a peer slot when a peer closes after a reload
+    
+    smux_accept() admits at most SMUXMAXPEERS - 1 authenticated peers,
+    counted by npeers: smux_process() incremented it when a peer
+    authenticated, and smux_peer_cleanup() decremented it when the closed
+    socket matched an entry of Auths[]. A configuration reload frees Auths[]
+    (smux_free_peer_auth()) and leaves npeers alone, so a peer that
+    authenticated before a reload and closes after it is never subtracted.
+    Each such peer leaks one slot, until smux_accept() refuses every new
+    peer.
+    
+    Count the authenticated peers from Auths[] instead, in the new
+    smux_count_peers(), so that the count is always that of the peers known
+    to be authenticated.
+    
+    A reload still forgets which connected peers are authenticated, as
+    before: such a peer is closed as unauthenticated when it next sends a
+    PDU other than an open, and it can then connect and authenticate again.
+    
+    Test: in T111smux, SMUXMAXPEERS peers each authenticate and close after
+    a reload, and smux_accept() then still admits a peer.
+
+commit 559b3bc75c965ec068e0e78f09a976e2d875be77
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Thu Oct 15 13:12:12 2026 +0200
+
+    smux: Do not clean up a peer from inside smux_handler()
+    
+    smux_snmp_process() and var_smux_write() run inside smux_handler(),
+    called for a registration of the peer they query. When the peer has
+    gone away (EOF or an error while waiting for its answer), they called
+    smux_peer_cleanup(), which unregisters every registration of the peer,
+    including the one whose handler is running. smux_handler() then goes on
+    with the freed registration for the next varbind, and
+    netsnmp_call_handler() reads the freed handler when it returns.
+    var_smux_write() itself also passed rptr->sr_fd to
+    smux_snmp_select_list_del() after smux_peer_cleanup() had freed rptr.
+    
+    Leave the cleanup to smux_process(): the peer's socket stays in the
+    select list and readable after a disconnect, so once the request is
+    done the main loop calls smux_process(), which sees the EOF or error
+    and runs smux_peer_cleanup(). Until then, requests for the peer's
+    subtrees fail like any other request the peer cannot answer, and a
+    passive registration of another peer takes over at the cleanup.
+    Document on smux_peer_cleanup() that it must not be called from
+    smux_handler().
+    
+    smux_process() only did that cleanup for authenticated peers. A
+    configuration reload frees the peer authentications, so a peer that
+    disconnected after a reload was treated as unauthenticated: its socket
+    was closed and its registrations stayed, pointing at the closed socket.
+    Use smux_peer_cleanup() on the failure paths for unauthenticated peers
+    too; for a peer that has no registrations it does no more than close
+    the socket. This includes a peer that was connected during a reload and
+    then sends a PDU other than an open: it is closed as unauthenticated, as
+    before, and its registrations are now removed with it.
+    
+    Extend T111smux: with the peer's side shut down, var_smux_write() and
+    var_smux_get() fail and the registration stays, and smux_process() then
+    removes it; a peer that disconnects after a reload has its registration
+    removed as well.
+
+commit 0b794f3a6a1cf3cee837c7ce8c8760ce820d5652
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Thu Oct 15 11:43:08 2026 +0200
+
+    snmpd: Forget target and proxy sessions closed by the peer
+    
+    When the peer of a stream session (TCP or Unix domain) closes the
+    connection, _sess_close_stream() reports NETSNMP_CALLBACK_OP_DISCONNECT
+    to the session callback and the next snmp_select_info() frees the
+    session. Notification sinks handle this in handle_disconnect_packet(),
+    but two other holders of outgoing sessions do not:
+    
+    - get_target_sessions() caches the session of an snmpTargetAddrEntry in
+      targaddrs->sess and reused it for the next notification after the
+      notification receiver had closed the connection.
+    - The proxy module keeps the session to the proxied agent in
+      simple_proxy.sess and used it for the next proxied request after the
+      proxied agent had closed the connection.
+    
+    Install a session callback in both that clears the cached pointer on
+    NETSNMP_CALLBACK_OP_DISCONNECT. get_target_sessions() then opens a new
+    session for the next notification. A proxy whose session was closed
+    answers genErr, without delegating any request, until the configuration
+    is reloaded, and logs that the connection is not re-opened, as
+    notification sinks do.
+    
+    Test: T117stream_session_closed_cagentlib opens a TCP target session
+    and a TCP proxy session to a local listener, closes the accepted
+    connections, and checks that both forget their session, that the next
+    get_target_sessions() opens a new one, and that proxy_handler(), given
+    two requests, sets genErr on the first one, which fails the PDU, and
+    delegates neither.
+
+commit 4f3c931b4f9e9d431d2a0769da27921092c1bbda
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Tue Oct 27 17:15:49 2026 +0100
+
+    agentx: End the SET requests of a master agent that has disconnected
+    
+    The AgentX subagent maps a SET request of the master agent onto the
+    agent's SET phases: TestSet runs RESERVE1 and RESERVE2, CommitSet runs
+    ACTION, UndoSet runs UNDO and CleanupSet runs FREE or COMMIT. Between
+    them, the state of the request (struct agent_netsnmp_set_info) waits for
+    the master agent's next PDU. When the master agent disconnects in
+    between, that PDU never comes: what RESERVE1, RESERVE2 and ACTION
+    reserved or changed was never released or undone, and the saved state
+    and the agent's set cache entry for the request leaked.
+    
+    End such a request as one that failed: when the master session is
+    closed, a request that waits for its next phase gets FREE after
+    RESERVE1 or RESERVE2 and UNDO after ACTION, and a request whose phase is
+    being processed gets it once that phase is done.
+    handle_subagent_set_response() then frees the saved state, as it does
+    after a FREE, UNDO or COMMIT from the master agent. A new in_progress
+    flag records that a phase awaits its answer, so that a phase is never
+    sent while another one is processed.
+    
+    A phase can also end without an answer: it times out, or it or its
+    answer cannot be passed on. handle_subagent_set_response() returned
+    early then and left the request as it was. Now such a phase ends the
+    request too: after FREE, UNDO or COMMIT the saved state is freed, and
+    after another phase a request of a master agent that has disconnected
+    gets its FREE or UNDO; a connected master agent still ends the request
+    itself once its own wait times out. A phase that cannot be passed on is
+    ended where snmp_async_send() returns 0, not in the SEND_FAILED callback
+    that comes with that return, so that it is ended only once.
+    
+    Test: T118agentx_set_master_closed_cagentlib registers a writable
+    instance in a subagent and has master sessions disconnect after TestSet,
+    after CommitSet, while CommitSet is processed, and while TestSet is
+    processed, once as is and once with every later send of the subagent
+    failing: the value set by CommitSet is restored, the others leave it
+    untouched, and the subagent frees the saved state of each request.
+
+commit 44e021519c645a672e3ab150abfacc171bb0c318
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Thu Oct 15 11:10:50 2026 +0200
+
+    snmpd: Do not answer on a session that has been closed
+    
+    A request that is delegated (to an AgentX subagent, a proxied agent or a
+    delayed handler), queued behind a SET, or in a handler that waits for
+    another agent keeps a pointer to the session it arrived on in
+    asp->session. When that session is a stream connection (TCP or Unix
+    domain) and the peer closes it before the request is done,
+    _sess_close_stream() reports NETSNMP_CALLBACK_OP_DISCONNECT and the next
+    snmp_select_info() frees the session. handle_snmp_packet() ignored the
+    disconnect, so netsnmp_wrap_up_request() later built and sent the
+    response through the freed session.
+    
+    Keep every agent session that has not been freed on a doubly linked
+    list, and handle the disconnect in handle_snmp_packet(): the new
+    netsnmp_agent_session_closed() clears asp->session of the requests that
+    arrived on the closed session. Such requests are still processed to the
+    end, so an SNMP SET that snmpd processes still runs its FREE, COMMIT or
+    UNDO phase and releases what it reserved, and netsnmp_wrap_up_request()
+    then frees the request without sending a response. smux_handler() no
+    longer assumes asp->session is set. ChangeLog documents the new members
+    of netsnmp_agent_session and that a MIB handler may now find its
+    session member NULL.
+    
+    The AgentX subagent has the same shape: a SET in progress keeps the
+    master session in its saved state, and handle_subagent_set_response()
+    answered on it after the master had disconnected. On disconnect, clear
+    the session of the saved SET state; handle_subagent_set_response()
+    already skips the response when it is NULL. It now frees exactly the
+    saved state it was called for instead of looking it up by session and
+    transaction ID, which are no longer unique once the session is cleared.
+    A SET that waits for the next phase from the master agent is ended by
+    the next commit.
+    
+    Test: T116agent_session_closed_cagentlib places requests of one session
+    on the queued and delegated lists and keeps a third on none, disconnects
+    that session through handle_snmp_packet(), and checks that all three
+    forget it and are wrapped up without it, while a request on another
+    session keeps its session.
+
+commit 6af8a77631480fcf5c7d9ee014c9d21c8efffe0a
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 20:09:45 2026 -0700
+
+    DISMAN-EXPRESSION-MIB: Fix memory safety and UB bugs in expValue.c
+    
+    Fix multiple memory safety bugs, undefined behavior issues, and memory
+    leaks in the DISMAN-EXPRESSION-MIB expression parser and evaluator:
+    
+    - Bound OID sub-identifier parsing in _expValue_evalExpr_impl() to
+      MAX_OID_LEN to prevent a stack buffer overflow on OID literals with
+      more than 128 sub-identifiers, and advance vtail and reset var after
+      adding an OID token so subsequent errors do not overwrite it.
+    - Validate that a parameter token is present and is a value operand in
+      _expValue_evalFunction() before dereferencing it.
+    - Guard against division and remainder by zero, signed integer overflow
+      (including LONG_MIN / -1), and out-of-range bit shift counts in
+      _expValue_evalOperator().
+    - Replace atoi() in _expParse_integer() with a digit loop that
+      saturates at INT_MAX, since atoi() triggers undefined behavior if the
+      parsed value does not fit in an int.
+    - Introduce _expValue_errorVar() to build ASN_NULL error varbinds,
+      allocating a fresh varbind if necessary, and _expValue_freeVarbind()
+      to free complete token chains after clearing the expression offsets
+      stored in the data member. Use these on all error paths instead of
+      passing a NULL or stale var pointer to snmp_set_var_typed_integer()
+      or leaking token chains with snmp_free_var().
+    - Check the return value of snmp_varlist_add_variable() for all token
+      types to avoid NULL dereferences and leaks on allocation failure.
+    - Check for missing left operands and propagate ASN_NULL error tokens
+      immediately in _expValue_evalExpr2() instead of pushing error tokens
+      back onto the evaluation stack.
+    - Advance cp1 past the closing quote in string literal parsing to fix
+      an infinite tokenizing loop and exclude the closing quote from the
+      parsed string length.
+    - Enlarge the ops[] table to 160 entries to prevent an out-of-bounds
+      read on "|=", reject unrecognized operators with EXPERRCODE_OPERATOR,
+      and determine the length of function tokens by scanning lowercase
+      letters instead of always reading three bytes past cp1.
+    - Check for a following digit when parsing unary minus, limit the
+      parenthesis nesting depth to MAX_EXPR_DEPTH (32) via the new
+      _expValue_evalExpr_impl() helper, and reject empty parentheses.
+    - NUL-terminate exprRaw, initialize cp in expValue_evaluateExpression()
+      and check for ASN_NULL error tokens before reporting trailing
+      characters. Guard against a NULL suffix and clamp suffix_len to
+      MAX_OID_LEN in _expValue_setError().
+    - Add regression tests in T155dismanexprmib_simple covering these bug
+      fixes.
+    
+    Fixes: 260fd4750de8 ("Improved expression parsing, and preliminary evaluation of expressions.")
+    Fixes: https://github.com/net-snmp/net-snmp/issues/1156
+
+commit 2d392ac1b0f29a547fdfb067980d814abe2d7640
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 13:06:14 2026 -0700
+
+    ci/install.sh: Remove microsoft-prod.list before running apt-get update
+    
+    GitHub Actions Ubuntu runner images configure the third-party Microsoft
+    APT repository in /etc/apt/sources.list.d/microsoft-prod.list. When
+    packages.microsoft.com returns HTTP 403 Forbidden, 'apt-get update'
+    exits with status 100 and aborts ci/install.sh under 'set -e'. Remove
+    /etc/apt/sources.list.d/microsoft-prod.list before running 'apt-get
+    update' since Net-SNMP only installs packages from the Ubuntu archive
+    repositories.
+    
+    Fixes: 6c7ec60055a2 ("ci: Improve .appveyor.yml")
+    Fixes: da5e22973040 ("ci: Enable set -e in build.sh, install.sh, and test.sh")
+
+commit c6edbf46c6847d848f01f138bc2cfe5709997b8d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 11:08:43 2026 -0700
+
+    SNMP-USM-DH-OBJECTS-MIB: Validate usmDHParameters SET varbinds
+    
+    handle_usmDHParameters() has the following issues:
+    - MODE_SET_RESERVE1 does not check the varbind type, so
+      MODE_SET_RESERVE2 passes the value of a varbind of any type to
+      d2i_DHparams().
+    - MODE_SET_RESERVE2 uses the static pointer cp to parse the varbind
+      value. cp holds the buffer that i2d_DHparams() allocated while
+      processing the most recent GET request. Overwriting cp leaks that
+      buffer and makes the next GET request pass a pointer into the value
+      of an already processed varbind to free(). This happens after every
+      SET request that reaches MODE_SET_RESERVE2, whether or not that
+      request succeeds.
+    - If d2i_DHparams() fails, MODE_SET_RESERVE2 does not stop but
+      continues with the trailing data check.
+    
+    Fix these issues by checking in MODE_SET_RESERVE1 that the varbind is
+    an OCTET STRING, by parsing the varbind value via a local variable in
+    MODE_SET_RESERVE2 and by leaving MODE_SET_RESERVE2 if parsing fails.
+    Add a test to T121 for the varbind type check.
+    
+    Fixes: 3e059be1a7ae ("Added the usmDHParameters object for management of the DH parameters")
+
+commit 3a8b133d2908443a3f7e40d94fdca2f716375540
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 11:08:43 2026 -0700
+
+    HOST-RESOURCES-MIB: Check hrSWRunStatus SET varbind type and size
+    
+    In MODE_SET_RESERVE1, hrSWRunTable_handler() reads
+    *requestvb->val.integer for the hrSWRunStatus column without checking
+    the varbind type or size. Hence, a varbind of another type, e.g. an
+    OCTET STRING, is interpreted as a long integer. Check the varbind with
+    netsnmp_check_vb_int() before reading its value and refuse the request
+    with the error code returned by that function if the check fails.
+    
+    Fixes: 6a99442cc9a9 ("Apple patches - host resources SWRun and SWRunPerf Table for darwin9")
+
+commit 305a9ccada63eff860580b327cf2e39be8309368
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 11:08:42 2026 -0700
+
+    SNMP-TSM-MIB: Fix SET varbind validation in snmpTsmConfigurationUsePrefix
+    
+    In MODE_SET_RESERVE1, handle_snmpTsmConfigurationUsePrefix() checks the
+    varbind type with netsnmp_check_vb_type() but continues if that check
+    fails. It then reads *requestvb->val.integer anyway, so a varbind of
+    another type, e.g. an OCTET STRING or a BIT STRING, is interpreted as a
+    long integer. Additionally, the varbind size is not checked.
+    
+    Check both the type and the size with netsnmp_check_vb_int() and break
+    out of the switch statement if that check fails. Also break out of the
+    switch statement after having reported SNMP_ERR_WRONGVALUE since there
+    is no point in saving the original value of a request that will be
+    refused. Add a test to T121 that verifies that a noSuchObject varbind
+    and a one-byte BIT STRING varbind are refused with wrongType.
+    
+    Fixes: d75c5a1c4f03 ("useprefix scalar testing and support")
+
+commit 8ac1d0638bb297f3000824a4fbf6e5134c98758c
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Sun Oct 25 11:08:42 2026 -0700
+
+    snmpd: Refuse value-less varbinds in internal SET requests
+    
+    Commit 8c7509afa42a ("snmpd: Refuse SET varbinds of every value-less
+    type") makes handle_pdu() refuse SET requests with a varbind of type
+    ASN_NULL, noSuchObject, noSuchInstance or endOfMibView such that SET
+    handlers that do not check the varbind type never see such a varbind.
+    That check only covers SNMP_MSG_SET. An AgentX subagent processes a
+    TestSet PDU as SNMP_MSG_INTERNAL_SET_RESERVE1, so value-less varbinds
+    received from the master agent still reach the SET handlers. The AgentX
+    decoder makes val.string of such varbinds point at the inline buffer of
+    the varbind, so handlers that skip the type check act on a bogus value.
+    
+    Also apply the check to SNMP_MSG_INTERNAL_SET_RESERVE1 and
+    SNMP_MSG_INTERNAL_SET_BEGIN. Rename check_set_pdu_for_null_varbind()
+    into check_set_pdu_for_valueless_varbind() since it checks for more
+    types than ASN_NULL. Extend the handle_pdu() test in T121 such that it
+    covers all three command codes.
+    
+    Fixes: 4589352dac3a ("snmp_agent: disallow SET with NULL varbind")
+    Fixes: 8c7509afa42a ("snmpd: Refuse SET varbinds of every value-less type")
+
+commit 8c7509afa42a2bda67730152af4ffb19677a2099
+Author: Alejandro Pacheco <alepacheco99@gmail.com>
+Date:   Thu Oct 15 22:19:17 2026 +0200
+
+    snmpd: Refuse SET varbinds of every value-less type
+    
+    check_set_pdu_for_null_varbind() (commit 4589352dac) refuses SET
+    requests that carry an ASN_NULL varbind, so that SET handlers which do not check the varbind
+    type never see a varbind without a value. The exception types
+    noSuchObject, noSuchInstance and endOfMibView are decoded the same way
+    as NULL (snmp_pdu_parse() leaves val NULL), but they were let through.
+    Handlers that read the value without a type check then dereference a
+    NULL pointer: the IP-MIB ipForwarding, ipDefaultTTL and
+    ipv6IpForwarding handlers read *val.integer in ACTION and the
+    ipAddressSpinLock handler in RESERVE1, none of them having checked the
+    type in RESERVE1.
+    
+    Refuse all four value-less types in check_set_pdu_for_null_varbind(),
+    so a SET request never hands one of them to a handler. Also check the
+    type and size with netsnmp_check_vb_int() in RESERVE1 of those four
+    IP-MIB handlers, so they also reject other wrong types with wrongType
+    instead of reading a long from a string value.
+    
+    Add T121 for both checks.
+
+commit 19abf2533bb43724fd94a99ebf998a471091ae40
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 22 08:22:04 2026 -0700
+
+    TCP-MIB: Log duplicate tcpListenerTable insertions with DEBUGMSGTL()
+    
+    Replace snmp_log(LOG_ERR, ...) with DEBUGMSGTL() when CONTAINER_INSERT()
+    fails in _add_connection() in tcpListenerTable_data_access.c. Avoid
+    logging an error for every duplicate listener when multiple SO_REUSEPORT
+    sockets listen on the same local address and port, because
+    tcpListenerTable is indexed only by local address type, local address,
+    and local port and therefore cannot hold multiple entries for the same
+    endpoint.
+    
+    Fixes: 39390a0233e7 ("TCP-MIB: Fix several memory leaks")
+    Fixes: https://github.com/net-snmp/net-snmp/issues/1142
+
+commit 900d180f9e15f98d3f47cdb71b23a44c8fd57dd4
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 22 08:15:55 2026 -0700
+
+    snmp-bridge-mib: Fix per-VLAN FDB lookups in dot1qfdb() and createmacs()
+    
+    Look up $port, $status, and $age in dot1qfdb() using the VLAN bridge key
+    $vbridge ($bridge . "_vlan" . $vlan) instead of $bridge so that
+    dot1qTpFdbTable uses the per-VLAN forwarding database entries populated
+    by tracevlan(). Skip %macs entries in createmacs() when
+    $macs{$mac}{$bridge} is undefined so that MAC addresses present only on
+    a VLAN bridge do not insert undefined values into dot1dTpFdbTable.
+    
+    Fixes: 0ec088afa27c ("create patch branch copy")
+
+commit 14c2dcae0e9806a9cc72e8bc861a47c83386a831
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 22 08:15:55 2026 -0700
+
+    snmp-bridge-mib: Fix is_local handling when reading brforward
+    
+    Report FDB_STATUS_SELF (4) when the Linux bridge __fdb_entry is_local
+    flag is non-zero and FDB_STATUS_LEARNED (3) when is_local is zero in
+    readforwards() and tracevlan(). Retain the bridge port number $port in
+    %macs for both local and learned entries instead of overwriting it with
+    the bridge interface name $bridge, because RFC 4188 specifies that
+    dot1dTpFdbPort identifies the bridge port for self(4) entries as well
+    and because $baseports{$bridge}{$bridge} is undefined, which otherwise
+    populates dot1dTpFdbPort with undef and terminates SNMP walks early.
+    
+    Fixes: 0ec088afa27c ("create patch branch copy")
+    Fixes: 962676394d3f ("CHANGES: agent: PATCH 3414051: from mijos: snmp-bridge-mib: fix for dot1dBaseTable")
+    Fixes: https://github.com/net-snmp/net-snmp/issues/1150
+
+commit d7890d2390d08287a1d335f31255df5880e6f015
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Wed Oct 21 10:41:53 2026 -0700
+
+    libsnmp: Introduce netsnmp_bind_ep_iface()
+    
+    The UDP/IPv4, UDP/IPv6, TCP/IPv4 and TCP/IPv6 transports each contain
+    an identical copy of the code that binds a socket to the network
+    interface specified in the endpoint, e.g. a Linux VRF device as in
+    "addr@vrf", and that reports the outcome via a debug message. Move
+    this code into a new helper function, netsnmp_bind_ep_iface(), to
+    reduce code duplication.
+    
+    Additionally, remove the comment "for Linux VRF Traps we try to bind
+    the iface if clientaddr is not set" because it is misleading: the
+    interface is bound whether or not a clientaddr has been configured,
+    and the TCP transports do not use clientaddr at all. Document the
+    purpose of the binding in the helper function instead, and explain in
+    the UDP transports why an interface specified in the source address
+    takes precedence.
+    
+    The only behavior change is that the TCP transports no longer log a
+    "VRF: Bound socket" debug message if no interface has been specified.
+
+commit d0e9f5e529c35272d9a78ce8d8c8f6220af1f8cb
+Author: Kuzin Andrey <kuzinandrey@yandex.ru>
+Date:   Tue Oct 20 09:55:07 2026 +0300
+
+    libsnmp: Set Linux VRF iface on Trap sink IPv6 UDP addresses
+    
+    The Linux VRF support for trap sink addresses added by 02de40054
+    ("libsnmp: Set Linux VRF iface on Trap sink IP addresses") and
+    93f8b0fbd ("libsnmp: Set Linux VRF iface on Trap sink IP addresses
+    for TCP transport") covers the IPv4 UDP and both TCP transports, but
+    not the IPv6 UDP transport. For an IPv6 UDP trap destination of the
+    form "addr@vrf" (e.g. trapsess ... fd00:6:2::2@vrf1),
+    netsnmp_udp6_transport_with_source() never applies the destination's
+    interface to the socket: the netsnmp_bindtodevice() call inside
+    netsnmp_udp6_transport_bind() receives the bind address, which for a
+    client session is the source/clientaddr endpoint (empty unless a
+    clientaddr is configured), not the destination. The trap socket is
+    therefore created without SO_BINDTODEVICE, so the kernel routes the
+    packets through the global routing table instead of the VRF's, and
+    sending fails with "Network is unreachable" even though the
+    destination is reachable from within the VRF.
+    
+    Bind the destination's interface to the socket in
+    netsnmp_udp6_transport_with_source(), mirroring the IPv4 UDP and TCP
+    transports, so the IPv6 UDP trap socket is bound to the VRF.
+    
+    Signed-off-by: Kuzin Andrey <kuzinandrey@yandex.ru>
+
+commit 15e258018a13a56410a48e4cc6bf31fe4fc07997
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 16 07:03:18 2026 -0700
+
+    libsnmp: Do not perform DNS lookups in fuzzing builds
+    
+    snmp_transport_fuzzer passes fuzzer-controlled strings to
+    netsnmp_sockaddr_in6() and the parse_security functions, and these
+    resolve hostnames via getaddrinfo(). Without network access, DNS
+    queries block until they time out, so the fuzz target was killed
+    by an external SIGABRT while blocked in send(). Fuzz targets must
+    not perform network I/O. Hence, when
+    FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION is defined, only resolve
+    numeric addresses and "localhost", and skip reverse lookups.
+
+commit d2d2112feb2993ca3402473405a9cbff650367e7
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 16 07:08:17 2026 -0700
+
+    libsnmp: Fix stack overflow in compute_match()
+    
+    If read_objid() and get_node() both fail, snmp_parse_oid() falls back
+    to get_wild_node(), which compiles the untrusted OID string as an
+    extended regular expression. glibc's regcomp() recurses once per
+    parenthesis nesting level, so input with deeply nested parentheses
+    overflows the stack. Reject patterns whose nesting depth exceeds 32
+    before calling regcomp().
+
+commit 2815614c257d74236696c7905b6fc09c2013e55d
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Fri Oct 16 07:37:54 2026 -0700
+
+    libsnmp: Fix memory leaks on duplicate MIB clauses
+    
+    parse_objecttype() and parse_trapDefinition() parse optional clauses
+    in a loop and assign strdup()'ed strings without freeing a value
+    stored by an earlier occurrence of the same clause. Hence, a MIB with
+    repeated DESCRIPTION, REFERENCE, AUGMENTS, DEFVAL or ENTERPRISE
+    clauses leaks memory. Free the previous value before assigning a new
+    one, as other MIB parsing functions already do.
+
+commit 25e069c0844454353336050e7aaba97502d424d8
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 19:20:17 2026 -0700
+
+    libsnmp: Fix quadratic BITS buffer growth in snmp_add_var()
+    
+    snmp_add_var() accepted bit numbers up to 8 * INT_MAX for BITS values
+    and grew the bit buffer with snmp_realloc(), which grows buffers above
+    8 KiB by only 8192 bytes per call. A short value such as "17179869000"
+    therefore triggered about 262,000 realloc() calls on a buffer that
+    grew to 2 GiB, which made the snmp_api_fuzzer time out. Additionally,
+    snmp_realloc() does not zero the bytes it adds, so uninitialized heap
+    bytes could end up in the BITS value.
+    
+    Reject bit numbers that do not fit in the 65535 octets allowed for an
+    OCTET STRING (RFC 2578, section 7.1.2), grow the buffer geometrically
+    and zero-initialize newly allocated bytes. Add regression tests.
+    
+    Fixes: ef8c33e95243 ("libsnmp: Fix bitstring buffer reallocation in snmp_add_var()")
+    Fixes: fa5b462c1bfa ("- hacking on snmp_add_var to handle long values")
+
+commit 5f801ab10b2e69f343896526631ed861093449e4
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Oct 15 18:53:00 2026 -0700
+
+    testing/fuzzing: Fix NULL f_close call in snmp_e2e_fuzzer
+    
+    Since commit 0e909c1c6f0c, snmp_close() is passed the active session
+    and hence closes the transport created by the fuzzer. That transport
+    has no f_close callback, so snmp_sess_close() calls a NULL function
+    pointer for every input. Add a close callback that leaves the fake
+    file descriptor alone. Also stop freeing the transport if snmp_add()
+    fails, since snmp_add() already closes and frees it in that case.
+    
+    Fixes: 0e909c1c6f0c ("testing/fuzzing: Pass active session to snmp_close() in snmp_e2e_fuzzer")
+
+
 Changes: V5.10.pre2 -> V5.10.pre3
 
 commit 45b355fec431339f16be5d74c032b76655b51eab
