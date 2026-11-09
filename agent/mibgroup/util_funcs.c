@@ -450,6 +450,7 @@ parse_cmd(char **args, const char *cmd)
                 cnt++;
         }
     }
+    *cptr2 = '\0';
     argv = malloc((cnt + 1) * sizeof(argv[0]));
     if (argv == NULL) {
         free(*args);
