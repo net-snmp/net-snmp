@@ -7,13 +7,9 @@
  * verifies that:
  * 1. The random part of the first salt is not all zeros. Unseeded salts
  *    start at zero.
- * 2. The salts of the two messages are different.
+ * 2. The salts of the two messages are different. The salt is a counter,
+ *    so this also passes for unseeded salts.
  */
-
-#include <net-snmp/library/keytools.h>
-#include <net-snmp/library/scapi.h>
-#include <net-snmp/library/snmpusm.h>
-#include <net-snmp/library/transform_oids.h>
 
 {
     static const u_char engineID[] = { 0x80, 0x00, 0x1f, 0x88, 0x80,
@@ -40,14 +36,17 @@
     SOCK_STARTUP;
     init_snmp("T122usm_salt_seed");
 
-    /* The packet is located at the end of the buffer with reverse encoding. */
+    /*
+     * Use reverse encoding even if a configuration file disables it. The
+     * packet is then located at the end of the buffer.
+     */
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
                            NETSNMP_DS_LIB_REVERSE_ENCODE, 1);
 
     for (i = 0; privs[i].name; i++) {
         netsnmp_session session, *ss;
         u_char          salt[2][8];
-        size_t          salt_len[2] = { 0, 0 };
+        size_t          off = privs[i].random_offset;
 
         snmp_sess_init(&session);
         session.version = SNMP_VERSION_3;
@@ -82,82 +81,48 @@
         if (!ss)
             continue;
 
+        memset(salt, 0, sizeof(salt));
         for (n = 0; n < 2; n++) {
             netsnmp_pdu    *pdu = snmp_pdu_create(SNMP_MSG_GET);
             size_t          pkt_len = 4096, offset = 0, len, str_len;
-            u_char         *pkt = malloc(pkt_len), *data = NULL;
-            u_char          type, str[256], secparams[256];
+            u_char         *pkt = malloc(pkt_len), *data, type, str[256];
             long            l;
-            int             rc;
+            int             ok;
 
             pdu->version = SNMP_VERSION_3;
-            rc = snmp_build(&pkt, &pkt_len, &offset, ss, pdu);
+            ok = snmp_build(&pkt, &pkt_len, &offset, ss, pdu) == 0;
             snmp_free_pdu(pdu);
-            if (rc == 0)
-                data = pkt + pkt_len - offset;
 
-            /* SNMPv3Message: msgVersion and msgGlobalData. */
-            len = offset;
-#define PARSE(expr) if (data) data = (expr)
-#define PARSE_STR(d, buf) \
-            (str_len = sizeof(buf), asn_parse_string(d, &len, &type, buf, &str_len))
-            PARSE(asn_parse_sequence(data, &len, &type,
-                                     ASN_SEQUENCE | ASN_CONSTRUCTOR, "msg"));
-            PARSE(asn_parse_int(data, &len, &type, &l, sizeof(l)));
             /*
-             * Skip msgGlobalData. asn_parse_sequence() sets len to the
-             * length of the sequence contents.
+             * Walk to msgPrivacyParameters. asn_parse_header() sets len to
+             * the length of the contents of the object.
              */
-            if (data) {
-                u_char         *start = data;
-                size_t          rest = len;
+#define HEADER  (data = asn_parse_header(data, &len, &type))
+#define INT     (data = asn_parse_int(data, &len, &type, &l, sizeof(l)))
+#define STR(b)  (str_len = sizeof(b), \
+                 data = asn_parse_string(data, &len, &type, b, &str_len))
+            data = pkt + pkt_len - offset;
+            len = offset;
+            ok = ok &&
+                HEADER && INT &&            /* SNMPv3Message, msgVersion */
+                HEADER &&                   /* msgGlobalData: skip it */
+                (data += len, len = pkt + pkt_len - data, 1) &&
+                HEADER && HEADER &&         /* msgSecurityParameters */
+                STR(str) && INT && INT &&   /* engine ID, boots, time */
+                STR(str) && STR(str) &&     /* user name, auth parameters */
+                STR(salt[n]) && str_len == 8;
+#undef STR
+#undef INT
+#undef HEADER
 
-                data = asn_parse_sequence(data, &len, &type,
-                                          ASN_SEQUENCE | ASN_CONSTRUCTOR,
-                                          "global");
-                if (data) {
-                    data += len;
-                    len = rest - (data - start);
-                }
-            }
-            PARSE(PARSE_STR(data, secparams));
-
-            /* UsmSecurityParameters: msgPrivacyParameters is the last field. */
-            if (data) {
-                data = secparams;
-                len = str_len;
-            }
-            PARSE(asn_parse_sequence(data, &len, &type,
-                                     ASN_SEQUENCE | ASN_CONSTRUCTOR, "usm"));
-            PARSE(PARSE_STR(data, str));    /* msgAuthoritativeEngineID */
-            PARSE(asn_parse_int(data, &len, &type, &l, sizeof(l)));
-            PARSE(asn_parse_int(data, &len, &type, &l, sizeof(l)));
-            PARSE(PARSE_STR(data, str));    /* msgUserName */
-            PARSE(PARSE_STR(data, str));    /* msgAuthenticationParameters */
-            PARSE(PARSE_STR(data, salt[n]));
-            if (data)
-                salt_len[n] = str_len;
-#undef PARSE_STR
-#undef PARSE
-
-            OKF(rc == 0 && data != NULL,
-                ("%s: build and parse message %d%s%s", privs[i].name, n + 1,
-                 data ? "" : ": ",
-                 data ? "" : snmp_api_errstring(ss->s_snmp_errno)));
+            OKF(ok, ("%s: build and parse message %d", privs[i].name, n + 1));
             free(pkt);
         }
 
-        if (salt_len[0] == 8 && salt_len[1] == 8) {
-            size_t off = privs[i].random_offset;
-
-            OKF(memcmp(salt[0] + off, zeros, 8 - off) != 0,
-                ("%s: first salt is seeded (not all zeros)", privs[i].name));
-            OKF(memcmp(salt[0], salt[1], 8) != 0,
-                ("%s: salts of two messages are different", privs[i].name));
-        } else {
-            OKF(0, ("%s: salt lengths are %d and %d, expected 8",
-                    privs[i].name, (int)salt_len[0], (int)salt_len[1]));
-        }
+        OKF(memcmp(salt[0] + off, zeros, 8 - off) != 0,
+            ("%s: first salt is seeded (not all zeros)", privs[i].name));
+        OKF(memcmp(salt[0], salt[1], 8) != 0,
+            ("%s: salts of two messages are different", privs[i].name));
 
         snmp_close(ss);
     }
