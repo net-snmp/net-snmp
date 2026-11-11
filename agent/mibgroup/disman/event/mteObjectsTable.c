@@ -87,10 +87,12 @@ mteObjectsTable_handler(netsnmp_mib_handler *handler,
 
     netsnmp_request_info       *request;
     netsnmp_table_request_info *tinfo;
-    netsnmp_tdata_row          *row;
     struct mteObject           *entry;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    netsnmp_tdata_row          *row;
     char mteOwner[MTE_STR1_LEN+1];
     char mteOName[MTE_STR1_LEN+1];
+#endif
     long ret;
 
     DEBUGMSGTL(("disman:event:mib", "ObjTable handler (%d)\n", reqinfo->mode));

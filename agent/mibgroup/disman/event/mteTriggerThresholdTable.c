@@ -86,7 +86,9 @@ mteTriggerThresholdTable_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info       *request;
     netsnmp_table_request_info *tinfo;
     struct mteTrigger          *entry;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     int ret;
+#endif
 
     DEBUGMSGTL(("disman:event:mib", "Threshold Table handler (%d)\n",
                                      reqinfo->mode));
