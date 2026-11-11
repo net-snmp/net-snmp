@@ -157,9 +157,12 @@ nsVacmAccessTable_handler(netsnmp_mib_handler *handler,
     netsnmp_variable_list      *idx;
     struct vacm_accessEntry    *entry;
     char atype[20];
-    int  viewIdx, ret;
+    int  viewIdx;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    int  ret;
     char *gName, *cPrefix;
     int  model, level;
+#endif
 
     switch (reqinfo->mode) {
         /*
