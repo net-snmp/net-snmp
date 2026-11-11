@@ -2003,7 +2003,9 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     }
 
     if (asp->pdu) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         const int command = asp->pdu->command;
+#endif
 
         /*
          * If we've got an error status, then this needs to be
