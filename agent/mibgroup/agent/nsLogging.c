@@ -137,7 +137,9 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
     netsnmp_request_info       *request     = NULL;
     netsnmp_table_request_info *table_info  = NULL;
     netsnmp_log_handler        *logh        = NULL;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     netsnmp_variable_list      *idx         = NULL;
+#endif
 
     switch (reqinfo->mode) {
 
