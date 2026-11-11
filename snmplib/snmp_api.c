@@ -3073,7 +3073,6 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         NETSNMP_FALLTHROUGH;
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
-        NETSNMP_FALLTHROUGH;
 #endif /* ! NETSNMP_NOTIFY_ONLY */
 #ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
