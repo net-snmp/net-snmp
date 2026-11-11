@@ -26,15 +26,18 @@
 #include "snmpTargetAddrEntry_data.h"
 #include "util_funcs/header_generic.h"
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
                                  * i.e. everything but index */
 
 static oid      snmpTargetAddrOID[snmpTargetAddrOIDLen] =
     { 1, 3, 6, 1, 6, 3, 12, 1, 2, 1, 0 };
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 static unsigned long snmpTargetSpinLock = 0;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
  * snmpTargetAddr_rowStatusCheck is boolean funciton that checks 
  * the status of a row's values in order to determine whether
@@ -45,6 +48,7 @@ snmpTargetAddr_rowStatusCheck(const struct targetAddrTable_struct *entry)
 {
     return entry->tDomainLen && entry->tAddress && entry->paramsData;
 }                               /* snmtpTargetAddrTable_rowStatusCheck */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 
 /*
