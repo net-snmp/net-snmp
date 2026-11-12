@@ -108,7 +108,7 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
   [AC_MSG_RESULT([no])])
 
 
-#   libregex                                            (MinGW)
+#   libregex                                            (MinGW, QNX)
 #
 netsnmp_save_LIBS="$LIBS"
 LIBS="$LIBS -lregex"
@@ -118,8 +118,9 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 ], [
   regcomp(0, 0, 0);
 ])], [
-  # Keep LIBS.
-  true
+  # Keep LIBS. libnetsnmp calls regcomp() itself (snmplib/parse.c) and is
+  # linked with LNETSNMPLIBS, not LIBS.
+  LNETSNMPLIBS="$LNETSNMPLIBS -lregex"
 ], [
   # Restore LIBS.
   LIBS="$netsnmp_save_LIBS"
