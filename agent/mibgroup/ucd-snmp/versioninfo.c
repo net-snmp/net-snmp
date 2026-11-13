@@ -160,6 +160,12 @@ var_extensible_version(struct variable *vp,
     return NULL;
 }
 
+static void
+update_config_alarm(unsigned int clientreg, void *clientarg)
+{
+    update_config();
+}
+
 int
 update_hook(int action,
             u_char * var_val,
@@ -175,7 +181,14 @@ update_hook(int action,
     }
     tmp = *((long *) var_val);
     if (tmp == 1 && action == COMMIT) {
-        update_config();
+        /*
+         * Reloading the configuration unregisters the MIB modules that have
+         * been registered by configuration directives, while the other
+         * varbinds of this request may still refer to them. Hence reload the
+         * configuration once this request has been processed.
+         */
+        if (snmp_alarm_register(0, 0, update_config_alarm, NULL) == 0)
+            return SNMP_ERR_COMMITFAILED;
     }
     return SNMP_ERR_NOERROR;
 }
