@@ -71,8 +71,9 @@ NETSNMP_SEARCH_LIBS([exp], [m],,,, [LMIBLIBS])
 #
 #   libkvm
 #
-NETSNMP_SEARCH_LIBS(kvm_read, kvm,,,, LAGENTLIBS)
-NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,,, LAGENTLIBS)
+dnl QNX 8.0 has no libkvm: kvm_openfiles() and kvm_read() are in libsocket
+NETSNMP_SEARCH_LIBS(kvm_read, [kvm socket],,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_openfiles, [kvm socket],,,, LAGENTLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,,, LMIBLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getproc2, kvm,,,, LMIBLIBS)
 NETSNMP_SEARCH_LIBS(kvm_getfiles, kvm,,,, LMIBLIBS)
