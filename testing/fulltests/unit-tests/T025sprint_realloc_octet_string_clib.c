@@ -220,6 +220,27 @@ static const struct {
         data_three,
         3,
         "2580-30"
+    },
+    {
+        "malformed utf-8 hint without length uses one octet",
+        "t",
+        data_ascii,
+        5,
+        "Hello"
+    },
+    {
+        "malformed ascii hint without length uses one octet",
+        "a",
+        data_ascii,
+        5,
+        "Hello"
+    },
+    {
+        "malformed decimal hint without length uses one octet",
+        "d.",
+        data_two,
+        2,
+        "10.20"
     }
 };
 

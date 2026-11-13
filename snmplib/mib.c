@@ -473,7 +473,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
 
     if (hint) {
-        int             repeat, width = 1;
+        int             repeat, width = 1, has_width;
         unsigned long   value;
         char            code = 'd', separ = 0, term = 0, ch, intbuf[32];
 #define HEX2DIGIT_NEED_INIT 3
@@ -497,6 +497,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     hint++;
                 }
                 width = 0;
+                has_width = '0' <= *hint && *hint <= '9';
                 while ('0' <= *hint && *hint <= '9')
                     width = (width * 10) + (*hint++ - '0');
                 code = *hint++;
@@ -512,6 +513,13 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     term = *hint++;
                 else
                     term = 0;
+                /*
+                 * A spec without an octet length (e.g. "t") is malformed,
+                 * use one octet like before. Only an explicit zero length
+                 * (e.g. "0a[") is a zero-width spec.
+                 */
+                if (!has_width)
+                    width = 1;
             }
 
             /*
