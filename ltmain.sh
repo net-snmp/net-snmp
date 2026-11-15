@@ -31,7 +31,7 @@
 
 PROGRAM=libtool
 PACKAGE=libtool
-VERSION="2.5.4 Debian-2.5.4-9+build1"
+VERSION="2.5.4 Debian-2.5.4-11"
 package_revision=2.5.4
 
 
@@ -2218,7 +2218,7 @@ func_version ()
 	year=`date +%Y`
 
 	cat <<EOF
-$progname $scriptversion Debian-2.5.4-9+build1
+$progname $scriptversion Debian-2.5.4-11
 Copyright (C) $year Free Software Foundation, Inc.
 License GPLv2+: GNU GPL version 2 or later <https://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
@@ -2312,12 +2312,12 @@ include the following information:
        compiler:       $LTCC
        compiler flags: $LTCFLAGS
        linker:         $LD (gnu? $with_gnu_ld)
-       version:        $progname $scriptversion Debian-2.5.4-9+build1
+       version:        $progname $scriptversion Debian-2.5.4-11
        automake:       `($AUTOMAKE --version) 2>/dev/null |$SED 1q`
        autoconf:       `($AUTOCONF --version) 2>/dev/null |$SED 1q`
 
 Report bugs to <bug-libtool@gnu.org>.
-GNU libtool home page: <https://www.gnu.org/s/libtool/>.
+GNU libtool home page: <https://www.gnu.org/software/libtool/>.
 General help using GNU software: <https://www.gnu.org/gethelp/>."
     exit 0
 }

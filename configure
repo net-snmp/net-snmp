@@ -26375,7 +26375,7 @@ if ac_fn_c_try_link "$LINENO"
 then :
   netsnmp_result="none required"
 else case e in #(
-  e) for netsnmp_cur_lib in kvm ; do
+  e) for netsnmp_cur_lib in kvm socket ; do
               LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
               cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -26460,7 +26460,7 @@ if ac_fn_c_try_link "$LINENO"
 then :
   netsnmp_result="none required"
 else case e in #(
-  e) for netsnmp_cur_lib in kvm ; do
+  e) for netsnmp_cur_lib in kvm socket ; do
               LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
               cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -29697,7 +29697,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 
 
-#   libregex                                            (MinGW)
+#   libregex                                            (MinGW, QNX)
 #
 netsnmp_save_LIBS="$LIBS"
 LIBS="$LIBS -lregex"
@@ -29720,8 +29720,9 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
 
-  # Keep LIBS.
-  true
+  # Keep LIBS. libnetsnmp calls regcomp() itself (snmplib/parse.c) and is
+  # linked with LNETSNMPLIBS, not LIBS.
+  LNETSNMPLIBS="$LNETSNMPLIBS -lregex"
 
 else case e in #(
   e)
