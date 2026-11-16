@@ -107,7 +107,10 @@ unregister_cb(int major, int minor, void* serv, void* client)
                 "unregister_cb(%d, %d, %p, %p)\n", major, minor, serv, client));
     sysORLastChange = ((struct sysORTable*)(serv))->OR_uptime;
 
-    while ((value = (sysORTable_entry*)ITERATOR_NEXT(it)) && value->data != serv);
+    for (value = (sysORTable_entry*)ITERATOR_FIRST(it);
+         value && value->data != serv;
+         value = (sysORTable_entry*)ITERATOR_NEXT(it))
+        ;
     ITERATOR_RELEASE(it);
     if(value) {
 	CONTAINER_REMOVE(table, value);
