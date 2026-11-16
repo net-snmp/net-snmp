@@ -223,13 +223,63 @@ static size_t   defaultPrivTypeLen = 0;
 /*
  * Globals.
  */
+#ifndef NETSNMP_DISABLE_DES
 static u_int    salt_integer;
+#endif
 #ifdef HAVE_AES
 static u_int    salt_integer64_1, salt_integer64_2;
 #endif
         /*
          * 1/2 of seed for the salt.   Cf. RFC2274, Sect 8.1.1.1.
          */
+
+/*
+ * Not read if neither DES nor AES support has been compiled in.
+ */
+static int      salts_seeded NETSNMP_ATTRIBUTE_UNUSED;
+
+#if !defined(NETSNMP_DISABLE_DES) || defined(HAVE_AES)
+/*
+ * Fill *salt with random data, falling back to time() if sc_random() fails.
+ */
+static void
+usm_seed_salt(u_int *salt, const char *name)
+{
+    size_t          salt_len = sizeof(*salt);
+
+    if (sc_random((u_char *) salt, &salt_len) != SNMPERR_SUCCESS) {
+        DEBUGMSGTL(("usm", "sc_random() failed: using time() as %s.\n",
+                    name));
+        *salt = time(NULL);
+    }
+}
+
+/*
+ * Seed the "arbitrary" portion of the salts with random numbers. This is
+ * deferred until a salt is needed for the first time because initializing
+ * the random number generator is expensive and is not necessary for
+ * SNMPv1/v2c or for SNMPv3 without privacy.
+ */
+static void
+usm_seed_salts(void)
+{
+    if (salts_seeded)
+        return;
+
+#ifndef NETSNMP_DISABLE_DES
+    usm_seed_salt(&salt_integer, "salt");
+#endif
+#ifdef HAVE_AES
+    usm_seed_salt(&salt_integer64_1, "aes1 salt");
+    usm_seed_salt(&salt_integer64_2, "aes2 salt");
+#endif
+    /*
+     * Only set the flag once the salts have been written, so that a
+     * concurrent caller seeds them again instead of using unseeded salts.
+     */
+    salts_seeded = 1;
+}
+#endif /* !NETSNMP_DISABLE_DES || HAVE_AES */
 
 static struct usmUser *noNameUser = NULL;
 /*
@@ -1240,6 +1290,7 @@ usm_set_salt(u_char * iv,
     }
 
 
+    usm_seed_salts();
     net_boots = htonl(snmpv3_local_snmpEngineBoots());
     net_salt_int = htonl(salt_integer);
 
@@ -1309,6 +1360,7 @@ usm_set_aes_iv(u_char * iv,
         return -1;
     }
 
+    usm_seed_salts();
     net_salt_int1 = htonl(salt_integer64_1);
     net_salt_int2 = htonl(salt_integer64_2);
 
@@ -5199,39 +5251,13 @@ init_usm_conf(const char *app)
  * initializations for the USM.
  *
  * Should be called after the (engineid) configuration files have been read.
- *
- * Set "arbitrary" portion of salt to a random number.
  */
 static int
 init_usm_post_config(int majorid, int minorid, void *serverarg,
                      void *clientarg)
 {
-    size_t          salt_integer_len = sizeof(salt_integer);
-    uint64_t        current_time;
-
-    if (sc_random((u_char *) & salt_integer, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as salt.\n"));
-        current_time = time(NULL);
-        salt_integer = current_time;
-    }
-
-#ifdef HAVE_AES
-    salt_integer_len = sizeof (salt_integer64_1);
-    if (sc_random((u_char *) & salt_integer64_1, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes1 salt.\n"));
-        current_time = time(NULL);
-        salt_integer64_1 = current_time;
-    }
-    salt_integer_len = sizeof (salt_integer64_1);
-    if (sc_random((u_char *) & salt_integer64_2, &salt_integer_len) !=
-        SNMPERR_SUCCESS) {
-        DEBUGMSGTL(("usm", "sc_random() failed: using time() as aes2 salt.\n"));
-        current_time = time(NULL);
-        salt_integer64_2 = current_time;
-    }
-#endif
+    /* Reseed the salts the next time one is needed. */
+    salts_seeded = 0;
 
     // Free noNameUser before it is assigned
     usm_free_user(noNameUser);
