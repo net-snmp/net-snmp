@@ -84,7 +84,8 @@ swrun_count_processes(int include_kthreads)
         return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
 
     it = CONTAINER_ITERATOR( swrun_container );
-    while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
+    for (entry = (netsnmp_swrun_entry*)ITERATOR_FIRST( it ); entry;
+         entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) {
         if (4 == entry->hrSWRunType)
             i++;
     }
@@ -126,7 +127,8 @@ swrun_count_processes_by_regex( char *name, netsnmp_regex_ptr regexp )
     }
 
     it = CONTAINER_ITERATOR( swrun_container );
-    while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
+    for (entry = (netsnmp_swrun_entry*)ITERATOR_FIRST( it ); entry;
+         entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) {
         /* need to assemble full command back so regexps can get full picture */
         snprintf(fullCommand, sizeof(fullCommand), "%s %s", entry->hrSWRunPath, entry->hrSWRunParameters);
 #ifdef HAVE_PCRE2_H
@@ -161,7 +163,8 @@ swrun_count_processes_by_name( char *name )
         return 0;    /* or -1 */
 
     it = CONTAINER_ITERATOR( swrun_container );
-    while ((entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) != NULL) {
+    for (entry = (netsnmp_swrun_entry*)ITERATOR_FIRST( it ); entry;
+         entry = (netsnmp_swrun_entry*)ITERATOR_NEXT( it )) {
         if (0 == strcmp( entry->hrSWRunName, name ))
             i++;
     }
