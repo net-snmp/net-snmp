@@ -550,7 +550,7 @@ init_notification_log(void)
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_DONT_RETAIN_NOTIFICATIONS);
 #if 0
-    /* xxx-rks: config for max size; should be peristent too, & tied to mib */
+    /* xxx-rks: config for max size; should be persistent too, & tied to mib */
     netsnmp_ds_register_config(ASN_INTEGER,
                                netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
                                                      NETSNMP_DS_LIB_APPTYPE),

@@ -36,7 +36,7 @@ extern          "C" {
  * dot3StatsDuplexStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef DOT3STATSDUPLEXSTATUS_ENUMS
 #define DOT3STATSDUPLEXSTATUS_ENUMS
@@ -53,7 +53,7 @@ extern          "C" {
  * dot3StatsRateControlAbility (TruthValue / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TRUTHVALUE_ENUMS
 #define TRUTHVALUE_ENUMS
@@ -69,7 +69,7 @@ extern          "C" {
  * dot3StatsRateControlStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef DOT3STATSRATECONTROLSTATUS_ENUMS
 #define DOT3STATSRATECONTROLSTATUS_ENUMS

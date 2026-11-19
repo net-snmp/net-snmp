@@ -367,7 +367,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         /*
          *  do we need to allocate memory for the use?
          * if the last call didn't use the memory we allocated,
-         * re-use it. Otherwise, allocate new chunk.
+         * reuse it. Otherwise, allocate new chunk.
          */
         if ((0 != lpi->mem_size) && (NULL == mem)) {
             mem = calloc(lpi->mem_size, 1);
@@ -378,7 +378,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         }
 
         /*
-         * do they want a copy ot the line?
+         * do they want a copy of the line?
          */
         if (lpi->flags & PMLP_FLAG_STRDUP_LINE) {
             li.start = strdup(li.start);
@@ -416,7 +416,7 @@ _pm_user_function(FILE *f, netsnmp_container *cin,
         else if (PMLP_RC_MEMORY_UNUSED == rc ) {
             /*
              * they didn't use the memory. if li.start was a strdup, we have
-             * to release it. leave mem, we can re-use it (its a fixed size).
+             * to release it. leave mem, we can reuse it (its a fixed size).
              */
             if (lpi->flags & PMLP_FLAG_STRDUP_LINE)
                 free(li.start); /* no point in SNMP_FREE */

@@ -723,7 +723,7 @@ asn_parse_unsigned_int(u_char * data,
  * 
  * @param data         IN - pointer to start of output buffer
  * @param datalength   IN/OUT - number of valid bytes left in buffer
- * @param type         IN  - asn type of objec
+ * @param type         IN  - asn type of object
  * @param intp         IN - pointer to start of long integer
  * @param intsize      IN - size of input buffer
  * 
@@ -799,7 +799,7 @@ asn_build_int(u_char * data,
  * 
  * @param data         IN - pointer to start of output buffer
  * @param datalength   IN/OUT - number of valid bytes left in buffer
- * @param type         IN  - asn type of objec
+ * @param type         IN  - asn type of object
  * @param intp         IN - pointer to start of long integer
  * @param intsize      IN - size of input buffer
  * 
@@ -1407,7 +1407,7 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
 
 /**
  * @internal
- * asn_parse_objid - pulls an object indentifier out of an ASN object identifier type.
+ * asn_parse_objid - pulls an object identifier out of an ASN object identifier type.
  *
  *  On entry, datalength is input as the number of valid bytes following
  *   "data".  On exit, it is returned as the number of valid bytes
@@ -1771,7 +1771,7 @@ asn_parse_null(u_char * data, size_t * datalength, u_char * type)
  * @param data         IN - pointer to start of object
  * @param datalength   IN/OUT - number of valid bytes left in buffer
  * @param type         IN - asn type of object
- * @retun  Returns a pointer to the first byte past the end
+ * @return  Returns a pointer to the first byte past the end
  *         of this object (i.e. the start of the next object).
  *         Returns NULL on any error.
  *
@@ -2391,7 +2391,7 @@ asn_build_signed_int64(u_char * data,
         low = (low & 0x00ffffff) << 8;
     }
     /*
-     * until a real int64 gets incorperated into SNMP, we are going to
+     * until a real int64 gets incorporated into SNMP, we are going to
      * encode it as an opaque instead.  First, we build the opaque
      * header and then the int64 tag type we use to mark it as an
      * int64 in the opaque string. 
@@ -2850,7 +2850,7 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
  * reverse  builds an ASN header for a length with
  * length specified.
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -2917,7 +2917,7 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_header
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -2955,7 +2955,7 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_int
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3034,7 +3034,7 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_string 
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3116,7 +3116,7 @@ asn_realloc_rbuild_string(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_unsigned_int
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3193,7 +3193,7 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_sequence
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3265,7 +3265,7 @@ static int store_uint32(uint8_t **pkt, size_t *pkt_len, size_t *offset, int r,
  *
  * @see asn_build_objid
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3354,7 +3354,7 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_null
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3389,7 +3389,7 @@ asn_realloc_rbuild_null(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_bitstring
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3475,7 +3475,7 @@ asn_realloc_rbuild_bitstring(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_unsigned_int64
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3660,7 +3660,7 @@ asn_realloc_rbuild_unsigned_int64(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_signed_int64
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3794,7 +3794,7 @@ asn_realloc_rbuild_signed_int64(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_float
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 
@@ -3871,7 +3871,7 @@ asn_realloc_rbuild_float(u_char ** pkt, size_t * pkt_len,
  *
  * @see asn_build_double
  * 
- * @param pkt     IN/OUT address of the begining of the buffer.
+ * @param pkt     IN/OUT address of the beginning of the buffer.
  * @param pkt_len IN/OUT address to an integer containing the size of pkt.
  * @param offset  IN/OUT offset to the start of the buffer where to write
  * @param r       IN if not zero reallocate the buffer to fit the 

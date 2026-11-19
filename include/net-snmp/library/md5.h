@@ -26,7 +26,7 @@ extern          "C" {
     /*
      * MDbegin(MD)
      * ** Input: MD -- an MDptr
-     * ** Initialize the MDstruct prepatory to doing a message digest computation.
+     * ** Initialize the MDstruct preparatory to doing a message digest computation.
      */
     NETSNMP_IMPORT void MDbegin(MDptr);
 

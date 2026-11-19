@@ -270,7 +270,7 @@ config_exclude(mibII/interfaces);
      *********************************************************************
      * TODO:115:o: |-> Review ifTable undo context.
      * We're just going to use the same data structure for our
-     * undo_context. If you want to do something more efficent,
+     * undo_context. If you want to do something more efficient,
      * define your typedef here.
      */
     typedef ifTable_data ifTable_undo_data;

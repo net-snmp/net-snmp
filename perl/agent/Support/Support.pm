@@ -358,7 +358,7 @@ sub getLeaf {
 # The workhorse for GETNEXT.
 # Given an OID, locates the next oid and if valid does
 # a getLeaf on that OID. It does this by walking the list of
-# OIDs. We try to otimise the walk by first looking for an oid
+# OIDs. We try to optimise the walk by first looking for an oid
 # in the list as follows:
 #
 # 1. Try to locate an oid match in the table.
@@ -367,13 +367,13 @@ sub getLeaf {
 #
 # 2. If the OID found is a table element then use the table
 #    specific index handler to see if there is an item with the
-#    next index.This will retutn either an oid which we get, or 0.
+#    next index.This will return either an oid which we get, or 0.
 #    If there is not then we continue our walk along the tree
 #
 #  3.If the supplied oid is not found, but is in the range of our  oids
 #    then we start at the root oid and walk the list until we either 
 #    drop of the end, or we fnd an OID that is greater than the OID supplied.
-#    In all cases if we sucessfully find an OID to retrieve, 
+#    In all cases if we successfully find an OID to retrieve, 
 #    then we set the next OID in the resposnse.
 #
 ######################################################

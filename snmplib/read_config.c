@@ -1710,7 +1710,7 @@ snmp_save_persistent(const char *type)
  *
  * Unlink all backup files called "<NETSNMP_PERSISTENT_DIRECTORY>/<type>.%d.conf".
  *
- * Should be called just after we successfull dumped the last of the
+ * Should be called just after we successfully dumped the last of the
  * persistent data, to remove the backup copies of previous storage dumps.
  *
  * XXX  Worth overwriting with random bytes first?  This would

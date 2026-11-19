@@ -105,7 +105,7 @@ use vars qw(
 
 $auto_init_mib = 1; # enable automatic MIB loading at session creation time
 $use_long_names = 0; # non-zero to prefer longer mib textual identifiers rather
-                   # than just leaf indentifiers (see translateObj)
+                   # than just leaf identifiers (see translateObj)
                    # may also be set on a per session basis(see UseLongNames)
 $use_sprint_value = 0; # non-zero to enable formatting of response values
                    # using the snmp libraries "snprint_value"
@@ -829,7 +829,7 @@ sub gettable {
 	# experimentally determined maybe guess at a best repeat value
 	# 1000 bytes max (safe), 30 bytes average for encoding of the
 	# varbind (experimentally determined to be closer to
-	# 26.  Again, being safe.  Then devide by the number of
+	# 26.  Again, being safe.  Then divide by the number of
 	# varbinds.
 	$state->{'repeatcount'} = int(1000 / 36 / ($#{$state->{'varbinds'}} + 1));
     }
@@ -1758,7 +1758,7 @@ passing the Varbind as the arg
 default 'undef', used by 'fget[next]', holds an hash
 reference of output value formatters, (e.g., {<type> =>
 <sub-ref>, ... }, the supplied sub is called to translate
-the value to a new format, unless a VarFormat mathces first
+the value to a new format, unless a VarFormat matches first
 (e.g., $sess->{TypeFormats}{INTEGER} = \&mapEnum();
 although this can be done more efficiently by enabling
 $SNMP::use_enums or session creation param 'UseEnums')
@@ -1816,7 +1816,7 @@ read-only, holds the error message assoc. w/ last request
 
 =item ErrorNum
 
-read-only, holds the snmp_err or staus of last request
+read-only, holds the snmp_err or status of last request
 
 =item ErrorInd
 
@@ -1856,7 +1856,7 @@ B<(WARNING! not fully implemented)>
 =item $sess->get(E<lt>varsE<gt> [,E<lt>callbackE<gt>])
 
 do SNMP GET, multiple <vars> formats accepted.
-for syncronous operation <vars> will be updated
+for synchronous operation <vars> will be updated
 with value(s) and type(s) and will also return
 retrieved value(s). If <callback> supplied method
 will operate asynchronously
@@ -2620,7 +2620,7 @@ Try running the apps from the Net-SNMP distribution.
 Make sure your agent (snmpd) is running and properly configured with
 read-write access for the community you are using.
 
-Ensure that your MIBs are installed and enviroment variables are set
+Ensure that your MIBs are installed and environment variables are set
 appropriately (see man mib_api)
 
 Be sure to remove old net-snmp installations and ensure headers and

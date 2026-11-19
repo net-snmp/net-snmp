@@ -1144,7 +1144,7 @@ _sess_copy(netsnmp_session * in_session)
     session = slp->session;
 
     /*
-     * zero out pointers so if we have to free the session we wont free mem
+     * zero out pointers so if we have to free the session we won't free mem
      * owned by in_session 
      */
     session->localname = NULL;
@@ -5097,7 +5097,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
  * and contextEngineID in pdu struct. Also stores pdu->command (handy for 
  * Report generation).
  * 
- * returns pointer to begining of PDU or NULL on error.
+ * returns pointer to beginning of PDU or NULL on error.
  */
 u_char         *
 snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
@@ -5586,7 +5586,7 @@ _sess_async_send(struct session_list *slp,
      * for incoming PDUs with a request id of 0. This could cause some
      * confusion if the caller is expecting the request id to match the
      * return code, as the documentation states it will. Most example code
-     * just checks for non-zero, so hopefully this wont be an issue.
+     * just checks for non-zero, so hopefully this won't be an issue.
      */
     if (0 == reqid && (SNMPERR_SUCCESS == session->s_snmp_errno))
         ++reqid;
@@ -6085,7 +6085,7 @@ _sess_process_packet_handle_pdu(struct session_list *slp, netsnmp_session * sp,
           /*
            * trigger immediate retry on recoverable Reports 
            * * (notInTimeWindow), incr_retries == TRUE to prevent
-           * * inifinite resend                      
+           * * infinite resend                      
            */
           if (rp->retries <= sp->retries) {
             snmp_resend_request(slp, orp, rp, TRUE);

@@ -202,7 +202,7 @@ netsnmp_tcp_transport(const struct netsnmp_ep *ep, int local)
         int opt = 1;
 
         /*
-         * This session is inteneded as a server, so we must bind to the given 
+         * This session is intended as a server, so we must bind to the given 
          * IP address (which may include an interface address, or could be
          * INADDR_ANY, but will always include a port number.  
          */

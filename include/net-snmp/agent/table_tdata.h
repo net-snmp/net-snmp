@@ -50,7 +50,7 @@ extern          "C" {
         netsnmp_container *container;
     } netsnmp_tdata;
 
-/* Backwards compatability with the previous (poorly named) data structures */
+/* Backwards compatibility with the previous (poorly named) data structures */
 typedef  struct netsnmp_tdata_row_s netsnmp_table_data2row;
 typedef  struct netsnmp_tdata_s     netsnmp_table_data2;
 

@@ -318,7 +318,7 @@ main(int argc, char *argv[])
      * open an SNMP session 
      */
     /*
-     * Note:  this wil obtain the engineID needed below 
+     * Note:  this will obtain the engineID needed below 
      */
     ss = snmp_open(&session);
     if (ss == NULL) {

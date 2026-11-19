@@ -1584,7 +1584,7 @@ handle_nsExtendOutput2Table(netsnmp_mib_handler          *handler,
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
         /*************************
          *
-         *  Compatability with the UCD extTable
+         *  Compatibility with the UCD extTable
          *
          *************************/
 

@@ -249,7 +249,7 @@ $m2c_conf_comment_divider
 $m2c_conf_comment Allow realloc when data size exceeds length? If your data
 $m2c_conf_comment store for this node is a pointer allocated with one of the
 $m2c_conf_comment alloc family functions, you can set this to 1 to use realloc
-$m2c_conf_comment when a new value length exceeds the old lenght. If you are
+$m2c_conf_comment when a new value length exceeds the old length. If you are
 $m2c_conf_comment using a fixed size buffer, this value should be 0.
 $m2c_conf_comment
 $m2c_conf_comment @eval $@m2c_node_realloc = $m2c_node_realloc@

@@ -575,7 +575,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             break;
         default:
             /*
-             * Other syntax values can't be used for Boolean/Theshold
+             * Other syntax values can't be used for Boolean/Threshold
              * tests. Report this as an error, and then rotate the
              * results ready for the next run, (which will presumably
              * also detect this as an error once again!)

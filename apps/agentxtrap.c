@@ -249,7 +249,7 @@ static const struct tState_s Connecting = {
     NULL,
     StateDisconnect,
     NULL,
-    "Connnecting",
+    "Connecting",
     0
 };
 

@@ -101,7 +101,7 @@ extern          "C" {
  * ipCidrRouteType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPCIDRROUTETYPE_ENUMS
 #define IPCIDRROUTETYPE_ENUMS
@@ -119,7 +119,7 @@ extern          "C" {
  * ipCidrRouteProto (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPCIDRROUTEPROTO_ENUMS
 #define IPCIDRROUTEPROTO_ENUMS
@@ -149,7 +149,7 @@ extern          "C" {
  * ipCidrRouteStatus (RowStatus / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ROWSTATUS_ENUMS
 #define ROWSTATUS_ENUMS

@@ -22,7 +22,7 @@ config_require(if-mib/data_access/interface);
  *    when a new platform is ported, it won't need a new test here.
  *
  * 2) don't do detail requirements here. If, for example,
- *    HPUX11 had different reuirements than other HPUX, that should
+ *    HPUX11 had different requirements than other HPUX, that should
  *    be handled in the *_hpux.h header file.
  */
 

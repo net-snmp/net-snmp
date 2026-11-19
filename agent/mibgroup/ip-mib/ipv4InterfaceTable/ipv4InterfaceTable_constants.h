@@ -62,7 +62,7 @@ extern          "C" {
  * ipv4InterfaceEnableStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPV4INTERFACEENABLESTATUS_ENUMS
 #define IPV4INTERFACEENABLESTATUS_ENUMS

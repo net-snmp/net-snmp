@@ -487,7 +487,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             /*
              * * if data was found, make sure it has the column we want
              */
-/* xxx-rks: add suport for sparse tables */
+/* xxx-rks: add support for sparse tables */
 
             /*
              * build new oid

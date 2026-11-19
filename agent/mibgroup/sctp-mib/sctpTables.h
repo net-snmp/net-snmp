@@ -20,6 +20,6 @@ config_require(sctp-mib/sctpTables_freebsd);
 #elif defined( solaris2 )
 config_require(sctp-mib/sctpTables_solaris2);
 #else
-config_error(SCTP-MIB is not available in tihs environment);
+config_error(SCTP-MIB is not available in this environment);
 #endif
 #endif                          /* SCTP_TABLES_H */

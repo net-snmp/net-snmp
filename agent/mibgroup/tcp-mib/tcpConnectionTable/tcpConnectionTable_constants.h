@@ -69,7 +69,7 @@ extern          "C" {
  * tcpConnectionLocalAddressType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -89,7 +89,7 @@ extern          "C" {
  * tcpConnectionRemAddressType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -109,7 +109,7 @@ extern          "C" {
  * tcpConnectionState (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TCPCONNECTIONSTATE_ENUMS
 #define TCPCONNECTIONSTATE_ENUMS

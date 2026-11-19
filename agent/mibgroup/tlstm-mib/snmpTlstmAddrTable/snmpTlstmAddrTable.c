@@ -1194,7 +1194,7 @@ _cache_load(netsnmp_cache *cache, void *q)
     itr = CONTAINER_ITERATOR(addrs);
     if (NULL == itr) {
         DEBUGMSGTL(("tlstmAddrTable:cache:load",
-                    "cant get iterator\n"));
+                    "can't get iterator\n"));
         return -1;
     }
 
@@ -1238,7 +1238,7 @@ _cache_free(netsnmp_cache *cache, void *q)
     tbl_itr = CONTAINER_ITERATOR(table->container);
     if (NULL == tbl_itr) {
         DEBUGMSGTL(("tlstmAddrTable:cache:free",
-                    "cant get entry iterator\n"));
+                    "can't get entry iterator\n"));
         return;
     }
 
@@ -1403,7 +1403,7 @@ _tlstmAddrTable_save_rows(int majorID, int minorID, void *serverarg,
     if (NULL != active_addrs) {
         addrs_itr = CONTAINER_ITERATOR(active_addrs);
         if (NULL == addrs_itr) {
-            DEBUGMSGTL(("tlstmAddrTable:save", "cant get addrs iterator\n"));
+            DEBUGMSGTL(("tlstmAddrTable:save", "can't get addrs iterator\n"));
             addr = NULL;
         }
         else
@@ -1426,7 +1426,7 @@ _tlstmAddrTable_save_rows(int majorID, int minorID, void *serverarg,
      */
     tbl_itr = CONTAINER_ITERATOR(mib_addrs);
     if (NULL == tbl_itr)
-        DEBUGMSGTL(("tlstmAddrTable:save", "cant get table iterator\n"));
+        DEBUGMSGTL(("tlstmAddrTable:save", "can't get table iterator\n"));
     else {
         row = ITERATOR_FIRST(tbl_itr);
         for( ; row; row = ITERATOR_NEXT(tbl_itr)) {

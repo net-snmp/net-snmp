@@ -5,7 +5,7 @@
 
 /***********************************************************************
  *   This file is auto-generated and SHOULD NOT BE EDITED by hand.
- *   Modify the netSnmpHostsTable_checkfns_local.[ch] files insead.
+ *   Modify the netSnmpHostsTable_checkfns_local.[ch] files instead.
  *   (so that you can regenerate this one as mib2c improvements are made)
  ***********************************************************************/
 #ifndef NETSNMPHOSTSTABLE_CHECKFNS_H

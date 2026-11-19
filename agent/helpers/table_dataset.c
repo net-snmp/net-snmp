@@ -307,7 +307,7 @@ netsnmp_table_data_set_create_row_from_defaults
  * Arguments should be the table_set, column number, variable type and
  * finally a 1 if it is allowed to be writable, or a 0 if not.  If the
  * default_value field is not NULL, it will be used to populate new
- * values in that column fro newly created rows. It is copied into the
+ * values in that column for newly created rows. It is copied into the
  * storage template (free your calling argument).
  *
  * returns SNMPERR_SUCCESS or SNMPERR_FAILURE

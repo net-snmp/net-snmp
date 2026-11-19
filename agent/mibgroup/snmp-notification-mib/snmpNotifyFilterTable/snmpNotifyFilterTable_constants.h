@@ -77,7 +77,7 @@ extern          "C" {
  * snmpNotifyFilterType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 
 
@@ -86,7 +86,7 @@ extern          "C" {
  * snmpNotifyFilterStorageType (StorageType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef STORAGETYPE_ENUMS
 #define STORAGETYPE_ENUMS
@@ -105,7 +105,7 @@ extern          "C" {
  * snmpNotifyFilterRowStatus (RowStatus / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ROWSTATUS_ENUMS
 #define ROWSTATUS_ENUMS

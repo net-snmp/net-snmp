@@ -227,7 +227,7 @@ lmSensorsTables_handler(
                                             (int)(mult*sensor_info->value));
                 break;
             case COLUMN_LMSENSORS_SIGNED:
-		/* Only avalable for temperature table */
+		/* Only available for temperature table */
 	        if (reginfo->rootoid[9] != 2)
 		    netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
 		else

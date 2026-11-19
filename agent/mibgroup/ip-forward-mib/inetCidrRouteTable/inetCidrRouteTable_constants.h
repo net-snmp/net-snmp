@@ -103,7 +103,7 @@ extern          "C" {
  * inetCidrRouteDestType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -123,7 +123,7 @@ extern          "C" {
  * inetCidrRouteNextHopType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -143,7 +143,7 @@ extern          "C" {
  * inetCidrRouteType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETCIDRROUTETYPE_ENUMS
 #define INETCIDRROUTETYPE_ENUMS
@@ -162,7 +162,7 @@ extern          "C" {
  * inetCidrRouteProto (IANAipRouteProtocol / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IANAIPROUTEPROTOCOL_ENUMS
 #define IANAIPROUTEPROTOCOL_ENUMS
@@ -193,7 +193,7 @@ extern          "C" {
  * inetCidrRouteStatus (RowStatus / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ROWSTATUS_ENUMS
 #define ROWSTATUS_ENUMS

@@ -306,7 +306,7 @@ shutdown_snmpTargetAddrEntry_data(void)
 }
 
 /*
- * store_snmpTargetAddrEntry handles the persistent storage proccess 
+ * store_snmpTargetAddrEntry handles the persistent storage process 
  * for this MIB table. It writes out all the non-volatile rows 
  * to permanent storage on a shutdown  
  */

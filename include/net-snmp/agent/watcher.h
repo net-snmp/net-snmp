@@ -36,7 +36,7 @@ extern "C" {
  *  @since Net-SNMP 5.5
  */
 #define WATCHER_SIZE_IS_PTR    0x04
-/** If set then data is suppposed to be a zero-terminated character array
+/** If set then data is supposed to be a zero-terminated character array
  *  and both data_size and data_size_p are ignored. Additionally \\0 is a
  *  forbidden character in the data set.
  *  @hideinitializer

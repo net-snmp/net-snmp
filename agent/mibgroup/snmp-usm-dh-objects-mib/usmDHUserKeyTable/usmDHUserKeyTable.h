@@ -86,7 +86,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
      *********************************************************************
      * TODO:115:o: |-> Review usmDHUserKeyTable undo context.
      * We're just going to use the same data structure for our
-     * undo_context. If you want to do something more efficent,
+     * undo_context. If you want to do something more efficient,
      * define your typedef here.
      */
     typedef usmDHUserKeyTable_data usmDHUserKeyTable_undo_data;
@@ -118,7 +118,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
      * length, update this macro to that length.
      *
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+     * POSSIBLE LENGTH FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(9)
      */
 #define MAX_usmDHUserKeyTable_IDX_LEN     66

@@ -97,7 +97,7 @@ extern          "C" {
  * ifLinkUpDownTrapEnable (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IFLINKUPDOWNTRAPENABLE_ENUMS
 #define IFLINKUPDOWNTRAPENABLE_ENUMS
@@ -113,7 +113,7 @@ extern          "C" {
  * ifPromiscuousMode (TruthValue / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TRUTHVALUE_ENUMS
 #define TRUTHVALUE_ENUMS
@@ -129,7 +129,7 @@ extern          "C" {
  * ifConnectorPresent (TruthValue / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TRUTHVALUE_ENUMS
 #define TRUTHVALUE_ENUMS

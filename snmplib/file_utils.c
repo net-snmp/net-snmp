@@ -61,7 +61,7 @@ netsnmp_feature_child_of(file_close, file_utils_all);
  * allocate a netsnmp_file structure
  *
  * This routine should be used instead of allocating on the stack,
- * for future compatability.
+ * for future compatibility.
  */
 netsnmp_file *
 netsnmp_file_create(void)

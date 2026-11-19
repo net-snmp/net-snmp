@@ -49,7 +49,7 @@ extern          "C" {
  * That means the counter of all packets must watched and checked
  * for overflows to reconstruct its 64-bit value (i.e. as usual
  * for counter of unicast packets), and after its expansion to 64-bits,
- * nr.of multicast packets must be substracted to get nr. of unicast
+ * nr.of multicast packets must be subtracted to get nr. of unicast
  * packets.
  * This flag marks stats of such platforms. Nr. of all incoming packets,
  * provided by the platform, must be stored in
@@ -63,7 +63,7 @@ extern          "C" {
  * ifAdminStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redifinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ifAdminStatus_ENUMS
 #define ifAdminStatus_ENUMS
@@ -79,7 +79,7 @@ extern          "C" {
  * ifOperStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redifinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ifOperStatus_ENUMS
 #define ifOperStatus_ENUMS

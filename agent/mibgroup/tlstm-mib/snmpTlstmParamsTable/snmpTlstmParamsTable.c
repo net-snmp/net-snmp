@@ -520,7 +520,7 @@ snmpTlstmParamsTable_load( netsnmp_cache *cache, void *vmagic )
     itr = CONTAINER_ITERATOR(active_params);
     if (NULL == itr) {
         DEBUGMSGTL(("tlstmParamsTable:cache:load",
-                    "cant get iterator\n"));
+                    "can't get iterator\n"));
         return -1;
     }
 
@@ -563,7 +563,7 @@ snmpTlstmParamsTable_free( netsnmp_cache *cache, void *vmagic )
     tbl_itr = CONTAINER_ITERATOR(table->container);
     if (NULL == tbl_itr) {
         DEBUGMSGTL(("tlstmParamsTable:cache:free",
-                    "cant get entry iterator\n"));
+                    "can't get entry iterator\n"));
         return;
     }
 
@@ -1204,7 +1204,7 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
         params_itr = CONTAINER_ITERATOR(active_params);
         if (NULL == params_itr) {
             DEBUGMSGTL(("tlstmParamsTable:save",
-                        "cant get params iterator\n"));
+                        "can't get params iterator\n"));
             params = NULL;
         }
         else
@@ -1227,7 +1227,7 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
      */
     tbl_itr = CONTAINER_ITERATOR(_table_data->container);
     if (NULL == tbl_itr)
-        DEBUGMSGTL(("tlstmParamsTable:save", "cant get table iterator\n"));
+        DEBUGMSGTL(("tlstmParamsTable:save", "can't get table iterator\n"));
     else {
         row = ITERATOR_FIRST(tbl_itr);
         for( ; row; row = ITERATOR_NEXT(tbl_itr)) {

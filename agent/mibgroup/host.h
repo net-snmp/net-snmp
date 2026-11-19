@@ -55,7 +55,7 @@ config_add_mib(HOST-RESOURCES-TYPES);
  *     instances of that type.
  *   When all devices of a particular type have been processed, the
  *     initialisation function for the next device type is called,
- *     and so on until all devices have been proceesed.
+ *     and so on until all devices have been processed.
  *   
  *   Similar arrays are used to provide type-specific functions to
  *     return the "common" device information (description, ID, status

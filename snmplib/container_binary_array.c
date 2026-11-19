@@ -770,7 +770,7 @@ _ba_duplicate(netsnmp_container *c, void *ctx, u_int flags)
     binary_array_table *dupt, *t;
 
     if (flags) {
-        snmp_log(LOG_ERR, "binary arry duplicate does not supprt flags yet\n");
+        snmp_log(LOG_ERR, "binary array duplicate does not support flags yet\n");
         return NULL;
     }
 

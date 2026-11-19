@@ -324,7 +324,7 @@ netsnmp_sock_buffer_set(NETSNMP_SOCKET sock, int optname, int local, int size)
          * This will allow us to reach a more optimal buffer.
          *   For example : On Solaris, if the max OS buffer is 100k and you 
          *   request 110k, you end up with the default 8k :-(
-         *   After this quick seach we would get 1k close to 100k (the max)
+         *   After this quick search we would get 1k close to 100k (the max)
          */
         DEBUGMSGTL(("socket:buffer", "couldn't set %s to %d\n",
                     buftype, size));

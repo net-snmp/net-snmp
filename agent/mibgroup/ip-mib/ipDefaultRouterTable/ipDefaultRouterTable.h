@@ -115,7 +115,7 @@ config_require(ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get);
      * length, update this macro to that length.
      *
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+     * POSSIBLE LENGTH FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(8)
      */
 #define MAX_ipDefaultRouterTable_IDX_LEN     118

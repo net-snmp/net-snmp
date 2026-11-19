@@ -170,7 +170,7 @@ netSnmpHostsTable_context_convert_function(void *loop_context,
  *  and set_XXX functions for data retrieval and modification during
  *  this SET request.
  *
- *  The indexs are encoded (in order) into the index_data pointer if it
+ *  The indexes are encoded (in order) into the index_data pointer if it
  *  would be helpful to use that information.
  */
 void           *

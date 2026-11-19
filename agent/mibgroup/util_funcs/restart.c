@@ -37,7 +37,7 @@ restart_doit(int a)
     snmp_shutdown(name);
 
     /*  This signal handler may run with SIGALARM blocked.
-     *  Since the signal mask is preserved accross execv(), we must
+     *  Since the signal mask is preserved across execv(), we must
      *  make sure that SIGALARM is unblocked prior of execv'ing.
      *  Otherwise SIGALARM will be ignored in the next incarnation
      *  of snmpd, because the signal is blocked. And thus, the

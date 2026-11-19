@@ -210,7 +210,7 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
     /*
      * This routine creates a completely new session every time.
      * It might be worth keeping track of which 'secNames' already
-     * have iquery sessions created, and re-using the appropriate one.  
+     * have iquery sessions created, and reusing the appropriate one.  
      */
     netsnmp_session *ss = NULL;
 

@@ -1,5 +1,5 @@
 /*
- *  UCD compatability definitions & declarations
+ *  UCD compatibility definitions & declarations
  *
  */
 

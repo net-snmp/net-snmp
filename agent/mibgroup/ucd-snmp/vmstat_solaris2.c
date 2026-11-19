@@ -228,7 +228,7 @@ init_vmstat_solaris2(void)
                  vmstat_variables_oid);
 
     /*
-     * First check whether shared kstat contol is NULL, if so, try to open our 
+     * First check whether shared kstat control is NULL, if so, try to open our 
      * own. 
      */
     if (kstat_fd == NULL) {

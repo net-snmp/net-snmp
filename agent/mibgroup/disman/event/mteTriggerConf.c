@@ -807,7 +807,7 @@ _parse_mteTCols( char *line, struct mteTrigger *entry, int bcomp )
          *   mteTriggerTest and mteTriggerSampleType values,
          *   as these are set implicitly from the relevant
          *   config directives.
-         * Backwards compatability with the previous (combined) 
+         * Backwards compatibility with the previous (combined) 
          *   style reads these in explicitly.
          */
         len  = 1;
@@ -825,7 +825,7 @@ _parse_mteTCols( char *line, struct mteTrigger *entry, int bcomp )
         /*
          * The newer style combines the various boolean values
          *   into a single field (which comes later).
-         * Backwards compatability means reading these individually. 
+         * Backwards compatibility means reading these individually. 
          */
         line = read_config_read_data(ASN_UNSIGNED,  line, &tmp, NULL);
         if (tmp == TV_TRUE)
@@ -854,7 +854,7 @@ _parse_mteTCols( char *line, struct mteTrigger *entry, int bcomp )
      */
     if (bcomp) {
         /*
-         * Backwards compatability stores the mteTriggerEnabled
+         * Backwards compatibility stores the mteTriggerEnabled
          *   and mteTriggerEntryStatus values separately...
          */
         line = read_config_read_data(ASN_UNSIGNED,  line, &tmp, NULL);
@@ -1219,7 +1219,7 @@ parse_mteTThTable(const char *token, char *line)
 
 
 /* 
- *  Backwards Compatability with the previous implementation
+ *  Backwards Compatibility with the previous implementation
  */
 
 void

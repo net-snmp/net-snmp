@@ -55,7 +55,7 @@ extern          "C" {
  * tcpListenerLocalAddressType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS

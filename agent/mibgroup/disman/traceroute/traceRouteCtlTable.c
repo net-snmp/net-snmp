@@ -4,7 +4,7 @@
  *All right reserved
  *
  *File Name:traceRouteCtlTable.c
- *File Description:Rows of traceRouteCtlTable MIB add delete ans read.
+ *File Description:Rows of traceRouteCtlTable MIB add delete and read.
  *              Rows of traceRouteResultsTable MIB add and delete.
  *              Rows of traceRouteProbeHistoryTable MIB add and delete.
  *              Rows of traceRouteHopsTable MIB add and delete.

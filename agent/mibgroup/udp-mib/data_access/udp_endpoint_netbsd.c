@@ -133,17 +133,17 @@ _load(netsnmp_container *container, u_int load_flags, int ver)
     }
 
     if (sysctlnametomib(mibname, mib, &mib_len) == -1) {
-    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: cant resolve mib %s\n", mibname);
+    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: can't resolve mib %s\n", mibname);
 	return -1;
     }
 
     if (sysctl(mib, sizeof(mib) / sizeof(*mib), NULL, &pcb_len, NULL, 0) == -1) {
-    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: cant size mib %s\n", mibname);
+    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: can't size mib %s\n", mibname);
 	return -1;
     }
 
     if ((pcblist = malloc(pcb_len)) == NULL) {
-    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: cant allocate mib %s\n", mibname);
+    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: can't allocate mib %s\n", mibname);
 	return -1;
     }
     memset(pcblist, 0, pcb_len);
@@ -153,7 +153,7 @@ _load(netsnmp_container *container, u_int load_flags, int ver)
 
     if (sysctl(mib, sizeof(mib) / sizeof(*mib),
 		    pcblist, &pcb_len, NULL, 0) == -1) {
-    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: cant size mib %s\n", mibname);
+    	snmp_log(LOG_ERR, "udp-mib:data_access:_load: can't size mib %s\n", mibname);
 	return -1;
     }
 

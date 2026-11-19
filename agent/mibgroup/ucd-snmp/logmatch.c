@@ -384,7 +384,7 @@ logmatch_parse_config(const char *token, char *cptr)
         /*
          * ------------------------------------
          * be careful: the flag 255 must fit to
-         * the size of regEx as definded in
+         * the size of regEx as defined in
          * logmatch.h
          * ------------------------------------
          */

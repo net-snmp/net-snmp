@@ -1,5 +1,5 @@
 /*
- * module to include the modules relavent to the mib-II mib(s) 
+ * module to include the modules relevant to the mib-II mib(s) 
  */
 
 config_require(mibII/system_mib);

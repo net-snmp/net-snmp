@@ -1289,7 +1289,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
                                       (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                        ASN_OCTET_STR),
                                       "ksm first octet")) == NULL) {
-        DEBUGMSGTL(("ksm", "Initial security paramter parsing failed\n"));
+        DEBUGMSGTL(("ksm", "Initial security parameter parsing failed\n"));
 
         retval = SNMPERR_ASN_PARSE_ERR;
         goto error;

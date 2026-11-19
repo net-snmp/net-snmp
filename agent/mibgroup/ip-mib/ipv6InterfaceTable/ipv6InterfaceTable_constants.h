@@ -69,7 +69,7 @@ extern          "C" {
  * ipv6InterfaceEnableStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPV6INTERFACEENABLESTATUS_ENUMS
 #define IPV6INTERFACEENABLESTATUS_ENUMS
@@ -85,7 +85,7 @@ extern          "C" {
  * ipv6InterfaceForwarding (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPV6INTERFACEFORWARDING_ENUMS
 #define IPV6INTERFACEFORWARDING_ENUMS

@@ -1715,7 +1715,7 @@ netsnmp_create_v3user_notification_session(const char *dest, const char *user,
                                              usmUser->engineIDLen);
     session.contextEngineIDLen = usmUser->engineIDLen;
 
-    /** open the tranport */
+    /** open the transport */
 
     memset(&tspec, 0, sizeof(netsnmp_tdomain_spec));
     tspec.application = "snmptrap";

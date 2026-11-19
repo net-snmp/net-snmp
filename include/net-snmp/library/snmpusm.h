@@ -154,7 +154,7 @@ extern          "C" {
 #define USM_CREATE_USER_AUTH_SHA256  NETSNMP_USMAUTH_HMAC192SHA256
 #define USM_CREATE_USER_AUTH_SHA224  NETSNMP_USMAUTH_HMAC128SHA224
 
-    /** flags for variants fo priv algorithsm */
+    /** flags for variants of priv algorithms */
 #define USM_DES_FLAG_3                      0x000100
 
 #define USM_AES_FLAG_192                    0x000100

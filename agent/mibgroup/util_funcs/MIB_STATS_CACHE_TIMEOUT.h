@@ -1,5 +1,5 @@
 /*
- * util_funcs/MIB_STATS_CACHE_TIMEOUT.h:  utilitiy functions for extensible
+ * util_funcs/MIB_STATS_CACHE_TIMEOUT.h:  utility functions for extensible
  * groups.
  */
 #ifndef _MIBGROUP_UTIL_FUNCS_MIB_STATS_CACHE_TIMEOUT_H

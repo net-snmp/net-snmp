@@ -370,7 +370,7 @@ void
 proxy_free_filled_in_session_args(netsnmp_session *session, void **configured)
 {
 
-    /* Only do comparisions, etc., if something was configured */
+    /* Only do comparisons, etc., if something was configured */
     if (*configured == NULL) {
         return;
     }

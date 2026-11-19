@@ -462,7 +462,7 @@ icmp_stats(const char *name)
     struct stat_table icmpstats_tbl[] = {
         {1, "%14lu total message%s received"},
         {2, "%14lu message%s dropped due to errors"},
-        {14, "%14lu ouput message request%s"},
+        {14, "%14lu output message request%s"},
         {15, "%14lu output message%s discarded"},
         {0, ""}
     };

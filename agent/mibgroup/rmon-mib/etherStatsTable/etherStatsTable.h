@@ -184,7 +184,7 @@ extern          "C" {
      *********************************************************************
      * TODO:115:o: |-> Review etherStatsTable undo context.
      * We're just going to use the same data structure for our
-     * undo_context. If you want to do something more efficent,
+     * undo_context. If you want to do something more efficient,
      * define your typedef here.
      */
     typedef etherStatsTable_data etherStatsTable_undo_data;

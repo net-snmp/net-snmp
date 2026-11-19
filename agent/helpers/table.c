@@ -703,7 +703,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  * no point in continuing without indexes for set.
                  */
                 netsnmp_assert(reqinfo->mode == MODE_SET_RESERVE1);
-                /** clear first request so we wont try to run FREE mode */
+                /** clear first request so we won't try to run FREE mode */
                 netsnmp_free_request_data_sets(requests);
                 /** set actual error */
                 table_helper_cleanup(reqinfo, request, SNMP_ERR_NOCREATION);
