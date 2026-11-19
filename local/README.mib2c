@@ -58,7 +58,7 @@ These indicate you don't have write access to the portions of the mib
 tree that the test script is trying to use.  Please don't email the
 UCD-SNMP list with other errors regarding the SNMP.pm module.
 comp.lang.perl.modules is probably the most appropriate spot to
-discuss problems with the SNMP.pm perl module itself. Interelated
+discuss problems with the SNMP.pm perl module itself. Interrelated
 problems between net-snmp and SNMP could be discussed on the net-snmp
 mailing lists though.
 
@@ -126,7 +126,7 @@ very large mib file.
 Examples:
 
 % mib2c interfaces
-outputing to interfaces.c and interfaces.h ...
+outputting to interfaces.c and interfaces.h ...
   depth: 3
   Number of Lines Created:
 178 interfaces.c
@@ -135,7 +135,7 @@ outputing to interfaces.c and interfaces.h ...
 Done.
 
 % mib2c mib-2                             # Don't ever do this.
-outputing to mib-2.c and mib-2.h ...
+outputting to mib-2.c and mib-2.h ...
   depth: 5
   Number of Lines Created:
 2783 mib-2.c
@@ -152,7 +152,7 @@ WHAT TO DO WITH THE CODE THAT GETS GENERATED
 
 	You will need to edit your generated code to work with your
 hardware.  For instance, if your MIB is for a refrigerator, you will need
-to write the code that talks to the refridgerator (through the serial
+to write the code that talks to the refrigerator (through the serial
 port, maybe?) in Fridge Protocol.
 
 	See the files in ./agent/mibgroup/examples/ and
@@ -172,7 +172,7 @@ It already needs changing, because the architecture has changed in the
 3.6 line (though its backwards compatible, I'd prefer to generate
 code from newer models than older ones).
 --------------------------------------
-	When I asked him to elaborate on the new 3.6 archictecture, all I
+	When I asked him to elaborate on the new 3.6 architecture, all I
 got was:
 --------------------------------------
 It hopefully will be in the new documentation about mib module api
@@ -204,7 +204,7 @@ Couldn't find mib reference: myEnterpriseOID
 you forgot to put the word "END" at the very end of your MIB.  (Uh...I'm
 not speaking from experience here.  Really.)
 
-ACKNOWLEGMENTS
+ACKNOWLEDGMENTS
 
 	Many thanks to the people on the UCD-SNMP mailing list
 (net-snmp-users@lists.sourceforge.net).  In particular, many thanks to

@@ -47,11 +47,11 @@
 
    These parameters passed are depending on the capabilities available for the
    AM33/AM34 development environment at the time of build. These parameter can be 
-   changed depending on the avialable capabilities and desired preferences.
+   changed depending on the available capabilities and desired preferences.
   
    You can use the below shell script directly to create Makefiles and other files.
-   This script also insttals all binaries ,libraries in usr directory in the directory 
-   in which this scrip executed.
+   This script also installs all binaries ,libraries in usr directory in the directory 
+   in which this script executed.
 
 # configure.am33 
 #--------------------------------------------------------------------------

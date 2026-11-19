@@ -946,7 +946,7 @@ The following registry keys are used by snmpd and snmptrapd:
 HKLM\SYSTEM\CurrentControlSet\Services\Net-SNMP Agent
 HKLM\SYSTEM\CurrentControlSet\Services\Net-SNMP Trap Handler
 
-Each command line option specified when regsitering the service will be added
+Each command line option specified when registering the service will be added
 to the Parameters registry subkey for the service as a ParamX REG_SZ value
 where X starts at 1 and increments for each additional command line option.
 For example, '-Lf c:/usr/log/snmptrapd.log' would be:

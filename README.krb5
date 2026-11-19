@@ -28,7 +28,7 @@ ksmChecksumType is an integer which corresponded to the checksum algorithm
 used to secure this message as defined by Kerberos (see section 8.3 of
 RFC1510).
 
-ksmChecksum is the output of the checksum algoritm defined by ksmChecksumtype
+ksmChecksum is the output of the checksum algorithm defined by ksmChecksumtype
 (with all NULs in the space for the checksum).
 
 ksmKerberosMsg is a Kerberos 5 AP_REQ or AP_REP message, depending on
@@ -130,7 +130,7 @@ To actually USE the Kerberos Security Model, do the following:
    your Kerberos documentation.
 
    On the SNMP _agent_ side, you'll want to place in your snmpd.conf file
-   (the one that lives in /usr/local/share/snmp/snmpd.conf, or whereever
+   (the one that lives in /usr/local/share/snmp/snmpd.conf, or wherever
    you have configured on your system):
 
    rwuser -s ksm userid@YOUR.REALM

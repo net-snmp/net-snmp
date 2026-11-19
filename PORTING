@@ -54,12 +54,12 @@ Then in your source code:
     #include <headdir/header.h>
   #ENDIF
 
---- LIBRARY ROUTIENS
+--- LIBRARY ROUTINES
 
 In configure.in:
   AC_CHECK_LIB(libexample, example_function)
 
-Thats it.  The Makefiles will automatically link against -llibexample
+That's it.  The Makefiles will automatically link against -llibexample
 if example_function is found in the library.
 
 --- FUNCTION CHECKS
@@ -92,13 +92,13 @@ follow.  Please check them out.
 
 I'd be happy to help you through anything you don't understand or
 through more complex examples (eg, checking for structure parts or
-existance).  I'd be far less happy to get patches ignoring the above
+existence).  I'd be far less happy to get patches ignoring the above
 request.  If you simple can't abide by this, please send the patches
 anyway, but it'll just take me longer to get them applied.
 
 Submit the patch to http://www.net-snmp.org/patches/.
 Please include what version of the net-snmp package it was applied to
-and state the arcitectures you have tested it on.
+and state the architectures you have tested it on.
 
 Thanks a lot for the consideration,
 Wes

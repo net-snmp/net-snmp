@@ -903,7 +903,7 @@ retrieved from picld is cached for six seconds.
 10.  MIB rewrites for IF-MIB, TCP-MIB and UDP-MIB
 
 net-snmp 5.4 has started to include rewrites for the IF-MIB, TCP-MIB and
-UDP-MIB implementations. They need to be explicitely enabled, though:
+UDP-MIB implementations. They need to be explicitly enabled, though:
 
   ./configure --enable-mfd-rewrites ...
 
