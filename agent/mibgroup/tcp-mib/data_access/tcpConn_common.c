@@ -186,7 +186,7 @@ netsnmp_access_tcpconn_entry_set(netsnmp_tcpconn_entry * entry)
  * such as oid_index, ns_ia_index and flags are not compared.
  *
  * @retval -1  : error
- * @retval >=0 : number of fileds updated
+ * @retval >=0 : number of fields updated
  */
 int
 netsnmp_access_tcpconn_entry_update(netsnmp_tcpconn_entry *lhs,

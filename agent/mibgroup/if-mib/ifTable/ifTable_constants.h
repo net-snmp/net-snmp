@@ -104,7 +104,7 @@ extern          "C" {
  * ifType (IANAifType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  *
  * See also
  * https://www.iana.org/assignments/smi-numbers/smi-numbers.xhtml#smi-numbers-5
@@ -343,7 +343,7 @@ extern          "C" {
  * ifAdminStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IFADMINSTATUS_ENUMS
 #define IFADMINSTATUS_ENUMS
@@ -360,7 +360,7 @@ extern          "C" {
  * ifOperStatus (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IFOPERSTATUS_ENUMS
 #define IFOPERSTATUS_ENUMS

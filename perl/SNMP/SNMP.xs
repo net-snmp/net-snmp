@@ -310,7 +310,7 @@ int *block;
       timersub(itvp,ctvp,ctvp);
    }
 
-   /* flag is set for callback but still hasnt fired so set to something
+   /* flag is set for callback but still hasn't fired so set to something
     * small and we will service packets first if there are any ready
     * (also guard against negative timeout - should never happen?)
     */
@@ -729,7 +729,7 @@ char * str;
    return SUCCESS;
 }
 
-/* does a destructive disection of <label1>...<labeln>.<iid> returning
+/* does a destructive dissection of <label1>...<labeln>.<iid> returning
    <labeln> and <iid> in separate strings (note: will destructively
    alter input string, 'name') */
 static int
@@ -761,7 +761,7 @@ int flag;
       while (lcp > name) {
        if (*lcp == '.') {
 
-          /* If this is the first occurence of '.', note it in icp.
+          /* If this is the first occurrence of '.', note it in icp.
           ** Otherwise, this must be the second occurrence, so break
           ** out of the loop.
           */
@@ -976,7 +976,7 @@ int    best_guess;
 /* function: __concat_oid_str
  *
  * This function converts a dotted-decimal string, soid_str, to an array
- * of oid types and concatenates them on doid_arr begining at the index
+ * of oid types and concatenates them on doid_arr beginning at the index
  * specified by doid_arr_len.
  *
  * returns : SUCCESS, FAILURE
@@ -1268,7 +1268,7 @@ __snmp_xs_cb(int op, netsnmp_session *ss, int reqid, netsnmp_pdu *pdu,
   sv_setiv(*err_num_svp, pdu->errstat);
   sv_setiv(*err_ind_svp, pdu->errindex);
 
-  varlist_ref = &sv_undef;	/* Prevent unintialized use below. */
+  varlist_ref = &sv_undef;	/* Prevent uninitialized use below. */
 
   switch (op) {
   case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
@@ -2040,7 +2040,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 	 ** pix == 0. But if 1st repeater is ignored we can get wrong results,
 	 ** because it was not included in 2nd and later request. So we set
 	 ** expect to repbase-1 and then search for 1st non-ignored repeater.
-	 ** repbase-1 is nessessary because we're starting search in loop below
+	 ** repbase-1 is necessary because we're starting search in loop below
 	 ** from ++expect and it will be exactly repbase on 1st search pass.
 	 */
 	 if (pix == 0)
@@ -2144,7 +2144,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 
 	 /* This non-repeater has now been seen, so mark the sub-tree as
 	 ** completed.  Note that this may not be the same oid as requested,
-	 ** since non-repeaters act like GETNEXT requests, not GET's. <sigh>
+	 ** since non-repeaters act like GETNEXT requests, not gets. <sigh>
 	 */
 	 context->req_oids[pix].complete = 1;
 	 context->req_remain --;
@@ -2259,7 +2259,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    ** exist, consider it a fatal error.
    */
    if ((context->pkts_exch == 1) && (context->oid_saved < context->non_reps)) {
-      /* Re-use space from the value string for error message. */
+      /* Reuse space from the value string for error message. */
       snprintf(str_buf, sizeof(str_buf), "%d non-repeaters went unanswered",
                context->non_reps);
       sv_setpv(*err_str_svp, str_buf);
@@ -2325,7 +2325,7 @@ _bulkwalk_finish(walk_context *context, int okay)
 #else
    /* unfortunately this may pop a mark, which is not what we want */
    /* older perl versions don't declare dITEMS though and the
-      following declars it but also uses dAXMARK instead of dMARK
+      following declares it but also uses dAXMARK instead of dMARK
       which is the bad popping version */
    dMARK;
 
@@ -2969,7 +2969,7 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
                    warn("snmp_update_session: Unsupported SNMP version (%s)\n", version);
                 goto update_end;
 	   }
-           /* WARNING LEAKAGE but I cant free lib memory under win32 */
+           /* WARNING LEAKAGE but I can't free lib memory under win32 */
            ss->community_len = strlen((char *)community);
            ss->community = (u_char *)netsnmp_strdup(community);
 	   ss->peername = netsnmp_strdup(peer);

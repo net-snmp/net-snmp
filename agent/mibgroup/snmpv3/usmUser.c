@@ -1208,7 +1208,7 @@ write_usmUserPrivProtocol(int action,
 /*
  * Note: This function handles both the usmUserPrivKeyChange and
  *       usmUserOwnPrivKeyChange objects.  We are not passed the name
- *       of the user requseting the keychange, so we leave this to the
+ *       of the user requesting the keychange, so we leave this to the
  *       calling module to verify when and if we should be called.  To
  *       change this would require a change in the mib module API to
  *       pass in the securityName requesting the change.

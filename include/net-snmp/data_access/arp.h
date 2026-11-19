@@ -25,7 +25,7 @@ extern          "C" {
  * inetNetToMediaType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef inetNetToMediaType_ENUMS
 #define inetNetToMediaType_ENUMS
@@ -43,7 +43,7 @@ extern          "C" {
  * inetNetToMediaState (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redifinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef inetNetToMediaState_ENUMS
 #define inetNetToMediaState_ENUMS

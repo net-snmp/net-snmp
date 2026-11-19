@@ -23,7 +23,7 @@
  *          subject to change at any time.
  *
  * A basic container template. A generic way for code to store and
- * retrieve data. Allows for interchangable storage algorithms.
+ * retrieve data. Allows for interchangeable storage algorithms.
  */
 #ifndef NET_SNMP_CONFIG_H
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
@@ -99,7 +99,7 @@ extern "C" {
                                           void **data);
 
     /*
-     * function returning an oject for an operation on an object and a
+     * function returning an object for an operation on an object and a
      * container
      */
     typedef void * (netsnmp_container_rtn)(struct netsnmp_container_s *,
@@ -119,7 +119,7 @@ extern "C" {
 
     /*
      * function returning an array of objects for an operation on an
-     * ojbect and a container
+     * object and a container
      */
     typedef netsnmp_void_array * (netsnmp_container_set)
         (struct netsnmp_container_s *, void *data);
@@ -496,7 +496,7 @@ extern "C" {
     typedef int (netsnmp_iterator_rc)(struct netsnmp_iterator_s *);
 
     /*
-     * function returning an oject for an operation on an iterator
+     * function returning an object for an operation on an iterator
      */
     typedef void * (netsnmp_iterator_rtn)(struct netsnmp_iterator_s *);
 

@@ -325,7 +325,7 @@ netsnmp_save_all_data(netsnmp_data_list *head,
 
     for (; head; head = head->next) {
         if (head->name) {
-            /* save begining of line */
+            /* save beginning of line */
             snprintf(buf, sizeof(buf), "%s ", token);
             cp = buf + strlen(buf);
             cp = read_config_save_octet_string(cp, (u_char*)head->name,

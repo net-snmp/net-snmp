@@ -75,7 +75,7 @@ extern          "C" {
      *              SNMPERR_GENERR  Otherwise -and- invokes ENSURE_ENGINE_RECORD()
      *                                      to add an entry to the EngineID List.
      *
-     * XXX  Requres the following declaration in modules calling ISENGINEKNOWN():
+     * XXX  Requires the following declaration in modules calling ISENGINEKNOWN():
      *      static u_int    dummy_etime, dummy_eboot;
      */
 #define ISENGINEKNOWN(e, e_l)					\

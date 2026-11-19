@@ -106,7 +106,7 @@ typedef struct netsnmp_baby_steps_access_methods_s {
 /** @} */
 
 
-/** backwards compatability. don't use in new code */
+/** backwards compatibility. don't use in new code */
 #define netsnmp_get_baby_steps_handler netsnmp_baby_steps_handler_get
 #define netsnmp_init_baby_steps_helper netsnmp_baby_steps_handler_init
 

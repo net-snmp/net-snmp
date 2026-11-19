@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
     /*
-     * Declare our publically-visible functions.
+     * Declare our publicly-visible functions.
      * Typically, these will include the initialization and shutdown functions,
      *  the main request callback routine and any writeable object methods.
      *

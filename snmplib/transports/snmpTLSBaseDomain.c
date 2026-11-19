@@ -1256,7 +1256,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
      *
      * XXX: this should actually check for a configured list of encryption
      *      algorithms to map to NOPRIV, but for the moment we'll
-     *      accept any encryption alogrithms that openssl is using.
+     *      accept any encryption algorithms that openssl is using.
      */
     netsnmp_openssl_null_checks(tlsdata->ssl, &no_auth, &no_priv);
     if (no_auth == 1) { /* null/unknown authentication */

@@ -55,7 +55,7 @@ void            set_current_agent_session(netsnmp_agent_session *asp);
 /** @defgroup old_api old_api
  *  Calls mib module code written in the old style of code.
  *  @ingroup handler
- *  This is a backwards compatilibity module that allows code written
+ *  This is a backwards compatibility module that allows code written
  *  in the old API to be run under the new handler based architecture.
  *  Use it by calling netsnmp_register_old_api().
  *  @{

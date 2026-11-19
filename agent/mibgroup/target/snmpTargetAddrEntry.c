@@ -39,7 +39,7 @@ static unsigned long snmpTargetSpinLock = 0;
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
- * snmpTargetAddr_rowStatusCheck is boolean funciton that checks 
+ * snmpTargetAddr_rowStatusCheck is boolean function that checks 
  * the status of a row's values in order to determine whether
  * the row should be notReady or notInService.
  */
@@ -899,7 +899,7 @@ write_snmpTargetAddrStorageType(int action,
  * when a new row is required. It creates a new row with 
  * the index of the passed in 'name' (i.e. full index OID) and
  * adds it to the linked list. 'name' should be the full OID of the new index. 
- * It passes back 0 if unsuccessfull.
+ * It passes back 0 if unsuccessful.
  */
 int
 snmpTargetAddr_createNewRow(oid * name, size_t name_len)

@@ -63,7 +63,7 @@ agentx_synch_input(int op,
         return handle_agentx_packet(op, session, reqid, pdu, magic);
     }
 
-    DEBUGMSGTL(("agentx/subagent", "synching input, op 0x%02x\n", op));
+    DEBUGMSGTL(("agentx/subagent", "syncing input, op 0x%02x\n", op));
     state->waiting = 0;
     if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
         if (pdu->command == AGENTX_MSG_RESPONSE) {

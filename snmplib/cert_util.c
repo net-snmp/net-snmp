@@ -276,7 +276,7 @@ netsnmp_certs_load(void)
     DEBUGMSGT(("cert:util:init","init\n"));
 
     if (NULL == _certs) {
-        snmp_log(LOG_ERR, "cant load certs without container\n");
+        snmp_log(LOG_ERR, "can't load certs without container\n");
         return;
     }
 
@@ -1889,7 +1889,7 @@ netsnmp_cert_find(int what, int where, void *hint)
                 fp =
                     netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                           NETSNMP_DS_LIB_TLS_LOCAL_CERT);
-                /** temp backwards compability; remove in 5.7 */
+                /** temp backwards compatibility; remove in 5.7 */
                 if (!fp) {
                     int           tmp;
                     tmp = (ptrdiff_t)hint;
@@ -1910,7 +1910,7 @@ netsnmp_cert_find(int what, int where, void *hint)
             case NS_CERT_REMOTE_PEER:
                 fp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                            NETSNMP_DS_LIB_TLS_PEER_CERT);
-                /** temp backwards compability; remove in 5.7 */
+                /** temp backwards compatibility; remove in 5.7 */
                 if (!fp)
                     fp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                                NETSNMP_DS_LIB_X509_SERVER_PUB);

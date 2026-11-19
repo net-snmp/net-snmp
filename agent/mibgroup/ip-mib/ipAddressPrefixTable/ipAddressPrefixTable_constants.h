@@ -65,7 +65,7 @@ extern          "C" {
  * ipAddressPrefixType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -85,7 +85,7 @@ extern          "C" {
  * ipAddressPrefixOrigin (IpAddressPrefixOriginTC / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPADDRESSPREFIXORIGINTC_ENUMS
 #define IPADDRESSPREFIXORIGINTC_ENUMS
@@ -104,7 +104,7 @@ extern          "C" {
  * ipAddressPrefixOnLinkFlag (TruthValue / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TRUTHVALUE_ENUMS
 #define TRUTHVALUE_ENUMS
@@ -120,7 +120,7 @@ extern          "C" {
  * ipAddressPrefixAutonomousFlag (TruthValue / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef TRUTHVALUE_ENUMS
 #define TRUTHVALUE_ENUMS

@@ -2,7 +2,7 @@
 #define SNMPV3MIBS_H
 
 /*
- * snmpv3mibs.h: mib module to include the modules relavent to the
+ * snmpv3mibs.h: mib module to include the modules relevant to the
  * snmpv3 mib(s) 
  */
 

@@ -85,7 +85,7 @@ extern          "C" {
  * ipAddressAddrType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -100,7 +100,7 @@ extern          "C" {
 #endif                          /* INETADDRESSTYPE_ENUMS */
 
     /*
-     * TODO:140:o: Define your interal representation of ipAddressAddrType enums.
+     * TODO:140:o: Define your internal representation of ipAddressAddrType enums.
      * (used for value mapping; see notes at top of file)
      *
      * simplistic map of address length to type
@@ -114,7 +114,7 @@ extern          "C" {
  * ipAddressType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPADDRESSTYPE_ENUMS
 #define IPADDRESSTYPE_ENUMS
@@ -131,7 +131,7 @@ extern          "C" {
  * ipAddressOrigin (IpAddressOriginTC / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPADDRESSORIGINTC_ENUMS
 #define IPADDRESSORIGINTC_ENUMS
@@ -150,7 +150,7 @@ extern          "C" {
  * ipAddressStatus (IpAddressStatusTC / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef IPADDRESSSTATUSTC_ENUMS
 #define IPADDRESSSTATUSTC_ENUMS
@@ -171,7 +171,7 @@ extern          "C" {
  * ipAddressRowStatus (RowStatus / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ROWSTATUS_ENUMS
 #define ROWSTATUS_ENUMS
@@ -191,7 +191,7 @@ extern          "C" {
  * ipAddressStorageType (StorageType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef STORAGETYPE_ENUMS
 #define STORAGETYPE_ENUMS

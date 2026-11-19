@@ -1,12 +1,12 @@
 /*
- * util_funcs/get_pid_from_inode.h:  utilitiy function to retrieve the pid
+ * util_funcs/get_pid_from_inode.h:  utility function to retrieve the pid
  * that controls a given inode on linux.
  */
 #ifndef NETSNMP_MIBGROUP_UTIL_FUNCS_GET_PID_FROM_INODE_H
 #define NETSNMP_MIBGROUP_UTIL_FUNCS_GET_PID_FROM_INODE_H
 
 #ifndef linux
-config_error(get_pid_from_inode is only suppored on linux);
+config_error(get_pid_from_inode is only supported on linux);
 #endif
 
 #define _LARGEFILE64_SOURCE 1

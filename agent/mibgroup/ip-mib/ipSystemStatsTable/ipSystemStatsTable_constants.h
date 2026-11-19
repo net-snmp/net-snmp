@@ -139,7 +139,7 @@ extern          "C" {
  * ipSystemStatsIPVersion (InetVersion / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETVERSION_ENUMS
 #define INETVERSION_ENUMS

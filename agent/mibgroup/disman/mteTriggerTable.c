@@ -1671,7 +1671,7 @@ write_mteTriggerComment(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerComment;
         tmplen = StorageTmp->mteTriggerCommentLen;
@@ -1758,7 +1758,7 @@ write_mteTriggerTest(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerTest;
         tmplen = StorageTmp->mteTriggerTestLen;
@@ -1846,7 +1846,7 @@ write_mteTriggerSampleType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerSampleType;
         StorageTmp->mteTriggerSampleType = *((long *) var_val);
@@ -1930,7 +1930,7 @@ write_mteTriggerValueID(int action,
         /*
          * The variable has been stored in objid for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerValueID;
         tmplen = StorageTmp->mteTriggerValueIDLen;
@@ -2024,7 +2024,7 @@ write_mteTriggerValueIDWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerValueIDWildcard;
         StorageTmp->mteTriggerValueIDWildcard = *((long *) var_val);
@@ -2108,7 +2108,7 @@ write_mteTriggerTargetTag(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerTargetTag;
         tmplen = StorageTmp->mteTriggerTargetTagLen;
@@ -2197,7 +2197,7 @@ write_mteTriggerContextName(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerContextName;
         tmplen = StorageTmp->mteTriggerContextNameLen;
@@ -2287,7 +2287,7 @@ write_mteTriggerContextNameWildcard(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerContextNameWildcard;
         StorageTmp->mteTriggerContextNameWildcard = *((long *) var_val);
@@ -2370,7 +2370,7 @@ write_mteTriggerFrequency(int action,
         /*
          * The variable has been stored in ulong_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerFrequency;
         StorageTmp->mteTriggerFrequency = *((unsigned long *) var_val);
@@ -2458,7 +2458,7 @@ write_mteTriggerObjectsOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerObjectsOwner;
         tmplen = StorageTmp->mteTriggerObjectsOwnerLen;
@@ -2548,7 +2548,7 @@ write_mteTriggerObjects(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerObjects;
         tmplen = StorageTmp->mteTriggerObjectsLen;
@@ -2636,7 +2636,7 @@ write_mteTriggerEnabled(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerEnabled;
         StorageTmp->mteTriggerEnabled = *((long *) var_val);
@@ -2842,7 +2842,7 @@ write_mteTriggerEntryStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 

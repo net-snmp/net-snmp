@@ -486,7 +486,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
 
         if (NULL == name) {
             DEBUGMSGT(("access:ipaddress:set",
-                       "cant find name for index %" NETSNMP_PRIo "d\n",
+                       "can't find name for index %" NETSNMP_PRIo "d\n",
                        entry->if_index));
             close(fd);
             return -1;

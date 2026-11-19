@@ -751,7 +751,7 @@ sc_get_openssl_privfn(int priv_type)
  *	 keylen		Length of key in bytes.
  *	*message	Pointer to the message to hash.
  *	 msglen		Length of the message.
- *	*MAC		Will be returned with allocated bytes containg hash.
+ *	*MAC		Will be returned with allocated bytes containing hash.
  *	*maclen		Length of the hash buffer in bytes; also indicates
  *				whether the MAC should be truncated.
  *      
@@ -1217,7 +1217,7 @@ _SCAPI_NOT_CONFIGURED
  *
  * Encrypt plaintext into ciphertext using key and iv.
  *
- * ctlen contains actual number of crypted bytes in ciphertext upon
+ * ctlen contains actual number of encrypted bytes in ciphertext upon
  * successful return.
  */
 int

@@ -1199,7 +1199,7 @@ subagent_register_ping_alarm(int majorID, int minorID,
                     "register ping alarm every %d seconds\n",
                     ping_interval));
         /*
-         * we re-use the securityModel parameter for an alarm stash,
+         * we reuse the securityModel parameter for an alarm stash,
          * since agentx doesn't need it 
          */
         ss->securityModel = snmp_alarm_register(ping_interval, SA_REPEAT,

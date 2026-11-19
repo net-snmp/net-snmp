@@ -642,7 +642,7 @@ _kul_extend_reeder(int needKeyLen, oid *hashoid, u_int hashoid_len,
  * will be freed.
  *
  * Parameters:
- *       neededKeyLen   The neede key length
+ *       neededKeyLen   The needed key length
  *      *hashoid        MIB OID for the hash transform type.
  *       hashoid_len    Length of the MIB OID hash transform type.
  *       privType       Privacy algorithm type

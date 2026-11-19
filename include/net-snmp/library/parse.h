@@ -220,7 +220,7 @@ SOFTWARE.
     struct tree    *find_best_tree_node(const char *, struct tree *,
                                         u_int *);
     /*
-     * backwards compatability 
+     * backwards compatibility 
      */
     NETSNMP_IMPORT
     struct tree    *find_node(const char *, struct tree *);

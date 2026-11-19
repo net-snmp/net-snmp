@@ -287,7 +287,7 @@ write_mteTriggerBooleanComparison(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanComparison;
         StorageTmp->mteTriggerBooleanComparison = *((long *) var_val);
@@ -371,7 +371,7 @@ write_mteTriggerBooleanValue(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanValue;
         StorageTmp->mteTriggerBooleanValue = *((long *) var_val);
@@ -455,7 +455,7 @@ write_mteTriggerBooleanStartup(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanStartup;
         StorageTmp->mteTriggerBooleanStartup = *((long *) var_val);
@@ -541,7 +541,7 @@ write_mteTriggerBooleanObjectsOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanObjectsOwner;
         tmplen = StorageTmp->mteTriggerBooleanObjectsOwnerLen;
@@ -631,7 +631,7 @@ write_mteTriggerBooleanObjects(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanObjects;
         tmplen = StorageTmp->mteTriggerBooleanObjectsLen;
@@ -722,7 +722,7 @@ write_mteTriggerBooleanEventOwner(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanEventOwner;
         tmplen = StorageTmp->mteTriggerBooleanEventOwnerLen;
@@ -812,7 +812,7 @@ write_mteTriggerBooleanEvent(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->mteTriggerBooleanEvent;
         tmplen = StorageTmp->mteTriggerBooleanEventLen;

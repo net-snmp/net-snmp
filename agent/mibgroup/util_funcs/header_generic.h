@@ -1,5 +1,5 @@
 /*
- *  util_funcs/header_generic.h:  utilitiy functions for extensible groups.
+ *  util_funcs/header_generic.h:  utility functions for extensible groups.
  */
 #ifndef _MIBGROUP_UTIL_FUNCS_HEADER_GENERIC_H
 #define _MIBGROUP_UTIL_FUNCS_HEADER_GENERIC_H

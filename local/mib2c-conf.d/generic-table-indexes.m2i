@@ -48,7 +48,7 @@ typedef struct ${context}_mib_index_s {
 @    if $m2c_gi_warn == 1@
      *
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+     * POSSIBLE LENGTH FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len($context.oidlength)
 @        if $m2c_gi_len > 126@
 @            eval $m2c_gi_len = 126 - $context.oidlength@

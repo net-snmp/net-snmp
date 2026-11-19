@@ -101,7 +101,7 @@ pass_persist_group(struct extensible *persistpassthrus)
    struct extensible *ptmp, *ptmp1;
 
    /*
-    * reset groupping
+    * reset grouping
     */
    for (ptmp = persistpassthrus; ptmp != NULL; ptmp = ptmp->next) {
       ptmp->passpersist_inst = NULL;

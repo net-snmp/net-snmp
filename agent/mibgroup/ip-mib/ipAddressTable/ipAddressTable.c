@@ -443,7 +443,7 @@ ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
  * @retval MFD_ERROR       : other error.
  *
  * @remark
- *  This function sets the mib indexs, then updates the oid indexs
+ *  This function sets the mib indexes, then updates the oid indexes
  *  from the mib index.
  */
 int
@@ -1507,7 +1507,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * find name for ifIndex
      */
     if (NULL == netsnmp_access_interface_name_find(ipAddressIfIndex_val)) {
-        DEBUGMSGT(("ipAddressTable", "cant find name for index %ld\n",
+        DEBUGMSGT(("ipAddressTable", "can't find name for index %ld\n",
                    ipAddressIfIndex_val));
         return MFD_NOT_VALID_NOW;
     }

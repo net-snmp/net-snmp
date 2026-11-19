@@ -86,7 +86,7 @@ dot3StatsTable_indexes_set_tbl_idx(dot3StatsTable_mib_index * tbl_idx,
  * @retval MFD_ERROR       : other error.
  *
  * @remark
- *  This function sets the mib indexs, then updates the oid indexs
+ *  This function sets the mib indexes, then updates the oid indexes
  *  from the mib index.
  */
 int
@@ -1036,13 +1036,13 @@ dot3StatsInternalMacReceiveErrors_get(dot3StatsTable_rowreq_ctx *
                     which identifies the chipset used to
                     realize the interface. Ethernet-like
                     interfaces are typically built out of
-                    several different chips. The MIB implementor
+                    several different chips. The MIB implementer
                     is presented with a decision of which chip
-                    to identify via this object. The implementor
+                    to identify via this object. The implementer
                     should identify the chip which is usually
                     called the Medium Access Control chip.
                     If no such chip is easily identifiable,
-                    the implementor should identify the chip
+                    the implementer should identify the chip
                     which actually gathers the transmit
                     and receive statistics and error
                     indications. This would allow a

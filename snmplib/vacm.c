@@ -1182,7 +1182,7 @@ vacm_is_configured(void)
 }
 
 /*
- * backwards compatability
+ * backwards compatibility
  */
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,

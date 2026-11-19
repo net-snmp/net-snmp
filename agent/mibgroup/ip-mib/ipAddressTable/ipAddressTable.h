@@ -82,7 +82,7 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
      *********************************************************************
      * TODO:115:o: |-> Review ipAddressTable undo context.
      * We're just going to use the same data structure for our
-     * undo_context. If you want to do something more efficent,
+     * undo_context. If you want to do something more efficient,
      * define your typedef here.
      */
     typedef ipAddressTable_data ipAddressTable_undo_data;
@@ -114,7 +114,7 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access);
      * length, update this macro to that length.
      *
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+     * POSSIBLE LENGTH FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(8)
      */
 #define MAX_ipAddressTable_IDX_LEN     118

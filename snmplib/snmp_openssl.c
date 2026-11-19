@@ -1027,7 +1027,7 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
                                                        NULL);
             break;
         default:
-            snmp_log(LOG_ERR, "cant extract secname for unknown map type %d\n",
+            snmp_log(LOG_ERR, "can't extract secname for unknown map type %d\n",
                      cert_map->mapType);
             break;
     } /* switch mapType */

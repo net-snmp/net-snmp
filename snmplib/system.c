@@ -281,7 +281,7 @@ int
 netsnmp_daemonize(int quit_immediately, int stderr_log)
 {
     int i = 0;
-    DEBUGMSGT(("daemonize","deamonizing...\n"));
+    DEBUGMSGT(("daemonize","daemonizing...\n"));
 #ifdef HAVE_FORK
 #ifdef HAVE__NSGETEXECUTABLEPATH
      char            path [PATH_MAX] = "";

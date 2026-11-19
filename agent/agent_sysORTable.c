@@ -138,7 +138,7 @@ unregister_sysORTable_sess(oid * oidin,
     }
 
     if (any_unregistered) {
-        DEBUGMSGTL(("agent/sysORTable", "unregistering successfull\n"));
+        DEBUGMSGTL(("agent/sysORTable", "unregistering successful\n"));
         return SYS_ORTABLE_UNREGISTERED_OK;
     } else {
         DEBUGMSGTL(("agent/sysORTable", "unregistering failed\n"));

@@ -350,7 +350,7 @@ allocate_idx_list(netsnmp_session * session, netsnmp_pdu *pdu)
      *  If any allocations fail, then we need to
      *    *fully* release the earlier ones.
      *  (i.e. remove them completely from the index registry,
-     *    not simply mark them as available for re-use)
+     *    not simply mark them as available for reuse)
      *
      * For now - assume they all succeed.
      */

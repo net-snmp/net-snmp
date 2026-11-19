@@ -134,7 +134,7 @@ _set_address(struct _if_info *cur_if)
 
     /*
      *  Note that this information only needs to be retrieved
-     *    once, and can be re-used for subsequent calls.
+     *    once, and can be reused for subsequent calls.
      */
     if (addr_if_var == NULL) {
         ipaddr_oid[9] = 2;      /* ipAdEntIfIndex */
@@ -167,7 +167,7 @@ _set_address(struct _if_info *cur_if)
                  vp2->name[11], vp2->name[12], vp2->name[13]);
 
         /*
-         * But re-use the routing table utilities/code for
+         * But reuse the routing table utilities/code for
          *   displaying the local network information
          */
         cp = tmpAddr.data;

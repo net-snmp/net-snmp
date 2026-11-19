@@ -309,7 +309,7 @@ ipAddressPrefixTable_indexes_set_tbl_idx(ipAddressPrefixTable_mib_index *
  * @retval MFD_ERROR       : other error.
  *
  * @remark
- *  This function sets the mib indexs, then updates the oid indexs
+ *  This function sets the mib indexes, then updates the oid indexes
  *  from the mib index.
  */
 int

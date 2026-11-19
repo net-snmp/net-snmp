@@ -1,5 +1,5 @@
 /*
- * This header is here to accomodate cross compiling for
+ * This header is here to accommodate cross compiling for
  * Microsoft Windows on a linux host using MinGW. All changes
  * should be made to mingw32.h - Andy
  */

@@ -857,7 +857,7 @@ _find_next_row(netsnmp_container *c,
 }
 
 /**
- * deprecated, backwards compatability only
+ * deprecated, backwards compatibility only
  *
  * expected impact to remove: none
  *  - used between helpers, shouldn't have been used by end users

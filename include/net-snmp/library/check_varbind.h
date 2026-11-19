@@ -6,7 +6,7 @@ extern          "C" {
 #endif
 
     /*
-     * Assorted convience routines to check the contents of a
+     * Assorted convenience routines to check the contents of a
      * netsnmp_variable_list instance.
      */
 

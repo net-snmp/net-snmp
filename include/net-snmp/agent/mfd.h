@@ -57,7 +57,7 @@
  **********************************************************************/
 
 /*----------------------------------------------------------------------
- * 8 flags resevered for the user
+ * 8 flags reserved for the user
  */
 #define MFD_ROW_FLAG_USER_1            0x00000001 /* user flag 1 */
 #define MFD_ROW_FLAG_USER_2            0x00000002 /* user flag 2 */

@@ -57,7 +57,7 @@
 #define NETSNMP_DEFAULT_MIBS "IP-MIB;IF-MIB;TCP-MIB;UDP-MIB;HOST-RESOURCES-MIB;SNMPv2-MIB;RFC1213-MIB;NOTIFICATION-LOG-MIB;UCD-SNMP-MIB;UCD-DEMO-MIB;SNMP-TARGET-MIB;NET-SNMP-AGENT-MIB;DISMAN-EVENT-MIB;SNMP-VIEW-BASED-ACM-MIB;SNMP-COMMUNITY-MIB;SNMP-FRAMEWORK-MIB;SNMP-MPD-MIB;SNMP-USER-BASED-SM-MIB;SNMP-NOTIFICATION-MIB;SNMPv2-TM"
 
 /* default location to look for mibs to load using the above tokens
-   and/or those in the MIBS envrionment variable*/
+   and/or those in the MIBS environment variable*/
 #define NETSNMP_DEFAULT_MIBDIRS INSTALL_BASE ## "/share/snmp/mibs"
 
 /* default mib files to load, specified by path. */
@@ -1287,7 +1287,7 @@
 #define NETSNMP_DOT_MIB         1.3.6.1.4.1.8072
 #define NETSNMP_DOT_MIB_LENGTH  7
 
-/* how long to wait (seconds) for error querys before reseting the error trap.*/
+/* how long to wait (seconds) for a query error before resetting the error trap.*/
 #define NETSNMP_ERRORTIMELENGTH 600
 
 /* Exec command to fix PROC problems */

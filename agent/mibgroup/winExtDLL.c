@@ -1919,7 +1919,7 @@ xarray_erase(xarray * a, void *const elem)
  * Change the number of allocated elements to 'reserved'.
  *
  * Can be used either for enlarging or for shrinking the memory allocated for
- * 'a'. Does not modify 'a' if memory allocation fails. Newly allocted memory
+ * 'a'. Does not modify 'a' if memory allocation fails. Newly allocated memory
  * is not initialized.
  *
  * @return != NULL upon success, NULL upon failure.

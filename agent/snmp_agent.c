@@ -1010,7 +1010,7 @@ netsnmp_addrcache_add(const char *addr)
 /*
  * Age the entries in the address cache.  
  *
- * backwards compatability; not used anywhere
+ * backwards compatibility; not used anywhere
  */
 #ifndef NETSNMP_FEATURE_REMOVE_ADDRCACHE_AGE
 void
@@ -3420,7 +3420,7 @@ check_getnext_results(netsnmp_agent_session *asp)
                  * I'm not sure why inclusive is set unconditionally here (see
                  * comments for revision 1.161), but it causes a problem for
                  * GETBULK over an overridden variable. The bulk-to-next
-                 * handler re-uses the same request for multiple varbinds,
+                 * handler reuses the same request for multiple varbinds,
                  * and once inclusive was set, it was never cleared. So, a
                  * hack. Instead of setting it to 1, set it to 2, so bulk-to
                  * next can clear it later. As of the time of this hack, all

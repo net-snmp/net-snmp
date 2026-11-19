@@ -1,5 +1,5 @@
 /*
- * util_funcs/header_simple_table.h:  utilitiy functions for extensible
+ * util_funcs/header_simple_table.h:  utility functions for extensible
  * groups.
  */
 #ifndef _MIBGROUP_UTIL_FUNCS_HEADER_SIMPLE_TABLE_H

@@ -1470,7 +1470,7 @@ int netsnmp_query_walk(netsnmp_variable_list *list,
 
         /*
          * Copy each response varbind to the end of the result list
-         * and then re-use this to ask for the next entry.
+         * and then reuse this to ask for the next entry.
          */
         if ( res_last ) {
             res_last->next_variable = snmp_clone_varbind( vb );

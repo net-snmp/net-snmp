@@ -1042,7 +1042,7 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
 		    req_type = GET_FIRST;
 		result = getentry(req_type, (void *) strbuf.buf, strbuf.len,
 				  entrysize, resp, comp, arg);
-		*length = strbuf.len;       /* To use in caller for cacheing */
+		*length = strbuf.len;       /* To use in caller for caching */
 		break;
 	    }
 	} while (rc == MOREDATA && result != FOUND);

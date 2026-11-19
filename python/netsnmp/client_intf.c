@@ -478,7 +478,7 @@ __get_label_iid(char *name, const char **last_label, const char **iid, int flag)
 /* function: __concat_oid_str
  *
  * This function converts a dotted-decimal string, soid_str, to an array
- * of oid types and concatenates them on doid_arr begining at the index
+ * of oid types and concatenates them on doid_arr beginning at the index
  * specified by doid_arr_len.
  *
  * returns : SUCCESS, FAILURE

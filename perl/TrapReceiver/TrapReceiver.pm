@@ -130,7 +130,7 @@ trap was received (what version of the SNMP protocol was used, where
 it came from, what SNMP user name or community name it was sent under,
 etc).  The second argument is a reference to an array containing the
 variable bindings (OID and value information) that define the
-noification itself.  Each variable is itself a reference to an array
+notification itself.  Each variable is itself a reference to an array
 containing four values: a NetSNMP::OID object, a string representation
 of the value that came associated with it, the value's numeric type (see
 NetSNMP::ASN for further details on SNMP typing information), and the raw
@@ -213,7 +213,7 @@ Then, put the following line in your snmprapd.conf file:
 
   perl do "/usr/local/share/snmp/mytrapd.pl";
 
-Start snmptrapd (as root, and the following other opions make it stay
+Start snmptrapd (as root, and the following other options make it stay
 in the foreground and log to stderr):
 
   snmptrapd -f -Le

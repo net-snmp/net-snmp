@@ -83,7 +83,7 @@ config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access);
      *********************************************************************
      * TODO:115:o: |-> Review ipCidrRouteTable undo context.
      * We're just going to use the same data structure for our
-     * undo_context. If you want to do something more efficent,
+     * undo_context. If you want to do something more efficient,
      * define your typedef here.
      */
     typedef ipCidrRouteTable_data ipCidrRouteTable_undo_data;

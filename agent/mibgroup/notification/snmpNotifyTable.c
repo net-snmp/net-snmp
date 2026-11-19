@@ -304,7 +304,7 @@ snmpTagValid(const char *tag, const size_t tagLen)
     for (i = 0; i < tagLen; i++) {
         if (is_delim(tag[i])) {
             /*
-             * Delimeters aren't allowed.  
+             * Delimiters aren't allowed.  
              */
             return 0;
         }

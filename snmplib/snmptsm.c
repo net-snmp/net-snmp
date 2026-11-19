@@ -278,7 +278,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                prefix in the securityName, or the prefix returned does
                not match the prefix in the securityName, or the length
                of the prefix is less than 1 or greater than 4 US-ASCII
-               alpha-numeric characters, then the
+               alphanumeric characters, then the
                snmpTsmInvalidPrefixes counter is incremented, an error
                indication is returned to the calling module, and
                message processing stops. */

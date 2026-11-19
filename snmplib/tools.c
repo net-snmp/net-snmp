@@ -369,7 +369,7 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
     return ret;
 }
 
-/** converts binary to hexidecimal
+/** converts binary to hexadecimal
  *
  *     @param *input            Binary data.
  *     @param len               Length of binary data.
@@ -422,7 +422,7 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
 
 }                               /* end netsnmp_binary_to_hex() */
 
-/** converts binary to hexidecimal
+/** converts binary to hexadecimal
  *
  *	@param *input		Binary data.
  *	@param len		Length of binary data.

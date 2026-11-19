@@ -967,7 +967,7 @@ _cache_load(netsnmp_cache *cache, void *q)
     map_itr = CONTAINER_ITERATOR(maps);
     if (NULL == map_itr) {
         DEBUGMSGTL(("tlstmCertToTSNTable:cache:load",
-                    "cant get map iterator\n"));
+                    "can't get map iterator\n"));
         return -1;
     }
 
@@ -1014,7 +1014,7 @@ _cache_free(netsnmp_cache *cache, void *q)
     tbl_itr = CONTAINER_ITERATOR(table->container);
     if (NULL == tbl_itr) {
         DEBUGMSGTL(("tlstmCertToTSNTable:cache:free",
-                    "cant get map iterator\n"));
+                    "can't get map iterator\n"));
         return;
     }
 
@@ -1182,7 +1182,7 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
         map_itr = CONTAINER_ITERATOR(maps);
         if (NULL == map_itr) {
             DEBUGMSGTL(("tlstmCertToTSNTable:save",
-                        "cant get map iterator\n"));
+                        "can't get map iterator\n"));
             map = NULL;
         }
         else
@@ -1204,7 +1204,7 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
      */
     tbl_itr = CONTAINER_ITERATOR(_table->container);
     if (NULL == tbl_itr)
-        DEBUGMSGTL(("tlstmCertToTSNTable:save", "cant get table iterator\n"));
+        DEBUGMSGTL(("tlstmCertToTSNTable:save", "can't get table iterator\n"));
     else {
         row = ITERATOR_FIRST(tbl_itr);
         for( ; row; row = ITERATOR_NEXT(tbl_itr)) {

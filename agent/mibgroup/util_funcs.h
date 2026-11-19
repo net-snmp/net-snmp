@@ -1,5 +1,5 @@
 /*
- *  util_funcs.h:  utilitiy functions for extensible groups.
+ *  util_funcs.h:  utility functions for extensible groups.
  */
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H

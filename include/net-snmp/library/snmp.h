@@ -41,7 +41,7 @@ SOFTWARE.
 #define SNMP_PORT	    161 /* standard UDP port for SNMP agents
                                  * to receive requests messages */
 #define SNMP_TRAP_PORT	    162 /* standard UDP port for SNMP
-                                 * managers to receive notificaion
+                                 * managers to receive notification
                                  * (trap and inform) messages */
 
 #define SNMP_MAX_LEN	    1500        /* typical maximum message size */
@@ -90,7 +90,7 @@ SOFTWARE.
      * * for SNMPv1, SNMPv2c, SNMPv2u, and SNMPv3 messages is the
      * * value of the message version field. Since SNMPsec, SNMPv2p,
      * * and SNMPv2* messages do not have a message version field,
-     * * the value in the defines for them is choosen to be a large
+     * * the value in the defines for them is chosen to be a large
      * * arbitrary number.
      * *
      * * Note that many of the version ID's are defined below purely for

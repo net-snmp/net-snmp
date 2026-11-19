@@ -1082,7 +1082,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
                  size_t * authParamsOffset,     /* Distance to auth bytes.                 */
                  size_t * privParamsOffset,     /* Distance to priv bytes.                 */
                  size_t * dataOffset,   /* Distance to scopedPdu SEQ  -or-  the
-                                         *   crypted (data) portion of msgData.    */
+                                         *   encrypted (data) portion of msgData.    */
                  size_t * datalen,      /* Size of msgData OCTET STRING encoding.  */
                  size_t * msgAuthParmLen,       /* Size of msgAuthenticationParameters.    */
                  size_t * msgPrivParmLen,       /* Size of msgPrivacyParameters.           */

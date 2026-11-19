@@ -286,7 +286,7 @@ write_snmpNotifyFilterProfileName(int action,
         /*
          * The variable has been stored in string for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         memcpy(StorageTmp->snmpNotifyFilterProfileName, var_val, var_val_len);
         StorageTmp->snmpNotifyFilterProfileNameLen = var_val_len;
@@ -366,7 +366,7 @@ write_snmpNotifyFilterProfileStorType(int action,
         /*
          * The variable has been stored in long_ret for
          * you to use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in the UNDO case 
+         * it.  Note that anything done here must be reversible in the UNDO case 
          */
         tmpvar = StorageTmp->snmpNotifyFilterProfileStorType;
         StorageTmp->snmpNotifyFilterProfileStorType = *((long *) var_val);
@@ -538,7 +538,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
         /*
          * The variable has been stored in set_value for you to
          * use, and you have just been asked to do something with
-         * it.  Note that anything done here must be reversable in
+         * it.  Note that anything done here must be reversible in
          * the UNDO case 
          */
 

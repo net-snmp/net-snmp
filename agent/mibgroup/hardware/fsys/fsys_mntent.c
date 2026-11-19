@@ -291,7 +291,7 @@ netsnmp_fsys_arch_load( void )
             entry->flags |= NETSNMP_FS_FLAG_BOOTABLE;
 
         /*
-         *  XXX - identify removeable disks
+         *  XXX - identify removable disks
          */
 
         /*

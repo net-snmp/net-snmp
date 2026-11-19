@@ -708,7 +708,7 @@ struct netsnmp_transport_s;
     /* this previously was end+1; don't know why the +1 is needed;
        XXX: check the code */
 #define  NETSNMP_STAT_MAX_STATS              (STAT_TLSTM_STATS_END+1)
-/** backwards compatability */
+/** backwards compatibility */
 #define MAX_STATS NETSNMP_STAT_MAX_STATS
 
     /*

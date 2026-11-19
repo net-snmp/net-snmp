@@ -288,7 +288,7 @@ ifTable_post_request(ifTable_registration * user_context, int rc)
  * @retval MFD_ERROR       : other error.
  *
  * @remark
- *  This function sets the mib indexs, then updates the oid indexs
+ *  This function sets the mib indexes, then updates the oid indexes
  *  from the mib index.
  */
 int

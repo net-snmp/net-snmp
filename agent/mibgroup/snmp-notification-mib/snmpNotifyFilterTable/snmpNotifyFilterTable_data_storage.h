@@ -24,7 +24,7 @@ extern          "C" {
 
     /*
      * BE VERY CAREFUL TO TAKE INTO ACCOUNT THE MAXIMUM
-     * POSSIBLE LENGHT FOR EVERY VARIABLE LENGTH INDEX!
+     * POSSIBLE LENGTH FOR EVERY VARIABLE LENGTH INDEX!
      * Guessing 128 - col/entry(2)  - oid len(9)
      */
 #define MAX_snmpNotifyFilterTable_IDX_LEN     117

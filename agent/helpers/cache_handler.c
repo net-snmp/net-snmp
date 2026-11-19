@@ -599,7 +599,7 @@ netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo,
 }
 
 /** Is the cache valid for a given request?
- * for backwards compatability. netsnmp_cache_is_valid() is preferred.
+ * for backwards compatibility. netsnmp_cache_is_valid() is preferred.
  */
 netsnmp_feature_child_of(netsnmp_is_cache_valid,netsnmp_unused);
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_IS_CACHE_VALID

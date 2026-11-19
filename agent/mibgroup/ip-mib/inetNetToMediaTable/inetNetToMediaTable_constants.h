@@ -78,7 +78,7 @@ extern          "C" {
  * inetNetToMediaNetAddressType (InetAddressType / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETADDRESSTYPE_ENUMS
 #define INETADDRESSTYPE_ENUMS
@@ -98,7 +98,7 @@ extern          "C" {
  * inetNetToMediaType (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETNETTOMEDIATYPE_ENUMS
 #define INETNETTOMEDIATYPE_ENUMS
@@ -117,7 +117,7 @@ extern          "C" {
  * inetNetToMediaState (INTEGER / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef INETNETTOMEDIASTATE_ENUMS
 #define INETNETTOMEDIASTATE_ENUMS
@@ -138,7 +138,7 @@ extern          "C" {
  * inetNetToMediaRowStatus (RowStatus / ASN_INTEGER)
  *
  * since a Textual Convention may be referenced more than once in a
- * MIB, protect againt redefinitions of the enum values.
+ * MIB, protect against redefinitions of the enum values.
  */
 #ifndef ROWSTATUS_ENUMS
 #define ROWSTATUS_ENUMS

@@ -1499,7 +1499,7 @@ find_best_tree_node_r(const char *pattrn, struct tree *tree_top,
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
                 find_best_tree_node_r(parsetree, tp->child_list, &new_match);
 #else
-                find_best_tree_node_r(pattrn, tp->child_list, &new_match);
+                find_best_tree_node_r(pattern, tp->child_list, &new_match);
 #endif
             if (new_match < old_match) {
                 best_so_far = retptr;
@@ -4276,7 +4276,7 @@ module_name(int modid, char *cp)
 }
 
 /*
- *  Backwards compatability
+ *  Backwards compatibility
  *  Read newer modules that replace the one specified:-
  *      either all of them (read_module_replacements),
  *      or those relating to a specified identifier (read_import_replacements)
@@ -5732,7 +5732,7 @@ add_mibdir(const char *dirname)
 
 /*
  * Returns the root of the whole tree
- *   (for backwards compatability)
+ *   (for backwards compatibility)
  */
 struct tree    *
 read_mib(const char *filename)
