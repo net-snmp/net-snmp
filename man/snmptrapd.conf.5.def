@@ -99,7 +99,7 @@ be used to allow unauthenticated notifications (\fInoauth\fR),
 or to require encryption (\fIpriv\fR), just as for the SNMP agent.
 .IP
 With both of these directives, the OID (or \fI\-v VIEW\fR) field
-can be used to retrict this configuration to the processing of
+can be used to restrict this configuration to the processing of
 particular notifications.
 .RS
 .IP "Note:"

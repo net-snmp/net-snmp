@@ -79,7 +79,7 @@ transport tcp:foo.example.com:9876
 .IP
 in the \fIhosts/foo.conf\fR file will make applications referencing
 the \fIfoo\fR hostname (e.g. \fIsnmpget\fR) to actually connect via
-TCP to \fIfoo.exmaple.com\fR on port 9876.
+TCP to \fIfoo.example.com\fR on port 9876.
 .IP "defVersion (1|2c|3)"
 defines the default version of SNMP to use.
 This can be overridden using the \fB\-v\fR option.
@@ -251,7 +251,7 @@ used security model for SNMPv3.
 define the (hexadecimal) keys to be used for SNMPv3 secure communications.
 SNMPv3 keys are frequently derived from a passphrase, as discussed in
 the \fIdefPassphrase\fR section above. However for improved security a
-truely random key can be generated and used instead (which would
+truly random key can be generated and used instead (which would
 normally has better entropy than a password unless it is
 amazingly long).
 The directives are equivalent to the short-form
@@ -324,7 +324,7 @@ of the buffer used when sending SNMP responses.
 .IP "sourceFilterType none|whitelist|blacklist"
 specifies whether or not addresses added with \fIsourceFilterAddress\fR are
 whitelisted or blacklisted. The default is none, indicating that incoming
-packets will not be checked agains the filter list.
+packets will not be checked against the filter list.
 .IP
 .IP "sourceFilterAddress ADDRESS"
 specifies an address to be added to the source address filter list.

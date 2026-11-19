@@ -32,7 +32,7 @@ agentAddress  udp:127.0.0.1:161
 #  createUser internalUser  MD5 "this is only ever used internally, but still change the password"
 
 #  If you also change the usernames (which might be sensible),
-#  then remember to update the other occurances in this example config file to match.
+#  then remember to update the other occurrences in this example config file to match.
 
 
 
@@ -164,7 +164,7 @@ linkUpDownNotifications  yes
 #  Walk the NET-SNMP-EXTEND-MIB tables (nsExtendConfigTable, nsExtendOutput1Table
 #     and nsExtendOutput2Table) to see the resulting output
 
-#  Note that the "extend" directive supercedes the previous "exec" and "sh" directives
+#  Note that the "extend" directive supersedes the previous "exec" and "sh" directives
 #  However, walking the UCD-SNMP-MIB::extTable should still returns the same output,
 #     as well as the fuller results in the above tables.
 

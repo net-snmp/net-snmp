@@ -251,7 +251,7 @@ A generic error occurred.
 The local port was bad because it had already been
 allocated or permission was denied.
 .IP SNMPERR_BAD_ADDRESS \w'SNMPERR_BAD_REPETITIONS'u+2n
-The host name or address given was not useable.
+The host name or address given was not usable.
 .IP SNMPERR_BAD_SESSION \w'SNMPERR_BAD_REPETITIONS'u+2n
 The specified session was not open.
 .IP SNMPERR_TOO_LONG \w'SNMPERR_BAD_REPETITIONS'u+2n

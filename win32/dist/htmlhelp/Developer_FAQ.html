@@ -139,7 +139,7 @@ If you get:
 
   perl: initializing perl (/usr/local/share/snmp/snmp_perl.pl)
   Can't open perl script "/usr/local/share/snmp/snmp_perl.pl": No such file or directory
-  embedded perl support failed to initalize
+  embedded perl support failed to initialize
 
 Then you need to locate snmp_perl.pl, and put it in the correct path, OR put
 the path in your snmpd.conf:
@@ -173,8 +173,8 @@ to. This may be OS specific. On Linux, if I put this in my snmpd.conf:
 	smuxsocket 1.0.0.0
 
 I get an error at startup, and lsof or netstat show that snmpd is no longer
-listenting on port 199. If you get and error message about the smuxsocket
-token not being recongnized, then you're out of luck. You'll have to recompile
+listening on port 199. If you get and error message about the smuxsocket
+token not being recognized, then you're out of luck. You'll have to recompile
 from source (or just use local firewall rules to block connections to port
 199).
  </pre>
@@ -201,7 +201,7 @@ then use --with-enterprise-oid
 
 Older Versions (4.2.x)
 ----------------------
-In older version, you have to manuall update the version_id in
+In older version, you have to manually update the version_id in
 agent/agent_trap.c:80
 
    oid version_id[]    = { EXTENSIBLEMIB, AGENTID, OSTYPE };

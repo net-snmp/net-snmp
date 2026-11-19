@@ -83,7 +83,7 @@ do this explicitly.
 .TP
 .B \-CI
 In fact, the given OID will be retrieved automatically if the main
-subtree walk returns no useable values.  This allows a walk of a
+subtree walk returns no usable values.  This allows a walk of a
 single instance to behave as generally expected, and return the
 specified instance value.
 This option turns off this final GET request, so a walk of a
