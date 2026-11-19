@@ -39,7 +39,7 @@ is a flexible SNMP application that can monitor and manage information
 on a network entity.
 .PP
 After invoking the program, a command line interpreter proceeds to
-accept commands.  This intepreter enables the user to send different
+accept commands.  This interpreter enables the user to send different
 types of SNMP requests to target agents.
 .PP
 AGENT identifies a target SNMP agent, which is instrumented
@@ -50,7 +50,7 @@ communication with the agent, using UDP/IPv4 to port 161
 of the given target host. See snmpcmd(1) for a full list of
 the possible formats for AGENT.
 .PP
-Once snmptest is invoked, the command line intepreter will prompt with:
+Once snmptest is invoked, the command line interpreter will prompt with:
 .PP
 .B Variable:
 .PP

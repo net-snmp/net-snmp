@@ -507,7 +507,7 @@ LEVEL is one of \fInoauth\fR, \fIauth\fR, or \fIpriv\fR.
 PREFX specifies how CONTEXT should be matched against the context of
 the incoming request, either \fIexact\fR or \fIprefix\fR.
 READ, WRITE and NOTIFY specifies the view to be used for GET*, SET
-and TRAP/INFORM requests (althought the NOTIFY view is not currently used).
+and TRAP/INFORM requests (although the NOTIFY view is not currently used).
 For v1 or v2c access, LEVEL will need to be \fInoauth\fR.
 .SS Typed-View Configuration
 The final group of directives extend the VACM approach into a more flexible
@@ -859,7 +859,7 @@ Note: A maximum of 20 files can be monitored.
 Note: If no \fIfile\fR directives are defined, then walking the
 \fCfileTable\fR will fail (\fInoSuchObject\fR).
 .IP "logmatch NAME FILE CYCLETIME REGEX"
-monitors the specified file for occurances of the specified
+monitors the specified file for occurrences of the specified
 pattern REGEX. The file position is stored internally so the entire file
 is only read initially, every subsequent pass will only read the new lines
 added to the file since the last read.
