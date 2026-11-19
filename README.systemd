@@ -22,7 +22,7 @@ This can be done in two ways:
 2) or as snmpd service unit with 'Type=simple', appropriate socket socket unit
    and the snmpd service enabled. This way systemd creates the snmpd listening
    socket early during boot and passes the sockets to snmpd slightly later
-   (but still during machine boot). This way systemd can paralelize start of
+   (but still during machine boot). This way systemd can parallelize start of
    services, which depend on snmpd. Admins must adjust the socket file manually,
    depending if the snmpd support AgentX, IPv6, SMUX etc.
 

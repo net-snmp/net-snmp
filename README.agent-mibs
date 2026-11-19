@@ -26,7 +26,7 @@ substituted in place of the '=' in the path. All paths are relative to
 the agent/mibgroup directory.
 
 X.*.0 indicates all scalars under node X.
-X.?.0 indicates all scalars execept as noted.
+X.?.0 indicates all scalars except as noted.
 .Y.0 indicates that Y is an exception to the previous scalar group.
 
 

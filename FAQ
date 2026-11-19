@@ -942,7 +942,7 @@ The agent worked for a while, then stopped responding.  Why?
     - it is hanging
     - it is temporarily overloaded
 
-  Detecting whether the agent has crashed should be fairly straighforward.
+  Detecting whether the agent has crashed should be fairly straightforward.
   If you can reliably reproduce this crash (e.g. by sending a particular
   SNMP request), then contact the coders list for advice.
   It's the other two cases that are probably more significant.
@@ -1526,7 +1526,7 @@ PERL
 What is the purpose of the Perl SNMP module?
 -------------------------------------------
 
-  Short, comprehensive (but ultimately unhelpful) anwer - to provide a
+  Short, comprehensive (but ultimately unhelpful) answer - to provide a
   perl interface for SNMP operations.
 
   Longer, incomplete (but more useful) answer - there are probably two
@@ -1731,7 +1731,7 @@ Where can I find a MIB compiler?
 
   Note that the parser is fairly forgiving (see 'What ASN.1 parser is used'
   below), so this should not be regarded as a stamp of approval.  For a
-  more rigourous validation, use a tool such as 'smilint', or the on-line
+  more rigorous validation, use a tool such as 'smilint', or the on-line
   interface at http://wwwsnmp.cs.utwente.nl/ietf/mibs/validate/
 
     The second type of "MIB compiler" is one to turn a MIB specification
@@ -1744,7 +1744,7 @@ Where can I find a MIB compiler?
 Why aren't my MIB files being read in?
 -------------------------------------
 
-  There are two basic likely causes - either the library isn't attemping to
+  There are two basic likely causes - either the library isn't attempting to
   load these particular MIB files, or it's trying to load them but can't
   locate them.
 
@@ -1871,7 +1871,7 @@ The parser doesn't handle comments properly. Why not?
 
   The assumption here is that a comment continues to the end of the line.
   Unfortunately, this is not correct.  A comment will continue either to
-  the end of the line, *or* the next occurance of a pair of dashes.
+  the end of the line, *or* the next occurrence of a pair of dashes.
 
     Thus in this case, the definition of "broken" is commented out (as
   intended) but the following text ("This isn't working yet") is treated
@@ -1913,7 +1913,7 @@ How can I get more information about problems with MIB files?
   or the tutorial at
 	http://www.net-snmp.org/tutorial-5/commands/snmptranslate.html
 
-  For a more rigourous validation, use a tool such as 'smilint', or the
+  For a more rigorous validation, use a tool such as 'smilint', or the
   on-line interface at http://wwwsnmp.cs.utwente.nl/ietf/mibs/validate/
 
 
@@ -1951,7 +1951,7 @@ Do I actually need the MIB files?
   document.  It's vital while developing an application (typically
   the MIB module or handler within the agent), since it defines
   what the application (MIB) must actually do.  But once the code
-  has been written, the design document becomes redundent.
+  has been written, the design document becomes redundant.
   The agent then has the same information hardcoded into it
   (literally!), and no longer needs the MIB file.
 
@@ -2250,7 +2250,7 @@ Which extension mechanism should I use?
   If there's an existing agent that already implements the desired new
   MIB, then it makes sense to re-use that, via whatever extension protocol
   that agent might support.  Note that the SMUX protocol has essentially
-  been superceded by AgentX, which provides a fuller and more reliable
+  been superseded by AgentX, which provides a fuller and more reliable
   mechanism than either SMUX or proxied SNMP.  So ideally, this would
   be the preferred extension approach.
   But if the target subagent only supports SMUX or basic SNMP, then that

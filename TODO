@@ -39,7 +39,7 @@ Extensibility:
 
 Library:
   Threading
-  Debugging	(heirarchical)
+  Debugging	(hierarchical)
   Config	(split syntax & processing, persist/read-only/etc)
   SecModels:
     Kerberos	(?done)

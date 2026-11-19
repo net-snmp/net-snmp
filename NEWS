@@ -96,7 +96,7 @@ listing of all changes made to the code.
       - Fix loadave.c out-of-bounds access 
       - Fix possible unix socket path overflow with strncpy 
       - Fix write_vacmAccessStatus use-after-free in mibII 
-      - Security vulnerabilty in the ping MIB reported by Christopher Ertl
+      - Security vulnerability in the ping MIB reported by Christopher Ertl
         from Microsoft fixed
 
     apps:
@@ -189,7 +189,7 @@ listing of all changes made to the code.
       - Remove the SNMP_SWIPE_MEM() macro Remove this macro since it is not
 	used in the Net-SNMP code base.
       - DISPLAY-HINT fixes
-      - Miscellanious improvements to the transports
+      - Miscellaneous improvements to the transports
       - Handle multiple oldEngineID configuration lines 
       - fixes for DNS names longer than 63 characters
 
@@ -204,7 +204,7 @@ listing of all changes made to the code.
 
     general:
       - configure: Remove -Wno-deprecated as it is no longer needed
-      - miscellanious ther bug fixes, build fixes and cleanups
+      - miscellaneous other bug fixes, build fixes and cleanups
 
 *5.9.3*:
     security:
@@ -250,7 +250,7 @@ listing of all changes made to the code.
 	base_transport ptr for tunneled transports
 
     snmpd:
-      - Security vulnerabilty in the ping MIB reported by Christopher Ertl
+      - Security vulnerability in the ping MIB reported by Christopher Ertl
 	from Microsoft fixed
       - Changing to a different uid/gid can only be done once
       - The extend mib is now read-only by default
@@ -374,8 +374,8 @@ listing of all changes made to the code.
 *5.7*
 
   snmpd:
-      - Delivery of data via regularily scheduled notifications.
-        (see "Data Delivery via Notfications" in snmpd.conf)
+      - Delivery of data via regularly scheduled notifications.
+        (see "Data Delivery via Notifications" in snmpd.conf)
       - Many time-based config options can take (m)ins, (h)ours, ... arguments
         (see the snmpd.conf manual page)
       - The PING and TRACEROUTE MIBs now compile and work-ish on linux
@@ -1139,7 +1139,7 @@ listing of all changes made to the code.
     - calculate a proper ifSpeed under linux when possible
     - better daemonization of snmpd
     - close and reopen snmptrapd log files on HUP
-    - support for 16 bit reuqest ids
+    - support for 16 bit request ids
     - Recognize new 't' code in display hints
     - misc other fixes
 
@@ -1217,7 +1217,7 @@ listing of all changes made to the code.
     - win32 builds should work properly again.
 
  Fixes:
-    - the 5.0.2 package had a few broken packaging problems.  Opps.
+    - the 5.0.2 package had a few broken packaging problems.  Oops.
     - a few misc fixes.
 
  Perl:
@@ -1352,7 +1352,7 @@ UCD-SNMP NEWS:
     - Fixes to the Tunnel mib.
     - Deprecated the non-raw objects in the system stats MIB portion.
     - Testing harness fixes.
-    - Network file system improvements fro the hrStorageTable. 
+    - Network file system improvements for the hrStorageTable. 
     - fixed snmptable.
     - fixed the memory table (again) locking to 2^31 in value.
     - Misc documentation fixes and clean-ups.
@@ -1458,7 +1458,7 @@ UCD-SNMP NEWS:
     - A new command to remotely list disk space: snmpdf.
     - the agent VACM tables are now writable.
     - a new snmpvacm tool can be used to change the running vacm configuration.
-    - dynamicly loadable mib module support for the agent.
+    - dynamically loadable mib module support for the agent.
       (see snmpd.conf on the dlmod directive)
     - minimal proxy support for snmpd
       (see snmpd.conf on the proxy directive)
@@ -1672,7 +1672,7 @@ UCD-SNMP NEWS:
       - this may break the agent compilation with some compilers.
     - floats, doubles, counter64s, int64s, uint64s support via opaque types.
     - new modules: misc/ipfwacc.
-    - use of dynamicly loadable modules now possible, but not fully supported.
+    - use of dynamically loadable modules now possible, but not fully supported.
     - New application command line flags:  -s, -S, -m MIBS, -M MIBDIRS.
     - new configure options: --with-cc=CC and --with-cflags=CFLAGS
 
@@ -1844,7 +1844,7 @@ UCD-SNMP NEWS:
 
   Fixes:
     - snmpset on a pass script works now.
-    - pass scripts more throughly tested and debugged.
+    - pass scripts more thoroughly tested and debugged.
     - community 5 can be set now.
     - Many others.
 

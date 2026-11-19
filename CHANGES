@@ -72,7 +72,7 @@ listing of all changes made to the code.
 	failed authentication attempts in a custom SNMP agent. [
 	bvanassche: edited commit message ]
       - Reworked hrStorageTable to support large filesystems.")
-      - Security vulnerabilty in the ping MIB reported by Christopher Ertl
+      - Security vulnerability in the ping MIB reported by Christopher Ertl
 	from Microsoft fixed
 
     snmptrapd:
@@ -135,7 +135,7 @@ listing of all changes made to the code.
       - Remove the SNMP_SWIPE_MEM() macro Remove this macro since it is not
 	used in the Net-SNMP code base.
       - DISPLAY-HINT fixes
-      - Miscellanious improvements to the transports
+      - Miscellaneous improvements to the transports
       - Handle multiple oldEngineID configuration lines 
       - fixes for DNS names longer than 63 characters
 
@@ -150,7 +150,7 @@ listing of all changes made to the code.
 
     general:
       - configure: Remove -Wno-deprecated as it is no longer needed
-      - miscellanious ther bug fixes, build fixes and cleanups
+      - miscellaneous ther bug fixes, build fixes and cleanups
 
 *5.9.3*:
     security:
@@ -422,11 +422,11 @@ listing of all changes made to the code.
 	caching. However, strictly negative values trigger the assert
 	statement in netsnmp_ready_monotonic(). Avoid triggering that
 	assert statement.
-      - Fixed monitoring based on non-delta trigger.   snmpd crashed wit
+      - Fixed monitoring based on non-delta trigger.   snmpd crashed with
 	following snmpd.conf: monitor -s -D -r 10 -e LOGMATCH -o
 	logMatchCurrentCount "Log Match" != logMatchCurrentCount logmatch
 	LoginFailure1 /var/log/secure 10 su: .*fail.* The reason was
-	unitialized variable sysUT_var in mteTrigger_run(), it was filled
+	uninitialized variable sysUT_var in mteTrigger_run(), it was filled
 	only if the trigger was delta-valued, while its value was used for
 	all triggers. With this patch, sysUT_var is filled for all code
 	branches where it is needed.
@@ -465,7 +465,7 @@ listing of all changes made to the code.
 
     apps:
       - Stop agentxtrap from accessing the persistent configuration This is
-	needed to prevent moaning about not beeing allowed to write those
+	needed to prevent moaning about not being allowed to write those
 	files due to bad permissions.
       - Stop using snmp_perror when logging after functions that don't set
 	snmp_errno.
@@ -530,7 +530,7 @@ listing of all changes made to the code.
 
     unspecified:
       - Added simfs (OpenVZ filesystem) to hrStorageTable and hrFSTable.
-      - Upport new MIB structures and MFD rewrites under Darwin
+      - Support new MIB structures and MFD rewrites under Darwin
       - [BUG 2470]: Accept 65535 as a valid IPv6 port number
       - [BUG 2476]: snmpd fails to start on AIX On an AIX system there is
 	no <kvm.h> header file nor do the /dev/dmem or /dev/drum devices
@@ -811,7 +811,7 @@ listing of all changes made to the code.
       - Make the transport configuration code work again Previously the
 	transport inheritance processing code ran with
 	NETSNMP_FEATURE_CHECKING set. In this mode the file
-	net-snmp/feature-details.h is requiered. That file is created
+	net-snmp/feature-details.h is required. That file is created
 	during the first make run, and that happens after configure is run.
 	Change this to undefine NETSNMP_MINIMAL_CODE, effectively turning
 	off feature support during transport configuration in order to make
@@ -886,7 +886,7 @@ listing of all changes made to the code.
       - Added CVFS (CentraVision File System) to hrStorageTable and
 	hrFSTable.
       - Removed counter-64 error messages.   These messages do not say
-	enything useful, caller should check their return value and report
+	anything useful, caller should check their return value and report
 	it.
       - Added OCFS2 (Oracle Cluster FS) to hrStorageTable and hrFSTable
       - [BUG 3444939]: BUG: 1796886: snmplib: Avoid that
@@ -1148,7 +1148,7 @@ listing of all changes made to the code.
       - [BUG 3151845]: fix multiple registrations of snmp transport handler
 
     snmp:
-      - patch: 3096725: sysORTable registation for notification log mib
+      - patch: 3096725: sysORTable registration for notification log mib
 	original patch fixed several issues, other parts applied earlier
 
     snmpd:
@@ -1251,7 +1251,7 @@ listing of all changes made to the code.
 	modify the OID.
       - Do not leak the limits of scalar_group objects on shutdown.
       - Extend the documentation for data_clone and data_free
-      - Factor out common config_add_mib statments
+      - Factor out common config_add_mib statements
       - Find out whether librpm is available before configuring the agent
 	modules because host/data/access/swinst needs symbol HAVE_LIBRPM.
 	As a result, configure has to be run only once instead of twice to
@@ -1273,7 +1273,7 @@ listing of all changes made to the code.
 	util_funcs/restart to the requirement set of ucd-snmp/versioninfo.
       - Patch 3141462: from fenner: fix agentx subagent issues with
 	multiple-object requests
-      - Patch from Niels to fix VACM persistant storage.
+      - Patch from Niels to fix VACM persistent storage.
       - Remove unused variable cmp
       - Remove util_funcs/Exit from the requirement sets of util_funcs and
 	default_modules.
@@ -1374,7 +1374,7 @@ listing of all changes made to the code.
 	and when the process exited after fopen(), so check
 	/proc/PID/status in both cases.
       - fixed race condition in hrSWRunTable Treat the reads from
-	/proc/<pid>/* carefuly, processes can exit in the middle of
+	/proc/<pid>/* carefully, processes can exit in the middle of
 	processing. (already fixed in V5-5-patches and V5-4-patches in SVN
 	rev. 20115, dunno why I did not patch trunk)
       - patch 3131397: from takevos: huge speedups of the TCP/UDP Tables
@@ -1411,7 +1411,7 @@ listing of all changes made to the code.
 
     building:
       - Fix --with-security-modules handling Allow repeated modules
-	(tsm,tsm) as well as defailt modules (usm) Move the generation of
+	(tsm,tsm) as well as default modules (usm) Move the generation of
 	the files after the checking
       - Make it possible to regenerate using autoconf 2.68.
       - Some systems do not support the -E flag to grep, use autoconf to
@@ -1437,7 +1437,7 @@ listing of all changes made to the code.
 	adds a number of new flags to configure (--enable-minimalist and
 	--enable-read-only). These changes are designed to remove much of
 	the inline code that isn't always necessary or desired. Scripts
-	exist (and will be improved) to stip out unused components from the
+	exist (and will be improved) to strip out unused components from the
 	code entirely to enable a shorter review process for upgrading to
 	new releases. This work was done by Wes Hardaker and Michael Baer
 	from SPARTA, Inc. but is being checked in as a large patch since
@@ -1735,7 +1735,7 @@ listing of all changes made to the code.
 	functions to avoid 100% CPU loops
       - patch: 3042770: from mehaf: Made run_alarms() reentrant
       - when displaying a byte as single digit hex value, default to
-	prefixing with 0 unless there is a seperator or addition hint data
+	prefixing with 0 unless there is a separator or addition hint data
       - 0 patch 3058645: from jorisesaturnus: modified version of the patch
 	to use MSG_DONTWAIT for the unix domain socket
       - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems.
@@ -1866,7 +1866,7 @@ listing of all changes made to the code.
       - new API for indicating that persistent store needs to be saved
 	after the current request finishes processing
       - [BUG 3003981]: Protect against buffer overflow
-      - [BUG 3019243]: Register execFix compatability directive correctly.
+      - [BUG 3019243]: Register execFix compatibility directive correctly.
       - patch 2912520: from listom: Free kmem references on shutdown
       - patch: 3028923: from jenso: new copy of the bridge-mib perl
 	implementation
@@ -2359,7 +2359,7 @@ listing of all changes made to the code.
       - [BUG 1976772]: Changed mib parser to handle long binary/hex strings.
       - [BUG 2001124]: Allow embedded NUL characters in usmUserPublic
       - [BUG 2027834]: Extend string print buffer by the minimum necessary.
-      - [BUG 2099985]: Added const qualifiers to time conversion routins
+      - [BUG 2099985]: Added const qualifiers to time conversion routines
       - [PATCH 2827722]: Improve strtoull to be less MSVC-specific
       - [BUG Coverity #183]: fix memory leak if IP_PKTINFO fails
       - [PATCH  700681]: limited support for UDPv4 broadcast addresses
@@ -2457,7 +2457,7 @@ listing of all changes made to the code.
       - [BUG 1685081]: Check for valid OID on Free/Undo passes.
       - [BUG 1693039]: be silent when insert fails.
       - [BUG 1712988]: default/configurable max # varbinds returned by GETBULK
-      - [BUG 1745113]: Handle single-line output in UCD compatability mode.
+      - [BUG 1745113]: Handle single-line output in UCD compatibility mode.
       - [BUG 1748206]: Protect against failures to open /etc/mtab (or equiv)
       - [BUG 1758212]: Handle missing variable types (IpAddress,Counter,Opaque)
       - [BUG 1760633]: fix typo in debug message
@@ -2538,7 +2538,7 @@ listing of all changes made to the code.
       - [PATCH 1753463]: Fix AgentX subagent ping alarm handling
       - [PATCH 1758208]: Fix memory leak
       - [PATCH 1783733]: Put the package version number into the hrSWInst table for solaris.
-      - [PATCH 1784747]: Fix long usage for ip adresses on 64 bit systems in various MIB-II tables.
+      - [PATCH 1784747]: Fix long usage for ip addresses on 64 bit systems in various MIB-II tables.
       - [PATCH 1797111]: implement IP-MIB::ipIfStatsTable
       - [PATCH 1804445]: High order bits of HCInOctets not set on Solaris
       - [PATCH 1806501]: Add API for sending traps with a snmpv3 context
@@ -2682,7 +2682,7 @@ listing of all changes made to the code.
       - Fix compilation on IRIX
       - Fix macro for '--with-features-of'
       - Improve library layering & dependency handling when linking apps
-      - Improve robustness of sed/grep/etc commans (using autoconf macros)
+      - Improve robustness of sed/grep/etc commands (using autoconf macros)
       - Improve RPM spec files, for consistency with vendor-provided packages.
       - Mechanism for selecting build environment based on version
       - New NETSNMP_ARG_WITH/ENABLE macros to catch incorrect 'with/enable' usage
@@ -2746,12 +2746,12 @@ listing of all changes made to the code.
       - [PATCH 1902105]: Hide and improve debug log messages
       - [PATCH 1902113]: Fix error log in inetNetToMediatable
       - Fix for refs to OBJECT-GROUP in another MIB
-      - Initalize log subsystem
+      - Initialize log subsystem
       - Remove support for use of varargs.h.
 
     perl:
       - [BUG 1450669]: a perl agentx consumes memory
-      - [BUG 1554817]: Fix class assigment so getRootOID works properly.
+      - [BUG 1554817]: Fix class assignment so getRootOID works properly.
       - [BUG 1606062]: perl bulkwalk (async) coredump
       - [BUG 1619827]: improve handling of link dependencies
       - [BUG 1747733]: More robust handling of undefined values.
@@ -2853,7 +2853,7 @@ listing of all changes made to the code.
       - Improve memory reporting (patch from Apple)
 
     Solaris:
-      - [BUG 1626153]: No hrSWRun informations on Solaris zones
+      - [BUG 1626153]: No hrSWRun information on Solaris zones
       - [BUG 1810814]: tcpTable missing entries and wrong ports
       - [BUG 1819189]: {ifOperStatus,ipAdEntIfIndex} reported incorrectly
       - [BUG 1822275]: {ifOperStatus,ipAdEntIfIndex} reported incorrectly

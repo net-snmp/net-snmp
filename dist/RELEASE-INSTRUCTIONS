@@ -31,7 +31,7 @@ STEP: 1: Setup Steps
 
   ===== Entering Step: 1 =====
 
-STEP: 1.1: Setup Checck
+STEP: 1.1: Setup Check
 
   This should show the last version number published in this branch by
   looking at the time line in the README file:
@@ -377,7 +377,7 @@ STEP: 4.1: changelog:svn2cl
 
 STEP: 4.4: changelog:manualedit
 
-  You need to manually insert the *relevent* portions of
+  You need to manually insert the *relevant* portions of
   'ChangeLog.reallyadd' into the ChangeLog file. I'll commit these changes
   for you after you finish cutting out the proper changes.
 
@@ -401,7 +401,7 @@ STEP: 4.7: docs:newnews
 
 STEP: 4.8: docs:README
 
-  You need to manually insert the relevent portions of 'CHANGES.new' and
+  You need to manually insert the relevant portions of 'CHANGES.new' and
   'NEWS.new' into the CHANGES and NEWS file. (There are alternative
   versions in 'CHANGES.new2' and 'NEWS.new2') You may wish to update the
   README file as well. I'll commit these changes for you afterwards
@@ -726,7 +726,7 @@ RELEASE TESTING:
      test the release tarball.
 
  15) Double-check that there are no outstanding changes that have
-     been missed from the CVS checkin:
+     been missed from the CVS check in:
 
         $ svn status
 
@@ -767,7 +767,7 @@ Note:  This is the last stage that is handled by the "makerelease" script
      fix them, don't announce the broken version - wait for the updated
      one instead.
 
- 18) Once this week has elapsed, submit an announement of the new
+ 18) Once this week has elapsed, submit an announcement of the new
      release to net-snmp-announce.  This message will need to be
      explicitly authorized via MailMan.
 

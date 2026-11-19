@@ -238,7 +238,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
 
     tidy -asxhtml -m c:\temp\net-snmp\html\FAQ.html
 
-3.  Grab the Devloper FAQ from the web site, strip out the includes and save as
+3.  Grab the Developer FAQ from the web site, strip out the includes and save as
     c:\temp\net-snmp\html\Developer_FAQ.html and run:
 
     tidy -asxhtml -m c:\temp\net-snmp\html\Developer_FAQ.html
@@ -272,7 +272,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     c:\temp\net-snmp\html\snmpd.conf.win32.html
     c:\temp\net-snmp\html\snmptrapd.conf.win32.html
  
-    Only add the relevent section to each file from the .options files
+    Only add the relevant section to each file from the .options files
     created above, ensure the font is set to fixed width.
 
     Tidy each file using tidy under Windows (or transfer to Linux and tidy
