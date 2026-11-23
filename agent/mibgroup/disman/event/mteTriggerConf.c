@@ -65,6 +65,9 @@ init_mteTriggerConf(void)
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
                            clear_mteTTable, NULL);
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                           SNMP_CALLBACK_SHUTDOWN,
+                           clear_mteTTable, NULL);
 }
 
 /* ==============================

@@ -207,6 +207,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     netsnmp_variable_list sysUT_var;
     int  cmp = 0, n, n2;
     long value;
+    long sysUT = 0;
     const char *reason;
 
     if (!entry) {
@@ -548,6 +549,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     memset( &sysUT_var, 0, sizeof( netsnmp_variable_list ));
     snmp_set_var_objid( &sysUT_var, _sysUpTime_instance, _sysUpTime_inst_len );
     netsnmp_query_get(  &sysUT_var, entry->session );
+    if (sysUT_var.val.integer)
+        sysUT = *sysUT_var.val.integer;
 
     if (( entry->mteTriggerTest & MTE_TRIGGER_BOOLEAN   ) ||
         ( entry->mteTriggerTest & MTE_TRIGGER_THRESHOLD )) {
@@ -615,6 +618,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 if (!dvar) {
                     _mteTrigger_failure(
                             "failed to create mteTrigger delta query varbind");
+                    snmp_free_varbind( var );
                     return;
                 }
                 snmp_set_var_objid( dvar, entry->mteDeltaDiscontID,
@@ -627,58 +631,9 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 if ( n != SNMP_ERR_NOERROR ) {
                     _mteTrigger_failure( "failed to run mteTrigger delta query" );
                     snmp_free_varbind( dvar );
+                    snmp_free_varbind( var );
                     return;
                 }
-            }
-
-            /*
-             * We can't calculate delta values the first time through,
-             *  so there's no point in evaluating the remaining tests.
-             *
-             * Save the results (and discontinuity markers),
-             *   ready for the next run.
-             */
-            if ( !entry->old_results ) {
-                entry->old_results =  var;
-                entry->old_deltaDs = dvar;
-                entry->sysUpTime   = *sysUT_var.val.integer;
-                return;
-            }
-            /*
-             * If the sysUpTime marker has been reset (or strictly,
-             *   has advanced by less than the monitor frequency),
-             *  there's no point in trying the remaining tests.
-             */
-
-            if (*sysUT_var.val.integer < entry->sysUpTime) {
-                DEBUGMSGTL(( "disman:event:delta",
-                             "single discontinuity: (sysUT)\n"));
-                snmp_free_varbind( entry->old_results );
-                snmp_free_varbind( entry->old_deltaDs );
-                entry->old_results =  var;
-                entry->old_deltaDs = dvar;
-                entry->sysUpTime   = *sysUT_var.val.integer;
-                return;
-            }
-            /*
-             * Similarly if a separate (non-wildcarded) discontinuity
-             *  marker has changed, then there's no
-             *  point in trying to evaluate these tests either.
-             */
-            if (!(entry->flags & MTE_TRIGGER_FLAG_DWILD)  &&
-                !(entry->flags & MTE_TRIGGER_FLAG_SYSUPT) &&
-                  (!entry->old_deltaDs ||
-                   (entry->old_deltaDs->val.integer != dvar->val.integer))) {
-                DEBUGMSGTL((  "disman:event:delta", "single discontinuity: ("));
-                DEBUGMSGOID(( "disman:event:delta", entry->mteDeltaDiscontID,
-                                           entry->mteDeltaDiscontID_len));
-                DEBUGMSG((    "disman:event:delta", ")\n"));
-                snmp_free_varbind( entry->old_results );
-                snmp_free_varbind( entry->old_deltaDs );
-                entry->old_results =  var;
-                entry->old_deltaDs = dvar;
-                entry->sysUpTime   = *sysUT_var.val.integer;
-                return;
             }
 
             /*
@@ -701,8 +656,15 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      * For each monitored instance, check whether
                      *   there's a matching discontinuity entry.
                      */
-                    cmp = snmp_oid_compare(vp1->name+n,  vp1->name_length-n,
-                                           vp2->name+n2, vp2->name_length-n2 );
+                    if (vp2) {
+                        cmp = snmp_oid_compare(
+                            (vp1->name_length > (size_t)n) ? vp1->name + n : vp1->name,
+                            (vp1->name_length > (size_t)n) ? vp1->name_length - n : 0,
+                            (vp2->name_length > (size_t)n2) ? vp2->name + n2 : vp2->name,
+                            (vp2->name_length > (size_t)n2) ? vp2->name_length - n2 : 0);
+                    } else {
+                        cmp = -1;
+                    }
                     if ( cmp < 0 ) {
                         /*
                          * If a discontinuity entry is missing,
@@ -716,14 +678,19 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                             _mteTrigger_failure(
                                   "failed to create mteTrigger discontinuity varbind");
                             snmp_free_varbind(dvar);
+                            snmp_free_varbind(var);
                             return;
                         }
+                        vtmp->type = ASN_NULL;
                         snmp_set_var_objid(vtmp, entry->mteDeltaDiscontID,
                                                  entry->mteDeltaDiscontID_len);
                             /* XXX - append instance subids */
-                        vtmp->next_variable     = vp2;
-                        vp2_prev->next_variable = vtmp;
-                        vp2_prev                = vtmp;
+                        vtmp->next_variable = vp2;
+                        if (vp2_prev)
+                            vp2_prev->next_variable = vtmp;
+                        else
+                            dvar                    = vtmp;
+                        vp2_prev = vtmp;
                         vp1 = vp1->next_variable;
                     } else if ( cmp == 0 ) {
                         /*
@@ -737,16 +704,76 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                          * Remove unneeded discontinuity entry
                          */
                         vtmp = vp2;
-                        vp2_prev->next_variable = vp2->next_variable;
-                        vp2                     = vp2->next_variable;
+                        if (vp2_prev)
+                            vp2_prev->next_variable = vp2->next_variable;
+                        else
+                            dvar                    = vp2->next_variable;
+                        vp2 = vp2->next_variable;
                         vtmp->next_variable = NULL;
                         snmp_free_varbind( vtmp );
                     }
                 }
                 /*
-                 * XXX - Now need to ensure that the old list of
-                 *   delta discontinuity markers matches as well.
+                 * Remove any trailing unneeded discontinuity entries.
                  */
+                if (vp2) {
+                    if (vp2_prev)
+                        vp2_prev->next_variable = NULL;
+                    else
+                        dvar = NULL;
+                    snmp_free_varbind( vp2 );
+                }
+            }
+
+            /*
+             * We can't calculate delta values the first time through,
+             *  so there's no point in evaluating the remaining tests.
+             *
+             * Save the results (and discontinuity markers),
+             *   ready for the next run.
+             */
+            if ( !entry->old_results ) {
+                entry->old_results =  var;
+                entry->old_deltaDs = dvar;
+                entry->sysUpTime   = sysUT;
+                return;
+            }
+            /*
+             * If the sysUpTime marker has been reset (or strictly,
+             *   has advanced by less than the monitor frequency),
+             *  there's no point in trying the remaining tests.
+             */
+
+            if (sysUT < entry->sysUpTime) {
+                DEBUGMSGTL(( "disman:event:delta",
+                             "single discontinuity: (sysUT)\n"));
+                snmp_free_varbind( entry->old_results );
+                snmp_free_varbind( entry->old_deltaDs );
+                entry->old_results =  var;
+                entry->old_deltaDs = dvar;
+                entry->sysUpTime   = sysUT;
+                return;
+            }
+            /*
+             * Similarly if a separate (non-wildcarded) discontinuity
+             *  marker has changed, then there's no
+             *  point in trying to evaluate these tests either.
+             */
+            if (!(entry->flags & MTE_TRIGGER_FLAG_DWILD)  &&
+                !(entry->flags & MTE_TRIGGER_FLAG_SYSUPT) &&
+                  (!entry->old_deltaDs || !dvar ||
+                   !entry->old_deltaDs->val.integer || !dvar->val.integer ||
+                   (*entry->old_deltaDs->val.integer != *dvar->val.integer))) {
+                DEBUGMSGTL((  "disman:event:delta", "single discontinuity: ("));
+                DEBUGMSGOID(( "disman:event:delta", entry->mteDeltaDiscontID,
+                                           entry->mteDeltaDiscontID_len));
+                DEBUGMSG((    "disman:event:delta", ")\n"));
+                snmp_free_varbind( entry->old_results );
+                snmp_free_varbind( entry->old_deltaDs );
+                entry->old_results =  var;
+                entry->old_deltaDs = dvar;
+                entry->sysUpTime   = sysUT;
+                return;
             }
         } /* delta samples */
     } /* Boolean/Threshold test checks */
@@ -773,6 +800,13 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             if ( !vp1->val.integer ) {  /* No value */
                 if ( vp2 )
                     vp2 = vp2->next_variable;
+                if ((entry->flags & MTE_TRIGGER_FLAG_DELTA) &&
+                    (entry->flags & MTE_TRIGGER_FLAG_DWILD)) {
+                    if ( dv1 )
+                        dv1 = dv1->next_variable;
+                    if ( dv2 )
+                        dv2 = dv2->next_variable;
+                }
                 continue;
             }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
@@ -783,8 +817,10 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      * Validate this particular sample against
                      *   the relevant wildcarded marker...
                      */
-                    if ((dv1->type == ASN_NULL)  ||
+                    if (!dv1 || !dv2 ||
+                        (dv1->type == ASN_NULL)  ||
                         (dv1->type != dv2->type) ||
+                        !dv1->val.integer || !dv2->val.integer ||
                         (*dv1->val.integer != *dv2->val.integer)) {
                         /*
                          * Bogus or changed discontinuity marker.
@@ -794,21 +830,29 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     DEBUGMSGOID(("disman:event:delta", vp1->name,
                                        vp1->name_length ));
     DEBUGMSG((   "disman:event:delta", " \n" ));
-                        vp2 = vp2->next_variable;
+                        if ( vp2 )
+                            vp2 = vp2->next_variable;
+                        if ( dv1 )
+                            dv1 = dv1->next_variable;
+                        if ( dv2 )
+                            dv2 = dv2->next_variable;
                         continue;
                     }
+                    dv1 = dv1->next_variable;
+                    dv2 = dv2->next_variable;
                 }
                 /*
                  * ... and check there is a previous sample to calculate
                  *   the delta value against (regardless of whether the
                  *   discontinuity marker was wildcarded or not).
                  */
-                if (vp2->type == ASN_NULL) {
+                if (!vp2 || vp2->type == ASN_NULL || !vp2->val.integer) {
     DEBUGMSGTL(( "disman:event:delta", "missing sample: "));
     DEBUGMSGOID(("disman:event:delta", vp1->name,
                                        vp1->name_length ));
     DEBUGMSG((   "disman:event:delta", " \n" ));
-                    vp2 = vp2->next_variable;
+                    if ( vp2 )
+                        vp2 = vp2->next_variable;
                     continue;
                 }
                 value = (*vp1->val.integer - *vp2->val.integer);
@@ -917,6 +961,13 @@ mteTrigger_run( unsigned int reg, void *clientarg)
             if ( !vp1->val.integer ) {  /* No value */
                 if ( vp2 )
                     vp2 = vp2->next_variable;
+                if ((entry->flags & MTE_TRIGGER_FLAG_DELTA) &&
+                    (entry->flags & MTE_TRIGGER_FLAG_DWILD)) {
+                    if ( dv1 )
+                        dv1 = dv1->next_variable;
+                    if ( dv2 )
+                        dv2 = dv2->next_variable;
+                }
                 continue;
             }
             if (entry->flags & MTE_TRIGGER_FLAG_DELTA) {
@@ -927,24 +978,34 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      * Validate this particular sample against
                      *   the relevant wildcarded marker...
                      */
-                    if ((dv1->type == ASN_NULL)  ||
+                    if (!dv1 || !dv2 ||
+                        (dv1->type == ASN_NULL)  ||
                         (dv1->type != dv2->type) ||
+                        !dv1->val.integer || !dv2->val.integer ||
                         (*dv1->val.integer != *dv2->val.integer)) {
                         /*
                          * Bogus or changed discontinuity marker.
                          * Need to skip this sample.
                          */
-                        vp2 = vp2->next_variable;
+                        if ( vp2 )
+                            vp2 = vp2->next_variable;
+                        if ( dv1 )
+                            dv1 = dv1->next_variable;
+                        if ( dv2 )
+                            dv2 = dv2->next_variable;
                         continue;
                     }
+                    dv1 = dv1->next_variable;
+                    dv2 = dv2->next_variable;
                 }
                 /*
                  * ... and check there is a previous sample to calculate
                  *   the delta value against (regardless of whether the
                  *   discontinuity marker was wildcarded or not).
                  */
-                if (vp2->type == ASN_NULL) {
-                    vp2 = vp2->next_variable;
+                if (!vp2 || vp2->type == ASN_NULL || !vp2->val.integer) {
+                    if ( vp2 )
+                        vp2 = vp2->next_variable;
                     continue;
                 }
                 value = (*vp1->val.integer - *vp2->val.integer);
@@ -1129,7 +1190,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     if ( entry->flags & MTE_TRIGGER_FLAG_DELTA ) {
         snmp_free_varbind( entry->old_deltaDs );
         entry->old_deltaDs = dvar;
-        entry->sysUpTime   = *sysUT_var.val.integer;
+        entry->sysUpTime   = sysUT;
     }
 }
 
@@ -1166,8 +1227,11 @@ mteTrigger_disable( struct mteTrigger *entry )
     if (entry->alarm) {
         snmp_alarm_unregister( entry->alarm );
         entry->alarm = 0;
-        /* XXX - perhaps release any previous results */
     }
+    snmp_free_varbind( entry->old_results );
+    entry->old_results = NULL;
+    snmp_free_varbind( entry->old_deltaDs );
+    entry->old_deltaDs = NULL;
 }
 
 long _mteTrigger_MaxCount = 0;
