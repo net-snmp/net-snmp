@@ -142,6 +142,7 @@ struct alarmTable_entry {
 
     int             valid;
     unsigned int    alarm_reg;
+    unsigned int    first_alarm_reg;  /* one-shot run registered by enable */
     netsnmp_session *session;
     u_long          last_abs_value;
     ALARM_TYPE_T    prev_alarm;        /* NOTHING | RISING | FALLING */
@@ -160,6 +161,8 @@ alarmTable_run( unsigned int reg, void *clientarg)
         snmp_alarm_unregister( reg );
         return;
     }
+    if (reg == entry->first_alarm_reg)
+        entry->first_alarm_reg = 0;   /* one-shot: the library frees it */
     /*
      * Retrieve the requested MIB value(s)...
      */
@@ -235,42 +238,45 @@ alarmTable_run( unsigned int reg, void *clientarg)
 }
 
 void
-alarmTable_enable( struct alarmTable_entry *entry )
-{
-    if (!entry)
-        return;
-
-    DEBUGMSGTL(( "rmon:alarmTable", "alarmTable_enable called.\n"));
-    if (entry->alarm_reg) {
-        snmp_alarm_unregister( entry->alarm_reg );
-        entry->alarm_reg = 0;
-    }
-
-    if (entry->alarmInterval) {
-        /*
-         * register once to run ASAP, and another to run
-         * at the trigger frequency
-         */
-        snmp_alarm_register(0, 0, alarmTable_run, entry );
-        entry->alarm_reg = snmp_alarm_register(
-                           entry->alarmInterval, SA_REPEAT,
-                           alarmTable_run, entry );
-    }
-}
-
-void
 alarmTable_disable( struct alarmTable_entry *entry )
 {
     if (!entry)
         return;
 
     DEBUGMSGTL(( "rmon:alarmTable", "alarmTable_disable called.\n"));
+    if (entry->first_alarm_reg) {
+        snmp_alarm_unregister( entry->first_alarm_reg );
+        entry->first_alarm_reg = 0;
+    }
     if (entry->alarm_reg) {
         snmp_alarm_unregister( entry->alarm_reg );
         entry->alarm_reg = 0;
         /* XXX - perhaps release any previous results */
     }
 }
+
+void
+alarmTable_enable( struct alarmTable_entry *entry )
+{
+    if (!entry)
+        return;
+
+    DEBUGMSGTL(( "rmon:alarmTable", "alarmTable_enable called.\n"));
+    alarmTable_disable( entry );
+
+    if (entry->alarmInterval) {
+        /*
+         * register once to run ASAP, and another to run
+         * at the trigger frequency
+         */
+        entry->first_alarm_reg =
+            snmp_alarm_register(0, 0, alarmTable_run, entry );
+        entry->alarm_reg = snmp_alarm_register(
+                           entry->alarmInterval, SA_REPEAT,
+                           alarmTable_run, entry );
+    }
+}
+
 
 /*
  * create a new row in the table 

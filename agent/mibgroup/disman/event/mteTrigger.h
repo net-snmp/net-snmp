@@ -163,6 +163,7 @@ struct mteTrigger {
      *     monitoring...
      */
     unsigned int    alarm;
+    unsigned int    first_alarm;  /* one-shot run registered by enable */
     long            sysUpTime;
     netsnmp_variable_list *old_results;
     netsnmp_variable_list *old_deltaDs;

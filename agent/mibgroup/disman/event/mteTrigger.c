@@ -213,6 +213,8 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         snmp_alarm_unregister( reg );
         return;
     }
+    if (reg == entry->first_alarm)
+        entry->first_alarm = 0;   /* one-shot: the library frees it */
     if (!(entry->flags & MTE_TRIGGER_FLAG_ENABLED ) ||
         !(entry->flags & MTE_TRIGGER_FLAG_ACTIVE  ) ||
         !(entry->flags & MTE_TRIGGER_FLAG_VALID  )) {
@@ -1139,18 +1141,14 @@ mteTrigger_enable( struct mteTrigger *entry )
     if (!entry)
         return;
 
-    if (entry->alarm) {
-        /* XXX - or explicitly call mteTrigger_disable ?? */
-        snmp_alarm_unregister( entry->alarm );
-        entry->alarm = 0;
-    }
+    mteTrigger_disable( entry );
 
     if (entry->mteTriggerFrequency) {
         /*
          * register once to run ASAP, and another to run
          * at the trigger frequency
          */
-        snmp_alarm_register(0, 0, mteTrigger_run, entry );
+        entry->first_alarm = snmp_alarm_register(0, 0, mteTrigger_run, entry );
         entry->alarm = snmp_alarm_register(
                            entry->mteTriggerFrequency, SA_REPEAT,
                            mteTrigger_run, entry );
@@ -1163,6 +1161,10 @@ mteTrigger_disable( struct mteTrigger *entry )
     if (!entry)
         return;
 
+    if (entry->first_alarm) {
+        snmp_alarm_unregister( entry->first_alarm );
+        entry->first_alarm = 0;
+    }
     if (entry->alarm) {
         snmp_alarm_unregister( entry->alarm );
         entry->alarm = 0;
