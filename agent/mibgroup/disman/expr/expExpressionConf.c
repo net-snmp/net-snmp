@@ -185,9 +185,9 @@ parse_expression(const char *token, char *line)
     entry->expValueType     = type;
     entry->flags |= EXP_FLAG_VALID
                  |  EXP_FLAG_ACTIVE;
-    expExpression_enable( entry );
     DEBUGMSG(("disman:expr:conf", "(%s, %s)\n", ename,
                                                 entry->expExpression));
+    expExpression_enable( entry );
 }
 
 void

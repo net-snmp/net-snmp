@@ -97,6 +97,17 @@ expObject_createRow( const char *expOwner, const char *expName, long expIndex, i
     return row;
 }
 
+static void
+_expObject_free( struct expObject *entry )
+{
+    if (entry->vars      ) snmp_free_varbind( entry->vars      );
+    if (entry->old_vars  ) snmp_free_varbind( entry->old_vars  );
+    if (entry->dvars     ) snmp_free_varbind( entry->dvars     );
+    if (entry->old_dvars ) snmp_free_varbind( entry->old_dvars );
+    if (entry->cvars     ) snmp_free_varbind( entry->cvars     );
+    SNMP_FREE(entry);
+}
+
 /*
  * Remove a row from the expression object table 
  */
@@ -110,13 +121,29 @@ expObject_removeEntry(netsnmp_tdata_row * row)
     entry = (struct expObject *)
         netsnmp_tdata_remove_and_delete_row(expObject_table_data, row);
     if (entry) {
-        if (entry->vars      ) snmp_free_varbind( entry->vars      );
-        if (entry->old_vars  ) snmp_free_varbind( entry->old_vars  );
-        if (entry->dvars     ) snmp_free_varbind( entry->dvars     );
-        if (entry->old_dvars ) snmp_free_varbind( entry->old_dvars );
-        if (entry->cvars     ) snmp_free_varbind( entry->cvars     );
-        SNMP_FREE(entry);
+        if (entry->in_use)
+            entry->removed = 1;
+        else
+            _expObject_free( entry );
     }
+}
+
+/*
+ * Retrieving the values of an object waits for the response, which
+ *   processes other requests in the meantime.  Those may remove the
+ *   object: hold it while in use, and free it when released.
+ */
+void
+expObject_hold( struct expObject *entry )
+{
+    entry->in_use++;
+}
+
+void
+expObject_release( struct expObject *entry )
+{
+    if (--entry->in_use == 0 && entry->removed)
+        _expObject_free( entry );
 }
 
 
@@ -174,6 +201,48 @@ expObject_getNext( netsnmp_tdata_row *thisRow )
      *   refers to the same expression too.
      */
     nextRow = netsnmp_tdata_row_next( expObject_table_data, thisRow );
+
+    if (!nextRow || !nextRow->data)
+        return NULL;
+    nextEntry = (struct expObject *)nextRow->data;
+
+    if ((strcmp( nextEntry->expOwner, thisEntry->expOwner ) != 0) ||
+        (strcmp( nextEntry->expName,  thisEntry->expName  ) != 0))
+        return NULL;
+
+    return nextRow;
+}
+
+/*
+ * The row after this object's index that refers to the same
+ *   expression.  Unlike expObject_getNext(), this also works for
+ *   an object that has been removed from the table.
+ */
+netsnmp_tdata_row *
+expObject_getNextEntry( struct expObject *thisEntry )
+{
+    struct expObject  *nextEntry;
+    netsnmp_tdata_row *nextRow;
+    netsnmp_variable_list owner_var, name_var, index_var;
+
+    memset(&owner_var, 0, sizeof(netsnmp_variable_list));
+    memset(&name_var,  0, sizeof(netsnmp_variable_list));
+    memset(&index_var, 0, sizeof(netsnmp_variable_list));
+    snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
+                       (const u_char*)thisEntry->expOwner,
+                       strlen(thisEntry->expOwner));
+    snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
+                       (const u_char*)thisEntry->expName,
+                       strlen(thisEntry->expName));
+    snmp_set_var_typed_value( &index_var, ASN_INTEGER,
+                       (const u_char*)&thisEntry->expObjectIndex,
+                       sizeof(thisEntry->expObjectIndex));
+    owner_var.next_variable = &name_var;
+    name_var.next_variable  = &index_var;
+    nextRow = netsnmp_tdata_row_next_byidx( expObject_table_data, &owner_var );
+    snmp_reset_var_buffers( &owner_var );
+    snmp_reset_var_buffers( &name_var );
+    snmp_reset_var_buffers( &index_var );
 
     if (!nextRow || !nextRow->data)
         return NULL;
@@ -250,10 +319,10 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
          * If this is the expExpressionPrefix object, then
          *   we already have the necessary list of values.
          *   There's no need to retrieve it again.
-         * This also takes care of releasing the prefix list
-         *   once the results are no longer needed.
+         * The expression keeps (and releases) its own list,
+         *   so the object stores a copy.
          */
-        var = expr->pvars;
+        var = snmp_clone_varbind( expr->pvars );
     } else {
         if (!(obj->flags & EXP_OBJ_FLAG_OWILD ))
             /*
@@ -293,6 +362,8 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
         snmp_free_varbind( obj->vars );
 
     obj->vars = var;
+    if ( expr->removed || obj->removed )
+        return;
 
 
     /*
@@ -316,6 +387,8 @@ expObject_getData( struct expExpression  *expr, struct expObject  *obj )
             snmp_free_varbind( obj->old_dvars );
         obj->old_dvars = obj->dvars;
         obj->dvars     = var;
+        if ( expr->removed || obj->removed )
+            return;
     }
 
     /*

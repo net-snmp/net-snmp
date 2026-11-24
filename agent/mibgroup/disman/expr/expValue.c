@@ -937,18 +937,15 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
 /* =============
  *  Main API 
  * ============= */
-netsnmp_variable_list *
-expValue_evaluateExpression( struct expExpression *exp,
-                             oid *suffix, size_t suffix_len )
+static netsnmp_variable_list *
+_expValue_evaluateExpression( struct expExpression *exp,
+                              oid *suffix, size_t suffix_len )
 {
     char exprRaw[     EXP_STR3_LEN+1 ];
     netsnmp_variable_list *var;
     netsnmp_variable_list owner_var, name_var, param_var;
     int n;
     char *cp = NULL;
-
-    if (!exp)
-        return NULL;
 
     /*
      * Gather data for evaluating expressions with no regular delta-value
@@ -1016,6 +1013,21 @@ expValue_evaluateExpression( struct expExpression *exp,
         _expValue_setError( exp, EXPERRCODE_TYPE, suffix, suffix_len, var );
         return NULL;
     }
+    return var;
+}
+
+netsnmp_variable_list *
+expValue_evaluateExpression( struct expExpression *exp,
+                             oid *suffix, size_t suffix_len )
+{
+    netsnmp_variable_list *var;
+
+    if (!exp)
+        return NULL;
+
+    expExpression_hold( exp );
+    var = _expValue_evaluateExpression( exp, suffix, suffix_len );
+    expExpression_release( exp );
     return var;
 }
 
