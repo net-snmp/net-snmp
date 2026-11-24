@@ -20,6 +20,7 @@
 netsnmp_feature_require(iquery);
 netsnmp_feature_require(query_set_default_session);
 netsnmp_feature_require(table_tdata);
+netsnmp_feature_require(table_tdata_remove_row);
 netsnmp_feature_require(check_vb_type_and_max_size);
 netsnmp_feature_require(check_vb_oid);
 netsnmp_feature_require(table_tdata_extract_table);
@@ -351,6 +352,20 @@ alarmTable_removeEntry(netsnmp_tdata * table_data, netsnmp_tdata_row * row)
 }
 
 
+/*
+ * Remove a row during a SET.  Detach the row from every request of the SET
+ * first, so that later varbinds for the same row do not use it.
+ */
+static void
+alarmTable_removeRequestRow(netsnmp_request_info *request,
+                            netsnmp_tdata *table_data,
+                            netsnmp_tdata_row *table_row)
+{
+    netsnmp_remove_tdata_row(request, table_row);
+    alarmTable_removeEntry(table_data, table_row);
+}
+
+
 /** handles requests for the alarmTable table */
 int
 alarmTable_handler(netsnmp_mib_handler *handler,
@@ -609,7 +624,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_ALARMOWNER:
             case COLUMN_ALARMSTATUS:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 }
                 break;
             }
@@ -703,11 +718,13 @@ alarmTable_handler(netsnmp_mib_handler *handler,
             table_row = netsnmp_tdata_extract_row(request);
             table_data = netsnmp_tdata_extract_table(request);
             table_info = netsnmp_extract_table_info(request);
+            if (!table_entry)
+                continue;   /* row removed by an earlier varbind */
 
             switch (table_info->colnum) {
             case COLUMN_ALARMINTERVAL:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmInterval =
                         table_entry->old_alarmInterval;
@@ -716,7 +733,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMVARIABLE:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     memcpy(table_entry->alarmVariable,
                            table_entry->old_alarmVariable,
@@ -729,7 +746,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMSAMPLETYPE:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmSampleType =
                         table_entry->old_alarmSampleType;
@@ -738,7 +755,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMSTARTUPALARM:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmStartupAlarm =
                         table_entry->old_alarmStartupAlarm;
@@ -747,7 +764,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMRISINGTHRESHOLD:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmRisingThreshold =
                         table_entry->old_alarmRisingThreshold;
@@ -756,7 +773,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMFALLINGTHRESHOLD:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmFallingThreshold =
                         table_entry->old_alarmFallingThreshold;
@@ -765,7 +782,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMRISINGEVENTINDEX:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmRisingEventIndex =
                         table_entry->old_alarmRisingEventIndex;
@@ -774,7 +791,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMFALLINGEVENTINDEX:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmFallingEventIndex =
                         table_entry->old_alarmFallingEventIndex;
@@ -783,7 +800,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMOWNER:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     memcpy(table_entry->alarmOwner,
                            table_entry->old_alarmOwner,
@@ -796,7 +813,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 break;
             case COLUMN_ALARMSTATUS:
                 if (table_entry && !table_entry->valid) {
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 } else {
                     table_entry->alarmStatus =
                         table_entry->old_alarmStatus;
@@ -812,6 +829,8 @@ alarmTable_handler(netsnmp_mib_handler *handler,
             table_entry = (struct alarmTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
+            if (!table_entry)
+                continue;   /* row removed by an earlier varbind */
 
             switch (table_info->colnum) {
             case COLUMN_ALARMINTERVAL:
@@ -862,7 +881,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 case RMON1_ENTRY_INVALID:
                     table_row = netsnmp_tdata_extract_row(request);
                     table_data = netsnmp_tdata_extract_table(request);
-                    alarmTable_removeEntry(table_data, table_row);
+                    alarmTable_removeRequestRow(request, table_data, table_row);
                 }
                 break;
             }
