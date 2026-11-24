@@ -143,6 +143,8 @@ struct alarmTable_entry {
     int             valid;
     unsigned int    alarm_reg;
     unsigned int    first_alarm_reg;  /* one-shot run registered by enable */
+    int             in_use;       /* waiting for the alarmVariable value */
+    int             removed;      /* removed while in use: free when done */
     netsnmp_session *session;
     u_long          last_abs_value;
     ALARM_TYPE_T    prev_alarm;        /* NOTHING | RISING | FALLING */
@@ -175,7 +177,19 @@ alarmTable_run( unsigned int reg, void *clientarg)
     snmp_set_var_objid( var, entry->alarmVariable,
                              entry->alarmVariable_len );
     
+    /*
+     * Waiting for the response processes other requests in the
+     *   meantime.  Those may remove this row.
+     */
+    entry->in_use++;
     rc = netsnmp_query_get(  var, entry->session );
+    entry->in_use--;
+    if (entry->removed) {
+        snmp_free_varbind(var);
+        if (entry->in_use == 0)
+            SNMP_FREE(entry);
+        return;
+    }
     if ( rc != SNMP_ERR_NOERROR ) {
         DEBUGMSGTL(( "rmon:alarmTable", "alarmVariable query failed (%d)\n", rc));
         snmp_free_varbind(var);
@@ -329,7 +343,10 @@ alarmTable_removeEntry(netsnmp_tdata * table_data, netsnmp_tdata_row * row)
         netsnmp_tdata_remove_and_delete_row(table_data, row);
     if (entry) {
         alarmTable_disable(entry);
-        SNMP_FREE(entry);       /* XXX - release any other internal resources */
+        if (entry->in_use)
+            entry->removed = 1; /* freed by alarmTable_run */
+        else
+            SNMP_FREE(entry);   /* XXX - release any other internal resources */
     }
 }
 

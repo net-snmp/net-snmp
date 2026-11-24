@@ -1485,8 +1485,7 @@ clear_mteTTable(int majorID, int minorID, void *serverarg, void *clientarg)
             snmp_unregister_callback( SNMP_CALLBACK_LIBRARY,
                                       SNMP_CALLBACK_POST_READ_CONFIG,
                                       _mteTrigger_callback_enable, entry, 0 ); 
-            mteTrigger_disable( entry );
-            SNMP_FREE(entry);
+            mteTrigger_free( entry );
         }
     }
     return SNMPERR_SUCCESS;

@@ -164,6 +164,8 @@ struct mteTrigger {
      */
     unsigned int    alarm;
     unsigned int    first_alarm;  /* one-shot run registered by enable */
+    int             in_use;       /* evaluations in progress */
+    int             removed;      /* removed while in use: free when done */
     long            sysUpTime;
     netsnmp_variable_list *old_results;
     netsnmp_variable_list *old_deltaDs;
@@ -191,6 +193,7 @@ extern void      init_trigger_table_data(void);
 
 void          init_mteTrigger(void);
 void               mteTrigger_removeEntry(netsnmp_tdata_row *row);
+void               mteTrigger_free(struct mteTrigger *entry);
 netsnmp_tdata_row *mteTrigger_createEntry(const char *mteOwner,
                                           char *mteTriggerName, int fixed);
 void               mteTrigger_enable(    struct mteTrigger *entry );

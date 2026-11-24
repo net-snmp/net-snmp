@@ -67,6 +67,8 @@ struct mteEvent {
 
     netsnmp_session *session;
     long            flags;
+    int             in_use;       /* firings in progress */
+    int             removed;      /* removed while in use: free when done */
 };
 
   /*

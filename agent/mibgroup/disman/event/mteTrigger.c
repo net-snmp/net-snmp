@@ -162,12 +162,33 @@ mteTrigger_removeEntry(netsnmp_tdata_row *row)
         return;                 /* Nothing to remove */
     entry = (struct mteTrigger *)
         netsnmp_tdata_remove_and_delete_row(trigger_table_data, row);
-    if (entry) {
-        mteTrigger_disable( entry );
-        SNMP_FREE(entry);
-    }
+    mteTrigger_free( entry );
 }
 #endif /* NETSNMP_FEATURE_REMOVE_MTETRIGGER_REMOVEENTRY */
+
+static void
+_mteTrigger_destroy(struct mteTrigger *entry)
+{
+    snmp_free_varbind( entry->old_results );
+    snmp_free_varbind( entry->old_deltaDs );
+    SNMP_FREE(entry);
+}
+
+/*
+ * Free a trigger that is no longer in the table.  A trigger that is
+ *   being evaluated is freed when its evaluation has finished.
+ */
+void
+mteTrigger_free(struct mteTrigger *entry)
+{
+    if (!entry)
+        return;
+    mteTrigger_disable( entry );
+    if (entry->in_use)
+        entry->removed = 1;
+    else
+        _mteTrigger_destroy( entry );
+}
 
     /* ===================================================
      *
@@ -195,10 +216,9 @@ _mteTrigger_failure( /* int error, */ const char *msg )
     return;
 }
 
-void
-mteTrigger_run( unsigned int reg, void *clientarg)
+static void
+_mteTrigger_run( unsigned int reg, struct mteTrigger *entry )
 {
-    struct mteTrigger *entry = (struct mteTrigger *)clientarg;
     netsnmp_variable_list *var, *vtmp;
     netsnmp_variable_list *vp1, *vp1_prev;
     netsnmp_variable_list *vp2, *vp2_prev;
@@ -209,10 +229,6 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     long value;
     const char *reason;
 
-    if (!entry) {
-        snmp_alarm_unregister( reg );
-        return;
-    }
     if (reg == entry->first_alarm)
         entry->first_alarm = 0;   /* one-shot: the library frees it */
     if (!(entry->flags & MTE_TRIGGER_FLAG_ENABLED ) ||
@@ -1133,6 +1149,27 @@ mteTrigger_run( unsigned int reg, void *clientarg)
         entry->old_deltaDs = dvar;
         entry->sysUpTime   = *sysUT_var.val.integer;
     }
+}
+
+void
+mteTrigger_run( unsigned int reg, void *clientarg)
+{
+    struct mteTrigger *entry = (struct mteTrigger *)clientarg;
+
+    if (!entry) {
+        snmp_alarm_unregister( reg );
+        return;
+    }
+
+    /*
+     * Retrieving the monitored values and firing events wait for
+     *   responses, which processes other requests in the meantime.
+     *   Those may remove this trigger: keep it until we are done.
+     */
+    entry->in_use++;
+    _mteTrigger_run( reg, entry );
+    if (--entry->in_use == 0 && entry->removed)
+        _mteTrigger_destroy( entry );
 }
 
 void

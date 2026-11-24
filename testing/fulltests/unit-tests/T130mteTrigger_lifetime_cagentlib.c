@@ -54,5 +54,16 @@ periodic = entry->alarm;
 mteTrigger_disable(entry);
 OK(!REGISTERED(periodic), "disable after the first run cancels the alarm");
 
-SNMP_FREE(entry);
+/* A trigger that is being evaluated is only freed once it is done. */
+mteTrigger_enable(entry);
+first = entry->first_alarm;
+periodic = entry->alarm;
+entry->in_use = 1;
+mteTrigger_free(entry);
+OK(entry->removed, "freeing a trigger in use defers the free");
+OK(!REGISTERED(first) && !REGISTERED(periodic),
+   "freeing a trigger in use cancels its alarms");
+entry->in_use = 0;
+
+mteTrigger_free(entry);
 #endif
