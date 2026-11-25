@@ -22,7 +22,7 @@ IMPORTS
 
 
 netSnmpAgentMIB MODULE-IDENTITY
-    LAST-UPDATED "201003170000Z"
+    LAST-UPDATED "202609140000Z"
     ORGANIZATION "www.net-snmp.org"
     CONTACT-INFO    
 	 "postal:   Wes Hardaker
@@ -32,6 +32,9 @@ netSnmpAgentMIB MODULE-IDENTITY
           email:    net-snmp-coders@lists.sourceforge.net"
     DESCRIPTION
 	 "Defines control and monitoring structures for the Net-SNMP agent."
+    REVISION     "202609140000Z"
+    DESCRIPTION
+	"Added a Linux/OpenSSL certificate trust-location inventory table."
     REVISION     "201003170000Z"
     DESCRIPTION
 	 "Made sure that this MIB can be compiled by MIB compilers that do not
@@ -53,6 +56,104 @@ nsCache                OBJECT IDENTIFIER ::= {netSnmpObjects 5}
 nsErrorHistory         OBJECT IDENTIFIER ::= {netSnmpObjects 6}
 nsConfiguration        OBJECT IDENTIFIER ::= {netSnmpObjects 7}
 nsTransactions         OBJECT IDENTIFIER ::= {netSnmpObjects 8}
+nsTrustedCertificates  OBJECT IDENTIFIER ::= {netSnmpObjects 10}
+
+--
+-- OpenSSL trusted certificate locations on Linux
+--
+
+nsTrustedCertificateTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF NsTrustedCertificateEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "Certificates discovered from the OpenSSL trust locations used by Net-SNMP on Linux. The implementation consults SSL_CERT_FILE, SSL_CERT_DIR, and the OpenSSL default certificate file and directory."
+    ::= { nsTrustedCertificates 1 }
+
+nsTrustedCertificateEntry OBJECT-TYPE
+    SYNTAX      NsTrustedCertificateEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+      "Information about one certificate discovered in the configured OpenSSL trust locations."
+    INDEX       { nsTrustedCertificateIndex }
+    ::= { nsTrustedCertificateTable 1 }
+
+NsTrustedCertificateEntry ::= SEQUENCE {
+    nsTrustedCertificateIndex              Unsigned32,
+    nsTrustedCertificateSubject            OCTET STRING,
+    nsTrustedCertificateIssuer             OCTET STRING,
+    nsTrustedCertificateSerialNumber       OCTET STRING,
+    nsTrustedCertificateSha256Fingerprint  OCTET STRING,
+    nsTrustedCertificateNotBefore          OCTET STRING,
+    nsTrustedCertificateNotAfter           OCTET STRING,
+    nsTrustedCertificateSignatureAlgorithm OCTET STRING,
+    nsTrustedCertificateSource             OCTET STRING
+}
+
+nsTrustedCertificateIndex OBJECT-TYPE
+    SYNTAX      Unsigned32 (1..4294967295)
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "An index assigned when the agent reads the trust store."
+    ::= { nsTrustedCertificateEntry 1 }
+
+nsTrustedCertificateSubject OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The RFC 2253 distinguished name of the certificate subject."
+    ::= { nsTrustedCertificateEntry 2 }
+
+nsTrustedCertificateIssuer OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The RFC 2253 distinguished name of the certificate issuer."
+    ::= { nsTrustedCertificateEntry 3 }
+
+nsTrustedCertificateSerialNumber OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The certificate serial number, encoded as hexadecimal."
+    ::= { nsTrustedCertificateEntry 4 }
+
+nsTrustedCertificateSha256Fingerprint OBJECT-TYPE
+    SYNTAX      OCTET STRING (SIZE (32))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The binary SHA-256 fingerprint of the certificate."
+    ::= { nsTrustedCertificateEntry 5 }
+
+nsTrustedCertificateNotBefore OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The start of the certificate validity period."
+    ::= { nsTrustedCertificateEntry 6 }
+
+nsTrustedCertificateNotAfter OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The end of the certificate validity period."
+    ::= { nsTrustedCertificateEntry 7 }
+
+nsTrustedCertificateSignatureAlgorithm OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The certificate signature algorithm."
+    ::= { nsTrustedCertificateEntry 8 }
+
+
+nsTrustedCertificateSource OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The OpenSSL certificate file or directory entry from which the certificate was loaded."
+    ::= { nsTrustedCertificateEntry 9 }
 
 --
 --  MIB Module data caching management
