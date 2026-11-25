@@ -1,0 +1,96 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER TLS certificate mapping destroy with storage-type update
+
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+
+# Depending on the module selection, either the wrapper module or
+# its implementation module may appear in the generated configuration.
+ISDEFINED USING_TLSTM_MIB_SNMPTLSTMCERTTOTSNTABLE_MODULE ||
+ISDEFINED USING_TLSTM_MIB_SNMPTLSTMCERTTOTSNTABLE_SNMPTLSTMCERTTOTSNTABLE_MODULE ||
+SKIP "TLS certificate-to-security-name mapping table is unavailable"
+
+# Write access for this isolated test agent.
+CONFIGAGENT "rwcommunity public"
+
+STARTAGENT
+
+target="$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+# snmpTlstmCertToTSNEntry, row index 1.
+entry=".1.3.6.1.2.1.198.2.2.1.3.1"
+fingerprint_oid="${entry}.2.1"
+maptype_oid="${entry}.3.1"
+storage_oid="${entry}.5.1"
+rowstatus_oid="${entry}.6.1"
+
+# Preserve the exact fingerprint bytes from the original command.
+fingerprint="040000000000000000000000000000000000000000000000000000000000000000"
+maptype="1.3.6.1.2.1.198.1.1.6"
+
+capture_snmpset()
+{
+    CAPTURE "snmpset $SNMP_FLAGS -v2c -c public -On -Oe \
+        $target $*"
+}
+
+capture_snmpget()
+{
+    CAPTURE "snmpget $SNMP_FLAGS -v2c -c public -On -Oe \
+        $target $*"
+}
+
+# Command 1:
+# Create row 1 with the supplied fingerprint and map type.
+# All three varbinds must remain in the same SET request.
+capture_snmpset \
+    "$fingerprint_oid" x "$fingerprint" \
+    "$maptype_oid" o "$maptype" \
+    "$rowstatus_oid" i 5
+
+rc=$?
+CHECKVALUEIS "$rc" 0 "Certificate mapping createAndWait SET succeeds"
+CHECK "^${rowstatus_oid} = INTEGER: 5$"
+
+# Do not continue with the reproducer if its prerequisite failed.
+if [ "$rc" -ne 0 ]; then
+    BAD "Cannot test destroy/update because row creation failed"
+    STOPAGENT
+    CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "Sanitizer"
+    CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "runtime error"
+    FINISHED
+fi
+
+# Command 2:
+# IMPORTANT: preserve this order in ONE SET request:
+#   1. RowStatus = destroy(6)
+#   2. StorageType = volatile(2)
+#
+# Do not split these into separate requests or reverse their order.
+capture_snmpset \
+    "$rowstatus_oid" i 6 \
+    "$storage_oid" i 2
+
+rc=$?
+CHECKVALUEIS "$rc" 0 "Combined destroy and storage-type SET succeeds"
+CHECK "^${rowstatus_oid} = INTEGER: 6$"
+CHECK "^${storage_oid} = INTEGER: 2$"
+
+# Verify both that the agent survived and that the row was removed.
+# A live agent returns an SNMP exception for the missing instance,
+# whereas a crashed agent would cause a timeout.
+capture_snmpget "$rowstatus_oid"
+rc=$?
+CHECKVALUEIS "$rc" 0 "Agent responds after combined destroy/update"
+CHECK "No Such Instance currently exists at this OID"
+
+STOPAGENT
+
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "Sanitizer"
+CHECKFILECOUNT "$SNMP_SNMPD_LOG_FILE.stdout" 0 "runtime error"
+
+FINISHED
