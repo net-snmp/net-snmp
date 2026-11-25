@@ -1152,6 +1152,17 @@ agentx_reopen_session(unsigned int clientreg, void *clientarg)
         netsnmp_sysORTable_foreach(&agentx_reopen_sysORTable, main_session);
 
         /*
+         * The master agent may have disconnected us while we registered.
+         * The disconnect handler has detached our nodes and set up the
+         * reopen alarm, but register_mib_reattach() has marked the nodes
+         * after that point as attached again.
+         */
+        if (main_session == NULL) {
+            register_mib_detach();
+            return;
+        }
+
+        /*
          * Register a ping alarm (if need be).  
          */
         subagent_register_ping_alarm(0, 0, NULL, main_session);
