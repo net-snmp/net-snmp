@@ -13,6 +13,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -45,10 +48,7 @@
 #include <net-snmp/library/snmp_secmod.h>
 #include <net-snmp/library/snmpusm.h>
 #include <net-snmp/library/lcd_time.h>
-#include <net-snmp/library/scapi.h>
 #include <net-snmp/library/snmpv3.h>
-
-#include <net-snmp/library/transform_oids.h>
 
 netsnmp_feature_child_of(usm_support, libnetsnmp);
 netsnmp_feature_child_of(usm_lcd_time, usm_support);
@@ -61,6 +61,12 @@ netsnmp_feature_child_of(usm_lcd_time, usm_support);
  * New records are prepended to the appropriate list at the hash index.
  */
 static Enginetime etimelist[ETIMELIST_SIZE];
+
+/*
+ * 32-bit FNV-1a parameters, used by hash_engineID().
+ */
+#define FNV1A_32_OFFSET_BASIS 2166136261U
+#define FNV1A_32_PRIME        16777619U
 
 
 
@@ -475,63 +481,36 @@ search_enginetime_list(const u_char * engineID, u_int engineID_len)
  *	 engineID_len
  *      
  * Returns:
- *	>0			etimelist index for this engineID.
+ *	>=0			etimelist index for this engineID.
  *	SNMPERR_GENERR		Error.
  *	
  * 
- * Use a cheap hash to build an index into the etimelist.  Method is 
- * to hash the engineID, then split the hash into u_int's and add them up
- * and modulo the size of the list.
+ * Use a cheap hash to build an index into the etimelist.
  *
  */
 int
 hash_engineID(const u_char * engineID, u_int engineID_len)
 {
-    int             rval = SNMPERR_GENERR;
-    size_t          buf_len = SNMP_MAXBUF;
-    u_int           additive = 0;
-    u_char         *bufp, buf[SNMP_MAXBUF];
-    void           *context = NULL;
-
-
+    uint32_t        h = FNV1A_32_OFFSET_BASIS;
+    u_int           i;
 
     /*
      * Sanity check.
      */
-    if (!engineID || (engineID_len <= 0)) {
-        QUITFUN(SNMPERR_GENERR, hash_engineID_quit);
-    }
-
+    if (!engineID || engineID_len == 0)
+        return SNMPERR_GENERR;
 
     /*
-     * Hash engineID into a list index.
+     * Hash engineID into a list index with FNV-1a. The index only selects
+     * a bucket in a small list so there is no need for a cryptographic
+     * hash function.
      */
-#ifndef NETSNMP_DISABLE_MD5
-    rval = sc_hash(usmHMACMD5AuthProtocol,
-                   OID_LENGTH(usmHMACMD5AuthProtocol),
-                   engineID, engineID_len, buf, &buf_len);
-    if (rval == SNMPERR_SC_NOT_CONFIGURED) {
-        /* fall back to sha1 */
-        rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   OID_LENGTH(usmHMACSHA1AuthProtocol),
-                   engineID, engineID_len, buf, &buf_len);
-    }
-#else
-    rval = sc_hash(usmHMACSHA1AuthProtocol,
-                   OID_LENGTH(usmHMACSHA1AuthProtocol),
-                   engineID, engineID_len, buf, &buf_len);
-#endif
-    QUITFUN(rval, hash_engineID_quit);
-
-    for (bufp = buf; (bufp - buf) < (int) buf_len; bufp += 4) {
-        additive += (u_int) * bufp;
+    for (i = 0; i < engineID_len; i++) {
+        h ^= engineID[i];
+        h *= FNV1A_32_PRIME;
     }
 
-  hash_engineID_quit:
-    SNMP_FREE(context);
-    memset(buf, 0, SNMP_MAXBUF);
-
-    return (rval < 0) ? rval : (int)(additive % ETIMELIST_SIZE);
+    return (int)(h % ETIMELIST_SIZE);
 
 }                               /* end hash_engineID() */
 
