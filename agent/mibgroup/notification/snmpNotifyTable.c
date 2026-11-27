@@ -327,7 +327,8 @@ write_snmpNotifyTag(int action,
                     u_char * statP, oid * name, size_t name_len)
 {
     static char    *tmpvar;
-    static int      allocated;
+    static struct snmpNotifyTable_data *allocated_row;
+    static int      allocated_is_new;
     struct snmpNotifyTable_data *StorageTmp = NULL;
     static size_t   tmplen;
     size_t          newlen = name_len - snmpNotifyTable_offset;
@@ -347,7 +348,8 @@ write_snmpNotifyTag(int action,
     case RESERVE1:
         tmpvar = NULL;
         tmplen = 0;
-        allocated = 0;
+        allocated_row = NULL;
+        allocated_is_new = 0;
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
@@ -364,6 +366,11 @@ write_snmpNotifyTag(int action,
         /*
          * memory reseveration, final preparation... 
          */
+        if (allocated_row != NULL) {
+            DEBUGMSGTL(("snmpNotifyTable",
+                        "writing multiple snmpNotifyTag values not supported\n"));
+            return SNMP_ERR_GENERR;
+        }
         tmpvar = StorageTmp->snmpNotifyTag;
         tmplen = StorageTmp->snmpNotifyTagLen;
         StorageTmp->snmpNotifyTag = calloc(1, var_val_len + 1);
@@ -372,7 +379,8 @@ write_snmpNotifyTag(int action,
             tmpvar = NULL;
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         }
-        allocated = 1;
+        allocated_row = StorageTmp;
+        allocated_is_new = (StorageTmp == StorageNew);
         break;
 
 
@@ -381,19 +389,17 @@ write_snmpNotifyTag(int action,
         /*
          * Release any resources that have been allocated 
          */
-        if (allocated) {
-            if ((StorageTmp = find_row_notifyTable(
-                     NULL, &name[snmpNotifyTable_offset], &newlen, 1,
-                     NULL, NULL)) != NULL ||
-                (StorageTmp = StorageNew) != NULL) {
-                SNMP_FREE(StorageTmp->snmpNotifyTag);
-                StorageTmp->snmpNotifyTag = tmpvar;
-                StorageTmp->snmpNotifyTagLen = tmplen;
+        if (allocated_row != NULL) {
+            if (!allocated_is_new || StorageNew != NULL) {
+                SNMP_FREE(allocated_row->snmpNotifyTag);
+                allocated_row->snmpNotifyTag = tmpvar;
+                allocated_row->snmpNotifyTagLen = tmplen;
             } else {
                 SNMP_FREE(tmpvar);
             }
             tmpvar = NULL;
-            allocated = 0;
+            allocated_row = NULL;
+            allocated_is_new = 0;
         }
         break;
 
@@ -410,7 +416,8 @@ write_snmpNotifyTag(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
-        allocated = 0;
+        allocated_row = NULL;
+        allocated_is_new = 0;
         snmp_store_needed(NULL);
         break;
     }
@@ -606,6 +613,9 @@ write_snmpNotifyRowStatus(int action,
             /*
              * creation 
              */
+            if (StorageNew != NULL) {
+                return SNMP_ERR_GENERR;
+            }
             vars = NULL;
 
             snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, NULL, 0);     /* snmpNotifyName */

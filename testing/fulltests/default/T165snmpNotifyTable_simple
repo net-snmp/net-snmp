@@ -1,0 +1,101 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER snmpNotifyTable multi-varbind SET handling
+
+SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SET_SUPPORT
+SKIPIF NETSNMP_NO_WRITE_SUPPORT
+SKIPIFNOT USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE
+
+#
+# Regression test for heap buffer overflow in write_snmpNotifyTag() when
+# multiple snmpNotifyTag varbinds are present in a single SET PDU.
+#
+
+CONFIGAGENT "rwcommunity private"
+
+STARTAGENT
+
+AGENT_ADDR="$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+SNMP_V2C_ARGS="-On -Oe $SNMP_FLAGS -v2c -c private $AGENT_ADDR"
+
+TAG=.1.3.6.1.6.3.13.1.1.1.2
+RS=.1.3.6.1.6.3.13.1.1.1.5
+# Implied OCTET STRING indices: "t1", "t2", "t3", "t4"
+T1=116.49
+T2=116.50
+T3=116.51
+T4=116.52
+
+LONG_TAG=`awk 'BEGIN { for (i = 0; i < 255; i++) printf "A" }'`
+
+# Create rows 't1' and 't2'.
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T1 i 4 $TAG.$T1 s orig1"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*orig1\"*$"
+
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T2 i 4 $TAG.$T2 s orig2"
+CHECKORDIE "^$TAG.$T2 = STRING: \"*orig2\"*$"
+
+# Duplicate snmpNotifyTag varbinds for the same row (255 bytes then 1 byte)
+# used to trigger a heap buffer overflow write in write_snmpNotifyTag().
+CAPTURE "snmpset $SNMP_V2C_ARGS $TAG.$T1 s $LONG_TAG $TAG.$T1 s B"
+CHECKORDIE "genError"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $TAG.$T1"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*orig1\"*$"
+
+# Reverse order (1 byte then 255 bytes) for the same row must also fail cleanly.
+CAPTURE "snmpset $SNMP_V2C_ARGS $TAG.$T1 s B $TAG.$T1 s $LONG_TAG"
+CHECKORDIE "genError"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $TAG.$T1"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*orig1\"*$"
+
+# Multiple snmpNotifyTag varbinds across different rows are rejected cleanly
+# without corrupting either row.
+CAPTURE "snmpset $SNMP_V2C_ARGS $TAG.$T1 s new1 $TAG.$T2 s new2"
+CHECKORDIE "genError"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $TAG.$T1 $TAG.$T2"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*orig1\"*$"
+CHECKORDIE "^$TAG.$T2 = STRING: \"*orig2\"*$"
+
+# createAndGo with duplicate snmpNotifyTag must roll back cleanly.
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T3 i 4 $TAG.$T3 s abc $TAG.$T3 s def"
+CHECKORDIE "genError"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $TAG.$T3"
+CHECKORDIE "No Such Instance"
+
+# Two createAndGo RowStatus varbinds in one PDU must fail and roll back cleanly.
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T3 i 4 $RS.$T4 i 4"
+CHECKORDIE "genError"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $RS.$T3"
+CHECKORDIE "No Such Instance"
+
+# Normal single-varbind update and destroy must still succeed.
+CAPTURE "snmpset $SNMP_V2C_ARGS $TAG.$T1 s updated1"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*updated1\"*$"
+
+CAPTURE "snmpget $SNMP_V2C_ARGS $TAG.$T1"
+CHECKORDIE "^$TAG.$T1 = STRING: \"*updated1\"*$"
+
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T1 i 6"
+CHECKORDIE "^$RS.$T1 = INTEGER: 6$"
+
+CAPTURE "snmpset $SNMP_V2C_ARGS $RS.$T2 i 6"
+CHECKORDIE "^$RS.$T2 = INTEGER: 6$"
+
+# Verify the agent is still alive and responsive.
+CAPTURE "snmpget $SNMP_V2C_ARGS .1.3.6.1.2.1.1.3.0"
+CHECKORDIE "^.1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+STOPAGENT
+
+CHECKANDDIE "AddressSanitizer" "$SNMP_SNMPD_LOG_FILE.stdout"
+CHECKANDDIE "LeakSanitizer" "$SNMP_SNMPD_LOG_FILE.stdout"
+
+FINISHED
