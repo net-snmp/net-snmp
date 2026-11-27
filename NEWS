@@ -10,6 +10,10 @@ listing of all changes made to the code.
         handshakes (CVE-2026-89147)
       - SECURITY: Fix newline injection in persistent configuration storage
         (CWE-93)
+      - SECURITY: Fix out-of-bounds accesses and integer overflows in VACM
+        OID parsing and use-after-free / state-machine bugs in AgentX;
+        reported by Michalis Vasileiadis (GitHub: vmihalis; swarm.security),
+        via Hacker Bob v2.0.1
       - AgentX: Enforce session ownership on unregistration and validate
         registration ranges/OID lengths
       - Log listening addresses and ports for snmpd and AgentX at startup
@@ -31,6 +35,10 @@ listing of all changes made to the code.
       - Fix TLS-TCP session polling and malformed SNMPv1 trap crashes
 
     snmplib:
+      - SECURITY: Fix an out-of-bounds read when formatting numeric
+        DISPLAY-HINT values in sprint_realloc_octet_string(); reported by
+        Michalis Vasileiadis (GitHub: vmihalis; swarm.security), via
+        Hacker Bob v2.0.1
       - Make the TLS-TCP transport fully asynchronous and non-blocking, and
         derive TLSTM securityName from the verified certificate chain
       - Port DES support to the OpenSSL EVP API and load OpenSSL 3.0+
