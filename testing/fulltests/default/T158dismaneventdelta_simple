@@ -1,0 +1,62 @@
+#!/bin/sh
+
+. ../support/simple_eval_tools.sh
+
+HEADER DISMAN EVENT MIB delta discontinuity handling
+
+ISDEFINED USING_DISMAN_EVENT_MTETRIGGER_MODULE ||
+ISDEFINED USING_DISMAN_EVENT_MODULE ||
+SKIP "DISMAN EVENT MIB is not available"
+
+ISDEFINED USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE ||
+ISDEFINED USING_MIBII_INTERFACES_MODULE ||
+ISDEFINED USING_IF_MIB_MODULE ||
+SKIP "IF-MIB is not available"
+
+. ./Sv3config
+
+CONFIGAGENT "iquerySecName initial"
+
+# Case 1: cmp > 0 on first element (ifIndex .1,.2 vs sysUpTime .0) + Boolean.
+CONFIGAGENT 'monitor -r 1 -d .1.3.6.1.2.1.1.3 "c1" .1.3.6.1.2.1.2.2.1.1 > 0'
+# Case 2: cmp < 0 on first element (sysUpTime .0 vs ifIndex .1,.2) + Threshold.
+CONFIGAGENT 'monitor -r 1 -t -d .1.3.6.1.2.1.2.2.1.1 "c2" .1.3.6.1.2.1.1.3 0 10'
+# Case 3: DWILD=true with default sysUpTime.0 (dvar == NULL).
+CONFIGAGENT 'monitor -r 1 -d .1.3.6.1.2.1.1.3.0 "c3" .1.3.6.1.2.1.2.2.1.1 > 0'
+# Case 4: Valid matching wildcard delta trigger (ifInOctets vs ifIndex).
+CONFIGAGENT 'monitor -r 1 -d .1.3.6.1.2.1.2.2.1.1 "c4" .1.3.6.1.2.1.2.2.1.10 > 0'
+# Case 5: Valid non-wildcarded custom discontinuity marker (ifInOctets.1 vs ifIndex.1).
+CONFIGAGENT 'monitor -r 1 -I -di .1.3.6.1.2.1.2.2.1.1.1 "c5" .1.3.6.1.2.1.2.2.1.10.1 > 0'
+
+AGENT_FLAGS="$AGENT_FLAGS -Ddisman:event:delta"
+
+STARTAGENT
+
+AGENT_ADDR="$SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+SNMP_V3_ARGS="-On -Oe $SNMP_FLAGS $NOAUTHTESTARGS $AGENT_ADDR"
+
+# Wait for at least two poll cycles of the 1-second triggers.
+sleep 3
+
+# Verify the agent is still alive and responsive.
+CAPTURE "snmpget $SNMP_V3_ARGS .1.3.6.1.2.1.1.3.0"
+CHECKORDIE "^.1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+CAPTURE "snmpget $SNMP_V3_ARGS .1.3.6.1.2.1.2.2.1.1.1 .1.3.6.1.2.1.2.2.1.10.1"
+has_if1=1
+if grep -q "No Such" "$junkoutputfile"; then
+    has_if1=0
+fi
+
+STOPAGENT
+
+if [ "$has_if1" -eq 1 ]; then
+    if ! ISDEFINED NETSNMP_NO_DEBUGGING; then
+        CHECKAGENTCOUNT atleastone "delta sample:"
+    fi
+    CHECKANDDIE "single discontinuity:" "$SNMP_SNMPD_LOG_FILE"
+fi
+CHECKANDDIE "AddressSanitizer" "$SNMP_SNMPD_LOG_FILE.stdout"
+CHECKANDDIE "LeakSanitizer" "$SNMP_SNMPD_LOG_FILE.stdout"
+
+FINISHED
