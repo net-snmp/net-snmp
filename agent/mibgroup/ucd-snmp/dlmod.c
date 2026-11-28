@@ -300,6 +300,16 @@ dlmod_get_by_index(int iindex)
     return NULL;
 }
 
+static void
+dlmod_unload_alarm(unsigned int clientreg, void *clientarg)
+{
+    /*
+     * Look the module up again: it may have been freed by a configuration
+     * reload since the unload was requested.
+     */
+    dlmod_unload_module(dlmod_get_by_index((int)(intptr_t)clientarg));
+}
+
 /*
  * Functions to parse config lines
  */
@@ -543,7 +553,15 @@ write_dlmodStatus(int action,
         case DLMOD_UNLOAD:
             if (!dlm || dlm->status != DLMOD_LOADED)
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
-            dlmod_unload_module(dlm);
+            /*
+             * Unloading a module unregisters its MIB objects and unmaps its
+             * code, while the other varbinds of this request may still refer
+             * to them. Hence unload the module once this request has been
+             * processed.
+             */
+            if (snmp_alarm_register(0, 0, dlmod_unload_alarm,
+                                    (void *)(intptr_t)dlm->index) == 0)
+                return SNMP_ERR_COMMITFAILED;
             break;
         case DLMOD_DELETE:
             if (!dlm || dlm->status == DLMOD_LOADED)
