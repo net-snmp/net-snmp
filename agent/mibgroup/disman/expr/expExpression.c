@@ -128,6 +128,21 @@ expExpression_createRow(const char *expOwner, const char *expName, int fixed)
     return row;
 }
 
+static void
+_expExpression_free( struct expExpression *entry )
+{
+    if (entry->session &&
+        entry->session != netsnmp_query_get_default_session_unchecked()) {
+        snmp_close(entry->session);
+        entry->session = NULL;
+    }
+    if (entry->pvars) {
+        snmp_free_varbind(entry->pvars);
+        entry->pvars = NULL;
+    }
+    SNMP_FREE(entry);
+}
+
 /*
  * Remove a row from the expression table 
  */
@@ -141,17 +156,30 @@ expExpression_removeEntry(netsnmp_tdata_row *row)
     entry = (struct expExpression *)
         netsnmp_tdata_remove_and_delete_row(expr_table_data, row);
     if (entry) {
-        /* expExpression_disable( entry ) */
-        if (entry->session) {
-            snmp_close(entry->session);
-            entry->session = NULL;
-        }
-        if (entry->pvars) {
-            snmp_free_varbind(entry->pvars);
-            entry->pvars = NULL;
-        }
-        SNMP_FREE(entry);
+        expExpression_disable( entry );
+        if (entry->in_use)
+            entry->removed = 1;
+        else
+            _expExpression_free( entry );
     }
+}
+
+/*
+ * Gathering data and evaluating an expression wait for responses,
+ *   which processes other requests in the meantime.  Those may remove
+ *   the expression: hold it while in use, and free it when released.
+ */
+void
+expExpression_hold( struct expExpression *entry )
+{
+    entry->in_use++;
+}
+
+void
+expExpression_release( struct expExpression *entry )
+{
+    if (--entry->in_use == 0 && entry->removed)
+        _expExpression_free( entry );
 }
 
 
@@ -214,18 +242,13 @@ expExpression_getEntry(const char *owner, const char *name )
  *    instances of this expression, rather than just the
  *    just the values needed for expanding a given instance.
  */
-void
-expExpression_getData( unsigned int reg, void *clientarg )
+static void
+_expExpression_getData( unsigned int reg, struct expExpression *entry )
 {
-    struct expExpression  *entry = (struct expExpression *)clientarg;
     netsnmp_tdata_row     *row;
+    struct expObject      *obj;
     netsnmp_variable_list *var;
     int ret;
-
-    if ( !entry && reg ) {
-        snmp_alarm_unregister( reg );
-        return;
-    }
 
     if (( entry->expExpression[0] == '\0' ) ||
         !(entry->flags & EXP_FLAG_ACTIVE)   ||
@@ -268,9 +291,8 @@ expExpression_getData( unsigned int reg, void *clientarg )
      *   than walking the object instances separately and merging
      *   merging the results).
      *
-     * NB: Releasing any old results is handled by expObject_getData.
-     *     Assigning to 'entry->pvars' without first releasing the
-     *     previous contents does *not* introduce a memory leak.
+     * NB: The expression owns 'entry->pvars'; the prefix object
+     *     keeps its own copy (see expObject_getData).
      */
     if ( entry->expPrefix_len ) {
         var = (netsnmp_variable_list *)
@@ -278,7 +300,11 @@ expExpression_getData( unsigned int reg, void *clientarg )
         snmp_set_var_objid( var, entry->expPrefix, entry->expPrefix_len);
         ret = netsnmp_query_walk( var, entry->session );
         DEBUGMSGTL(("disman:expr:run", "Walk returned %d\n", ret ));
+        if ( entry->pvars )
+            snmp_free_varbind( entry->pvars );
         entry->pvars = var;
+        if ( entry->removed )
+            return;
     }
 
     /* XXX - retrieve sysUpTime.0 value, and check for discontinuity */
@@ -299,15 +325,33 @@ expExpression_getData( unsigned int reg, void *clientarg )
      * Loop through the list of relevant objects,
      *   and retrieve the corresponding values.
      */
-    for ( row = expObject_getFirst(  entry->expOwner, entry->expName );
-          row;
-          row = expObject_getNext( row )) {
+    row = expObject_getFirst(  entry->expOwner, entry->expName );
+    while ( row && !entry->removed ) {
+        obj = (struct expObject *)row->data;
 
         /* XXX - may need to check whether owner/name still match */
-        expObject_getData( entry, (struct expObject *)row->data);
+        expObject_hold( obj );
+        expObject_getData( entry, obj );
+        row = expObject_getNextEntry( obj );
+        expObject_release( obj );
     }
 }
 
+void
+expExpression_getData( unsigned int reg, void *clientarg )
+{
+    struct expExpression  *entry = (struct expExpression *)clientarg;
+
+    if ( !entry ) {
+        if ( reg )
+            snmp_alarm_unregister( reg );
+        return;
+    }
+
+    expExpression_hold( entry );
+    _expExpression_getData( reg, entry );
+    expExpression_release( entry );
+}
 
 void
 expExpression_enable( struct expExpression *entry )

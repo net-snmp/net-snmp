@@ -58,6 +58,8 @@ struct expExpression {
     long            sysUpTime;
     long            count;
     long            flags;
+    int             in_use;       /* data gathering or evaluation in progress */
+    int             removed;      /* removed while in use: free when done */
 };
 
 
@@ -83,6 +85,8 @@ struct expExpression *expExpression_getNextEntry(const char *, const char *);
 
 void                  expExpression_enable(  struct expExpression *);
 void                  expExpression_disable( struct expExpression *);
+void                  expExpression_hold(    struct expExpression *);
+void                  expExpression_release( struct expExpression *);
 
 void                  expExpression_getData(   unsigned int, void *);
 void                  expExpression_evaluate(struct expExpression *);

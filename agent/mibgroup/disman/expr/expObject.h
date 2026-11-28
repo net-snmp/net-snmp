@@ -53,6 +53,8 @@ struct expObject {
     netsnmp_variable_list *cvars, *old_cvars;
 
     long            flags;
+    int             in_use;       /* data gathering in progress */
+    int             removed;      /* removed while in use: free when done */
 };
 
   /*
@@ -72,6 +74,9 @@ void                expObject_removeEntry( netsnmp_tdata_row * );
 
 netsnmp_tdata_row * expObject_getFirst( const char *, const char * );
 netsnmp_tdata_row * expObject_getNext(  netsnmp_tdata_row * );
+netsnmp_tdata_row * expObject_getNextEntry( struct expObject * );
+void                expObject_hold(    struct expObject * );
+void                expObject_release( struct expObject * );
 void                expObject_getData( struct expExpression *,
                                        struct expObject * );
 #endif                          /* EXPOBJECT_H */

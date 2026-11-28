@@ -67,6 +67,8 @@ struct schedTable_entry {
     unsigned int    schedCallbackID;
     netsnmp_session *session;
     long            flags;
+    int             in_use;       /* scheduled actions in progress */
+    int             removed;      /* removed while in use: free when done */
 };
 
 /*
